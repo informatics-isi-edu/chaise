@@ -356,12 +356,6 @@
           }
         }
 
-        // iframe{
-        //   display:none !important;
-        // }
-
-
-
         //Top up arrow
         #back-to-top{
             display:none;
@@ -376,18 +370,18 @@
         .bottom-panel-container{
             .table {
                 .entity-key {
-                padding-left:20px;
-                width: 15%;
-                min-width: 150px;
-                float: left;
+                  padding-left:20px;
+                  width: 15%;
+                  min-width: 150px;
+                  float: left;
                 }
 
             .entity-value {
-                width: 85%;
-                padding-left: 15%!important;
-                padding-right: 8px;
-                padding-top: 8px;
-                padding-bottom: 8px;
+                  width: 85%;
+                  padding-left: 15%!important;
+                  padding-right: 8px;
+                  padding-top: 8px;
+                  padding-bottom: 8px;
                 }
             }
         }
@@ -457,14 +451,14 @@
             display: none;
         }
 
-        record-table th {
-            border: solid #000 !important;
-            border-width: 1.5px 1.5px 1.5px 1.5px !important;
+        record-table td {
+            border: solid #BBBBBB !important;
+            border-width: 1px 1px 1px 1px !important;
         }
 
-        record-table td {
-            border: solid #000 !important;
-            border-width: 1.5px 1.5px 1.5px 1.5px !important;
+        record-table th {
+            border: solid #BBBBBB !important;
+            border-width: 1px 1px 1px 1px !important;
         }
 
         @page {
