@@ -32,9 +32,10 @@ exports.parameterize = function(config, configParams) {
     config.capabilities['name'] = "chaise #" + process.env.TRAVIS_BUILD_NUMBER;
   }
 
-  var onErmrestLogin = function(defer) {
+  var onErmrestLogin = function(defer, sessionInfo) {
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
+    testConfiguration.client = sessionInfo.client;
 
     pImport.setup(testConfiguration).then(function(data) {
       process.env.CATALOGID = data.catalogId;
@@ -86,13 +87,10 @@ exports.parameterize = function(config, configParams) {
 
                 // get the client information
                 var info = JSON.parse(body);
-                testConfiguration.client = info.client;
-
-                console.log(testConfiguration);
 
                 if (testConfiguration.authCookie) {
                   process.env.AUTH_COOKIE = testConfiguration.authCookie;
-                  onErmrestLogin(defer);
+                  onErmrestLogin(defer, info);
                 } else defer.reject(error);
               } else {
                 console.dir(error);
@@ -111,9 +109,8 @@ exports.parameterize = function(config, configParams) {
             if (!error && response.statusCode == 200) {
                 // get the client information
                 var info = JSON.parse(body);
-                testConfiguration.client = info.client;
 
-                onErmrestLogin(defer);
+                onErmrestLogin(defer, info);
             } else {
                 throw new Error('Unable to retreive userinfo');
             }
@@ -134,9 +131,6 @@ exports.parameterize = function(config, configParams) {
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
-    browser.params.client = testConfiguration.client;
-    console.log("browser param configuration");
-    console.log(browser.params.configuration);
 
     // Set catalogId in browser params for future reference to delete it if required
     browser.params.catalogId = catalogId = process.env.CATALOGID;
