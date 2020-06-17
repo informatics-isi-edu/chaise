@@ -32,12 +32,9 @@ exports.parameterize = function(config, configParams) {
     config.capabilities['name'] = "chaise #" + process.env.TRAVIS_BUILD_NUMBER;
   }
 
-  var onErmrestLogin = function(defer, sessionInfo) {
+  var onErmrestLogin = function(defer) {
     testConfiguration.setup.url = process.env.ERMREST_URL;
     testConfiguration.setup.authCookie = testConfiguration.authCookie;
-    console.log("================sessioninfo onErmrstLogin================")
-    console.log(sessionInfo);
-    testConfiguration.client = sessionInfo.client;
 
     pImport.setup(testConfiguration).then(function(data) {
       process.env.CATALOGID = data.catalogId;
@@ -87,14 +84,12 @@ exports.parameterize = function(config, configParams) {
                   if (c.name == "webauthn") testConfiguration.authCookie = c.name + "=" + c.value + ";";
                 });
 
-                // get the client information
-                var info = JSON.parse(body);
-                console.log(info.client);
+                // set the session information to be parsed later
+                process.env.SESSION = body;
 
                 if (testConfiguration.authCookie) {
                   process.env.AUTH_COOKIE = testConfiguration.authCookie;
-                  console.log("before ermLogin function call");
-                  onErmrestLogin(defer, info);
+                  onErmrestLogin(defer);
                 } else defer.reject(error);
               } else {
                 console.dir(error);
@@ -111,10 +106,10 @@ exports.parameterize = function(config, configParams) {
             }
         }, function(error, response, body) {
             if (!error && response.statusCode == 200) {
-                // get the client information
-                var info = JSON.parse(body);
+                // set the session information to be parsed later
+                process.env.SESSION = body;
 
-                onErmrestLogin(defer, info);
+                onErmrestLogin(defer);
             } else {
                 throw new Error('Unable to retreive userinfo');
             }
@@ -129,13 +124,13 @@ exports.parameterize = function(config, configParams) {
 
   // This method will be called before starting to execute the test suite
   config.onPrepare = function() {
-    console.log(testConfiguration);
 
     var SpecReporter = require('jasmine-spec-reporter');
     // add jasmine spec reporter
     jasmine.getEnv().addReporter(new SpecReporter({displayStacktrace: 'all'}));
 
     browser.params.configuration = testConfiguration, defer = Q.defer();
+    browser.params.client = JSON.parse(process.env.SESSION).client;
 
     // Set catalogId in browser params for future reference to delete it if required
     browser.params.catalogId = catalogId = process.env.CATALOGID;
