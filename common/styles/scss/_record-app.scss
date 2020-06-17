@@ -450,17 +450,6 @@
             display: none;
         }
 
-        #no-results-row{
-          display:table-cell !important;
-          border: solid #BBBBBB !important;
-          border-width: 1px 1px 1px 1px !important;
-        }
-
-        record-table {
-          empty-cells: show !important;
-          border-collapse: collapse !important;
-        }
-
         record-table td {
             border: solid #BBBBBB !important;
             border-width: 1px 1px 1px 1px !important;
@@ -471,6 +460,15 @@
             border-width: 1px 1px 1px 1px !important;
         }
 
+        #no-results-row{
+          display:table-cell !important;
+        }
+
+        record-table {
+          empty-cells: show !important;
+          border-collapse: collapse !important;
+        }
+        
         @page {
 
             size: auto;
