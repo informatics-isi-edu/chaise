@@ -86,6 +86,7 @@ exports.parameterize = function(config, configParams) {
 
                 // get the client information
                 var info = JSON.parse(body);
+                console.log(info);
                 testConfiguration.client = info.client;
 
                 if (testConfiguration.authCookie) {
