@@ -87,9 +87,11 @@ exports.parameterize = function(config, configParams) {
 
                 // get the client information
                 var info = JSON.parse(body);
+                console.log(info.client);
 
                 if (testConfiguration.authCookie) {
                   process.env.AUTH_COOKIE = testConfiguration.authCookie;
+                  console.log("before ermLogin function call");
                   onErmrestLogin(defer, info);
                 } else defer.reject(error);
               } else {
