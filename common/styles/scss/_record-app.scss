@@ -444,14 +444,14 @@
             display:none;
         }
 
-        record-table {
-          empty-cells: show !important;
-        }
-
         //Hiding the 1st column (Actions) in Record Table
         record-table th:nth-child(1),
         record-table td:nth-child(1) {
             display: none;
+        }
+
+        record-table {
+          empty-cells: show !important;
         }
 
         record-table td {
