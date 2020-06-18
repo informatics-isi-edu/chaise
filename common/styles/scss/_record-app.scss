@@ -409,6 +409,9 @@
             }
         }
 
+        .chaise-body h1{
+          font-size: 1.5 rem;
+        }
         #rt-container{
             .vocab::after{
                 content: "\2002\2022" !important;
@@ -468,7 +471,7 @@
           empty-cells: show !important;
           border-collapse: collapse !important;
         }
-        
+
         @page {
 
             size: auto;
