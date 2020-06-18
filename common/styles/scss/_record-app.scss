@@ -409,10 +409,11 @@
             }
         }
 
-        #entity-title{
-          font-size: 1.5 rem !important;
+        .chaise-body {
+          .title-container h1{
+            font-size: 1.5 rem !important;
         }
-        
+
         #rt-container{
             .vocab::after{
                 content: "\2002\2022" !important;
