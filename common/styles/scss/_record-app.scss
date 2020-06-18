@@ -409,10 +409,12 @@
             }
         }
 
-        .chaise-body {
-          .title-container h1{
-            font-size: 1.5 rem !important;
-          }
+        .chaise-body h1{
+            .chaise-body {
+                .h1-class {
+                    font-size: 1.5 rem !important;
+                }
+            }
         }
 
         #rt-container{
