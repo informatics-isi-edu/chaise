@@ -1626,7 +1626,10 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        if (typeof column_values[columnName].link === 'string') {
+        if (process.env.TRAVIS && column_values[colName].ignoreInTRAVIS) {
+            continue;
+        }
+        else if (typeof column_values[columnName].link === 'string') {
             column = column.element(by.css("a"));
             var link = mustache.render(column_values[columnName].link, {
                 "catalog_id": process.env.catalogId,
@@ -1680,18 +1683,20 @@ exports.selectFile = function(file, fileInput, txtInput) {
     expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
     expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
 
-    // test the tooltip on hover
-    // move the mouse first to force any other tooltips to hide
-    browser.actions().mouseMove(element(by.css(".text-danger"))).perform();
-    var tooltip = chaisePage.getTooltipDiv();
+    if (typeof file.tooltip === "string") {
+        // test the tooltip on hover
+        // move the mouse first to force any other tooltips to hide
+        browser.actions().mouseMove(element(by.css(".text-danger"))).perform();
+        var tooltip = chaisePage.getTooltipDiv();
 
-    chaisePage.waitForElementInverse(tooltip).then(function () {
-        browser.actions().mouseMove(txtInput).perform();
+        chaisePage.waitForElementInverse(tooltip).then(function () {
+            browser.actions().mouseMove(txtInput).perform();
 
-        return chaisePage.waitForElement(tooltip)
-    }).then(function () {
-        expect(tooltip.getText()).toBe(file.tooltip, "Incorrect tooltip on the File Input");
-    });
+            return chaisePage.waitForElement(tooltip)
+        }).then(function () {
+            expect(tooltip.getText()).toBe(file.tooltip, "Incorrect tooltip on the File Input");
+        });
+    }
 };
 
 /**
