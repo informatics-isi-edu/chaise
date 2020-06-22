@@ -1626,7 +1626,7 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        if (process.env.TRAVIS && column_values[colName].ignoreInTRAVIS) {
+        if (process.env.TRAVIS && column_values[columnName].ignoreInTRAVIS) {
             continue;
         }
         else if (typeof column_values[columnName].link === 'string') {
