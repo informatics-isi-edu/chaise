@@ -385,6 +385,12 @@
             }
         }
 
+        .panel-title{
+          .rt-section-header{
+            font-size: 1.5rem !important;
+          }
+        }
+
         //Prev and Next buttons
         .bottom-panel-container {
             .chaise-table-pagination {
@@ -466,6 +472,8 @@
 
         #no-results-row{
           display:table-cell !important;
+          text-align: left !important;
+          padding-left: 150px !important;
         }
 
         record-table {
