@@ -443,21 +443,12 @@
             }
         }
 
-        .chaise-table-header{
-            .chaise-table-header-total-count{
-                margin:8px!important;
-            }
-
-        }
-
         //Removing button styling from Display record information
-        .chaise-btn{
-          .chaise-btn-secondary{
+        .page-size-dropdown{
             border: none !important;
             padding: 0px;
             margin-bottom: 2.5px;
-            min-width: unset;
-          }
+            min-width: unset !important;
         }
 
         //Removing the dropdown button from Display record information
@@ -470,7 +461,7 @@
         .fa-chevron-down:before{
           font-size: 1.2rem !important;
         }
-        
+
         .fa-arrows-alt-v{
             display:none;
         }
