@@ -452,10 +452,8 @@
         }
 
         //Removing the dropdown button from Display record information
-        .chaise-body{
-          .caret{
-            display: none !important;
-          }
+        .caret{
+           display: none !important;
         }
 
         .fa-chevron-down:before{
