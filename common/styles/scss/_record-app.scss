@@ -450,6 +450,27 @@
 
         }
 
+        //Removing button styling from Display record information
+        .chaise-btn{
+          .chaise-btn-secondary{
+            border: none !important;
+            padding: 0px;
+            margin-bottom: 2.5px;
+            min-width: unset;
+          }
+        }
+
+        //Removing the dropdown button from Display record information
+        .chaise-body{
+          .caret{
+            display: none !important;
+          }
+        }
+
+        .fa-chevron-down:before{
+          font-size: 1.2rem !important;
+        }
+        
         .fa-arrows-alt-v{
             display:none;
         }
