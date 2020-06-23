@@ -288,7 +288,7 @@ describe('When editing a record', function() {
                 expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
 
                 var colNames = Object.keys(testParams.table_1.null_submitted_values).filter(function (el) {
-                    return !process.env.TRAVIS || el.ignoreInTRAVIS !== true;
+                    return !process.env.TRAVIS || !(typeof el === 'object' && el != null && el.ignoreInTRAVIS === true);
                 });
                 recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.null_submitted_values, colNames.length+5); // +5 for system columns
             });

@@ -125,10 +125,7 @@ before_script:
   - sudo -H -u webauthn webauthn2-manage assign test1 admin
 
 script:
-  - make testfullfeaturesconfirmation
-  - make testdefaultconfig
-  - make testfullfeatures
-  - make testdeleteprohibited
+  - make testrecordedit
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}
