@@ -106,7 +106,6 @@ before_install:
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
   - cd ermrestjs
-  - git checkout asset-null
   - sudo make install
   - cd ../chaise
   - sudo cp test/ermrest_config.json /home/ermrest/
@@ -125,7 +124,10 @@ before_script:
   - sudo -H -u webauthn webauthn2-manage assign test1 admin
 
 script:
-  - make testrecordedit
+  - make testfullfeaturesconfirmation
+  - make testdefaultconfig
+  - make testfullfeatures
+  - make testdeleteprohibited
 
 after_failure:
   - sudo cat ${HTTPD_ERROR_LOG}
