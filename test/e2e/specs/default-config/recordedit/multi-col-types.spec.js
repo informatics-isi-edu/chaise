@@ -51,8 +51,6 @@ var testParams = {
             {name: "asset_null_col", displayType: "asset", value: files[0]},
             {name: "asset_col", displayType: "asset"},
         ],
-        columns: ["int2_col", "int4_col", "int8_col", "float4_col", "float8_col", "text_col", "longtext_col", "markdown_col", "bool_true_col", "bool_false_col", "timestamp_col", "timestamptz_col", "date_col", "vDcNH5rGBzGJObTbqmnH7g", "json_null_col", "json_col", "asset_col", "asset_col_filename", "asset_col_bytes", "asset_col_md5"],
-        null_columns: ["int2_null_col", "int4_null_col", "int8_null_col", "float4_null_col", "float8_null_col", "text_null_col", "longtext_null_col", "markdown_null_col", "bool_null_col", "bool_true_col", "timestamp_null_col", "timestamptz_null_col", "date_null_col", "6lhMahZsQfXf_lAs9BSxNA", "json_null_col", "json_col", "timestamp_txt", "asset_null_col", "asset_null_col_filename", "asset_null_col_bytes"],
         submitted_values: {
             int2_col: "32,767",
             int4_col: "-2,147,483,648",
@@ -97,8 +95,8 @@ var testParams = {
             json_col: "null",
             timestamp_txt: currentTimestampTime,
             asset_null_col: {ignoreInTRAVIS: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
-            asset_null_col_filename: "testfile500kb_nulltest.png",
-            asset_null_col_bytes: "512,000"
+            asset_null_col_filename: {ignoreInTRAVIS: true, value: "testfile500kb_nulltest.png"},
+            asset_null_col_bytes: {ignoreInTRAVIS: true, value: "512,000"}
         }
     },
     table_w_generated_columns : {
@@ -175,7 +173,8 @@ describe('When editing a record', function() {
             });
 
             expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
-            recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.columns, testParams.table_1.submitted_values, testParams.table_1.columns.length+5); // +5 for system columns
+            var colNames = Object.keys(testParams.table_1.submitted_values);
+            recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.submitted_values, colNames.length+5); // +5 for system columns
         });
     });
 
@@ -287,7 +286,11 @@ describe('When editing a record', function() {
                 });
 
                 expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
-                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.null_columns, testParams.table_1.null_submitted_values, testParams.table_1.null_columns.length+5); // +5 for system columns
+
+                var colNames = Object.keys(testParams.table_1.null_submitted_values).filter(function (el) {
+                    return !process.env.TRAVIS && el.ignoreInTRAVIS !== true;
+                });
+                recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.null_submitted_values, colNames.length+5); // +5 for system columns
             });
         });
     });

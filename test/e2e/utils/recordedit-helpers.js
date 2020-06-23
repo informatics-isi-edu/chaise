@@ -1612,6 +1612,11 @@ exports.testSubmission = function (tableParams, isEditMode) {
 /**
  * column_names - array of string column_names
  * column_values - hash of column_name: column_value
+ * acceptable column_value formats:
+ *   - string
+ *   - {value: string, ignoreInTRAVIS: boolean}
+ *   - {link: true, value: string, ignoreInTRAVIS: boolean}
+ *
  * Checks for if values are defined and set properly
  */
 exports.testRecordAppValuesAfterSubmission = function(column_names, column_values, num_displayed_columns) {
@@ -1638,7 +1643,11 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
             expect(column.getText()).toEqual(column_values[columnName].value, "Value for " + columnName + " is not what was expected");
             expect(column.getAttribute('href')).toContain(link, "link for " + columnName + " is not what was expected");
         } else {
-            expect(column.getText()).toBe(column_values[columnName], "Value for " + columnName + " is not what was expected");
+            var val = column_values[columnName];
+            if (typeof val === 'object' && val != null && typeof val.value === "string") {
+                val = val.value;
+            }
+            expect(column.getText()).toBe(val, "Value for " + columnName + " is not what was expected");
         }
 
     }
