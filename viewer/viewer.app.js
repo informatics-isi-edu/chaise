@@ -18,6 +18,9 @@
     var client;
 
     angular.module('chaise.viewer', [
+        'ngSanitize',
+        'ngCookies',
+        'ngAnimate',
         'duScroll',
         'chaise.alerts',
         'chaise.authen',
@@ -26,6 +29,7 @@
         'chaise.filters',
         'chaise.inputs',
         'chaise.delete',
+        'chaise.markdown',
         'chaise.modal',
         'chaise.navbar',
         'chaise.upload',
@@ -35,12 +39,16 @@
         'ermrestjs',
         'ngCookies',
         'ngSanitize',
+        'ui.mask',
         'ui.select',
         'ui.bootstrap',
-        'ng.deviceDetector'
+        'ng.deviceDetector',
+        'angular-markdown-editor'
     ])
 
-    .config(['$provide', function($provide) {
+    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
+        ConfigUtilsProvider.$get().configureAngular($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider);
+
         $provide.decorator('$templateRequest', ['ConfigUtils', 'UriUtils', '$delegate', function (ConfigUtils, UriUtils, $delegate) {
             return ConfigUtils.decorateTemplateRequest($delegate, UriUtils.chaiseDeploymentPath());
         }]);
@@ -81,6 +89,7 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
+    // TODO not used anymore and can be removed (it was used by old annotation support code)
     .config(['userProvider', 'context', 'SessionProvider', 'ConfigUtilsProvider', function configureUser(userProvider, context, SessionProvider, ConfigUtilsProvider) {
         var chaiseConfig = ConfigUtilsProvider.$get().getConfigJSON();
         SessionProvider.$get().getSession().then(function success(session) {
@@ -129,26 +138,23 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils',  'UiUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', 'viewerAppUtils', 'viewerModel', '$rootScope', function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UiUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, comments, anatomies, user, MathUtils, viewerAppUtils, viewerModel, $rootScope) {
+    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'MathUtils', 'viewerModel', '$rootScope', 'Session', 'annotationCreateForm', 'annotationEditForm', 'recordCreate', 'AlertsService', 'viewerConstant',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, MathUtils, viewerModel, $rootScope, Session, annotationCreateForm, annotationEditForm, recordCreate, AlertsService, viewerConstant) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
-        var annotoriousReady = false;
-        var chaiseReady = false;
         $rootScope.displayReady = false;
 
         var arrows = [];
         var rectangles = [];
         var sections = [];
 
-        var origin = $window.location.origin;
         var iframe = $window.frames[0];
-        var annotoriousReady = false;
-        var chaiseReady = false;
         var arrows = [];
         var rectangles = [];
         var sections = [];
         var session;
         var imageAnnotationURL = context.serviceURL + "/catalog/2/entity/Gene_Expression:Image_Annotation";
+        var imageURI, svgURIs = [];
         var config = ConfigUtils.getContextJSON();
 
         context.server = config.server;
@@ -162,7 +168,9 @@
         var ermrestUri = res.ermrestUri,
             pcid = config.contextHeaderParams.cid,
             ppid = config.contextHeaderParams.pid,
-            isQueryParameter = res.isQueryParameter;
+            isQueryParameter = res.isQueryParameter,
+            queryParamsString = res.queryParamsString,
+            queryParams = res.queryParams;
 
         context.catalogID = res.catalogId;
 
@@ -187,359 +195,174 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
-            var schema = catalog.schemas.get(context.schemaName);
-            // So the schema and tables can be accessed in controllers
-            context.schema = schema;
-            console.log('Schema: ', schema);
-            if (schema) {
-                var table = schema.tables.get(context.tableName);
-                // BinaryPredicate(column, operator, value) is used for building a filter
-                // This predicate is used to get the image based on the id of the image the user is navigating to
-                var imagePath = new ERMrest.DataPath(table);
-                var imagePathColumn = imagePath.context.columns.get('id');
-                var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
+        var session;
+
+        // Subscribe to on change event for session
+        var subId = Session.subscribeOnChange(function () {
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
+
+            var imageReference;
+            // resolve the main (image) reference
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+                imageReference = ref;
+
+                // TODO check for filter
+                // context.filter = imageReference.location.filter;
+                // context.facets = imageReference.location.facets;
+                // DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
+
+                session = Session.getSessionValue();
+                if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+
+                var logObj = {};
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                if (isQueryParameter) logObj.cqp = 1;
 
                 $rootScope.logStackPath = logService.logStackPaths.ENTITY;
                 $rootScope.logStack = [
                     logService.getStackNode(
                         logService.logStackTypes.ENTITY,
-                        table,
-                        {
-                            "and": [
-                                {"source": "id", "choices": [context.imageID]}
-                            ]
-                        }
+                        imageReference.table,
+                        imageReference.filterLogInfo
                     )
                 ];
 
-                var contextHeaderParams = {
-                    catalog: context.catalogID,
-                    schema_table: context.schemaName + ":" + context.tableName,
-                    action: logService.getActionString(logService.logActions.LOAD),
-                    stack: logService.getStackObject()
-                };
-
-                if (context.queryParams && context.queryParams.ppid) {
-                    contextHeaderParams.ppid = context.queryParams.ppid;
+                // TODO what should be the context
+                return imageReference.contextualize.detailed.read(1, logObj, true, true);
+            })
+            // read the main (image) reference
+            .then(function (imagePage) {
+                // TODO what if the record doesn't exist (or there are multiple)
+                if (imagePage.length > 0) {
+                    image.entity = imagePage.tuples[0].data;
                 }
 
-                if (context.queryParams && context.queryParams.pcid) {
-                    contextHeaderParams.pcid = context.queryParams.pcid;
+                if (image.entity) {
+                    imageURI = image.entity.uri;
                 }
 
-                imagePath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(entity) {
-                    image.entity = entity[0];
-                    var waterMark = context.queryParams.waterMark;
-                    if (waterMark === undefined) {
-                        waterMark = '';
-                    } else {
-                        waterMark = '&waterMark=' + waterMark;
-                    }
+                imageAnnotationURL += "/Image=" + context.imageID;
+                return ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid });
+            })
+            // create the annotation reference
+            .then(function (annotationReference) {
 
-                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
-                    if (meterScaleInPixels === undefined) {
-                      meterScaleInPixels = '';
-                    } else {
-                      meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
-                    }
+                // we are using filter to determine app mode, the logic for getting filter
+                // should be in the parser and we should not duplicate it in here
+                // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
+                // var location = annotationReference.location;
 
-                    console.log('uri='+image.entity.uri + waterMark);
-
-                    var osdViewerPath =  origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
-
-                    /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
-                      It calls the new OpenSeadragon viewer app with parameters based on the file format. Need to change this, when we
-                      will start getting svg files in the URL itself instead of making a call to ermrest.
-                      Currently it's a HACK
-                    */
-                    // var params = window.location.href.split("?");
-                    // if(window.location.href.indexOf("url") > -1){
-                    //   image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
-                    // } else {
-                    //   var old_params = image.entity.uri.split("?");
-                    //   image.entity.uri = origin+"/openseadragon-viewer/index.html?" + old_params[1];
-                    // }
-                    // var old_params = image.entity.uri.split("?");
-                    // image.entity.uri = origin+"/~mingyi/openseadragon-viewer/index.html?" + params[1];
-
-                    // for (var i = 0; i < svgUrls.length; i++){
-                    //     image.entity.uri += "&url=" + svgUrls[i];
-                    // }
-
-                    // // image.entity.uri = image.entity.uri + "&url=data/Q-296R_all_contours_cw_named.svg";
-                    // console.log('replace uri = '+image.entity.uri + waterMark)
-                    // iframe.location.replace(image.entity.uri + waterMark);
-                    // console.log('Image: ', image);
-
-                    // var annotationTable = schema.tables.get('annotation');
-                    // var annotationPath = imagePath.extend(annotationTable).datapath;
-                    // var contextHeaderParams = {
-                    //     catalog: context.catalogID,
-                    //     schema_table: context.schemaName + ":annotation",
-                    //     action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
-                    //     stack: logService.getStackObject()
-                    // };
-                    // annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
-                    //     var length = _annotations.length;
-                    //     for (var i = 0; i < length; i++) {
-                    //         _annotations[i].table = annotationPath.context.table.name;
-                    //         var annotation = _annotations[i];
-                    //         if (!annotation.config) {
-                    //             annotation.config = {};
-                    //         }
-                    //         annotations.push(annotation);
-                    //     }
-                    //     chaiseReady = true;
-
-                    //     if (annotoriousReady && chaiseReady) {
-                    //         iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
-                    //     }
-                    //     console.log('Annotations: ', annotations);
-
-                    //     var commentTable = schema.tables.get('annotation_comment');
-                    //     var commentPath = annotationPath.extend(commentTable).datapath;
-                    //     var contextHeaderParams = {
-                    //         catalog: context.catalogID,
-                    //         schema_table: context.schemaName + ":annotation_comment",
-                    //         action: logService.getActionString(logService.logActions.VIEWER_ANNOT_COMMENT_LOAD),
-                    //         stack: logService.getStackObject()
-                    //     };
-
-                    //     // Get all the comments for this image
-                    //     // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
-                    //     commentPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_comments){
-                    //         var length = _comments.length;
-                    //         for (var i = 0; i < length; i++) {
-                    //             _comments[i].table = commentPath.context.table.name;
-                    //             var annotationId = _comments[i].annotation_id;
-                    //             if (!comments[annotationId]) {
-                    //                 comments[annotationId] = [];
-                    //             }
-                    //             comments[annotationId].push(_comments[i]);
-                    //         }
-                    //         console.log('Comments: ', comments);
-                    //     }, function error(response) {
-                    //         console.log(response);
-                    //     });
-
-                    // }, function error(response) {
-                    //     throw response;
-                    // });
-                }, function error(response) {
-                    throw response;
-                }).then(function(){
-
-                    imageAnnotationURL += "/Image="+context.imageID;
-                    ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference){
-
-                        // we are using filter to determine app mode, the logic for getting filter
-                        // should be in the parser and we should not duplicate it in here
-                        // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
-                        var location = reference.location;
-                        var svgUrls = [];
-
-                        // Mode can be any 3 with a filter
-                        if (location.filter || location.facets) {
-                            // prefill always means create
-                            // copy means copy regardless of a limit defined
-                            // edit is everything else with a filter
-                            context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
-                        } else if (context.queryParams.limit) {
-                            context.mode = context.modes.EDIT;
-                        }
-                        context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
-
-                        //contextualize the reference based on the mode (determined above) recordedit is in
-                        if (context.mode == context.modes.EDIT) {
-                            $rootScope.reference = reference.contextualize.entryEdit;
-                        } else if (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) {
-                            $rootScope.reference = reference.contextualize.entryCreate;
-                        }
-                        console.log("Reference : ", $rootScope.reference);
-                        $rootScope.canCreate = reference.canCreate || false;
-                        $rootScope.canUpdate = reference.canUpdate || false;
-                        $rootScope.canDelete = reference.canDelete || false;
-
-                        $rootScope.reference.session = session;
-                        $rootScope.session = session;
-                        // $rootScope.reference = reference;
+                // TODO remove anywhere these are used
+                // Mode can be any 3 with a filter
+                // if (location.filter || location.facets) {
+                //     // prefill always means create
+                //     // copy means copy regardless of a limit defined
+                //     // edit is everything else with a filter
+                //     context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
+                // } else if (context.queryParams.limit) {
+                //     context.mode = context.modes.EDIT;
+                // }
+                // context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
 
 
-                        // log attribues
-                        $rootScope.logStackPath = logService.logStackPaths.SET;
-                        $rootScope.logStack = [
-                            logService.getStackNode(
-                                logService.logStackTypes.SET,
-                                $rootScope.reference.table,
-                                $rootScope.reference.filterLogInfo
-                            )
-                        ];
+                // get the list of annotations
+                // TODO should be removed (currently used in form which is wrong)
 
-                        // The log object that will be used for the submission request
-                        var action = (context.mode == context.modes.CREATE || context.mode == context.modes.COPY) ? logService.logActions.CREATE : logService.logActions.UPDATE;
-                        var logObj = {
-                            action: logService.getActionString(action),
-                            stack: logService.getStackObject()
-                        };
-                        if (pcid) logObj.pcid = pcid;
-                        if (ppid) logObj.ppid = ppid;
-                        if (isQueryParameter) logObj.cqp = 1;
-                        context.logObject = logObj;
+                // TODO should use compact context
+                // $rootScope.annotationReference = annotationReference.contextualize.compact;
+                $rootScope.annotationReference = annotationReference.contextualize.entryCreate;
 
-                        $rootScope.reference.columns.forEach(function (column, index) {
-                            var isDisabled = InputUtils.isDisabled(column);
-                            var stackNode = logService.getStackNode(
-                                column.isForeignKey ? logService.logStackTypes.FOREIGN_KEY : logService.logStackTypes.COLUMN,
-                                column.table,
-                                {source: column.compressedDataSource, entity: column.isForeignKey}
-                            );
-                            var stackPath = column.isForeignKey ? logService.logStackPaths.FOREIGN_KEY : logService.logStackPaths.COLUMN;
+                $rootScope.canCreate = annotationReference.canCreate || false;
+                $rootScope.canUpdate = annotationReference.canUpdate || false;
+                $rootScope.canDelete = annotationReference.canDelete || false;
 
-                            viewerModel.columnModels[index] = {
-                                allInput: null,
-                                column: column,
-                                isDisabled: isDisabled,
-                                inputType: viewerAppUtils.columnToInputType(column, isDisabled),
-                                highlightRow: false,
-                                showSelectAll: false,
-                                logStack: logService.getStackObject(stackNode),
-                                logStackPath: logService.getStackPath("", stackPath)
-                            };
-                        });
+                $rootScope.annotationReference.session = session;
+                $rootScope.session = session;
 
-                        var numberRowsToRead = context.MAX_ROWS_TO_ADD;
-                        var logObj = {
-                            action: logService.getActionString(logService.logActions.LOAD),
-                            stack: logService.getStackObject()
-                        };
+                // TODO used for create and edit, used to be populated here...
+                // context.logObject = logObj;
 
-                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
-                            console.log("Page : ", page );
-
-                            // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
-                            $rootScope.tuples = [];
-                            if (context.mode == context.modes.EDIT && page.tuples.length == 1) {
-                                $rootScope.displayname = page.tuples[0].displayname;
-                            }
-                            $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
-                            $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
-
-                            var column, value;
-
-                            for(var j = 0; j < page.tuples.length; j++){
-                                var row = page.tuples[j].data,
-                                    tuple = page.tuples[j],
-                                    shallowCopy = tuple.copy();
-
-                                viewerModel.rows[j] = shallowCopy.data;
-
-                                if(row && row.File_URI){
-                                    viewerModel.rows[j]._svgUrl =  "https://"+ context.server.host + row.File_URI;
-                                    // svgUrls.push("https://"+ context.server.host + row.File_URI);
-                                }
-                            }
-
-                            $rootScope.displayReady = true;
-                            console.log('Model: ', viewerModel);
-                            // Keep a copy of the initial rows data so that we can see if user has made any changes later
-                            viewerModel.oldRows = angular.copy(viewerModel.rows);
-                            // return svgUrls;
-                        }, function error(response) {
-                            var errorData = {};
-                            errorData.redirectUrl = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
-                            errorData.gotoTableDisplayname = $rootScope.reference.displayname.value;
-                            response.errorData = errorData;
-                            throw response;
-                        })
-                        .then(function(){
-                            // Load the openseadragon after get the corresponding svg files
-                            var waterMark = context.queryParams.waterMark === undefined ? '' :  '&waterMark=' + context.queryParams.waterMark;
-                            var params = window.location.href.split("?");
-                            var osdViewerPath =  origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
-
-                            /* Note: the following has been done so that the viewer app supports both type of formats i.e tiff and czi.
-                            It calls the new OpenSeadragon viewer app with parameters based on the file format. Need to change this, when we
-                            will start getting svg files in the URL itself instead of making a call to ermrest.
-                            Currently it's a HACK
-                            */
-                            if(window.location.href.indexOf("url") > -1){
-                                image.entity.uri = osdViewerPath +"?" + params[1];
-                            } else {
-                                var old_params = image.entity.uri.split("?");
-                                image.entity.uri = osdViewerPath + "?" + old_params[1];
-                            }
-
-                            for (var i = 0; i < viewerModel.rows.length; i++){
-                                image.entity.uri += "&url=" + viewerModel.rows[i]._svgUrl;
-                            }
-
-                            console.log('replace uri = '+image.entity.uri + waterMark)
-                            iframe.location.replace(image.entity.uri + waterMark);
-                            console.log('Image: ', image);
-
-                        })
-
-                    }, function error(response){
-                        console.log("ERMrest error : ", response );
-                    })
-                });
-
-
-
-
-                // Get all rows from "anatomy" table
-                var anatomyTable = schema.tables.get('anatomy');
-                var anatomyPath = new ERMrest.DataPath(anatomyTable);
-                var contextHeaderParams = {
-                    catalog: context.catalogID,
-                    schema_table: context.schemaName + ":anatomy",
-                    action: logService.getActionString(logService.logActions.VIEWER_ANATOMY_LOAD),
-                    stack: logService.getStackObject()
-                };
-                anatomyPath.entity.get(contextHeaderParams).then(function success(_anatomies) {
-                    anatomies.push('No Anatomy');
-                    var length = _anatomies.length;
-                    for (var j = 0; j < length; j++) {
-                        anatomies.push(_anatomies[j].term);
-                    }
-                    anatomies.sort(function sortAnatomies(a, b) {
-                        a = a.toLowerCase();
-                        b = b.toLowerCase();
-                        if (a < b) {
-                            return -1;
-                        } else if (a > b) {
-                            return 1;
-                        } else {
-                            return 0;
-                        }
+                // create the edit and create forms
+                if ($rootScope.canCreate) {
+                    annotationCreateForm.reference = annotationReference.contextualize.entryCreate;
+                    annotationCreateForm.reference.columns.forEach(function (column, index) {
+                        annotationCreateForm.columnModels[index] = recordCreate.columnToColumnModel(column);
                     });
-                }, function error(response) {
-                    throw response;
-                });
-            }
-        }, function error(response) {
-          console.log(response);
-        });
-
-
-        // Set up a listener for all "message" events
-        $window.addEventListener('message', function(event) {
-            if (event.origin === origin) {
-                if (event.data.messageType == 'annotoriousReady') {
-                    annotoriousReady = event.data.content;
-                    if (annotoriousReady && chaiseReady) {
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
-                    }
-                } else if (event.data.messageType == 'dismissChannels') {
-                  window.console.log("XXX pull off the channels filtering pullout..");
-                  var btnptr = $('#filter-btn');
-                  btnptr.click();
                 }
-                // should really capture the 'unhandled' message type here..
-            } else {
-                console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
-            }
+
+                if ($rootScope.canUpdate) {
+                    annotationEditForm.reference = annotationReference.contextualize.entryEdit;
+                    annotationEditForm.reference.columns.forEach(function (column, index) {
+                        annotationEditForm.columnModels[index] = recordCreate.columnToColumnModel(column);
+                    });
+                }
+
+                // TODO needs to be updated
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
+                    stack: logService.getStackObject()
+                };
+
+                // TODO how many should we read?
+                return $rootScope.annotationReference.read(201, logObj);
+            })
+            // read the annotation reference
+            .then(function getPage(page) {
+                // TODO tuples, rows
+                // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
+                $rootScope.tuples = [];
+                for(var j = 0; j < page.tuples.length; j++){
+                    var row = page.tuples[j].data,
+                        tuple = page.tuples[j],
+                        shallowCopy = tuple.copy();
+
+                    viewerModel.rows[j] = shallowCopy.data;
+
+                    // TODO foreignKeyData should be added for domain_filter_pattern
+
+                    if(row && row[viewerConstant.annotation.assetColumn]){
+                        svgURIs.push(row[viewerConstant.annotation.assetColumn]);
+                    }
+                }
+
+                console.log('Model: ', viewerModel);
+
+                // Load the openseadragon after we got the corresponding svg files
+                var osdViewerLocation =  origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
+                var osdViewerQueryParams = queryParamsString;
+
+                /**
+                 * - if url is passed in query parameters, don't use image.uri value
+                 * - otherwise, if image.uri value exists
+                 *    - and has query parameter, use the image.uri query parameter.
+                 *    - otherwise, use the image.uri value
+                 */
+                if(!("url" in queryParams) && (typeof imageURI === "string")){
+                    if (imageURI.indexOf("?") !== -1) {
+                        osdViewerQueryParams += imageURI.split("?")[1];
+                    } else {
+                        osdViewerQueryParams += imageURI;
+                    }
+                }
+
+                // attach the svg locations
+                for (var i = 0; i < svgURIs.length; i++){
+                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
+                    osdViewerQueryParams += "url=" + UriUtils.getAbsoluteURL(svgURIs[i], origin);
+                }
+
+                // TODO what if there are no osdViewerQueryParams
+                var osdViewerURI = osdViewerLocation + "?" + osdViewerQueryParams;
+                console.log('replace uri = '+ osdViewerURI)
+                iframe.location.replace(osdViewerURI);
+                console.log('Image: ', image);
+
+                $rootScope.displayReady = true;
+            }).catch(function (err) {
+                throw err;
+            });
         });
 
         // Initialize Bootstrap tooltips

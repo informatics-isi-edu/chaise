@@ -647,7 +647,7 @@
 
         function isRequired(columnIndex) {
             var cm = vm.recordEditModel.columnModels[columnIndex];
-            return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
+            return cm && cm.isRequired;
         }
 
         /**

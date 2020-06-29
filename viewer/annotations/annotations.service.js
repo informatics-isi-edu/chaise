@@ -12,6 +12,7 @@
         //     iframe.postMessage({messageType: 'drawAnnotation'}, origin);
         // }
 
+        // TODO not used
         function createAnnotation(newAnnotation) {
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
@@ -53,8 +54,8 @@
 
         /**
          * checkEntryExist - checks whether the table has created an entry with the combination of keys
-         * @param {string} imageID 
-         * @param {string} anatomyID 
+         * @param {string} imageID
+         * @param {string} anatomyID
          * @return {boolean} whether table has the entry
          */
         function checkEntryExist(imageID, anatomyID){
@@ -78,7 +79,7 @@
         function removeEntry(item){
             var defer = $q.defer();
             var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(item.Image) + "&Anatomy="+ encodeURIComponent(item.Anatomy);
-            var reference; 
+            var reference;
 
             ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){
                  //TODO needs proper logging parameter
@@ -105,8 +106,8 @@
         }
 
         /**
-         * send saving result to openseadragon 
-         * @param {} result 
+         * send saving result to openseadragon
+         * @param {} result
          */
         function changeSVGId(result) {
             iframe.postMessage({messageType: 'changeSVGId', content: result}, origin);

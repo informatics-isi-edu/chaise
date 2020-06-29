@@ -131,7 +131,7 @@ a.cardlink.delete {
     flex-direction: column;
     height: calc(100vh - 60px);
     padding: 0;
-    overflow: auto;
+    /* overflow: auto; */
 }
 
 #viewer-container.col-md-9 {
@@ -385,7 +385,7 @@ a.cardlink.delete {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-} 
+}
 
 #viewer-content .annotation-list .annotationSetting .switch-status.on{
     top: 0;

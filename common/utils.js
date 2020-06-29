@@ -245,11 +245,13 @@
 
             var ermrestUri = {},
                 queryParams = {},
+                queryParamsString = "",
                 catalogId, ppid, pcid;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
-                var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
+                queryParamsString = hash.match(/\?(.+)/)[1];
+                var queries = queryParamsString.split("&"); // get the query params
                 var acceptedQueries = [], i;
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
@@ -366,6 +368,7 @@
                     hash: originalHash,
                     ppid: ppid,
                     pcid: pcid,
+                    queryParamsString: queryParamsString,
                     queryParams: queryParams,
                     isQueryParameter: isQueryParameter
                 };
@@ -1003,6 +1006,29 @@
             return url;
         }
 
+        /**
+         * Given a url, will return it if it's absolute, otherwise will
+         * attach the current origin (if origin is not passed) to it.
+         */
+        function getAbsoluteURL(uri, origin) {
+            if (typeof origin !== 'string' || origin.length < 1) {
+                origin = $window.location.origin;
+            }
+
+            // A more universal, non case-sensitive, protocol-agnostic regex
+            // to test a URL string is relative or absolute
+            var r = new RegExp('^(?:[a-z]+:)?//', 'i');
+
+            // The url is absolute so don't make any changes and return it as it is
+            if (r.test(uri))  return uri;
+
+            // If uri starts with "/" then simply prepend the server uri
+            if (uri.indexOf("/") === 0)  return origin + uri;
+
+            // else prepend the server uri with an additional "/"
+            return origin + "/" + uri;
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -1025,7 +1051,8 @@
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
             stripSortAndQueryParams: stripSortAndQueryParams,
-            getRecordsetLink: getRecordsetLink
+            getRecordsetLink: getRecordsetLink,
+            getAbsoluteURL: getAbsoluteURL
         }
     }])
 

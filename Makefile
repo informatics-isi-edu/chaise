@@ -264,7 +264,8 @@ SHARED_JS_VENDOR_ASSET=$(JS)/vendor/angular-plotly.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/vendor/css-element-queries.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(JS)/vendor/select.js
+	$(JS)/vendor/select.js \
+	$(COMMON)/vendor/mask.min.js
 
 SHARED_JS_VENDOR_ASSET_MIN=chaise.vendor.min.js
 $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
@@ -367,10 +368,8 @@ $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN): $(RECORDEDIT_JS_SOURCE)
 	$(call bundle_js_files,$(RECORDEDIT_JS_SOURCE_MIN),$(RECORDEDIT_JS_SOURCE))
 
 # TODO why four different files for markdown? if inputswitch will be used everywhere, this should move to shared
-RECORDEDIT_JS_VENDOR_ASSET=$(JS)/vendor/select.js \
-	$(JS)/vendor/angular-datepicker.js \
+RECORDEDIT_JS_VENDOR_ASSET=$(JS)/vendor/angular-datepicker.js \
 	$(JS)/vendor/rzslider.js \
-	$(COMMON)/vendor/mask.min.js \
 	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
@@ -412,7 +411,8 @@ recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
 VIEWER_ROOT=viewer
 
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
-	$(VIEWER_ROOT)//model.js \
+	$(VIEWER_ROOT)/model.js \
+	$(VIEWER_ROOT)/constant.js \
 	$(VIEWER_ROOT)/common/providers/context.js \
 	$(VIEWER_ROOT)/common/providers/image.js \
 	$(VIEWER_ROOT)/common/providers/user.js \
@@ -420,7 +420,6 @@ VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
 	$(VIEWER_ROOT)/sidebar/sidebar.controller.js \
 	$(VIEWER_ROOT)/annotations/annotations.js \
 	$(VIEWER_ROOT)/annotations/comments.js \
-	$(VIEWER_ROOT)/annotations/anatomies.js \
 	$(VIEWER_ROOT)/annotations/annotations.service.js \
 	$(VIEWER_ROOT)/annotations/comments.service.js \
 	$(VIEWER_ROOT)/annotations/annotations.controller.js \
@@ -428,16 +427,20 @@ VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
 	$(VIEWER_ROOT)/osd/osd.controller.js \
 	$(VIEWER_ROOT)/image-metadata/vocabs.js \
 	$(VIEWER_ROOT)/image-metadata/statuses.js \
-	$(VIEWER_ROOT)/image-metadata/metadata.controller.js \
-	$(VIEWER_ROOT)/alerts/alerts.controller.js \
-	$(VIEWER_ROOT)/viewer.utils.js
+	$(VIEWER_ROOT)/image-metadata/metadata.controller.js
 
 VIEWER_JS_SOURCE_MIN=viewer.min.js
 $(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
 	$(call bundle_js_files,$(VIEWER_JS_SOURCE_MIN),$(VIEWER_JS_SOURCE))
 
 VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
-	$(COMMON)/vendor/ng-device-detector.js
+	$(COMMON)/vendor/ng-device-detector.js \
+	$(JS)/vendor/angular-datepicker.js \
+	$(JS)/vendor/rzslider.js \
+	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
 
 VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
 	$(CSS)/vendor/select2.css \

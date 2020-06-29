@@ -7,23 +7,15 @@
 </head>
 <body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-viewer">
-        <loading-spinner ng-show="!displayReady"></loading-spinner>
+        <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container" ng-show="displayReady">
+    <div class="app-container">
         <navbar></navbar>
-        <div>
+        <loading-spinner ng-show="!displayReady"></loading-spinner>
+        <div class="viewer-container" ng-show="displayReady">
             <!-- CONTROLLER: OSDController -->
             <div ng-controller="OSDController as osd" id="viewer-container" class="col-md-12">
-                <div ng-controller="AlertsController as alerts" id="alert" class="row">
-                    <div class="col-md-12">
-                        <div ng-repeat="alert in alerts.alerts" class="alert alert-dismissable" ng-class="{'alert-danger': alert.type == 'error'}" role="alert">
-                            <button ng-click="alerts.closeAlert(alert);" type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <strong>{{alert.type | toTitleCase}}:</strong> {{alert.message}}
-                        </div>
-                    </div>
-                </div>
+                <alerts alerts="osd.alerts"></alerts>
                 <div ng-if="osd.showTitle" id="viewer-header" class="row">
                     <div class="top-flex-panel">
                       <div class="top-left-panel also-resizeable open-panel resizable" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}">
@@ -32,7 +24,7 @@
                           <div class="pull-left">
                             <h1 id="page-title">
                                 <span class="ng-binding ng-scope">
-                                    {{osd.image.entity.slide_id || osd.image.entity.RID || 'No Slide ID'}}
+                                    {{osd.image.entity.slide_id || osd.image.entity.RID || 'Image'}}
                                 </span>
                             </h1>
                         </div>
@@ -46,7 +38,7 @@
                     <!-- <div id="sidebar" ng-class="sidebar faceting-resizable {'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true"> -->
                         <div ng-controller="AnnotationsController as anno" class='annotation-list facet-panel'>
                             <div class='annotationSetting' ng-form="annoForm" ng-show="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
-                                <div class="annotationRow" ng-show="canUpdate">
+                                <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowHeader">
                                             <span class="text-danger ng-scope">*</span>Annotated Region
@@ -85,17 +77,6 @@
                                 </div>
                                 <div class="annotationRow">
                                     <div class='flex-column'>
-                                        <div class='annotationRowHeader'>Record Status</div>
-                                        <div class="annotationRowValue" ng-click="anno.changeStatus(anno.editingAnatomy, 'Record_Status')" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change record status">
-                                            <span class="chaise-input-control text">
-                                                <input name="record_status" style="flex:1" type="text" class="ng-binding" ng-model="anno.editingAnatomy.Record_Status" required disabled />
-                                                <span class="changeBtn glyphicon glyphicon-chevron-down"></span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="annotationRow">
-                                    <div class='flex-column'>
                                         <div class='annotationRowHeader'>Curation Status</div>
                                         <div class="annotationRowValue" ng-click="anno.changeStatus(anno.editingAnatomy, 'Curation_Status')" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Change curation status">
                                             <span class="chaise-input-control text">
@@ -105,6 +86,25 @@
                                         </div>
                                     </div>
                                 </div>
+                                <!-- TODO what should be the model?  -->
+                                <!-- <div class="annotationRow" ng-if="anno.editingAnatomy.isNew" ng-repeat="(columnIndex, columnModel) in annotationCreateForm.columnModels">
+                                    <div class="flex-column entity-key">
+                                        <div class="annotationRowHeader">
+                                            <span ng-if="columnModel.isRequired" class="text-danger ng-scope">*</span>
+                                            <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': column.comment}" ng-attr-uib-tooltip="{{::(columnModel.column.comment) ? columnModel.column.comment : undefined}}" tooltip-placement="right">
+                                                <span ng-if="::columnModel.column.displayname.isHTML" ng-bind-html="::columnModel.column.displayname.value"></span>
+                                                <span ng-if="::!columnModel.column.displayname.isHTML" ng-bind="::columnModel.column.displayname.value"></span>
+                                            </span>
+                                        </div>
+                                        <div class="annotationRowValue" data-toggle="tooltip" tooltip-placement="bottom" uib-tooltip="Change term ID" data-original-title="" title="">
+                                            <input-switch column="column" column-model="columnModel" model="WHAT" column-index="columnIndex"></input-switch>
+                                            <span class="chaise-input-control text" ng-click="anno.changeTerm(anno.editingAnatomy, $event)">
+                                                <input name="anatomy" style="flex:1" type="text" class="ng-binding" ng-model="anno.editingAnatomy.Anatomy" required disabled/>
+                                                <span class="changeBtn glyphicon glyphicon-search"></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div> -->
                                 <div class="annotationRow">
                                     <div class='flex-row' style="justify-content: space-between;">
                                         <div class='annotationRowValue' ng-show="canDelete && !anno.editingAnatomy.isNew" data-toggle='tooltip' tooltip-placement="bottom">
@@ -117,9 +117,8 @@
                                             <button class="btn chaise-btn chaise-btn-primary" type="submit" ng-click="anno.saveAnnotationRecord(anno.editingAnatomy)" ng-disabled="annoForm.$invalid">
                                                 <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
                                                 <span>Submit</span>
-                                            </button>   
+                                            </button>
                                         </div>
-                                        
                                     </div>
                                 </div>
                             </div>
@@ -154,16 +153,18 @@
                                 </div>
                             </div>
                             <div class='flex-row'>
-                                <div class="chaise-input-control has-feedback">
-                                  <input type='text' class='search-input' placeholder='Search in the list' ng-model="anno.searchKeyword" ng-change="anno.search()" />
-                                  <div class="clear-search" ng-show="anno.searchKeyword != ''"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
-                                      <span class="glyphicon glyphicon-remove coltooltiptext facet-search-clear search-remove" ng-click="anno.clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
-                                  </div>
-                                </div>
-                                <div class='chaise-input-group-append'>
-                                  <button id="search-submit" class="chaise-search-btn chaise-btn chaise-btn-primary" ng-click="anno.searchInputChanged()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
-                                      &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
-                                  </button>
+                                <div class="chaise-search-box chaise-input-group">
+                                    <div class="chaise-input-control has-feedback">
+                                        <input type='text' class='search-input' placeholder='Search in the list' ng-model="anno.searchKeyword" ng-change="anno.search()" />
+                                        <div class="clear-search" ng-show="anno.searchKeyword != ''"><!-- form-control:focus changes the z-index of the form control from 2 to 3. form-control-feedback has z-index of 2. Overriding that z index to 5 so it isn't hidden when focused-->
+                                            <span class="glyphicon glyphicon-remove coltooltiptext facet-search-clear search-remove" ng-click="anno.clearSearch()" tooltip-placement="bottom" uib-tooltip="Clear field"></span>
+                                        </div>
+                                    </div>
+                                    <div class='chaise-input-group-append'>
+                                        <button id="search-submit" class="chaise-search-btn chaise-btn chaise-btn-primary" ng-click="anno.searchInputChanged()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
+                                            &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
+                                        </button>
+                                    </div>
                                 </div>
                                 <button ng-show="canCreate" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                             </div>
@@ -176,7 +177,7 @@
                             <div class='groups'>
                                 <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.viewerModel.rows" ng-show="item.isShow && item.svgID && item.groupID" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
                                     <div class='itemContent'>
-                                        <div class='itemRow'> 
+                                        <div class='itemRow'>
                                             <span class='anatomy'>
                                                 {{ item.name }}
                                                 <a ng-if="item.id"  href="{{item.url}}" target="_blank" tooltip-placement="auto" uib-tooltip="Click to view details and associated data">
@@ -197,7 +198,7 @@
                                         </div>
                                     </span>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -233,6 +234,7 @@
                         </iframe>
                     </div>
                 </div>
+            </div>
         </div>
     </div>
 </body>

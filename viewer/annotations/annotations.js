@@ -4,5 +4,15 @@
 
     angular.module('chaise.viewer')
 
-    .value('annotations', []);
+    .value('annotations', [])
+
+    .value('annotationCreateForm', {
+        reference: null,
+        columnModels: []
+    })
+
+    .value('annotationEditForm', {
+        reference: null,
+        columnModels: []
+    });
 })();

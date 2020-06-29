@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(deviceDetector,context, image, $window, $rootScope, $scope) {
+    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -12,6 +12,7 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
+        vm.alerts = AlertsService.alerts;
         var showTitle = context.queryParams.showTitle;
         if (showTitle === "true") {
             vm.showTitle = true;
@@ -37,7 +38,6 @@
               break;
             }
         }
-        $rootScope.displayReady = true;
 
         vm.openAnnotations = openAnnotations;
         vm.error = '';
@@ -85,7 +85,7 @@
                         break;
 
                     default:
-                        console.log('Invalid event message type "' + messageType + '"');
+                        // other messages are handled by other controllers
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
