@@ -59,7 +59,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="annotationRow">
+                                <!-- <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowHeader">
                                             <span class="text-danger ng-scope">*</span>Anatomy ID
@@ -85,9 +85,8 @@
                                             </span>
                                         </div>
                                     </div>
-                                </div>
-                                <!-- TODO what should be the model?  -->
-                                <!-- <div class="annotationRow" ng-if="anno.editingAnatomy.isNew" ng-repeat="(columnIndex, columnModel) in annotationCreateForm.columnModels">
+                                </div> -->
+                                <div class="annotationRow" ng-if="anno.editingAnatomy.isNew" ng-repeat="(columnIndex, columnModel) in anno.annotationCreateForm.columnModels">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowHeader">
                                             <span ng-if="columnModel.isRequired" class="text-danger ng-scope">*</span>
@@ -96,15 +95,11 @@
                                                 <span ng-if="::!columnModel.column.displayname.isHTML" ng-bind="::columnModel.column.displayname.value"></span>
                                             </span>
                                         </div>
-                                        <div class="annotationRowValue" data-toggle="tooltip" tooltip-placement="bottom" uib-tooltip="Change term ID" data-original-title="" title="">
-                                            <input-switch column="column" column-model="columnModel" model="WHAT" column-index="columnIndex"></input-switch>
-                                            <span class="chaise-input-control text" ng-click="anno.changeTerm(anno.editingAnatomy, $event)">
-                                                <input name="anatomy" style="flex:1" type="text" class="ng-binding" ng-model="anno.editingAnatomy.Anatomy" required disabled/>
-                                                <span class="changeBtn glyphicon glyphicon-search"></span>
-                                            </span>
+                                        <div class="annotationRowValue">
+                                            <input-switch column="columnModel.column" column-model="columnModel" model="anno.annotationCreateForm.rows[0][columnModel.column.name]" column-index="columnIndex" mode="create"></input-switch>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div>
                                 <div class="annotationRow">
                                     <div class='flex-row' style="justify-content: space-between;">
                                         <div class='annotationRowValue' ng-show="canDelete && !anno.editingAnatomy.isNew" data-toggle='tooltip' tooltip-placement="bottom">

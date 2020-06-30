@@ -577,7 +577,7 @@
          * @param  {string} origUrl         the parent url that should be resolved to get the complete row of data
          * @param  {Object} rowname         the default rowname that should be displayed
          */
-        function _processPrefilledForeignKeys(model, fkColumnNames, keys, origUrl, rowname) {
+        function _processPrefilledForeignKeys(model, reference, fkColumnNames, keys, origUrl, rowname) {
             var newRow = model.rows.length - 1;
 
             fkColumnNames.forEach(function (cn) {
@@ -593,7 +593,7 @@
 
                 // get the first foreignkey relationship between the ref.table and current table
                 // and log it as the foreignkey that we are prefilling (eventhough we're prefilling multiple fks)
-                var fks = $rootScope.reference.table.foreignKeys.all(), source = {};
+                var fks = reference.table.foreignKeys.all(), source = {};
                 for (var i = 0; i < fks.length; i++) {
                     if (fkColumnNames.indexOf(fks[i].name) !== -1) {
                         source = fks[i].compressedDataSource;
@@ -621,7 +621,7 @@
             }
         }
 
-        function populateCreateDefaultValues(model, prefillQueryParam) {
+        function populateCreateDefaultValues(model, reference, prefillQueryParam) {
             // get the prefilled values
             var prefilledColumns = {}, prefilledFks = [];
             if (prefillQueryParam) {
@@ -650,11 +650,11 @@
             }
 
             // populate defaults
-            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
+            for (var i = 0; i < model.columnModels.length; i++) {
                 // default model initialiation is null
                 var initialModelValue = null;
-                var column = $rootScope.reference.columns[i];
                 var colModel = model.columnModels[i];
+                var column = colModel.column;
 
                 // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
                 var defaultValue = column.default;

@@ -144,7 +144,7 @@
     </div>
 
     <!-- disabled -->
-    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="getDisabledInputValue()" empty-to-null>
+    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::getDisabledInputValue();}}" empty-to-null>
 
     <!-- shorttext/default text input -->
     <div ng-switch-default class="chaise-input-control has-feedback">

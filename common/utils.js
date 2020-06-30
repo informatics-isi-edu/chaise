@@ -2113,7 +2113,7 @@
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                if (typeof scope.displayname !== "object") {
+                if (typeof scope.displayname !== "object" && scope.reference) {
                     scope.displayname = scope.reference.displayname;
                 }
 

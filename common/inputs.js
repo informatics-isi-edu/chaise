@@ -99,7 +99,10 @@
 
         /* File specific functions */
         function fileExtensionTypes(column) {
-            return column.filenameExtFilter.join(", ");
+            if (column && Array.isArray(column.filenameExtFilter)) {
+                return column.filenameExtFilter.join(", ");
+            }
+            return "";
         }
 
         /* Foregin Key specific functions */
@@ -303,7 +306,8 @@
                 column: '=',
                 columnIndex: '=', // index in column models list
                 columnModel: '=',
-                model: '=?'
+                model: '=?',
+                mode: "="
             },
             link: function(scope, elem, attr) {
                 scope.model = {};
@@ -360,7 +364,9 @@
                     params.displayname = scope.column.displayname;
 
                     var context = ConfigUtils.getContextJSON();
-                    if (context.mode == context.modes.EDIT) {
+                    var mode = scope.mode ? scope.mode : context.mode;
+                    // TODO needs to be refactored
+                    if (mode === "edit") {
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupEdit;
                     } else {
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;

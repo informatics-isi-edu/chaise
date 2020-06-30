@@ -390,7 +390,7 @@
                         $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                         $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
-                        recordCreate.populateCreateDefaultValues(recordEditModel, context.queryParams.prefill);
+                        recordCreate.populateCreateDefaultValues(recordEditModel, $rootScope.reference, context.queryParams.prefill);
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create

@@ -35,10 +35,12 @@
         'chaise.upload',
         'chaise.record.table',
         'chaise.recordcreate',
+        'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
         'ngSanitize',
+        'ngMessages',
         'ui.mask',
         'ui.select',
         'ui.bootstrap',
@@ -138,8 +140,8 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'MathUtils', 'viewerModel', '$rootScope', 'Session', 'annotationCreateForm', 'annotationEditForm', 'recordCreate', 'AlertsService', 'viewerConstant',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, MathUtils, viewerModel, $rootScope, Session, annotationCreateForm, annotationEditForm, recordCreate, AlertsService, viewerConstant) {
+    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'MathUtils', 'viewerModel', '$rootScope', 'Session', 'annotationCreateForm', 'annotationEditForm', 'recordCreate', 'AlertsService', 'viewerConstant', 'annotationList',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, MathUtils, viewerModel, $rootScope, Session, annotationCreateForm, annotationEditForm, recordCreate, AlertsService, viewerConstant, annotationList) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         $rootScope.displayReady = false;
@@ -287,15 +289,27 @@
                 // create the edit and create forms
                 if ($rootScope.canCreate) {
                     annotationCreateForm.reference = annotationReference.contextualize.entryCreate;
-                    annotationCreateForm.reference.columns.forEach(function (column, index) {
-                        annotationCreateForm.columnModels[index] = recordCreate.columnToColumnModel(column);
+                    annotationCreateForm.reference.columns.forEach(function (column) {
+                        // remove the asset column from the form
+                        if (column.name === viewerConstant.annotation.ASSET_COLUMN_NAME) return;
+
+                        // remove the image from the form
+                        if (column.name === viewerConstant.annotation.IMAGE_VISIBLE_COLUMN_NAME) return;
+
+                        annotationCreateForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
                 }
 
                 if ($rootScope.canUpdate) {
                     annotationEditForm.reference = annotationReference.contextualize.entryEdit;
-                    annotationEditForm.reference.columns.forEach(function (column, index) {
-                        annotationEditForm.columnModels[index] = recordCreate.columnToColumnModel(column);
+                    annotationEditForm.reference.columns.forEach(function (column) {
+                        // remove the asset column from the form
+                        if (column.name === viewerConstant.annotation.ASSET_COLUMN_NAME) return;
+
+                        // remove the image from the form
+                        if (column.name === viewerConstant.annotation.IMAGE_VISIBLE_COLUMN_NAME) return;
+
+                        annotationEditForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
                 }
 
@@ -313,6 +327,7 @@
                 // TODO tuples, rows
                 // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                 $rootScope.tuples = [];
+                $rootScope.showColumnSpinner = [{}];
                 for(var j = 0; j < page.tuples.length; j++){
                     var row = page.tuples[j].data,
                         tuple = page.tuples[j],
@@ -322,8 +337,8 @@
 
                     // TODO foreignKeyData should be added for domain_filter_pattern
 
-                    if(row && row[viewerConstant.annotation.assetColumn]){
-                        svgURIs.push(row[viewerConstant.annotation.assetColumn]);
+                    if(row && row[viewerConstant.annotation.ASSET_COLUMN_NAME]){
+                        svgURIs.push(row[viewerConstant.annotation.ASSET_COLUMN_NAME]);
                     }
                 }
 

@@ -510,8 +510,7 @@
 
         // Add new anatomy to the list
         function addNewTerm(){
-            var newAnnotation = populateSubmissionRow({}, {}, null, annotationCreateForm.reference.columns, false);
-            Object.assign(newAnnotation, {
+            var newAnnotation = {
                 svgID : "NEW_SVG",
                 groupID : "NEW_GROUP",
                 anatomy : "",
@@ -522,11 +521,10 @@
                 isNew : true,
                 name: null,
                 id: null,
-                url: null,
-                Image : context.imageID,
-                Anatomy : "",
-                Curation_Status : "In Preparation"
-            });
+                url: null
+            };
+
+            recordCreate.populateCreateDefaultValues(annotationCreateForm, annotationCreateForm.reference);
 
             // Set it to show the setting panel
             vm.editAnatomyAnnotations(newAnnotation);
@@ -911,13 +909,13 @@
                         submissionRow["Image"] = row.Image;
                         submissionRow["Anatomy"] = row.Anatomy;
                         submissionRow["Curation_Status"] = row.Curation_Status;
-                        submissionRow[viewerConstant.annotation.assetColumn] = {
+                        submissionRow[viewerConstant.annotation.ASSET_COLUMN_NAME] = {
                             uri : fileName,
                             file : file,
                             fileName : fileName,
                             fileSize : file.size,
                             hatracObj : new ERMrest.Upload(file, {
-                                column: reference.columns.find(function (column) {return column.name == viewerConstant.annotation.assetColumn}),
+                                column: reference.columns.find(function (column) {return column.name == viewerConstant.annotation.ASSET_COLUMN_NAME}),
                                 reference: reference
                             })
                         };
@@ -933,13 +931,13 @@
                     submissionRow = populateSubmissionRow({}, submissionRow, originalTuple, reference.columns, false);
                     submissionRow["Image"] = imageID;
                     submissionRow["Anatomy"] = anatomyID;
-                    submissionRow[viewerConstant.annotation.assetColumn] = {
+                    submissionRow[viewerConstant.annotation.ASSET_COLUMN_NAME] = {
                         uri : fileName,
                         file : file,
                         fileName : fileName,
                         fileSize : file.size,
                         hatracObj : new ERMrest.Upload(file, {
-                            column: reference.columns.find(function (column) {return column.name == viewerConstant.annotation.assetColumn}),
+                            column: reference.columns.find(function (column) {return column.name == viewerConstant.annotation.ASSET_COLUMN_NAME}),
                             reference: reference
                         })
                     };
