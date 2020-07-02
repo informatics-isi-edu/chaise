@@ -284,6 +284,10 @@
 
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
+                    scope.ridSearch = function () {
+                        $window.location = "/id/" + scope.ridSearchTerm;
+                    }
+
                     if (isCatalogDefined(catalogId)) {
                         scope.isVersioned = function () {
                             return catalogId.split("@")[1] ? true : false;
