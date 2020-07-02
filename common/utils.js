@@ -2635,7 +2635,7 @@
           var osName = "unidentified";
           var browserName = "unidentified";
 
-          if ((navigator.platform.indexOf("Mac")!= -1) && (navigator.userAgent.indexOf("Firefox"))!=-1))
+          if ((navigator.platform.indexOf("Mac")!= -1) && (navigator.userAgent.indexOf("Firefox")!=-1))
           {
             osName="MacOS";
             browserName = "Firefox";
