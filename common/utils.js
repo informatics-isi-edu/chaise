@@ -2601,7 +2601,7 @@
         };
     }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', 'UiUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, UiUtils, $window) {
 
         /**
          * adds a link tag to head with the custom css. It will be resolved when
@@ -2628,6 +2628,27 @@
                 defer.resolve();
             }
             return defer.promise;
+        }
+
+        /* Custom function to add styling based on browser type and operating system */
+        function addNewClassForBrowerInOs(){
+          var osName = "unidentified";
+          var browserName = "unidentified";
+
+          if ((navigator.platform.indexOf("Mac")!= -1) && (navigator.userAgent.indexOf("Firefox"))!=-1))
+          {
+            osName="MacOS";
+            browserName = "Firefox";
+          }
+
+          if((osName == "MacOS") && (browserName == "Firefox"))
+          {
+              var newCustomClass = "chaise-mac-firefox";
+              var bodyElement = document.querySelector(".chaise-body");
+              if (bodyElement){
+                  UiUtils.addClass(bodyElement, newCustomClass);
+              }
+          }
         }
 
         function addTitle() {
@@ -2785,6 +2806,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
+            addNewClassForBrowerInOs();
             return addCustomCSS();
         }
 
