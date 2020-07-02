@@ -2641,7 +2641,7 @@
             browserName = "Firefox";
           }
 
-          if((osName == "MacOS") && (browserName == "Firefox"))
+          if((osName === "MacOS") && (browserName === "Firefox"))
           {
               var newCustomClass = "chaise-mac-firefox";
               var bodyElement = document.querySelector(".chaise-body");
