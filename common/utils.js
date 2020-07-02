@@ -2649,7 +2649,7 @@
                   UiUtils.addClass(bodyElement, newCustomClass);
               }
           }
-        }
+      }
 
         function addTitle() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
