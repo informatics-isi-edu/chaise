@@ -386,9 +386,11 @@
         }
 
         // for mac and firefox
-        .chaise-mac-firefox {
-          .bottom-panel-container{
-            .table {
+        .chaise-body {
+          @media print{
+            @at-root .chaise-mac-firefox
+            {
+              #tblRecord {
                 .entity-key {
                   padding-left:20px;
                   width: 20%;
@@ -406,7 +408,7 @@
             }
           }
         }
-
+      }
         .panel-title{
           .rt-section-header{
             font-size: 1.5rem !important;
