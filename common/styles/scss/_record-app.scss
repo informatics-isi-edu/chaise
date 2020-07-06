@@ -411,16 +411,16 @@
         }
 
         .chaise-table.table {
-            border-top: 1px solid #FF0000;
-            border-bottom: 1px solid #FF0000;
+            border-top: 3px solid purple;
+            border-bottom: 3px solid purple;
 
             tr {
-                  border-left: 1px solid #FF0000;
+                  border-left: 3px solid purple;
                   border-bottom: none;
             }
 
             >thead>tr>th {
-                  border-bottom: 1px solid #FF0000;
+                  border-bottom: 3px solid purple;
             }
 
             >thead>tr>th,
@@ -430,11 +430,11 @@
             >tbody>tr>td,
             >tfoot>tr>td {
                   border-top: none;
-                  border-right: 1px solid #FF0000;
+                  border-right: 3px solid purple;
             }
 
             th {
-                  border-top: 1px solid #FF0000;
+                  border-top: 3px solid purple;
             }
         }
 
