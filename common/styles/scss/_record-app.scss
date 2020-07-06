@@ -409,20 +409,20 @@
 
               #rt-Figure{
                   .chaise-table.table {
-                    border-top: 3px solid #BBBBBB !important;
-                    border-bottom: 3px solid #BBBBBB !important;
+                    border-top: 3px solid #FF0000 !important;
+                    border-bottom: 3px solid #FF0000 !important;
                   }
 
                   .chaise-table.table > tfoot > tr > td{
-                    border-right: 3px solid #BBBBBB !important;
+                    border-right: 3px solid #FF0000 !important;
                   }
 
                   .chaise-table.table > thead > tr > th{
-                    border-bottom: 3px solid #BBBBBB !important;
+                    border-bottom: 3px solid #FF0000 !important;
                   }
 
                   .chaise-table tr{
-                    border-left: 3px solid #BBBBBB !important;
+                    border-left: 3px solid #FF0000 !important;
                   }
               }
             }
