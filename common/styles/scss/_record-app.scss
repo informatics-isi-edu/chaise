@@ -413,8 +413,6 @@
 
                     tr {
                         border-left: 1px solid #FF0000 !important;
-                        border-right: 1px solid #FF0000 !important;
-                        border-bottom: none !important;
                       }
 
                     >thead>tr>th {
@@ -427,13 +425,11 @@
                     >thead>tr>td,
                     >tbody>tr>td,
                     >tfoot>tr>td {
-                        border-top: none !important;
                         border-right: 1px solid #FF0000 !important;
                     }
 
                     th {
                         border-top: 1px solid #FF0000 !important;
-                        border-right: 1px solid #FF0000 !important;
                     }
                   }
                 }
