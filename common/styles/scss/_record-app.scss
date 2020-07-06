@@ -495,9 +495,25 @@
             display: none;
         }
 
-        .chaise-table{
-          .table th{
-            border-right: 3px solid #BBBBBB;
+        #rt-Figure{
+          .recordset-table{
+            .chaise-table{
+              border-top: 3px solid #BBBBBB !important;
+              border-bottom: 3px solid #BBBBBB !important;
+            }
+
+            .chaise-table tr{
+              border-left: 3px solid #BBBBBB !important;
+            }
+
+            .chaise-table th{
+              border-right: 3px solid #BBBBBB !important;
+              border-bottom: 3px solid #BBBBBB !important;
+            }
+
+            .chaise-table td{
+              border-right: 3px solid #BBBBBB !important;
+            }
           }
         }
         // record-table th {
