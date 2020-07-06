@@ -407,27 +407,36 @@
                 }
               }
 
-              #rt-Figure{
-                  .chaise-table.table {
+                .chaise-table.table {
                     border-top: 3px solid #FF0000 !important;
                     border-bottom: 3px solid #FF0000 !important;
-                  }
 
-                  .chaise-table.table > tfoot > tr > td{
-                    border-right: 3px solid #FF0000 !important;
-                  }
+                    tr {
+                        border-left: 3px solid #FF0000 !important;
+                        border-bottom: none !important;
+                      }
 
-                  .chaise-table.table > thead > tr > th{
-                    border-bottom: 3px solid #FF0000 !important;
-                  }
+                    >thead>tr>th {
+                        border-bottom: 3px solid #FF0000 !important;
+                    }
 
-                  .chaise-table tr{
-                    border-left: 3px solid #FF0000 !important;
+                    >thead>tr>th,
+                    >tbody>tr>th,
+                    >tfoot>tr>th,
+                    >thead>tr>td,
+                    >tbody>tr>td,
+                    >tfoot>tr>td {
+                        border-top: none !important;
+                        border-right: 3px solid #FF0000 !important;
+                    }
+
+                    th {
+                        border-top: 3px solid #FF0000 !important;
+                    }
                 }
-              }
-            }
-          }
-        }
+             }
+           }
+         }
 
         .panel-title{
           .rt-section-header{
