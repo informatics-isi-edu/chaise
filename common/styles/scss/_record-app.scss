@@ -406,37 +406,37 @@
                   padding-bottom: 8px;
                 }
               }
-
-                .chaise-table.table {
-                    border-top: 1px solid #FF0000;
-                    border-bottom: 1px solid #FF0000;
-
-                    tr {
-                        border-left: 1px solid #FF0000;
-                        border-bottom: none;
-                      }
-
-                    >thead>tr>th {
-                        border-bottom: 1px solid #FF0000;
-                    }
-
-                    >thead>tr>th,
-                    >tbody>tr>th,
-                    >tfoot>tr>th,
-                    >thead>tr>td,
-                    >tbody>tr>td,
-                    >tfoot>tr>td {
-                        border-top: none;
-                        border-right: 1px solid #FF0000;
-                    }
-
-                    th {
-                        border-top: 1px solid #FF0000;
-                    }
-                  }
-                }
-              }
             }
+          }
+        }
+
+        .chaise-table.table {
+            border-top: 1px solid #FF0000;
+            border-bottom: 1px solid #FF0000;
+
+            tr {
+                  border-left: 1px solid #FF0000;
+                  border-bottom: none;
+            }
+
+            >thead>tr>th {
+                  border-bottom: 1px solid #FF0000;
+            }
+
+            >thead>tr>th,
+            >tbody>tr>th,
+            >tfoot>tr>th,
+            >thead>tr>td,
+            >tbody>tr>td,
+            >tfoot>tr>td {
+                  border-top: none;
+                  border-right: 1px solid #FF0000;
+            }
+
+            th {
+                  border-top: 1px solid #FF0000;
+            }
+        }
 
         .panel-title{
           .rt-section-header{
