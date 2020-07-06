@@ -408,15 +408,16 @@
               }
 
                 .chaise-table.table {
-                    border-top: 1px solid #FF0000 !important;
-                    border-bottom: 1px solid #FF0000 !important;
+                    border-top: 1px solid #FF0000;
+                    border-bottom: 1px solid #FF0000;
 
                     tr {
-                        border-left: 1px solid #FF0000 !important;
+                        border-left: 1px solid #FF0000;
+                        border-bottom: none;
                       }
 
                     >thead>tr>th {
-                        border-bottom: 1px solid #FF0000 !important;
+                        border-bottom: 1px solid #FF0000;
                     }
 
                     >thead>tr>th,
@@ -425,11 +426,12 @@
                     >thead>tr>td,
                     >tbody>tr>td,
                     >tfoot>tr>td {
-                        border-right: 1px solid #FF0000 !important;
+                        border-top: none;
+                        border-right: 1px solid #FF0000;
                     }
 
                     th {
-                        border-top: 1px solid #FF0000 !important;
+                        border-top: 1px solid #FF0000;
                     }
                   }
                 }
