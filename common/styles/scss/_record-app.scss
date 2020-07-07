@@ -415,15 +415,15 @@
             border-bottom: 3px solid purple;
 
             >thead>tr>th {
-                  border-right: 3px solid black;
-                  border-bottom: 6px solid green;
+                  border-right: 6px solid black;
+                  border-left: 3px solid blue;
             }
 
             tr {
                   border-left: 3px solid blue;
                   border-bottom: none;
             }
-            
+
             >thead>tr>th,
             >tbody>tr>th,
             >tfoot>tr>th,
@@ -432,6 +432,10 @@
             >tfoot>tr>td {
                   border-top: none;
                   border-right: 3px solid red;
+            }
+
+            th {
+                  border-bottom: 6px solid green;
             }
         }
 
