@@ -420,7 +420,8 @@
             >thead>tr>th,
             >tbody>tr>th,
             >tfoot>tr>th {
-                  border-right: 25px solid black !important;
+                  border-top: none;
+                  border-right: 1px solid red;
                   border-bottom: 3px solid green;
             }
 
@@ -519,15 +520,6 @@
         record-table td:nth-child(1) {
             display: none;
         }
-
-        // record-table th {
-        //     border-top: none !important;
-        //     border-right: 1px solid #BBBBBB !important;
-        // }
-        // record-table td {
-        //     border-top: none !important;
-        //     border-right: 1px solid #BBBBBB !important;
-        // }
 
         #no-results-row{
           display:table-cell !important;
