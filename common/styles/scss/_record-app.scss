@@ -413,12 +413,13 @@
         .chaise-table.table {
 
             tr {
-                  border-left: 6px solid blue;
+                  border-left: 3px solid blue;
                   border-bottom: none;
             }
 
             >thead>tr>th {
                   border-right: 6px solid black;
+                  border-left: 6px solid blue !important;
             }
 
             >thead>tr>td,
