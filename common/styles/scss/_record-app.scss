@@ -415,8 +415,8 @@
             border-bottom: 3px solid purple;
 
             >thead>tr>th {
-                  border-right: 6px solid black;
-                  border-left: 3px solid blue;
+                  border-right: 6px solid black !important;
+                  border-left: 3px solid blue !important;
             }
 
             tr {
@@ -434,9 +434,9 @@
                   border-right: 3px solid red;
             }
 
-            th {
-                  border-bottom: 6px solid green;
-            }
+            // th {
+            //       border-bottom: 6px solid green;
+            // }
         }
 
         .panel-title{
