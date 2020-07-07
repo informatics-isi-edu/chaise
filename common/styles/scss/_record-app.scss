@@ -420,7 +420,8 @@
             }
 
             >thead>tr>th {
-                  border-bottom: 3px solid green;
+                  border-bottom: 6px solid green;
+                  border-right: 3px solid black;
             }
 
             >thead>tr>th,
@@ -431,10 +432,6 @@
             >tfoot>tr>td {
                   border-top: none;
                   border-right: 3px solid red;
-            }
-
-            th {
-                  border-right: 3px solid black;
             }
         }
 
