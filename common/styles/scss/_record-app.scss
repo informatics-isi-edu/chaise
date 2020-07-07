@@ -421,6 +421,7 @@
             >tbody>tr>th,
             >tfoot>tr>th::after {
                   border-top: none;
+                  border-right: 20px solid red;
                   border-bottom: 3px solid green;
             }
 
@@ -435,9 +436,9 @@
             border-bottom: 1px solid purple;
         }
 
-        .table-column-displayname::after{
-           border-right: 5px solid red;
-        }
+        // .table-column-displayname::after{
+        //    border-right: 5px solid red;
+        // }
 
         .panel-title{
           .rt-section-header{
