@@ -419,9 +419,9 @@
 
             >thead>tr>th,
             >tbody>tr>th,
-            >tfoot>tr>th {
+            >tfoot>tr>th::after {
                   border-top: none;
-                  border-right: 1px solid red;
+                  border-right: 50px solid red !important;
                   border-bottom: 3px solid green;
             }
 
