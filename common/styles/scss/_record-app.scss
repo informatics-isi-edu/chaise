@@ -417,14 +417,12 @@
                   border-bottom: none;
             }
 
-            th {
+            >thead>tr>th,
+            >tbody>tr>th,
+            >tfoot>tr>th {
                   border-right: 25px solid black !important;
                   border-bottom: 3px solid green;
             }
-
-            // >thead>tr>th {
-            //       border-right: 1px solid black !important;
-            // }
 
             >thead>tr>td,
             >tbody>tr>td,
