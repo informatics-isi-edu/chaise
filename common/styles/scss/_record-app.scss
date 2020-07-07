@@ -421,7 +421,6 @@
             >tbody>tr>th,
             >tfoot>tr>th::after {
                   border-top: none;
-                  border-right: 50px solid red !important;
                   border-bottom: 3px solid green;
             }
 
@@ -434,6 +433,10 @@
 
             border-top: 1px solid purple;
             border-bottom: 1px solid purple;
+        }
+
+        .table-column-displayname::after{
+           border-right: 1px solid red;
         }
 
         .panel-title{
