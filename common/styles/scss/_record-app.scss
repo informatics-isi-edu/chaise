@@ -415,12 +415,12 @@
             border-bottom: 3px solid purple;
 
             tr {
-                  border-left: 3px solid purple;
+                  border-left: 3px solid blue;
                   border-bottom: none;
             }
 
             >thead>tr>th {
-                  border-bottom: 3px solid purple;
+                  border-bottom: 3px solid green;
             }
 
             >thead>tr>th,
@@ -430,11 +430,11 @@
             >tbody>tr>td,
             >tfoot>tr>td {
                   border-top: none;
-                  border-right: 3px solid purple;
+                  border-right: 3px solid red;
             }
 
             th {
-                  border-top: 3px solid purple;
+                  border-top: 3px solid black;
             }
         }
 
