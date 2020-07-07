@@ -413,30 +413,26 @@
         .chaise-table.table {
 
             tr {
-                  border-left: 3px solid blue;
+                  border-left: 3px solid blue !important;
                   border-bottom: none;
             }
 
             >thead>tr>th {
-                  border-right: 6px solid black;
-                  border-left: 6px solid blue !important;
+                  border-right: 6px solid black !important;
             }
 
             >thead>tr>td,
             >tbody>tr>td,
-            >tfoot>tr>td,
-            >thead>tr>th,
-            >tbody>tr>th,
-            >tfoot>tr>th {
+            >tfoot>tr>td {
                   border-top: none;
                   border-right: 3px solid red;
             }
 
             th {
-                  border-bottom: 6px solid green;
+                  border-bottom: 3px solid green;
             }
 
-            border-top: 6px solid purple;
+            border-top: 3px solid purple;
             border-bottom: 3px solid purple;
         }
 
