@@ -65,9 +65,8 @@
         vm.changeStrokeScale = changeStrokeScale;
         vm.changeSelectingAnnotation = changeSelectingAnnotation;
         vm.changeTerm = changeTerm;
-        vm.changeStatus = changeStatus;
         vm.clearSearch = clearSearch;
-        vm.closeAnnotationPanel = closeAnnotationPanel;
+        vm.closeAnnotationForm = closeAnnotationForm;
         vm.drawAnnotation = drawAnnotation;
         vm.editAnatomyAnnotations = editAnatomyAnnotations;
         vm.highlightGroup = highlightGroup;
@@ -526,6 +525,9 @@
 
             recordCreate.populateCreateDefaultValues(annotationCreateForm, annotationCreateForm.reference);
 
+            // this attribute is needed by inputs.js
+            $rootScope.reference = null
+
             // Set it to show the setting panel
             vm.editAnatomyAnnotations(newAnnotation);
 
@@ -604,27 +606,6 @@
             })
         }
 
-        /**
-         * Change the Curation_Status column
-         * @param {object} item : selecting anatomy item
-         * @param {string} key : changing metadata
-         */
-        function changeStatus(item, key){
-            var column = $rootScope.annotationReference.columns.find(function (col) {
-                return col.isForeignKey && col.foreignKey.colset.columns[0].name === key;
-            });
-
-            if(!column){
-                return;
-            }
-
-            // open search modal to change the metadata
-            vm.searchPopup(column, function(tuple){
-                var data = tuple._data;
-                item[key] = data.Name;
-            })
-        }
-
         // Check whether anatomy id has existed in the viewerModel
         function checkAnatomyIDExist(id){
             return vm.viewerModel.rows.find(function (row) { return row.id === id}) ? true : false;
@@ -639,10 +620,10 @@
         /**
          * Close the annotation metadata panel
          */
-        function closeAnnotationPanel(){
+        function closeAnnotationForm(){
 
-            $scope.annoForm.$setPristine();
-            $scope.annoForm.$setUntouched();
+            vm.annoForm.$setPristine();
+            vm.annoForm.$setUntouched();
 
             var item = vm.editingAnatomy;
 
@@ -689,6 +670,7 @@
             // change current drawing annotation to selected one
             vm.editingAnatomy = item;
             vm.editingAnatomy.isDrawing = !vm.editingAnatomy.isDrawing;
+            vm.editingAnatomy.isRequiredError = false;
 
             AnnotationsService.drawAnnotation({
                 svgID : vm.editingAnatomy.svgID,
@@ -803,7 +785,7 @@
                         }
 
                         // close the current panel
-                        vm.closeAnnotationPanel();
+                        vm.closeAnnotationForm();
                     }
                 });
         }
@@ -882,7 +864,8 @@
                 reference;
 
             if(data.content[0].numOfAnnotations === 0){
-                AlertsService.addAlert("Drawing is required for new annotations.", "error");
+                vm.editingAnatomy.isRequiredError = true;
+                _displaySubmitError();
                 return;
             }
 
@@ -987,7 +970,7 @@
                         vm.viewerModel.rows.push(vm.editingAnatomy);
                     }
                     vm.updateDisplayNum();
-                    vm.closeAnnotationPanel();
+                    vm.closeAnnotationForm();
 
                 }, context.logObject);
             });
@@ -998,11 +981,21 @@
          * @param {object} item : the editing anatomy's annotations object
          */
         function saveAnnotationRecord(item){
+            if (vm.annoForm.$invalid) {
+                _displaySubmitError();
+                return;
+            }
 
             AnnotationsService.saveAnnotationRecord({
                 svgID : item.svgID,
                 groupID : item.groupID
             });
+        }
+
+        function _displaySubmitError() {
+            angular.element(document.getElementsByClassName('annotation-list-container')[0]).scrollTo(0, 0, 500);
+            AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
+            vm.annoForm.$setSubmitted();
         }
 
         // Toggle the display of the anatomy's annotations

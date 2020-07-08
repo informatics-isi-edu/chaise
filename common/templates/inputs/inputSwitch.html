@@ -1,14 +1,14 @@
-<div ng-switch="columnModel.inputType" ng-form="inputContainer">
+<div ng-switch="vm.columnModel.inputType" ng-form="vm.inputContainer">
 
     <!-- date input-->
     <div ng-switch-when="date">
         <div class="chaise-input-group">
             <div class="chaise-input-control has-feedback">
-                <input type="text" ng-model="model.value" placeholder="{{dataFormats.placeholder.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date>
-                <chaise-clear-input btn-class="date-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
+                <input type="text" ng-model="vm.model" placeholder="{{vm.dataFormats.placeholder.date}}" name="{{::vm.column.name}}" ui-mask="{{vm.maskOptions.date.mask}}" ui-options="vm.maskOptions.date.options" model-view-value="true" ng-required="vm.isRequired" date>
+                <chaise-clear-input btn-class="date-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
             </div>
             <span class="chaise-input-group-append">
-                <button type="button" class="chaise-btn chaise-btn-secondary" ng-click="::applyCurrentDatetime();">Today</button>
+                <button type="button" class="chaise-btn chaise-btn-secondary" ng-click="::vm.applyCurrentDatetime();">Today</button>
             </span>
         </div>
     </div>
@@ -22,8 +22,8 @@
                         <div class="chaise-input-group-text dt-width">Date</div>
                     </span>
                     <div class="chaise-input-control has-feedback">
-                        <input class="input-timestamptz" type="text" ng-model="model.value.date" placeholder="{{dataFormats.placeholder.date}}" name="{{::column.name}}" ui-mask="{{maskOptions.date.mask}}" ui-options="maskOptions.date.options" model-view-value="true" date timestamp validate-values="model.value">
-                        <chaise-clear-input btn-class="ts-date-remove" click-callback="::clearDate()" show="showDateRemove()"></chaise-clear-input>
+                        <input class="input-timestamptz" type="text" ng-model="vm.model.date" placeholder="{{vm.dataFormats.placeholder.date}}" name="{{::vm.column.name}}" ui-mask="{{vm.maskOptions.date.mask}}" ui-options="vm.maskOptions.date.options" model-view-value="true" date timestamp validate-values="vm.model">
+                        <chaise-clear-input btn-class="ts-date-remove" click-callback="::vm.clearDate()" show="vm.showDateRemove()"></chaise-clear-input>
                     </div>
                 </div>
             </div>
@@ -33,18 +33,18 @@
                         <div class="chaise-input-group-text dt-width">Time</div>
                     </span>
                     <div class="chaise-input-control has-feedback">
-                        <input type="text" ng-model="model.value.time" placeholder="{{dataFormats.placeholder.time}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="model.value">
-                        <chaise-clear-input btn-class="ts-time-remove" click-callback="::clearTime()" show="showTimeRemove()"></chaise-clear-input>
+                        <input type="text" ng-model="vm.model.time" placeholder="{{vm.dataFormats.placeholder.time}}" name="{{::vm.column.name}}" model-view-value="true" ng-required="vm.isRequired" time timestamp validate-values="vm.model">
+                        <chaise-clear-input btn-class="ts-time-remove" click-callback="::vm.clearTime()" show="vm.showTimeRemove()"></chaise-clear-input>
                     </div>
                     <span class="chaise-input-group-append">
-                        <button class="chaise-btn chaise-btn-secondary" name="{{::column.name}}" type="button" ng-click="::toggleMeridiem();" ng-bind="model.value.meridiem || 'AM'">AM</button>
+                        <button class="chaise-btn chaise-btn-secondary" name="{{::vm.column.name}}" type="button" ng-click="::vm.toggleMeridiem();" ng-bind="vm.model.meridiem || 'AM'">AM</button>
                     </span>
                 </div>
             </div>
             <div class="col-xs-12">
                 <div class="chaise-btn-group pull-right" role="group">
-                    <button type="button" name="{{::column.name}}-now" class="chaise-btn chaise-btn-secondary" ng-click="::applyCurrentDatetime();">Now</button>
-                    <button type="button" name="{{::column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::clearDatetime();">Clear</button>
+                    <button type="button" name="{{::vm.column.name}}-now" class="chaise-btn chaise-btn-secondary" ng-click="::vm.applyCurrentDatetime();">Now</button>
+                    <button type="button" name="{{::vm.column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::vm.clearDatetime();">Clear</button>
                 </div>
             </div>
         </div>
@@ -53,14 +53,14 @@
     <!-- modal popup input -->
     <div ng-switch-when="popup-select" class="chaise-input-group modal-popup">
         <div class="chaise-input-control has-feedback">
-            <div contenteditable="false" class="popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::searchPopup()" ng-bind-html="(columnModel.fkDisplayName.value ? columnModel.fkDisplayName.value : getDisabledInputValue())"></div>
-            <chaise-clear-input btn-class="foreignkey-remove" click-callback="::clearForeignKey()" show="showRemove()"></chaise-clear-input>
+            <div contenteditable="false" class="popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::vm.searchPopup()" ng-bind-html="(vm.fkValue ? vm.fkValue : vm.getDisabledInputValue())"></div>
+            <chaise-clear-input btn-class="foreignkey-remove" click-callback="::vm.clearForeignKey()" show="vm.showRemove()"></chaise-clear-input>
         </div>
         <!-- So that the foreign key input can be validated -->
-        <input type="hidden" ng-model="columnModel.fkDisplayName.value" />
+        <input type="hidden" ng-model="vm.fkValue" ng-required="vm.isRequired" />
         <label class="sr-only"></label>
         <span class="chaise-input-group-append">
-            <button ng-focus="::blurElement($event);" class="chaise-btn chaise-btn-secondary modal-popup-btn" type="button" ng-click="searchPopup()" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
+            <button ng-focus="::vm.blurElement($event);" class="chaise-btn chaise-btn-secondary modal-popup-btn" type="button" ng-click="vm.searchPopup()" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
                 <span class="glyphicon glyphicon-chevron-down"></span>
             </button>
         </span>
@@ -68,54 +68,54 @@
 
     <!-- int2 input -->
     <div ng-switch-when="integer2" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="text" chaise-min="{{::int2min}}" chaise-max="{{::int2max}}" integer>
-        <chaise-clear-input btn-class="int2-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
+        <input ng-model="vm.model" name="{{::vm.column.name}}" type="text" ng-required="vm.isRequired" chaise-min="{{::vm.int2min}}" chaise-max="{{::vm.int2max}}" integer>
+        <chaise-clear-input btn-class="int2-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
     </div>
-    <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int2'">
-        <div ng-message="chaiseMin">This field requires a value greater than {{int2min}}.</div>
-        <div ng-message="chaiseMax">This field requires a value smaller than {{int2max}}.</div>
+    <div ng-messages="vm.inputContainer.$error" ng-show="vm.inputContainer.$dirty  || vm.formContainer.$submitted" class="text-danger" role="alert" ng-if="::vm.column.type.name == 'int2'">
+        <div ng-message="chaiseMin">This field requires a value greater than {{vm.int2min}}.</div>
+        <div ng-message="chaiseMax">This field requires a value smaller than {{vm.int2max}}.</div>
     </div>
 
     <!-- int4 input -->
     <div ng-switch-when="integer4" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="text" chaise-min="{{::int4min}}" chaise-max="{{::int4max}}" integer>
-        <chaise-clear-input btn-class="int4-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
+        <input ng-model="vm.model" name="{{::vm.column.name}}" type="text" ng-required="vm.isRequired" chaise-min="{{::vm.int4min}}" chaise-max="{{::vm.int4max}}" integer>
+        <chaise-clear-input btn-class="int4-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
     </div>
-    <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty  || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int4'">
-        <div ng-message="chaiseMin">This field requires a value greater than {{int4min}}.</div>
-        <div ng-message="chaiseMax">This field requires a value smaller than {{int4max}}.</div>
+    <div ng-messages="vm.inputContainer.$error" ng-show="vm.inputContainer.$dirty  || vm.formContainer.$submitted" class="text-danger" role="alert" ng-if="::vm.column.type.name == 'int4'">
+        <div ng-message="chaiseMin">This field requires a value greater than {{vm.int4min}}.</div>
+        <div ng-message="chaiseMax">This field requires a value smaller than {{vm.int4max}}.</div>
     </div>
 
     <!-- int8 input -->
     <div ng-switch-when="integer8" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="text" chaise-min="{{::int8min}}" chaise-max="{{::int8max}}" integer>
-        <chaise-clear-input btn-class="int8-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
+        <input ng-model="vm.model" name="{{::vm.column.name}}" type="text" ng-required="vm.isRequired" chaise-min="{{::vm.int8min}}" chaise-max="{{::vm.int8max}}" integer>
+        <chaise-clear-input btn-class="int8-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
     </div>
-    <div ng-messages="inputContainer.$error" ng-show="inputContainer.$dirty || inputContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
-        <div ng-message="chaiseMin">This field requires a value greater than {{int8min}}.</div>
-        <div ng-message="chaiseMax">This field requires a value smaller than {{int8max}}.</div>
+    <div ng-messages="vm.inputContainer.$error" ng-show="vm.inputContainer.$dirty || vm.formContainer.$submitted" class="text-danger" role="alert" ng-if="::vm.column.type.name == 'int8'">
+        <div ng-message="chaiseMin">This field requires a value greater than {{vm.int8min}}.</div>
+        <div ng-message="chaiseMax">This field requires a value smaller than {{vm.int8max}}.</div>
     </div>
 
     <!-- float/decimal/numeric -->
     <div ng-switch-when="number" class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="text" float>
-        <chaise-clear-input btn-class="float-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
+        <input ng-model="vm.model" name="{{::vm.column.name}}" type="text" ng-required="vm.isRequired" float>
+        <chaise-clear-input btn-class="float-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
     </div>
 
 
     <!-- boolean input -->
-    <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="inputContainerForDropdowns" on-toggle="setDropdownWidth()">
-        <div id="{{columnIndex}}-boolean-input" class="chaise-input-control has-feedback" uib-dropdown-toggle>
-            <div contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="model.value"></div>
-            <chaise-clear-input btn-class="boolean-remove" click-callback="::clearInput()" show="showBooleanRemove()"></chaise-clear-input>
+    <div ng-switch-when="boolean" class="chaise-boolean-dropdown" uib-dropdown dropdown-append-to="vm.inputContainerForDropdowns" on-toggle="vm.setDropdownWidth()">
+        <div id="{{vm.columnIndex}}-boolean-input" class="chaise-input-control has-feedback" uib-dropdown-toggle>
+            <div contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="vm.model"></div>
+            <chaise-clear-input btn-class="boolean-remove" click-callback="::vm.clearInput()" show="vm.showBooleanRemove()"></chaise-clear-input>
             <button class="chaise-btn chaise-btn-primary" type="button">
                 <span class="glyphicon glyphicon-chevron-down"></span>
             </button>
         </div>
         <!-- So that the boolean input can be validated -->
-        <input type="hidden" ng-model="model.value" />
+        <input type="hidden" ng-model="vm.model" ng-required="vm.isRequired" />
         <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu" ng-style="inputWidth">
-            <li ng-repeat="option in ::booleanValues" ng-click="model.value = option">
+            <li ng-repeat="option in ::vm.booleanValues" ng-click="vm.model = option">
                 <a ng-bind-html="option" style="min-height: 20px;"></a>
             </li>
         </ul>
@@ -123,50 +123,50 @@
 
     <!-- longtext/textarea input -->
     <div ng-switch-when="longtext">
-        <textarea ng-model="model.value" rows="5" name="{{::column.name}}" class="content-box" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
-        <a href class="live-preview" markdown-preview textinput="model.value"></a>
+        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box" ng-required="vm.isRequired" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <a href class="live-preview" markdown-preview textinput="vm.model"></a>
     </div>
 
 
     <!-- File input -->
     <div ng-switch-when="file">
-        <upload reference="::$root.reference" column="::column" placeholder="getDisabledInputValue()" value="model.value" is-required="false" is-disabled="columnModel.isDisabled"></upload>
+        <upload reference="::$root.reference" column="::vm.column" placeholder="vm.getDisabledInputValue()" value="vm.model" is-required="vm.isRequired" is-disabled="vm.columnModel.isDisabled"></upload>
     </div>
 
     <!--JSON input -->
     <div ng-switch-when="json">
-        <textarea json ng-model="model.value" rows="5" name="{{::column.name}}" class="chaise-input-control" empty-to-null></textarea>
+        <textarea json ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="chaise-input-control" ng-required="vm.isRequired" empty-to-null></textarea>
     </div>
 
     <!--array input -->
     <div ng-switch-when="array">
-        <textarea array column-type="{{column.type.rootName}}" custom-error-message="model.customErrorMessage" ng-model="model.value"  rows="5" name="{{::column.name}}" class="chaise-input-control" empty-to-null></textarea>
+        <textarea array column-type="{{vm.column.type.rootName}}" custom-error-message="vm.customErrorMessage" ng-model="vm.model"  rows="5" name="{{::vm.column.name}}" class="chaise-input-control" ng-required="vm.isRequired" empty-to-null></textarea>
     </div>
 
     <!-- disabled -->
-    <input ng-switch-when="disabled" ng-model="model.value" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::getDisabledInputValue();}}" empty-to-null>
+    <input ng-switch-when="disabled" ng-model="vm.model" name="{{::vm.column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::vm.getDisabledInputValue();}}" empty-to-null>
 
     <!-- shorttext/default text input -->
     <div ng-switch-default class="chaise-input-control has-feedback">
-        <input ng-model="model.value" name="{{::column.name}}" type="text" empty-to-null>
-        <chaise-clear-input btn-class="text-remove" click-callback="::clearInput()" show="showRemove()"></chaise-clear-input>
+        <input ng-model="vm.model" name="{{::vm.column.name}}" type="text" ng-required="vm.isRequired" empty-to-null>
+        <chaise-clear-input btn-class="text-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
     </div>
 
     <!-- Validation error messages to show when the form field is touched -->
-    <div ng-messages="inputContainer.$error" ng-show="inputContainer.$error || inputContainer.$submitted" class="text-danger" role="alert">
-        <div ng-message="date">Please enter a date value in {{dataFormats.placeholder.date}} format.</div>
-        <div ng-message="time">Please enter a time value in 12-hr {{dataFormats.placeholder.time}} format.</div>
-        <div ng-message="timestampDate">Please enter a date value in {{dataFormats.placeholder.date}} format.</div>
-        <div ng-message="timestampTime">Please enter a time value in 12-hr {{dataFormats.placeholder.time}} format.</div>
+    <div ng-messages="vm.inputContainer.$error" ng-show="vm.inputContainer.$error || vm.formContainer.$submitted" class="text-danger" role="alert">
+        <div ng-message="date">Please enter a date value in {{vm.dataFormats.placeholder.date}} format.</div>
+        <div ng-message="time">Please enter a time value in 12-hr {{vm.dataFormats.placeholder.time}} format.</div>
+        <div ng-message="timestampDate">Please enter a date value in {{vm.dataFormats.placeholder.date}} format.</div>
+        <div ng-message="timestampTime">Please enter a time value in 12-hr {{vm.dataFormats.placeholder.time}} format.</div>
         <div ng-message="integer">Please enter an integer value.</div>
         <div ng-message="float">Please enter a decimal value.</div>
         <div ng-message="json">Please enter a valid JSON value.</div>
-        <div ng-message="fileExtension">Please select a file with the following type: {{fileExtensionTypes(column)}}</div>
-        <div ng-message="customError">{{model.customErrorMessage}}</div>
+        <div ng-message="fileExtension">Please select a file with the following type: {{vm.fileExtensionTypes(column)}}</div>
+        <div ng-message="customError">{{vm.customErrorMessage}}</div>
     </div>
 
     <!-- Validation error messages to show when the form is submitted -->
-    <!-- <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
+    <div ng-messages="vm.inputContainer.$error" ng-show="vm.formContainer.$submitted" class="text-danger" role="alert">
         <div ng-message="required">Please enter a value for this field.</div>
-    </div> -->
+    </div>
 </div>

@@ -443,8 +443,7 @@ VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
 
 VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
-	$(CSS)/vendor/select2.css \
-	$(VIEWER_ROOT)/viewer.css
+	$(CSS)/vendor/select2.css
 
 .make-viewer-includes: $(BUILD_VERSION)
 	@> .make-viewer-includes

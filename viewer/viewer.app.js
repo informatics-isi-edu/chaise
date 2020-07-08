@@ -374,6 +374,7 @@
                 iframe.location.replace(osdViewerURI);
                 console.log('Image: ', image);
 
+                // TODO there should be a way that osd tells us it's done doing it's setup..
                 $rootScope.displayReady = true;
             }).catch(function (err) {
                 throw err;

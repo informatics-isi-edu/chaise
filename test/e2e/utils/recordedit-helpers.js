@@ -1327,7 +1327,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
             if (floatCols.length > 0) {
                 describe("Float fields,", function() {
+                    browser.pause();
                     it("should render input type as number with float attribute", function() {
+                        browser.pause();
                         floatCols.forEach(function(column) {
                             chaisePage.recordEditPage.getFloatInputForAColumn(column.name, recordIndex).then(function(floatInput) {
                                     expect(floatInput.isDisplayed()).toBeTruthy();

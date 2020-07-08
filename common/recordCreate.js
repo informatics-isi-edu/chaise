@@ -516,7 +516,7 @@
             }
 
             return {
-                allInput: null,
+                allInput: undefined,
                 column: column,
                 isDisabled: isDisabled,
                 isRequired: !column.nullok && !isDisabled,
@@ -735,11 +735,94 @@
             }
         }
 
+        /**
+         * Given a modelRow and submissionRow objects, use the value of modelRow to modify the submissionRow value.
+         * These are the modifications that it does:
+         *   - foreignKeys: if they are not edited, use the value of originalTuple for its constituent columns
+         *   - array: parse the string representation
+         *   - timestamp: turn object to string representation
+         *   - json: parse the string representation
+         *   - otherwise: use the modelRow value as is
+         * TODO technically we don't need to pass modelRow and submissionRow since their attached to $rootScope
+         * TODO even the third and fourth inputs can be derived in this function.
+         * @param {Object} modelRow - each object in the recordEditModel.rows array
+         * @param {Object} submissionRow - each object in the recordEditModel.submissionRow array
+         * @param {ERMrest.Reference=} reference - the reference that these values are based on.
+         * @param {ERMrest.Tuple=} originalTuple - the original tuple that comes from the first read
+         * @param {Boolean} editOrCopy - true if it's edit or copy, otherwise it's false.
+         */
+        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy) {
+            reference.columns.forEach(function (column) {
+                // If the column is a foreign key column, it needs to get the originating columns name for data submission
+                if (column.isForeignKey) {
+
+                    var foreignKeyColumns = column.foreignKey.colset.columns;
+                    for (var k = 0; k < foreignKeyColumns.length; k++) {
+                        var referenceColumn = foreignKeyColumns[k];
+                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
+                        // check if value is set in submission data yet (searchPopup will set this value if foreignkey is picked)
+                        if (!submissionRow[referenceColumn.name]) {
+                            /**
+                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
+                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
+                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
+                            **/
+                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
+                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
+                            } else {
+                                submissionRow[referenceColumn.name] = null;
+                            }
+                        }
+                    }
+
+                    return;
+                }
+                // not foreign key, column.name is sufficient for the keys
+                var rowVal = modelRow[column.name];
+                if (rowVal && !column.isDisabled) {
+                    if (column.type.isArray) {
+                        rowVal = JSON.parse(rowVal);
+                    } else {
+                        switch (column.type.name) {
+                            case "timestamp":
+                            case "timestamptz":
+                                var options = {
+                                    outputType: "string",
+                                    currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
+                                    outputMomentFormat: dataFormats.datetime.submission
+                                }
+
+                                var value = null;
+                                if (rowVal.date) {
+                                    // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
+                                    // meridiem should never be null, time can be left empty (null) the case below will catch that.
+                                    if (rowVal.time === null) rowVal.time = '00:00:00';
+                                    value = rowVal.date + rowVal.time + rowVal.meridiem;
+                                }
+                                rowVal = InputUtils.formatDatetime(value, options);
+                                break;
+                            case "json":
+                            case "jsonb":
+                                rowVal=JSON.parse(rowVal);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+                // set null if not set so that the whole data object is filled out for posting to ermrestJS
+                submissionRow[column.name] = (rowVal === undefined) ? null : rowVal;
+            });
+
+            return submissionRow;
+        }
+
         return {
             addRelatedRecordFact: addRelatedRecordFact,
             addRecords: addRecords,
             columnToColumnModel: columnToColumnModel,
-            populateCreateDefaultValues: populateCreateDefaultValues
+            populateCreateDefaultValues: populateCreateDefaultValues,
+            populateSubmissionRow: populateSubmissionRow
         }
     }])
 })();
