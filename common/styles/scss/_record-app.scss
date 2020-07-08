@@ -411,25 +411,34 @@
         }
 
         .chaise-table.table {
+
+            tr {
+                  border-left: 1px solid blue !important;
+                  border-bottom: none;
+            }
+
+            >thead>tr>th,
+            >tbody>tr>th,
+            >tfoot>tr>th::after {
+                  border-top: none;
+                  border-right: 20px solid red;
+                  border-bottom: 3px solid green;
+            }
+
+            >thead>tr>td,
+            >tbody>tr>td,
+            >tfoot>tr>td {
+                  border-top: none;
+                  border-right: 1px solid red;
+            }
+
             border-top: 1px solid purple;
             border-bottom: 1px solid purple;
         }
 
-        tr {
-              border-left: 1px solid blue !important;
-              border-bottom: none;
-        }
-
-        thead, th, tbody, tfoot {
-              border-top: none;
-              border-right: 1px solid red;
-              border-bottom: 3px solid green;
-        }
-
-        thead, td, tbody, tfoot {
-              border-top: none;
-              border-right: 1px solid red;
-        }
+        // .table-column-displayname::after{
+        //    border-right: 5px solid red;
+        // }
 
         .panel-title{
           .rt-section-header{
