@@ -411,7 +411,6 @@ recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
 VIEWER_ROOT=viewer
 
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
-	$(VIEWER_ROOT)/model.js \
 	$(VIEWER_ROOT)/constant.js \
 	$(VIEWER_ROOT)/common/providers/context.js \
 	$(VIEWER_ROOT)/common/providers/image.js \

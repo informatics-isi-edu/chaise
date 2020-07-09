@@ -66,9 +66,12 @@
                 <div class="side-panel-resizable" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
                     <div class="side-panel-container">
                         <div class='annotation-list-container facet-panel'>
-                            <div class='annotation-form-container' ng-form="anno.annoForm" ng-show="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
+                            <div class='annotation-form-container' ng-form="anno.annoForm" ng-if="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
                                 <div class="annotationRow">
                                     <div class="flex-column entity-key">
+                                        <div class="annotationRowValue" ng-show="!anno.editingAnatomy.isNew && !anno.editingAnatomy.isStoredInDB">
+                                            <div class="drawingHint">This annotation is not stored in the database.</div>
+                                        </div>
                                         <div class="annotationRowValue" ng-show="anno.editingAnatomy.isNew">
                                             <div class="drawingHint">Drawing is required for new annotations</div>
                                         </div>
@@ -84,7 +87,7 @@
                                                             <span class="fas fa-pencil-ruler"></span>
                                                         </span>
                                                         <span ng-if="!anno.editingAnatomy.isDrawing">Start drawing</span>
-                                                        <span ng-if="anno.editingAnatomy.isDrawing">Stop drawing</span>
+                                                        <span ng-if="anno.editingAnatomy.isDrawing">Finish drawing</span>
                                                     </div>
                                                     <div class="text-danger" ng-if="anno.editingAnatomy.isRequiredError">
                                                         <div>Please draw annotation on the image.</div>
@@ -95,6 +98,25 @@
                                                     </div> -->
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="annotationRow" ng-if="!anno.editingAnatomy.isNew" ng-repeat="(columnIndex, columnModel) in anno.annotationEditForm.columnModels">
+                                    <div class="flex-column entity-key">
+                                        <div class="annotationRowHeader">
+                                            <span ng-if="columnModel.isRequired" class="text-danger ng-scope">*</span>
+                                            <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': columnModel.column.comment}" ng-attr-uib-tooltip="{{::(columnModel.column.comment) ? columnModel.column.comment : undefined}}" tooltip-placement="right">
+                                                <span ng-if="::columnModel.column.displayname.isHTML" ng-bind-html="::columnModel.column.displayname.value"></span>
+                                                <span ng-if="::!columnModel.column.displayname.isHTML" ng-bind="::columnModel.column.displayname.value"></span>
+                                            </span>
+                                        </div>
+                                        <div class="annotationRowValue">
+                                            <!-- TODO what about tuples? In edit mode -->
+                                            <input-switch column="columnModel.column" column-model="columnModel" parent-reference="anno.annotationEditForm.reference" parent-tuples="[item.tuple]"
+                                                          parent-model="anno.annotationEditForm" model="anno.annotationEditForm.rows[0][columnModel.column.name]"
+                                                          column-index="columnIndex" mode="edit" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
+                                                          on-foreign-key-value-change="anno.onForeignKeyValueChange"
+                                                          is-required="columnModel.isRequired"></input-switch>
                                         </div>
                                     </div>
                                 </div>
@@ -112,6 +134,7 @@
                                             <input-switch column="columnModel.column" column-model="columnModel" parent-reference="anno.annotationCreateForm.reference"
                                                           parent-model="anno.annotationCreateForm" model="anno.annotationCreateForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="create" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
+                                                          on-foreign-key-value-change="anno.onForeignKeyValueChange"
                                                           is-required="columnModel.isRequired"></input-switch>
                                         </div>
                                     </div>
@@ -125,7 +148,7 @@
                                                 <span>Save</span>
                                             </button>
                                         </div>
-                                        <div class='annotationRowValue' ng-show="canDelete && !anno.editingAnatomy.isNew" data-toggle='tooltip' tooltip-placement="bottom">
+                                        <div class='annotationRowValue' ng-show="canDelete && !anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
                                             <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>
@@ -181,7 +204,7 @@
                                     {{osd.error}}
                                 </div>
                                 <div class='groups'>
-                                    <div id="{{item.svgID + item.groupID}}" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.viewerModel.rows" ng-show="item.isShow && item.svgID && item.groupID" ng-class="item.isSelected ? 'annotationItem current' : 'annotationItem' ">
+                                    <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
                                         <div class='itemContent'>
                                             <div class='itemRow'>
                                                 <span class='anatomy'>

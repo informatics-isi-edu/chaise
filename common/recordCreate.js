@@ -152,7 +152,6 @@
         function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
-            var form = viewModel.formContainer;
 
             // this will include updated and previous raw values.
             var submissionRowsCopy = [];
@@ -621,7 +620,7 @@
             }
         }
 
-        function populateCreateDefaultValues(model, reference, prefillQueryParam) {
+        function populateCreateModelValues(model, reference, prefillQueryParam, initialValues) {
             // get the prefilled values
             var prefilledColumns = {}, prefilledFks = [];
             if (prefillQueryParam) {
@@ -649,6 +648,11 @@
                 }
             }
 
+            //add initialValues to submissionRows
+            if (DataUtils.isObjectAndNotNull(initialValues)) {
+                model.submissionRows[0] = initialValues;
+            }
+
             // populate defaults
             for (var i = 0; i < model.columnModels.length; i++) {
                 // default model initialiation is null
@@ -658,6 +662,9 @@
 
                 // only want to set primitive values in the input fields so make sure it isn't a function, null, or undefined
                 var defaultValue = column.default;
+                if (DataUtils.isObjectAndNotNull(initialValues) && initialValues[column.name] && !column.isForeignKey) {
+                    defaultValue = initialValues[column.name];
+                }
 
                 // if it's a prefilled foreignkey, the value is already set
                 if (column.isForeignKey &&  prefilledFks.indexOf(column.name) !== -1) {
@@ -706,14 +713,22 @@
                                 return prefilledColumns[col.name] != null;
                             });
 
-                            if (allPrefilled) {
-                                var defaultDisplay = column.getDefaultDisplay(prefilledColumns);
+                            // if all the columns of the foreignkey are initialized, use that instead of default
+                            var allInitialized = initialValues && column.foreignKey.colset.columns.every(function (col) {
+                                return initialValues[col.name] != null;
+                            });
 
-                                colModel.isDisabled = true;
-                                colModel.inputType = "disabled";
+                            if (allPrefilled || allInitialized) {
+                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues);
+
+                                if (allPrefilled) {
+                                    colModel.isDisabled = true;
+                                    colModel.inputType = "disabled";
+                                }
+                                // display the initial value
                                 initialModelValue = defaultDisplay.rowname.value;
                                 // initialize foreignKey data
-                                model.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.fkValues;
+                                model.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.values;
                                 // get the actual foreign key data
                                 _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT, colModel.logStack);
                             } else if (defaultValue != null) {
@@ -733,6 +748,96 @@
 
                 model.rows[0][column.name] = initialModelValue;
             }
+        }
+
+        function populateEditModelValues(model, reference, tuple, tupleIndex, isCopy) {
+            // initialize row objects {column-name: value,...}
+            model.rows[tupleIndex] = {};
+            // needs to be initialized so foreign keys can be set
+            // these are the values that we're sending to ermrestjs,
+            // chaise should not use these values and we should just populate the values
+            model.submissionRows[tupleIndex] = {};
+
+            var values = tuple.values;
+
+            // attach the foreign key data of the tuple
+            model.foreignKeyData[tupleIndex] = tuple.linkedData;
+
+            model.columnModels.forEach(function (colModel) {
+                var column = colModel.column,
+                    value;
+
+                // columnModels array might not be the same size as column list
+                var i = reference.columns.findIndex(function (col) {return col.name === column.name});
+
+                // If input is disabled, and it's copy, we don't want to copy the value
+                if (colModel.inputType == "disabled" && isCopy) return;
+
+                // stringify the returned array value
+                if (column.type.isArray) {
+                    if (values[i] !== null) {
+                        model.rows[tupleIndex][column.name] = JSON.stringify(values[i], undefined, 2);
+                    }
+                    return;
+                }
+
+                // Transform column values for use in view model
+                var options = { outputType: "object" }
+                switch (column.type.name) {
+                    case "timestamp":
+                        // If input is disabled, there's no need to transform the column value.
+                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatDatetime(values[i], options);
+                        break;
+                    case "timestamptz":
+                        if (colModel.inputType == "disabled") {
+                            options.outputType = "string";
+                            options.outputMomentFormat = dataFormats.datetime.return;
+                        }
+                        value = InputUtils.formatDatetime(values[i], options);
+                        break;
+                    case "int2":
+                    case "int4":
+                    case "int8":
+                        // If input is disabled, there's no need to transform the column value.
+                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatInt(values[i]);
+                        break;
+                    case "float4":
+                    case "float8":
+                    case "numeric":
+                        // If input is disabled, there's no need to transform the column value.
+                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
+                        break;
+                    default:
+                        // the structure for asset type columns is an object with a 'url' property
+                        if (column.isAsset) {
+                            var metadata = column.getMetadata(tuple.data);
+                            value = {
+                                url: values[i] || "",
+                                filename: metadata.filename || metadata.caption,
+                                filesize: metadata.byteCount
+                            };
+                        } else {
+                            value = values[i];
+                        }
+
+                        // if in copy mode and copying an asset column with metadata available, attach that to the submission model
+                        if (column.isAsset && isCopy) {
+                            // may not have been set or fetched above because of disabled case
+                            // we still want to copy the metadata
+                            var metadata = column.getMetadata(tuple.data);
+
+                            // I don't think this should be done brute force like this
+                            if (metadata.filename) model.submissionRows[tupleIndex][column.filenameColumn.name] = metadata.filename;
+                            if (metadata.byteCount) model.submissionRows[tupleIndex][column.byteCountColumn.name] = metadata.byteCount;
+                            if (metadata.md5) model.submissionRows[tupleIndex][column.md5.name] = metadata.md5;
+                            if (metadata.sha256) model.submissionRows[tupleIndex][column.sha256.name] = metadata.sha256;
+                        }
+                        break;
+                }
+
+                // no need to check for copy here because the case above guards against the negative case for copy
+                model.rows[tupleIndex][column.name] = value;
+            });
         }
 
         /**
@@ -767,7 +872,7 @@
                              * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
                              * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
                             **/
-                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
+                            if (editOrCopy && originalTuple && undefined != originalTuple.data[referenceColumn.name]) {
                                 submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
                             } else {
                                 submissionRow[referenceColumn.name] = null;
@@ -821,7 +926,8 @@
             addRelatedRecordFact: addRelatedRecordFact,
             addRecords: addRecords,
             columnToColumnModel: columnToColumnModel,
-            populateCreateDefaultValues: populateCreateDefaultValues,
+            populateCreateModelValues: populateCreateModelValues,
+            populateEditModelValues: populateEditModelValues,
             populateSubmissionRow: populateSubmissionRow
         }
     }])

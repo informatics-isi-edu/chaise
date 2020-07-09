@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', 'viewerConstant', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q, viewerConstant) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var table = null;
@@ -78,7 +78,9 @@
 
         function removeEntry(item){
             var defer = $q.defer();
-            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(item.Image) + "&Anatomy="+ encodeURIComponent(item.Anatomy);
+            var anatomy = item.tuple.data[viewerConstant.annotation.ANNOTATED_TERM_COLUMN_NAME];
+
+            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(context.imageID) + "&Anatomy="+ encodeURIComponent(anatomy);
             var reference;
 
             ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){

@@ -140,8 +140,8 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'MathUtils', 'viewerModel', '$rootScope', 'Session', 'annotationCreateForm', 'annotationEditForm', 'recordCreate', 'AlertsService', 'viewerConstant', 'annotationList',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, MathUtils, viewerModel, $rootScope, Session, annotationCreateForm, annotationEditForm, recordCreate, AlertsService, viewerConstant, annotationList) {
+    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'MathUtils', '$rootScope', 'Session', 'annotationCreateForm', 'annotationEditForm', 'recordCreate', 'AlertsService', 'viewerConstant',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, MathUtils, $rootScope, Session, annotationCreateForm, annotationEditForm, recordCreate, AlertsService, viewerConstant) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         $rootScope.displayReady = false;
@@ -176,28 +176,11 @@
 
         context.catalogID = res.catalogId;
 
-        // will be used to determine the app mode (edit, create, or copy)
-        // We are not passing the query parameters that are used for app mode,
-        // so we cannot use the queryParams that parser is returning.
         context.queryParams = res.queryParams;
-        context.MAX_ROWS_TO_ADD = 201;
-
-        // modes = create, edit, copy
-        // create is contextualized to entry/create
-        // edit is contextualized to entry/edit
-        // copy is contextualized to entry/create
-        // NOTE: copy is technically creating an entity so it needs the proper visible column list as well as the data for the record associated with the given filter
-        context.modes = {
-            COPY: "copy",
-            CREATE: "create",
-            EDIT: "edit"
-        }
-        // mode defaults to create
-        context.mode = context.modes.CREATE;
 
         FunctionUtils.registerErmrestCallbacks();
 
-        var session;
+        var session, annotationEditReference;
 
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function () {
@@ -249,38 +232,15 @@
                 return ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid });
             })
             // create the annotation reference
-            .then(function (annotationReference) {
+            .then(function (ref) {
 
-                // we are using filter to determine app mode, the logic for getting filter
-                // should be in the parser and we should not duplicate it in here
-                // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
-                // var location = annotationReference.location;
+                annotationEditReference = ref.contextualize.entryEdit;
 
-                // TODO remove anywhere these are used
-                // Mode can be any 3 with a filter
-                // if (location.filter || location.facets) {
-                //     // prefill always means create
-                //     // copy means copy regardless of a limit defined
-                //     // edit is everything else with a filter
-                //     context.mode = (context.queryParams.prefill ? context.modes.CREATE : (context.queryParams.copy ? context.modes.COPY : context.modes.EDIT));
-                // } else if (context.queryParams.limit) {
-                //     context.mode = context.modes.EDIT;
-                // }
-                // context.appContext = (context.mode == context.modes.EDIT ? "entry/edit" : "entry/create");
+                $rootScope.canCreate = annotationEditReference.canCreate || false;
+                $rootScope.canUpdate = annotationEditReference.canUpdate || false;
+                $rootScope.canDelete = annotationEditReference.canDelete || false;
 
-
-                // get the list of annotations
-                // TODO should be removed (currently used in form which is wrong)
-
-                // TODO should use compact context
-                // $rootScope.annotationReference = annotationReference.contextualize.compact;
-                $rootScope.annotationReference = annotationReference.contextualize.entryCreate;
-
-                $rootScope.canCreate = annotationReference.canCreate || false;
-                $rootScope.canUpdate = annotationReference.canUpdate || false;
-                $rootScope.canDelete = annotationReference.canDelete || false;
-
-                $rootScope.annotationReference.session = session;
+                annotationEditReference.session = session;
                 $rootScope.session = session;
 
                 // TODO used for create and edit, used to be populated here...
@@ -288,26 +248,26 @@
 
                 // create the edit and create forms
                 if ($rootScope.canCreate) {
-                    annotationCreateForm.reference = annotationReference.contextualize.entryCreate;
+                    annotationCreateForm.reference = ref.contextualize.entryCreate;
                     annotationCreateForm.reference.columns.forEach(function (column) {
                         // remove the asset column from the form
-                        if (column.name === viewerConstant.annotation.ASSET_COLUMN_NAME) return;
+                        if (column.name === viewerConstant.annotation.OVERLAY_COLUMN_NAME) return;
 
                         // remove the image from the form
-                        if (column.name === viewerConstant.annotation.IMAGE_VISIBLE_COLUMN_NAME) return;
+                        if (column.name === viewerConstant.annotation.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
 
                         annotationCreateForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
                 }
 
                 if ($rootScope.canUpdate) {
-                    annotationEditForm.reference = annotationReference.contextualize.entryEdit;
+                    annotationEditForm.reference = annotationEditReference;
                     annotationEditForm.reference.columns.forEach(function (column) {
                         // remove the asset column from the form
-                        if (column.name === viewerConstant.annotation.ASSET_COLUMN_NAME) return;
+                        if (column.name === viewerConstant.annotation.OVERLAY_COLUMN_NAME) return;
 
                         // remove the image from the form
-                        if (column.name === viewerConstant.annotation.IMAGE_VISIBLE_COLUMN_NAME) return;
+                        if (column.name === viewerConstant.annotation.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
 
                         annotationEditForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
@@ -320,29 +280,23 @@
                 };
 
                 // TODO how many should we read?
-                return $rootScope.annotationReference.read(201, logObj);
+                // using edit, because the tuples is used in edit context
+                return annotationEditReference.read(201, logObj);
             })
             // read the annotation reference
             .then(function getPage(page) {
-                // TODO tuples, rows
-                // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
-                $rootScope.tuples = [];
+                // TODO not used
                 $rootScope.showColumnSpinner = [{}];
+
+                // TODO should be refactored
+                $rootScope.annotationTuples = page.tuples;
+
                 for(var j = 0; j < page.tuples.length; j++){
-                    var row = page.tuples[j].data,
-                        tuple = page.tuples[j],
-                        shallowCopy = tuple.copy();
-
-                    viewerModel.rows[j] = shallowCopy.data;
-
-                    // TODO foreignKeyData should be added for domain_filter_pattern
-
-                    if(row && row[viewerConstant.annotation.ASSET_COLUMN_NAME]){
-                        svgURIs.push(row[viewerConstant.annotation.ASSET_COLUMN_NAME]);
+                    var row = page.tuples[j].data;
+                    if(row && row[viewerConstant.annotation.OVERLAY_COLUMN_NAME]){
+                        svgURIs.push(row[viewerConstant.annotation.OVERLAY_COLUMN_NAME]);
                     }
                 }
-
-                console.log('Model: ', viewerModel);
 
                 // Load the openseadragon after we got the corresponding svg files
                 var osdViewerLocation =  origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";

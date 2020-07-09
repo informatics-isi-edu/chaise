@@ -6,9 +6,26 @@
 
     .value('annotations', [])
 
-    .value('annotationList', [])
+    /**
+     * each annotation has the following:
+     *  - svgID
+     *  - groupID
+     *  - anatomy
+     *  - description
+     *  - isSelected
+     *  - isDrawing
+     *  - isDisplay
+     *  - isNew
+     *  - isStoredInDB
+     *  - name
+     *  - id
+     *  - url
+     *  - tuple
+     */
+    .value('annotationModels', [])
 
     .value('annotationCreateForm', {
+        returnEditContext: true,
         reference: null,
         columnModels: [],
         rows: [{}], // rows of data in the form, not the table from ERMrest
@@ -18,6 +35,7 @@
     })
 
     .value('annotationEditForm', {
+        returnEditContext: true,
         reference: null,
         columnModels: [],
         rows: [{}], // rows of data in the form, not the table from ERMrest

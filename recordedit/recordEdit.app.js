@@ -267,96 +267,12 @@
                             $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
                             for (var j = 0; j < page.tuples.length; j++) {
-                                // initialize row objects {column-name: value,...}
-                                recordEditModel.rows[j] = {};
-                                // needs to be initialized so foreign keys can be set
-                                // these are the values that we're sending to ermrestjs,
-                                // chaise should not use these values and we should just populate the values
-                                recordEditModel.submissionRows[j] = {};
-
-                                var tuple = page.tuples[j],
-                                    values = tuple.values;
-
-                                // attach the foreign key data of the tuple
-                                recordEditModel.foreignKeyData[j] = tuple.linkedData;
-
                                 // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
                                 // The submission data is copied back to the tuples object before submitted in the PUT request
-                                var shallowTuple = tuple.copy();
+                                var shallowTuple = page.tuples[j].copy();
                                 $rootScope.tuples.push(shallowTuple);
 
-                                for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                                    column = $rootScope.reference.columns[i];
-                                    var colModel = recordEditModel.columnModels[i];
-
-                                    // If input is disabled, and it's copy, we don't want to copy the value
-                                    if (colModel.inputType == "disabled" && context.mode == context.modes.COPY) continue;
-
-                                    // stringify the returned array value
-                                    if (column.type.isArray) {
-                                        if (values[i] !== null) {
-                                            recordEditModel.rows[j][column.name] = JSON.stringify(values[i], undefined, 2);
-                                        }
-                                        continue;
-                                    }
-
-                                    // Transform column values for use in view model
-                                    var options = { outputType: "object" }
-                                    switch (column.type.name) {
-                                        case "timestamp":
-                                            // If input is disabled, there's no need to transform the column value.
-                                            value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatDatetime(values[i], options);
-                                            break;
-                                        case "timestamptz":
-                                            if (colModel.inputType == "disabled") {
-                                                options.outputType = "string";
-                                                options.outputMomentFormat = dataFormats.datetime.return;
-                                            }
-                                            value = InputUtils.formatDatetime(values[i], options);
-                                            break;
-                                        case "int2":
-                                        case "int4":
-                                        case "int8":
-                                            // If input is disabled, there's no need to transform the column value.
-                                            value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatInt(values[i]);
-                                            break;
-                                        case "float4":
-                                        case "float8":
-                                        case "numeric":
-                                            // If input is disabled, there's no need to transform the column value.
-                                            value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
-                                            break;
-                                        default:
-                                            // the structure for asset type columns is an object with a 'url' property
-                                            if (column.isAsset) {
-                                                var metadata = column.getMetadata(tuple.data);
-                                                value = {
-                                                    url: values[i] || "",
-                                                    filename: metadata.filename || metadata.caption,
-                                                    filesize: metadata.byteCount
-                                                };
-                                            } else {
-                                                value = values[i];
-                                            }
-
-                                            // if in copy mode and copying an asset column with metadata available, attach that to the submission model
-                                            if (column.isAsset && context.mode == context.modes.COPY) {
-                                                // may not have been set or fetched above because of disabled case
-                                                // we still want to copy the metadata
-                                                var metadata = column.getMetadata(tuple.data);
-
-                                                // I don't think this should be done brute force like this
-                                                if (metadata.filename) recordEditModel.submissionRows[j][column.filenameColumn.name] = metadata.filename;
-                                                if (metadata.byteCount) recordEditModel.submissionRows[j][column.byteCountColumn.name] = metadata.byteCount;
-                                                if (metadata.md5) recordEditModel.submissionRows[j][column.md5.name] = metadata.md5;
-                                                if (metadata.sha256) recordEditModel.submissionRows[j][column.sha256.name] = metadata.sha256;
-                                            }
-                                            break;
-                                    }
-
-                                    // no need to check for copy here because the case above guards against the negative case for copy
-                                    recordEditModel.rows[j][column.name] = value;
-                                }
+                                recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
                             }
 
                             $rootScope.displayReady = true;
@@ -390,7 +306,7 @@
                         $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                         $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
-                        recordCreate.populateCreateDefaultValues(recordEditModel, $rootScope.reference, context.queryParams.prefill);
+                        recordCreate.populateCreateModelValues(recordEditModel, $rootScope.reference, context.queryParams.prefill);
 
                         $rootScope.displayReady = true;
                         // if there is a session, user isn't allowed to create

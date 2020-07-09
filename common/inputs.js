@@ -314,7 +314,8 @@
                 isRequired: "=?", // we cannot derive this from the columnModel (for select-all none of the inputs are required)
                 parentModel: "=?",
                 parentReference: "=?",
-                parentTuples: "=?"
+                parentTuples: "=?",
+                onForeignKeyValueChange: "&?"
             },
             controllerAs: 'vm',
             controller: function () {},
@@ -461,6 +462,7 @@
                     }, function dataSelected(tuple) {
                         // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
 
+
                         // in select-all we're not changing the parent model directly here
                         if (!hasParentModel) {
                             vm.fkValue = tuple.displayname.value;
@@ -488,6 +490,17 @@
                         vm.parentModel.rows[vm.rowIndex][vm.column.name] = tuple.displayname.value;
                         vm.model = tuple.displayname.value;
                         vm.fkValue = tuple.displayname.value;
+
+                        if (typeof vm.onForeignKeyValueChange === 'function') {
+                            var res = vm.onForeignKeyValueChange()(vm.columnModel, tuple);
+                            if (res.error) {
+                                vm.inputContainer.$error.customError = res.message;
+                                vm.customErrorMessage = res.message;
+                            } else {
+                                delete vm.inputContainer.$error.customError;
+                                vm.customErrorMessage = "";
+                            }
+                        }
                     }, false, false);
                 }
 
@@ -510,27 +523,37 @@
                 }
 
                 vm.clearInput = function (model) {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
                     vm.model = null;
                 }
 
                 // used for foriegn key inputs only
                 vm.clearForeignKey = function() {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
                     vm.model = null;
                     vm.fkValue = null;
                 }
 
                 // Used to remove the value in timestamp inputs when the "Clear" button is clicked
                 vm.clearDatetime = function () {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
                     vm.model = InputUtils.clearDatetime(vm.columnModel.inputType);
                 }
 
                 // used for timestamp[tz] inputs only
                 vm.clearDate = function () {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
                     vm.model.date = null;
                 }
 
                 // used for timestamp[tz] inputs only
                 vm.clearTime = function () {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
                     vm.model.time = null;
                 }
 
