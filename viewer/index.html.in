@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html id="viewer">
 <head>
     <title>Image Viewer</title>
@@ -112,7 +113,7 @@
                                         </div>
                                         <div class="annotationRowValue">
                                             <!-- TODO what about tuples? In edit mode -->
-                                            <input-switch column="columnModel.column" column-model="columnModel" parent-reference="anno.annotationEditForm.reference" parent-tuples="[item.tuple]"
+                                            <input-switch column="columnModel.column" column-model="columnModel" parent-reference="anno.annotationEditForm.reference" parent-tuples="anno.editingAnatomy.tuple"
                                                           parent-model="anno.annotationEditForm" model="anno.annotationEditForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="edit" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
                                                           on-foreign-key-value-change="anno.onForeignKeyValueChange"

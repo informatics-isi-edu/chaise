@@ -6,7 +6,6 @@
     .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant',
     function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant) {
 
-        console.log("annotation controller created!");
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var vm = this;
 

@@ -24,6 +24,10 @@
         padding-left: 20px !important;
     }
 
+    .main-body, .side-panel-container {
+        height: 100%;
+    }
+
     .flex-row{
         display: flex;
         flex-direction: row;
@@ -253,7 +257,7 @@
             margin-top: 8px;
 
             .annotation-form-container, .annotation-list{
-                margin-bottom: 5px;
+                margin-bottom: 20px;
             }
 
             .annotation-form-container{
@@ -283,11 +287,18 @@
                     width: 100%;
                     color: #6a6a6a;
                     flex-direction: row;
-                }
 
-                .annotationRow .annotationToolRow .chaise-btn.selected{
-                    background-color: #4673a7;
-                    color: #fff;
+                    .annotationRowValue {
+                        width: 100%;
+                        .chaise-btn {
+                            width: 100%;
+                        }
+                    }
+
+                    .chaise-btn.selected{
+                        background-color: #4673a7;
+                        color: #fff;
+                    }
                 }
 
                 .annotationRowHeader{

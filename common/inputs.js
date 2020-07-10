@@ -308,7 +308,7 @@
                 rowIndex: "=?",
                 columnModel: '=',
                 model: "=",
-                mode: "=",
+                mode: "@",
                 inputContainer: "=?",
                 formContainer: "=?",
                 isRequired: "=?", // we cannot derive this from the columnModel (for select-all none of the inputs are required)
@@ -397,15 +397,19 @@
                     var originalTuple = null, editOrCopy = false;
 
                     // parentTuples is only defined in edit/copy
-                    if (Array.isArray(vm.parentTuples)) {
-                        var i = vm.rowIndex;
-                        // TODO needs to be refactored
-                        // context.modes is only defined in recordedit but should be in utils
-                        if (mode === "copy") {
-                            i = 0;
-                        }
-                        originalTuple = vm.parentTuples[i];
+                    if (vm.parentTuples) {
                         editOrCopy = true;
+                        if (!Array.isArray(vm.parentTuples)) {
+                            originalTuple = vm.parentTuples;
+                        } else {
+                            var i = vm.rowIndex;
+                            // TODO needs to be refactored
+                            // context.modes is only defined in recordedit but should be in utils
+                            if (vm.mode === "copy") {
+                                i = 0;
+                            }
+                            originalTuple = vm.parentTuples[i];
+                        }
                     }
 
                     // used for filteredRef (to support domain-fitler-pattern)
@@ -432,7 +436,7 @@
 
                     // TODO needs to be refactored
                     // context.modes is only defined in recordedit but should be in utils
-                    if (mode === "edit") {
+                    if (vm.mode === "edit") {
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupEdit;
                     } else {
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
