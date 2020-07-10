@@ -436,10 +436,6 @@
             border-bottom: 1px solid purple;
         }
 
-        // .table-column-displayname::after{
-        //    border-right: 5px solid red;
-        // }
-
         .panel-title{
           .rt-section-header{
             font-size: 1.5rem !important;
@@ -492,11 +488,11 @@
             content: none !important;
         }
 
-        .table {
-            .table-heading-icons {
-                display:none;
-            }
-        }
+        // .table {
+        //     .table-heading-icons {
+        //         display:none;
+        //     }
+        // }
 
         //Removing button styling from Display record information
         .page-size-dropdown{
