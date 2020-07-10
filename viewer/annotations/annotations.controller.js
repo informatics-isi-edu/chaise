@@ -371,6 +371,10 @@
                   }
                 }
 
+                var url = "/chaise/record/#" + context.catalogID;
+                url += "/" + viewerConstant.annotation.ANNOTATED_TERM_TABLE;
+                url += "/" + viewerConstant.annotation.ANNOTATED_TERM_ID_COLUMN_NAME + "=" + fixedEncodeURIComponent(id);
+
                 // default values for new anatomy's annotation
                 obj = {
                     groupID : groupID,
@@ -385,7 +389,7 @@
                     isShow : true,
                     name: name,
                     id: id,
-                    url: "/chaise/record/#2/Vocabulary:Anatomy/ID="+fixedEncodeURIComponent(id),
+                    url: url,
                     tuple: null
                 };
 
@@ -441,6 +445,8 @@
                 description : ""
             });
 
+            AlertsService.deleteAllAlerts();
+
         }
 
         // Click to toggle overlay visibility in Openseadragon
@@ -482,12 +488,13 @@
                 return true;
             }
 
-            var item = vm.editingAnatomy;
-
-            var data = tuple.data;
+            var item = vm.editingAnatomy,
+                data = tuple.data,
+                idColName = viewerConstant.annotation.ANNOTATED_TERM_ID_COLUMN_NAME,
+                nameColName = viewerConstant.annotation.ANNOTATED_TERM_NAME_COLUMN_NAME;
 
             // make sure the ID doesn't exist
-            if(vm.annotationModels.find(function (row) { return row.id === data.ID})){
+            if(vm.annotationModels.find(function (row) { return row.id === data[idColName]})){
                 return {error: true, message: "An annotation already exists for this Anatomy, please select other terms."};
             }
 
@@ -495,14 +502,14 @@
             AnnotationsService.changeGroupInfo({
                 svgID : item.svgID,
                 groupID : item.groupID,
-                newGroupID : data.ID + "," + data.Name,
-                newAnatomy : data.Name + " (" + data.ID + ")"
+                newGroupID : data[idColName] + "," + data[nameColName],
+                newAnatomy : data[nameColName] + " (" + data[idColName] + ")"
             });
 
-            item["groupID"] = data.ID + "," + data.Name;
-            item["name"] = data.Name;
-            item["id"] = data.ID;
-            item["url"] = "/chaise/record/#2/Vocabulary:Anatomy/ID=" + fixedEncodeURIComponent(data.ID);
+            item["groupID"] = data[idColName] + "," + data[nameColName];
+            item["name"] = data[nameColName];
+            item["id"] = data[idColName];
+            item["url"] = "/chaise/record/#2/Vocabulary:Anatomy/ID=" + fixedEncodeURIComponent(data[idColName]);
             return true;
         }
 
@@ -605,6 +612,7 @@
                     recordCreate.populateEditModelValues(annotationEditForm, annotationEditForm.reference, item.tuple, 0, false);
                 }
             }
+            AlertsService.deleteAllAlerts();
         }
 
         /**
@@ -749,7 +757,7 @@
             });
 
             // add the image value
-            formModel.submissionRows[0][viewerConstant.annotation.IMAGE_FOREIGN_KEY_COLUMN_NAME] = imageRID;
+            formModel.submissionRows[0][viewerConstant.annotation.REFERENCE_IMAGE_COLUMN_NAME] = imageRID;
 
             // change the overlay file value
             formModel.submissionRows[0][viewerConstant.annotation.OVERLAY_COLUMN_NAME] = {
@@ -803,7 +811,7 @@
 
                 // TODO this shouldn't happen
                 if (!resultTuple) {
-                    AlertsService.addAlert("Something went wrong. Please try again.", "error")
+                    AlertsService.addAlert("Something went wrong. Please try again.", "error");
                     return;
                 }
 

@@ -155,7 +155,6 @@
         var rectangles = [];
         var sections = [];
         var session;
-        var imageAnnotationURL = context.serviceURL + "/catalog/2/entity/Gene_Expression:Image_Annotation";
         var imageURI, svgURIs = [];
         var config = ConfigUtils.getContextJSON();
 
@@ -180,6 +179,7 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
+        var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + viewerConstant.annotation.ANNOTATION_TABLE_NAME;
         var session, annotationEditReference;
 
         // Subscribe to on change event for session
