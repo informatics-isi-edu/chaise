@@ -515,9 +515,10 @@
           font-size: 1.2rem !important;
         }
 
-        .fa-arrows-alt-v{
-            display:none;
-        }
+        //Sort icons in record table
+        // .fa-arrows-alt-v{
+        //     display:none;
+        // }
 
         //Hiding the 1st column (Actions) in Record Table
         record-table th:nth-child(1),
