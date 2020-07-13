@@ -314,15 +314,13 @@
             display: block;
         }
 
-        //Action button top right corner
         .top-right-panel {
+            //Action button top right corner
             .page-action-btns{
                 display:none;
             }
-        }
 
-        //Creat,Copy,Edit and Del Buttons
-        .top-right-panel {
+            //Creat,Copy,Edit and Del Buttons
             .title-buttons {
                 display:none;
             }
@@ -385,58 +383,57 @@
             }
         }
 
+        .table-heading-icons {
+            display:none;
+        }
+
         // for mac and firefox
-        .chaise-body {
-          @media print{
-            @at-root .chaise-mac-firefox
-            {
-              #tblRecord {
-                .entity-key {
+        @at-root .chaise-mac.chaise-firefox
+        {
+           #tblRecord {
+              .entity-key {
                   padding-left:20px;
                   width: 20%;
                   min-width: 150px;
                   float: left;
-                }
+              }
 
-                .entity-value {
+              .entity-value {
                   width: 80%;
-                  padding-left: 15%!important;
+                  padding-left: 10%!important;
                   padding-right: 8px;
                   padding-top: 8px;
                   padding-bottom: 8px;
-                }
               }
             }
           }
-        }
 
-        .chaise-table.table {
+          .chaise-table.table {
+              border-top: 1px solid #BBBBBB;
+              border-bottom: 1px solid #BBBBBB;
 
-            tr {
-                  border-left: 1px solid #BBBBBB !important;
-                  border-bottom: none;
-            }
+              tr {
+                    border-left: 1px solid #BBBBBB;
+                    border-bottom: none;
+                 }
 
-            >thead>tr>th,
-            >tbody>tr>th,
-            >tfoot>tr>th,
-            >thead>tr>td,
-            >tbody>tr>td,
-            >tfoot>tr>td {
-                  border-top: none;
-                  border-right: 1px solid #BBBBBB;
-            }
+              >thead>tr>th,
+              >tbody>tr>th,
+              >tfoot>tr>th,
+              >thead>tr>td,
+              >tbody>tr>td,
+              >tfoot>tr>td {
+                    border-top: none;
+                    border-right: 1px solid #BBBBBB;
+              }
 
-            th
-            {
-                  background-color: unset !important;
-                  border-top: none;
-                  border-bottom: 1px solid #BBBBBB;
-            }
-
-            border-top: 1px solid #BBBBBB;
-            border-bottom: 1px solid #BBBBBB;
-        }
+              th
+              {
+                    background-color: unset !important;
+                    border-top: none;
+                    border-bottom: 1px solid #BBBBBB;
+              }
+          }
 
         .panel-title{
           .rt-section-header{
@@ -472,6 +469,7 @@
             font-size: 1.75rem !important;
         }
 
+        //Removes bubbles and represents the vocab as a dot separated list
         #rt-container{
             .vocab::after{
                 content: "\2002\2022" !important;
@@ -489,12 +487,6 @@
         a[href]:after {
             content: none !important;
         }
-
-        // .table {
-        //     .table-heading-icons {
-        //         display:none;
-        //     }
-        // }
 
         //Removing button styling from Display record information
         .page-size-dropdown{
@@ -514,9 +506,9 @@
         }
 
         //Sort icons in record table
-        // .fa-arrows-alt-v{
-        //     display:none;
-        // }
+        .fa-arrows-alt-v{
+            display:none;
+        }
 
         //Hiding the 1st column (Actions) in Record Table
         record-table th:nth-child(1),

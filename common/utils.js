@@ -2631,25 +2631,18 @@
         }
 
         /* Custom function to add styling based on browser type and operating system */
-        function addNewClassForBrowerInOs(){
-          var osName = "unidentified";
-          var browserName = "unidentified";
+        function addMacFirefoxClass(){
+          var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
+          var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
 
-          if ((navigator.platform.indexOf("Mac")!= -1) && (navigator.userAgent.indexOf("Firefox")!=-1))
-          {
-            osName="MacOS";
-            browserName = "Firefox";
-          }
-
-          if((osName === "MacOS") && (browserName === "Firefox"))
-          {
-              var newCustomClass = "chaise-mac-firefox";
-              var bodyElement = document.querySelector(".chaise-body");
-              if (bodyElement){
-                  UiUtils.addClass(bodyElement, newCustomClass);
-              }
-          }
-      }
+          var bodyElement = document.querySelector(".chaise-body");
+          if (bodyElement){
+            if(osClass)
+              UiUtils.addClass(bodyElement, osClass);
+            if(browserClass)
+              UiUtils.addClass(bodyElement, browserClass);
+           }
+        }
 
         function addTitle() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
@@ -2806,7 +2799,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
-            addNewClassForBrowerInOs();
+            addMacFirefoxClass();
             return addCustomCSS();
         }
 
