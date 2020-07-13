@@ -413,27 +413,29 @@
         .chaise-table.table {
 
             tr {
-                  border-left: 1px solid blue !important;
+                  border-left: 1px solid #BBBBBB !important;
                   border-bottom: none;
             }
 
             >thead>tr>th,
             >tbody>tr>th,
-            >tfoot>tr>th::after {
-                  border-top: none;
-                  border-right: 20px solid red;
-                  border-bottom: 3px solid green;
-            }
-
+            >tfoot>tr>th,
             >thead>tr>td,
             >tbody>tr>td,
             >tfoot>tr>td {
                   border-top: none;
-                  border-right: 1px solid red;
+                  border-right: 1px solid #BBBBBB;
             }
 
-            border-top: 1px solid purple;
-            border-bottom: 1px solid purple;
+            th
+            {
+                  background-color: unset !important;
+                  border-top: none;
+                  border-bottom: 1px solid #BBBBBB;
+            }
+
+            border-top: 1px solid #BBBBBB;
+            border-bottom: 1px solid #BBBBBB;
         }
 
         .panel-title{
