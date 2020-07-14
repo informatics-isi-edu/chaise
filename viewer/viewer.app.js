@@ -309,6 +309,7 @@
                  *    - otherwise, use the image.uri value
                  */
                 if(!("url" in queryParams) && (typeof imageURI === "string")){
+                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
                     if (imageURI.indexOf("?") !== -1) {
                         osdViewerQueryParams += imageURI.split("?")[1];
                     } else {
