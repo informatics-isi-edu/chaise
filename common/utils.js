@@ -2685,25 +2685,25 @@
         }
 
         function overrideDownloadClickBehavior() {
-            addClickListener("a.asset-permission", function (e) {
+            addClickListener("a.asset-permission", function (e, element) {
 
                 function hideSpinner() {
-                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                    element.innerHTML = element.innerHTML.slice(0, element.innerHTML.indexOf(spinnerHTML));
                 }
 
                 e.preventDefault();
 
                 var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
                 //show spinner
-                e.target.innerHTML += spinnerHTML;
+                element.innerHTML += spinnerHTML;
 
                 // if same origin, verify authorization
-                if (UriUtils.isSameOrigin(e.target.href)) {
+                if (UriUtils.isSameOrigin(element.href)) {
                     var config = {skipRetryBrowserError: true, skipHTTP401Handling: true};
 
                     // make a HEAD request to check if the user can fetch the file
-                    ConfigUtils.getHTTPService().head(e.target.href, config).then(function (response) {
-                        clickHref(e.target.href);
+                    ConfigUtils.getHTTPService().head(element.href, config).then(function (response) {
+                        clickHref(element.href);
                     }).catch(function (exception) {
                         // error/login modal was closed
                         if (typeof exception == 'string') return;
@@ -2726,7 +2726,7 @@
         }
 
         function overrideExternalLinkBehavior() {
-            addClickListener('a.external-link', function (e) {
+            addClickListener('a.external-link', function (e, element) {
                 e.preventDefault();
 
                 // asset-permission will be appended via display annotation or by heuristic if no annotation
@@ -2741,7 +2741,7 @@
                 }
                 // show modal dialog with countdown before redirecting to "asset"
                 modalUtils.showModal(modalProperties, function () {
-                    clickHref(e.target.href);
+                    clickHref(element.href);
                 }, false);
             });
         }
@@ -2749,12 +2749,19 @@
         /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
-         * @param {function} handler  the handler callback function
+         * @param {function} handler  the handler callback function.
+         * handler parameters are:
+         *  - Event object that is returned.
+         *  - The target (element that is described by the selector)
+         * NOTE since we're checking the closest element to the target, the e.target might
+         * be different from the actual target that we want. That's why we have to send the target too.
+         * We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
+         * the image as the value of e.target and not the link
          */
         function addClickListener(selector, handler) {
             document.querySelector("body").addEventListener("click", function (e) {
                 if (e.target.closest(selector)) {
-                    handler(e);
+                    handler(e, e.target.closest(selector));
                 }
             });
         }
