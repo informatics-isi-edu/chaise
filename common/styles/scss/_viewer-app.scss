@@ -345,7 +345,9 @@
                 }
 
                 .annotationRowValue .drawingHint{
-                    background: #ecec7d;
+                    &:not(.alert-danger) {
+                        background: #ecec7d;
+                    }
                     width: 100%;
                     padding: 5px;
                     margin: 5px 0;
@@ -402,7 +404,7 @@
             .clear-search{
                 position: absolute;
                 right: 5px;
-                top: 8px;
+                top: 5px;
             }
 
 

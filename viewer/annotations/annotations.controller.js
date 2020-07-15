@@ -7,6 +7,7 @@
     function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant) {
 
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+        var annotConstant = viewerConstant.annotation;
         var vm = this;
 
         vm.annotationCreateForm = annotationCreateForm;
@@ -58,7 +59,9 @@
         vm.strokeScale = 1; // stroke size of the annotation
         vm.editingAnatomy = null; // current setting anatomy from annotationModels
         vm.editingAnatomyIndex = null;
-        vm.onForeignKeyValueChange = onForeignKeyValueChange; // if anatomy changed, we should do some updates
+        vm.onSearchPopupValueChange = onSearchPopupValueChange; // if anatomy changed, we should do some updates
+        vm.getAnnotatedTermDisabledTuples = getAnnotatedTermDisabledTuples; // disable the existing anatomy, in the popup
+        vm.displayDrawingRequiredError = false;
 
         vm.addNewTerm = addNewTerm;
         vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
@@ -143,8 +146,6 @@
                     case 'onHighlighted':
                     case 'onUnHighlighted':
                         break;
-                    default:
-                        console.log('Invalid event message type "' + messageType + '"');
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
@@ -306,14 +307,6 @@
             $rootScope.$emit("dismissEvent");
         }
 
-        function fixedEncodeURIComponent(id) {
-          var result = encodeURIComponent(id).replace(/[!'()*]/g, function(c) {
-              return '%' + c.charCodeAt(0).toString(16).toUpperCase();
-          });
-          return result;
-        }
-
-
         /**
          * Add new annotation items
          * This function will be called after osd viewer is done processing the svgs,
@@ -372,8 +365,8 @@
                 }
 
                 var url = "/chaise/record/#" + context.catalogID;
-                url += "/" + viewerConstant.annotation.ANNOTATED_TERM_TABLE;
-                url += "/" + viewerConstant.annotation.ANNOTATED_TERM_ID_COLUMN_NAME + "=" + fixedEncodeURIComponent(id);
+                url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME);
+                url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(id);
 
                 // default values for new anatomy's annotation
                 obj = {
@@ -394,7 +387,7 @@
                 };
 
                 row = $rootScope.annotationTuples.find(function (tuple, index) {
-                    return tuple.data && tuple.data[viewerConstant.annotation.ANNOTATED_TERM_COLUMN_NAME] === id;
+                    return tuple.data && tuple.data[annotConstant.ANNOTATED_TERM_COLUMN_NAME] === id;
                 });
 
                 // if row with same anatomy id exists in the viewer model -> update it
@@ -483,15 +476,21 @@
             AnnotationsService.changeStrokeScale(vm.strokeScale);
         }
 
-        function onForeignKeyValueChange(columnModel, tuple) {
-            if (columnModel.column.name !== viewerConstant.annotation.ANNOTATED_TERM_VISIBLE_COLUMN_NAME) {
+        /**
+         * This function is called after each foreignkey value change in annotation form.
+         * The purpose of this callback is to do
+         *  - Make sure the selected annotated term is unique in the list of annotations.
+         *  - Signal OSD to change the groupID and svgID of drawing
+         */
+        function onSearchPopupValueChange(columnModel, tuple) {
+            if (columnModel.column.name !== annotConstant.ANNOTATED_TERM_VISIBLE_COLUMN_NAME) {
                 return true;
             }
 
             var item = vm.editingAnatomy,
                 data = tuple.data,
-                idColName = viewerConstant.annotation.ANNOTATED_TERM_ID_COLUMN_NAME,
-                nameColName = viewerConstant.annotation.ANNOTATED_TERM_NAME_COLUMN_NAME;
+                idColName = annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME,
+                nameColName = annotConstant.ANNOTATED_TERM_NAME_COLUMN_NAME;
 
             // make sure the ID doesn't exist
             if(vm.annotationModels.find(function (row) { return row.id === data[idColName]})){
@@ -506,11 +505,77 @@
                 newAnatomy : data[nameColName] + " (" + data[idColName] + ")"
             });
 
+            // TODO should be part of a prototype (this is done twice)
+            var url = "/chaise/record/#" + context.catalogID;
+            url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME);
+            url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(data[idColName]);
+
             item["groupID"] = data[idColName] + "," + data[nameColName];
             item["name"] = data[nameColName];
             item["id"] = data[idColName];
-            item["url"] = "/chaise/record/#2/Vocabulary:Anatomy/ID=" + fixedEncodeURIComponent(data[idColName]);
+            item["url"] = url;
             return true;
+        }
+
+        /**
+         * disable the
+         * TODO might be able to refactor this, it's the same as the one in recordCreate
+         */
+        function getAnnotatedTermDisabledTuples (columnModel) {
+            if (columnModel.column.name !== annotConstant.ANNOTATED_TERM_VISIBLE_COLUMN_NAME) {
+                return null;
+            }
+
+            return function (tableModel, page, requestCauses, reloadStartTime) {
+                var defer = $q.defer();
+                var disabledRows = [], index, newStack = tableModel.logStack, pageSize = tableModel.pageLimit;
+
+                var action = logService.logActions.LOAD;
+                if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+                    action = logService.logActions.RELOAD;
+                    newStack = logService.addCausesToStack(tableModel.logStack, requestCauses, reloadStartTime);
+                }
+                var logObj = {
+                    action: logService.getActionString(action, tableModel.logStackPath),
+                    stack: newStack
+                }
+
+                var facet = {};
+
+                /*
+                 * The displayed table is the annotated table, and we want to disable
+                 * rows from this table that already have the combination of Image in database.
+                 * So we start from the anootated term, add a filter based on the image value
+                 * that is in the annotation table.
+                 */
+                 // TODO should be done in ermrestjs
+                 var existingRefURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":";
+                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME) + "/";
+
+                facet.choices = [context.imageID];
+                facet.source = [{"inbound": annotConstant.ANNOTATED_TERM_FOREIGN_KEY_CONSTRAINT}];
+                facet.source.push(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
+                existingRefURL += "*::facets::" + ERMrest.encodeFacet({and: [facet]});
+
+                ERMrest.resolve(existingRefURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+                    // TODO properly pass logObj
+                    return ref.setSamePaging(page).read(pageSize, logObj, false, true);
+                }).then(function (newPage) {
+                    newPage.tuples.forEach(function (newTuple) {
+                        index = page.tuples.findIndex(function (tuple) {
+                            return tuple.uniqueId == newTuple.uniqueId;
+                        });
+                        if (index > -1) disabledRows.push(page.tuples[index]);
+                    });
+
+                    defer.resolve({disabledRows: disabledRows, page: page});
+                }).catch(function (err) {
+                    defer.reject(err);
+                });
+
+                return defer.promise;
+            }
         }
 
         // Clear search term from the input
@@ -572,7 +637,7 @@
             // change current drawing annotation to selected one
             vm.editingAnatomy = item;
             vm.editingAnatomy.isDrawing = !vm.editingAnatomy.isDrawing;
-            vm.editingAnatomy.isRequiredError = false;
+            vm.displayDrawingRequiredError = false;
 
             AnnotationsService.drawAnnotation({
                 svgID : vm.editingAnatomy.svgID,
@@ -606,7 +671,7 @@
                 // TODO if the data is not in database, the form is create right? default values etc.
                 if (!item.tuple) {
                     var values = {};
-                    values[viewerConstant.annotation.ANNOTATED_TERM_COLUMN_NAME] = item.id;
+                    values[annotConstant.ANNOTATED_TERM_COLUMN_NAME] = item.id;
                     recordCreate.populateCreateModelValues(annotationEditForm, annotationEditForm.reference, null, values);
                 } else {
                     recordCreate.populateEditModelValues(annotationEditForm, annotationEditForm.reference, item.tuple, 0, false);
@@ -670,18 +735,7 @@
                 controllerAs: "ctrl",
                 size: "sm"
             }, function onSuccess(res) {
-                removeAnatomy(item);
-            }, null, false);
-        }
-
-        /**
-         * remove annotation record from the table
-         * @param {object} item : the anatomy's annotations object
-         */
-        function removeAnatomy(item){
-            return AnnotationsService.removeEntry(item)
-                .then(function(result){
-
+                AnnotationsService.removeEntry(item).then(function(result){
                     delItem = result.item;
 
                     //TODO is this correct?
@@ -708,7 +762,10 @@
                         // close the current panel
                         vm.closeAnnotationForm();
                     }
+                }).catch(function (err) {
+                    console.log("error while deleteing:", err);
                 });
+            }, null, false);
         }
 
         // Search based on the keyword
@@ -723,7 +780,7 @@
         function saveAnatomySVGFile(data){
             // if there are no overlay drawn
             if(data.content.length <= 0 || data.content[0].svg === "" || data.content[0].numOfAnnotations === 0){
-                vm.editingAnatomy.isRequiredError = true;
+                vm.displayDrawingRequiredError = true;
                 _displaySubmitError();
                 return;
             }
@@ -748,25 +805,25 @@
             );
 
             // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
-            fileName = imageRID + "_" + formModel.submissionRows[0][viewerConstant.annotation.ANNOTATED_TERM_COLUMN_NAME];
-            if (formModel.submissionRows[0][viewerConstant.annotation.Z_INDEX_COLUMN_NAME]) {
-                fileName += "_z" + formModel.submissionRows[0][viewerConstant.annotation.Z_INDEX_COLUMN_NAME];
+            fileName = imageRID + "_" + formModel.submissionRows[0][annotConstant.ANNOTATED_TERM_COLUMN_NAME];
+            if (formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME]) {
+                fileName += "_z" + formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME];
             }
             file = new File([data.content[0].svg], fileName + ".svg", {
                 type : "image/svg+xml"
             });
 
             // add the image value
-            formModel.submissionRows[0][viewerConstant.annotation.REFERENCE_IMAGE_COLUMN_NAME] = imageRID;
+            formModel.submissionRows[0][annotConstant.REFERENCE_IMAGE_COLUMN_NAME] = imageRID;
 
             // change the overlay file value
-            formModel.submissionRows[0][viewerConstant.annotation.OVERLAY_COLUMN_NAME] = {
+            formModel.submissionRows[0][annotConstant.OVERLAY_COLUMN_NAME] = {
                 uri : fileName,
                 file : file,
                 fileName : fileName,
                 fileSize : file.size,
                 hatracObj : new ERMrest.Upload(file, {
-                    column: formModel.reference.columns.find(function (column) {return column.name == viewerConstant.annotation.OVERLAY_COLUMN_NAME}),
+                    column: formModel.reference.columns.find(function (column) {return column.name == annotConstant.OVERLAY_COLUMN_NAME}),
                     reference: formModel.reference
                 })
             };
@@ -775,8 +832,6 @@
             // TODO the last element is logObject, should be changed later...
             recordCreate.addRecords(isUpdate, null, formModel, false, formModel.reference, [originalTuple], {}, vm, function (formModel, result) {
                 var afterMutation = function (tuple) {
-                    AlertsService.addAlert("Your data has been saved.", "success");
-
                     var savedItem = vm.editingAnatomy;
 
                     // update SVG ID (NEW_SVG) after successfully created
@@ -795,7 +850,6 @@
                     savedItem.isNew = false;
 
                     // update the annotationModels
-                    //  TODO we can use just isNew, no?? it's the same object passed, so we don't need to do this
                     var rowIndex = vm.editingAnatomyIndex;
                     if (rowIndex !== -1) { // it's part of the form
                         vm.annotationModels[rowIndex] = savedItem;
@@ -805,11 +859,15 @@
 
                     vm.updateDisplayNum();
                     vm.closeAnnotationForm();
+
+                    AlertsService.addAlert("Your data has been saved.", "success");
                 };
 
                 var resultTuple = (result.successful.length > 0) ? result.successful.tuples[0] : null;
 
-                // TODO this shouldn't happen
+                // NOTE this cannot happen since we're asking for row change,
+                // so if it fails, the promise will be rejected and not resolved.
+                // But I added this for consistency.
                 if (!resultTuple) {
                     AlertsService.addAlert("Something went wrong. Please try again.", "error");
                     return;

@@ -64,24 +64,8 @@
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
 
-        // should we allow for improper URLs here?
-        // what if there are 2 filters and the id filter is the second one.
-        // Is that improper or should it be parsed and ignore the other filter?
-        var filter = context.filter.filters[0];
-        if (filter.type === "BinaryPredicate" &&
-            filter.operator === "=" &&
-            filter.column.toLowerCase() === "id") {
-            context.imageID = filter.value;
-        }
-
+        // TODO this should be removed, viewer shouldn't parse the url
         console.log('Context', context);
-        // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
-    }])
-
-    // set the chasie-config property
-    .config(['headInjectorProvider', function (headInjectorProvider) {
-
-        headInjectorProvider.$get().setupHead();
     }])
 
     // Configure all tooltips to be attached to the body by default. To attach a
@@ -157,6 +141,8 @@
         var session;
         var imageURI, svgURIs = [];
         var config = ConfigUtils.getContextJSON();
+        var annotConstant = viewerConstant.annotation;
+        var imageConstant = viewerConstant.image;
 
         context.server = config.server;
         context.wid = config.contextHeaderParams.wid;
@@ -179,7 +165,6 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + viewerConstant.annotation.ANNOTATION_TABLE_NAME;
         var session, annotationEditReference;
 
         // Subscribe to on change event for session
@@ -214,7 +199,6 @@
                     )
                 ];
 
-                // TODO what should be the context
                 return imageReference.contextualize.detailed.read(1, logObj, true, true);
             })
             // read the main (image) reference
@@ -224,11 +208,18 @@
                     image.entity = imagePage.tuples[0].data;
                 }
 
+                context.imageID = image.entity.RID;
+
                 if (image.entity) {
-                    imageURI = image.entity.uri;
+                    imageURI = image.entity[imageConstant.URI_COLUMN];
                 }
 
-                imageAnnotationURL += "/Image=" + context.imageID;
+                // TODO should be done in ermrestjs
+                var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+                imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":";
+                imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_NAME) + "/";
+                imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
+                imageAnnotationURL += "=" + UriUtils.fixedEncodeURIComponent(context.imageID);
                 return ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid });
             })
             // create the annotation reference
@@ -243,18 +234,15 @@
                 annotationEditReference.session = session;
                 $rootScope.session = session;
 
-                // TODO used for create and edit, used to be populated here...
-                // context.logObject = logObj;
-
                 // create the edit and create forms
                 if ($rootScope.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
                     annotationCreateForm.reference.columns.forEach(function (column) {
                         // remove the asset column from the form
-                        if (column.name === viewerConstant.annotation.OVERLAY_COLUMN_NAME) return;
+                        if (column.name === annotConstant.OVERLAY_COLUMN_NAME) return;
 
                         // remove the image from the form
-                        if (column.name === viewerConstant.annotation.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
+                        if (column.name === annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
 
                         annotationCreateForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
@@ -264,10 +252,10 @@
                     annotationEditForm.reference = annotationEditReference;
                     annotationEditForm.reference.columns.forEach(function (column) {
                         // remove the asset column from the form
-                        if (column.name === viewerConstant.annotation.OVERLAY_COLUMN_NAME) return;
+                        if (column.name === annotConstant.OVERLAY_COLUMN_NAME) return;
 
                         // remove the image from the form
-                        if (column.name === viewerConstant.annotation.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
+                        if (column.name === annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
 
                         annotationEditForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
@@ -280,7 +268,7 @@
                 };
 
                 // TODO how many should we read?
-                // using edit, because the tuples is used in edit context
+                // using edit, because the tuples are used in edit context (for populating edit form)
                 return annotationEditReference.read(201, logObj);
             })
             // read the annotation reference
@@ -288,13 +276,12 @@
                 // TODO not used
                 $rootScope.showColumnSpinner = [{}];
 
-                // TODO should be refactored
                 $rootScope.annotationTuples = page.tuples;
 
                 for(var j = 0; j < page.tuples.length; j++){
                     var row = page.tuples[j].data;
-                    if(row && row[viewerConstant.annotation.OVERLAY_COLUMN_NAME]){
-                        svgURIs.push(row[viewerConstant.annotation.OVERLAY_COLUMN_NAME]);
+                    if(row && row[annotConstant.OVERLAY_COLUMN_NAME]){
+                        svgURIs.push(row[annotConstant.OVERLAY_COLUMN_NAME]);
                     }
                 }
 
@@ -320,6 +307,11 @@
                 for (var i = 0; i < svgURIs.length; i++){
                     osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
                     osdViewerQueryParams += "url=" + UriUtils.getAbsoluteURL(svgURIs[i], origin);
+                }
+
+                // TODO throw error
+                if (osdViewerQueryParams.length === 0) {
+                    console.log("there wasn't any appropriate parameters for osd.")
                 }
 
                 // TODO what if there are no osdViewerQueryParams

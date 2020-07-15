@@ -315,7 +315,8 @@
                 parentModel: "=?",
                 parentReference: "=?",
                 parentTuples: "=?",
-                onForeignKeyValueChange: "&?"
+                onSearchPopupValueChange: "&?", // callback that will fire when the search popup value changes
+                searchPopupGetDisabledTuples: "&?" // callback that will be used to generate the list of disabled tuples in search popup
             },
             controllerAs: 'vm',
             controller: function () {},
@@ -449,6 +450,11 @@
                     params.showFaceting = true;
                     params.facetPanelOpen = false;
 
+                    if (vm.searchPopupGetDisabledTuples) {
+                        console.log("has getDisabledTuples");
+                        params.getDisabledTuples = vm.searchPopupGetDisabledTuples()(vm.columnModel);
+                    }
+
                     // log attributes
                     params.logStack = vm.columnModel.logStack;
                     params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
@@ -495,8 +501,8 @@
                         vm.model = tuple.displayname.value;
                         vm.fkValue = tuple.displayname.value;
 
-                        if (typeof vm.onForeignKeyValueChange === 'function') {
-                            var res = vm.onForeignKeyValueChange()(vm.columnModel, tuple);
+                        if (typeof vm.onSearchPopupValueChange === 'function') {
+                            var res = vm.onSearchPopupValueChange()(vm.columnModel, tuple);
                             if (res.error) {
                                 vm.inputContainer.$error.customError = res.message;
                                 vm.customErrorMessage = res.message;

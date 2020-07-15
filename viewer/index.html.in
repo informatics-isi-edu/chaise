@@ -32,7 +32,7 @@
                     </div>
                     <div class="top-right-panel">
                         <div class="title-container">
-                            <h1 id="page-title" ng-if="osd.showTitle">{{osd.image.entity.slide_id || osd.image.entity.RID || 'Image'}}</h1>
+                            <h1 id="page-title" ng-if="osd.showTitle">{{osd.image.entity.RID || 'Image'}}</h1>
                         </div>
                         <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" role="group">
                             <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" uib-tooltip="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
@@ -71,7 +71,7 @@
                                 <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowValue" ng-show="!anno.editingAnatomy.isNew && !anno.editingAnatomy.isStoredInDB">
-                                            <div class="drawingHint">This annotation is not stored in the database.</div>
+                                            <div class="drawingHint alert-danger">This annotation is not stored in the database.</div>
                                         </div>
                                         <div class="annotationRowValue" ng-show="anno.editingAnatomy.isNew">
                                             <div class="drawingHint">Drawing is required for new annotations</div>
@@ -83,14 +83,14 @@
                                         <div class="annotationRowValue">
                                             <div class='annotationToolRow'>
                                                 <div class='annotationRowValue'>
-                                                    <div class="chaise-btn chaise-btn-secondary draw-btn" ng-click="anno.drawAnnotation(anno.editingAnatomy, $event)" tooltip-placement="right" ng-attr-uib-tooltip="{{anno.editingAnatomy.isDrawing ? 'Turn off the drawing tool' : 'Turn on the drawing tool'}}">
+                                                    <div class="chaise-btn chaise-btn-primary draw-btn" ng-click="anno.drawAnnotation(anno.editingAnatomy, $event)" tooltip-placement="right" ng-attr-uib-tooltip="{{anno.editingAnatomy.isDrawing ? 'Turn off the drawing tool' : 'Turn on the drawing tool'}}">
                                                         <span class="chaise-btn-icon">
                                                             <span class="fas fa-pencil-ruler"></span>
                                                         </span>
                                                         <span ng-if="!anno.editingAnatomy.isDrawing">Start drawing</span>
                                                         <span ng-if="anno.editingAnatomy.isDrawing">Finish drawing</span>
                                                     </div>
-                                                    <div class="text-danger" ng-if="anno.editingAnatomy.isRequiredError">
+                                                    <div class="text-danger" ng-if="anno.displayDrawingRequiredError">
                                                         <div>Please draw annotation on the image.</div>
                                                     </div>
                                                     <!-- <div class="switch-btn" ng-click="anno.drawAnnotation(anno.editingAnatomy, $event)" data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{anno.editingAnatomy.isDrawing ? 'Turn off the drawing tool' : 'Turn on the drawing tool'}}">
@@ -112,11 +112,10 @@
                                             </span>
                                         </div>
                                         <div class="annotationRowValue">
-                                            <!-- TODO what about tuples? In edit mode -->
                                             <input-switch column="columnModel.column" column-model="columnModel" parent-reference="anno.annotationEditForm.reference" parent-tuples="anno.editingAnatomy.tuple"
                                                           parent-model="anno.annotationEditForm" model="anno.annotationEditForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="edit" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
-                                                          on-foreign-key-value-change="anno.onForeignKeyValueChange"
+                                                          on-search-popup-value-change="anno.onSearchPopupValueChange" search-popup-get-disabled-tuples="anno.getAnnotatedTermDisabledTuples"
                                                           is-required="columnModel.isRequired"></input-switch>
                                         </div>
                                     </div>
@@ -131,11 +130,10 @@
                                             </span>
                                         </div>
                                         <div class="annotationRowValue">
-                                            <!-- TODO what about tuples? In edit mode -->
                                             <input-switch column="columnModel.column" column-model="columnModel" parent-reference="anno.annotationCreateForm.reference"
                                                           parent-model="anno.annotationCreateForm" model="anno.annotationCreateForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="create" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
-                                                          on-foreign-key-value-change="anno.onForeignKeyValueChange"
+                                                          on-search-popup-value-change="anno.onSearchPopupValueChange" search-popup-get-disabled-tuples="anno.getAnnotatedTermDisabledTuples"
                                                           is-required="columnModel.isRequired"></input-switch>
                                         </div>
                                     </div>

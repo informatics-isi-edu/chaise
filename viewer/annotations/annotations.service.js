@@ -52,55 +52,17 @@
             iframe.postMessage({messageType: 'cancelAnnotationCreation'}, origin);
         }
 
-        /**
-         * checkEntryExist - checks whether the table has created an entry with the combination of keys
-         * @param {string} imageID
-         * @param {string} anatomyID
-         * @return {boolean} whether table has the entry
-         */
-        function checkEntryExist(imageID, anatomyID){
-            var defer = $q.defer();
-            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(imageID) + "&Anatomy="+ encodeURIComponent(anatomyID);
-
-            ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){
-                 //TODO needs proper logging parameter
-                return ref.contextualize.detailed.read(1, context.logObject, true, true);
-            })
-            .then(function(page){
-                defer.resolve(page);
-            })
-            .catch(function(err){
-                defer.reject(err);
-            });
-
-            return defer.promise;
-        }
-
         function removeEntry(item){
             var defer = $q.defer();
-            var anatomy = item.tuple.data[viewerConstant.annotation.ANNOTATED_TERM_COLUMN_NAME];
 
-            var uri = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + context.schemaName + ":Image_Annotation/Image=" + encodeURIComponent(context.imageID) + "&Anatomy="+ encodeURIComponent(anatomy);
-            var reference;
+            if (!item.tuple || !item.tuple.reference) {
+                return defer.reject("given item didn't have proper tuple"), defer.promise;
+            }
 
-            ERMrest.resolve(uri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function(ref){
-                 //TODO needs proper logging parameter
-                reference = ref;
-                return reference.contextualize.detailed.read(1, context.logObject, true, true);
-            })
-            .then(function(page){
-                reference.delete(context.logObject).then(function deleteSuccess(){
-                    console.log("delete success");
-                    defer.resolve({
-                        item : item,
-                        status : "success"
-                    })
-                }, function deleteFail(){
-                    console.log("delete failed");
-                });
-                // defer.resolve(page);
-            })
-            .catch(function(err){
+            // TODO proper log object
+            item.tuple.reference.delete().then(function () {
+                defer.resolve();
+            }).catch(function (err) {
                 defer.reject(err);
             });
 
@@ -202,7 +164,6 @@
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
             cancelNewAnnotation: cancelNewAnnotation,
-            checkEntryExist : checkEntryExist,
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
             centerAnnotation: centerAnnotation,
