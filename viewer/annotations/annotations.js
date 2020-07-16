@@ -7,6 +7,7 @@
     .value('annotations', [])
 
     /**
+     * TODO should be a prototype
      * each annotation has the following:
      *  - svgID
      *  - groupID

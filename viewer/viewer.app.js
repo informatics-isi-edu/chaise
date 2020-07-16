@@ -29,7 +29,6 @@
         'chaise.filters',
         'chaise.inputs',
         'chaise.delete',
-        'chaise.markdown',
         'chaise.modal',
         'chaise.navbar',
         'chaise.upload',
@@ -234,15 +233,19 @@
                 annotationEditReference.session = session;
                 $rootScope.session = session;
 
+                // TODO create and edit should be refactored to reuse the same code
                 // create the edit and create forms
+                var invisibleColumns = [
+                    annotConstant.OVERLAY_COLUMN_NAME,
+                    annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME,
+                    annotConstant.Z_INDEX_COLUMN_NAME,
+                    annotConstant.CHANNELS_COLUMN_NAME
+                ];
                 if ($rootScope.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
                     annotationCreateForm.reference.columns.forEach(function (column) {
-                        // remove the asset column from the form
-                        if (column.name === annotConstant.OVERLAY_COLUMN_NAME) return;
-
-                        // remove the image from the form
-                        if (column.name === annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
+                        // remove the invisible (asset, image, z-index, channels) columns
+                        if (invisibleColumns.indexOf(column.name) !== -1) return;
 
                         annotationCreateForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });
@@ -251,11 +254,8 @@
                 if ($rootScope.canUpdate) {
                     annotationEditForm.reference = annotationEditReference;
                     annotationEditForm.reference.columns.forEach(function (column) {
-                        // remove the asset column from the form
-                        if (column.name === annotConstant.OVERLAY_COLUMN_NAME) return;
-
-                        // remove the image from the form
-                        if (column.name === annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME) return;
+                        // remove the invisible (asset, image, z-index, channels) columns
+                        if (invisibleColumns.indexOf(column.name) !== -1) return;
 
                         annotationEditForm.columnModels.push(recordCreate.columnToColumnModel(column));
                     });

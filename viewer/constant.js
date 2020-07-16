@@ -18,8 +18,10 @@
             REFERENCE_IMAGE_COLUMN_NAME: "Image",
             // the asset column that has the annotation
             OVERLAY_COLUMN_NAME: "File_URL",
-            // used for filename
+
+            // used internally and should be removed from the form
             Z_INDEX_COLUMN_NAME: "Z_Index",
+            CHANNELS_COLUMN_NAME: "Channels",
 
             // anatomy fk in annotation table
             ANNOTATED_TERM_COLUMN_NAME: "Anatomy",

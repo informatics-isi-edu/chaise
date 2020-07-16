@@ -725,7 +725,6 @@
         function removeAnnotationEntry(item){
             var i = 0,
                 row = null,
-                delItem = null;
                 isFound = false;
 
             modalUtils.showModal({
@@ -735,13 +734,12 @@
                 controllerAs: "ctrl",
                 size: "sm"
             }, function onSuccess(res) {
-                AnnotationsService.removeEntry(item).then(function(result){
-                    delItem = result.item;
+                AnnotationsService.removeEntry(item).then(function(){
 
-                    //TODO is this correct?
+                    // OPTIMIZE: do we need to go over the list?
                     for(i = 0; i < vm.annotationModels.length; i++){
                         row = vm.annotationModels[i];
-                        if(row.id === delItem.id){
+                        if(row.id === item.id){
                             isFound = true;
                             break;
                         }
@@ -755,8 +753,8 @@
                         vm.updateDisplayNum();
 
                         // remove svg object from openseadragon
-                        if(delItem.svgID){
-                            AnnotationsService.removeSVG({svgID : delItem.svgID});
+                        if(item.svgID){
+                            AnnotationsService.removeSVG({svgID : item.svgID});
                         }
 
                         // close the current panel
