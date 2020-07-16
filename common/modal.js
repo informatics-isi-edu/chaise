@@ -521,4 +521,21 @@
         }, 5000);
     }])
 
+    .controller('MarkdownPreviewController', ['$scope', '$uibModalInstance', 'params', 'ERMrest', function MarkdownPreviewController($scope, $uibModalInstance, params) {
+        var vm = this;
+
+        var val = ERMrest.renderMarkdown(params.rawMarkdown);
+        if (typeof val !== "string") {
+            val = "";
+        }
+        vm.renderedMarkdown = val;
+
+        function ok() {
+            $uibModalInstance.close();
+        }
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
 })();

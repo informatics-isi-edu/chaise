@@ -18,7 +18,6 @@
 
 /* Recordedit App */
     angular.module('chaise.recordEdit', [
-        '720kb.datepicker',
         'duScroll',
         'chaise.alerts',
         'chaise.authen',
@@ -31,7 +30,6 @@
         'chaise.navbar',
         'chaise.upload',
         'chaise.record.table',
-        'chaise.markdown',
         'chaise.resizable',
         'chaise.utils',
         'chaise.validators',
