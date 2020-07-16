@@ -21,6 +21,11 @@
         margin: 5px 5px 5px 0;
     }
 
+    // override the browser's default border
+    iframe {
+        border: 2px solid #ccc;
+    }
+
     .vocab {
         color: darkblue;
         background-color: rgba(220, 220, 220, 0.68);

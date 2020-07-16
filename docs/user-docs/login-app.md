@@ -45,17 +45,30 @@ The position of where you're adding these include statements is very important. 
 
 You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
 
-If you're using Jekyll, you can:
+If you're using [Jekyll](https://jekyllrb.com), the following are the steps on how you can achieve this:
 
-- After `make install` is done Chaise, copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
+1. Make sure `make install` is done in Chaise.
+    - This will create the `dist` folder in your specified build target (by default it's `/var/www/html/chaise`).
+    - It will also generate the `dist/chaise-dependencies.html`.
 
-- Include the file using `%include` statement:
+
+2. Copy the `dist/chaise-dependencies.html` file into your `_includes` folder.
+    - As it was mentioned, this MUST be part of your automated build process that is responsible for building Chaise, and should not be done manually.
+    - `_includes` folder [is specific to Jekyll](https://jekyllrb.com/docs/includes/). You should be able to find it in the root location of your Jekyll website repository.
+
+
+3. Include the file using `%include` statement:
     ```html
     <head>
         {% include chaise-dependencies.html %}
         <script src="/chaise/lib/login/login.app.js"></script>
     </head>
     ```
+
+
+4. Build your Jekyll site as you normally would (using `jekyll build` or `jekyll serve` commands.)
+    - As you most probably might know, this MUST be part of your automated build process, and should not be done manually. You just have to make sure that copying of `chaise-dependencies.html` is done prior to rebuilding the Jekyll site.
+
 
 #### 2.2. Prefetch custom styles (optional)
 

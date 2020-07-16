@@ -24,7 +24,8 @@
                             scope.user = null;
                         } else {
                             var user = $rootScope.session.client;
-                            scope.user = dcctx.user = user.display_name || user.full_name || user.email || user.id || user;
+                            scope.user = dcctx.user = user.full_name || user.display_name || user.email || user.id || user;
+                            if (user.full_name) scope.userTooltip = user.full_name + "\n" + user.display_name;
                         }
 
                     });
