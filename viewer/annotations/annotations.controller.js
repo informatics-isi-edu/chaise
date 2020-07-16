@@ -8,6 +8,8 @@
 
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var annotConstant = viewerConstant.annotation;
+        var idColName = annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME,
+            nameColName = annotConstant.ANNOTATED_TERM_NAME_COLUMN_NAME
         var vm = this;
 
         vm.annotationCreateForm = annotationCreateForm;
@@ -488,13 +490,15 @@
             }
 
             var item = vm.editingAnatomy,
-                data = tuple.data,
-                idColName = annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME,
-                nameColName = annotConstant.ANNOTATED_TERM_NAME_COLUMN_NAME;
+                data = tuple.data;
 
-            // make sure the ID doesn't exist
-            if(vm.annotationModels.find(function (row) { return row.id === data[idColName]})){
-                return {error: true, message: "An annotation already exists for this Anatomy, please select other terms."};
+            // allow itself to be selected
+            if (data[idColName] !== item.id) {
+                // manually make sure the ID doesn't exist in the list,
+                // because some of the annotations might not be stored in the database
+                if(vm.annotationModels.find(function (row) { return row.id === data[idColName]})){
+                    return {error: true, message: "An annotation already exists for this Anatomy, please select other terms."};
+                }
             }
 
             // Update the new Anatomy name and ID at openseadragon viewer
@@ -563,6 +567,10 @@
                     return ref.setSamePaging(page).read(pageSize, logObj, false, true);
                 }).then(function (newPage) {
                     newPage.tuples.forEach(function (newTuple) {
+                        // currently selected value should not be disabled
+                        if (vm.editingAnatomy.id === newTuple.data[idColName]) {
+                            return;
+                        }
                         index = page.tuples.findIndex(function (tuple) {
                             return tuple.uniqueId == newTuple.uniqueId;
                         });
