@@ -87,8 +87,16 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
 
 ### Examples:
 
+- Added a class to with deal column spacing in Firefox browser on Mac
+```css
+.addMacFirefoxClass{
+  .entity-value {
+      width: 80%;
+      padding-left: 15%;
+  }
+}
+```
 - Hide everything except the result table in recordset:
-
 ```css
 .rs_s_schema.rs_t_table .top-left-panel,
 .rs_s_schema.rs_t_table .side-panel-resizable,
