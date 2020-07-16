@@ -53,11 +53,14 @@
     <!-- modal popup input -->
     <div ng-switch-when="popup-select" class="chaise-input-group modal-popup">
         <div class="chaise-input-control has-feedback">
-            <div contenteditable="false" class="popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::vm.searchPopup()" ng-bind-html="(vm.fkValue ? vm.fkValue : vm.getDisabledInputValue())"></div>
+            <div contenteditable="false" class="popup-select-value" ng-style="{'cursor': 'pointer'}" ng-click="::vm.searchPopup()" ng-bind-html="(vm.fkValue ? vm.fkValue : (vm.model ? vm.model : vm.getDisabledInputValue()))"></div>
             <chaise-clear-input btn-class="foreignkey-remove" click-callback="::vm.clearForeignKey()" show="vm.showRemove()"></chaise-clear-input>
         </div>
         <!-- So that the foreign key input can be validated -->
-        <input type="hidden" ng-model="vm.fkValue" ng-required="vm.isRequired" />
+        <input type="hidden" ng-if="vm.hasParentModel" ng-model="vm.model" ng-required="vm.isRequired" />
+        <!-- in some cases (select-all), we don't want to change the model value and instead we're just using a placeholder to show the value -->
+        <!-- after the submission of this value is done (apply select-all), it will properly fix the values in the model (rows, submissionRows, etc) -->
+        <input type="hidden" ng-if="!vm.hasParentModel" ng-model="vm.fkValue" ng-required="vm.isRequired" />
         <label class="sr-only"></label>
         <span class="chaise-input-group-append">
             <button ng-focus="::vm.blurElement($event);" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="vm.searchPopup()" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">

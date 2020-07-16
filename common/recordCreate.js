@@ -545,16 +545,13 @@
             };
             fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
-                    $rootScope.showColumnSpinner[rowIndex][colName] = true;
-                    if ($rootScope.showColumnSpinner[rowIndex][colName]) {
-                        // default value is validated
-                        if (page.tuples.length > 0) {
-                            model.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
-                            model.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
-                        } else {
-                            model.foreignKeyData[rowIndex][colName] = null;
-                            model.rows[rowIndex][colName] = null;
-                        }
+                    // default value is validated
+                    if (page.tuples.length > 0) {
+                        model.foreignKeyData[rowIndex][colName] = page.tuples[rowIndex].data;
+                        model.rows[rowIndex][colName] = page.tuples[rowIndex].displayname.value;
+                    } else {
+                        model.foreignKeyData[rowIndex][colName] = null;
+                        model.rows[rowIndex][colName] = null;
                     }
 
                     $rootScope.showColumnSpinner[rowIndex][colName] = false;

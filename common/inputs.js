@@ -340,15 +340,12 @@
                     vm.formContainer = vm.inputContainer;
                 }
 
-                var hasParentModel = false;
+                // TODO in select-all implementation, we're doing things differently,
+                // we're doing a post process after the apply-all is selected, this boolean flag
+                // will signal whether we're doings things in place or is this part of a bigger form.
+                vm.hasParentModel = false;
                 if (typeof vm.parentModel === "object" && typeof vm.parentReference === "object") {
-                    hasParentModel = true;
-
-                    // in recordedit select-all, we cannot change the rows
-                    // directly, so we're creating this for display purposes here only
-                    if (vm.columnModel.inputType === "popup-select") {
-                        vm.fkValue = vm.model;
-                    }
+                    vm.hasParentModel = true;
                 }
 
                 vm.customErrorMessage = null;
@@ -417,7 +414,7 @@
                     // TODO: domain-filter pattern support does not work for set all input
                     // TODO: we need to pass the parent models in recordedit as well
                     var  submissionRow = {}, rowForeignKeyData = {};
-                    if (hasParentModel) {
+                    if (vm.hasParentModel) {
                         rowForeignKeyData = vm.parentModel.foreignKeyData[vm.rowIndex];
                         submissionRow = recordCreate.populateSubmissionRow(
                             vm.parentModel.rows[vm.rowIndex],
@@ -474,7 +471,7 @@
 
 
                         // in select-all we're not changing the parent model directly here
-                        if (!hasParentModel) {
+                        if (!vm.hasParentModel) {
                             vm.fkValue = tuple.displayname.value;
                             vm.model = tuple;
                             return;
@@ -499,8 +496,6 @@
 
                         vm.parentModel.rows[vm.rowIndex][vm.column.name] = tuple.displayname.value;
                         vm.model = tuple.displayname.value;
-                        vm.fkValue = tuple.displayname.value;
-
                         if (typeof vm.onSearchPopupValueChange === 'function') {
                             var res = vm.onSearchPopupValueChange()(vm.columnModel, tuple);
                             if (res.error) {
