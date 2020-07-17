@@ -51,12 +51,12 @@ How each browser renders printing styles is different from the other. Mac and Wi
   - If yes, then we must override those rules with `!important` to get the desired effect.
 
   - A new class has been defined to apply custom styling to the case of Firefox browser in combination with MacOs which can be found here
-    :(https://github.com/DamCousik/chaise/blob/origin/isi-isrd-local-dev/docs/user-docs/custom-css.md)
+    : (https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/custom-css.md)
 
   - Use the print mode in the rendering tab to see how the document looks when printed in Chrome browser. On Firefox, this can be achieved
     by clicking on a small page icon in the "Inspect Element mode".
 
-  - The print preview that is seen when doing a `Ctrl-P` on Windows or a `™£¡•-P` on Mac doesn't necessarily give you the right picture of
+  - The print preview that is seen when doing a `Ctrl-P` on Windows or a `Cmd-P` on Mac doesn't necessarily give you the right picture of
     the document to be printed. To view what will be printed, either save to PDF file or chose to switch to the 'Print mode' as described above.
 
 ### SCSS structure
