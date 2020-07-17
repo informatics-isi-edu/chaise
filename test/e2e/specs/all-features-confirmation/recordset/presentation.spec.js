@@ -103,12 +103,12 @@ var testParams = {
                 luxurious: "true",
                 json_col: "9876.3543",
                 json_col_with_markdown: "Status is: “Processing”",
-                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt:",
+                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt: 0",
                 no_of_baths: "baths: 1, id: 4004",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
-                count_image_id: "",
-                count_distinct_image_id: "",
+                count_image_id: "0",
+                count_distinct_image_id: "0",
                 min_image_id: "",
                 max_image_id: ""
             }
@@ -226,8 +226,8 @@ var testParams = {
             [
                 "main two", "", "1,234,502",
                 "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "0",
+                "", "0", "", "", "", "", "",
                 ""
             ]
         ]
