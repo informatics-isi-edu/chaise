@@ -34,6 +34,30 @@ To make sure you're familiar with both CSS and SASS. The following are some guid
   - [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS): a very thorough CSS reference that you can use to learn more about different CSS features.
   - [caniuse.com](https://caniuse.com/): can be used to quickly figure out if a feature can be used based on our browser support or not.
   - [Sass basics](https://sass-lang.com/guide): a very good starting point for learning Sass basics (we're using SCSS syntax.)
+  - [Guide to Chrome DevTools](https://www.keycdn.com/blog/chrome-devtools): Very useful for CSS debugging.
+  - [Glyph-icons](https://css-tricks.com/snippets/html/glyphs/) : An amazing comprehensive guide to include any glyphs in your css code
+  - [CSS Printing Guide - 1](https://www.smashingmagazine.com/2018/05/print-stylesheets-in-2018/) : A-Z about CSS print rules
+  - [CSS Printing Guide - 2](https://www.smashingmagazine.com/2015/01/designing-for-print-with-css/) : Essentials for CSS Print rules
+    (part - 2)
+  - [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority but they
+    too can be overwritten when the element is accessed as shown in the document.
+
+### Useful CSS rules
+How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc). Hence we need to keep in mind the following while writing print rules in css.
+
+  - If table borders or other line elements are not visible in the print preview or the PDF, check if there exists any overriding
+    bootstrap rules. These bootstrap rules could be a `background-color`, `background-border`, etc. and they always take precedence over the custom css rules that are defined in the @media-print section of the css file.
+
+  - If yes, then we must override those rules with `!important` to get the desired effect.
+
+  - A new class has been defined to apply custom styling to the case of Firefox browser in combination with MacOs which can be found here
+    : (https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/custom-css.md)
+
+  - Use the print mode in the rendering tab to see how the document looks when printed in Chrome browser. On Firefox, this can be achieved
+    by clicking on a small page icon in the "Inspect Element mode".
+
+  - The print preview that is seen when doing a `Ctrl-P` on Windows or a `Cmd-P` on Mac doesn't necessarily give you the right picture of
+    the document to be printed. To view what will be printed, either save to PDF file or chose to switch to the 'Print mode' as described above.
 
 ### SCSS structure
 
