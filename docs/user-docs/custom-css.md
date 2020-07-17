@@ -14,8 +14,12 @@ Custom style classes with modified styling attributes can be added in `chaise.cs
 ## Changing chaise styles
 With the current HTML structure, it is possible to apply different styles to different parts of chaise and to further style the chaise tables based on model information :
 
- - `.addMacFirefoxClass`
-   - Added a class to deal with table column spacing in Firefox browser on Mac
+ - `.chaise-mac`
+   - Added a class to deal with table column spacing on Mac OS. This class can be used to apply any custom styling specific to the Mac OS
+     irrespective of the browser type.
+ - `.chaise-firefox`
+   - Added a class to deal with table column spacing in Firefox browser. This class can be used to apply any custom styling specific to
+     the Firefox browser irrespective of the operating system.
  - `navbar`
    - identifies the navbar that is displayed on top of every app.
  - `recordset` identifier (`#recordset`)
