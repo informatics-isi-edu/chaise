@@ -64,6 +64,7 @@
         vm.onSearchPopupValueChange = onSearchPopupValueChange; // if anatomy changed, we should do some updates
         vm.getAnnotatedTermDisabledTuples = getAnnotatedTermDisabledTuples; // disable the existing anatomy, in the popup
         vm.displayDrawingRequiredError = false;
+        vm.annotationFormPendingResult = false;
 
         vm.addNewTerm = addNewTerm;
         vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
@@ -439,7 +440,7 @@
                 anatomy : "",
                 description : ""
             });
-
+            
             AlertsService.deleteAllAlerts();
 
         }
@@ -742,8 +743,10 @@
                 controllerAs: "ctrl",
                 size: "sm"
             }, function onSuccess(res) {
+                vm.annotationFormPendingResult = true;
                 AnnotationsService.removeEntry(item).then(function(){
-
+                    vm.annotationFormPendingResult = false;
+ 
                     // OPTIMIZE: do we need to go over the list?
                     for(i = 0; i < vm.annotationModels.length; i++){
                         row = vm.annotationModels[i];
@@ -785,11 +788,17 @@
          */
         function saveAnatomySVGFile(data){
             // if there are no overlay drawn
-            if(data.content.length <= 0 || data.content[0].svg === "" || data.content[0].numOfAnnotations === 0){
+            var noAnnot;
+            if (data.content.length <= 0 || data.content[0].svg === "" || data.content[0].numOfAnnotations === 0) {
+                noAnnot = true;
                 vm.displayDrawingRequiredError = true;
+            }
+            
+            if(noAnnot || vm.annoForm.$invalid){
                 _displaySubmitError();
                 return;
             }
+            vm.annotationFormPendingResult = true;
 
             var formModel = vm.editingAnatomy.isNew ? annotationCreateForm : annotationEditForm,
                 isUpdate = !vm.editingAnatomy.isNew && vm.editingAnatomy.isStoredInDB,
@@ -838,6 +847,7 @@
             // TODO the last element is logObject, should be changed later...
             recordCreate.addRecords(isUpdate, null, formModel, false, formModel.reference, [originalTuple], {}, vm, function (formModel, result) {
                 var afterMutation = function (tuple) {
+                    vm.annotationFormPendingResult = false;
                     var savedItem = vm.editingAnatomy;
 
                     // update SVG ID (NEW_SVG) after successfully created
@@ -900,10 +910,10 @@
          */
         function saveAnnotationRecord(item){
             AlertsService.deleteAllAlerts();
-            if (vm.annoForm.$invalid) {
-                _displaySubmitError();
-                return;
-            }
+            // if (vm.annoForm.$invalid) {
+            //     _displaySubmitError();
+            //     return;
+            // }
 
             AnnotationsService.saveAnnotationRecord({
                 svgID : item.svgID,

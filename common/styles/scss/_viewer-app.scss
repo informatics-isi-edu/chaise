@@ -264,6 +264,27 @@
                 border: 1px solid #d9d9d9;
                 border-radius: 3px;
                 background: #f8f8f8;
+                position: relative;
+                
+                .form-spinner-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 100%;
+                    width: 100%;
+                    background-color: $disabled-background-color;
+                    opacity: 0.8;
+                    z-index: 6; // higher than the clear button
+                }
+                
+                .form-spinner {
+                    // make sure the text is visible in one line
+                    #spinner {
+                        width: 160px;
+                        height: 105px;
+                        top: 50%;
+                    }
+                }
 
                 &.open{
                     opacity : 1;

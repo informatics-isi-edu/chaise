@@ -128,6 +128,9 @@
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         $rootScope.displayReady = false;
+        
+        // only show the panel if there are annotation images in the url
+        $rootScope.hideAnnotationSidebar = true;
 
         var arrows = [];
         var rectangles = [];
@@ -183,6 +186,9 @@
 
                 session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+                    
+                // TODO is it needed?
+                $rootScope.session = session;
 
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
@@ -202,16 +208,17 @@
             })
             // read the main (image) reference
             .then(function (imagePage) {
-                // TODO what if the record doesn't exist (or there are multiple)
-                if (imagePage.length > 0) {
-                    image.entity = imagePage.tuples[0].data;
+                
+                // TODO throw error
+                // what if the record doesn't exist (or there are multiple)
+                if (imagePage.length != 1) {
+                    console.log("Image request didn't return a row.");
+                    return false;
                 }
-
+                
+                image.entity = imagePage.tuples[0].data;
                 context.imageID = image.entity.RID;
-
-                if (image.entity) {
-                    imageURI = image.entity[imageConstant.URI_COLUMN];
-                }
+                imageURI = image.entity[imageConstant.URI_COLUMN];
 
                 // TODO should be done in ermrestjs
                 var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
@@ -223,7 +230,31 @@
             })
             // create the annotation reference
             .then(function (ref) {
-
+                
+                // if there are any svg files in the query params, ignore the annotation table.
+                // we cannot use the queryParams object that is returned since it only give us the last url
+                // (it's a key-value so it's not supporting duplicated key values)
+                // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
+                var queryParamsURLs = queryParamsString.split('&'), hasSVGQueryParam = false;
+                for (var i = 0; i < queryParamsURLs.length && ("url" in queryParams); i++) {
+                    if ( queryParamsURLs[i].split("=")[0] !== "url") continue;
+                    
+                    var queryVal = queryParamsURLs[i].split("=")[1];
+                    if (queryVal.indexOf(".svg") != -1 || queryVal.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
+                        $rootScope.hideAnnotationSidebar = false;
+                        hasSVGQueryParam = true;
+                        break;
+                    }
+                }
+                
+                if (!ref || hasSVGQueryParam) {
+                    $rootScope.canCreate = false;
+                    $rootScope.canUpdate = false;
+                    $rootScope.canDelete = false;
+                    return false;
+                }
+                
+                
                 annotationEditReference = ref.contextualize.entryEdit;
 
                 $rootScope.canCreate = annotationEditReference.canCreate || false;
@@ -231,7 +262,6 @@
                 $rootScope.canDelete = annotationEditReference.canDelete || false;
 
                 annotationEditReference.session = session;
-                $rootScope.session = session;
 
                 // TODO create and edit should be refactored to reuse the same code
                 // create the edit and create forms
@@ -269,32 +299,20 @@
 
                 // TODO how many should we read?
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                return annotationEditReference.read(201, logObj);
+                return annotationEditReference.read(201, logObj, false, true);
             })
             // read the annotation reference
             .then(function getPage(page) {
                 // TODO not used
                 $rootScope.showColumnSpinner = [{}];
-
-                $rootScope.annotationTuples = page.tuples;
-
-                for(var j = 0; j < page.tuples.length; j++){
-                    var row = page.tuples[j].data;
-                    if(row && row[annotConstant.OVERLAY_COLUMN_NAME]){
-                        svgURIs.push(row[annotConstant.OVERLAY_COLUMN_NAME]);
-                    }
-                }
-
-                // Load the openseadragon after we got the corresponding svg files
-                var osdViewerLocation =  origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
-                var osdViewerQueryParams = queryParamsString;
-
+                
                 /**
-                 * - if url is passed in query parameters, don't use image.uri value
-                 * - otherwise, if image.uri value exists
-                 *    - and has query parameter, use the image.uri query parameter.
-                 *    - otherwise, use the image.uri value
-                 */
+                * - if url is passed in query parameters, don't use image.uri value
+                * - otherwise, if image.uri value exists
+                *    - and has query parameter, use the image.uri query parameter.
+                *    - otherwise, use the image.uri value
+                */
+                var osdViewerQueryParams = queryParamsString;
                 if(!("url" in queryParams) && (typeof imageURI === "string")){
                     osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
                     if (imageURI.indexOf("?") !== -1) {
@@ -304,10 +322,21 @@
                     }
                 }
 
-                // attach the svg locations
-                for (var i = 0; i < svgURIs.length; i++){
-                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
-                    osdViewerQueryParams += "url=" + UriUtils.getAbsoluteURL(svgURIs[i], origin);
+                $rootScope.annotationTuples = [];
+                if (page && page.length > 0) {
+                    $rootScope.annotationTuples = page.tuples;
+                    
+                    for(var j = 0; j < page.tuples.length; j++){
+                        var row = page.tuples[j].data;
+                        if(row && row[annotConstant.OVERLAY_COLUMN_NAME]){
+                            // attach to the query params
+                            osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
+                            osdViewerQueryParams += "url=" + UriUtils.getAbsoluteURL(row[annotConstant.OVERLAY_COLUMN_NAME], origin);
+                            
+                            // there are some annotation in database, so open the sidebar
+                            $rootScope.hideAnnotationSidebar = false;
+                        }
+                    }
                 }
 
                 // TODO throw error
@@ -315,13 +344,11 @@
                     console.log("there wasn't any appropriate parameters for osd.")
                 }
 
-                // TODO what if there are no osdViewerQueryParams
-                var osdViewerURI = osdViewerLocation + "?" + osdViewerQueryParams;
-                console.log('replace uri = '+ osdViewerURI)
+                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;
+                console.log('replace uri = '+ osdViewerURI);
                 iframe.location.replace(osdViewerURI);
-                console.log('Image: ', image);
 
-                // TODO there should be a way that osd tells us it's done doing it's setup..
+                // TODO there should be a way that osd tells us it's done doing it's setup.
                 $rootScope.displayReady = true;
             }).catch(function (err) {
                 throw err;

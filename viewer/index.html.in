@@ -17,13 +17,13 @@
             <div class="top-panel-container">
                 <alerts alerts="osd.alerts"></alerts>
                 <div class="top-flex-panel">
-                    <div class="top-left-panel" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}">
+                    <div class="top-left-panel" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}">
                         <div class="panel-header">
                             <div class="pull-left">
                                 <h3 class="side-panel-heading">{{anno.editingAnatomy == null ? "Annotations" :  (anno.editingAnatomy.isNew ? "Create annotation" : "Edit annotation")}}</h3>
                             </div>
                             <div class="pull-right">
-                                <button ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm()">
+                                <button ng-disabled="anno.annotationFormPendingResult" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm()">
                                     <span class="fas fa-arrow-left"></span>
                                     <span>Back</span>
                                 </button>
@@ -34,14 +34,14 @@
                         <div class="title-container">
                             <h1 id="page-title" ng-if="osd.showTitle">{{osd.image.entity.RID || 'Image'}}</h1>
                         </div>
-                        <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" role="group">
-                            <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" uib-tooltip="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
-                              <span class="glyphicon glyphicon-edit"></span> {{osd.annotationsSidebarAreHidden ? "Show" : "Hide" }} Annotations
+                        <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" role="group">
+                            <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" uib-tooltip="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
+                              <span class="glyphicon glyphicon-edit"></span> {{hideAnnotationSidebar ? "Show" : "Hide" }} Annotations
                             </button>
                             <button ng-click="osd.filterChannels();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" uib-tooltip="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
-                            <!-- <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!osd.annotationsSidebarAreHidden}" role="button" title="edit annotations" id="edit-btn">
+                            <!-- <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" title="edit annotations" id="edit-btn">
                                 <span class="glyphicon glyphicon-edit"></span> Annotations
                             </button> -->
                             <!-- <button ng-click="osd.toggleAnnotations();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
@@ -64,10 +64,13 @@
             </div>
 
             <div class="bottom-panel-container" id="viewer-content">
-                <div class="side-panel-resizable" ng-class="{'open-panel': !osd.annotationsSidebarAreHidden, 'close-panel': osd.annotationsSidebarAreHidden}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
+                <div class="side-panel-resizable" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
                     <div class="side-panel-container">
                         <div class='annotation-list-container facet-panel'>
                             <div class='annotation-form-container' ng-form="anno.annoForm" ng-if="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
+                                <div class="form-spinner-overlay" ng-if="anno.annotationFormPendingResult">
+                                </div>
+                                <loading-spinner class="form-spinner" ng-if="anno.annotationFormPendingResult" message="Saving the changes..."></loading-spinner>
                                 <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowValue" ng-show="!anno.editingAnatomy.isNew && !anno.editingAnatomy.isStoredInDB">
@@ -147,7 +150,7 @@
                                                 <span>Save</span>
                                             </button>
                                         </div>
-                                        <div class='annotationRowValue' ng-show="canDelete && !anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
+                                        <div class='annotationRowValue' ng-disabled="anno.annotationFormPendingResult || !canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
                                             <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>
@@ -203,7 +206,7 @@
                                     {{osd.error}}
                                 </div>
                                 <div class='groups'>
-                                    <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
+                                    <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels track by $index" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
                                         <div class='itemContent'>
                                             <div class='itemRow'>
                                                 <span class='anatomy'>

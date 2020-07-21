@@ -28,16 +28,6 @@
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
 
-        vm.annotationsSidebarAreHidden = true;
-        var urls = $window.location.hash.split('&');
-        for (var i = 0; i < urls.length; i++) {
-            var url = urls[i];
-            var extension = url.substring(url.lastIndexOf(".") + 1);
-            if (extension == 'svg') {
-              vm.annotationsSidebarAreHidden = false
-              break;
-            }
-        }
 
         // the top-left-panel that needs to be resizable with toc
         vm.resizePartners = document.querySelector(".top-left-panel");
@@ -66,13 +56,14 @@
                             // users should still be able to open annotation list if there's no annotation
                             // the following two lines are commented for demo purpose
                             // vm.disableAnnotationList = data.content;
-                            // vm.annotationsSidebarAreHidden = data.content;
-                            var sidebarptr=$('#sidebar');
-                            if(data.content) {
-                              sidebarptr.css("display","none");
-                              } else {
-                                sidebarptr.css("display","block");
-                            }
+                            // TODO should be moved to annotation controller
+                            $rootScope.hideAnnotationSidebar = data.content;
+                            // var sidebarptr=$('#sidebar');
+                            // if(data.content) {
+                            //   sidebarptr.css("display","none");
+                            //   } else {
+                            //     sidebarptr.css("display","block");
+                            // }
 
                         });
                         break;
@@ -155,7 +146,7 @@
             btnptr.blur();
             // var panelptr=$('#annotations-panel');
             var sidebarptr=$('#sidebar');
-            if(vm.annotationsSidebarAreHidden) {
+            if($rootScope.hideAnnotationSidebar) {
               // if(!vm.filterChannelsAreHidden) { // close channels
               //   filterChannels();
               // }
@@ -166,7 +157,7 @@
                 sidebarptr.css("display","none");
             }
             // iframe.postMessage({messageType: 'openAnnotations'}, origin);
-            vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
+            $rootScope.hideAnnotationSidebar = !$rootScope.hideAnnotationSidebar;
         }
 
         function covered() {
@@ -184,7 +175,7 @@
             var sidebarptr=$('#sidebar');
 
             // if(vm.filterChannelsAreHidden) {
-            //   if(!vm.annotationsSidebarAreHidden) { // annotation is up
+            //   if(!vm.hideAnnotationSidebar) { // annotation is up
                 // openAnnotations(); // close it
             //   }
             //   if(covered())

@@ -18,6 +18,7 @@
             REFERENCE_IMAGE_COLUMN_NAME: "Image",
             // the asset column that has the annotation
             OVERLAY_COLUMN_NAME: "File_URL",
+            OVERLAY_HATRAC_PATH: "resources/gene_expression/annotations",
 
             // used internally and should be removed from the form
             Z_INDEX_COLUMN_NAME: "Z_Index",

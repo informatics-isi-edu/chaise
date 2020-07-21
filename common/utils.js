@@ -1937,7 +1937,10 @@
     .directive('loadingSpinner', ['UriUtils', function (UriUtils) {
         return {
             restrict: 'E',
-            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
+            scope: {
+                message: "@?"
+            }
         }
     }])
 
@@ -1946,7 +1949,10 @@
         return {
             restrict: 'A',
             transclude: true,
-            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html',
+            scope: {
+                message: "@?"
+            }
         }
     }])
 
