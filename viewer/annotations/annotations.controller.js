@@ -821,8 +821,8 @@
 
             // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
             fileName = imageRID + "_" + formModel.submissionRows[0][annotConstant.ANNOTATED_TERM_COLUMN_NAME];
-            if (formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME]) {
-                fileName += "_z" + formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME];
+            if (context.defaultZIndex != null) {
+                fileName += "_z" + context.defaultZIndex;
             }
             file = new File([data.content[0].svg], fileName + ".svg", {
                 type : "image/svg+xml"
