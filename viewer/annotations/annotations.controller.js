@@ -830,6 +830,11 @@
 
             // add the image value
             formModel.submissionRows[0][annotConstant.REFERENCE_IMAGE_COLUMN_NAME] = imageRID;
+            
+            // add the default z index value
+            if (context.defaultZIndex != null) {
+                formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME] = context.defaultZIndex;
+            }
 
             // change the overlay file value
             formModel.submissionRows[0][annotConstant.OVERLAY_COLUMN_NAME] = {

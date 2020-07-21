@@ -218,7 +218,13 @@
                 
                 image.entity = imagePage.tuples[0].data;
                 context.imageID = image.entity.RID;
-                imageURI = image.entity[imageConstant.URI_COLUMN];
+                imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
+                
+                // TODO this feels hacky
+                // get the default zindex value
+                if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
+                    context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
+                }
 
                 // TODO should be done in ermrestjs
                 var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";

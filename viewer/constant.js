@@ -5,8 +5,8 @@
 
     .constant('viewerConstant', {
         image: {
-            URI_COLUMN: "uri",
-            DEFAULT_Z: "" // the default value of the zindex in the form TODO
+            URI_COLUMN_NAME: "uri",
+            DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z" // the default value of the zindex in the form TODO
         },
         annotation: {
             // annotation table
