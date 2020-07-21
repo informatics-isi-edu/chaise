@@ -66,7 +66,7 @@ var testParams = {
             timestamptz_col: "2016-01-18 00:00:00",
             date_col: "2016-08-15",
             // Value of foreign (fk_col) related entity
-            "vDcNH5rGBzGJObTbqmnH7g": "Abraham Lincoln",
+            "PhF3HG1fOZs72s_xbuLx4Q": "Abraham Lincoln",
             json_null_col: "null",
             json_col: '"89.586"',
             asset_col: {link: "/hatrac/js/chaise/somepath.png", value: "filenamevalue.png"},
@@ -90,7 +90,7 @@ var testParams = {
             timestamptz_null_col: "2016-01-18 13:00:00",
             date_null_col: "2016-08-15",
             // Value of foreign (fk_null_col) related entity
-            "6lhMahZsQfXf_lAs9BSxNA": "Abraham Lincoln",
+            "Un6B-zCfMiIKZGKbF1TPFw": "Abraham Lincoln",
             json_null_col: "89.586",
             json_col: "null",
             timestamp_txt: currentTimestampTime,

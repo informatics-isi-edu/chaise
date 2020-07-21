@@ -638,7 +638,7 @@
                     prefilledColumns = cookie.keys;
 
                     // process the list of prefilled foreignkeys to get additional data
-                    _processPrefilledForeignKeys(model, cookie.fkColumnNames, cookie.keys, cookie.origUrl, cookie.rowname);
+                    _processPrefilledForeignKeys(model, reference, cookie.fkColumnNames, cookie.keys, cookie.origUrl, cookie.rowname);
 
                     // Keep a copy of the initial rows data so that we can see if user has made any changes later
                     model.oldRows = angular.copy(model.rows);

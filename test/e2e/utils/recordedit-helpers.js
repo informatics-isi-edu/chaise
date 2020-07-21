@@ -600,7 +600,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }
                                     markdownField.sendKeys(input);
                                     modalPrevBtn.click();
-                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
+                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.renderedMarkdown"]'));
                                     browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
                                     element(by.className('modal-close')).click();
