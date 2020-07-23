@@ -2,7 +2,12 @@
     'use strict';
 
     angular.module('chaise.viewer')
-
+    
+    /**
+     * TODO eventually this should be moved to a more configurable location,
+     * either a standalone js file like chaise-config, or as part of the chaise-config file.
+     * For now, we decided to have a centeral location for these constant without deciding how this should be configurable
+     */
     .constant('viewerConstant', {
         image: {
             URI_COLUMN_NAME: "uri",

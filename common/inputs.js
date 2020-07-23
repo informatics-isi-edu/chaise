@@ -461,7 +461,6 @@
                     params.facetPanelOpen = false;
 
                     if (vm.searchPopupGetDisabledTuples) {
-                        console.log("has getDisabledTuples");
                         params.getDisabledTuples = vm.searchPopupGetDisabledTuples()(vm.columnModel);
                     }
 

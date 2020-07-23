@@ -524,7 +524,14 @@
         }
 
         /**
-         * disable the
+         * This function is used for all the foreignkey columns presented in the annotation form,
+         * but the only purpose of this is to actually return a function for just the annotated term (anatomy).
+         * This will disable the rows that already exist in the database. 
+         *
+         * The displayed table (in the popup) is the annotated table, and we want to disable
+         * rows from this table that already have the combination of Image in database.
+         * So we start from the anotated term and add a filter based on the image value
+         * that is in the annotation table.
          * TODO might be able to refactor this, it's the same as the one in recordCreate
          */
         function getAnnotatedTermDisabledTuples (columnModel) {
@@ -547,13 +554,6 @@
                 }
 
                 var facet = {};
-
-                /*
-                 * The displayed table is the annotated table, and we want to disable
-                 * rows from this table that already have the combination of Image in database.
-                 * So we start from the anootated term, add a filter based on the image value
-                 * that is in the annotation table.
-                 */
                  // TODO should be done in ermrestjs
                  var existingRefURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
                  existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":";
