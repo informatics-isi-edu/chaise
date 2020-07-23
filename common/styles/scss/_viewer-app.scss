@@ -244,6 +244,7 @@
         // override the padding that is definde in app.scss
         .main-container {
             padding-right: 0;
+            height: 100%;
         }
 
         .annotation-list-container {
@@ -273,7 +274,7 @@
                     height: 100%;
                     width: 100%;
                     background-color: $disabled-background-color;
-                    opacity: 0.8;
+                    opacity: 0.5;
                     z-index: 6; // higher than the clear button
                 }
                 
@@ -802,6 +803,7 @@
 
         iframe#osd {
             height: 100%;
+            width: 100%;
         }
 
     }

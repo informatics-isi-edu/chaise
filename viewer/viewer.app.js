@@ -168,6 +168,29 @@
         FunctionUtils.registerErmrestCallbacks();
 
         var session, annotationEditReference;
+        var osdViewerQueryParams = queryParamsString, // what will be passed onto osd viewer
+            hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
+            hasImageQueryParam = false, // if there is an image in query, we should just use it and shouldn't use the image uri from db
+            osdCanShowAnnotation = false; // whether we can show image annotations or not (if not, we will disable the sidebar)
+        
+        // HACK: this is just a hack to allow quick testing
+        // if there are any svg files in the query params, ignore the annotation table.
+        // we cannot use the queryParams object that is returned since it only give us the last url
+        // (it's a key-value so it's not supporting duplicated key values)
+        // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
+        if (queryParamsString && queryParamsString.length > 0) {
+            queryParamsString.split('&').forEach(function (queryStr) {
+                var qpart = queryStr.split("=");
+                if (qpart.length != 2 || qpart[0] !== "url") return;
+                
+                if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
+                    $rootScope.hideAnnotationSidebar = false;
+                    hasAnnotationQueryParam = true;
+                } else {
+                    hasImageQueryParam = true;
+                }
+            });
+        }
 
         // Subscribe to on change event for session
         var subId = Session.subscribeOnChange(function () {
@@ -220,10 +243,52 @@
                 context.imageID = image.entity.RID;
                 imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
                 
+                // TODO some sort of warning maybe?
+                if (!imageURI) {
+                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty. We cannot show any image from database.");
+                }
+                
                 // TODO this feels hacky
                 // get the default zindex value
                 if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
                     context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
+                }
+                
+                /**
+                * - if url is passed in query parameters, don't use image.uri value 
+                *   (TODO maybe we shouldn't even read the image? (we're reading image for RID value etc..)
+                * - otherwise, if image.uri value exists
+                *    - and has query parameter, use the image.uri query parameter.
+                *    - otherwise, use the image.uri value
+                */
+                if(!hasImageQueryParam && (typeof imageURI === "string")){
+                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
+                    if (imageURI.indexOf("?") !== -1) {
+                        osdViewerQueryParams += imageURI.split("?")[1];
+                    } else {
+                        osdViewerQueryParams += imageURI;
+                    }
+                }
+                
+                // TODO should we move this to osd viewer?
+                // if we cannot show any annotation on the image (osd doesn't support it), 
+                //  - disable the annotation list
+                //  - don't even send a request to database
+                if (osdViewerQueryParams && osdViewerQueryParams.length > 0) {
+                    osdViewerQueryParams.split('&').forEach(function (queryStr) {
+                        var qpart = queryStr.split("=");
+                        if (qpart.length != 2 || qpart[0] !== "url") return;
+                        
+                        if (qpart[1].indexOf("info.json") != -1) {
+                            osdCanShowAnnotation = true;
+                        }
+                    });
+                }
+
+                // if there's svg query param, don't fetch the annotations from DB.
+                // if we cannot show any overlay, there's no point in reading
+                if (hasAnnotationQueryParam || !osdCanShowAnnotation) {
+                    return false;
                 }
 
                 // TODO should be done in ermrestjs
@@ -237,29 +302,12 @@
             // create the annotation reference
             .then(function (ref) {
                 
-                // if there are any svg files in the query params, ignore the annotation table.
-                // we cannot use the queryParams object that is returned since it only give us the last url
-                // (it's a key-value so it's not supporting duplicated key values)
-                // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
-                var queryParamsURLs = queryParamsString.split('&'), hasSVGQueryParam = false;
-                for (var i = 0; i < queryParamsURLs.length && ("url" in queryParams); i++) {
-                    if ( queryParamsURLs[i].split("=")[0] !== "url") continue;
-                    
-                    var queryVal = queryParamsURLs[i].split("=")[1];
-                    if (queryVal.indexOf(".svg") != -1 || queryVal.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
-                        $rootScope.hideAnnotationSidebar = false;
-                        hasSVGQueryParam = true;
-                        break;
-                    }
-                }
-                
-                if (!ref || hasSVGQueryParam) {
+                if (!ref) {
                     $rootScope.canCreate = false;
                     $rootScope.canUpdate = false;
                     $rootScope.canDelete = false;
                     return false;
                 }
-                
                 
                 annotationEditReference = ref.contextualize.entryEdit;
 
@@ -309,25 +357,10 @@
             })
             // read the annotation reference
             .then(function getPage(page) {
+                
                 // TODO not used
                 $rootScope.showColumnSpinner = [{}];
                 
-                /**
-                * - if url is passed in query parameters, don't use image.uri value
-                * - otherwise, if image.uri value exists
-                *    - and has query parameter, use the image.uri query parameter.
-                *    - otherwise, use the image.uri value
-                */
-                var osdViewerQueryParams = queryParamsString;
-                if(!("url" in queryParams) && (typeof imageURI === "string")){
-                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
-                    if (imageURI.indexOf("?") !== -1) {
-                        osdViewerQueryParams += imageURI.split("?")[1];
-                    } else {
-                        osdViewerQueryParams += imageURI;
-                    }
-                }
-
                 $rootScope.annotationTuples = [];
                 if (page && page.length > 0) {
                     $rootScope.annotationTuples = page.tuples;
@@ -343,20 +376,28 @@
                             $rootScope.hideAnnotationSidebar = false;
                         }
                     }
+                } 
+                // disable the annotaiton sidebar: 
+                //  - if there are no annotation and we cannot create
+                //  - the image type doesn't support annotation.
+                else if (!$rootScope.canCreate && !hasAnnotationQueryParam) {
+                    $rootScope.disableAnnotationSidebar = true;
                 }
 
                 // TODO throw error
                 if (osdViewerQueryParams.length === 0) {
-                    console.log("there wasn't any appropriate parameters for osd.")
+                    console.log("there wasn't any appropriate parameters for osd.");
                 }
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;
-                console.log('replace uri = '+ osdViewerURI);
+                console.log('osd viewer location: ', osdViewerURI);
                 iframe.location.replace(osdViewerURI);
 
                 // TODO there should be a way that osd tells us it's done doing it's setup.
                 $rootScope.displayReady = true;
             }).catch(function (err) {
+                // TODO errors.js is not showing the errors coming from viewer,
+                // so if we decided to show errors from this app, we should change that one as well.
                 throw err;
             });
         });

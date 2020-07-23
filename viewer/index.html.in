@@ -35,7 +35,7 @@
                             <h1 id="page-title" ng-if="osd.showTitle">{{osd.image.entity.RID || 'Image'}}</h1>
                         </div>
                         <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" role="group">
-                            <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" uib-tooltip="edit annotations" ng-disabled="osd.disableAnnotationList"  id="edit-btn">
+                            <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" uib-tooltip="edit annotations" ng-disabled="disableAnnotationSidebar"  id="edit-btn">
                               <span class="glyphicon glyphicon-edit"></span> {{hideAnnotationSidebar ? "Show" : "Hide" }} Annotations
                             </button>
                             <button ng-click="osd.filterChannels();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" uib-tooltip="channel filtering" id="filter-btn">
@@ -238,7 +238,7 @@
                 </div>
                 <div class="main-container">
                     <div class="main-body">
-                        <iframe id="osd" width="100%" src="about:blank" frameBorder="0" style="flex:1">
+                        <iframe id="osd" src="about:blank" frameBorder="0">
                             &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                         </iframe>
                     </div>

@@ -3,7 +3,8 @@
     'use strict';
 
     angular.module('chaise.viewer')
-
+    
+    // TODO not used
     .value('annotations', [])
 
     /**
@@ -24,9 +25,9 @@
      *  - tuple
      */
     .value('annotationModels', [])
-
+    
+    // NOTE: if we change the recordedit vm model object, we should update this one as well.
     .value('annotationCreateForm', {
-        returnEditContext: true,
         reference: null,
         columnModels: [],
         rows: [{}], // rows of data in the form, not the table from ERMrest
@@ -35,8 +36,8 @@
         foreignKeyData: [{}]
     })
 
+    // NOTE: if we change the recordedit vm model object, we should update this one as well.
     .value('annotationEditForm', {
-        returnEditContext: true,
         reference: null,
         columnModels: [],
         rows: [{}], // rows of data in the form, not the table from ERMrest

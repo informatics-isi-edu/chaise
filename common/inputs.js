@@ -296,7 +296,20 @@
             }
         }
     }])
-
+    
+    /**
+     * This directive can be used to display an appropriate input element based on the given columnModel in a form.
+     * Based on the passed values, it can be used in two different modes:
+     *  - standalone: As an standalone input element (used in select-all feature in recordedit).
+     *  - form: As a normal input in a form
+     * The mode is determined by the directive itself based on the given attributes.
+     * If you pass parentModel and parentReference, it will assume that you want the form mode, otherwise it will be in standalone mode.
+     * The only noticable difference is just how the scope.model value works (especially in the case of foreignkey inputs).
+     * In standalone mode, 
+     *  - the initial value of scope.model for foreignkeys is ignored.
+     *  - the value of scope.model for foreignkeys is a "tuple" (instead of rowname).
+     *  - since we don't have access to the parentModel, there must be a translation layer to properly set the value of foreignkey columns.
+     */
     .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'DataUtils', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
                 function(ConfigUtils, dataFormats, DataUtils, InputUtils, integerLimits, logService, maskOptions, modalBox, modalUtils, recordCreate, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {

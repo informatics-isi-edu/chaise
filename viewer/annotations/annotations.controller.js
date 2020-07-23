@@ -59,6 +59,7 @@
         vm.matchCount = 0; // number of filtered annotations
         vm.selectedItem = null; // current selected annotation item
         vm.strokeScale = 1; // stroke size of the annotation
+        // TODO  the following should be renamed evnetually (we're editing annotation not anatomy)
         vm.editingAnatomy = null; // current setting anatomy from annotationModels
         vm.editingAnatomyIndex = null;
         vm.onSearchPopupValueChange = onSearchPopupValueChange; // if anatomy changed, we should do some updates

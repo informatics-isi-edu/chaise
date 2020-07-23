@@ -55,7 +55,7 @@
                             // Note: This logic need to change
                             // users should still be able to open annotation list if there's no annotation
                             // the following two lines are commented for demo purpose
-                            // vm.disableAnnotationList = data.content;
+                            // $rootScope.disableAnnotationSidebar = data.content;
                             // TODO should be moved to annotation controller
                             $rootScope.hideAnnotationSidebar = data.content;
                             // var sidebarptr=$('#sidebar');
