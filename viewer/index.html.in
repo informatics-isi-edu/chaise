@@ -238,7 +238,7 @@
                 </div>
                 <div class="main-container">
                     <div class="main-body">
-                        <iframe id="osd" src="about:blank" frameBorder="0">
+                        <iframe ng-show='displayIframe' id="osd" src="about:blank" frameBorder="0">
                             &lt;p&gt;Your browser does not support iframes.&lt;/p&gt;
                         </iframe>
                     </div>

@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', 'UiUtils', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope, UiUtils) {
+    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -83,28 +83,6 @@
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
-            }
-        });
-
-        // watch for the display to be ready before setting the main container height
-        var unbindDisplayReady = $scope.$watch(function() {
-            return $rootScope.displayReady;
-        }, function (newValue, oldValue) {
-            if (newValue) {
-                // NOTE this function is being called here because this is the
-                // first place that we can be sure that the record-container elements
-                // are available and visible. This is because of the ng-if that we have
-                // on the top-panel container. If we call this function in the watch below,
-                // it will throw an error.
-
-
-                // fix the size of main-container and sticky areas
-                UiUtils.attachContainerHeightSensors();
-
-                // make sure footer is always at the bottom of the page
-                // UiUtils.attachFooterResizeSensor(0);
-
-                unbindDisplayReady();
             }
         });
 
