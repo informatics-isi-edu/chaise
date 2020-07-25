@@ -67,6 +67,20 @@
                 <div class="side-panel-resizable" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
                     <div class="side-panel-container">
                         <div class='annotation-list-container facet-panel'>
+                            <div class='strokeScale'>
+                                <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
+                                <div class='slider'>
+                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
+                                </div>
+                                <div class='sliderTicks'>
+                                    <span class='currentScale'>1</span>
+                                    <span class='currentScale'>2</span>
+                                    <span class='currentScale'>3</span>
+                                    <span class='currentScale'>4</span>
+                                    <span class='currentScale'>5</span>
+                                    <span class='currentScale'>6</span>
+                                </div>
+                            </div>
                             <div class='annotation-form-container' ng-form="anno.annoForm" ng-if="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
                                 <div class="form-spinner-overlay" ng-if="anno.annotationFormPendingResult">
                                 </div>
@@ -77,7 +91,7 @@
                                             <div class="drawingHint alert-danger">This annotation is not stored in the database.</div>
                                         </div>
                                         <div class="annotationRowValue" ng-show="anno.editingAnatomy.isNew">
-                                            <div class="drawingHint">Drawing is required for new annotations</div>
+                                            <div class="drawingHint">Drawing is required.</div>
                                         </div>
                                         <div class="annotationRowHeader">
                                             <span class="text-danger ng-scope">*</span>
@@ -88,10 +102,11 @@
                                                 <div class='annotationRowValue'>
                                                     <div class="chaise-btn chaise-btn-primary draw-btn" ng-click="anno.drawAnnotation(anno.editingAnatomy, $event)" tooltip-placement="right" ng-attr-uib-tooltip="{{anno.editingAnatomy.isDrawing ? 'Turn off the drawing tool' : 'Turn on the drawing tool'}}">
                                                         <span class="chaise-btn-icon">
-                                                            <span class="fas fa-pencil-ruler"></span>
+                                                            <span ng-if="!anno.editingAnatomy.isDrawing" class="fas fa-pencil-ruler"></span>
+                                                            <span ng-if="anno.editingAnatomy.isDrawing" class="glyphicon glyphicon-eye-open"></span>
                                                         </span>
-                                                        <span ng-if="!anno.editingAnatomy.isDrawing">Start drawing</span>
-                                                        <span ng-if="anno.editingAnatomy.isDrawing">Finish drawing</span>
+                                                        <span ng-if="!anno.editingAnatomy.isDrawing">Switch to drawing mode</span>
+                                                        <span ng-if="anno.editingAnatomy.isDrawing">Display all annotations</span>
                                                     </div>
                                                     <div class="text-danger" ng-if="anno.displayDrawingRequiredError">
                                                         <div>Please draw annotation on the image.</div>
@@ -169,20 +184,6 @@
                                         <i ng-class="anno.isDisplayAll ? 'glyphicon glyphicon-unchecked' : 'glyphicon glyphicon-check'"></i> None
                                     </span>
                                 </span>
-                                <div class='strokeScale'>
-                                    <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
-                                    <div class='slider'>
-                                        <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
-                                    </div>
-                                    <div class='sliderTicks'>
-                                        <span class='currentScale'>1</span>
-                                        <span class='currentScale'>2</span>
-                                        <span class='currentScale'>3</span>
-                                        <span class='currentScale'>4</span>
-                                        <span class='currentScale'>5</span>
-                                        <span class='currentScale'>6</span>
-                                    </div>
-                                </div>
                                 <div class='flex-row'>
                                     <div class="chaise-search-box chaise-input-group">
                                         <div class="chaise-input-control has-feedback">

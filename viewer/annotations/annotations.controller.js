@@ -441,7 +441,8 @@
                 anatomy : "",
                 description : ""
             });
-            
+
+            vm.displayDrawingRequiredError = false;
             AlertsService.deleteAllAlerts();
 
         }
@@ -654,12 +655,15 @@
                 groupID : vm.editingAnatomy.groupID,
                 mode : (vm.editingAnatomy.isDrawing) ? "ON" : "OFF"
             });
-
-            event.stopPropagation();
+            
+            if (event) {
+                event.stopPropagation();
+            }
         }
 
         /**
-         * click the setting icon to open the setting panel for the specific annotation
+         * click the setting icon to open the setting panel for the specific annotation,
+         * or when in the controller we want to switch to/from form
          * @param {object} item : the anatomy's annotations object
          */
         function editAnatomyAnnotations(item, index, event){
@@ -670,8 +674,9 @@
             vm.editingAnatomy = item || null;
             vm.editingAnatomyIndex = index || -1;
             vm.showPanel = (item !== null) ? true : false;
-
-            if (item !== null) {
+            
+            // only in edit mode
+            if (typeof index == 'number') {
                 // TODO is this unnecessary?
                 annotationEditForm.rows = [{}];
                 annotationEditForm.submissionRows = [{}];
@@ -687,6 +692,14 @@
                     recordCreate.populateEditModelValues(annotationEditForm, annotationEditForm.reference, item.tuple, 0, false);
                 }
             }
+            
+            // if item is null, we just wanted to switch away from edit/create mode
+            if (item != null) {
+                // switch to drawing mode by default
+                vm.drawAnnotation(vm.editingAnatomy);
+            }
+            
+            vm.displayDrawingRequiredError = false;
             AlertsService.deleteAllAlerts();
         }
 
@@ -915,6 +928,7 @@
          * @param {object} item : the editing anatomy's annotations object
          */
         function saveAnnotationRecord(item){
+            vm.displayDrawingRequiredError = false;
             AlertsService.deleteAllAlerts();
             // if (vm.annoForm.$invalid) {
             //     _displaySubmitError();
