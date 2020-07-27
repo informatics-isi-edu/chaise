@@ -66,7 +66,28 @@
             getSearchPopupSize: getSearchPopupSize
         };
     }])
+    
+    /**
+     * Controller used to show the modal popup for confirming an action.
+     *
+     * parameters that we will look for:
+     * - action {String=} - the message shown in the modal header (optional)
+     * - message {String=} - the message for the body of the modal (optional)
+     * - buttonAction {String=} - the confirm button label (optional)
+     */
+    .controller('ConfirmModalController', ['params', '$uibModalInstance', function (params, $uibModalInstance) {
+        var vm = this;
+        vm.params = params;
 
+        vm.ok = function () {
+            $uibModalInstance.close();
+        }
+
+        vm.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        }
+    }])
+    
     .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
         var vm = this;
         vm.ok = ok;

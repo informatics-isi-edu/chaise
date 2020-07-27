@@ -598,34 +598,55 @@
         /**
          * Close the annotation metadata panel
          */
-        function closeAnnotationForm(){
+        function closeAnnotationForm(confirm){
+            var close = function () {
+                vm.annoForm.$setPristine();
+                vm.annoForm.$setUntouched();
 
-            vm.annoForm.$setPristine();
-            vm.annoForm.$setUntouched();
+                var item = vm.editingAnatomy;
 
-            var item = vm.editingAnatomy;
+                // Close the drawing tool if opened
+                if(item && item.isDrawing){
+                    item.isDrawing = false;
+                    AnnotationsService.drawAnnotation({
+                        svgID : item.svgID,
+                        groupID : item.groupID,
+                        mode : (item.isDrawing) ? "ON" : "OFF"
+                    });
+                };
 
-            // Close the drawing tool if opened
-            if(item && item.isDrawing){
-                item.isDrawing = false;
-                AnnotationsService.drawAnnotation({
-                    svgID : item.svgID,
-                    groupID : item.groupID,
-                    mode : (item.isDrawing) ? "ON" : "OFF"
-                });
-            };
+                /**
+                 * if the current setting anatomy is still unsaved when closing the panel
+                 * remove the drawing from openseadragon
+                 */
+                if(item.svgID === "NEW_SVG" || item.groupID === "NEW_GROUP"){
+                    // Remove the new created svg and group if not saved
+                    AnnotationsService.removeSVG({svgID : item.svgID});
+                }
 
-            /**
-             * if the current setting anatomy is still unsaved when closing the panel
-             * remove the drawing from openseadragon
-             */
-            if(item.svgID === "NEW_SVG" || item.groupID === "NEW_GROUP"){
-                // Remove the new created svg and group if not saved
-                AnnotationsService.removeSVG({svgID : item.svgID});
+                // Set editing item to null to hide the metadata panel
+                vm.editAnatomyAnnotations(null);
+            }
+            
+            // show confirmation on back button
+            if (confirm) {
+                modalUtils.showModal({
+                    animation: false,
+                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/confirmation.modal.html",
+                    controller: "ConfirmModalController",
+                    controllerAs: "ctrl",
+                    size: "sm",
+                    resolve: {
+                        params: {
+                            buttonAction: "Discard",
+                            message: "Are you sure you want to discard your changes?"
+                        }
+                    }
+                }, close, null, false); 
+            } else {
+                close();
             }
 
-            // Set editing item to null to hide the metadata panel
-            vm.editAnatomyAnnotations(null);
         }
 
         /**

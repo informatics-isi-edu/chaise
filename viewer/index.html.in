@@ -23,7 +23,7 @@
                                 <h3 class="side-panel-heading">{{anno.editingAnatomy == null ? "Annotations" :  (anno.editingAnatomy.isNew ? "Create annotation" : "Edit annotation")}}</h3>
                             </div>
                             <div class="pull-right">
-                                <button ng-disabled="anno.annotationFormPendingResult" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm()">
+                                <button ng-disabled="anno.annotationFormPendingResult" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
                                     <span class="fas fa-arrow-left"></span>
                                     <span>Back</span>
                                 </button>
