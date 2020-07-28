@@ -531,6 +531,10 @@
           display: none !important;
         }
 
+        .video-info-in-print{
+          visibility: visible !important;
+        }
+
         @page {
             size: auto;
             margin: 5% 3% 5% 3%;
