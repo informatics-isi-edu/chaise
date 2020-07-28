@@ -19,16 +19,20 @@
                         <div ng-switch-when="popup/foreignkey/create">
                             <span>Select </span>
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
-                            <span> for new </span>
-                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                            <span ng-if="ctrl.tableModel.parentReference">
+                                <span> for new </span>
+                                <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                            </span>
                         </div>
                         <div ng-switch-when="popup/foreignkey/edit">
                             <span>Select </span>
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
-                            <span> for </span>
-                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
-                            <span ng-if="ctrl.tableModel.parentTuple">:
-                                <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
+                            <span ng-if="ctrl.tableModel.parentReference">
+                                <span> for </span>
+                                <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                                <span ng-if="ctrl.tableModel.parentTuple">:
+                                    <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
+                                </span>
                             </span>
                         </div>
                         <div ng-switch-when="popup/purebinary/add">

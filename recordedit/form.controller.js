@@ -89,66 +89,6 @@
             $window.location = redirectUrl;
         }
 
-        /*
-         * TODO this is currently only used in populateSubmissionRow and
-         * it's not doing what it was originally desgined for which is as described:
-         * Allows to tranform some form values depending on their types
-         * Boolean: If the value is empty ('') then set it as null
-         * Date/Timestamptz: If the value is empty ('') then set it as null
-         * Instead it will:
-         *  - turn array and json string value to object.
-         *  - turn the timestamp object to a string value that database understands.
-         * NOTE Should not be used by itself, instead use the populateSubmissionRow to populate submission rows
-         */
-        function transformRowValues(row) {
-            var transformedRow = {};
-            /* Go through the set of columns for the reference.
-             * If a value for that column is present (row[col.name]), transform the row value as needed
-             * NOTE:
-             * Opted to loop through the columns once and use the row object for quick checking instead
-             * of looking at each key in row and looping through the column set each time to grab the column
-             * My solution is worst case n-time
-             * The latter is worst case rowKeys.length * n time
-             */
-            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                var col = $rootScope.reference.columns[i];
-                var rowVal = row[col.name];
-                if (rowVal && !col.getInputDisabled(context.appContext)) {
-                    if (col.type.isArray) {
-                        rowVal = JSON.parse(rowVal);
-                    } else {
-                        switch (col.type.name) {
-                            case "timestamp":
-                            case "timestamptz":
-                                if (vm.readyToSubmit) {
-                                    var options = {
-                                        outputType: "string",
-                                        currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
-                                        outputMomentFormat: dataFormats.datetime.submission
-                                    }
-
-                                    // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
-                                    // meridiem should never be null, time can be left empty (null) the case below will catch that.
-                                    if (rowVal.time === null) rowVal.time = '00:00:00';
-                                    var value = rowVal.date ? rowVal.date + rowVal.time + rowVal.meridiem : null;
-
-                                    rowVal = InputUtils.formatDatetime(value, options);
-                                }
-                                break;
-                            case "json":
-                            case "jsonb":
-                                rowVal=JSON.parse(rowVal);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                }
-                transformedRow[col.name] = rowVal;
-            }
-            return transformedRow;
-        }
-
         /**
          * onSuccess - callback after results are added
          *
@@ -272,7 +212,7 @@
                     originalTuple = null;
                     editOrCopy = false;
                 }
-                populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, editOrCopy);
+                recordCreate.populateSubmissionRow(model.rows[j], model.submissionRows[j], $rootScope.reference, originalTuple, editOrCopy);
             }
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
@@ -311,7 +251,7 @@
                 editOrCopy = false;
             }
 
-            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, editOrCopy);
+            var submissionRow = recordCreate.populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], $rootScope.reference, originalTuple, editOrCopy);
 
             // used for title
             params.parentReference = $rootScope.reference;
@@ -531,55 +471,6 @@
             }
         }
 
-        /**
-         * Given a modelRow and submissionRow objects, use the value of modelRow to modify the submissionRow value.
-         * These are the modifications that it does:
-         *   - foreignKeys: if they are not edited, use the value of originalTuple for its constituent columns
-         *   - array: parse the string representation
-         *   - timestamp: turn object to string representation
-         *   - json: parse the string representation
-         *   - otherwise: use the modelRow value as is
-         * TODO technically we don't need to pass modelRow and submissionRow since their attached to $rootScope
-         * TODO even the third and fourth inputs can be derived in this function.
-         * @param {Object} modelRow - each object in the recordEditModel.rows array
-         * @param {Object} submissionRow - each object in the recordEditModel.submissionRow array
-         * @param {ERMrest.Tuple=} originalTuple - the original tuple that comes from the first read
-         * @param {Boolean} editOrCopy - true if it's edit or copy, otherwise it's false.
-         */
-        function populateSubmissionRow(modelRow, submissionRow, originalTuple, editOrCopy) {
-            var transformedRow = transformRowValues(modelRow);
-            $rootScope.reference.columns.forEach(function (column) {
-                // If the column is a foreign key column, it needs to get the originating columns name for data submission
-                if (column.isForeignKey) {
-
-                    var foreignKeyColumns = column.foreignKey.colset.columns;
-                    for (var k = 0; k < foreignKeyColumns.length; k++) {
-                        var referenceColumn = foreignKeyColumns[k];
-                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-                        // check if value is set in submission data yet (searchPopup will set this value if foreignkey is picked)
-                        if (!submissionRow[referenceColumn.name]) {
-                            /**
-                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
-                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
-                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
-                            **/
-                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
-                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
-                            } else {
-                                submissionRow[referenceColumn.name] = null;
-                            }
-                        }
-                    }
-                // not foreign key, column.name is sufficient for the keys
-                } else {
-                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                    submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
-                }
-            });
-
-            return submissionRow;
-        }
-
         function spliceRows(index) {
             vm.recordEditModel.rows.splice(index, 1);
             vm.recordEditModel.oldRows.splice(index, 1);
@@ -647,7 +538,7 @@
 
         function isRequired(columnIndex) {
             var cm = vm.recordEditModel.columnModels[columnIndex];
-            return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
+            return cm && cm.isRequired;
         }
 
         /**
@@ -865,7 +756,7 @@
                 stack: model.logStack
             }, defaultLogInfo);
 
-            setValueAllInputs(index, model.allInput.value);
+            setValueAllInputs(index, model.allInput);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
@@ -894,21 +785,21 @@
         // decides whether apply should be disabled
         vm.disableApply = function disableApply(index) {
             var columnModel = vm.recordEditModel.columnModels[index];
-            if (!columnModel || !columnModel.allInput) return true;
+            if (!columnModel) return true;
 
             var noValue = true;
-            var value = columnModel.allInput.value;
+            var value = columnModel.allInput;
             if (columnModel.inputType === "timestamp") {
                 // We don't care if a time value is set or not, time is meaningless without a date
-                if (value && value.date) noValue = false;
+                if (DataUtils.isObjectAndNotNull(value) && value.date) noValue = false;
             } else if (columnModel.inputType === "file") {
                 // the url value is what determines if a file exists or not
-                if (value && value.url) noValue = false;
+                if (DataUtils.isObjectAndNotNull(value) && value.url) noValue = false;
             } else if (columnModel.inputType === "boolean") {
                 // check if the selected value is a boolean (true|false)
                 if (typeof value === "boolean") noValue = false;
             } else {
-                if (columnModel.allInput.value) noValue = false;
+                if (value != null) noValue = false;
             }
             return noValue;
         }

@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(deviceDetector,context, image, $window, $rootScope, $scope) {
+    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -12,6 +12,7 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
+        vm.alerts = AlertsService.alerts;
         var showTitle = context.queryParams.showTitle;
         if (showTitle === "true") {
             vm.showTitle = true;
@@ -27,17 +28,9 @@
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
 
-        vm.annotationsSidebarAreHidden = true;
-        var urls = $window.location.hash.split('&');
-        for (var i = 0; i < urls.length; i++) {
-            var url = urls[i];
-            var extension = url.substring(url.lastIndexOf(".") + 1);
-            if (extension == 'svg') {
-              vm.annotationsSidebarAreHidden = false
-              break;
-            }
-        }
-        $rootScope.displayReady = true;
+
+        // the top-left-panel that needs to be resizable with toc
+        vm.resizePartners = document.querySelector(".top-left-panel");
 
         vm.openAnnotations = openAnnotations;
         vm.error = '';
@@ -59,14 +52,18 @@
                 switch (messageType) {
                     case "disableAnnotationList":
                         $scope.$apply(function(){
-                            vm.disableAnnotationList = data.content;
-                            vm.annotationsSidebarAreHidden = data.content;
-                            var sidebarptr=$('#sidebar');
-                            if(data.content) {
-                              sidebarptr.css("display","none");
-                              } else {
-                                sidebarptr.css("display","block");
-                            }
+                            // Note: This logic need to change
+                            // users should still be able to open annotation list if there's no annotation
+                            // the following two lines are commented for demo purpose
+                            // $rootScope.disableAnnotationSidebar = data.content;
+                            // TODO should be moved to annotation controller
+                            $rootScope.hideAnnotationSidebar = data.content;
+                            // var sidebarptr=$('#sidebar');
+                            // if(data.content) {
+                            //   sidebarptr.css("display","none");
+                            //   } else {
+                            //     sidebarptr.css("display","block");
+                            // }
 
                         });
                         break;
@@ -82,7 +79,7 @@
                         break;
 
                     default:
-                        console.log('Invalid event message type "' + messageType + '"');
+                        // other messages are handled by other controllers
                 }
             } else {
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
@@ -127,7 +124,7 @@
             btnptr.blur();
             // var panelptr=$('#annotations-panel');
             var sidebarptr=$('#sidebar');
-            if(vm.annotationsSidebarAreHidden) {
+            if($rootScope.hideAnnotationSidebar) {
               // if(!vm.filterChannelsAreHidden) { // close channels
               //   filterChannels();
               // }
@@ -138,7 +135,7 @@
                 sidebarptr.css("display","none");
             }
             // iframe.postMessage({messageType: 'openAnnotations'}, origin);
-            vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
+            $rootScope.hideAnnotationSidebar = !$rootScope.hideAnnotationSidebar;
         }
 
         function covered() {
@@ -156,7 +153,7 @@
             var sidebarptr=$('#sidebar');
 
             // if(vm.filterChannelsAreHidden) {
-            //   if(!vm.annotationsSidebarAreHidden) { // annotation is up
+            //   if(!vm.hideAnnotationSidebar) { // annotation is up
                 // openAnnotations(); // close it
             //   }
             //   if(covered())

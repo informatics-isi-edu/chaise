@@ -219,7 +219,6 @@
                                                             <!-- longtext/textarea input -->
                                                             <div ng-switch-when="longtext">
                                                                 <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
-                                                                <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview" markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                             </div>
 
 

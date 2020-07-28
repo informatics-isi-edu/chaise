@@ -893,7 +893,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
         });
 
-        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
+        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function(done) {
             // Verify page count and on first page
             var e = chaisePage.recordsetPage.getPageLimitSelector(fileParams.custom_page_size);
 
@@ -907,7 +907,10 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
         it("should display the proper row count and total row count.", function () {
@@ -916,8 +919,9 @@ describe('View recordset,', function() {
             });
         });
 
-        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function() {
-            var previousBtn = chaisePage.recordsetPage.getPreviousButton();
+        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function(done) {
+            var previousBtn = chaisePage.recordsetPage.getPreviousButton(),
+                pageLimitBtn = chaisePage.recordsetPage.getPageLimitDropdown();
             // page to the next page then page back to the first page so the @before modifier is applied
             chaisePage.recordsetPage.getNextButton().click().then(function() {
                 // wait for it to be on the second page
@@ -927,8 +931,11 @@ describe('View recordset,', function() {
             }).then(function() {
                 //wait for it to be on the first page again
                 browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
+                
+                //make sure the button is clickable
+                browser.wait(EC.elementToBeClickable(pageLimitBtn), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getPageLimitDropdown().click();
+                return pageLimitBtn.click();
             }).then(function() {
                 var dropdownOption = chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size);
                 browser.wait(EC.elementToBeClickable(dropdownOption), browser.params.defaultTimeout);
@@ -945,10 +952,13 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.page_size);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
-        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function() {
+        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function(done) {
             var nextBtn = chaisePage.recordsetPage.getNextButton(),
                 prevBtn = chaisePage.recordsetPage.getPreviousButton();
 
@@ -963,7 +973,10 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(14);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
     });
 
