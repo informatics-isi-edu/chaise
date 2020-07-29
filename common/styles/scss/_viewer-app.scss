@@ -740,6 +740,7 @@
                 }
 
                 .editBtn{
+                    text-decoration: none;
                     padding: 3px;
                     border-radius: 2px;
                     margin: 2px;
@@ -873,4 +874,36 @@
       font-weight: 600;
     }
 
+}
+
+
+// modify the chaise share citation that is displayed for annotations
+#viewer .chaise-share-citation {
+    
+    li:not(#share-link) {
+        h3.share-item-header {
+            display: inline-block;
+            &:after {
+                content: ":";
+            }
+        }
+        
+        .share-item-value {
+            padding-left: 0px;
+        }
+    }
+    
+    h3.share-item-header {
+        font-size: 1.1em;
+        margin-top: 5px;
+        margin-bottom: 0px;
+    }
+    
+    .share-item-value {
+        padding-left: 10px;
+    }
+    
+    #share-link {
+        padding-top: 10px;
+    }
 }

@@ -66,6 +66,7 @@
         vm.getAnnotatedTermDisabledTuples = getAnnotatedTermDisabledTuples; // disable the existing anatomy, in the popup
         vm.displayDrawingRequiredError = false;
         vm.annotationFormPendingResult = false;
+        vm.shareAnnotation = shareAnnotation;
 
         vm.addNewTerm = addNewTerm;
         vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
@@ -739,6 +740,44 @@
                 keyword = vm.searchKeyword ? vm.searchKeyword.toLowerCase() : "";
 
             return (id.indexOf(keyword) >= 0) || (name.indexOf(keyword) >= 0);
+        }
+        
+        /**
+         * Open a share dialog for the given annotation
+         */
+        function shareAnnotation (item, index, event) {
+            // make sure it's highlighted
+            if (!item.isSelected) {
+                highlightGroup(item, event);
+            }
+
+            // TODO could be refactored
+            var url = "/chaise/record/#" + context.catalogID;
+            url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_NAME);
+            url += "/RID=" + UriUtils.fixedEncodeURIComponent(item.tuple.data.RID);
+            
+            var moreInfo = {
+                title: "Annotation",
+                hideHeader: true,
+                hideCitation: true,
+                extraInformation: [
+                    {
+                        title: "RID",
+                        value: item.tuple.data.RID,
+                        link: url,
+                        type: "link"
+                    },
+                    {
+                        title: annotConstant.ANNOTATED_TERM_DISPLAYNAME,
+                        value: item.name + (item.id ? (" (" + item.id + ")") : "")
+                    }
+                ]
+            };
+            
+            modalUtils.openSharePopup(item.tuple, $rootScope.annotationEditReference, moreInfo);
+
+            event.stopPropagation();
+            event.preventDefault();
         }
 
         /**

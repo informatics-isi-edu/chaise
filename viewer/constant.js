@@ -30,6 +30,7 @@
             CHANNELS_COLUMN_NAME: "Channels",
 
             // anatomy fk in annotation table
+            ANNOTATED_TERM_DISPLAYNAME: "Anatomy",
             ANNOTATED_TERM_COLUMN_NAME: "Anatomy",
             ANNOTATED_TERM_VISIBLE_COLUMN_NAME: "Y7oiVf4tLQPtUWQRrtF-KQ",
             ANNOTATED_TERM_FOREIGN_KEY_CONSTRAINT: ["Gene_Expression", "Image_Annotation_Anatomy_fkey"],

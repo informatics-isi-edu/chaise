@@ -312,6 +312,10 @@
                 
                 annotationEditReference = ref.contextualize.entryEdit;
 
+                // TODO we might be able to refactor this
+                // attach to the $rootScope so it can be used in annotations.controller
+                $rootScope.annotationEditReference = annotationEditReference;
+
                 $rootScope.canCreate = annotationEditReference.canCreate || false;
                 $rootScope.canUpdate = annotationEditReference.canUpdate || false;
                 $rootScope.canDelete = annotationEditReference.canDelete || false;

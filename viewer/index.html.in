@@ -220,11 +220,11 @@
                                                     <span class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
                                                         <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
                                                     </span>
-                                                    <span class="editBtn" ng-click="anno.highlightGroup(item, $event)" data-type='highlightGroup' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isSelected ? 'Unhighlight annotation' : 'Highlight annotation'}}">
-                                                        <i class="glyphicon glyphicon-tag"></i>
-                                                    </span>
                                                     <span ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
                                                         <i class="glyphicon glyphicon-pencil"></i>
+                                                    </span>
+                                                    <span ng-if="item.tuple" class="editBtn" tooltip-placement="bottom" uib-tooltip="Share Annotation" ng-click="anno.shareAnnotation(item, $index, $event)">
+                                                        <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
                                                     </span>
                                                 </span>
                                             </div>

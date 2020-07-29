@@ -4,7 +4,7 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["UriUtils", "$log", "$uibModal", "$window", function (UriUtils, $log, $uibModal, $window) {
+    .factory('modalUtils', ["logService", "UiUtils", "UriUtils", "$log", "$uibModal", "$window", function (logService, UiUtils, UriUtils, $log, $uibModal, $window) {
 
         /**
          * Given the parameters that are used to generate a modal, returns the appropriate size.
@@ -60,10 +60,55 @@
 
             return modalInstance;
         }
+        
+        /**
+         * Given a tuple and reference will open the share popup.
+         * You can also pass extra parameters if you want. The acceptable extra params are:
+         *  - title: will be displayed in the modal title
+         *  - hideCitation: hide the citation section
+         *  - hideHeader: hides all the section headers.
+         *  - extraInformation: An array of objects that will be displayed. Each element can be either
+         *    {value: "string", title: "string"} or {title: "string", value: "string", link: "string", ype: "link"}
+         */
+        function openSharePopup (tuple, reference, extraParams) {
+            var refTable = reference.table;
+            var params = extraParams || {};
+            
+            params.displayname = refTable.name+'_'+tuple.uniqueId,
+            params.reference = reference;
+
+            var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
+            params.permalink = UriUtils.resolvePermalink(tuple, reference);
+            params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
+            params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+            params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+
+            var snaptimeHeader = {
+                action: logService.getActionString(logService.logActions.SHARE_OPEN),
+                stack: logService.getStackObject(),
+                catalog: reference.defaultLogInfo.catalog,
+                schema_table: reference.defaultLogInfo.schema_table
+            }
+            refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
+                // if current fetched snpatime doesn't match old snaptime, show a warning
+                params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
+            }).finally(function() {
+                showModal({
+                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
+                    controller: "ShareCitationController",
+                    windowClass: "chaise-share-citation",
+                    controllerAs: "ctrl",
+                    resolve: {
+                        params: params
+                    }
+                }, false, false, false); // not defining any extra callbacks
+            });
+        }
 
         return {
             showModal: showModal,
-            getSearchPopupSize: getSearchPopupSize
+            getSearchPopupSize: getSearchPopupSize,
+            openSharePopup: openSharePopup
         };
     }])
     
