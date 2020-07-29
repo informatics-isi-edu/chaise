@@ -217,15 +217,15 @@
                                                     </a>
                                                 </span>
                                                 <span class='editRow'>
-                                                    <span class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
+                                                    <button class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
                                                         <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
-                                                    </span>
-                                                    <span ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
+                                                    </button>
+                                                    <button ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
                                                         <i class="glyphicon glyphicon-pencil"></i>
-                                                    </span>
-                                                    <span ng-if="item.tuple" class="editBtn" tooltip-placement="bottom" uib-tooltip="Share Annotation" ng-click="anno.shareAnnotation(item, $index, $event)">
-                                                        <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
-                                                    </span>
+                                                    </button>
+                                                    <button ng-if="item.tuple" class="editBtn" tooltip-placement="bottom" uib-tooltip="Share Annotation" ng-click="anno.shareAnnotation(item, $index, $event)" ng-disabled="anno.waitingForSharePopup">
+                                                        <i class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': item.waitingForSharePopup, 'glyphicon-share': !item.waitingForSharePopup}"></i>
+                                                    </button>
                                                 </span>
                                             </div>
                                         </span>

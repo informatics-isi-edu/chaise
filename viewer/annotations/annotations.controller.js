@@ -133,7 +133,6 @@
                         break;
                     case "updateAnnotationList":
                         $scope.$apply(function(){
-                            console.log("here");
                             _addAnnotationToList(data.content);
                             vm.updateDisplayNum();
                         })
@@ -773,8 +772,22 @@
                     }
                 ]
             };
+                
+            // to disable all the share buttons
+            vm.waitingForSharePopup = true;
             
-            modalUtils.openSharePopup(item.tuple, $rootScope.annotationEditReference, moreInfo);
+            // to show the loader
+            item.waitingForSharePopup = true;
+
+            modalUtils.openSharePopup(item.tuple, $rootScope.annotationEditReference, moreInfo).then(function () {
+                if (!item.isSelected) {
+                    highlightGroup(item, event);
+                }
+                vm.waitingForSharePopup = false;
+                item.waitingForSharePopup = false;
+            }).catch(function () {
+                //
+            });
 
             event.stopPropagation();
             event.preventDefault();

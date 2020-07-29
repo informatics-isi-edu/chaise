@@ -4,7 +4,7 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["logService", "UiUtils", "UriUtils", "$log", "$uibModal", "$window", function (logService, UiUtils, UriUtils, $log, $uibModal, $window) {
+    .factory('modalUtils', ["logService", "UiUtils", "UriUtils", "$log", "$q", "$uibModal", "$window", function (logService, UiUtils, UriUtils, $log, $q, $uibModal, $window) {
 
         /**
          * Given the parameters that are used to generate a modal, returns the appropriate size.
@@ -62,7 +62,8 @@
         }
         
         /**
-         * Given a tuple and reference will open the share popup.
+         * Given a tuple and reference will open the share popup. It will return a promise
+         * that will be resolved when the modal is displayed.
          * You can also pass extra parameters if you want. The acceptable extra params are:
          *  - title: will be displayed in the modal title
          *  - hideCitation: hide the citation section
@@ -71,6 +72,8 @@
          *    {value: "string", title: "string"} or {title: "string", value: "string", link: "string", ype: "link"}
          */
         function openSharePopup (tuple, reference, extraParams) {
+            var defer = $q.defer();
+            
             var refTable = reference.table;
             var params = extraParams || {};
             
@@ -102,7 +105,11 @@
                         params: params
                     }
                 }, false, false, false); // not defining any extra callbacks
+                
+                defer.resolve();
             });
+            
+            return defer.promise;
         }
 
         return {
