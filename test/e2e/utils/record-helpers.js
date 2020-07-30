@@ -161,25 +161,20 @@ exports.testPresentation = function (tableParams) {
             expect(pageColumns.length).toBe(columns.length);
             var index = 0;
             pageColumns.forEach(function(c) {
-                if (columns[index].inlineComment) {
-                    return;
-                } else {
-                    var comment = columns[index++].comment;
-                    chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
-                        var exists = actualComment ? true : undefined;
-                        expect(exists).toBeDefined();
+                var comment = columns[index++].comment;
+                chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
+                    var exists = actualComment ? true : undefined;
+                    expect(exists).toBeDefined();
 
-                        // Check comment is same
-                        expect(actualComment).toBe(comment);
-                    });
-                }
+                    // Check comment is same
+                    expect(actualComment).toBe(comment);
+                });
             });
         });
     });
 
     it("should show inline comment for inline table with one defined", function () {
-        browser.pause();
-        expect(chaisePage.recordPage.getInlineRelatedTableComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
+        expect(chaisePage.recordPage.getInlineRelatedTableInlineComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
     });
 
     it("should render columns based on their markdown pattern.", function(done) {

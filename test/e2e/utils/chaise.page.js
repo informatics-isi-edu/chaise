@@ -488,7 +488,7 @@ var recordPage = function() {
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
 
-    this.getInlineRelatedTableComment = function (displayname) {
+    this.getInlineRelatedTableInlineComment = function (displayname) {
         return this.getEntityRelatedTable(displayname).element(by.css(".inline-tooltip"));
     }
 

@@ -369,15 +369,7 @@
                     "default"
                 ],
                 "tag:misd.isi.edu,2015:display": {
-                    "name": "Accommodations",
-                    "comment": {
-                        "detailed": "Inline table comment"
-                    },
-                    "comment_display": {
-                        "detailed": {
-                            "table_comment_display": "inline"
-                        }
-                    }
+                    "name": "Accommodations"
                 },
                 "description": {
                     "display": "Accommodations",

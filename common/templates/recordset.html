@@ -32,7 +32,6 @@
                         <chaise-title add-link="false" reference="vm.reference"></chaise-title>
                         <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
                     </h1>
-                    <div class="inline-tooltip">This is inline tooltip</div>
                 </div>
                 <div class="recordset-controls-container">
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
