@@ -105,6 +105,7 @@ before_install:
   - sudo npm install
   - cd ..
   - git clone https://github.com/informatics-isi-edu/ermrestjs.git
+  - git checkout descriptive-comment
   - cd ermrestjs
   - sudo make install
   - cd ../chaise
