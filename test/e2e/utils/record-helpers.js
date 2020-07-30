@@ -155,22 +155,31 @@ exports.testPresentation = function (tableParams) {
 
     it("should show line under columns which have a comment and inspect the comment value too", function() {
         var columns = notNullColumns.filter(function(c) {
-            return (typeof c.comment == 'string');
+            return (typeof c.comment == 'string' || c.inlineComment);
         });
         chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
             expect(pageColumns.length).toBe(columns.length);
             var index = 0;
             pageColumns.forEach(function(c) {
-                var comment = columns[index++].comment;
-                chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
-                    var exists = actualComment ? true : undefined;
-                    expect(exists).toBeDefined();
+                if (columns[index].inlineComment) {
+                    return;
+                } else {
+                    var comment = columns[index++].comment;
+                    chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
+                        var exists = actualComment ? true : undefined;
+                        expect(exists).toBeDefined();
 
-                    // Check comment is same
-                    expect(actualComment).toBe(comment);
-                });
+                        // Check comment is same
+                        expect(actualComment).toBe(comment);
+                    });
+                }
             });
         });
+    });
+
+    it("should show inline comment for inline table with one defined", function () {
+        browser.pause();
+        expect(chaisePage.recordPage.getInlineRelatedTableComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
     });
 
     it("should render columns based on their markdown pattern.", function(done) {
@@ -625,6 +634,12 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
     if (!params.isInline) {
         it("title should be correct.", function () {
             expect(chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname).getText()).toBe(params.displayname, "heading missmatch.");
+        });
+    }
+
+    if (params.inlineComment) {
+        it("comment should be displayed and correct", function () {
+            expect(chaisePage.recordPage.getRelatedTableInlineComment(params.displayname).getText()).toBe(params.comment, "inline comment is not correct");
         });
     }
 
