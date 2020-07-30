@@ -1283,38 +1283,6 @@
             e.setSelection(cursor,cursor+chunk.length);
           }
         }]
-      },{
-        name: 'groupUtil',
-        data: [{
-          name: "cmdHelp",
-          title: "Help",
-          // btnClass: 'live-preview',
-          icon: {
-            fa: "fa fa-question",
-            glyph: "glyphicon glyphicon-question-sign"
-          },
-          callback: function(e) {
-              window.open('./mdHelp.html');
-          }
-        },{
-          name: 'cmdPreview',
-          toggle: true,
-          hotkey: 'Ctrl+P',
-          title: 'Preview',
-          btnClass: 'chaise-btn chaise-btn-secondary',
-          icon: { glyph: 'glyphicon glyphicon-eye-open', fa: 'fa fa-eye', 'fa-3': 'icon-eye-open' },
-          callback: function(e){
-            // Check the preview mode and toggle based on this flag
-            var isPreview = e.$isPreview,content;
-
-            if (isPreview === false) {
-              // Give flag that tell the editor enter preview mode
-              e.showPreview();
-            } else {
-              e.hidePreview();
-            }
-          }
-        }]
       }]
     ],
     fullscreen: {

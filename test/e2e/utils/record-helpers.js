@@ -633,7 +633,9 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
     if (!params.isInline) {
         it("title should be correct.", function () {
-            expect(chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname).getText()).toBe(params.displayname, "heading missmatch.");
+            var titleEl = chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname);
+            chaisePage.waitForElement(titleEl);
+            expect(titleEl.getText()).toBe(params.displayname, "heading missmatch.");
         });
     }
 

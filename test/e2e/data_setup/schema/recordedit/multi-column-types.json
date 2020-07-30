@@ -309,6 +309,57 @@
                     "typename": "json"
                   },
                   "annotations": {}
+                },
+                {
+                  "comment": "used for generating hatrac urls",
+                  "name": "timestamp_txt",
+                  "type": {
+                    "typename": "text"
+                  }
+                },
+                {
+                  "name": "asset_col",
+                  "type": {"typename": "text"},
+                  "annotations": {
+                    "tag:isrd.isi.edu,2017:asset": {
+                      "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/multi-col-asset/{{{_asset_col.md5_hex}}}",
+                      "filename_column" : "asset_col_filename",
+                      "byte_count_column": "asset_col_bytes",
+                      "md5": "asset_col_md5"
+                    }
+                  }
+                },
+                {
+                  "name": "asset_col_filename",
+                  "type": {"typename": "text"}
+                },
+                {
+                  "name": "asset_col_bytes",
+                  "type": {"typename": "int"}
+                },
+                {
+                  "name": "asset_col_md5",
+                  "type": {"typename": "text"}
+                },
+                {
+                  "name": "asset_null_col",
+                  "comment": "url_pattern combination of invisible generated column and md5",
+                  "type": {"typename": "text"},
+                  "annotations": {
+                    "tag:isrd.isi.edu,2017:asset": {
+                      "url_pattern":"/hatrac/js/chaise/{{{_timestamp_txt}}}/multi-col-asset-null/{{{_asset_null_col.md5_hex}}}",
+                      "filename_column" : "asset_null_col_filename",
+                      "byte_count_column": "asset_null_col_bytes"
+                    }
+                  }
+                },
+                {
+                  "name": "asset_null_col_filename",
+                  "type": {"typename": "text"}
+                },
+                {
+                  "name": "asset_null_col_bytes",
+                  "type": {"typename": "int"}
                 }
             ],
             "keys": [
@@ -323,6 +374,7 @@
             "foreign_keys": [
                 {
                     "comment": "Describes the fk relationship between table_1:fk_null_col and table_2:id",
+                    "names": [["multi-column-types", "table_1_fk_1"]],
                     "foreign_key_columns": [
                         {
                             "table_name": "table_1",
@@ -341,6 +393,7 @@
                 },
                 {
                     "comment": "Describes the fk relationship between table_1:fk_col and table_2:id",
+                    "names": [["multi-column-types", "table_1_fk_2"]],
                     "foreign_key_columns": [
                         {
                             "table_name": "table_1",
@@ -357,8 +410,7 @@
                     ],
                     "annotations": {}
                 }
-            ],
-            "annotations": {}
+            ]
         },
         "table_w_generated_columns": {
             "table_name": "table_w_generated_columns",

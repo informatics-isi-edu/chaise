@@ -245,11 +245,13 @@
 
             var ermrestUri = {},
                 queryParams = {},
+                queryParamsString = "",
                 catalogId, ppid, pcid;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
-                var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
+                queryParamsString = hash.match(/\?(.+)/)[1];
+                var queries = queryParamsString.split("&"); // get the query params
                 var acceptedQueries = [], i;
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
@@ -366,6 +368,7 @@
                     hash: originalHash,
                     ppid: ppid,
                     pcid: pcid,
+                    queryParamsString: queryParamsString,
                     queryParams: queryParams,
                     isQueryParameter: isQueryParameter
                 };
@@ -820,25 +823,28 @@
 
         /**
          * Gives the path of the chaise deployment directory.
-         * If we access it from an app inside chaise folder then it returns the pathname before the appName in the url
-         * otherwise if we access it from an app outside chaise then:
-         *      1. It returns the chaise path mentioned in the chaiseConfig
-         *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
+         *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
+         *   - otherwise, returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            var chaiseConfig = ConfigUtils.getConfigJSON();
-            var appNames = ["record", "recordset", "recordedit", "search", "login"];
-            var currentAppName = appNamefromUrlPathname($window.location.pathname);
-            if (appNames.includes(currentAppName)) {
-                var index = $window.location.pathname.indexOf(currentAppName);
-                return $window.location.pathname.substring(0, index);
-            } else if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                var path = chaiseConfig.chaiseBasePath;
+            if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                var path = chaiseBuildVariables.chaiseBasePath;
                 if(path[path.length-1] !== "/")
                     path = path + "/";
                 return path;
             } else {
                 return '/chaise/';
+            }
+        }
+
+        /**
+         * Returns the path that openseadragon-viewer is installed
+         */
+        function OSDViewerDeploymentPath() {
+            if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.OSDViewerBasePath === "string") {
+                return chaiseBuildVariables.OSDViewerBasePath;
+            } else {
+                return '/openseadragon-viewer/';
             }
         }
 
@@ -1000,6 +1006,29 @@
             return url;
         }
 
+        /**
+         * Given a url, will return it if it's absolute, otherwise will
+         * attach the current origin (if origin is not passed) to it.
+         */
+        function getAbsoluteURL(uri, origin) {
+            if (typeof origin !== 'string' || origin.length < 1) {
+                origin = $window.location.origin;
+            }
+
+            // A more universal, non case-sensitive, protocol-agnostic regex
+            // to test a URL string is relative or absolute
+            var r = new RegExp('^(?:[a-z]+:)?//', 'i');
+
+            // The url is absolute so don't make any changes and return it as it is
+            if (r.test(uri))  return uri;
+
+            // If uri starts with "/" then simply prepend the server uri
+            if (uri.indexOf("/") === 0)  return origin + uri;
+
+            // else prepend the server uri with an additional "/"
+            return origin + "/" + uri;
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -1014,6 +1043,7 @@
             getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             isSameOrigin: isSameOrigin,
+            OSDViewerDeploymentPath: OSDViewerDeploymentPath,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
@@ -1021,7 +1051,8 @@
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
             stripSortAndQueryParams: stripSortAndQueryParams,
-            getRecordsetLink: getRecordsetLink
+            getRecordsetLink: getRecordsetLink,
+            getAbsoluteURL: getAbsoluteURL
         }
     }])
 
@@ -1730,7 +1761,6 @@
     }])
 
     .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
-
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)
@@ -1861,8 +1891,11 @@
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
             // return a function that will be called when a template needs t be fetched
             return function(templateUrl) {
-                var dcctx = getContextJSON();
-                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
+                var version = "";
+                if (typeof chaiseBuildVariables === "object") {
+                    version = chaiseBuildVariables.buildVersion;
+                }
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + version : "");
 
                 return delegate(versionedTemplateUrl);
             }
@@ -1904,7 +1937,10 @@
     .directive('loadingSpinner', ['UriUtils', function (UriUtils) {
         return {
             restrict: 'E',
-            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
+            scope: {
+                message: "@?"
+            }
         }
     }])
 
@@ -1913,7 +1949,10 @@
         return {
             restrict: 'A',
             transclude: true,
-            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html',
+            scope: {
+                message: "@?"
+            }
         }
     }])
 
@@ -2083,7 +2122,7 @@
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                if (typeof scope.displayname !== "object") {
+                if (typeof scope.displayname !== "object" && scope.reference) {
                     scope.displayname = scope.reference.displayname;
                 }
 
@@ -2601,7 +2640,7 @@
         };
     }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', 'UiUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, UiUtils, $window) {
 
         /**
          * adds a link tag to head with the custom css. It will be resolved when
@@ -2612,7 +2651,7 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
                 // if the file is already injected
-                if (document.querySelector('link[href="' + chaiseConfig['customCSS'] + '"]')) {
+                if (document.querySelector('link[href^="' + chaiseConfig['customCSS'] + '"]')) {
                     return defer.resolve(), defer.promise;
                 }
 
@@ -2628,6 +2667,20 @@
                 defer.resolve();
             }
             return defer.promise;
+        }
+
+        /* Custom function to add styling based on browser type and operating system */
+        function addMacFirefoxClass(){
+          var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
+          var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
+
+          var bodyElement = document.querySelector(".chaise-body");
+          if (bodyElement){
+            if(osClass)
+              UiUtils.addClass(bodyElement, osClass);
+            if(browserClass)
+              UiUtils.addClass(bodyElement, browserClass);
+           }
         }
 
         function addTitle() {
@@ -2679,25 +2732,25 @@
         }
 
         function overrideDownloadClickBehavior() {
-            addClickListener("a.asset-permission", function (e) {
+            addClickListener("a.asset-permission", function (e, element) {
 
                 function hideSpinner() {
-                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                    element.innerHTML = element.innerHTML.slice(0, element.innerHTML.indexOf(spinnerHTML));
                 }
 
                 e.preventDefault();
 
                 var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
                 //show spinner
-                e.target.innerHTML += spinnerHTML;
+                element.innerHTML += spinnerHTML;
 
                 // if same origin, verify authorization
-                if (UriUtils.isSameOrigin(e.target.href)) {
+                if (UriUtils.isSameOrigin(element.href)) {
                     var config = {skipRetryBrowserError: true, skipHTTP401Handling: true};
 
                     // make a HEAD request to check if the user can fetch the file
-                    ConfigUtils.getHTTPService().head(e.target.href, config).then(function (response) {
-                        clickHref(e.target.href);
+                    ConfigUtils.getHTTPService().head(element.href, config).then(function (response) {
+                        clickHref(element.href);
                     }).catch(function (exception) {
                         // error/login modal was closed
                         if (typeof exception == 'string') return;
@@ -2720,7 +2773,7 @@
         }
 
         function overrideExternalLinkBehavior() {
-            addClickListener('a.external-link', function (e) {
+            addClickListener('a.external-link', function (e, element) {
                 e.preventDefault();
 
                 // asset-permission will be appended via display annotation or by heuristic if no annotation
@@ -2735,7 +2788,7 @@
                 }
                 // show modal dialog with countdown before redirecting to "asset"
                 modalUtils.showModal(modalProperties, function () {
-                    clickHref(e.target.href);
+                    clickHref(element.href);
                 }, false);
             });
         }
@@ -2743,12 +2796,19 @@
         /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
-         * @param {function} handler  the handler callback function
+         * @param {function} handler  the handler callback function.
+         * handler parameters are:
+         *  - Event object that is returned.
+         *  - The target (element that is described by the selector)
+         * NOTE since we're checking the closest element to the target, the e.target might
+         * be different from the actual target that we want. That's why we have to send the target too.
+         * We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
+         * the image as the value of e.target and not the link
          */
         function addClickListener(selector, handler) {
             document.querySelector("body").addEventListener("click", function (e) {
                 if (e.target.closest(selector)) {
-                    handler(e);
+                    handler(e, e.target.closest(selector));
                 }
             });
         }
@@ -2785,6 +2845,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
+            addMacFirefoxClass();
             return addCustomCSS();
         }
 

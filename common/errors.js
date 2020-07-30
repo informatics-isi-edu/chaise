@@ -646,11 +646,6 @@ var offlineModalTemplate = function (error, dialogMessage, redirectLink, canClos
 
 window.onerror = function() {
 
-    if (window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) {
-        console.log(arguments[4]);
-        return;
-    }
-
     var canClose = false;
 
     if (typeof chaiseConfig != 'undefined' && chaiseConfig.allowErrorDismissal) {

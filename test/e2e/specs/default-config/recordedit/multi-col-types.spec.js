@@ -5,6 +5,14 @@ var moment = require('moment');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditPage = chaisePage.recordEditPage;
+var currentTimestampTime = moment().format("x");
+
+var files = [{
+    name: "testfile500kb_nulltest.png",
+    size: "512000",
+    displaySize: "500KB",
+    path: "testfile500kb_nulltest.png",
+}];
 var testParams = {
     table_1: {
         tableName: "table_1",
@@ -38,10 +46,11 @@ var testParams = {
             {name: "fk_null_col", displayType: "popup-select"},
             {name: "fk_col", displayType: "popup-select"},
             {name: "json_null_col", displayType: "json", value: "89.586"},
-            {name: "json_col", displayType: "json"}
+            {name: "json_col", displayType: "json"},
+            {name: "timestamp_txt", displayType: "text", value: currentTimestampTime}, // used for generating the hatrac path
+            {name: "asset_null_col", displayType: "asset", value: files[0]},
+            {name: "asset_col", displayType: "asset"},
         ],
-        columns: ["int2_col", "int4_col", "int8_col", "float4_col", "float8_col", "text_col", "longtext_col", "markdown_col", "bool_true_col", "bool_false_col", "timestamp_col", "timestamptz_col", "date_col", "vDcNH5rGBzGJObTbqmnH7g", "json_null_col", "json_col"],
-        null_columns: ["int2_null_col", "int4_null_col", "int8_null_col", "float4_null_col", "float8_null_col", "text_null_col", "longtext_null_col", "markdown_null_col", "bool_null_col", "bool_true_col", "timestamp_null_col", "timestamptz_null_col", "date_null_col", "6lhMahZsQfXf_lAs9BSxNA", "json_null_col", "json_col"],
         submitted_values: {
             int2_col: "32,767",
             int4_col: "-2,147,483,648",
@@ -57,10 +66,15 @@ var testParams = {
             timestamptz_col: "2016-01-18 00:00:00",
             date_col: "2016-08-15",
             // Value of foreign (fk_col) related entity
-            "vDcNH5rGBzGJObTbqmnH7g": "Abraham Lincoln",
+            "PhF3HG1fOZs72s_xbuLx4Q": "Abraham Lincoln",
             json_null_col: "null",
-            json_col: '"89.586"'
+            json_col: '"89.586"',
+            asset_col: {link: "/hatrac/js/chaise/somepath.png", value: "filenamevalue.png"},
+            asset_col_filename: "filenamevalue.png",
+            asset_col_bytes: "12,345",
+            asset_col_md5: "md5value"
         },
+        // the rest of the columns are null and therefore not displayed:
         null_submitted_values: {
             int2_null_col: "32,767",
             int4_null_col: "-2,147,483,648",
@@ -76,9 +90,13 @@ var testParams = {
             timestamptz_null_col: "2016-01-18 13:00:00",
             date_null_col: "2016-08-15",
             // Value of foreign (fk_null_col) related entity
-            "6lhMahZsQfXf_lAs9BSxNA": "Abraham Lincoln",
+            "Un6B-zCfMiIKZGKbF1TPFw": "Abraham Lincoln",
             json_null_col: "89.586",
-            json_col: "null"
+            json_col: "null",
+            timestamp_txt: currentTimestampTime,
+            asset_null_col: {ignoreInTRAVIS: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
+            asset_null_col_filename: {ignoreInTRAVIS: true, value: "testfile500kb_nulltest.png"},
+            asset_null_col_bytes: {ignoreInTRAVIS: true, value: "512,000"}
         }
     },
     table_w_generated_columns : {
@@ -111,6 +129,12 @@ describe('When editing a record', function() {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
         chaisePage.waitForElement(element(by.id("submit-record-button")));
+
+        if (!process.env.TRAVIS && files.length > 0) {
+            // create files that will be uploaded
+            recordEditHelpers.createFiles(files);
+            console.log("\n");
+        }
     });
 
     // Tests that check the values for regular, non-disabled input fields are in 01-recordedit.edit.spec.js
@@ -149,8 +173,8 @@ describe('When editing a record', function() {
             });
 
             expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
-
-            recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.columns, testParams.table_1.submitted_values, testParams.table_1.columns.length+5); // +5 for system columns
+            var colNames = Object.keys(testParams.table_1.submitted_values);
+            recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.submitted_values, colNames.length+5); // +5 for system columns
         });
     });
 
@@ -224,6 +248,20 @@ describe('When editing a record', function() {
                             recordEditPage.getDropdownClear(dropdown).click();
                         }
                         break;
+                    case "asset":
+                        var inpt = chaisePage.recordEditPage.getInputForAColumn(name, 0);
+                        var clearBtn = chaisePage.recordEditPage.getClearButton(inpt);
+                        // clear the asset
+                        chaisePage.clickButton(clearBtn).then(function () {
+                            // select new file
+                            if (newValue && !process.env.TRAVIS) {
+                                recordEditHelpers.testFileInput(name, 0, newValue, "", true, false);
+                            }
+                        }).catch(function(error) {
+                            console.log(error);
+                            expect('Something went wrong in this promise chain.').toBe('Please see error message.');
+                        });
+                        break;
                     default:
                         var input = recordEditPage.getInputById(0, name);
                         input.clear().then(function() {
@@ -249,8 +287,19 @@ describe('When editing a record', function() {
 
                 expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
 
-                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.table_1.null_columns, testParams.table_1.null_submitted_values, testParams.table_1.null_columns.length+5); // +5 for system columns
+                var colNames = Object.keys(testParams.table_1.null_submitted_values).filter(function (colName) {
+                    var el = testParams.table_1.null_submitted_values[colName];
+                    return !process.env.TRAVIS || !(typeof el === 'object' && el != null && el.ignoreInTRAVIS === true);
+                });
+                recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.null_submitted_values, colNames.length+5); // +5 for system columns
             });
         });
     });
+
+    if (!process.env.TRAVIS && files.length > 0) {
+        afterAll(function() {
+            recordEditHelpers.deleteFiles(files);
+            console.log("\n");
+        });
+    }
 });
