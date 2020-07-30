@@ -535,6 +535,10 @@
           visibility: visible !important;
         }
 
+        .alert-success{
+          display: none !important;
+        }
+
         @page {
             size: auto;
             margin: 5% 3% 5% 3%;
