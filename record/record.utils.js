@@ -65,7 +65,7 @@
                         // will take care of adding to occpuied slots
                         recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
                     }
-                    return;
+                    continue;
                 }
 
                 // related
@@ -75,8 +75,7 @@
                         // will take care of adding to occpuied slots
                         recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
                     }
-
-                    return;
+                    continue;
                 }
 
                 // entityset or aggregate
@@ -108,7 +107,12 @@
         function _afterUpdateRelatedEntity(model) {
             return function (tableModel, res) {
                 model.processed = !res;
-                if (res && (!model.hasWaitFor || model.waitForDataLoaded)) {
+                /*
+                 * the returned `res` boolean indicates whether we should consider this response final or not.
+                 * it doesn't necessarily mean that the response was successful, so we should not use the page blindly.
+                 * If the request errored out (timeout or other types of error) tableModel.page will be undefined.
+                 */
+                if (res && tableModel.page && (!model.hasWaitFor || model.waitForDataLoaded)) {
                     model.tableMarkdownContentInitialized = true;
                     model.tableMarkdownContent = tableModel.page.getContent($rootScope.templateVariables);
                 }
