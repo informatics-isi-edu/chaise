@@ -11,16 +11,18 @@
         <strong>Warning</strong> <span compile="ctrl.warningMessage"></span>
     </div>
     <ul style="word-break: break-word;">
-        <li ng-repeat="item in ctrl.params.extraInformation track by $index" ng-switch="item.type" class="share-extra-item">
-            <div ng-switch-when="link">
-                <h3 class="share-item-header">{{item.title}}</h3> 
-                <a class="share-item-value" href="{{item.link}}">{{item.value}}</a>
-            </div>
-            <div ng-switch-default>
-                <h3 class="share-item-header">{{item.title}}</h3>
-                <span class="share-item-value">{{item.value}}</span>
-            </div>
-        <li>
+        <div ng-if="ctrl.params.extraInformation.length">
+            <li ng-repeat="item in ctrl.params.extraInformation track by $index" ng-switch="item.type" class="share-extra-item">
+                <div ng-switch-when="link">
+                    <h3 class="share-item-header">{{item.title}}</h3>
+                    <a class="share-item-value" href="{{item.link}}">{{item.value}}</a>
+                </div>
+                <div ng-switch-default>
+                    <h3 class="share-item-header">{{item.title}}</h3>
+                    <span class="share-item-value">{{item.value}}</span>
+                </div>
+            <li>
+        </div>
         <li id="share-link">
             <h2 ng-show="!ctrl.params.hideHeader">Share Link</h2>
             <h3 class="share-item-header">

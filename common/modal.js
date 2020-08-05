@@ -60,7 +60,7 @@
 
             return modalInstance;
         }
-        
+
         /**
          * Given a tuple and reference will open the share popup.
          * You can also pass extra parameters if you want. The acceptable extra params are:
@@ -73,7 +73,7 @@
         function openSharePopup (tuple, reference, extraParams) {
             var refTable = reference.table;
             var params = extraParams || {};
-            
+
             params.displayname = refTable.name+'_'+tuple.uniqueId,
             params.reference = reference;
 
@@ -111,7 +111,7 @@
             openSharePopup: openSharePopup
         };
     }])
-    
+
     /**
      * Controller used to show the modal popup for confirming an action.
      *
@@ -132,7 +132,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    
+
     .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
         var vm = this;
         vm.ok = ok;

@@ -497,7 +497,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTableTitles = function() {
-        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header span').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getRelatedTableAccordion = function(displayName) {
