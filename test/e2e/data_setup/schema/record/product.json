@@ -635,12 +635,8 @@
                     }],
                     "annotations": {
                         "tag:isrd.isi.edu,2016:foreign-key": {
-                            "display": {
-                                "detailed": {
-                                    "from_comment": "booking inline related table comment",
-                                    "from_comment_display": "inline"
-                                }
-                            }
+                            "from_comment": "booking inline related table comment",
+                            "from_comment_display": "inline"
                         }
                     },
                     "referenced_columns": [{

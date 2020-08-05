@@ -155,7 +155,7 @@ exports.testPresentation = function (tableParams) {
 
     it("should show line under columns which have a comment and inspect the comment value too", function() {
         var columns = notNullColumns.filter(function(c) {
-            return (typeof c.comment == 'string' || c.inlineComment);
+            return (typeof c.comment == 'string');
         });
         chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
             expect(pageColumns.length).toBe(columns.length);
