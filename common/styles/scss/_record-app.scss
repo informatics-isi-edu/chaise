@@ -531,11 +531,12 @@
           display: none !important;
         }
 
+        //In print we hide YouTube and other videos. This class is then made visible to display the relevant info in print mode
         .video-info-in-print{
           visibility: visible !important;
         }
 
-        .alert-success{
+        alerts {
           display: none !important;
         }
 
