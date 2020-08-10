@@ -14,6 +14,8 @@ var testParams = {
     title: "Sherathon Hotel",
     subTitle: "Accommodations",
     tableComment: "List of different types of accommodations",
+    inlineTableWithCommentName: "booking",
+    inlineTableComment: "booking inline related table comment",
     tocHeaders: [
         "Summary", "accommodation_collections (1)", "table_w_aggregates (1)", "accommodation_image_assoc (1)", "table_w_invalid_row_markdown_pattern (1)", "accommodation_image (2+)"
     ],

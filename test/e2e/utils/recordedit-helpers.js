@@ -603,6 +603,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     let mdDiv = element(by.css('[ng-bind-html="ctrl.renderedMarkdown"]'));
                                     browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
+                                    browser.wait(EC.elementToBeClickable(element(by.className('modal-close'))), browser.params.defaultTimeout);
                                     element(by.className('modal-close')).click();
                                     PrevBtn.click();        //generate preview
                                     let mdPrevDiv = element(by.className("md-preview"));

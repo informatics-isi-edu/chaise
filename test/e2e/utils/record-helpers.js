@@ -173,6 +173,10 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    it("should show inline comment for inline table with one defined", function () {
+        expect(chaisePage.recordPage.getInlineRelatedTableInlineComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
+    });
+
     it("should render columns based on their markdown pattern.", function(done) {
         var columns = tableParams.columns.filter(function(c) {return c.markdown_title;});
         chaisePage.recordPage.getColumnCaptionsWithHtml().then(function(pageColumns) {
@@ -627,6 +631,12 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
             var titleEl = chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname);
             chaisePage.waitForElement(titleEl);
             expect(titleEl.getText()).toBe(params.displayname, "heading missmatch.");
+        });
+    }
+
+    if (params.inlineComment) {
+        it("comment should be displayed and correct", function () {
+            expect(chaisePage.recordPage.getRelatedTableInlineComment(params.displayname).getText()).toBe(params.comment, "inline comment is not correct");
         });
     }
 

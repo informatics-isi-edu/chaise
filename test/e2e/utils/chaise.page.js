@@ -488,12 +488,16 @@ var recordPage = function() {
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
 
+    this.getInlineRelatedTableInlineComment = function (displayname) {
+        return this.getEntityRelatedTable(displayname).element(by.css(".inline-tooltip"));
+    }
+
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-accordion"));
     };
 
     this.getRelatedTableTitles = function() {
-        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header span').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getRelatedTableAccordion = function(displayName) {
@@ -508,6 +512,10 @@ var recordPage = function() {
     this.getRelatedTableSectionHeader = function(displayName) {
         return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header'));
     };
+
+    this.getRelatedTableInlineComment = function(displayname) {
+        return this.getRelatedTableAccordion(displayname).element(by.css('.inline-tooltip'));
+    }
 
     this.getRelatedTableHeadingTitle = function(displayname) {
         displayName = makeSafeIdAttr(displayname);

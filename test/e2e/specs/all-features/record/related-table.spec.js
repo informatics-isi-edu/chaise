@@ -93,6 +93,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         count: 6,
         canDelete: true,
         canEdit: true,
+        inlineComment: true,
+        comment: "booking inline comment",
         viewMore: {
             displayname: "booking",
             filter: "Accommodations\nSuper 8 North Hollywood Motel"

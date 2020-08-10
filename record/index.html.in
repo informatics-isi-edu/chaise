@@ -134,9 +134,11 @@
                                     <uib-accordion-heading>
                                         <div class="rt-section-header" ng-click="::ctrl.logAccordionClick(rtm)">
                                             <i class="toggle-icon fas" ng-class="{'fa-chevron-down': rtm.open, 'fa-chevron-right': !rtm.open}"></i>
-                                            <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
-                                            <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
-                                            <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
+                                            <span ng-class="{'chaise-icon-for-tooltip':  rtm.tableModel.reference.commentDisplay == 'tooltip' && rtm.tableModel.reference.comment}" ng-attr-uib-tooltip="{{::(rtm.tableModel.reference.commentDisplay == 'tooltip' && rtm.tableModel.reference.comment) ? rtm.tableModel.reference.comment : undefined}}" tooltip-placement="right">
+                                                <span ng-if="::rtm.displayname.isHTML" class="rt-displayname" ng-bind-html="::rtm.displayname.value"></span>
+                                                <span ng-if="::!rtm.displayname.isHTML" class="rt-displayname" ng-bind="::rtm.displayname.value"></span>
+                                                <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
+                                            </span>
                                         </div>
                                         <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
                                             is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
@@ -147,6 +149,7 @@
 
                                     <!-- for different elements inside the accordion -->
                                     <div class="row" style="margin-right: 0px; margin-left: 0px;">
+                                        <div ng-if="rtm.tableModel.reference.commentDisplay == 'inline' && rtm.tableModel.reference.comment" class="inline-tooltip">{{rtm.tableModel.reference.comment}}</div>
                                         <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)">
                                             <div ng-switch-when="true">
                                                 <span class="markdown-container" ng-bind-html="rtm.tableMarkdownContent | trustedHTML"></span>

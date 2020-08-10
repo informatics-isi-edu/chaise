@@ -2126,6 +2126,7 @@
                     scope.displayname = scope.reference.displayname;
                 }
 
+                // TODO: this needs to be extended to use reference.comment once table display is being digested for the title of each app
                 if (!scope.comment && scope.reference && scope.reference.table.comment) {
                     scope.comment = scope.reference.table.comment;
                 }
