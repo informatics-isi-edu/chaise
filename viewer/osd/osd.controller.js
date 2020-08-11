@@ -50,28 +50,6 @@
                 var messageType = data.messageType;
 
                 switch (messageType) {
-                    case "disableAnnotationList":
-                        $scope.$apply(function(){
-                            // Note: This logic need to change
-                            // users should still be able to open annotation list if there's no annotation
-                            // the following two lines are commented for demo purpose
-                            // $rootScope.disableAnnotationSidebar = data.content;
-                            // TODO should be moved to annotation controller
-                            $rootScope.hideAnnotationSidebar = data.content;
-                            // var sidebarptr=$('#sidebar');
-                            // if(data.content) {
-                            //   sidebarptr.css("display","none");
-                            //   } else {
-                            //     sidebarptr.css("display","block");
-                            // }
-
-                        });
-                        break;
-                    case "errorAnnotation":
-                        $scope.$apply(function(){
-                            vm.error = "No data in svg found.";
-                        });
-                        break;
                     case "hideChannelList":
                         $scope.$apply(function(){
                           vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;

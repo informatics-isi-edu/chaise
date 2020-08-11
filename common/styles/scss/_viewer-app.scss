@@ -259,13 +259,21 @@
 
             .annotation-form-container, .annotation-list{
                 margin-bottom: 20px;
+                position: relative;
+            }
+            
+            .annotation-spinner {
+                #spinner {
+                    top: 200px;
+                    // width: 160px;
+                    // height: 90px;
+                }
             }
 
             .annotation-form-container{
                 border: 1px solid #d9d9d9;
                 border-radius: 3px;
                 background: #f8f8f8;
-                position: relative;
                 
                 .form-spinner-overlay {
                     position: absolute;

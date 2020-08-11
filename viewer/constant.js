@@ -14,6 +14,9 @@
             DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z" // the default value of the zindex in the form TODO
         },
         annotation: {
+            // how many annotations at a time should we read from database
+            PAGE_COUNT: 25,
+            
             // annotation table
             ANNOTATION_TABLE_NAME: "Image_Annotation",
             ANNOTATION_TABLE_SCHEMA_NAME: "Gene_Expression",

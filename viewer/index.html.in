@@ -175,6 +175,8 @@
                                 </div>
                             </div>
                             <div class='annotation-list' ng-show="anno.editingAnatomy == null">
+                                <!-- message="Loading annotations..." -->
+                                <loading-spinner class="annotation-spinner" ng-if="loadingAnnotations"></loading-spinner>
                                 <span class='row filter' data-type='overlayVisibility'>
                                     <span class='name'> Display : </span>
                                     <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
@@ -201,7 +203,7 @@
                                     <button ng-show="canCreate" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                                 </div>
                                 <span class='resultCount'>
-                                    <span>Displaying {{ anno.matchCount }} of {{ anno.totalCount }} Annotations</span>
+                                    <span>Displaying {{ anno.matchCount }} <span ng-if="!loadingAnnotations"> of {{ anno.totalCount }} </span>Annotations</span>
                                 </span>
                                 <div ng-if="osd.error != ''" class="annotation-error">
                                     {{osd.error}}

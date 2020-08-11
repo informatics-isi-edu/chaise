@@ -123,8 +123,10 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'InputUtils', 'logService', '$window', 'context', 'image', 'annotations', 'MathUtils', '$rootScope', 'Session', 'annotationCreateForm', 'annotationEditForm', 'recordCreate', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, InputUtils, logService, $window, context, image, annotations, MathUtils, $rootScope, Session, annotationCreateForm, annotationEditForm, recordCreate, AlertsService, viewerConstant, UiUtils, $timeout) {
+    .run([
+        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         $rootScope.displayReady = false;
@@ -186,6 +188,7 @@
                 
                 if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
                     $rootScope.hideAnnotationSidebar = false;
+                    $rootScope.loadingAnnotations = true;
                     hasAnnotationQueryParam = true;
                 } else {
                     hasImageQueryParam = true;
@@ -271,20 +274,9 @@
                     }
                 }
                 
-                // TODO should we move this to osd viewer?
-                // if we cannot show any annotation on the image (osd doesn't support it), 
-                //  - disable the annotation list
-                //  - don't even send a request to database
-                if (osdViewerQueryParams && osdViewerQueryParams.length > 0) {
-                    osdViewerQueryParams.split('&').forEach(function (queryStr) {
-                        var qpart = queryStr.split("=");
-                        if (qpart.length != 2 || qpart[0] !== "url") return;
-                        
-                        if (qpart[1].indexOf("info.json") != -1) {
-                            osdCanShowAnnotation = true;
-                        }
-                    });
-                }
+                // TODO throw an error if there wasn't any image
+                
+                osdCanShowAnnotation = viewerAppUtils.canOSDShowAnnotation(osdViewerQueryParams);
 
                 // if there's svg query param, don't fetch the annotations from DB.
                 // if we cannot show any overlay, there's no point in reading
@@ -292,106 +284,19 @@
                     return false;
                 }
 
-                // TODO should be done in ermrestjs
-                var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-                imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":";
-                imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_NAME) + "/";
-                imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
-                imageAnnotationURL += "=" + UriUtils.fixedEncodeURIComponent(context.imageID);
-                return ERMrest.resolve(imageAnnotationURL, { cid: context.cid, pid: context.pid, wid: context.wid });
-            })
-            // create the annotation reference
-            .then(function (ref) {
-                
-                if (!ref) {
-                    $rootScope.canCreate = false;
-                    $rootScope.canUpdate = false;
-                    $rootScope.canDelete = false;
-                    return false;
-                }
-                
-                annotationEditReference = ref.contextualize.entryEdit;
-
-                // TODO we might be able to refactor this
-                // attach to the $rootScope so it can be used in annotations.controller
-                $rootScope.annotationEditReference = annotationEditReference;
-
-                $rootScope.canCreate = annotationEditReference.canCreate || false;
-                $rootScope.canUpdate = annotationEditReference.canUpdate || false;
-                $rootScope.canDelete = annotationEditReference.canDelete || false;
-
-                annotationEditReference.session = session;
-
-                // TODO create and edit should be refactored to reuse the same code
-                // create the edit and create forms
-                var invisibleColumns = [
-                    annotConstant.OVERLAY_COLUMN_NAME,
-                    annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME,
-                    annotConstant.Z_INDEX_COLUMN_NAME,
-                    annotConstant.CHANNELS_COLUMN_NAME
-                ];
-                if ($rootScope.canCreate) {
-                    annotationCreateForm.reference = ref.contextualize.entryCreate;
-                    annotationCreateForm.reference.columns.forEach(function (column) {
-                        // remove the invisible (asset, image, z-index, channels) columns
-                        if (invisibleColumns.indexOf(column.name) !== -1) return;
-
-                        annotationCreateForm.columnModels.push(recordCreate.columnToColumnModel(column));
-                    });
-                }
-
-                if ($rootScope.canUpdate) {
-                    annotationEditForm.reference = annotationEditReference;
-                    annotationEditForm.reference.columns.forEach(function (column) {
-                        // remove the invisible (asset, image, z-index, channels) columns
-                        if (invisibleColumns.indexOf(column.name) !== -1) return;
-
-                        annotationEditForm.columnModels.push(recordCreate.columnToColumnModel(column));
-                    });
-                }
-
-                // TODO needs to be updated
-                var logObj = {
-                    action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
-                    stack: logService.getStackObject()
-                };
-
-                // TODO how many should we read?
-                // using edit, because the tuples are used in edit context (for populating edit form)
-                return annotationEditReference.read(201, logObj, false, true);
+                return viewerAppUtils.readAllAnnotations();
             })
             // read the annotation reference
-            .then(function getPage(page) {
-                
-                // TODO not used
-                $rootScope.showColumnSpinner = [{}];
-                
-                $rootScope.annotationTuples = [];
-                if (page && page.length > 0) {
-                    $rootScope.annotationTuples = page.tuples;
-                    
-                    for(var j = 0; j < page.tuples.length; j++){
-                        var row = page.tuples[j].data;
-                        if(row && row[annotConstant.OVERLAY_COLUMN_NAME]){
-                            // attach to the query params
-                            osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
-                            osdViewerQueryParams += "url=" + UriUtils.getAbsoluteURL(row[annotConstant.OVERLAY_COLUMN_NAME], origin);
-                            
-                            // there are some annotation in database, so open the sidebar
-                            $rootScope.hideAnnotationSidebar = false;
-                        }
-                    }
-                } 
+            .then(function (res) {
                 // disable the annotaiton sidebar: 
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
-                else if (!$rootScope.canCreate && !hasAnnotationQueryParam) {
+                if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
                     $rootScope.disableAnnotationSidebar = true;
                 }
-
-                // TODO throw error
-                if (osdViewerQueryParams.length === 0) {
-                    console.log("there wasn't any appropriate parameters for osd.");
+                
+                if ($rootScope.annotationTuples.length > 0) {
+                    $rootScope.loadingAnnotations = true;
                 }
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;
@@ -419,29 +324,18 @@
                 throw err;
             });
         });
+        
+        /**
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        UriUtils.setLocationChangeHandling();
 
-        // Initialize Bootstrap tooltips
-        $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip({
-                placement: 'bottom',
-                container: 'body',
-                html: true
-            });
-        });
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
+        UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
-
-    // Refresh the page when the window's hash changes. Needed because Angular
-    // normally doesn't refresh page when hash changes.
-    window.onhashchange = function() {
-        if (window.location.hash != '#undefined') {
-            location.reload();
-        } else {
-            history.replaceState("", document.title, window.location.pathname);
-            location.reload();
-        }
-        function goBack() {
-            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
-            window.location.lasthash.pop();
-        }
-    }
 })();
