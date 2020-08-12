@@ -235,10 +235,12 @@ var testParams = {
     system_columns: {
         table_name: "system-columns",
         compactConfig: ['RCB', 'RMT'],
-        detailedCofnig: true,
+        detailedConfig: true,
+        entryConfig: ['RCB', 'RMB', 'RMT'],
         compactColumnsSystemColumnsTable: ['id', 'text', 'int', 'RCB', 'RMT'],
         detailedColumns: ['RID', 'id', 'text', 'int', 'RCB', 'RMB', 'RCT', 'RMT'],
-        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
+        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'], // no int column because it's the foreign key link (would be redundent)
+        entryColumns: ['id', 'text', 'int', 'RCB', 'RMB', 'RMT']
     }
 };
 
@@ -931,7 +933,7 @@ describe('View recordset,', function() {
             }).then(function() {
                 //wait for it to be on the first page again
                 browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
-                
+
                 //make sure the button is clickable
                 browser.wait(EC.elementToBeClickable(pageLimitBtn), browser.params.defaultTimeout);
 
@@ -1131,8 +1133,9 @@ describe('View recordset,', function() {
 
                 it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
                     browser.executeScript('return chaiseConfig').then(function(config) {
-                        expect(config.SystemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
-                        expect(config.SystemColumnsDisplayDetailed).toBeTruthy();
+                        expect(config.systemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
+                        expect(config.systemColumnsDisplayDetailed).toBeTruthy();
+                        expect(config.systemColumnsDisplayEntry).toEqual(systemColumnsParams.entryConfig);
                     }).catch(function(error) {
                         console.log('ERROR:', error);
                         // Fail the test
@@ -1140,7 +1143,7 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("with SystemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
+                it("with systemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
                     chaisePage.recordsetPage.getColumnNames().then(function(columns) {
                         expect(columns.length).toBe(systemColumnsParams.compactColumnsSystemColumnsTable.length);
                         for (var i = 0; i < columns.length; i++) {
@@ -1149,7 +1152,7 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("SystemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
                     chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
                         expect(buttons.length).toBe(1);
                         return buttons[0].click();
@@ -1171,11 +1174,28 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("on record page, SystemColumnsDisplayCompact should also be honored for related tables.", function () {
+                it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
                     chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
                         expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
                         for (var i = 0; i < columns.length; i++) {
                             expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
+                    });
+                });
+
+                it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
+                    // click create
+                    chaisePage.recordPage.getCreateRecordButton().click().then(function () {
+                        // test columns length
+
+                        chaisePage.recordeditPageReady();
+                        return chaisePage.recordEditPage.getAllColumnCaptions();
+                    }).then(function(pageColumns) {
+                        expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
+
+                        // test each column
+                        for (var i=0; i<pageColumns.length; i++) {
+                            expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
                         }
                     });
                 });
