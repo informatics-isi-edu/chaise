@@ -9,6 +9,7 @@
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
+          "dataBrowser": "/chaise/recordset",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
           "deleteRecord": false,
