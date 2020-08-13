@@ -75,8 +75,7 @@ body > .container {
 }
 
 .dropdown-submenu>.dropdown-menu {
-    top: 0;
-    left: 100%;
+		position: fixed;
     margin-top: -6px;
     margin-left: -1px;
     -webkit-border-radius: 0 6px 6px 6px;
@@ -132,4 +131,11 @@ body > .container {
 
 #brand {
     color: #fff;
+}
+
+/*Adding the scroll bar to the menu */
+.navbar-nav>li>.dropdown-menu {
+		max-height: 250px;
+		overflow-x: hidden;
+		overflow-y: auto;
 }

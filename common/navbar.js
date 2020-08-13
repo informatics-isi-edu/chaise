@@ -16,6 +16,16 @@
       });
     }
 
+    /* Function to calculate the left of the toggleSubMenu*/
+    function getOffsetValue(element){
+       var offsetLeft = 0
+       while(element) {
+          offsetLeft += element.offsetLeft;
+          element = element.offsetParent;
+       }
+       return offsetLeft;
+    }
+
     /**
      * It will toggle the dropdown that this event is based on. If we're going to open it,
      * it will close all the other dropdowns and also will return `true`.
@@ -26,6 +36,16 @@
       $event.preventDefault();
 
       var menuTarget = getNextSibling($event.target,".dropdown-menu");
+      var immediateParent = $event.target.offsetParent;
+      var parent = immediateParent.offsetParent;
+      var posValues = getOffsetValue(immediateParent);
+
+      if(parent.scrollTop == 0){
+          menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
+      } else if (parent.scrollTop > 0) {
+          menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
+      }
+      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
 
       var open = !menuTarget.classList.contains("show");
 
