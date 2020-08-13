@@ -131,9 +131,10 @@
         var iframe = $window.frames[0];
         $rootScope.displayReady = false;
         $rootScope.displayIframe = false;
-        
+
         // only show the panel if there are annotation images in the url
         $rootScope.hideAnnotationSidebar = true;
+        $rootScope.annotationTuples = [];
 
         var arrows = [];
         var rectangles = [];
@@ -175,7 +176,7 @@
             hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
             hasImageQueryParam = false, // if there is an image in query, we should just use it and shouldn't use the image uri from db
             osdCanShowAnnotation = false; // whether we can show image annotations or not (if not, we will disable the sidebar)
-        
+
         // HACK: this is just a hack to allow quick testing
         // if there are any svg files in the query params, ignore the annotation table.
         // we cannot use the queryParams object that is returned since it only give us the last url
@@ -185,7 +186,7 @@
             queryParamsString.split('&').forEach(function (queryStr) {
                 var qpart = queryStr.split("=");
                 if (qpart.length != 2 || qpart[0] !== "url") return;
-                
+
                 if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
                     $rootScope.hideAnnotationSidebar = false;
                     $rootScope.loadingAnnotations = true;
@@ -213,7 +214,7 @@
 
                 session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
-                    
+
                 // TODO is it needed?
                 $rootScope.session = session;
 
@@ -235,31 +236,31 @@
             })
             // read the main (image) reference
             .then(function (imagePage) {
-                
+
                 // TODO throw error
                 // what if the record doesn't exist (or there are multiple)
                 if (imagePage.length != 1) {
                     console.log("Image request didn't return a row.");
                     return false;
                 }
-                
+
                 image.entity = imagePage.tuples[0].data;
                 context.imageID = image.entity.RID;
                 imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
-                
+
                 // TODO some sort of warning maybe?
                 if (!imageURI) {
                     console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty. We cannot show any image from database.");
                 }
-                
+
                 // TODO this feels hacky
                 // get the default zindex value
                 if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
                     context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
                 }
-                
+
                 /**
-                * - if url is passed in query parameters, don't use image.uri value 
+                * - if url is passed in query parameters, don't use image.uri value
                 *   (TODO maybe we shouldn't even read the image? (we're reading image for RID value etc..)
                 * - otherwise, if image.uri value exists
                 *    - and has query parameter, use the image.uri query parameter.
@@ -273,9 +274,9 @@
                         osdViewerQueryParams += imageURI;
                     }
                 }
-                
+
                 // TODO throw an error if there wasn't any image
-                
+
                 osdCanShowAnnotation = viewerAppUtils.canOSDShowAnnotation(osdViewerQueryParams);
 
                 // if there's svg query param, don't fetch the annotations from DB.
@@ -288,13 +289,13 @@
             })
             // read the annotation reference
             .then(function (res) {
-                // disable the annotaiton sidebar: 
+                // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
                 if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
                     $rootScope.disableAnnotationSidebar = true;
                 }
-                
+
                 if ($rootScope.annotationTuples.length > 0) {
                     $rootScope.loadingAnnotations = true;
                 }
@@ -305,11 +306,11 @@
 
                 // TODO there should be a way that osd tells us it's done doing it's setup.
                 $rootScope.displayReady = true;
-                
+
                 /**
                  * fix the size of main-container and sticky areas, and then show the iframe.
                  * these have to be done in a digest cycle after setting the displayReady.
-                 * Because this way, we will ensure to run the height logic after the page 
+                 * Because this way, we will ensure to run the height logic after the page
                  * content is visible and therefore it can set a correct height for the bottom-container.
                  * otherwise the iframe will be displayed in a small box first.
                  */
@@ -324,7 +325,7 @@
                 throw err;
             });
         });
-        
+
         /**
          * it saves the location in $rootScope.location.
          * When address bar is changed, this code compares the address bar location

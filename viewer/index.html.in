@@ -41,12 +41,6 @@
                             <button ng-click="osd.filterChannels();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" uib-tooltip="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
-                            <!-- <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" title="edit annotations" id="edit-btn">
-                                <span class="glyphicon glyphicon-edit"></span> Annotations
-                            </button> -->
-                            <!-- <button ng-click="osd.toggleAnnotations();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
-                                <span class="glyphicon glyphicon-eye-close"></span> Hide
-                            </button> -->
                             <button ng-click="osd.zoomInView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
@@ -56,8 +50,10 @@
                             <button ng-click="osd.homeView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="reset" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="take snapshot" id="download-btn">
-                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
+                            <button ng-click="osd.downloadView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="take snapshot" id="download-btn" ng-disabled="osd.waitingForScreenshot">
+                                <span class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': osd.waitingForScreenshot, 'glyphicon-camera': !osd.waitingForScreenshot}"></span>
+                                <span>Take a Screenshot</span>
+                            </button>
                         </div>
                     </div>
                 </div>

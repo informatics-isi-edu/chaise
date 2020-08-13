@@ -55,7 +55,17 @@
                           vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
                         });
                         break;
-
+                    case "downloadViewDone":
+                        $scope.$apply(function(){
+                          vm.waitingForScreenshot = false;
+                        });
+                        break;
+                    case "downloadViewError":
+                        $scope.$apply(function(){
+                          vm.waitingForScreenshot = false;
+                          AlertsService.addAlert("Couldn't process the screenshot.", "warning");
+                        });
+                        break;
                     default:
                         // other messages are handled by other controllers
                 }
@@ -73,6 +83,8 @@
                 messageType: 'downloadView',
                 content: filename
             }
+
+            vm.waitingForScreenshot = true;
             iframe.postMessage(obj, origin);
         }
 
