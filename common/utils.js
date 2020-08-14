@@ -1764,12 +1764,11 @@
     .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$log', '$rootScope', '$window', function(defaultConfig, $http, $log, $rootScope, $window) {
         // List of all accepted chaiseConfig properties in defined case from chaise-config.md
         var chaiseConfigPropertyNames = [
-            "catalog", "schema", "layout", "facetPolicy", "feedbackURL", "helpURL", "ermrestLocation", "recordResource",
-            "showBadgeCounts", "tableThreshold", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
-            "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor", "confirmDelete",
-            "hideSearchTextFacet", "maxColumns", "showUnfilteredResults", "editRecord", "deleteRecord", "defaultCatalog",
-            "defaultTables", "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
-            "allowErrorDismissal", "searchPageSize", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
+            "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
+            "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
+            "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
+            "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+            "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
             "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
             "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
             "logClientActions", "disableExternalLinkModal", "internalHosts", "configRules"
