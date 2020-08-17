@@ -159,6 +159,10 @@
         function saveAnnotationRecord(data){
             iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
         }
+        
+        function loadAnnotations(data) {
+            iframe.postMessage({messageType: 'loadAnnotations', content: data}, origin);
+        }
 
         return {
             drawAnnotation: drawAnnotation,
@@ -177,7 +181,8 @@
             addNewTerm : addNewTerm,
             removeEntry : removeEntry,
             removeSVG : removeSVG,
-            saveAnnotationRecord : saveAnnotationRecord
+            saveAnnotationRecord : saveAnnotationRecord,
+            loadAnnotations: loadAnnotations
         };
 
     }]);
