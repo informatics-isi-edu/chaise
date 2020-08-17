@@ -277,8 +277,8 @@ SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
 	$(info - creating app.css and navbar.css)
-	@$(BIN)/node-sass --output-style compressed --source-map-embed $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --output-style compressed --source-map-embed $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	@$(BIN)/node-sass --output-style compressed --source-map-embed --source-map-root $(CHAISE_BASE_PATH) $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --output-style compressed --source-map-embed --source-map-root $(CHAISE_BASE_PATH) $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 JS_CONFIG=chaise-config.js
 $(JS_CONFIG): chaise-config-sample.js
@@ -407,6 +407,7 @@ recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
 VIEWER_ROOT=viewer
 
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
+	$(VIEWER_ROOT)/viewer.utils.js \
 	$(VIEWER_ROOT)/constant.js \
 	$(VIEWER_ROOT)/common/providers/context.js \
 	$(VIEWER_ROOT)/common/providers/image.js \

@@ -104,7 +104,12 @@
 
         // this function assumes tuple and reference are attached to the $rootScope
         vm.sharePopup = function() {
-            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference);
+            vm.waitingForSharePopup = true;
+            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference).then(function () {
+                vm.waitingForSharePopup = false;
+            }).catch(function (err) {
+                // the promise won't be rejected
+            });
         };
 
         vm.toRecordSet = function(ref) {

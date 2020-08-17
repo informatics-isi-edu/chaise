@@ -93,6 +93,12 @@
                 var messageType = data.messageType;
                 // console.log("event received : ", event);
                 switch (messageType) {
+                    case 'osdInitialized':
+                        AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                        break;
+                    case 'annotationsLoaded':
+                        $rootScope.loadingAnnotations = false;
+                        break;
                     case 'annotationDrawn':
                         vm.newAnnotation.shape = data.content.shape;
                         $scope.$apply(function() {
@@ -126,14 +132,12 @@
                         })
                         break;
                     case "onChangeStrokeScale":
-                        // console.log(data)
                         $scope.$apply(function(){
                             vm.strokeScale = +data.content.strokeScale.toFixed(2);
                         });
                         break;
                     case "updateAnnotationList":
                         $scope.$apply(function(){
-                            console.log("here");
                             _addAnnotationToList(data.content);
                             vm.updateDisplayNum();
                         })
@@ -144,12 +148,12 @@
                             vm.saveAnatomySVGFile(data);
                         })
                         break;
-                    // The following cases are already handled elsewhere or are
-                    // no longer needed but the case is repeated here to avoid
-                    // triggering the default case.
-                    case 'annotoriousReady': // handled in viewer.app.js.
-                    case 'onHighlighted':
-                    case 'onUnHighlighted':
+                    case 'disableAnnotationSidebar':
+                        $rootScope.disableAnnotationSidebar = (data === true);
+                        break;
+                    case 'errorAnnotation':
+                        AlertsService.addAlert("Couldn't parse the given annotation.", "warning");
+                        console.log("annotation error: ", data);
                         break;
                 }
             } else {
@@ -773,8 +777,22 @@
                     }
                 ]
             };
+                
+            // to disable all the share buttons
+            vm.waitingForSharePopup = true;
             
-            modalUtils.openSharePopup(item.tuple, $rootScope.annotationEditReference, moreInfo);
+            // to show the loader
+            item.waitingForSharePopup = true;
+
+            modalUtils.openSharePopup(item.tuple, $rootScope.annotationEditReference, moreInfo).then(function () {
+                if (!item.isSelected) {
+                    highlightGroup(item, event);
+                }
+                vm.waitingForSharePopup = false;
+                item.waitingForSharePopup = false;
+            }).catch(function () {
+                //
+            });
 
             event.stopPropagation();
             event.preventDefault();
