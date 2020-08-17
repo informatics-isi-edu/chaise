@@ -4,15 +4,15 @@ var chaiseConfig = {
     name: "All Features with Delete Confirmation Dialog",
     editRecord: true,
     deleteRecord: true,
-    confirmDelete: true,
-    defaultCatalog: 1,
+    CONFIRMDELETE: true, //testing case-insensitive properties as well
+    deFAuLtCaTAlog: 1, //testing case-insensitive properties as well
     maxRelatedTablesOpen: 6,
     maxRecordsetRowHeight: false, // triggers (ignores) some logic in ellipsis.js. Tests view buttons having proper links
     allowErrorDismissal : true,
     resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id
-    systemColumnsDisplayCompact: ['RCB', 'RMT'],
-    systemColumnsDisplayDetailed: true,
-    systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'],
+    systemcolumnsdisplaycompact: ['RCB', 'RMT'], //testing case-insensitive properties as well
+    SystemColumnsDisplayDetailed: true, //testing case-insensitive properties as well
+    systemColumnsDisplayENTRY: ['RCB', 'RMB', 'RMT'], //testing case-insensitive properties as well
     disableExternalLinkModal: true,
     logClientActions: false,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
