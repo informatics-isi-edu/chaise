@@ -643,7 +643,14 @@
                             message: "Are you sure you want to discard your changes?"
                         }
                     }
-                }, close, null, false); 
+                }, function () {
+                    if (!vm.editingAnatomy.isNew) {
+                        // send a message to osd viewer to cancel
+                        AnnotationsService.discardAnnotationChanges();
+                    }
+                    
+                    close();
+                }, null, false); 
             } else {
                 close();
             }
