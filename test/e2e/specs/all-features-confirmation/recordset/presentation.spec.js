@@ -1068,7 +1068,8 @@ describe('View recordset,', function() {
             }).then(function(config) {
                 chaiseConfig = config;
                 expect(chaiseConfig.confirmDelete).toBeTruthy();
-                expect(chaiseConfig.defaultCatalog).toBe(1);
+                // use "deFAuLtCaTAlog" since we are grabbing the property directly from chaise config. The application will use the right value
+                expect(chaiseConfig.deFAuLtCaTAlog).toBe(1);
                 expect(chaiseConfig.defaultTables['1'].schema).toBe("isa");
                 expect(chaiseConfig.defaultTables['1'].table).toBe("dataset");
             }).catch(function(error) {
@@ -1131,11 +1132,13 @@ describe('View recordset,', function() {
                     chaisePage.recordsetPageReady();
                 });
 
-                it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
+                it('should have values defined in config with odd cases', function() {
                     browser.executeScript('return chaiseConfig').then(function(config) {
-                        expect(config.systemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
-                        expect(config.systemColumnsDisplayDetailed).toBeTruthy();
-                        expect(config.systemColumnsDisplayEntry).toEqual(systemColumnsParams.entryConfig);
+                        // testing the following based on case defined in chaise-config.js
+                        // the application will digest this properly and test that below by inspecting the UI
+                        expect(config.systemcolumnsdisplaycompact).toEqual(systemColumnsParams.compactConfig);
+                        expect(config.SystemColumnsDisplayDetailed).toBeTruthy();
+                        expect(config.systemColumnsDisplayENTRY).toEqual(systemColumnsParams.entryConfig);
                     }).catch(function(error) {
                         console.log('ERROR:', error);
                         // Fail the test

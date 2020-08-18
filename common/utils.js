@@ -1802,6 +1802,15 @@
          *     a. Apply base level configuration properties
          *     b. Apply config-rules in order depending on matching host definitions
          *
+         * NOTE: Chaise Config properties can be case-insensitive since we check the properties against a whitelist of accepted property names.
+         * If the same property is defined in the same "chaise config" more than once with different case, the latter defined property will be used.
+         *
+         * For instance, given the below object, defaultCATALOG will be used over defaultCatalog:
+         * chaise-config.js = {
+         *   "defaultCatalog": 1,
+         *   "defaultCATALOG": 2
+         * }
+         *
          * @params {Object} catalogAnnotation - the chaise-config object returned from the 2019 chaise-config annotation tag attached to the catalog object
          *
          */
@@ -1823,11 +1832,7 @@
 
                     // if we found a match for the current key in chaiseConfig, use the match from chaiseConfigPropertyNames as the key and set the value
                     if (matchedKey.length > 0 && matchedKey[0]) {
-                        if (cc[matchedKey[0]]) {
-                            $log.warn("duplicate key found in chaise-config.js, ignoring the 2nd value with key=", key);
-                        } else {
-                            cc[matchedKey[0]] = chaiseConfig[key];
-                        }
+                        cc[matchedKey[0]] = chaiseConfig[key];
                     }
                 }
             }
@@ -1873,11 +1878,7 @@
 
                                         // if we found a match for the current key in ruleset.config, use the match from chaiseConfigPropertyNames as the key and set the value
                                         if (matchedKey.length > 0 && matchedKey[0]) {
-                                            if (cc[matchedKey[0]]) {
-                                                $log.warn("duplicate key found in configRules for one of the rulesets, ignoring the 2nd value with key=", property);
-                                            } else {
-                                                cc[matchedKey[0]] = ruleset.config[property];
-                                            }
+                                            cc[matchedKey[0]] = ruleset.config[property];
                                         }
                                     }
                                     break;
@@ -1901,11 +1902,7 @@
 
                     // if we found a match for the current key in catalogAnnotation, use the match from chaiseConfigPropertyNames as the key and set the value
                     if (matchedKey.length > 0 && matchedKey[0]) {
-                        if (cc[matchedKey[0]]) {
-                            $log.warn("duplicate key found in catalog annotation, ignoring the 2nd value with key=", property);
-                        } else {
-                            cc[matchedKey[0]] = catalogAnnotation[property];
-                        }
+                        cc[matchedKey[0]] = catalogAnnotation[property];
                     }
                 }
 
