@@ -9,87 +9,83 @@
         };
     }])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logActions', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logActions, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
-        function deleteReference(scope, reference) {
-            var logObject = {action: logActions.recordsetDelete};
-            // if it's related mode, change the logObject
-            if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0) {
-                logObject = {
-                    action: logActions.recordRelatedDelete,
-                    referrer: scope.parentReference.defaultLogInfo
+        function containerDetails(scope) {
+            return {
+                displayMode: scope.config.displayMode,
+                containerIndex: scope.config.containerIndex
+            };
+        }
+
+        function getLogAction(scope, actionVerb) {
+            return recordTableUtils.getTableLogAction(scope.tableModel, logService.logStackPaths.ENTITY, actionVerb);
+        }
+
+        function deleteReference(scope, reference, isRelated, isUnlink) {
+            Session.validateSessionBeforeMutation(function () {
+                var logObj = {
+                    action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK : logService.logActions.DELETE),
+                    stack: scope.logStack
                 };
-            }
+                var emmitedMessageArgs = {};
+                if (isRelated) {
+                    emmitedMessageArgs = containerDetails(scope);
+                }
 
-            if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
-                var isRecordset = (scope.displayMode == recordsetDisplayModes.fullscreen),
-                    isInline = (scope.displayMode == recordsetDisplayModes.inline);
+                if (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) {
+                    var onError = function (response) {
+                        scope.$root.showSpinner = false;
 
-                var action;
-                if (isRecordset) {
-                    action = logActions.deleteIntend;
-                } else if (isInline) {
-                    action = (scope.isUnLink ? logActions.inlineUnlinkIntend : logActions.inlineDeleteIntend );
+                        // log the opening of cancelation modal
+                        logService.logClientAction({
+                            action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_CANCEL : logService.logActions.DELETE_CANCEL),
+                            stack: scope.logStack
+                        }, reference.defaultLogInfo);
+
+                        // if response is string, the modal has been dismissed
+                        if (typeof response !== "string") {
+                            ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
+                        }
+                    }
+
+                    // log the opening of delete modal
+                    logService.logClientAction({
+                        action: getLogAction(scope, isUnlink ? logService.logActions.UNLINK_INTEND : logService.logActions.DELETE_INTEND),
+                        stack: scope.logStack
+                    }, reference.defaultLogInfo);
+
+                    modalUtils.showModal({
+                        animation: false,
+                        templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
+                        controller: "ConfirmDeleteController",
+                        controllerAs: "ctrl",
+                        size: "sm"
+                    }, function onSuccess(res) {
+                        scope.$root.showSpinner = true;
+                        // user accepted prompt to delete
+                        reference.delete(logObj).then(function deleteSuccess() {
+                            scope.$root.showSpinner = false;
+                            // tell parent controller data updated
+                            scope.$emit('record-deleted', emmitedMessageArgs);
+                        }).catch(onError);
+                    }, onError, false);
                 } else {
-                    action = (scope.isUnLink ? logActions.relatedUnlinkIntend : logActions.relatedDeleteIntend );
-                }
-
-                var actionHeader = {
-                    action: action,
-                    facet: reference.defaultLogInfo.facet
-                }
-
-                var onError = function (response) {
-                    scope.$root.showSpinner = false;
-
-                    if (isRecordset) {
-                        action = logActions.deleteCancel;
-                    } else if (isInline) {
-                        action = (scope.isUnLink ? logActions.inlineUnlinkCancel : logActions.inlineDeleteCancel );
-                    } else {
-                        action = (scope.isUnLink ? logActions.relatedUnlinkCancel : logActions.relatedDeleteCancel );
-                    }
-
-                    actionHeader.action = action;
-                    logService.logClientAction(actionHeader, reference.defaultLogInfo);
-                    // if response is string, the modal has been dismissed
-                    if (typeof response !== "string") {
-                        ErrorService.handleException(response, true);  // throw exception for dismissible pop- up (error, isDismissible = true)
-                    }
-                }
-
-                logService.logClientAction(actionHeader, reference.defaultLogInfo);
-
-                modalUtils.showModal({
-                    animation: false,
-                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
-                    controller: "ConfirmDeleteController",
-                    controllerAs: "ctrl",
-                    size: "sm"
-                }, function onSuccess(res) {
                     scope.$root.showSpinner = true;
-                    // user accepted prompt to delete
-                    reference.delete(logObject).then(function deleteSuccess() {
+                    reference.delete(logObj).then(function deleteSuccess() {
                         scope.$root.showSpinner = false;
                         // tell parent controller data updated
-                        scope.$emit('record-deleted');
-                    }).catch(onError);
-                }, onError, false);
-            } else {
-                scope.$root.showSpinner = true;
-                reference.delete(logObject).then(function deleteSuccess() {
-                    scope.$root.showSpinner = false;
-                    // tell parent controller data updated
-                    scope.$emit('record-deleted');
+                        scope.$emit('record-deleted', emmitedMessageArgs);
 
-                }).catch(function (error) {
-                    scope.$root.showSpinner = false;
-                    ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
-                });
-            }
+                    }).catch(function (error) {
+                        scope.$root.showSpinner = false;
+                        ErrorService.handleException(error, true); // throw exception for dismissible pop- up (error, isDismissible = true)
+                    });
+                }
+            });
         }
 
         return {
@@ -98,17 +94,10 @@
             scope: {
                 tuple: '=',
                 rowValues: '=', // tuple's values
-                context: '=',
-                config: '=',    // {viewable, editable, deletable, selectMode}
+                rowIndex: '=', // tuple's row index in rowValues array
                 onRowClickBind: '=?',
-                // the tuple of the parent reference (not the reference that this ellipsis is based on)
-                // in popups and related: the main page tuple, otherwise: it will be empty
-                parentTuple: '=?',
                 selected: '=',
                 selectDisabled: "=?",
-                displayMode: "@",
-                parentReference: "=?",
-                columnModels: "=",
                 tableModel: "="
             },
             link: function (scope, element) {
@@ -119,43 +108,62 @@
                     scope.hideContent = false;
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
+
                     scope.noSelect = modalBox.noSelect;
                     scope.singleSelect = modalBox.singleSelectMode;
                     scope.multiSelect = modalBox.multiSelectMode;
                     scope.defaultDisplayname = defaultDisplayname;
+                    scope.config = scope.tableModel.config;
 
                     scope.tooltip = {};
 
-                    var editLink = null;
+                    var tupleReference = scope.tuple.reference,
+                        isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
+                        editLink = null,
+                        associationRef;
 
-                    // unlink button should only show up in related mode
-                    if (scope.displayMode.indexOf(recordsetDisplayModes.related) === 0 && scope.parentTuple) {
-                        scope.associationRef = scope.tuple.getAssociationRef(scope.parentTuple.data);
+                    // view link
+                    if (scope.config.viewable) {
+                        scope.viewLink = tupleReference.contextualize.detailed.appLink;
                     }
 
-                    if (scope.config.viewable)
-                        scope.viewLink = scope.tuple.reference.contextualize.detailed.appLink;
+                    // if tupleReference is not defined
+                    // this has been added for case of facet picker, in this case we don't want edit and delete links anyways.
+                    if (!tupleReference) return;
 
-                    if (scope.config.editable && scope.associationRef)
-                        editLink = scope.associationRef.contextualize.entryEdit.appLink;
+                    // all the row level actions should use this stack
+                    scope.logStack = recordTableUtils.getTableLogStack(
+                        scope.tableModel,
+                        logService.getStackNode(logService.logStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo)
+                    );
 
-                    else if (scope.config.editable)
-                        editLink = scope.tuple.reference.contextualize.entryEdit.appLink;
-
-
-                    if (editLink) {
+                    // edit button
+                    if (scope.config.editable && tupleReference.canUpdate) {
                         scope.edit = function () {
                             var id = MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
-                            var link = editLink + '?invalidate=' + UriUtils.fixedEncodeURIComponent(id);
-                            $window.open(link, '_blank');
-                            scope.$emit("edit-request", {"id": id, "schema": scope.tuple.reference.location.schemaName, "table": scope.tuple.reference.location.tableName});
+
+                            var editLink = editLink = tupleReference.contextualize.entryEdit.appLink;
+                            var qCharacter = editLink.indexOf("?") !== -1 ? "&" : "?";
+                            $window.open(editLink + qCharacter + 'invalidate=' + UriUtils.fixedEncodeURIComponent(id), '_blank');
+
+                            var args = {};
+                            if (isRelated) {
+                                args = containerDetails(scope);
+                            }
+                            args.id = id;
+                            scope.$emit("edit-request", args);
+
+                            logService.logClientAction({
+                                action: getLogAction(scope, logService.logActions.EDIT_INTEND),
+                                stack: scope.logStack
+                            }, tupleReference.defaultLogInfo);
                         };
                     }
 
-                    // TODO: why do we need to verify the context?
-                    // NOTE: unlink only makes sense in the context of record app because there is a parent tuple
-                    // there is no concept of an association in other apps (no parent)
-                    scope.isUnLink = (scope.config.deletable && scope.context.indexOf("compact/brief") === 0 && scope.associationRef);
+                    // unlink button should only show up in related mode
+                    if (isRelated && scope.tableModel.parentTuple) {
+                        associationRef = scope.tuple.getAssociationRef(scope.tableModel.parentTuple.data);
+                    }
 
                     if (scope.isUnLink) {
                         scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.parentReference.displayname.value + '.';
@@ -177,6 +185,8 @@
 
                 scope.onSelect = function($event) {
                     var args = {"tuple": scope.tuple};
+
+                    // call the call-backs
                     if (scope.onRowClickBind) {
                         scope.onRowClickBind(args, $event);
                     } else if (scope.onRowClick) {
@@ -185,11 +195,13 @@
                 };
 
                 // If chaiseconfig contains maxRecordSetHeight then apply more-less styling
+                var userClicked = false, initializeOverflowLogic, removeCellSensors;
                 if (chaiseConfig.maxRecordsetRowHeight != false ) {
-                    var userClicked = false,
+                    var tdPadding = 10, // +10 to account for padding on TD
                         moreButtonHeight = 20,
                         maxHeight = chaiseConfig.maxRecordsetRowHeight || 160,
-                        maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" };
+                        maxHeightStyle = { "max-height": (maxHeight - moreButtonHeight) + "px" },
+                        cellSensors = {};
 
                     scope.readmore = function() {
                         userClicked = true; // avoid triggering resize Sensor logic
@@ -210,8 +222,7 @@
                         for (var i = 0; i < element[0].children.length-1; i++) {
                             var currentTD = element[0].children[i];
 
-                            // +10 to account for padding on TD
-                            scope.overflow[i] = (currentTD.children[0].clientHeight + 10) > maxHeight
+                            scope.overflow[i] = (currentTD.children[0].clientHeight + tdPadding) > maxHeight
                         }
                     }
 
@@ -224,32 +235,51 @@
                         scope.$digest();
                     }
 
+                    // function to remove the cell sesnsors before adding new ones
+                    // prevents having sensors on cells with no content
+                    var removeCellSensors = function () {
+                        for(var key in cellSensors) {
+                            cellSensors[key].detach();
+                        }
+                        cellSensors = {};
+                    }
+
                     new ResizeSensor(element[0], function (dimensions) {
                         // if TR.offsetHeight > the calculated maxRecordsetRowHeight
-                        // +10 to account for padding on TD element
-                        if (dimensions.height > (maxHeight + 10)) {
+                        if (dimensions.height > (maxHeight + tdPadding)) {
                             // iterate over each cell (TD), check it's height, and set overflow if necessary
                             if (!userClicked) {
                                 initializeOverflowLogic();
                             }
-                        } else if (dimensions.height < (maxHeight + 10)) {
+                        } else if (dimensions.height < (maxHeight + tdPadding)) {
                             scope.overflow = [];
                         }
                     });
 
-                    // reset overflows because new rows are available
-                    $rootScope.$on('reference-modified', function() {
-                        scope.overflow = [];
-                        scope.hideContent = false;
-                        scope.maxHeightStyle = null;
-                        userClicked = false;
+                    // internalID is per table instance, rowIndex is per row in each table
+                    $rootScope.$on('aggregate-loaded-' + scope.tableModel.internalID + "-" + scope.rowIndex, function(events, data) {
+                        var columnModelIndex = data;
+                        // +1 to account for the actions column
+                        var columnUiIndex = columnModelIndex + 1;
+                        var hasPostLoadClass = scope.rowValues[columnModelIndex].isHTML && scope.rowValues[columnModelIndex].value.indexOf('-chaise-post-load') > -1;
 
-                        $timeout(function () {
-                            initializeOverflowLogic();
-                        });
+                        if (scope.tableModel.columnModels[columnModelIndex].column.hasAggregate && hasPostLoadClass) {
+                            var aggTD = element[0].children[columnUiIndex];
+                            cellSensors[columnModelIndex] = new ResizeSensor(aggTD, function (dimensions) {
+                                // if TD.offsetHeight > the calculated maxRecordsetRowHeight
+                                // +10 to account for padding on TD element
+                                if (dimensions.height > (maxHeight)) {
+                                    // iterate over each cell (TD), check it's height, and set overflow if necessary
+                                    if (!userClicked) {
+                                        initializeOverflowLogic();
+                                    }
+                                } else if (dimensions.height < (maxHeight)) {
+                                    scope.overflow[2] = false;
+                                }
+                            });
+                        }
                     });
                 }
-
             }
         };
     }])

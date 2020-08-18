@@ -101,7 +101,7 @@ var testParams = {
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
         text_col: "one",
-        longtext_col: "one",
+        longtext_col: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.",
         markdown_col: "one",
         int_col: "11",
         float_col: "11.1100",
@@ -183,6 +183,12 @@ describe("Other facet features, ", function() {
 
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == testParams.filter_secondary_key.numRows;
+                    });
+                }, browser.params.defaultTimeout);
+
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function (ct) {
                 expect(ct).toBe(testParams.filter_secondary_key.numRows, "number of rows is incorrect");
@@ -193,6 +199,11 @@ describe("Other facet features, ", function() {
         it ("the selected value should be selected on the modal.", function (done) {
             chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalOptions().count().then(function(ct) {
+                        return ct == 12;
+                    });
+                }, browser.params.defaultTimeout);
 
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
                 return chaisePage.recordsetPage.getModalOptions();
@@ -349,6 +360,12 @@ describe("Other facet features, ", function() {
         it ("`All Records with value` option must be available in facet panel.", function (done) {
             // make sure facet is loaded
             browser.wait(EC.elementToBeClickable(showMore));
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option).count().then(function(ct) {
+                    return ct == 12;
+                });
+            }, browser.params.defaultTimeout);
+
             chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option).then(function (text) {
                 expect(text).toEqual(testParams.not_null.options_w_not_null, "the options are not the same.");
                 done();
@@ -543,6 +560,11 @@ describe("Other facet features, ", function() {
 
         it ("main and faceting data should be based on the filter, and be able to apply new filters.", function (done) {
             // main
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return ct == customFilterParams.numRows;
+                });
+            }, browser.params.defaultTimeout);
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
 
             chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
@@ -578,7 +600,6 @@ describe("Other facet features, ", function() {
                 // make sure filter is there
                 expect(chaisePage.recordsetPage.getFacetFilters().count()).toBe(2, "facet filter missing.");
 
-
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -588,9 +609,19 @@ describe("Other facet features, ", function() {
 
             chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFilterParams.numRowsWOFilter;
+                    });
+                }, browser.params.defaultTimeout);
 
                 expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
 
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                        return ct == customFilterParams.optionsWOFilter.length;
+                    });
+                }, browser.params.defaultTimeout);
                 expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFilterParams.optionsWOFilter, "options missmatch.");
 
                 done();
@@ -759,7 +790,10 @@ describe("Other facet features, ", function() {
             });
 
             it("clicking edit should show the same number of forms in RE as rows in RS.", function (done) {
-                chaisePage.recordsetPage.getEditRecordLink().click().then(function() {
+                var editLink = chaisePage.recordsetPage.getEditRecordLink();
+                browser.wait(EC.elementToBeClickable(editLink));
+
+                editLink.click().then(function() {
                     browser.wait(function() {
                         return chaisePage.recordEditPage.getForms().count().then(function(ct) {
                             return (ct == 25);
@@ -789,7 +823,7 @@ describe("Other facet features, ", function() {
                     var uri = url.replace("recordset", "recordedit");
                     browser.get(uri);
 
-                    chaisePage.waitForElement(element(by.id("submit-record-button")));
+                    chaisePage.recordeditPageReady();
 
                     done();
                 }).catch(chaisePage.catchTestError(done));
@@ -878,7 +912,7 @@ describe("Other facet features, ", function() {
             })
 
             it("navigating to record with a facet url", function () {
-                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.recordColumns, testParams.recordValues);
+                recordEditHelpers.testRecordAppValuesAfterSubmission(testParams.recordColumns, testParams.recordValues, testParams.recordColumns.length);
             });
 
             it("should click the add button for an association table and have the facet collapse button visible", function (done) {
@@ -971,6 +1005,11 @@ describe("Other facet features, ", function() {
         });
 
         it ("main and faceting data should be based on the filter, and be able to apply new filters.", function (done) {
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return ct == customFacetParams.numRows;
+                });
+            }, browser.params.defaultTimeout);
             // main
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
 

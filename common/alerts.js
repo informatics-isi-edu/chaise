@@ -54,16 +54,24 @@
             return alert;
         }
 
+        /**
+         * delete all alerts
+         */
+        function deleteAllAlerts() {
+            alerts.length = 0;
+        }
+
         return {
             alerts: alerts,
             addAlert: addAlert,
             deleteAlert: deleteAlert,
+            deleteAllAlerts: deleteAllAlerts,
             addURLLimitAlert: addURLLimitAlert,
             deleteURLLimitAlert: deleteURLLimitAlert
         };
     }])
 
-    .directive('alerts', ['AlertsService', 'Session', 'UriUtils', function(AlertsService, Session, UriUtils) {
+    .directive('alerts', ['AlertsService', 'logService', 'Session', 'UriUtils', function(AlertsService, logService, Session, UriUtils) {
 
         return {
             restrict: 'E',
@@ -77,7 +85,7 @@
                 }
 
                 scope.login = function() {
-                    Session.loginInAPopUp();
+                    Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
                 }
             }
         };

@@ -79,6 +79,25 @@
                             "column_name": "id"
                         }
                     ]
+                },
+                {
+                    "comment": null,
+                    "names": [
+                        ["product-unordered-related-tables-links", "fk_to_accommodation_outbound1"]
+                    ],
+                    "foreign_key_columns": [{
+                        "table_name": "accommodation",
+                        "schema_name": "product-unordered-related-tables-links",
+                        "column_name": "fk_col_outbound1"
+                    }],
+                    "annotations": {
+                        "comment": ["thumbnail"]
+                    },
+                    "referenced_columns": [{
+                        "table_name": "accommodation_outbound1",
+                        "schema_name": "product-unordered-related-tables-links",
+                        "column_name": "id"
+                    }]
                 }
             ],
             "table_name": "accommodation",
@@ -333,6 +352,12 @@
                         },
                         "tag:isrd.isi.edu,2016:ignore" : ["record"]
                     }
+                },
+                {
+                    "name": "fk_col_outbound1",
+                    "type": {
+                        "typename": "text"
+                    }
                 }
             ],
             "annotations": {
@@ -357,15 +382,84 @@
                         ["product-unordered-related-tables-links", "fk_assoc_accommodation"],
                         ["product-unordered-related-tables-links", "fk_accommodation_image"],
                         ["product-unordered-related-tables-links", "fk_assoc_mdn_accommodation"],
-                        {"source": [
-                            {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
-                            {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
-                            {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
-                            "id"
-                        ]},
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
+                                "id"
+                            ],
+                            "display": {
+                                "wait_for": ["entity_set_accommodation_inbound2"]
+                            }
+                        },
                         ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"],
-                        {"source": [{"inbound": ["product-unordered-related-tables-links", "fk_table_invalid_markdown"]}, "id"]}
+                        {"source": [{"inbound": ["product-unordered-related-tables-links", "fk_table_invalid_markdown"]}, "id"]},
+                        {
+                            "sourcekey": "entity_set_accommodation_inbound1",
+                            "markdown_name": "inbound related with display.wait_for entityset",
+                            "display": {
+                                "template_engine": "handlebars",
+                                "wait_for": ["entity_set_accommodation_inbound2"],
+                                "markdown_pattern": "{{#each $self}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}} ({{#each entity_set_accommodation_inbound2}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}})"
+                            }
+                        },
+                        {
+                            "sourcekey": "entity_set_accommodation_inbound3",
+                            "markdown_name": "inbound related with display.wait_for agg",
+                            "display": {
+                                "template_engine": "handlebars",
+                                "wait_for": ["cnt_d_accommodation_inbound2"],
+                                "markdown_pattern": "{{#each $self}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}} ({{{cnt_d_accommodation_inbound2}}})"
+                            }
+                        }
                     ]
+                },
+                "tag:isrd.isi.edu,2018:citation": {
+                    "template_engine": "handlebars",
+                    "journal_pattern": "{{title}}, {{{entity_all_outbound_outbound1_outbound1.rowName}}}",
+                    "year_pattern": "{{formatDate RCT 'YYYY'}}",
+                    "url_pattern": "{{website}}",
+                    "id_pattern": "{{id}}",
+                    "wait_for": ["entity_all_outbound_outbound1_outbound1"]
+                },
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "fkeys": true,
+                    "columns": true,
+                    "sources": {
+                        "entity_all_outbound_outbound1_outbound1": {
+                            "source": [
+                                {"outbound": ["product-unordered-related-tables-links", "fk_to_accommodation_outbound1"]},
+                                {"outbound": ["product-unordered-related-tables-links", "accommodation_outbound1_fk1"]},
+                                "RID"
+                            ]
+                        },
+                        "entity_set_accommodation_inbound1": {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "accommodation_inbound1_fk1"]},
+                                "RID"
+                            ]
+                        },
+                        "entity_set_accommodation_inbound2": {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "accommodation_inbound2_fk1"]},
+                                "RID"
+                            ]
+                        },
+                        "entity_set_accommodation_inbound3": {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "accommodation_inbound3_fk1"]},
+                                "RID"
+                            ]
+                        },
+                        "cnt_d_accommodation_inbound2": {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "accommodation_inbound2_fk1"]},
+                                "RID"
+                            ],
+                            "aggregate": "cnt_d"
+                        }
+                    }
                 }
             }
         },
@@ -394,7 +488,12 @@
                             "column_name": "accommodation_id"
                         }
                     ],
-                    "annotations": {},
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "from_comment": "booking inline comment",
+                            "from_comment_display": "inline"
+                        }
+                    },
                     "referenced_columns": [
                         {
                             "table_name": "accommodation",
@@ -1445,13 +1544,33 @@
                         "id",
                         ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"],
                         {"source": "value", "aggregate": "max"},
-                        {"source": "value", "aggregate": "min"},
+                        {"sourcekey": "value_min"},
                         {"source": "value", "aggregate": "cnt"},
-                        {"source": "value", "aggregate": "cnt_d"}
+                        {"source": "value", "aggregate": "cnt_d"},
+                        {
+                            "markdown_name": "virtual column",
+                            "display": {
+                                "template_engine": "handlebars",
+                                "markdown_pattern": "virtual {{{value_min}}} with {{{outbound_to_accommodation.rowName}}}",
+                                "wait_for": ["value_min", "outbound_to_accommodation"]
+                            }
+                        }
                     ]
                 },
                 "tag:isrd.isi.edu,2016:table-display": {
                     "*": {"row_order": [{"column": "id"}]}
+                },
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "fkeys": true,
+                    "columns": true,
+                    "sources": {
+                        "value_min": {
+                            "source": "value", "aggregate": "min"
+                        },
+                        "outbound_to_accommodation": {
+                            "source": [{"outbound": ["product-unordered-related-tables-links", "fk_table_w_agg_accommodation"]}, "RID"]
+                        }
+                    }
                 }
             }
         },
@@ -1537,6 +1656,205 @@
                     }
                 }
             }
+        },
+        "accommodation_outbound1": {
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "accommodation_outbound1",
+            "keys": [{"unique_columns": ["id"]}],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "accommodation_outbound1_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk1_col",
+                            "table_name": "accommodation_outbound1",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "accommodation_outbound1_outbound1",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "name",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk1_col",
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk2_col",
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk3_col",
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk4_col",
+                    "type": {"typename": "text"}
+                }
+            ]
+        },
+        "accommodation_outbound1_outbound1": {
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "accommodation_outbound1_outbound1",
+            "keys": [{"unique_columns": ["id"]}],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk1_col",
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "name",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                }
+            ]
+        },
+        "accommodation_inbound1": {
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "accommodation_inbound1",
+            "keys": [{"unique_columns": ["id"]}],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "accommodation_inbound1_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk1_col",
+                            "table_name": "accommodation_inbound1",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "name",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk1_col",
+                    "type": {"typename": "int4"}
+                }
+            ]
+        },
+        "accommodation_inbound2": {
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "accommodation_inbound2",
+            "keys": [{"unique_columns": ["id"]}],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "accommodation_inbound2_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk1_col",
+                            "table_name": "accommodation_inbound2",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "name",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk1_col",
+                    "type": {"typename": "int4"}
+                }
+            ]
+        },
+        "accommodation_inbound3": {
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "accommodation_inbound3",
+            "keys": [{"unique_columns": ["id"]}],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "accommodation_inbound3_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk1_col",
+                            "table_name": "accommodation_inbound3",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "name",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk1_col",
+                    "type": {"typename": "int4"}
+                }
+            ]
         }
     },
     "comment": null,

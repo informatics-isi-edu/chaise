@@ -10,7 +10,8 @@ var testParams = {
     html_table_name: "html-name-table",
     html_table_display: "<strong>Html Name</strong>",
     keys: [{"name": "id", "value": 1, "operator": "="}],
-    html_keys: [{"name": "id", "value": 1, "operator": "="}]
+    html_keys: [{"name": "id", "value": 1, "operator": "="}],
+    html_table_name_record_url: browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:html-name-table/RID=" + chaisePage.getEntityRow("editable-id", "html-name-table", [{column: "id", value: "1"}]).RID
 };
 
 var relatedTableTestParams = {
@@ -37,9 +38,9 @@ describe('View existing record,', function() {
 
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=9", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=11", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(9);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(11);
             });
         });
 
@@ -47,7 +48,7 @@ describe('View existing record,', function() {
             expect(element.all(by.css('.panel-open')).count()).toEqual(0);
         });
 
-        it ("should have only 'CSV' option in export menu because of `disableDefaultExport` chaise-config.", function () {
+        it ("should have only 'search results (csv)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
             var options = chaisePage.recordsetPage.getExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
         });
@@ -57,19 +58,18 @@ describe('View existing record,', function() {
     // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal
     describe("For table " + testParams.html_table_name + ",", function() {
 
+        var currentBrowserUrl;
         beforeAll(function() {
             var keys = [];
             browser.ignoreSynchronization=true;
-            var RID = chaisePage.getEntityRow("editable-id", testParams.html_table_name, [{column: "id", value: "1"}]).RID
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.html_table_name + "/RID=" + RID;
-            browser.get(url);
-            // TODO use recordPageReady
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+            browser.get(testParams.html_table_name_record_url);
+            chaisePage.recordPageReady();
         });
 
         it("should display the entity subtitle name with html in it.", function() {
-            expect(chaisePage.recordPage.getEntitySubTitleElement().getText()).toBe(testParams.html_table_display);
+            var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
+            chaisePage.waitForElement(subTitleEl);
+            expect(subTitleEl.getText()).toBe(testParams.html_table_display);
         });
 
         it("should load chaise-config.js and have resolverImplicitCatalog=false,", function() {
@@ -86,31 +86,11 @@ describe('View existing record,', function() {
         });
 
         // test that no citation appears in share modal when no citation is defined on table
-        it("should show the share dialog when clicking the share button with only permalink present.", function(done) {
-            chaisePage.recordPage.getShareButton().click().then(function () {
-                var shareDialog = chaisePage.recordPage.getShareModal();
-                // wait for dialog to open
-                chaisePage.waitForElement(shareDialog);
-                shareDialog.allowAnimations(false);
-
-                // verify modal dialog contents
-                expect(chaisePage.recordEditPage.getModalTitle().getText()).toBe("Share", "Share citation modal title is incorrect");
-                expect(chaisePage.recordPage.getModalListElements().count()).toBe(1, "Number of list elements in share citation modal is incorrect");
-
-                return browser.getCurrentUrl();
-            }).then(function (url) {
-                // verify permalink
-                expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toContain(url, "permalink url is incorrect");
-
-                // close dialog
-                return chaisePage.recordsetPage.getModalCloseBtn().click();
-            }).then(function () {
-                done();
-            }).catch(function(err){
-                console.log(err);
-                done.fail();
-            });
+        recordHelpers.testSharePopup({
+            permalink: testParams.html_table_name_record_url,
+            verifyVersionedLink: false,
+            citation: null,
+            bibtextFile: null
         });
 
         it("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {
@@ -174,9 +154,7 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            // TODO use recordPageReady
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+            chaisePage.recordPageReady();
         });
 
         it("should load chaise-config.js and have editRecord=true", function() {
@@ -190,10 +168,13 @@ describe('View existing record,', function() {
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
 
             it("should display the entity title and subtitle based on their markdown patterns.", function() {
+                var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
+                chaisePage.waitForElement(subTitleEl);
+                
                 // page-title and page-subtitle are attached to chaise-title,
                 // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
                 // title structure is: chaise-title -> span -> span (therefore we need to be more specific)
-                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.css("span")),
+                var subtitleElement = subTitleEl.element(by.css("span")),
                     titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.css("span span"));
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {

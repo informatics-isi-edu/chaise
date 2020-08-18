@@ -11,9 +11,15 @@ The default styling for specific elements can be altered by adding a custom css 
 
 Custom style classes with modified styling attributes can be added in `chaise.css`. Make sure to use same class names and hierarchy as described below to avoid any discrepancy.
 
+## Changing chaise styles
+With the current HTML structure, it is possible to apply different styles to different parts of chaise and to further style the chaise tables based on model information :
 
-## Changing chaise table styles
-With the current HTML structure, it is possible to apply different styles to the table directive. There are a few key HTML ids/classes to be aware of:
+ - `.chaise-mac`
+   - Added a class to deal with table column spacing on Mac OS. This class can be used to apply any custom styling specific to the Mac OS
+     irrespective of the browser type.
+ - `.chaise-firefox`
+   - Added a class to deal with table column spacing in Firefox browser. This class can be used to apply any custom styling specific to
+     the Firefox browser irrespective of the operating system.
  - `navbar`
    - identifies the navbar that is displayed on top of every app.
  - `recordset` identifier (`#recordset`)
@@ -52,6 +58,15 @@ With the current HTML structure, it is possible to apply different styles to the
 
 More often than not, you will want to apply styling for each of the columns rather than at the table level, so the `c_<column.name>` identifier should almost always be included in the selector.
 
+### Character replacement
+For both class names and id attributes:
+   - Must begin with a letter A-Z or a-z
+   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("\_")
+
+This means that if the schema, table, or column name contains any other characters, they will be replaced with a "-".
+If the name contains multiple unsafe characters in a row, all will be replaced by 1 single "-".
+For example, if your column name is `text (name)`, chaise will rewrite this as `text-name-` and then will use `c_text-name-` as the class name.
+
 ### General HTML structure:
 ```html
 <html id="<appname>"
@@ -79,7 +94,6 @@ More often than not, you will want to apply styling for each of the columns rath
 ### Examples:
 
 - Hide everything except the result table in recordset:
-
 ```css
 .rs_s_schema.rs_t_table .top-left-panel,
 .rs_s_schema.rs_t_table .side-panel-resizable,
@@ -108,7 +122,7 @@ More often than not, you will want to apply styling for each of the columns rath
   min-width: 200px;
 }
 ```
-NOTE: The `min-width` property will almost always be honored. If content is shorter than the `min-width`, there will be whitespace after the content. If the content is longer than the `min-width`, the width will be at minimum the value set for `min-width` and get wider to accomodate the content. This may be affected by having many columns with each having a `min-width` property set. 
+NOTE: The `min-width` property will almost always be honored. If content is shorter than the `min-width`, there will be whitespace after the content. If the content is longer than the `min-width`, the width will be at minimum the value set for `min-width` and get wider to accomodate the content. This may be affected by having many columns with each having a `min-width` property set.
 
 NOTE: The `max-width` property will also almost always be honored. If the content is shorter than the `max-width` value, then it will shrink down to fit the content. If the content itself has to show on one line and is longer than the `max-width` value, the `max-width` will be ignored.
 
@@ -157,14 +171,6 @@ By relaxing the selector, we can make the rule more general:
    - this will apply the styling to all columns with `column.name = Images`
      - useful if multiple Images columns are defined in many different tables in many different schemas
 
-### Caveats
-Some characters are not allowed in HTML class names. We replace those characters with HTML safe characters:
- - `&` is replaced by: `&amp;`
- - `\s` (any whitespace character) is replaced by `&nbsp;`
- - `<` is replaced by `&lt;`
- - `>` is replaced by `&gt;`
- - `"` is replaced by `&quot;`
- - `'` is replaced by `&#39;`
 
 For pseudocolumns, it's not immediately obvious what they name will be. We use a hashing function in `ermrestJS` that is based on the full path of the column. So `this/path/id=value` will become something like `hsoinel`.
 

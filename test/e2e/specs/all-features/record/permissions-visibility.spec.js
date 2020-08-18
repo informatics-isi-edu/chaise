@@ -69,11 +69,13 @@ describe('When viewing Record app', function() {
         it('should display the share button', function() {
             var permalink = recordPage.getShareButton();
             expect(permalink.isDisplayed()).toBeTruthy();
+            expect(permalink.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Create button', function() {
             var button = recordPage.getCreateRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
+            expect(button.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Edit button as disabled', function() {
@@ -82,10 +84,10 @@ describe('When viewing Record app', function() {
             expect(button.getAttribute("disabled")).toBeTruthy();
         });
 
-        it('should display the Copy button as disabled', function() {
+        it('should display the Copy button', function() {
             var button = recordPage.getCopyRecordButton();
-            expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.isDisplayed()).toBeTruthy();
+            expect(button.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Delete button as disabled', function() {
@@ -160,16 +162,19 @@ describe('When viewing Record app', function() {
             // a user can edit, the user can also create.
             var button = recordPage.getCreateRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
+            expect(button.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Edit button', function() {
             var button = recordPage.getEditRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
+            expect(button.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Copy button', function() {
             var button = recordPage.getCopyRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
+            expect(button.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Delete button as disabled', function() {

@@ -101,6 +101,7 @@
                     }
 
                     .selected-chiclet-remove {
+                        cursor: pointer;
                         margin-right: -3px;
                         i {
                             top: 2px;
@@ -250,8 +251,16 @@
         }
     }
 
+    &.table-striped > tbody > tr {
+        position: unset !important;
+    }
+
     &.table-striped > tbody > tr:nth-child(odd) {
         background: $table-striped-background-color;
+    }
+
+    >thead>tr>th {
+        border-bottom: 1px solid $table-border-color;
     }
 
     >thead>tr>th,
@@ -260,13 +269,9 @@
     >thead>tr>td,
     >tbody>tr>td,
     >tfoot>tr>td {
-        border: none;
+        border-top: none;
         border-right: 1px solid $table-border-color;
         word-wrap: break-word;
-    }
-
-    >thead>tr:first-child {
-        border-bottom: 1px solid $table-border-color;
     }
 
     >tbody>tr>td {
@@ -322,7 +327,7 @@
             padding: 0;
             margin: -3px;
             height: auto; //override the default button height
-
+            min-height: 25px; // make sure the button has default height
             // make sure the three icons are shown in the center of the cell.
             // (the font baseline of these two icons are different and need to be adjusted)
             .chaise-view-details, .fa-file-alt, .fa-trash-alt {

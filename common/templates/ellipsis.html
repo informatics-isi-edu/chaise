@@ -1,5 +1,5 @@
 <td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block action-btns" ng-switch="config.selectMode">
-    <button ng-switch-when="single-select" type="button" class="select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
+    <button ng-switch-when="single-select" type="button" class="select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn" ng-disabled="selectDisabled" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
         <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
     </button>
     <div ng-switch-when="multi-select" class="chaise-checkbox">
@@ -8,16 +8,17 @@
     </div>
     <div class="chaise-btn-group" ng-switch-default>
         <!-- NOTE: so users can control how to open the view link -->
-        <a ng-if="config.viewable" type="button" class="view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
+        <a ng-if="viewLink" type="button" class="view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
             <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
         </a>
-        <button ng-if="config.editable && tuple.reference.canUpdate" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
+        <button ng-if="edit" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
             <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
         </button>
+        <!-- TODO: should this be "config.deletable && unlink && associationRef.canDelete" || "unlink" -->
         <button ng-if="config.deletable && unlink && associationRef.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="{{tooltip.unlink}}">
             <span class="chaise-btn-icon glyphicon glyphicon-remove-circle"></span>
         </button>
-        <button ng-if="config.deletable && delete && tuple.reference.canDelete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
+        <button ng-if="delete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="delete()" tooltip-placement="bottom" uib-tooltip="Delete">
             <span class="chaise-btn-icon far fa-trash-alt""></span>
         </button>
     </div>
@@ -33,7 +34,6 @@
                 <span ng-if="val.value == null" ng-bind-html="defaultDisplayname.null"></span>
             </span>
         </div>
-        <!-- index+1 because rowValues pertain to columns in table starting at index 1 (action column is index 0) -->
         <div ng-if="overflow[$index+1]" style="display:inline;">
             ...
             <span style="display:inline-block; text-decoration: underline;cursor: pointer;" class="text-primary readmore" ng-click="readmore($index+1)">{{linkText}}</span>

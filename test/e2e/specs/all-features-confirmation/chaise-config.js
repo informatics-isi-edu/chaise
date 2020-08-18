@@ -7,11 +7,13 @@ var chaiseConfig = {
     confirmDelete: true,
     defaultCatalog: 1,
     maxRelatedTablesOpen: 6,
+    maxRecordsetRowHeight: false, // triggers (ignores) some logic in ellipsis.js. Tests view buttons having proper links
     allowErrorDismissal : true,
     resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id
     SystemColumnsDisplayCompact: ['RCB', 'RMT'],
     SystemColumnsDisplayDetailed: true,
     disableExternalLinkModal: true,
+    logClientActions: false,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

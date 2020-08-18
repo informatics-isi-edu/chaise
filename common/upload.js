@@ -14,7 +14,7 @@
                     values: '=?',
                     value: '=',
                     reference: '=',
-                    isDisabled: "=?",
+                    isDisabled: "=",
                     placeholder: "=",
                     isRequired: "="
                 },
@@ -27,7 +27,6 @@
                     $timeout(function() {
                         scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
                         scope.context = ConfigUtils.getContextJSON();
-                        scope.isDisabled = InputUtils.isDisabled(scope.column);
 
                         // Bind change event file input
                         scope.fileEl

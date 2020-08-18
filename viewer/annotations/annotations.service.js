@@ -3,15 +3,16 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', '$window', '$q', function(context, user, image, annotations, AlertsService, $window, $q) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', 'viewerConstant', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q, viewerConstant) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var table = null;
 
-        function drawAnnotation() {
-            iframe.postMessage({messageType: 'drawAnnotation'}, origin);
-        }
+        // function drawAnnotation() {
+        //     iframe.postMessage({messageType: 'drawAnnotation'}, origin);
+        // }
 
+        // TODO not used
         function createAnnotation(newAnnotation) {
             if (newAnnotation.anatomy == 'No Anatomy') {
                 newAnnotation.anatomy = null;
@@ -49,6 +50,31 @@
 
         function cancelNewAnnotation() {
             iframe.postMessage({messageType: 'cancelAnnotationCreation'}, origin);
+        }
+
+        function removeEntry(item){
+            var defer = $q.defer();
+
+            if (!item.tuple || !item.tuple.reference) {
+                return defer.reject("given item didn't have proper tuple"), defer.promise;
+            }
+
+            // TODO proper log object
+            item.tuple.reference.delete().then(function () {
+                defer.resolve();
+            }).catch(function (err) {
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        /**
+         * send saving result to openseadragon
+         * @param {} result
+         */
+        function changeSVGId(result) {
+            iframe.postMessage({messageType: 'changeSVGId', content: result}, origin);
         }
 
         function updateAnnotation(annotation) {
@@ -98,6 +124,46 @@
             iframe.postMessage({messageType: 'syncVisibility', content: annotations}, origin);
         }
 
+        function highlightAnnotation(data){
+            iframe.postMessage({messageType: 'highlightAnnotation', content: data}, origin);
+        }
+
+        function changeAnnotationVisibility(data){
+            iframe.postMessage({messageType: 'changeAnnotationVisibility', content: data}, origin);
+        }
+
+        function changeAllAnnotationVisibility(data){
+            iframe.postMessage({messageType: 'changeAllAnnotationVisibility', content: data}, origin);
+        }
+
+        function changeStrokeScale(scale){
+            iframe.postMessage({messageType: 'changeStrokeScale', content: scale}, origin);
+        }
+
+        function drawAnnotation(data){
+            iframe.postMessage({messageType: 'drawAnnotationMode', content: data}, origin);
+        }
+
+        function changeGroupInfo(data){
+            iframe.postMessage({messageType: 'changeGroupInfo', content: data}, origin);
+        }
+
+        function addNewTerm(data){
+            iframe.postMessage({messageType: 'addNewTerm', content: data}, origin);
+        }
+
+        function removeSVG(data){
+            iframe.postMessage({messageType: 'removeSVG', content: data}, origin);
+        }
+
+        function saveAnnotationRecord(data){
+            iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
+        }
+        
+        function loadAnnotations(data) {
+            iframe.postMessage({messageType: 'loadAnnotations', content: data}, origin);
+        }
+
         return {
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
@@ -105,7 +171,18 @@
             updateAnnotation: updateAnnotation,
             deleteAnnotation: deleteAnnotation,
             centerAnnotation: centerAnnotation,
-            syncVisibility: syncVisibility
+            syncVisibility: syncVisibility,
+            highlightAnnotation : highlightAnnotation,
+            changeAnnotationVisibility : changeAnnotationVisibility,
+            changeAllAnnotationVisibility : changeAllAnnotationVisibility,
+            changeStrokeScale : changeStrokeScale,
+            changeSVGId : changeSVGId,
+            changeGroupInfo : changeGroupInfo,
+            addNewTerm : addNewTerm,
+            removeEntry : removeEntry,
+            removeSVG : removeSVG,
+            saveAnnotationRecord : saveAnnotationRecord,
+            loadAnnotations: loadAnnotations
         };
 
     }]);

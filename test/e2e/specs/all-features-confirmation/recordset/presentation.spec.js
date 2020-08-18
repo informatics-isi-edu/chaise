@@ -103,12 +103,12 @@ var testParams = {
                 luxurious: "true",
                 json_col: "9876.3543",
                 json_col_with_markdown: "Status is: “Processing”",
-                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt:",
+                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt: 0",
                 no_of_baths: "baths: 1, id: 4004",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
-                count_image_id: "",
-                count_distinct_image_id: "",
+                count_image_id: "0",
+                count_distinct_image_id: "0",
                 min_image_id: "",
                 max_image_id: ""
             }
@@ -198,7 +198,7 @@ var testParams = {
         data: [
             [
                 "main one", // self_link_rowname
-                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525\n... more", // self_link_id
+                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // self_link_id
                 "1,234,501", //normal_col_int_col
                 "current cnt: 5 - 1,234,511, 1234511, cnt_i1: 5", //normal_col_int_col_2
                 "outbound1 one", //outbound_entity_o1
@@ -221,12 +221,14 @@ var testParams = {
                 "current: 12,345,221, 12345221, 12,345,111", //min_i2
                 "1,234,525", //max_i1
                 "current: 12,345,225, 12345225", //max_i2
+                "virtual col value is 12,345,225", //virtual column
             ],
             [
                 "main two", "", "1,234,502",
                 "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "",
-                "", "", "", "", "", "", ""
+                "", "", "", "", "", "", "0",
+                "", "0", "", "", "", "", "",
+                ""
             ]
         ]
     },
@@ -256,7 +258,7 @@ describe('View recordset,', function() {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
 
                 chaisePage.recordsetPageReady();
-                chaisePage.recordsetPage.waitForAggregates();
+                chaisePage.waitForAggregates();
             });
 
             it ("should show correct table rows.", function (done) {
@@ -288,7 +290,7 @@ describe('View recordset,', function() {
                 browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
 
                 chaisePage.recordsetPageReady()
-                chaisePage.recordsetPage.waitForAggregates();
+                chaisePage.waitForAggregates();
                 done();
             })
         });
@@ -303,7 +305,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
             chaisePage.recordsetPageReady()
-            chaisePage.recordsetPage.waitForAggregates();
+            chaisePage.waitForAggregates();
         });
 
         describe("Presentation ,", function() {
@@ -345,9 +347,9 @@ describe('View recordset,', function() {
 
             it("should use annotated page size", function() {
                 var EC = protractor.ExpectedConditions;
-                var e = chaisePage.recordsetPage.getCustomPageSize();
+                var e = chaisePage.recordsetPage.getPageLimitSelector(15);
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
-                expect(e.getAttribute("innerText")).toBe("15 (Custom)");
+                expect(e.getAttribute("innerText")).toBe("15");
             });
 
             it("should show correct table rows", function() {
@@ -421,8 +423,8 @@ describe('View recordset,', function() {
             if (!process.env.TRAVIS) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("CSV");
-                        expect(csvOption.getText()).toBe("CSV");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
+                        expect(csvOption.getText()).toBe("search results (csv)");
                         return csvOption.click();
                     }).then(function () {
                         browser.wait(function() {
@@ -488,7 +490,7 @@ describe('View recordset,', function() {
 
             it("apply different searches, ", function(done) {
                 var EC = protractor.ExpectedConditions;
-                var e = chaisePage.recordsetPage.getCustomPageSize();
+                var e = chaisePage.recordsetPage.getPageLimitSelector(15);
                 browser.wait(EC.presenceOf(e), browser.params.defaultTimeout);
 
                 var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
@@ -543,20 +545,38 @@ describe('View recordset,', function() {
 
             it("JSON Column value should be searchable", function(){
                 var searchBox = chaisePage.recordsetPage.getMainSearchInput(),
-                searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton(),
-                clearSearchButton = chaisePage.recordsetPage.getSearchClearButton(),
-                noResultsMessage = "No Results Found";
-                searchBox.sendKeys('testing_json');
+                    searchSubmitButton = chaisePage.recordsetPage.getSearchSubmitButton();
+
+                // search for a row that is not the first one after sorting
+                searchBox.sendKeys('9876.3543');
                 searchSubmitButton.click().then(function() {
                     chaisePage.recordsetPage.waitForInverseMainSpinner();
                     return chaisePage.recordsetPage.getRows();
                 }).then(function(rows) {
                     expect(rows.length).toBe(1);
-                    // clear search
-                    return clearSearchButton.click();
-                })
+
+                    // clear search in next it case
+                });
             });
 
+            it("check the link of the view details after searching", function () {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[3].id;
+                });
+
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+                var viewUrl = '/record/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
+
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    // get first row view details button
+                    expect(rows[0].element(by.css('.view-action-button')).getAttribute("href")).toContain(viewUrl, "View button url is incorrect after filtering set");
+
+                    // clear search
+                    return chaisePage.recordsetPage.getSearchClearButton().click();
+                });
+            });
+
+            // view link here should be different from the `it` case above
             it("action columns should show view button that redirects to the record page", function() {
                 var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
                     return entity.id == accommodationParams.data[0].id;
@@ -873,9 +893,9 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
         });
 
-        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
+        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function(done) {
             // Verify page count and on first page
-            var e = chaisePage.recordsetPage.getCustomPageSize();
+            var e = chaisePage.recordsetPage.getPageLimitSelector(fileParams.custom_page_size);
 
             browser.wait(EC.presenceOf(e), browser.params.defaultTimeout).then(function() {
                 browser.wait(function () {
@@ -887,7 +907,10 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
         it("should display the proper row count and total row count.", function () {
@@ -896,8 +919,9 @@ describe('View recordset,', function() {
             });
         });
 
-        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function() {
-            var previousBtn = chaisePage.recordsetPage.getPreviousButton();
+        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function(done) {
+            var previousBtn = chaisePage.recordsetPage.getPreviousButton(),
+                pageLimitBtn = chaisePage.recordsetPage.getPageLimitDropdown();
             // page to the next page then page back to the first page so the @before modifier is applied
             chaisePage.recordsetPage.getNextButton().click().then(function() {
                 // wait for it to be on the second page
@@ -907,11 +931,16 @@ describe('View recordset,', function() {
             }).then(function() {
                 //wait for it to be on the first page again
                 browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
+                
+                //make sure the button is clickable
+                browser.wait(EC.elementToBeClickable(pageLimitBtn), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getPageLimitDropdown().click();
+                return pageLimitBtn.click();
             }).then(function() {
+                var dropdownOption = chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size);
+                browser.wait(EC.elementToBeClickable(dropdownOption), browser.params.defaultTimeout);
                 // increase the page limit
-                return chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size).click();
+                return dropdownOption.click();
             }).then(function() {
                 browser.wait(function() {
                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
@@ -923,10 +952,13 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.page_size);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
-        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function() {
+        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function(done) {
             var nextBtn = chaisePage.recordsetPage.getNextButton(),
                 prevBtn = chaisePage.recordsetPage.getPreviousButton();
 
@@ -941,7 +973,10 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(14);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
     });
 
@@ -1121,6 +1156,12 @@ describe('View recordset,', function() {
                     }).then(function () {
                         return chaisePage.recordPageReady();
                     }).then(function () {
+                        browser.wait(function () {
+                            return chaisePage.recordPage.getColumns().count().then(function(ct) {
+                                return ct == systemColumnsParams.detailedColumns.length;
+                            });
+                        });
+
                         return chaisePage.recordPage.getColumns();
                     }).then(function (columns) {
                         expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);

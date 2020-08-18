@@ -50,8 +50,8 @@
         }]);
     }])
 
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
-        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'FunctionUtils', 'headInjector', 'logService', 'MathUtils', 'messageMap', 'recordAppUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$timeout', '$window',
+        function runApp(AlertsService, ConfigUtils, DataUtils, ERMrest, FunctionUtils, headInjector, logService, MathUtils, messageMap, recordAppUtils, Session, UiUtils, UriUtils, $log, $rootScope, $timeout, $window) {
 
         var session,
             errorData = {};
@@ -86,7 +86,7 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
-            ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
@@ -98,12 +98,25 @@
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
+
                 $log.info("Reference: ", $rootScope.reference);
 
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
+
+
+                $rootScope.logStackPath = logService.logStackPaths.ENTITY;
+                $rootScope.logStack = [
+                    logService.getStackNode(
+                        logService.logStackTypes.ENTITY,
+                        $rootScope.reference.table,
+                        $rootScope.reference.filterLogInfo
+                    )
+                ];
+                $rootScope.reloadCauses = [];
+
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
@@ -118,10 +131,52 @@
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState('', '', url);
 
-                // related references
-                var related = $rootScope.reference.generateRelatedList(tuple);
+                //NOTE when the read is called, reference.activeList will be generated
+                // autmoatically but we want to make sure that urls are generated using tuple,
+                // so the links are based on facet. We might be able to improve this and avoid
+                // duplicated logic.
+                var activeList = $rootScope.reference.generateActiveList(tuple);
 
-                var columns = $rootScope.reference.generateColumnsList(tuple), model;
+                // requestModels is used to generate the secondary requests that the page needs.
+                $rootScope.requestModels = [];
+                activeList.requests.forEach(function (req) {
+                    var m = {
+                        activeListModel: req,
+                        processed: false
+                    };
+
+                    if (req.entityset || req.aggregate) {
+                        var extra = {
+                            source: req.column.compressedDataSource,
+                            entity: req.column.isEntityMode,
+                        };
+                        if (req.aggregate) {
+                            extra.agg = req.column.aggregateFn;
+                        }
+
+                        // these attributes are used for logging purposes
+                        m.logStack = logService.getStackObject(
+                            logService.getStackNode(logService.logStackTypes.PSEUDO_COLUMN, req.column.table, extra)
+                        );
+                        m.logStackPath = logService.getStackPath("", logService.logStackPaths.PSEUDO_COLUMN);
+                        m.reloadCauses = [];
+                        m.reloadStartTime = -1;
+
+                        // to avoid computing this multiple times
+                        // this reference is going to be used for getting the values
+                        if (req.entityset) {
+                            m.reference = req.column.reference.contextualize.compactBrief;
+                        }
+
+                    }
+
+                    $rootScope.requestModels.push(m);
+                });
+
+                // related references
+                var related = $rootScope.reference.related;
+
+                var columns = $rootScope.reference.columns, model;
 
                 $log.info("default export template is accessible through `defaultExportTemplate` variable. To get the string value of it call `angular.toJson(defaultExportTemplate, 1)`");
                 $window.defaultExportTemplate = $rootScope.reference.defaultExportTemplate;
@@ -134,28 +189,37 @@
                 columns.forEach(function (col, index) {
                     model = {};
 
-                    // aggregate
-                    if (col.isPathColumn && col.hasAggregate) {
-                        model = {
-                            columnError: false,
-                            isLoading: true,
-                            isAggregate: true,
-                            dirtyResult: true
-                        };
-                        $rootScope.hasAggregate = true;
-                    }
 
                     // inline
-                    else if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
+                    if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
                         var reference = col.reference.contextualize.compactBriefInline;
                         model = {
                             tableError: false,
                             isInline: true,
                             isTableDisplay: reference.display.type == 'table',
                             displayname: reference.displayname,
-                            tableModel: recordAppUtils.getTableModel(reference, "compact/brief/inline", $rootScope.tuple, $rootScope.reference)
+                            // whether we should do the waitfor logic:
+                            hasWaitFor: col.hasWaitFor,
+                            // to show the loader or not:
+                            isLoading: col.hasWaitFor,
+                            // this indicates that we got the waitfor data:
+                            // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
+                            waitForDataLoaded: !col.hasWaitFor,
+                            // this indicates that the tableMarkdownContent has been initialized:
+                            // we should not show the related table before initialzing the tableMarkdownContent
+                            tableMarkdownContentInitialized: false,
+                            tableMarkdownContent: null,
+                            tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
+                    }
+                    // columns that are relying on aggregates or are aggregate themselves
+                    else if (col.hasWaitFor || !col.isUnique) {
+                        model = {
+                            columnError: false,
+                            isLoading: true,
+                            hasWaitForOrNotUnique: true
+                        };
                     }
 
                     model.column = col;
@@ -177,7 +241,18 @@
                         open: openByDefault,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
-                        tableModel: recordAppUtils.getTableModel(ref, "compact/brief", $rootScope.tuple, $rootScope.reference),
+                        // whether we should do the waitfor logic:
+                        hasWaitFor: ref.display.sourceHasWaitFor,
+                        // to show the loader or not (currently not used in index.html.in but added for consistency):
+                        isLoading: ref.display.sourceHasWaitFor,
+                        // this indicates that we got the waitfor data:
+                        // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
+                        waitForDataLoaded: false,
+                        // this indicates that the tableMarkdownContent has been initialized:
+                        // we should not show the related table before initialzing the tableMarkdownContent
+                        tableMarkdownContentInitialized: false,
+                        tableMarkdownContent: null,
+                        tableModel: recordAppUtils.getTableModel(ref, index),
                         baseTableName: $rootScope.reference.displayname
                     });
                 });

@@ -3,9 +3,8 @@
 <head>
     <title>RecordEdit App</title>
     <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
-    %VERSION%
     <script src="/gtm-id.js"></script>
-    %ASSETS%
+    %INCLUDES%
 </head>
 <body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-recordedit">
@@ -150,14 +149,14 @@
                                                             <!-- modal popup input -->
                                                             <div ng-switch-when="popup-select" class="chaise-input-group modal-popup">
                                                                 <div class="chaise-input-control has-feedback">
-                                                                    <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column)" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
+                                                                    <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" class="popup-select-value" style="cursor: pointer" ng-click="::form.searchPopup(rowIndex, column, columnIndex)" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
                                                                     <chaise-clear-input btn-class="foreignkey-remove" click-callback="::form.clearForeignKey(rowIndex, column)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                                 </div>
                                                                 <label class="sr-only"></label>
                                                                 <!-- So that the foreign key input can be validated -->
                                                                 <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
                                                                 <span class="chaise-input-group-append">
-                                                                    <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
+                                                                    <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column, columnIndex)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
                                                                         <span class="glyphicon glyphicon-chevron-down"></span>
                                                                     </button>
                                                                 </span>
@@ -220,13 +219,13 @@
                                                             <!-- longtext/textarea input -->
                                                             <div ng-switch-when="longtext">
                                                                 <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
-                                                                <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview" markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                             </div>
 
 
                                                             <!-- File input -->
                                                             <div ng-switch-when="file">
-                                                                <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])" values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]" is-required="!column.nullok"></upload>
+                                                                <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])"
+                                                                values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]" is-required="::form.isRequired(columnIndex)" is-disabled="form.isDisabled(columnIndex)"></upload>
                                                             </div>
 
                                                             <!--JSON input -->

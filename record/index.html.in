@@ -3,9 +3,8 @@
 <head>
     <title>Record</title>
     <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=10; IE=9; IE=8; IE=7; IE=EDGE" />
-    %VERSION%
     <script src="/gtm-id.js"></script>
-    %ASSETS%
+    %INCLUDES%
 </head>
 <body class="chaise-body">
     <div class="configure-container" ng-app="chaise.configure-record">
@@ -39,8 +38,8 @@
                                 </button>
                                 <!-- download CSV included by default -->
                                 <export reference="reference" style="position:relative;" disabled="!displayReady"></export>
-                                <button ng-show="displayReady" id="share" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
-                                    <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
+                                <button ng-disabled="!displayReady || tuple == null || ctrl.waitingForSharePopup" id="share" class="chaise-btn chaise-btn-primary" ng-click="ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
+                                    <span class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': ctrl.waitingForSharePopup, 'glyphicon-share': !ctrl.waitingForSharePopup}"></span>
                                     <span>Share and cite</span>
                                 </button>
                             </div>
@@ -58,7 +57,7 @@
                                                     <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
                                                     <span>Create</span>
                                                 </button>
-                                                <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
+                                                <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canCreate()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
                                                     <span class="chaise-btn-icon glyphicon glyphicon-copy"></span>
                                                     <span>Copy</span>
                                                 </button>
@@ -92,7 +91,7 @@
                                 <div ng-repeat="cm in columnModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showInlineTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToSection(cm.displayname.value)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading toc-inline-heading">
-                                        <a ng-class="{'empty-toc-heading': cm.tableModel.page.length === 0}">
+                                        <a ng-class="{'empty-toc-heading': cm.tableModel.page.length === 0}" uib-tooltip="Scroll to the {{cm.displayname.value}} section (containing {{cm.tableModel.page.length}}{{cm.tableModel.page.hasNext ? ' or more' : ''}} record{{cm.tableModel.page.length != 1 ? 's' : ''}})" tooltip-placement="right">
                                             <span ng-if="::cm.displayname.isHTML" ng-bind-html="::cm.displayname.value"></span>
                                             <span ng-if="::!cm.displayname.isHTML" ng-bind="::cm.displayname.value"></span>
                                             <span>({{cm.tableModel.page.length}}{{cm.tableModel.page.hasNext ? '+' : ''}})</span>
@@ -102,7 +101,7 @@
                                 <div ng-repeat="rtm in relatedTableModels track by $index" id="recordSidePan-{{$index}}" ng-if="ctrl.showRelatedTable($index)" class="{{lastActiveFacet == $index ? 'focused': ''}}" ng-click="::ctrl.scrollToSection(rtm.displayname.value)">
 
                                     <li id="recordSidePan-heading-{{$index}}" class="toc-heading">
-                                        <a ng-class="{'empty-toc-heading': rtm.tableModel.page.length === 0}">
+                                        <a ng-class="{'empty-toc-heading': rtm.tableModel.page.length === 0}" uib-tooltip="Scroll to the {{rtm.displayname.value}} section (containing {{rtm.tableModel.page.length}}{{rtm.tableModel.page.hasNext ? ' or more' : ''}} record{{rtm.tableModel.page.length != 1 ? 's' : ''}})" tooltip-placement="right">
                                             <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
                                             <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
                                             <span>({{rtm.tableModel.page.length}}{{rtm.tableModel.page.hasNext ? '+' : ''}})</span>
@@ -136,9 +135,11 @@
                                     <uib-accordion-heading>
                                         <div class="rt-section-header" ng-click="::ctrl.logAccordionClick(rtm)">
                                             <i class="toggle-icon fas" ng-class="{'fa-chevron-down': rtm.open, 'fa-chevron-right': !rtm.open}"></i>
-                                            <span ng-if="::rtm.displayname.isHTML" ng-bind-html="::rtm.displayname.value"></span>
-                                            <span ng-if="::!rtm.displayname.isHTML" ng-bind="::rtm.displayname.value"></span>
-                                            <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
+                                            <span ng-class="{'chaise-icon-for-tooltip':  rtm.tableModel.reference.commentDisplay == 'tooltip' && rtm.tableModel.reference.comment}" ng-attr-uib-tooltip="{{::(rtm.tableModel.reference.commentDisplay == 'tooltip' && rtm.tableModel.reference.comment) ? rtm.tableModel.reference.comment : undefined}}" tooltip-placement="right">
+                                                <span ng-if="::rtm.displayname.isHTML" class="rt-displayname" ng-bind-html="::rtm.displayname.value"></span>
+                                                <span ng-if="::!rtm.displayname.isHTML" class="rt-displayname" ng-bind="::rtm.displayname.value"></span>
+                                                <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
+                                            </span>
                                         </div>
                                         <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-delete="ctrl.canDeleteRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
                                             is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
@@ -149,9 +150,10 @@
 
                                     <!-- for different elements inside the accordion -->
                                     <div class="row" style="margin-right: 0px; margin-left: 0px;">
+                                        <div ng-if="rtm.tableModel.reference.commentDisplay == 'inline' && rtm.tableModel.reference.comment" class="inline-tooltip">{{rtm.tableModel.reference.comment}}</div>
                                         <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)">
                                             <div ng-switch-when="true">
-                                                <span class="markdown-container" ng-bind-html="rtm.tableModel.page.content | trustedHTML"></span>
+                                                <span class="markdown-container" ng-bind-html="rtm.tableMarkdownContent | trustedHTML"></span>
                                             </div>
                                             <div ng-switch-default>
                                                 <table-header vm="rtm.tableModel"></table-header>

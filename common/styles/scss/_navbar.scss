@@ -1,3 +1,6 @@
+// required here because the output of this file (navbar.css) is used for login.index.html as well still
+@import "variables";
+
 body > .container {
 	min-height: 100%;
 	position: relative;
@@ -13,8 +16,11 @@ body > .container {
     z-index: 1037;
 }
 
+// default modal z-index is 1050 (for the first modal)
+// as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
+// we tried to be safe about it before by increasing it by only 1
 .error-open #mainnav {
-    z-index: 1051;
+    z-index: 1501;
 }
 
 .navbar-inverse {
@@ -56,6 +62,12 @@ body > .container {
 .navbar-inverse .navbar-toggle {
     border-color: #fff;
 		color: #fff;
+}
+
+.navbar .navbar-nav .disable-link {
+    pointer-events: none;
+    cursor: default;
+    color: $disabled-color;
 }
 
 .dropdown-submenu {

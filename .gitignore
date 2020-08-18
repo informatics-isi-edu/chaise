@@ -26,6 +26,7 @@ mdHelp.html
 test/e2e/data_setup/uploaded_files/*.*
 package-lock.json
 entities.json
+lib/switchUserAccounts.html
 
 # the compiled css files
 common/styles/app.css

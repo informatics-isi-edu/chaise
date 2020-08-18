@@ -90,6 +90,23 @@
                             "schema_name": "active_list_schema"
                         }
                     ]
+                },
+                {
+                    "names": [["active_list_schema", "main_fk4"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk4_col1",
+                            "table_name": "main",
+                            "schema_name": "active_list_schema"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "outbound3_id",
+                            "table_name": "outbound3",
+                            "schema_name": "active_list_schema"
+                        }
+                    ]
                 }
             ],
             "column_definitions": [
@@ -151,6 +168,17 @@
                 },
                 {
                     "name": "fk3_col2",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "virtual column",
+                    "comment": "this is not visible, but the name collides with virtual column",
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk4_col1",
                     "type": {
                         "typename": "text"
                     }
@@ -232,7 +260,7 @@
                             "display": {
                                 "markdown_pattern": "{{#if $self}}current: [{{{$self.rowName}}}({{{$self.values._int_col}}}, {{{$self.values.int_col}}})]({{{$self.uri.detailed}}}), array: {{#each _array_d_scalar_i2}}{{#unless @first}}| {{/unless}}{{{this}}}{{/each}}{{/if}}",
                                 "template_engine": "handlebars",
-                                "wait_for": ["array_d_scalar_i2"]
+                                "wait_for": ["array_d_scalar_i2", "entity_set_i2"]
                             },
                             "markdown_name": "all_outbound_entity_o2_o1"
                         },
@@ -326,6 +354,13 @@
                                 "wait_for": ["array_d_entity_i1", "array_d_scalar_i4"]
                             },
                             "markdown_name": "max_i2"
+                        },
+                        {
+                            "markdown_name": "virtual column",
+                            "display": {
+                                "markdown_pattern": "virtual col value is {{{max_i2}}}",
+                                "wait_for": ["max_i2", "entity_set_i2"]
+                            }
                         }
                     ]
                 },
@@ -358,6 +393,10 @@
                             "source": [{"outbound": ["active_list_schema", "main_fk2"]}, "RID"],
                             "entity": true
                         },
+                        "outbound_entity_o3": {
+                            "source": [{"outbound": ["active_list_schema", "main_fk4"]}, "RID"],
+                            "entity": true
+                        },
                         "outbound_scalar_o1": {
                             "source": [{"outbound": ["active_list_schema", "main_fk1"]}, "int_col"],
                             "entity": false
@@ -379,6 +418,14 @@
                                 {"outbound": ["active_list_schema", "main_fk2"]},
                                 {"outbound": ["active_list_schema", "outbound2_fk1"]},
                                 "outbound2_outbound1_id"
+                            ],
+                            "entity": true
+                        },
+                        "all_outbound_entity_o3_o1": {
+                            "source": [
+                                {"outbound": ["active_list_schema", "main_fk4"]},
+                                {"outbound": ["active_list_schema", "outbound3_fk1"]},
+                                "outbound3_outbound1_id"
                             ],
                             "entity": true
                         },
@@ -781,6 +828,108 @@
             "column_definitions": [
                 {
                     "name": "outbound2_outbound1_id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "rowname_col",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "int_col",
+                    "type": {
+                        "typename": "int4"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "row_name": {
+                        "row_markdown_pattern": "{{{rowname_col}}}"
+                    }
+                }
+            }
+        },
+        "outbound3": {
+            "kind": "table",
+            "table_name": "outbound3",
+            "schema_name": "active_list_schema",
+            "keys": [
+                {"unique_columns": ["outbound3_id"]},
+                {"unique_columns": ["rowname_col"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["active_list_schema", "outbound3_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk1_col1",
+                            "table_name": "outbound3",
+                            "schema_name": "active_list_schema"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "outbound3_outbound1_id",
+                            "table_name": "outbound3_outbound1",
+                            "schema_name": "active_list_schema"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "outbound3_id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "rowname_col",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk1_col1",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "int_col",
+                    "type": {
+                        "typename": "int4"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "row_name": {
+                        "row_markdown_pattern": "{{{rowname_col}}}"
+                    }
+                }
+            }
+        },
+        "outbound3_outbound1": {
+            "kind": "table",
+            "table_name": "outbound3_outbound1",
+            "schema_name": "active_list_schema",
+            "foreign_keys": [],
+            "keys": [
+                {"unique_columns": ["outbound3_outbound1_id"]},
+                {"unique_columns": ["rowname_col"]}
+            ],
+            "column_definitions": [
+                {
+                    "name": "outbound3_outbound1_id",
                     "nullok": false,
                     "type": {
                         "typename": "text"

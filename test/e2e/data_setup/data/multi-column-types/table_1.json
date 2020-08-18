@@ -29,6 +29,13 @@
         "fk_null_col": null,
         "fk_col": 1,
         "json_col" : "89.586",
-        "json_null_col": null
+        "json_null_col": null,
+        "asset_col": "/hatrac/js/chaise/somepath.png",
+        "asset_col_md5": "md5value",
+        "asset_col_filename": "filenamevalue.png",
+        "asset_col_bytes": 12345,
+        "asset_null_col": null,
+        "asset_null_col_filename": null,
+        "asset_null_col_bytes": null
     }
 ]

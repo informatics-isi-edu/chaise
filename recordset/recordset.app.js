@@ -65,8 +65,8 @@
     })
 
     // Register work to be performed after loading all modules
-    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logActions', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
-        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logActions, MathUtils, messageMap, modalBox, recordsetDisplayModes, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'FunctionUtils', 'headInjector', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, FunctionUtils, headInjector, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $window) {
         try {
             var session;
 
@@ -117,7 +117,7 @@
                 Session.unsubscribeOnChange(subId);
 
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
-                ERMrest.resolve(ermrestUri, { cid: context.cid, pid: context.pid, wid: context.wid }).then(function getReference(reference) {
+                ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                     session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
@@ -133,7 +133,6 @@
 
 
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.context = context.appContext = "compact";
                     recordsetModel.reference.session = session;
 
                     // if there's something wrong with the facet or filters in the url,
@@ -157,8 +156,19 @@
 
                     recordsetModel.search = recordsetModel.reference.location.searchTerm;
 
+                    $rootScope.logStackPath = logService.logStackPaths.SET;
+                    $rootScope.logStack = [
+                        logService.getStackNode(
+                            logService.logStackTypes.SET,
+                            recordsetModel.reference.table,
+                            recordsetModel.reference.filterLogInfo
+                        )
+                    ];
+                    recordsetModel.logStack = $rootScope.logStack;
+                    recordsetModel.logStackPath = $rootScope.logStackPath;
+
                     // create log object that will be used for the first request
-                    recordsetModel.logObject = {action: logActions.recordsetLoad};
+                    recordsetModel.logObject = {};
                     if (pcid) recordsetModel.logObject.pcid = pcid;
                     if (ppid) recordsetModel.logObject.ppid = ppid;
                     if (isQueryParameter) recordsetModel.logObject.cqp = 1;

@@ -18,22 +18,38 @@
     var client;
 
     angular.module('chaise.viewer', [
-        'ermrestjs',
         'ngSanitize',
-        'chaise.alerts',
-        'chaise.filters',
         'ngCookies',
+        'ngAnimate',
+        'duScroll',
+        'chaise.alerts',
         'chaise.authen',
         'chaise.errors',
+        'chaise.faceting',
+        'chaise.filters',
+        'chaise.inputs',
         'chaise.delete',
         'chaise.modal',
+        'chaise.navbar',
+        'chaise.upload',
+        'chaise.record.table',
+        'chaise.recordcreate',
+        'chaise.resizable',
         'chaise.utils',
+        'ermrestjs',
+        'ngCookies',
+        'ngSanitize',
+        'ngMessages',
+        'ui.mask',
         'ui.select',
         'ui.bootstrap',
-        'ng.deviceDetector'
+        'ng.deviceDetector',
+        'angular-markdown-editor'
     ])
 
-    .config(['$provide', function($provide) {
+    .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
+        ConfigUtilsProvider.$get().configureAngular($compileProvider, $cookiesProvider, $logProvider, $uibTooltipProvider);
+
         $provide.decorator('$templateRequest', ['ConfigUtils', 'UriUtils', '$delegate', function (ConfigUtils, UriUtils, $delegate) {
             return ConfigUtils.decorateTemplateRequest($delegate, UriUtils.chaiseDeploymentPath());
         }]);
@@ -47,24 +63,8 @@
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
 
-        // should we allow for improper URLs here?
-        // what if there are 2 filters and the id filter is the second one.
-        // Is that improper or should it be parsed and ignore the other filter?
-        var filter = context.filter.filters[0];
-        if (filter.type === "BinaryPredicate" &&
-            filter.operator === "=" &&
-            filter.column.toLowerCase() === "id") {
-            context.imageID = filter.value;
-        }
-
+        // TODO this should be removed, viewer shouldn't parse the url
         console.log('Context', context);
-        // TODO: Check if context has everything it needs before proceeding. If not, Bad Request
-    }])
-
-    // set the chasie-config property
-    .config(['headInjectorProvider', function (headInjectorProvider) {
-
-        headInjectorProvider.$get().setupHead();
     }])
 
     // Configure all tooltips to be attached to the body by default. To attach a
@@ -74,6 +74,7 @@
         $uibTooltipProvider.options({appendToBody: true});
     }])
 
+    // TODO not used anymore and can be removed (it was used by old annotation support code)
     .config(['userProvider', 'context', 'SessionProvider', 'ConfigUtilsProvider', function configureUser(userProvider, context, SessionProvider, ConfigUtilsProvider) {
         var chaiseConfig = ConfigUtilsProvider.$get().getConfigJSON();
         SessionProvider.$get().getSession().then(function success(session) {
@@ -122,195 +123,220 @@
     }])
 
     // Hydrate values providers and set up iframe
-    .run(['ConfigUtils', 'ERMrest', 'logActions', '$window', 'context', 'image', 'annotations', 'comments', 'anatomies', 'user', 'MathUtils', function runApp(ConfigUtils, ERMrest, logActions, $window, context, image, annotations, comments, anatomies, user, MathUtils) {
+    .run([
+        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
-        var annotoriousReady = false;
-        var chaiseReady = false;
+        $rootScope.displayReady = false;
+        $rootScope.displayIframe = false;
+
+        // only show the panel if there are annotation images in the url
+        $rootScope.hideAnnotationSidebar = true;
+        $rootScope.annotationTuples = [];
+
         var arrows = [];
         var rectangles = [];
         var sections = [];
 
-        ConfigUtils.getContextJSON().server.catalogs.get(context.catalogID).then(function success(catalog) {
-            var schema = catalog.schemas.get(context.schemaName);
-            // So the schema and tables can be accessed in controllers
-            context.schema = schema;
-            console.log('Schema: ', schema);
-            if (schema) {
-                var table = schema.tables.get(context.tableName);
-                // BinaryPredicate(column, operator, value) is used for building a filter
-                // This predicate is used to get the image based on the id of the image the user is navigating to
-                var imagePath = new ERMrest.DataPath(table);
-                var imagePathColumn = imagePath.context.columns.get('id');
-                var imageFilter = new ERMrest.BinaryPredicate(imagePathColumn, ERMrest.OPERATOR.EQUAL, context.imageID);
+        var iframe = $window.frames[0];
+        var arrows = [];
+        var rectangles = [];
+        var sections = [];
+        var session;
+        var imageURI, svgURIs = [];
+        var config = ConfigUtils.getContextJSON();
+        var annotConstant = viewerConstant.annotation;
+        var imageConstant = viewerConstant.image;
 
-                var contextHeaderParams = {
-                    catalog: context.catalogID,
-                    schema_table: context.schemaName + ":" + context.tableName,
-                    filter: "id=" + context.imageID,
-                    action: logActions.viewerMain
-                };
+        context.server = config.server;
+        context.wid = config.contextHeaderParams.wid;
+        context.cid = config.contextHeaderParams.cid;
+        context.pid = config.contextHeaderParams.pid;
+        context.chaiseBaseURL = UriUtils.chaiseBaseURL();
+        UriUtils.setOrigin();
 
-                if (context.queryParams && context.queryParams.ppid) {
-                    contextHeaderParams.ppid = context.queryParams.ppid;
+        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
+        var ermrestUri = res.ermrestUri,
+            pcid = config.contextHeaderParams.cid,
+            ppid = config.contextHeaderParams.pid,
+            isQueryParameter = res.isQueryParameter,
+            queryParamsString = res.queryParamsString,
+            queryParams = res.queryParams;
+
+        context.catalogID = res.catalogId;
+
+        context.queryParams = res.queryParams;
+
+        FunctionUtils.registerErmrestCallbacks();
+
+        var session, annotationEditReference;
+        var osdViewerQueryParams = queryParamsString, // what will be passed onto osd viewer
+            hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
+            hasImageQueryParam = false, // if there is an image in query, we should just use it and shouldn't use the image uri from db
+            osdCanShowAnnotation = false; // whether we can show image annotations or not (if not, we will disable the sidebar)
+
+        // HACK: this is just a hack to allow quick testing
+        // if there are any svg files in the query params, ignore the annotation table.
+        // we cannot use the queryParams object that is returned since it only give us the last url
+        // (it's a key-value so it's not supporting duplicated key values)
+        // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
+        if (queryParamsString && queryParamsString.length > 0) {
+            queryParamsString.split('&').forEach(function (queryStr) {
+                var qpart = queryStr.split("=");
+                if (qpart.length != 2 || qpart[0] !== "url") return;
+
+                if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
+                    $rootScope.hideAnnotationSidebar = false;
+                    $rootScope.loadingAnnotations = true;
+                    hasAnnotationQueryParam = true;
+                } else {
+                    hasImageQueryParam = true;
+                }
+            });
+        }
+
+        // Subscribe to on change event for session
+        var subId = Session.subscribeOnChange(function () {
+            // Unsubscribe onchange event to avoid this function getting called again
+            Session.unsubscribeOnChange(subId);
+
+            var imageReference;
+            // resolve the main (image) reference
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+                imageReference = ref;
+
+                // TODO check for filter
+                // context.filter = imageReference.location.filter;
+                // context.facets = imageReference.location.facets;
+                // DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
+
+                session = Session.getSessionValue();
+                if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+
+                // TODO is it needed?
+                $rootScope.session = session;
+
+                var logObj = {};
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                if (isQueryParameter) logObj.cqp = 1;
+
+                $rootScope.logStackPath = logService.logStackPaths.ENTITY;
+                $rootScope.logStack = [
+                    logService.getStackNode(
+                        logService.logStackTypes.ENTITY,
+                        imageReference.table,
+                        imageReference.filterLogInfo
+                    )
+                ];
+
+                return imageReference.contextualize.detailed.read(1, logObj, true, true);
+            })
+            // read the main (image) reference
+            .then(function (imagePage) {
+
+                // TODO throw error
+                // what if the record doesn't exist (or there are multiple)
+                if (imagePage.length != 1) {
+                    console.log("Image request didn't return a row.");
+                    return false;
                 }
 
-                if (context.queryParams && context.queryParams.pcid) {
-                    contextHeaderParams.pcid = context.queryParams.pcid;
+                image.entity = imagePage.tuples[0].data;
+                context.imageID = image.entity.RID;
+                imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
+
+                // TODO some sort of warning maybe?
+                if (!imageURI) {
+                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty. We cannot show any image from database.");
                 }
-                imagePath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(entity) {
-                    image.entity = entity[0];
-                    var waterMark = context.queryParams.waterMark;
-                    if (waterMark === undefined) {
-                    	waterMark = '';
+
+                // TODO this feels hacky
+                // get the default zindex value
+                if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
+                    context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
+                }
+
+                /**
+                * - if url is passed in query parameters, don't use image.uri value
+                *   (TODO maybe we shouldn't even read the image? (we're reading image for RID value etc..)
+                * - otherwise, if image.uri value exists
+                *    - and has query parameter, use the image.uri query parameter.
+                *    - otherwise, use the image.uri value
+                */
+                if(!hasImageQueryParam && (typeof imageURI === "string")){
+                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
+                    if (imageURI.indexOf("?") !== -1) {
+                        osdViewerQueryParams += imageURI.split("?")[1];
                     } else {
-                    	waterMark = '&waterMark=' + waterMark;
+                        osdViewerQueryParams += imageURI;
                     }
-                    var meterScaleInPixels = context.queryParams.meterScaleInPixels;
-                    if (meterScaleInPixels === undefined) {
-                    	meterScaleInPixels = '';
-                    } else {
-                    	meterScaleInPixels = '&meterScaleInPixels=' + meterScaleInPixels;
-                    }
-                    console.log('uri='+image.entity.uri + waterMark + meterScaleInPixels);
-                    iframe.location.replace(image.entity.uri + waterMark + meterScaleInPixels);
-                    console.log('Image: ', image);
+                }
 
-                    var annotationTable = schema.tables.get('annotation');
-                    var annotationPath = imagePath.extend(annotationTable).datapath;
-                    var contextHeaderParams = {
-                        catalog: context.catalogID,
-                        schema_table: context.schemaName + ":annotation",
-                        filter: "id=" + context.imageID,
-                        action: logActions.viewerAnnotation
-                    };
-                    annotationPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_annotations) {
-                        var length = _annotations.length;
-                        for (var i = 0; i < length; i++) {
-                            _annotations[i].table = annotationPath.context.table.name;
-                            var annotation = _annotations[i];
-                            if (!annotation.config) {
-                                annotation.config = {};
-                            }
-                            annotations.push(annotation);
-                        }
-                        chaiseReady = true;
+                // TODO throw an error if there wasn't any image
 
-                        if (annotoriousReady && chaiseReady) {
-                            iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
-                        }
-                        console.log('Annotations: ', annotations);
+                osdCanShowAnnotation = viewerAppUtils.canOSDShowAnnotation(osdViewerQueryParams);
 
-                        var commentTable = schema.tables.get('annotation_comment');
-                        var commentPath = annotationPath.extend(commentTable).datapath;
-                        var contextHeaderParams = {
-                            catalog: context.catalogID,
-                            schema_table: context.schemaName + ":annotation_comment",
-                            filter: "id=" + context.imageID,
-                            action: logActions.viewerComment
-                        };
+                // if there's svg query param, don't fetch the annotations from DB.
+                // if we cannot show any overlay, there's no point in reading
+                if (hasAnnotationQueryParam || !osdCanShowAnnotation) {
+                    return false;
+                }
 
-                        // Get all the comments for this image
-                        // Nest comments fetch in annotations so annotations will be fetched and loaded to the DOM before the comments
-                        commentPath.filter(imageFilter).entity.get(contextHeaderParams).then(function success(_comments){
-                            var length = _comments.length;
-                            for (var i = 0; i < length; i++) {
-                                _comments[i].table = commentPath.context.table.name;
-                                var annotationId = _comments[i].annotation_id;
-                                if (!comments[annotationId]) {
-                                    comments[annotationId] = [];
-                                }
-                                comments[annotationId].push(_comments[i]);
-                            }
-                            console.log('Comments: ', comments);
-                        }, function error(response) {
-                            console.log(response);
-                        });
+                return viewerAppUtils.readAllAnnotations();
+            })
+            // read the annotation reference
+            .then(function (res) {
+                // disable the annotaiton sidebar:
+                //  - if there are no annotation and we cannot create
+                //  - the image type doesn't support annotation.
+                if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
+                    $rootScope.disableAnnotationSidebar = true;
+                }
 
-                    }, function error(response) {
-                        throw response;
-                    });
-                }, function error(response) {
-                    throw response;
+                if ($rootScope.annotationTuples.length > 0) {
+                    $rootScope.loadingAnnotations = true;
+                }
+
+                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;
+                console.log('osd viewer location: ', osdViewerURI);
+                iframe.location.replace(osdViewerURI);
+
+                // TODO there should be a way that osd tells us it's done doing it's setup.
+                $rootScope.displayReady = true;
+
+                /**
+                 * fix the size of main-container and sticky areas, and then show the iframe.
+                 * these have to be done in a digest cycle after setting the displayReady.
+                 * Because this way, we will ensure to run the height logic after the page
+                 * content is visible and therefore it can set a correct height for the bottom-container.
+                 * otherwise the iframe will be displayed in a small box first.
+                 */
+                $timeout(function () {
+                    UiUtils.attachContainerHeightSensors();
+                    $rootScope.displayIframe = true;
                 });
 
-                // Get all rows from "anatomy" table
-                var anatomyTable = schema.tables.get('anatomy');
-                var anatomyPath = new ERMrest.DataPath(anatomyTable);
-                var contextHeaderParams = {
-                    catalog: context.catalogID,
-                    schema_table: context.schemaName + ":anatomy",
-                    action: logActions.viewerAnatomy
-                };
-                anatomyPath.entity.get(contextHeaderParams).then(function success(_anatomies) {
-                    anatomies.push('No Anatomy');
-                    var length = _anatomies.length;
-                    for (var j = 0; j < length; j++) {
-                        anatomies.push(_anatomies[j].term);
-                    }
-                    anatomies.sort(function sortAnatomies(a, b) {
-                        a = a.toLowerCase();
-                        b = b.toLowerCase();
-                        if (a < b) {
-                            return -1;
-                        } else if (a > b) {
-                            return 1;
-                        } else {
-                            return 0;
-                        }
-                    });
-                }, function error(response) {
-                    throw response;
-                });
-            }
-        }, function error(response) {
-          console.log(response);
-        });
-
-        // Set up a listener for all "message" events
-        $window.addEventListener('message', function(event) {
-            if (event.origin === origin) {
-                if (event.data.messageType == 'annotoriousReady') {
-                    annotoriousReady = event.data.content;
-                    if (annotoriousReady && chaiseReady) {
-                        iframe.postMessage({messageType: 'loadAnnotations', content: annotations}, origin);
-                    }
-                } else if (event.data.messageType == 'dismissChannels') {
-window.console.log("XXX pull off the channels filtering pullout..");
-/*
-<button ng-click="osd.filterChannels();" class="btn btn-success" ng-class="{'pick':!osd.filterChannelsAreHidden}" type="button" role="button" title="channel filtering" id="filter-btn">
-*/
-                  var btnptr = $('#filter-btn');
-                  btnptr.click();
-                }
-                // should really capture the 'unhandled' message type here..
-            } else {
-                console.log('Invalid event origin. Event origin: ', origin, '. Expected origin: ', window.location.origin);
-            }
-        });
-
-        // Initialize Bootstrap tooltips
-        $(document).ready(function(){
-            $('[data-toggle="tooltip"]').tooltip({
-                placement: 'bottom',
-                container: 'body',
-                html: true
+            }).catch(function (err) {
+                // TODO errors.js is not showing the errors coming from viewer,
+                // so if we decided to show errors from this app, we should change that one as well.
+                throw err;
             });
         });
-    }]);
 
-    // Refresh the page when the window's hash changes. Needed because Angular
-    // normally doesn't refresh page when hash changes.
-    window.onhashchange = function() {
-        if (window.location.hash != '#undefined') {
-            location.reload();
-        } else {
-            history.replaceState("", document.title, window.location.pathname);
-            location.reload();
-        }
-        function goBack() {
-            window.location.hash = window.location.lasthash[window.location.lasthash.length-1];
-            window.location.lasthash.pop();
-        }
-    }
+        /**
+         * it saves the location in $rootScope.location.
+         * When address bar is changed, this code compares the address bar location
+         * with the last save recordset location. If it's the same, the change of url was
+         * done internally, do not refresh page. If not, the change was done manually
+         * outside recordset, refresh page.
+         *
+         */
+        UriUtils.setLocationChangeHandling();
+
+        // This is to allow the dropdown button to open at the top/bottom depending on the space available
+        UiUtils.setBootstrapDropdownButtonBehavior();
+    }]);
 })();

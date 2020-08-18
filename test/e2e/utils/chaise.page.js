@@ -318,6 +318,8 @@ var recordEditPage = function() {
         return el.getAttribute('value').then(function(value) {
             el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
             browser.sleep(10);
+        }).catch(function (err) {
+            console.log(err)
         });
     };
 
@@ -486,12 +488,16 @@ var recordPage = function() {
         return element(by.id("entity-" + displayName)).element(by.css(".ng-scope")).element(by.css(".ng-scope"));
     };
 
+    this.getInlineRelatedTableInlineComment = function (displayname) {
+        return this.getEntityRelatedTable(displayname).element(by.css(".inline-tooltip"));
+    }
+
     this.getRelatedTableHeadings = function() {
         return element.all(by.css(".related-table-accordion"));
     };
 
     this.getRelatedTableTitles = function() {
-        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header span').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getRelatedTableAccordion = function(displayName) {
@@ -506,6 +512,10 @@ var recordPage = function() {
     this.getRelatedTableSectionHeader = function(displayName) {
         return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header'));
     };
+
+    this.getRelatedTableInlineComment = function(displayname) {
+        return this.getRelatedTableAccordion(displayname).element(by.css('.inline-tooltip'));
+    }
 
     this.getRelatedTableHeadingTitle = function(displayname) {
         displayName = makeSafeIdAttr(displayname);
@@ -611,6 +621,17 @@ var recordPage = function() {
     this.getShareModal = function() {
         return element(by.css(".chaise-share-citation"));
     };
+
+    this.waitForCitation = function (timeout) {
+        var locator = element.all(by.css('.citation-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            }).catch(function () {
+                return true;
+            });
+        }, timeout || browser.params.defaultTimeout);
+    }
 
     this.getModalListElements = function() {
         return this.getModalText().all(by.tagName('li'));
@@ -802,24 +823,25 @@ var recordsetPage = function() {
         return el.getAttribute('uib-tooltip');
     };
 
-    this.getMainSearchBox = function() {
-        return element(by.className("recordset-main-search"));
+    this.getMainSearchBox = function(el) {
+        var locator = by.className("recordset-main-search");
+        return el ? el.element(locator) : element(locator);
     };
 
-    this.getMainSearchPlaceholder = function () {
-        return this.getMainSearchBox().element(by.className("chaise-input-placeholder"))
+    this.getMainSearchPlaceholder = function (el) {
+        return this.getMainSearchBox(el).element(by.className("chaise-input-placeholder"))
     }
 
-    this.getMainSearchInput = function() {
-        return this.getMainSearchBox().element(by.className("main-search-input"));
+    this.getMainSearchInput = function(el) {
+        return this.getMainSearchBox(el).element(by.className("main-search-input"));
     };
 
-    this.getSearchSubmitButton = function() {
-        return this.getMainSearchBox().element(by.className("chaise-search-btn"));
+    this.getSearchSubmitButton = function(el) {
+        return this.getMainSearchBox(el).element(by.className("chaise-search-btn"));
     };
 
-    this.getSearchClearButton = function() {
-        return this.getMainSearchBox().element(by.className("remove-search-btn"));
+    this.getSearchClearButton = function(el) {
+        return this.getMainSearchBox(el).element(by.className("remove-search-btn"));
     };
 
     this.getAddRecordLink = function(el) {
@@ -876,10 +898,6 @@ var recordsetPage = function() {
 
     this.getPageLimitDropdown = function () {
         return element(by.css(".page-size-dropdown"));
-    };
-
-    this.getCustomPageSize = function() {
-        return element(by.css(".page-size-limit-custom"));
     };
 
     this.getPageLimitSelector = function (limit) {
@@ -1125,17 +1143,6 @@ var recordsetPage = function() {
         return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 
-    this.waitForAggregates = function (timeout) {
-        var locator = element.all(by.css('.aggregate-col-loader'));
-        return browser.wait(function () {
-            return locator.isDisplayed().then(function (arr) {
-                return arr.includes(true) === false;
-            }).catch(function () {
-                return true;
-            });
-        }, timeout || browser.params.defaultTimeout);
-    };
-
     this.getWarningAlert = function () {
         return element(by.css(".alert-warning"));
     };
@@ -1147,8 +1154,21 @@ var recordsetPage = function() {
     this.getSelectAllBtn = function () {
         return element(by.id("table-select-all-rows"));
     };
-
 };
+
+var SearchPopup = function () {
+    this.getAddPureBinaryPopup = function () {
+        return element(by.className("add-pure-and-binary-popup"));
+    };
+
+    this.getFacetPopup = function () {
+        return element(by.className("faceting-show-details-popup"));
+    };
+
+    this.getForeignKeyPopup = function () {
+        return element(by.className("foreignkey-popup"));
+    };
+}
 
 var errorModal = function () {
     var self = this;
@@ -1165,13 +1185,8 @@ var errorModal = function () {
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
 function makeSafeIdAttr(string) {
-    return String(string)
-        .replace(/&/g, '&amp;')
-        .replace(/\s/g, '&nbsp;') // any whitespace
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+    var ID_SAFE_REGEX = /[^\w-]+/g;
+    return String(string).replace(ID_SAFE_REGEX, '-');
 }
 
 function chaisePage() {
@@ -1179,6 +1194,7 @@ function chaisePage() {
     this.recordPage = new recordPage();
     this.recordsetPage = new recordsetPage();
     this.errorModal = new errorModal();
+    this.searchPopup = new SearchPopup();
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
@@ -1206,7 +1222,7 @@ function chaisePage() {
         return browser.executeScript("return window.name;");
     };
     this.getPageId = function() {
-        return browser.executeScript("return window.dcctx.pid");
+        return browser.executeScript("return window.dcctx.contextHeaderParams.pid");
     };
     this.recordsetPageReady = function() {
         return this.waitForElement(element(by.css(".recordset-table")));
@@ -1217,6 +1233,7 @@ function chaisePage() {
     }
     this.recordeditPageReady = function() {
         this.waitForElement(element(by.id("submit-record-button")));
+        this.waitForElementInverse(element(by.id("spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
@@ -1374,6 +1391,17 @@ function chaisePage() {
         });
 
         return defer.promise;
+    };
+
+    this.waitForAggregates = function (timeout) {
+        var locator = element.all(by.css('.aggregate-col-loader'));
+        return browser.wait(function () {
+            return locator.isDisplayed().then(function (arr) {
+                return arr.includes(true) === false;
+            }).catch(function () {
+                return true;
+            });
+        }, timeout || browser.params.defaultTimeout);
     };
 };
 

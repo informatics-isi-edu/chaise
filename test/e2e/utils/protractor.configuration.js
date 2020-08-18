@@ -13,7 +13,7 @@ exports.getConfig = function(options) {
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
           args: ['--lang=en',
-                 '--window-size=1920,1920'],
+                 '--window-size=1280,720'],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
@@ -25,7 +25,7 @@ exports.getConfig = function(options) {
       },
       'os': 'MacOS El Capitan 10.11',
       'platform': 'OS X 10.11',
-      'screenResolution': '1920x1440'
+      'screenResolution': '1280x960'
     },
     specs: [
       '*.spec.js'
@@ -97,7 +97,7 @@ exports.getConfig = function(options) {
 
   var execSync = require('child_process').execSync;
   var remoteChaiseDirPath = process.env.REMOTE_CHAISE_DIR_PATH;
-  var cmd = 'sudo cp ' + ("/var/www/html/chaise/" + chaiseFilePath) + " " + ("/var/www/html/chaise/chaise-config.js");
+  var cmd = 'sudo cp ' + chaiseFilePath + " " + ("/var/www/html/chaise/chaise-config.js");
 
   // The tests will take this path when it is not running on Travis and remoteChaseDirPath is not null
   if (typeof remoteChaiseDirPath == 'string') {

@@ -231,7 +231,7 @@ describe('Record Add', function() {
                     } else {
                         browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+tableParams.schema_name+":" + tableParams.table_name);
                     }
-                    chaisePage.waitForElement(element(by.id("submit-record-button")));
+                    chaisePage.recordeditPageReady();
                 });
 
                 describe("Presentation and validation,", function() {
@@ -313,7 +313,7 @@ describe('Record Add', function() {
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
-                    constraintNames: ['npH9l-Il-ZAadyQ8VTPStA'], // A FK that Accommodation table has with Category table, column._name
+                    fkColumnNames: ['npH9l-Il-ZAadyQ8VTPStA'], // A FK that Accommodation table has with Category table, column._name
                     rowname: {
                         value: "Castle"
                     },

@@ -26,6 +26,9 @@
     ])
 
     .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
+
+        // TODO navbar changes (these should move to ConfigUtils)
+        // because we might call that one first. these should be in the setter...
         headInjector.setWindowName();
 
         // trick to verify if this config app is running inside of an iframe as part of another app
@@ -48,17 +51,16 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
-        var metatag = document.head.querySelector("[name~=version][content]");
-        var version = metatag ? metatag.content : null;
 
         // initialize dcctx object
         $window.dcctx = {
-            cid: appName,
-            pid: MathUtils.uuid(),
-            wid: $window.name,
-            hideNavbar: hideNavbar,
-            version: version
-        }
+            contextHeaderParams: {
+                cid: appName,
+                pid: MathUtils.uuid(),
+                wid: $window.name
+            },
+            hideNavbar: hideNavbar
+        };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();
 
@@ -69,11 +71,11 @@
 
             if (catalogId) {
                 // the server object that can be used in other places
-                $window.dcctx.server = ERMrest.ermrestFactory.getServer(service, { cid: $window.dcctx.cid, pid: $window.dcctx.pid, wid: $window.dcctx.wid });
+                $window.dcctx.server = ERMrest.ermrestFactory.getServer(service, $window.dcctx.contextHeaderParams);
 
-                $window.dcctx.server.catalogs.get(catalogId).then(function (response) {
+                $window.dcctx.server.catalogs.get(catalogId, true).then(function (response) {
                     // we already setup the defaults and the configuration based on chaise-config.js
-                    if (response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
+                    if (response && response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
                     return headInjector.setupHead();
                 }).then(function () {

@@ -3,8 +3,8 @@
 
     angular.module('chaise.recordEdit')
 
-    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logActions', 'logService', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logActions, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('FormController', ['AlertsService', 'ConfigUtils', 'dataFormats', 'DataUtils', 'ErrorService', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordEditAppUtils', 'recordEditModel', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function FormController(AlertsService, ConfigUtils, dataFormats, DataUtils, ErrorService, InputUtils, integerLimits, logService, maskOptions, messageMap, modalBox, modalUtils, recordCreate, recordEditAppUtils, recordEditModel, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
         var context = ConfigUtils.getContextJSON();
         var chaiseConfig = ConfigUtils.getConfigJSON();
@@ -16,6 +16,7 @@
             cheatsheet: "http://commonmark.org/help/"
         };
         vm.isRequired = isRequired;
+        vm.isDisabled = isDisabled;
         vm.getDisabledInputValue = getDisabledInputValue;
 
         vm.alerts = AlertsService.alerts;
@@ -88,65 +89,6 @@
             $window.location = redirectUrl;
         }
 
-        /*
-         * Allows to tranform some form values depending on their types
-         * Boolean: If the value is empty ('') then set it as null
-         * Date/Timestamptz: If the value is empty ('') then set it as null
-         */
-        function transformRowValues(row) {
-            var transformedRow = {};
-            /* Go through the set of columns for the reference.
-             * If a value for that column is present (row[col.name]), transform the row value as needed
-             * NOTE:
-             * Opted to loop through the columns once and use the row object for quick checking instead
-             * of looking at each key in row and looping through the column set each time to grab the column
-             * My solution is worst case n-time
-             * The latter is worst case rowKeys.length * n time
-             */
-            for (var i = 0; i < $rootScope.reference.columns.length; i++) {
-                var col = $rootScope.reference.columns[i];
-                var rowVal = row[col.name];
-                if (rowVal && !col.getInputDisabled(context.appContext)) {
-                    if (col.type.isArray) {
-                        rowVal = JSON.parse(rowVal);
-                    } else {
-                        switch (col.type.name) {
-                            case "timestamp":
-                            case "timestamptz":
-                                if (vm.readyToSubmit) {
-                                    var options = {
-                                        outputType: "string",
-                                        currentMomentFormat: dataFormats.date + dataFormats.time12 + 'A',
-                                        outputMomentFormat: dataFormats.datetime.submission
-                                    }
-
-                                    // in create if the user doesn't change the timestamp field, it will be an object in form {time: null, date: null, meridiem: AM}
-                                    // meridiem should never be null, time can be left empty (null) the case below will catch that.
-                                    if (rowVal.time === null) rowVal.time = '00:00:00';
-                                    var value = rowVal.date ? rowVal.date + rowVal.time + rowVal.meridiem : null;
-
-                                    rowVal = InputUtils.formatDatetime(value, options);
-                                }
-                                break;
-                            case "json":
-                            case "jsonb":
-                                rowVal=JSON.parse(rowVal);
-                                break;
-                            default:
-                                if (col.isAsset) {
-                                    if (!vm.readyToSubmit) {
-                                        rowVal = { url: "" };
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                }
-                transformedRow[col.name] = rowVal;
-            }
-            return transformedRow;
-        }
-
         /**
          * onSuccess - callback after results are added
          *
@@ -163,6 +105,16 @@
             }
             else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
+
+                // NOTE currently this has been added just to make sure nothing is broken,
+                // but it's not used since the displayed table doesn't have any controls.
+                // if we end up adding more controls and needed to log them, we might want to
+                // revisit the filters that we're logging here.
+                var logStackNode = logService.getStackNode(
+                    logService.logStackTypes.SET,
+                    resultsReference.table,
+                    resultsReference.filterLogInfo
+                );
 
                 // includes identifiers for specific records modified
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
@@ -183,8 +135,11 @@
                         viewable: false,
                         editable: false,
                         deletable: false,
-                        selectMode: modalBox.noSelect //'no-select'
-                    }
+                        selectMode: modalBox.noSelect, //'no-select'
+                        displayMode: recordsetDisplayModes.table
+                    },
+                    logStack: logService.getStackObject(logStackNode),
+                    logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_SUCCESFUL_SET)
                 };
 
                 // NOTE: This case is for a pseudo-failure case
@@ -206,8 +161,11 @@
                             viewable: false,
                             editable: false,
                             deletable: false,
-                            selectMode: modalBox.noSelect
-                        }
+                            selectMode: modalBox.noSelect,
+                            displayMode: recordsetDisplayModes.table
+                        },
+                        logStack: logService.getStackObject(logStackNode),
+                        logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_FAILED_SET)
                     };
                 }
                 vm.resultset = true;
@@ -254,7 +212,7 @@
                     originalTuple = null;
                     editOrCopy = false;
                 }
-                populateSubmissionRow(model.rows[j], model.submissionRows[j], originalTuple, $rootScope.reference.columns, editOrCopy);
+                recordCreate.populateSubmissionRow(model.rows[j], model.submissionRows[j], $rootScope.reference, originalTuple, editOrCopy);
             }
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
@@ -266,8 +224,9 @@
             if (chaiseConfig.showFaceting) {
                 uri = ref.appLink;
             } else {
-                var location = ref.location;
-                uri = "../search/#" + location.catalog + '/' + location.schemaName + ':' + location.tableName;
+                var table = ref.table;
+                var encode = UriUtils.fixedEncodeURIComponent;
+                uri = "../search/#" + table.schema.catalog.id + '/' + encode(table.schema.name) + ':' + encode(table.name);
             }
 
             $rootScope.showSpinner = false;
@@ -276,7 +235,7 @@
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
         // TODO: remove when RE has been refactored to use the inputSwitch directive for all form inputs
-        function searchPopup(rowIndex, column) {
+        function searchPopup(rowIndex, column, columnIndex) {
             var originalTuple,
                 editOrCopy = true,
                 params = {};
@@ -292,7 +251,7 @@
                 editOrCopy = false;
             }
 
-            var submissionRow = populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], originalTuple, $rootScope.reference.columns, editOrCopy);
+            var submissionRow = recordCreate.populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], $rootScope.reference, originalTuple, editOrCopy);
 
             // used for title
             params.parentReference = $rootScope.reference;
@@ -304,14 +263,14 @@
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
             params.reference.session = $rootScope.session;
 
-            params.logObject = params.reference.defaultLogInfo;
-            params.logObject.referrer = params.parentReference.defaultLogInfo;
-
-            params.context = "compact/select";
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
             params.showFaceting = true;
             params.facetPanelOpen = false;
+
+            var columnModel = vm.recordEditModel.columnModels[columnIndex];
+            params.logStack = columnModel.logStack;
+            params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
             modalUtils.showModal({
                 animation: false,
@@ -344,13 +303,10 @@
                 }
 
                 vm.recordEditModel.rows[rowIndex][column.name] = tuple.displayname.value;
-            }, function modalCanceled() {
-                var fkCancelHeader = {
-                    action: logActions.recordeditFKCancel
-                }
 
-                logService.logClientAction(fkCancelHeader, params.reference.defaultLogInfo);
-            }, false);
+                // call resize function in case the rowname is long enough to span 2+ lines
+                resizeColumns(true);
+            }, null, false);
         }
 
         // idx - the index of the form
@@ -396,7 +352,9 @@
                 var referenceCol = foreignKeyColumns[i];
 
                 delete model.submissionRows[rowIndex][referenceCol.name];
-                if ($rootScope.tuples) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+                // Note: this conditional is for clearing `tuple.data` for update
+                // we rely on the data property to compare against the old data to verify what has changed
+                if ($rootScope.tuples && $rootScope.tuples[rowIndex]) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
             }
 
             model.rows[rowIndex][column.name] = null;
@@ -406,20 +364,74 @@
             $window.open(column.reference.contextualize.entryCreate.appLink, '_blank');
         }
 
+        /**
+         * what we capture in rows are not always simple objects and
+         * we should manually copy in those cases. this includes:
+         *   - asset column: for these columns we are storing the object
+         */
+        function copyRow (row) {
+            var res = {}, k, colValue;
+            $rootScope.reference.columns.forEach(function (col, colIndex) {
+                colValue = row[col.name];
+                if (col.isAsset) {
+
+                    // make sure it is not null
+                    if (!DataUtils.isObjectAndNotNull(colValue)) return;
+
+                    res[col.name] = {};
+
+                    // copy each value individually
+                    for (k in colValue) {
+                        if (!colValue.hasOwnProperty(k)) return;
+                        if (k === "hatracObj") {
+                            res[col.name].hatracObj = new ERMrest.Upload(colValue.file, {
+                                column: col,
+                                reference: $rootScope.reference
+                            });
+                        } else {
+                            // one of the values is file object, based on my testing
+                            // it seems like passing the value this way is fine.
+                            // we should avoid angular.copy since based on the
+                            // angular documentation it has known issues with File object
+                            res[col.name][k] = colValue[k];
+                        }
+                    }
+
+                    return;
+                }
+
+                // for other columns we can just copy the value
+                res[col.name] = angular.copy(colValue);
+            });
+
+            // there might be some data for the columns that are not visible
+            if (DataUtils.isObjectAndNotNull(row)) {
+                for (k in row) {
+                    if (row.hasOwnProperty(k) && !(k in res)) {
+                        res[k] = angular.copy(row[k]);
+                    }
+                }
+            }
+
+            return res;
+        }
+
         function copyFormRow() {
             if (!vm.numberRowsToAdd) vm.numberRowsToAdd = 1;
 
             // log the button was clicked
-            var copyFormRowHeader = {
-                action: logActions.add1
-            }
+            var action = logService.logActions.FORM_CLONE,
+                stack = logService.getStackObject();
 
             if (vm.numberRowsToAdd > 1) {
-                copyFormRowHeader.action = logActions.addX;
-                copyFormRowHeader.x = vm.numberRowsToAdd;
+                action = logService.logActions.FORM_CLONE_X;
+                stack = logService.addExtraInfoToStack(null, {clone: vm.numberRowsToAdd});
             }
 
-            logService.logClientAction(copyFormRowHeader, $rootScope.reference.defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(action),
+                stack: stack
+            }, $rootScope.reference.defaultLogInfo);
 
             if ((vm.numberRowsToAdd + vm.recordEditModel.rows.length) > vm.MAX_ROWS_TO_ADD) {
                 AlertsService.addAlert("Cannot add " + vm.numberRowsToAdd + " records. Please input a value between 1 and " + (vm.MAX_ROWS_TO_ADD - vm.recordEditModel.rows.length) + ', inclusive.', 'error');
@@ -440,17 +452,13 @@
             });
 
             if (validRow) {
-                var rowset = vm.recordEditModel.rows;
-                var protoRow = rowset[index];
-
                 for (var i = 0; i < vm.numberRowsToAdd; i++) {
-                    var row = angular.copy(protoRow);
-                    // transform row values to avoid parsing issues with null values
-                    var transformedRow = transformRowValues(row);
-                    var submissionRow = angular.copy(vm.recordEditModel.submissionRows[index]);
+
+                    var row = copyRow(vm.recordEditModel.rows[index]);
+                    var submissionRow = copyRow(vm.recordEditModel.submissionRows[index]);
                     var foreignKeyData = angular.copy(vm.recordEditModel.foreignKeyData[index]);
 
-                    rowset.push(transformedRow);
+                    vm.recordEditModel.rows.push(row);
                     vm.recordEditModel.submissionRows.push(submissionRow);
                     vm.recordEditModel.foreignKeyData.push(foreignKeyData);
                 }
@@ -461,40 +469,6 @@
                     onResize();
                 }, 10);
             }
-        }
-
-        function populateSubmissionRow(modelRow, submissionRow, originalTuple, columns, editOrCopy) {
-            var transformedRow = transformRowValues(modelRow);
-            columns.forEach(function (column) {
-                // If the column is a foreign key column, it needs to get the originating columns name for data submission
-                if (column.isForeignKey) {
-
-                    var foreignKeyColumns = column.foreignKey.colset.columns;
-                    for (var k = 0; k < foreignKeyColumns.length; k++) {
-                        var referenceColumn = foreignKeyColumns[k];
-                        var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
-                        // check if value is set in submission data yet
-                        if (!submissionRow[referenceColumn.name]) {
-                            /**
-                             * User didn't change the foreign key, copy the value over to the submission data with the proper column name
-                             * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
-                             * In the case of create, the value is unset if it is not present in submissionRows and because it's newly created it doesn't have a value to fallback to, so use null
-                            **/
-                            if (editOrCopy && undefined != originalTuple.data[referenceColumn.name]) {
-                                submissionRow[referenceColumn.name] = originalTuple.data[referenceColumn.name];
-                            } else {
-                                submissionRow[referenceColumn.name] = null;
-                            }
-                        }
-                    }
-                // not foreign key, column.name is sufficient for the keys
-                } else {
-                    // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                    submissionRow[column.name] = (transformedRow[column.name] === undefined) ? null : transformedRow[column.name];
-                }
-            });
-
-            return submissionRow;
         }
 
         function spliceRows(index) {
@@ -513,15 +487,11 @@
             scope.$root.showSpinner = true;
 
             var defaultLogInfo = (vm.editMode ? $rootScope.tuples[index].reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateRemove : logActions.createRemove);
 
-            var removeFormRowHeader = {
-                action: action
-            }
-
-            if (vm.editMode) removeFormRowHeader.facet = defaultLogInfo.facet;
-
-            logService.logClientAction(removeFormRowHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.FORM_REMOVE),
+                stack: logService.getStackObject()
+            }, defaultLogInfo);
 
             return spliceRows(index);
         }
@@ -568,7 +538,15 @@
 
         function isRequired(columnIndex) {
             var cm = vm.recordEditModel.columnModels[columnIndex];
-            return cm && cm.column && !cm.column.nullok && !cm.isDisabled;
+            return cm && cm.isRequired;
+        }
+
+        /**
+         * if ermrestjs says the column should be disabled, or we're showing select-all
+         */
+        function isDisabled(columnIndex) {
+            var cm = vm.recordEditModel.columnModels[columnIndex];
+            return cm && (cm.isDisabled || cm.showSelectAll);
         }
 
         // when a boolean dropdown is opened, resize the dropdown menu to match the width of the input
@@ -597,25 +575,22 @@
             selectAllOpen = false;
         }
 
-        // toggles the state of the select all dialog
+        /**
+         * this function will be called when user toggles the select-all panel. it will,
+         * - log the client action
+         * - set the boolean flags
+         * - convert the values from disabled mode to interactable mode or vice versa.
+         */
         vm.toggleSelectAll = function toggleSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
 
-            var action;
-            if (vm.editMode) {
-                action = (model.showSelectAll ? logActions.updateMultiClose : logActions.updateMultiOpen);
-            } else {
-                action = (model.showSelectAll ? logActions.createMultiClose : logActions.createMultiOpen);
-            }
-
-            var toggleSelectAllHeader = {
-                action: action,
-                column: model.column.name
-            };
-
-            logService.logClientAction(toggleSelectAllHeader, defaultLogInfo);
+            var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
+            logService.logClientAction({
+                action: logService.getActionString(action, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             if (selectAllOpen) {
                 // close the other select all dialog first
@@ -652,21 +627,12 @@
                                 var valueOrNull = value.date ? value.date + value.time + value.meridiem : null;
                                 value = InputUtils.formatDatetime(valueOrNull, options);
                             }
-                        } else if (cm.inputType == "file") {
-                            // copy file values to submission model to preserve them
-                            vm.recordEditModel.submissionRows[index][cm.column.name] = value;
-                            value = value.url;
                         }
                     } else {
                         if (cm.inputType == "timestamp") {
                             var options = { outputType: "object" };
                             // if value is a string or null, convert to object format
                             if ((value && typeof value == "string") || value == null) value = InputUtils.formatDatetime(value, options);
-                        } else if (cm.inputType == "file") {
-                            // copy file values from submission model (if they exist)
-                            if (vm.recordEditModel.submissionRows[index][cm.column.name]) {
-                                value = vm.recordEditModel.submissionRows[index][cm.column.name];
-                            }
                         }
                     }
                     row[cm.column.name] = value;
@@ -676,19 +642,20 @@
             resizeColumns(true);
         }
 
-        // closes the select all
+        /**
+         * this function will be called when user closes the select-all panel. it will,
+         * - log the client action
+         * - set the boolean flags
+         * - convert the values from disabled mode to interactable mode.
+         */
         vm.cancelSelectAll = function cancelSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateMultiCancel : logActions.createMultiCancel);
-
-            var cancelSelectAllHeader = {
-                action: action,
-                column: model.column.name
-            }
-
-            logService.logClientAction(cancelSelectAllHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.SET_ALL_CANCEL, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             model.showSelectAll = false;
             model.highlightRow = false;
@@ -703,11 +670,6 @@
                     var value = row[model.column.name];
                     var options = { outputType: "object" };
                     row[model.column.name] = InputUtils.formatDatetime(value, options);
-                });
-            } else if (model.inputType == "file") {
-                vm.recordEditModel.rows.forEach(function (row, index) {
-                    // copy file values from submission model
-                    row[model.column.name] = vm.recordEditModel.submissionRows[index][model.column.name];
                 });
             }
         }
@@ -744,28 +706,24 @@
                     });
                     break;
                 case "file":
-                    model.submissionRows.forEach(function (submissionRow) {
+                    model.rows.forEach(function (row) {
                         // need to set each property to avoid having a reference to the same object
-                        submissionRow[column.name] = {}
+                        row[column.name] = {}
                         Object.keys(value).forEach(function (key) {
                             if (key !== "hatracObj") {
-                                submissionRow[column.name][key] = value[key];
+                                row[column.name][key] = value[key];
                             }
                         });
 
                         // TODO: This is duplicated in the upload-input directive.
                         // Should be removed in both places and only created at submission time
-                        if (submissionRow[column.name].file) {
+                        if (row[column.name].file) {
                             // if condition guards for "clear all" case
-                            submissionRow[column.name].hatracObj = new ERMrest.Upload(submissionRow[column.name].file, {
+                            row[column.name].hatracObj = new ERMrest.Upload(row[column.name].file, {
                                 column: column,
                                 reference: $rootScope.reference
                             });
                         }
-                    });
-
-                    model.rows.forEach(function (row) {
-                        row[column.name] = value.url;
                     });
                     break;
                 case "timestamp":
@@ -793,30 +751,22 @@
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateMultiApply : logActions.createMultiApply);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.SET_ALL_APPLY, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
-            var applySelectAllHeader = {
-                action: action,
-                column: model.column.name
-            }
-
-            logService.logClientAction(applySelectAllHeader, defaultLogInfo);
-
-            setValueAllInputs(index, model.allInput.value);
+            setValueAllInputs(index, model.allInput);
         }
 
         vm.clearSelectAll = function clearSelectAll(index) {
             var model = vm.recordEditModel.columnModels[index];
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-            var action = (vm.editMode ? logActions.updateMultiClear : logActions.createMultiClear);
-
-            var clearSelectAllHeader = {
-                action: action,
-                column: model.column.name
-            }
-
-            logService.logClientAction(clearSelectAllHeader, defaultLogInfo);
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.SET_ALL_CLEAR, model.logStackPath),
+                stack: model.logStack
+            }, defaultLogInfo);
 
             var value = null;
             var inputType = model.inputType;
@@ -835,32 +785,32 @@
         // decides whether apply should be disabled
         vm.disableApply = function disableApply(index) {
             var columnModel = vm.recordEditModel.columnModels[index];
-            if (!columnModel || !columnModel.allInput) return true;
+            if (!columnModel) return true;
 
             var noValue = true;
-            var value = columnModel.allInput.value;
+            var value = columnModel.allInput;
             if (columnModel.inputType === "timestamp") {
                 // We don't care if a time value is set or not, time is meaningless without a date
-                if (value && value.date) noValue = false;
+                if (DataUtils.isObjectAndNotNull(value) && value.date) noValue = false;
             } else if (columnModel.inputType === "file") {
                 // the url value is what determines if a file exists or not
-                if (value && value.url) noValue = false;
+                if (DataUtils.isObjectAndNotNull(value) && value.url) noValue = false;
             } else if (columnModel.inputType === "boolean") {
                 // check if the selected value is a boolean (true|false)
                 if (typeof value === "boolean") noValue = false;
             } else {
-                if (columnModel.allInput.value) noValue = false;
+                if (value != null) noValue = false;
             }
             return noValue;
         }
 
         // We have 2 ways to determine a disabled input, or rather, when an input should be shown as disabled
         //   1. we check the column beforehand and determine if the input should ALWAYS be disabled
-        //   2. If the select all dialog is open, the form inputs should be disabled
+        //   2. If the select all dialog is open and input is not file, the form inputs should be disabled
         vm.inputTypeOrDisabled = function inputTypeOrDisabled(index) {
             try {
                 var model = vm.recordEditModel.columnModels[index];
-                return model.showSelectAll ? "disabled" : model.inputType;
+                return (model.showSelectAll && model.inputType !== "file") ? "disabled" : model.inputType;
             } catch (err) {}
         }
 
@@ -1026,13 +976,16 @@
 
             // iterate over each row
             for(var i=0;i<trs.length;i++) {
+                // unset the height in case the column name is long enough to move the set all button down
+                trs[i].children[0].height = "unset";
+
                 // Get the height of the first column and  second column of the row
                 // Which are the key and value for the row
                 var keytdHeight = trs[i].children[0].getAttribute('data-height');
                 if (keytdHeight == null || keytdHeight == 0) {
                     keytdHeight = trs[i].children[0].offsetHeight;
                     // set first TD height
-                    trs[i].children[0].setAttribute('data-height', keytdHeight);
+                    trs[i].children[0].setAttribute('height', keytdHeight);
                 }
 
                 var valuetdHeight = trs[i].children[1].offsetHeight;

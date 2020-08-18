@@ -20,12 +20,15 @@
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
         noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
-        multipleDataErrorCode : "Multiple Records Found",
-        multipleDataMessage : "There are more than 1 record found for the filters provided.",
-        facetFilterMissing : "No filtering criteria was specified to identify a specific record.",
-        unauthorizedAssetRetrieval : "You must be logged in and authorized to download this asset.",
-        forbiddenAssetRetrieval : " is logged in but not authorized to download this asset.",
-        systemAdminMessage : "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
+        multipleDataErrorCode: "Multiple Records Found",
+        multipleDataMessage: "There are more than 1 record found for the filters provided.",
+        facetFilterMissing: "No filtering criteria was specified to identify a specific record.",
+        unauthorizedAssetRetrieval: "You must be logged in and authorized to download this asset.",
+        forbiddenAssetRetrieval: " is logged in but not authorized to download this asset.",
+        differentUserConflict1: "Continuing on this page requires that you be logged in as ",
+        differentUserConflict2: ". However, you are currently logged in as ",
+        anonUserConflict: "Your session has expired. Continuing on this page requires that you be logged in as ",
+        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
     })
 
     .factory('Errors', ['ConfigUtils', 'errorNames', 'errorMessages', 'messageMap', function(ConfigUtils, errorNames, errorMessages, messageMap) {
@@ -218,6 +221,116 @@
         ForbiddenAssetAccess.prototype.constructor = ForbiddenAssetAccess;
 
         /**
+         * Error class that is used when a user logs , but the page's previous session was another user
+         *
+         * @return {object}        Error Object
+         */
+        function DifferentUserConflictError(sessionInfo, prevSessionInfo, cb) {
+            /**
+             * @type {object}
+             * @desc  custom object to store miscellaneous elements viz. stacktrace
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = messageMap.loginStatusChanged;
+
+            var prevUser;
+            if (prevSessionInfo.client.full_name) {
+                prevUser = '<span class="no-word-break">' + prevSessionInfo.client.full_name + ' (' + prevSessionInfo.client.display_name + ')</span>';
+            } else {
+                prevUser = prevSessionInfo.client.display_name;
+            }
+
+            if (sessionInfo) {
+                var currUser;
+                if (sessionInfo.client.full_name) {
+                    currUser = '<span class="no-word-break">' + sessionInfo.client.full_name + ' (' + sessionInfo.client.display_name + ')</span>';
+                } else {
+                    currUser = sessionInfo.client.display_name;
+                }
+
+                /**
+                 * @type {string}
+                 * @desc   Error message
+                 */
+                this.message = errorMessages.differentUserConflict1 + prevUser + errorMessages.differentUserConflict2 + currUser + '.';
+
+                /**
+                 * @type {string}
+                 * @desc message for the reload and continue buttons
+                 */
+                this.errorData.clickActionMessage = messageMap.clickActionMessage.continueMessageReload + currUser + '; or';
+
+                /**
+                 * @type {string}
+                 * @desc text to display to the user
+                 */
+                this.errorData.continueMessage = messageMap.clickActionMessage.continueMessage1 + prevUser + messageMap.clickActionMessage.continueMessage2;
+
+                /**
+                 * @type {string}
+                 * @desc button text for continue case
+                 */
+                this.errorData.continueBtnText = "Continue";
+            } else {
+                /**
+                 * @type {string}
+                 * @desc   Error message
+                 */
+                this.message = errorMessages.anonUserConflict + prevUser + '.';
+
+                /**
+                 * @type {string}
+                 * @desc message for the reload and continue buttons
+                 */
+                this.errorData.clickActionMessage = messageMap.clickActionMessage.anonContinueMessageReload;
+
+                /**
+                 * @type {string}
+                 * @desc text to display to the user
+                 */
+                this.errorData.continueMessage = messageMap.clickActionMessage.anonContinueMessage + prevUser + '.';
+
+                /**
+                 * @type {string}
+                 * @desc button text for continue case
+                 */
+                this.errorData.continueBtnText = "Login";
+            }
+
+            /**
+             * @type {boolean}
+             * @desc Set true to dismiss the error modal on clicking the OK button
+             */
+            this.clickOkToDismiss = false;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to show the reload button in the modal
+             */
+            this.showReloadBtn = true;
+
+            /**
+             * @type {boolean}
+             * @desc Set true to show the continue button in the modal
+             */
+            this.showContinueBtn = true;
+
+            /**
+             * @type {function}
+             * @desc function to run when continue btn is clicked
+             */
+             this.errorData.continueCB = cb;
+        }
+
+        DifferentUserConflictError.prototype = Object.create(Error.prototype);
+        DifferentUserConflictError.prototype.constructor = DifferentUserConflictError;
+
+        /**
          * CustomError - throw custom error from Apps outside Chaise.
          *
          * @param  {string} header              Header of the Error Modal         *
@@ -269,26 +382,23 @@
 
         return {
             multipleRecordError: multipleRecordError,
-            noRecordError:noRecordError,
+            noRecordError: noRecordError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
             UnauthorizedAssetAccess: UnauthorizedAssetAccess,
             ForbiddenAssetAccess: ForbiddenAssetAccess,
+            DifferentUserConflictError: DifferentUserConflictError,
             CustomError: CustomError
         };
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
 
         // NOTE: overriding `window.onerror` in the ErrorService scope
         $window.onerror = function () {
           return handleException(arguments[4]);
-        };
-
-        var reloadCb = function() {
-            window.location.reload();
         };
 
         /**
@@ -359,7 +469,7 @@
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
                 if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
-                    Session.loginInAPopUp();
+                    Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);
                 } else {
                     if(actionBtnIdentifier == "reload"){
                         reloadCb();
@@ -407,11 +517,17 @@
             // If not authorized, ask user to sign in first
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
                 // Unauthorized (needs to login)
-                Session.loginInAModal(reloadCb);
+                Session.loginInAModal(function() {
+                    if (Session.shouldReloadPageAfterLogin()) {
+                        window.location.reload();
+                    } else if (!Session.isSameSessionAsPrevious()) {
+                        handleException(new Errors.DifferentUserConflictError(Session.getSessionValue(), Session.getPrevSessionValue()), false);
+                    }
+                });
                 return;
             }
 
-            var assetPermissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess);
+            var assetPermissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess || exception instanceof Errors.DifferentUserConflictError);
 
             if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
                 // change defaults
@@ -445,7 +561,7 @@
             errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
 
             // if not a dismissible errror then exception should be suppressed
-            if (!isDismissible) exceptionFlag = true;
+            if (!isDismissible && !exception.showContinueBtn) exceptionFlag = true;
         }
 
         return {
@@ -529,11 +645,6 @@ var offlineModalTemplate = function (error, dialogMessage, redirectLink, canClos
 }
 
 window.onerror = function() {
-
-    if (window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) {
-        console.log(arguments[4]);
-        return;
-    }
 
     var canClose = false;
 

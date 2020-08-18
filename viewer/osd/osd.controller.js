@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['deviceDetector', 'image', '$window', '$rootScope', function OSDController(deviceDetector, image, $window, $rootScope) {
+    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -12,16 +12,28 @@
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
-
-        vm.filterChannelsAreHidden = true;
+        vm.alerts = AlertsService.alerts;
+        var showTitle = context.queryParams.showTitle;
+        if (showTitle === "true") {
+            vm.showTitle = true;
+        } else if (showTitle === "false") {
+            vm.showTitle = false;
+        } else {
+            vm.showTitle = true;
+        }
+        vm.disablefilterChannels = false;
+        vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;
 
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
 
-        vm.annotationsSidebarAreHidden = true;
-        vm.openAnnotations = openAnnotations;
 
+        // the top-left-panel that needs to be resizable with toc
+        vm.resizePartners = document.querySelector(".top-left-panel");
+
+        vm.openAnnotations = openAnnotations;
+        vm.error = '';
         vm.device = deviceDetector;
         vm.isSafari = false;
         testSafari();
@@ -30,6 +42,36 @@
 
         $rootScope.$on("dismissEvent", function () {
             openAnnotations();
+        });
+
+        $window.addEventListener('message', function channelControllerListener(event) {
+            if (event.origin === window.location.origin) {
+                var data = event.data;
+                var messageType = data.messageType;
+
+                switch (messageType) {
+                    case "hideChannelList":
+                        $scope.$apply(function(){
+                          vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+                        });
+                        break;
+                    case "downloadViewDone":
+                        $scope.$apply(function(){
+                          vm.waitingForScreenshot = false;
+                        });
+                        break;
+                    case "downloadViewError":
+                        $scope.$apply(function(){
+                          vm.waitingForScreenshot = false;
+                          AlertsService.addAlert("Couldn't process the screenshot.", "warning");
+                        });
+                        break;
+                    default:
+                        // other messages are handled by other controllers
+                }
+            } else {
+                console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
+            }
         });
 
         function downloadView() {
@@ -41,6 +83,8 @@
                 messageType: 'downloadView',
                 content: filename
             }
+
+            vm.waitingForScreenshot = true;
             iframe.postMessage(obj, origin);
         }
 
@@ -61,25 +105,27 @@
             btnptr.blur();
 //            event.currentTarget.blur();
             var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
-            iframe.postMessage({messageType: messageType}, origin);
+            // iframe.postMessage({messageType: messageType}, origin);
             vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
         function openAnnotations() {
             var btnptr = $('#edit-btn');
             btnptr.blur();
-            var panelptr=$('#annotations-panel');
+            // var panelptr=$('#annotations-panel');
             var sidebarptr=$('#sidebar');
-            if(vm.annotationsSidebarAreHidden) {
-              if(!vm.filterChannelsAreHidden) { // close channels
-                filterChannels();
-              }
-              sidebarptr.css("display","");
-              panelptr.removeClass('fade-out').addClass('fade-in');
+            if($rootScope.hideAnnotationSidebar) {
+              // if(!vm.filterChannelsAreHidden) { // close channels
+              //   filterChannels();
+              // }
+              sidebarptr.css("display","block");
+
+              // panelptr.removeClass('fade-out').addClass('fade-in');
               } else {
-                panelptr.removeClass('fade-in').addClass('fade-out');
+                sidebarptr.css("display","none");
             }
-            vm.annotationsSidebarAreHidden = !vm.annotationsSidebarAreHidden;
+            // iframe.postMessage({messageType: 'openAnnotations'}, origin);
+            $rootScope.hideAnnotationSidebar = !$rootScope.hideAnnotationSidebar;
         }
 
         function covered() {
@@ -95,14 +141,14 @@
             var btnptr = $('#filter-btn');
             btnptr.blur();
             var sidebarptr=$('#sidebar');
-  
-            if(vm.filterChannelsAreHidden) {
-              if(!vm.annotationsSidebarAreHidden) { // annotation is up
-                openAnnotations(); // close it
-              }
-              if(covered())
-                  sidebarptr.css("display","none");
-            }
+
+            // if(vm.filterChannelsAreHidden) {
+            //   if(!vm.hideAnnotationSidebar) { // annotation is up
+                // openAnnotations(); // close it
+            //   }
+            //   if(covered())
+                //   sidebarptr.css("display","none");
+            // }
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
         }
@@ -123,7 +169,7 @@
                                (-o-min-device-pixel-ratio: 3/2),\
                                (min-resolution: 1.5dppx)";
 
-            if ((window.devicePixelRatio > 1) || 
+            if ((window.devicePixelRatio > 1) ||
                  (window.matchMedia && window.matchMedia(mediaQuery).matches)) {
                 vm.isRetina=true;
             }

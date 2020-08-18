@@ -40,6 +40,7 @@ describe('Navbar ', function() {
     it('should hide the navbar bar if the hideNavbar query parameter is set to true', function () {
         browser.get(url + "?hideNavbar=true");
         browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
+        chaisePage.recordsetPageReady()
 
         expect(navbar.isDisplayed()).toBeFalsy();
     });

@@ -99,7 +99,10 @@
 
         /* File specific functions */
         function fileExtensionTypes(column) {
-            return column.filenameExtFilter.join(", ");
+            if (column && Array.isArray(column.filenameExtFilter)) {
+                return column.filenameExtFilter.join(", ");
+            }
+            return "";
         }
 
         /* Foregin Key specific functions */
@@ -293,92 +296,177 @@
             }
         }
     }])
-
-    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'InputUtils', 'integerLimits', 'maskOptions', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
-                function(ConfigUtils, dataFormats, InputUtils, integerLimits, maskOptions, modalBox, modalUtils, recordsetDisplayModes, UriUtils, $log, $rootScope) {
+    
+    /**
+     * This directive can be used to display an appropriate input element based on the given columnModel in a form.
+     * Based on the passed values, it can be used in two different modes:
+     *  - standalone: As an standalone input element (used in select-all feature in recordedit).
+     *  - form: As a normal input in a form
+     * The mode is determined by the directive itself based on the given attributes.
+     * If you pass parentModel and parentReference, it will assume that you want the form mode, otherwise it will be in standalone mode.
+     * The only noticable difference is just how the scope.model value works (especially in the case of foreignkey inputs).
+     * In standalone mode, 
+     *  - the initial value of scope.model for foreignkeys is ignored.
+     *  - the value of scope.model for foreignkeys is a "tuple" (instead of rowname).
+     *  - since we don't have access to the parentModel, there must be a translation layer to properly set the value of foreignkey columns.
+     */
+    .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'DataUtils', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
+                function(ConfigUtils, dataFormats, DataUtils, InputUtils, integerLimits, logService, maskOptions, modalBox, modalUtils, recordCreate, recordsetDisplayModes, UriUtils, $log, $rootScope) {
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
             scope: {
                 column: '=',
                 columnIndex: '=', // index in column models list
+                rowIndex: "=?",
                 columnModel: '=',
-                model: '=?'
+                model: "=",
+                mode: "@",
+                inputContainer: "=?",
+                formContainer: "=?",
+                isRequired: "=?", // we cannot derive this from the columnModel (for select-all none of the inputs are required)
+                parentModel: "=?",
+                parentReference: "=?",
+                parentTuples: "=?",
+                onSearchPopupValueChange: "&?", // callback that will fire when the search popup value changes
+                searchPopupGetDisabledTuples: "&?" // callback that will be used to generate the list of disabled tuples in search popup
             },
-            link: function(scope, elem, attr) {
-                scope.model = {};
-                scope.blurElement = InputUtils.blurElement;
-                scope.booleanValues = InputUtils.booleanValues;
-                scope.dataFormats = dataFormats;
-                scope.fileExtensionTypes = InputUtils.fileExtensionTypes;
-                scope.maskOptions = maskOptions;
+            controllerAs: 'vm',
+            controller: function () {},
+            bindToController: true,
+            link: function(scope, elem, attr, vm) {
 
-                scope.int2min = integerLimits.INT_2_MIN;
-                scope.int2max = integerLimits.INT_2_MAX;
-                scope.int4min = integerLimits.INT_4_MIN;
-                scope.int4max = integerLimits.INT_4_MAX;
-                scope.int8min = integerLimits.INT_8_MIN;
-                scope.int8max = integerLimits.INT_8_MAX;
+                // TODO does this make sense?
+                if (typeof vm.rowIndex !== "integer") {
+                    vm.rowIndex = 0;
+                }
+
+                if (typeof vm.isRequired !== "boolean") {
+                    vm.isRequired = false;
+                }
+
+                if (typeof vm.inputContainer !== "object") {
+                    vm.inputContainer = {};
+                }
+
+                if (typeof vm.formContainer !== "object") {
+                    vm.formContainer = vm.inputContainer;
+                }
+
+                // TODO in select-all implementation, we're doing things differently,
+                // we're doing a post process after the apply-all is selected, this boolean flag
+                // will signal whether we're doings things in place or is this part of a bigger form.
+                vm.hasParentModel = false;
+                if (typeof vm.parentModel === "object" && typeof vm.parentReference === "object") {
+                    vm.hasParentModel = true;
+                }
+
+                vm.customErrorMessage = null;
+                vm.blurElement = InputUtils.blurElement;
+                vm.booleanValues = InputUtils.booleanValues;
+                vm.dataFormats = dataFormats;
+                vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
+                vm.maskOptions = maskOptions;
+
+                vm.int2min = integerLimits.INT_2_MIN;
+                vm.int2max = integerLimits.INT_2_MAX;
+                vm.int4min = integerLimits.INT_4_MIN;
+                vm.int4max = integerLimits.INT_4_MAX;
+                vm.int8min = integerLimits.INT_8_MIN;
+                vm.int8max = integerLimits.INT_8_MAX;
 
                 // initialize value for different input types
-                if (scope.columnModel.inputType === "timestamp") {
-                    scope.model.value = {
+                if (vm.columnModel.inputType === "timestamp" && !DataUtils.isObjectAndNotNull(vm.model)) {
+                    vm.model = {
                         date: null,
                         time: null,
                         meridiem: 'AM'
                     }
-                } else if (scope.columnModel.inputType === "file") {
-                    scope.model.value = {};
+                } else if (vm.columnModel.inputType === "file" && !DataUtils.isObjectAndNotNull(vm.model)) {
+                    vm.model = {};
                 }
 
-                scope.getDisabledInputValue = function () {
-                    return InputUtils.getDisabledInputValue(scope.column);
+                vm.getDisabledInputValue = function () {
+                    return InputUtils.getDisabledInputValue(vm.column);
                 }
 
                 // Assigns the current date or timestamp to inputValue
-                scope.applyCurrentDatetime = function () {
-                    scope.model.value = InputUtils.applyCurrentDatetime(scope.columnModel.inputType);
+                vm.applyCurrentDatetime = function () {
+                    vm.model = InputUtils.applyCurrentDatetime(vm.columnModel.inputType);
                 }
 
                 // Toggle between AM/PM for a time input's model
-                scope.toggleMeridiem = function() {
-                    var value = scope.model.value;
+                vm.toggleMeridiem = function() {
+                    var value = vm.model;
                     value.meridiem = InputUtils.toggleMeridiem(value.meridiem);
                 }
 
-                scope.searchPopup = function() {
+                vm.searchPopup = function() {
+                    var context = ConfigUtils.getContextJSON();
+                    var mode = vm.mode ? vm.mode : context.mode;
+
+                    var originalTuple = null, editOrCopy = false;
+
+                    // parentTuples is only defined in edit/copy
+                    if (vm.parentTuples) {
+                        editOrCopy = true;
+                        if (!Array.isArray(vm.parentTuples)) {
+                            originalTuple = vm.parentTuples;
+                        } else {
+                            var i = vm.rowIndex;
+                            // TODO needs to be refactored
+                            // context.modes is only defined in recordedit but should be in utils
+                            if (vm.mode === "copy") {
+                                i = 0;
+                            }
+                            originalTuple = vm.parentTuples[i];
+                        }
+                    }
+
+                    // used for filteredRef (to support domain-fitler-pattern)
+                    // TODO: domain-filter pattern support does not work for set all input
+                    // TODO: we need to pass the parent models in recordedit as well
+                    var  submissionRow = {}, rowForeignKeyData = {};
+                    if (vm.hasParentModel) {
+                        rowForeignKeyData = vm.parentModel.foreignKeyData[vm.rowIndex];
+                        submissionRow = recordCreate.populateSubmissionRow(
+                            vm.parentModel.rows[vm.rowIndex],
+                            vm.parentModel.submissionRows[vm.rowIndex],
+                            vm.parentReference,
+                            originalTuple,
+                            editOrCopy
+                        );
+                    }
 
                     var params = {};
+
                     // used for title
-                    if ($rootScope.reference) {
-                        params.parentReference = $rootScope.reference;
-                    }
-                    if ($rootScope.tuple) {
-                        params.parentTuple = $rootScope.tuple;
-                    }
+                    params.parentReference = vm.parentReference;
+                    params.parentTuple = originalTuple;
+                    params.displayname = vm.column.displayname;
 
-                    params.displayname = scope.column.displayname;
-
-                    var context = ConfigUtils.getContextJSON();
-                    if (context.mode == context.modes.EDIT) {
+                    // TODO needs to be refactored
+                    // context.modes is only defined in recordedit but should be in utils
+                    if (vm.mode === "edit") {
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupEdit;
                     } else {
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
                     }
 
-
-                    // TODO: domain-filter pattern support does not work for set all input
-                    // the set will not be filtered based on other column values the user has selected
-                    // filteredRef taked 2 params:
-                    //   - first parameter is the data for the current main entity, but converted into submission format
-                    //   - second parameter is data for the linked table to complete the row name that is currently displayed in input
-                    params.reference = scope.column.filteredRef({}, {}).contextualize.compactSelect;
+                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).contextualize.compactSelect;
                     params.reference.session = $rootScope.session;
-                    params.context = "compact/select";
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
                     params.facetPanelOpen = false;
+
+                    if (vm.searchPopupGetDisabledTuples) {
+                        params.getDisabledTuples = vm.searchPopupGetDisabledTuples()(vm.columnModel);
+                    }
+
+                    // log attributes
+                    params.logStack = vm.columnModel.logStack;
+                    params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
                     modalUtils.showModal({
                         animation: false,
@@ -393,63 +481,108 @@
                     }, function dataSelected(tuple) {
                         // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
 
-                        scope.columnModel.fkDisplayName = tuple.displayname;
-                        scope.model.value = tuple;
+
+                        // in select-all we're not changing the parent model directly here
+                        if (!vm.hasParentModel) {
+                            vm.fkValue = tuple.displayname.value;
+                            vm.model = tuple;
+                            return;
+                        }
+
+                        // udpate the foreign key data
+                        vm.parentModel.foreignKeyData[vm.rowIndex][vm.column.foreignKey.name] = tuple.data;
+
+                        // TODO should be refactored
+                        // make sure the spinner is not showing
+                        if ($rootScope.showColumnSpinner[vm.rowIndex] && $rootScope.showColumnSpinner[vm.rowIndex][vm.column.name]) {
+                            $rootScope.showColumnSpinner[vm.rowIndex][vm.column.name] = false;
+                        }
+
+                        var foreignKeyColumns = vm.column.foreignKey.colset.columns;
+                        for (var i = 0; i < foreignKeyColumns.length; i++) {
+                            var referenceCol = foreignKeyColumns[i];
+                            var foreignTableCol = vm.column.foreignKey.mapping.get(referenceCol);
+
+                            vm.parentModel.submissionRows[vm.rowIndex][referenceCol.name] = tuple.data[foreignTableCol.name];
+                        }
+
+                        vm.parentModel.rows[vm.rowIndex][vm.column.name] = tuple.displayname.value;
+                        vm.model = tuple.displayname.value;
+                        if (typeof vm.onSearchPopupValueChange === 'function') {
+                            var res = vm.onSearchPopupValueChange()(vm.columnModel, tuple);
+                            if (res.error) {
+                                vm.inputContainer.$error.customError = res.message;
+                                vm.customErrorMessage = res.message;
+                            } else {
+                                delete vm.inputContainer.$error.customError;
+                                vm.customErrorMessage = "";
+                            }
+                        }
                     }, false, false);
                 }
 
-                scope.showRemove = function () {
-                    return scope.model.value || scope.inputContainer.$invalid;
+                vm.showRemove = function () {
+                    return vm.model || (vm.inputContainer.$invalid && !vm.inputContainer.$error.required);
                 }
 
-                scope.showBooleanRemove = function () {
-                    return scope.model.value !== null
-                }
-
-                // used for timestamp[tz] inputs only
-                scope.showDateRemove = function () {
-                    return (scope.model.value && scope.model.value.date) || scope.inputContainer.$error.date;
+                vm.showBooleanRemove = function () {
+                    return vm.model !== null || (vm.inputContainer.$invalid && !vm.inputContainer.$error.required);
                 }
 
                 // used for timestamp[tz] inputs only
-                scope.showTimeRemove = function () {
-                    return (scope.model.value && scope.model.value.time) || scope.inputContainer.$error.time;
+                vm.showDateRemove = function () {
+                    return (vm.model && vm.model.date) || vm.inputContainer.$error.date;
                 }
 
-                scope.clearInput = function (model) {
-                    scope.model.value = null;
+                // used for timestamp[tz] inputs only
+                vm.showTimeRemove = function () {
+                    return (vm.model.value && vm.model.value.time) || vm.inputContainer.$error.time;
+                }
+
+                vm.clearInput = function (model) {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
+                    vm.model = null;
                 }
 
                 // used for foriegn key inputs only
-                scope.clearForeignKey = function() {
-                    scope.model.value = null;
-                    scope.columnModel.fkDisplayName = null;
+                vm.clearForeignKey = function() {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
+                    vm.model = null;
+                    vm.fkValue = null;
                 }
 
                 // Used to remove the value in timestamp inputs when the "Clear" button is clicked
-                scope.clearDatetime = function () {
-                    scope.model.value = InputUtils.clearDatetime(scope.columnModel.inputType);
+                vm.clearDatetime = function () {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
+                    vm.model = InputUtils.clearDatetime(vm.columnModel.inputType);
                 }
 
                 // used for timestamp[tz] inputs only
-                scope.clearDate = function () {
-                    scope.model.value.date = null;
+                vm.clearDate = function () {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
+                    vm.model.date = null;
                 }
 
                 // used for timestamp[tz] inputs only
-                scope.clearTime = function () {
-                    scope.model.value.time = null;
+                vm.clearTime = function () {
+                    delete vm.inputContainer.$error.customError;
+                    vm.customErrorMessage = "";
+                    vm.model.time = null;
                 }
 
-                scope.inputContainerForDropdowns = document.querySelector('.input-container');
+                vm.inputContainerForDropdowns = document.querySelector('.input-container');
 
                 // used to increase the width of boolean dropdowns to the size of the input
-                scope.setDropdownWidth = function () {
-                    var inputSelector = scope.columnIndex + '-boolean-input',
+                vm.setDropdownWidth = function () {
+                    var inputSelector = vm.columnIndex + '-boolean-input',
                         input = document.getElementById(inputSelector);
 
                     // ng-style attached to dropdown for better repositioning
-                    scope.inputWidth = {
+                    vm.inputWidth = {
                         width: input.offsetWidth + 'px',
                         "margin-top": '14px'
                     };

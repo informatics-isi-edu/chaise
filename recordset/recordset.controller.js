@@ -4,6 +4,7 @@
     angular.module('chaise.recordset')
 
     // Register the recordset controller
+    // TODO We should use the contoller-as syntax instead of attaching attributes to the scope.
     .controller('recordsetController', ['ConfigUtils', 'DataUtils', 'messageMap', 'recordsetModel', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$scope', '$timeout', '$window',
         function(ConfigUtils, DataUtils, messageMap, recordsetModel, Session, UiUtils, UriUtils, $log, $rootScope, $scope, $timeout, $window) {
 

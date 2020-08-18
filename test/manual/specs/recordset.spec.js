@@ -6,7 +6,7 @@ describe('View recordset,', function () {
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:accommodation");
 
         chaisePage.recordsetPageReady()
-        chaisePage.recordsetPage.waitForAggregates();
+        chaisePage.waitForAggregates();
     });
 
     // test to setup recordset table with long tooltip text and check the placement of tooltips manually

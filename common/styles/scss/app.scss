@@ -16,6 +16,16 @@
 // app specific
 @import "recordedit-app";
 @import "viewer-app";
+@import "switch-user-accounts";
+
+
+// if we want to hide the page and then show navbar and content together
+.wait-for-navbar {
+    visibility: hidden;
+}
+.wait-for-navbar-loader {
+    visibility: visible;
+}
 
 // configure app rules
 .chaise-body .app-container {
@@ -123,6 +133,10 @@ html {
     h1 .chaise-icon-for-tooltip::after {
         font-size: .6em;
         vertical-align: super;
+    }
+
+    .inline-tooltip {
+        font-size: 16px;
     }
 
     .tooltip-inner {

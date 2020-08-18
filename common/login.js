@@ -6,7 +6,7 @@
         'chaise.authen',
         'ui.bootstrap'
     ])
-        .directive('login', ['ConfigUtils', 'logActions', 'logService', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, logActions, logService, modalUtils, Session, UriUtils, $rootScope) {
+        .directive('login', ['ConfigUtils', 'logService', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, logService, modalUtils, Session, UriUtils, $rootScope) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             var dcctx = ConfigUtils.getContextJSON();
             return {
@@ -18,13 +18,14 @@
                     scope.profileURL = chaiseConfig.profileURL;
 
                     Session.subscribeOnChange(function () {
-                        $rootScope.session = dcctx.session = Session.getSessionValue();
+                        $rootScope.session = Session.getSessionValue();
 
                         if ($rootScope.session == null) {
                             scope.user = null;
                         } else {
                             var user = $rootScope.session.client;
-                            scope.user = dcctx.user = user.display_name || user.full_name || user.email || user.id || user;
+                            scope.user = dcctx.user = user.full_name || user.display_name || user.email || user.id || user;
+                            if (user.full_name) scope.userTooltip = user.full_name + "\n" + user.display_name;
                         }
 
                     });
@@ -39,24 +40,20 @@
                     })
 
                     scope.login = function login() {
-                        Session.loginInAPopUp();
+                        Session.loginInAPopUp(logService.logActions.LOGIN_NAVBAR);
                     };
 
 
                     scope.logDropdownOpen = function () {
-                        var dropdownOpenHeader = {
-                            action: logActions.dropdownUser
-                        }
-
-                        logService.logClientAction(dropdownOpenHeader);
+                        logService.logClientAction({
+                            action: logService.logActions.NAVBAR_ACCOUNT_DROPDOWN
+                        });
                     }
 
                     scope.openProfile = function openProfile() {
-                        var profileHeader = {
-                            action: logActions.profile
-                        }
-
-                        logService.logClientAction(profileHeader);
+                        logService.logClientAction({
+                            action: logService.logActions.NAVBAR_PROFILE_OPEN
+                        });
 
                         modalUtils.showModal({
                             templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
@@ -67,7 +64,7 @@
                     };
 
                     scope.logout = function logout() {
-                        Session.logout();
+                        Session.logout(logService.logActions.LOGOUT_NAVBAR);
                     };
 
                 }

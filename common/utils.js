@@ -76,14 +76,19 @@
             title: "You need to be logged in to continue."
         },
         "clickActionMessage": {
-            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
-            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "continueMessageReload": "Click <b>Reload</b> to start over with the identity ",
+            "anonContinueMessageReload": "Click <b>Reload</b> to start over with limited anonymous access; or",
+            "continueMessage1": "Click <b>Continue</b> to continue as ",
+            "continueMessage2": ' after you restore your login status. Instructions on how to restore login is in the <a id="switch-user-accounts-link" ng-click="ctrl.switchUserAccounts()">Switch User Accounts Document</a>.',
+            "anonContinueMessage": "Click <b>Login</b> to login and continue access as ",
             "dismissDialog": "Click <b>OK</b> to dismiss this dialog.",
+            "loginOrDismissDialog": "Click <a ng-click='ctrl.login()'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.",
+            "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
-            "reloadMessage": "Click <b>Reload</b> to start over.",
-            "pageRedirect": "Click <b>OK</b> to go to the "
+            "pageRedirect": "Click <b>OK</b> to go to the ",
+            "reloadMessage": "Click <b>Reload</b> to start over."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -94,6 +99,7 @@
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
+        "loginStatusChanged": "Unexpected Change of Login Status",
         "unauthorizedErrorCode" : "Unauthorized Access",
         "localStorageDisabled": "localStorage is disabled by the browser settings. Some features might not work as expected",
         "showErrDetails" : "Show Error Details",
@@ -103,7 +109,7 @@
             downloadCSV: "Click to download all matched results",
             permalink: "Click to copy the current url to clipboard.",
             actionCol: "Click on the action buttons to view, edit, or delete each record",
-            viewCol: "Click on the eye button to view the detailed page associated with each record",
+            viewCol: "Click on the icon to view the detailed page associated with each record",
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
@@ -113,173 +119,6 @@
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
         "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
-    })
-
-    .constant("logActions", {
-        // action namespace
-        "clientAction": "client_action", // path to log button click events
-
-        // actions
-        "recordRead": "record/main", // read the main entity (record)
-        "recordUpdate": "record/main/update", // read the main entity (record)
-        "recordRelatedRead": "record/related", // secondary
-        "recordRelatedUpdate": "record/related/update", // secondary
-        "recordRelatedAggregate": "record/related/aggregate", // secondary
-        "recordRelatedAggregateUpdate": "record/related/aggregate/update", // secondary
-        "recordInlineRead": "record/inline", // secondary
-        "recordInlineUpdate": "record/inline/update", // secondary
-        "recordInlineAggregate": "record/inline/aggregate",
-        "recordInlineAggregateUpdate": "record/inline/aggregate/update",
-        "recordAggregate": "record/aggregate", // secondary
-        "recordAggregateUpdate": "record/aggregate/update", // secondary
-
-        "createPrefill": "create/prefill", // create with inbound related prefilled (recordedit) -> does it need referrer? (the pre should have it)
-        "createAssociation": "create/prefill/association", // batch create association (record) -> does itneed referrer? (the pre should have it)
-        "createModal": "create/modal", // create entity coming from plus button in modal of foreignkey (recordedit)
-        "copy": "create/copy", // create entity by copying another (recordedit)
-        "create": "create/new", // create entity (recordedit)
-
-        "preCreatePrefill": "pre-create/prefill", // read the foreignkey value for the prefill (recoredit) has referrer -> read is on the fk, .. it's fine. we are not looking at url anyways.
-        "preCreateAssociation": "pre-create/prefill/association", // read the association values to add new ones (record) has referrer
-        "preCreateAssociationSelected": "pre-create/prefill/association/disabled", // secondary
-        "preUnlinkAssociation": "pre-unlink/prefill/association",
-        "preCopy": "pre-create/copy", // read the current data before copy (recordedit)
-        "recordeditDefault": "default",
-
-        "update": "update", // update entity (recordedit)
-        "preUpdate": "pre-update", // read entity to be updated (recordedit)
-
-        "recordsetCount": "recordset/main/count", // secondary
-        "recordsetLoad": "recordset/main/load", // recordset main data read on load (recordset)
-        "recordsetUpdate": "recordset/main/update", // recordset main data read on update (edit or delete) secondary
-        "recordsetSort": "recordset/main/sort", // recordset main data read on changing sort (recordset) has sort
-        "recordsetPage": "recordset/main/page", // recordset main data read on changing page (recordset) has page
-        "recordsetLimit": "recordset/main/limit", // recordset main data read on changing page limit (recordset)
-        "recordsetAggregate": "recordset/main/aggregate", //secondary (recordset get data for pseudo-columns)
-        "recordsetFacet": "recordset/main/facet", // recordset main data read on changing facet (recordset)
-        "recordsetFacetDetails": "recordset/viewmore", // getting facet details in modal (recordset)
-        "recordsetFacetRead": "recordset/facet", // secondary
-        "recordsetFacetInit": "recordset/facet/init", // secondary (getting the rowname of preselected facets)
-        "recordsetFacetHistogram": "recordset/facet/histogram", // secondary (getting the histogrma buckets)
-
-        "recordDelete": "delete/record", // delete record (record)
-        "recordEditDelete": "delete/recordedit", // delete record (recordedit)
-        "recordsetDelete": "delete/recordset", // delete a row (recordset)
-        "recordRelatedDelete": "delete/record/related", // delete a row from related entities (record) has referrer
-
-        "export": "export",
-
-        "viewerMain": "main",
-        "viewerAnnotation": "annotation",
-        "viewerComment": "comment",
-        "viewerAnatomy": "anatomy",
-
-        // # client actions (mostly button click events)
-        "deleteIntend": "delete/intend", // delete clicked -> confirm delete dialog opened (record button and recordset row)
-        "deleteCancel": "delete/cancel", // cancel clicked when confirm delete dialog open (record button and recordset row)
-
-        // ## recordset actions
-        // ### page level actions
-        "exportOpen": "export/open", // export dropdown was opened
-        "permalinkLeft": "permalink/lclick", // permalink left clicked (copied)
-        "permalinkRight": "permalink/rclick", // permalink right clicked (contextmenu opened)
-        // ### recordset directive for facet popups
-        "recordsetPageSize": "page-size", // page size dropdown opened
-        "recordsetFacetOpen": "panel/show", // facet panel opened
-        "recordsetFacetClose": "panel/hide", // facet panel closed
-        "recordsetFacetPageSize": "facet/page-size", // in "show more" for facet
-        "recordsetFacetAll": "facet/all", // in "show more" for facet
-        "recordsetFacetNone": "facet/none", // in "show more" for facet
-        "recordsetFacetClear": "facet/reset", // in "show more" for facet
-        "recordsetFacetCancel": "facet/cancel", // in "show more" for facet
-
-        // ## record actions
-        "showAllRelated": "show-empty/show", // "show empty sections" button clicked
-        "hideAllRelated": "show-empty/hide", // "hide empty sections" button clicked
-        "share": "share", // share dialog opened
-        "liveCopy": "share/live", // live link copied to clipboard
-        "versionCopy": "share/version", // versioned link copied to clipboard
-        "cite": "cite/bibtex", // bibtex citation downloaded
-        "scrollTop": "scroll-top", // bottom right, "scroll to top" button clicked
-        "tocShow": "toc/show", // the toc panel toggled open/close
-        "tocHide": "toc/hide", // the toc panel toggled open/close
-        "tocScrollTop": "toc/scroll-top", // "summary" heading clicked to scroll to top of record
-        "tocScrollTo": "toc/scroll-to", // one of the toc headings clicked
-        // ### related tables in RT section
-        "relatedOpen": "related/open", // RT in RT section toggled open
-        "relatedClose": "related/close", // RT in RT section toggled close
-        "relatedPageSize": "related/page-size", // toggle page size dropdown
-        // #### RT modes
-        "relatedTableDisplay": "related/display/table", // toggle display mode to table display
-        "relatedMkdnDisplay": "related/display/mkdn", // toggle display mode to custom display
-        "relatedEditDisplay": "related/display/edit", // toggle display mode to edit display
-        // #### RT actions
-        "relatedDeleteIntend": "related/delete/intend", // row delete clicked from delete in action column
-        "relatedDeleteCancel": "related/delete/cancel", // row delete cancelled
-        "relatedUnlinkIntend": "related/unlink/intend", // row unlink clicked from unlink in action column
-        "relatedUnlinkCancel": "related/unlink/cancel", // row unlink cancelled
-        // ### inline related tables in record display section
-        "inlinePageSize": "inline/page-size", // toggle page size dropdown for inline RT
-        // #### inline modes
-        "inlineTableDisplay": "inline/display/table", // toggle display mode to table display
-        "inlineMkdnDisplay": "inline/display/mkdn", // toggle display mode to custom display
-        "inlineEditDisplay": "inline/display/edit", // toggle display mode to edit display
-        // #### inline actions
-        "inlineDeleteIntend": "inline/delete/intend", // row delete clicked from delete in action column
-        "inlineDeleteCancel": "inline/delete/cancel", // row delete cancelled
-        "inlineUnlinkIntend": "inline/unlink/intend", // row unlink clicked from unlink in action column
-        "inlineUnlinkCancel": "inline/unlink/cancel", // row unlink cancelled
-        // ### recordset directive for pure and binary popups
-        "recordPBOpen": "pb/panel/show", // facet panel opened
-        "recordPBClose": "pb/panel/hide", // facet panel closed
-        "recordPBPageSize": "pb/page-size",
-        "recordPBAll": "pb/all",
-        "recordPBNone": "pb/none",
-        "recordPBClear": "pb/reset",
-        "recordPBCancel": "pb/cancel",
-        // #### recordset directive for facet "show more" in pure and binary popups
-        "recordPBFacetPageSize": "pb/facet/page-size",
-        "recordPBFacetAll": "pb/facet/all",
-        "recordPBFacetNone": "pb/facet/none",
-        "recordPBFacetClear": "pb/facet/reset",
-        "recordPBFacetCancel": "pb/facet/cancel",
-
-        // ## recordedit actions
-        // ### create actions
-        "add1": "create/clone", // one form was added to the container
-        "addX": "create/clone-x", // multiple forms were added to the container
-        "createRemove": "create/remove", // remove a form during creation
-        "createMultiOpen": "create/set-all/open", // set all opened
-        "createMultiClose": "create/set-all/close", // set all opened
-        "createMultiCancel": "create/set-all/cancel", // set all closed (cancel button)
-        "createMultiApply": "create/set-all/apply", // set all, apply all clicked
-        "createMultiClear": "create/set-all/clear", // set all, clear all clicked
-        // ### update actions
-        "updateRemove": "update/remove", // remove a form during editing
-        "updateMultiOpen": "update/set-all/open", // set all opened
-        "updateMultiClose": "update/set-all/close", // set all opened
-        "updateMultiCancel": "update/set-all/cancel", // set all closed (cancel button)
-        "updateMultiApply": "update/set-all/apply", // set all, apply all clicked
-        "updateMultiClear": "update/set-all/clear", // set all, clear all clicked
-        // ### recordset directive for foreign key picker
-        "recordeditFKOpen": "fk/panel/show", // facet panel opened
-        "recordeditFKClose": "fk/panel/hide", // facet panel closed
-        "recordeditFKPageSize": "fk/page-size",
-        "recordeditFKCancel": "fk/cancel",
-        // #### recordset directive for facet "show more" in foriegn key pickers
-        "recordeditFKFacetPageSize": "fk/facet/page-size",
-        "recordeditFKFacetAll": "fk/facet/all",
-        "recordeditFKFacetNone": "fk/facet/none",
-        "recordeditFKFacetClear": "fk/facet/reset",
-        "recordeditFKFacetCancel": "fk/facet/cancel",
-
-        // ## navbar actions
-        "branding": "branding", // top left corner branding text/logo clicked
-        "dropdownUser": "user", // user dropdown opened
-        "profile": "user/profile", // user profile dialog opened
-        "dropdownMenu": "menu/submenu", // navbar menu dropdown opened
-        "dropdownMenuInternal": "menu/internal", // navbar menu internal page
-        "dropdownMenuExternal": "menu/external" // navbar menu external page
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -296,6 +135,7 @@
     // make sure to update the templates that are using this: recordset.html, recordsetSelectFaceting.html
     .constant("recordsetDisplayModes", {
         fullscreen: "fullscreen",
+        table: "table",
         related: "related",
         inline: "related/inline",
         popup: "popup",
@@ -406,11 +246,13 @@
 
             var ermrestUri = {},
                 queryParams = {},
+                queryParamsString = "",
                 catalogId, ppid, pcid;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
-                var queries = hash.match(/\?(.+)/)[1].split("&"); // get the query params
+                queryParamsString = hash.match(/\?(.+)/)[1];
+                var queries = queryParamsString.split("&"); // get the query params
                 var acceptedQueries = [], i;
 
                 hash = hash.slice(0, hash.indexOf('?')); // remove queries
@@ -527,6 +369,7 @@
                     hash: originalHash,
                     ppid: ppid,
                     pcid: pcid,
+                    queryParamsString: queryParamsString,
                     queryParams: queryParams,
                     isQueryParameter: isQueryParameter
                 };
@@ -566,8 +409,9 @@
             var pcontext = [];
 
             var contextObj = ConfigUtils.getContextJSON();
-            pcontext.push("pcid=" + contextObj.cid);
-            pcontext.push("ppid=" + contextObj.pid);
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
+            pcontext.push("pcid=" + contextHeaderParams.cid);
+            pcontext.push("ppid=" + contextHeaderParams.pid);
             // only add the value to the applink function if it's true
             if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
 
@@ -980,25 +824,28 @@
 
         /**
          * Gives the path of the chaise deployment directory.
-         * If we access it from an app inside chaise folder then it returns the pathname before the appName in the url
-         * otherwise if we access it from an app outside chaise then:
-         *      1. It returns the chaise path mentioned in the chaiseConfig
-         *      2. If ChaiseConfig doesn't specify the chaisePath, then it returns the default value '/chaise/'
+         *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
+         *   - otherwise, returns the default value '/chaise/'
         */
         function chaiseDeploymentPath() {
-            var chaiseConfig = ConfigUtils.getConfigJSON();
-            var appNames = ["record", "recordset", "recordedit", "search", "login"];
-            var currentAppName = appNamefromUrlPathname($window.location.pathname);
-            if (appNames.includes(currentAppName)) {
-                var index = $window.location.pathname.indexOf(currentAppName);
-                return $window.location.pathname.substring(0, index);
-            } else if (chaiseConfig && typeof chaiseConfig.chaiseBasePath === "string") {
-                var path = chaiseConfig.chaiseBasePath;
+            if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                var path = chaiseBuildVariables.chaiseBasePath;
                 if(path[path.length-1] !== "/")
                     path = path + "/";
                 return path;
             } else {
                 return '/chaise/';
+            }
+        }
+
+        /**
+         * Returns the path that openseadragon-viewer is installed
+         */
+        function OSDViewerDeploymentPath() {
+            if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.OSDViewerBasePath === "string") {
+                return chaiseBuildVariables.OSDViewerBasePath;
+            } else {
+                return '/openseadragon-viewer/';
             }
         }
 
@@ -1083,6 +930,18 @@
          * '?catalog/schema:table/limit=20' where limit is a column name
          */
         function getQueryParam(url, key) {
+            return getQueryParams(url)[key];
+        }
+
+        /**
+         * Given a location href, return all the query parameters available on the url.
+         * @param {String} url - the full url for the current page
+         * @returns {Object} an object, containing the query parameters.
+         *
+         * Note: This won't handle the case where the url might be like this:
+         * '?catalog/schema:table/limit=20' where limit is a column name
+         */
+        function getQueryParams(url) {
             var params = {};
             var idx = url.lastIndexOf("?");
             if (idx !== -1) {
@@ -1092,7 +951,7 @@
                     params[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
             }
-            return params[key];
+            return params;
         }
 
         /**
@@ -1148,6 +1007,29 @@
             return url;
         }
 
+        /**
+         * Given a url, will return it if it's absolute, otherwise will
+         * attach the current origin (if origin is not passed) to it.
+         */
+        function getAbsoluteURL(uri, origin) {
+            if (typeof origin !== 'string' || origin.length < 1) {
+                origin = $window.location.origin;
+            }
+
+            // A more universal, non case-sensitive, protocol-agnostic regex
+            // to test a URL string is relative or absolute
+            var r = new RegExp('^(?:[a-z]+:)?//', 'i');
+
+            // The url is absolute so don't make any changes and return it as it is
+            if (r.test(uri))  return uri;
+
+            // If uri starts with "/" then simply prepend the server uri
+            if (uri.indexOf("/") === 0)  return origin + uri;
+
+            // else prepend the server uri with an additional "/"
+            return origin + "/" + uri;
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -1159,8 +1041,10 @@
             getCatalogId: getCatalogId,
             getHash: getHash,
             getQueryParam: getQueryParam,
+            getQueryParams: getQueryParams,
             isBrowserIE: isBrowserIE,
             isSameOrigin: isSameOrigin,
+            OSDViewerDeploymentPath: OSDViewerDeploymentPath,
             parsedFilterToERMrestFilter: parsedFilterToERMrestFilter,
             parseURLFragment: parseURLFragment,
             queryStringToJSON: queryStringToJSON,
@@ -1168,7 +1052,8 @@
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
             stripSortAndQueryParams: stripSortAndQueryParams,
-            getRecordsetLink: getRecordsetLink
+            getRecordsetLink: getRecordsetLink,
+            getAbsoluteURL: getAbsoluteURL
         }
     }])
 
@@ -1325,6 +1210,13 @@
         }
 
         /**
+         * Verifies that the object is not null and is defined.
+         */
+        function isObjectAndNotNull(obj) {
+            return typeof obj === "object" && obj !== null;
+        }
+
+        /**
          * Verifies that the given data is integer
          * @param  {Object}  data
          * @return {Boolean} whether it is integer or not
@@ -1333,22 +1225,20 @@
             return (typeof data === 'number') && (data % 1 === 0);
         }
 
+        var ID_SAFE_REGEX = /[^\w-]+/g;
         /**
         *
-        * @desc Converts the following characters to HTML entities for safe and
-        * HTML5-valid usage in the `id` attributes of HTML elements: spaces, ampersands,
-        * right angle brackets, left angle brackets, double quotes, single quotes.
+        * @desc This function is used to make sure the input `string` is id/class safe
+        * For both class and id:
+        *   - Must begin with a letter A-Z or a-z
+        *   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("_")
+        * NOTE: this won't ensure the very beginning of the input string is safe
+        * it assumes the input string is being appended to an already safe string
         * @param {String} string
         * @return {String} a string suitable for use in the `id` attributes of HTML elements
         */
         function makeSafeIdAttr(string, val) {
-            return String(string)
-                .replace(/&/g, '&amp;')
-                .replace(/\s/g, '&nbsp;') // any whitespace
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
+            return String(string).replace(ID_SAFE_REGEX, '-');
         }
 
         /**
@@ -1395,16 +1285,37 @@
             }
         }
 
+        /**
+         * @private
+         * @function
+         * @param  {Object} source the object that you want to be copied
+         * @desc
+         * Creat a deep copy of the given object.
+         * NOTE: This is very limited and only works for simple objects.
+         * Some of its limitations are:
+         * 1. Cannot copy functions.
+         * 2. Cannot work on circular references.
+         * 3. Will convert date objects back to UTC in the string representation in the ISO8601 format.
+         * 4. It will fail to copy anything that is not in the JSON spec.
+         *
+         * ONLY USE THIS FUNCTION IF IT IS NOT ANY OF THE GIVEN LIMIATIONS.
+         */
+        function simpleDeepCopy (source) {
+            return JSON.parse(JSON.stringify(source));
+        };
+
         return {
             getRowValuesFromPage: getRowValuesFromPage,
             getRowValuesFromTupleData: getRowValuesFromTupleData,
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
+            isObjectAndNotNull: isObjectAndNotNull,
             isInteger: isInteger,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
             addSpaceAfterLogicalOperators: addSpaceAfterLogicalOperators,
-            verify: verify
+            verify: verify,
+            simpleDeepCopy: simpleDeepCopy
         };
     }])
 
@@ -1851,7 +1762,6 @@
     }])
 
     .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
-
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)
@@ -1962,6 +1872,10 @@
             return getContextJSON().server ? getContextJSON().server.http : $http;
         };
 
+        function getContextHeaderParams() {
+            return getContextJSON().contextHeaderParams;
+        }
+
         function configureAngular(compileProvider, cookiesProvider, logProvider, uibTooltipProvider) {
             // angular configurations
             // allows unsafe prefixes to be downloaded
@@ -1978,8 +1892,11 @@
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
             // return a function that will be called when a template needs to be fetched
             return function(templateUrl) {
-                var dcctx = getContextJSON();
-                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + dcctx.version : "");
+                var version = "";
+                if (typeof chaiseBuildVariables === "object") {
+                    version = chaiseBuildVariables.buildVersion;
+                }
+                var versionedTemplateUrl = templateUrl + (templateUrl.indexOf(chaiseDeploymentPath) !== -1 ? "?v=" + version : "");
 
                 return delegate(versionedTemplateUrl);
             }
@@ -2012,6 +1929,7 @@
             getConfigJSON: getConfigJSON,
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
+            getContextHeaderParams: getContextHeaderParams,
             systemColumnsMode: systemColumnsMode
         }
     }])
@@ -2020,7 +1938,10 @@
     .directive('loadingSpinner', ['UriUtils', function (UriUtils) {
         return {
             restrict: 'E',
-            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
+            scope: {
+                message: "@?"
+            }
         }
     }])
 
@@ -2029,7 +1950,10 @@
         return {
             restrict: 'A',
             transclude: true,
-            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html'
+            templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner-sm.html',
+            scope: {
+                message: "@?"
+            }
         }
     }])
 
@@ -2077,7 +2001,7 @@
         }
     }])
 
-    .directive('chaiseSearchInput', ['UriUtils', '$timeout', function (UriUtils, $timeout) {
+    .directive('chaiseSearchInput', ['logService', 'UriUtils', '$timeout', function (logService, UriUtils, $timeout) {
 
         return {
             restrict: 'E',
@@ -2092,7 +2016,7 @@
             },
             link: function (scope, elem, attrs) {
                 var AUTO_SEARCH_TIMEOUT = 2000;
-                scope.inputChangedPromise = undefined;
+                scope.inputChangedPromise = null;
                 scope.inputElement = elem[0].querySelector("input");
                 scope.isArray = angular.isArray;
 
@@ -2105,10 +2029,18 @@
                 }
 
                 // will be called when users click on enter or submit button
-                scope.enterPressed = function() {
+                scope.enterPressed = function(isButton) {
                     if (scope.disabled) return;
+
+                    // cancel the timeout
+                    if (scope.inputChangedPromise) {
+                        $timeout.cancel(scope.inputChangedPromise);
+                    }
+
+                    // remove it from scope
                     scope.inputChangedPromise = null;
-                    scope.searchCallback(scope.searchTerm);
+
+                    scope.searchCallback(scope.searchTerm, isButton ? logService.logActions.SEARCH_BOX_CLICK : logService.logActions.SEARCH_BOX_ENTER);
                 };
 
                 // will be called everytime users change the input
@@ -2122,7 +2054,7 @@
                     // Wait for the user to stop typing for a second and then fire the search
                     scope.inputChangedPromise = $timeout(function() {
                         scope.inputChangedPromise = null;
-                        scope.searchCallback(scope.searchTerm);
+                        scope.searchCallback(scope.searchTerm, logService.logActions.SEARCH_BOX_AUTO);
                     }, AUTO_SEARCH_TIMEOUT);
                 };
 
@@ -2130,7 +2062,7 @@
                 scope.clearSearch = function() {
                     if (scope.disabled) return;
                     if (scope.searchTerm) {
-                        scope.searchCallback(null);
+                        scope.searchCallback(null, logService.logActions.SEARCH_BOX_CLEAR);
                     }
                     scope.searchTerm = null;
                 };
@@ -2191,10 +2123,11 @@
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                if (typeof scope.displayname !== "object") {
+                if (typeof scope.displayname !== "object" && scope.reference) {
                     scope.displayname = scope.reference.displayname;
                 }
 
+                // TODO: this needs to be extended to use reference.comment once table display is being digested for the title of each app
                 if (!scope.comment && scope.reference && scope.reference.table.comment) {
                     scope.comment = scope.reference.table.comment;
                 }
@@ -2326,35 +2259,390 @@
         }
     }])
 
-    .service('logService', ['ConfigUtils', '$log', function (ConfigUtils, $log) {
-        var context = ConfigUtils.getContextJSON(),
-            cc = ConfigUtils.getConfigJSON();
+    /**
+     * This service is used for logging purposes. The functions in this service can be used to
+     * create new stack nodes, retrieve the stack object, manipulate the stack object, or
+     * get the action string that should be used.
+     * This service relies on these two attributes in $rootScope:
+     *  - $rootScope.appMode: the app-mode. Could be undefined.
+     *  - $rootScope.logStack: The stack object of the whole app (usually the stack of the initial request of the page)
+     *  - $rootScope.logStackPath: The stack path of the whole app (usually the stack path of the initial request of the page)
+     *
+     */
+    .service('logService', ['ConfigUtils', 'DataUtils', '$log', '$rootScope', function (ConfigUtils, DataUtils, $log, $rootScope) {
+        var appModeStackPathSeparator = ":",
+            stackPathClientPathSeparator = ",",
+            clientPathActionSeparator = ";",
+            separator = "/";
+        var logActions = Object.freeze({
+            // general
+
+            // - server:
+            LOAD: clientPathActionSeparator + "load",
+            RELOAD: clientPathActionSeparator + "reload",
+            DELETE: clientPathActionSeparator + "delete",
+            EXPORT: clientPathActionSeparator + "export",
+
+            // - client:
+            CANCEL: clientPathActionSeparator + "cancel",
+            OPEN: clientPathActionSeparator + "open",
+            CLOSE: clientPathActionSeparator + "close",
+            EXPORT_OPEN: "export" + clientPathActionSeparator + "open",
+            ADD_INTEND: "add" + clientPathActionSeparator + "intend",
+            EDIT_INTEND: "edit" + clientPathActionSeparator + "intend",
+            DELETE_INTEND: "delete" + clientPathActionSeparator + "intend",
+            DELETE_CANCEL: "delete" + clientPathActionSeparator + "cancel",
+
+            // recordset app and table:
+
+            //   - server:
+            COUNT: clientPathActionSeparator + "count",
+            RECOUNT: clientPathActionSeparator + "recount",
+            FACET_CHOICE_LOAD: "choice" + clientPathActionSeparator + "load",
+            FACET_CHOICE_RELOAD: "choice" + clientPathActionSeparator + "reload",
+            FACET_RANGE_LOAD: "range" + clientPathActionSeparator + "load",
+            FACET_RANGE_RELOAD: "range" + clientPathActionSeparator + "reload",
+            FACET_HISTOGRAM_LOAD: "range" + clientPathActionSeparator + "load-histogram",
+            FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
+            PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
+
+            //   - client:
+            PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
+            PERMALINK_RIGHT: "permalink" + clientPathActionSeparator + "click-right",
+            PAGE_SIZE_OEPN: "page-size" + clientPathActionSeparator + "open",
+            PAGE_SIZE_SELECT: "page-size" + clientPathActionSeparator + "select",
+            FACET_PANEL_SHOW: "panel" + clientPathActionSeparator + "show",
+            FACET_PANEL_HIDE: "panel" + clientPathActionSeparator + "hide",
+            PAGE_SELECT_ALL: "page" + clientPathActionSeparator + "select-all",
+            PAGE_DESELECT_ALL: "page" + clientPathActionSeparator + "deselect-all",
+            PAGE_NEXT: "page" + clientPathActionSeparator + "next",
+            PAGE_PREV: "page" + clientPathActionSeparator + "previous",
+            SORT: clientPathActionSeparator + "sort",
+            SELECTION_CLEAR: "selection" + clientPathActionSeparator + "clear",
+            SELECTION_CLEAR_ALL: "selection" + clientPathActionSeparator + "clear-all",
+            BREADCRUMB_CLEAR: "breadcrumb" + clientPathActionSeparator + "clear",
+            BREADCRUMB_CLEAR_ALL: "breadcrumb" + clientPathActionSeparator + "clear-all",
+            BREADCRUMB_CLEAR_CFACET: "breadcrumb" + clientPathActionSeparator + "clear-cfacet",
+            BREADCRUMB_CLEAR_CUSTOM: "breadcrumb" + clientPathActionSeparator + "clear-custom",
+            BREADCRUMB_SCROLL_TO: "breadcrumb" + clientPathActionSeparator + "scroll-to",
+            SEARCH_BOX_AUTO: "search-box" + clientPathActionSeparator + "search-delay",
+            SEARCH_BOX_CLEAR: "search-box" + clientPathActionSeparator + "clear",
+            SEARCH_BOX_CLICK: "search-box" + clientPathActionSeparator + "search-click",
+            SEARCH_BOX_ENTER: "search-box" + clientPathActionSeparator + "search-enter",
+
+
+            // record app:
+
+            // - server:
+            SHARE_OPEN: "share" + clientPathActionSeparator + "open",
+            LOAD_DOMAIN: clientPathActionSeparator + "load-domain", // add pure and binary first request
+            RELOAD_DOMAIN: clientPathActionSeparator + "reload-domain",
+            LINK: clientPathActionSeparator + "link",
+            UNLINK: clientPathActionSeparator + "unlink",
+
+            // - client:
+            TOC_SHOW: "toc" +  clientPathActionSeparator + "show",
+            TOC_HIDE: "toc" +  clientPathActionSeparator + "hide",
+            RELATED_DISPLAY_TABLE: "display" + separator + "table" + clientPathActionSeparator + "show",
+            RELATED_DISPLAY_MARKDOWN: "display" + separator + "mkdn" + clientPathActionSeparator + "show",
+            EMPTY_RELATED_SHOW: "show-empty" + clientPathActionSeparator + "show",
+            EMPTY_RELATED_HIDE: "show-empty" + clientPathActionSeparator + "hide",
+            UNLINK_INTEND: "unlink" + clientPathActionSeparator + "intend",
+            UNLINK_CANCEL: "unlink" + clientPathActionSeparator + "cancel",
+
+            SCROLL_TOP: clientPathActionSeparator + "scroll-top",
+            TOC_SCROLL_TOP: "toc" + separator + "main" + clientPathActionSeparator + "scroll-to",
+            TOC_SCROLL_RELATED: "toc" + separator + "section" + clientPathActionSeparator + "scroll-to",
+
+            SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
+            SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
+
+            CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
+
+
+            // recordedit app:
+
+            // - server:
+            FOREIGN_KEY_PRESELECT: clientPathActionSeparator +  "preselect",
+            FOREIGN_KEY_DEFAULT: clientPathActionSeparator + "default",
+            CREATE: clientPathActionSeparator + "create",
+            UPDATE: clientPathActionSeparator + "update",
+
+            // - client:
+            FORM_CLONE: clientPathActionSeparator + "clone",
+            FORM_CLONE_X: clientPathActionSeparator +  "clone-x",
+            FORM_REMOVE: clientPathActionSeparator + "remove",
+            SET_ALL_OPEN: "set-all" + clientPathActionSeparator + "open",
+            SET_ALL_CLOSE: "set-all" + clientPathActionSeparator + "close",
+            SET_ALL_CANCEL: "set-all" + clientPathActionSeparator + "cancel",
+            SET_ALL_APPLY: "set-all" + clientPathActionSeparator + "apply",
+            SET_ALL_CLEAR: "set-all" + clientPathActionSeparator + "clear",
+
+
+            // viewer app:
+
+            // - server:
+            VIEWER_ANNOT_LOAD: "annotation" + clientPathActionSeparator + "read",
+            VIEWER_ANNOT_COMMENT_LOAD: "annotation_comment" + clientPathActionSeparator + "read",
+            VIEWER_COMMENT_LOAD: "commnet" + clientPathActionSeparator + "read",
+            VIEWER_ANATOMY_LOAD: "anatomy" + clientPathActionSeparator + "read",
+
+
+            // - authen:
+            LOGOUT_NAVBAR: "navbar/account" + clientPathActionSeparator + "logout",
+            LOGIN_NAVBAR: "navbar/account" + clientPathActionSeparator + "login",
+            LOGIN_ERROR_MODAL: "error-modal" + clientPathActionSeparator + "login",
+            LOGIN_LOGIN_MODAL: "login-modal" + clientPathActionSeparator + "login",
+            LOGIN_WARNING: "warning" + clientPathActionSeparator + "login",
+            SESSION_VALIDATE: "session" + clientPathActionSeparator + "validate",
+            SESSION_RETRIEVE: "session" + clientPathActionSeparator + "retrieve",
+
+            SWITCH_USER_ACCOUNTS_LOGIN: "switch-accounts" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
+            SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
+
+            // - navbar:
+            NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
+            NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",
+            NAVBAR_MENU_INTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-internal",
+            NAVBAR_MENU_OPEN: "navbar/menu" + clientPathActionSeparator + "open",
+            NAVBAR_ACCOUNT_DROPDOWN: "navbar/account" + clientPathActionSeparator + "open",
+            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open"
+        });
+
+        var logStackTypes = Object.freeze({
+            ENTITY: "entity",
+            SET: "set",
+            RELATED: "related",
+            FOREIGN_KEY: "fk",
+            COLUMN: "col",
+            PSEUDO_COLUMN: "pcol",
+            FACET: "facet"
+        });
+
+        var logStackPaths = Object.freeze({
+            ENTITY: "entity",
+            SET: "set",
+            COLUMN: "col",
+            PSEUDO_COLUMN: "pcol",
+            FOREIGN_KEY: "fk",
+            FACET: "facet",
+            RELATED: "related",
+            RELATED_INLINE: "related-inline",
+            ADD_PB_POPUP: "related-link-picker",
+            FOREIGN_KEY_POPUP: "fk-picker",
+            FACET_POPUP: "facet-picker",
+            // these two have been added to the tables that recordedit is showing
+            //(but not used in logs technically since we're not showing any controls he)
+            RESULT_SUCCESFUL_SET: "result-successful-set",
+            RESULT_FAILED_SET: "result-failed-set"
+        });
+
+        var appModes = Object.freeze({
+            EDIT: "edit",
+            CREATE: "create",
+            CREATE_COPY: "create-copy",
+            CREATE_PRESELECT: "create-preselect"
+        });
+
+        // why we had to reload a request
+        var reloadCauses = Object.freeze({
+            CLEAR_ALL: "clear-all", // clear all button
+            CLEAR_CFACET: "clear-cfacet",
+            CLEAR_CUSTOM_FILTER: "clear-custom-filter",
+            ENTITY_CREATE: "entity-create", // new rows has been created in the table
+            ENTITY_DELETE: "entity-delete", // a row in the table has been deleted
+            ENTITY_UPDATE: "entity-update", // a row in the table has been updated
+            FACET_CLEAR: "facet-clear", // a facet cleared
+            FACET_DESELECT: "facet-deselect", // a facet deselected
+            FACET_SELECT: "facet-select", // a facet selected
+            FACET_MODIFIED: "facet-modified", // facet changed in the modal
+            FACET_SEARCH_BOX: "facet-search-box", // facet search box changed
+            FACET_PLOT_RELAYOUT:  "facet-histogram-relayout", // users interact with plot and we need to get new info for it
+            FACET_RETRY: "facet-retry", // users click on retry for a facet that errored out
+            PAGE_LIMIT: "page-limit", // change page limit
+            PAGE_NEXT: "page-next", // go to next page
+            PAGE_PREV: "page-prev", // go to previous page
+            RELATED_CREATE: "related-create", // new rows in one of the related tables has been created
+            RELATED_DELETE: "related-delete", // a row in one of the related tables has been deleted
+            RELATED_UPDATE: "related-update", // a row in one of the related tables has been edited
+            RELATED_INLINE_CREATE: "related-inline-create", // new rows in one of the related (inline) tables has been created
+            RELATED_INLINE_DELETE: "related-inline-delete", // a row in one of the related (inline) tables has been deleted
+            RELATED_INLINE_UPDATE: "related-inline-update", // a row in one of the related (inline) tables has been edited
+            SORT: "sort", // sort changed
+            SEARCH_BOX: "search-box", // search box value changed
+        });
 
         /**
-         * Takes a header object, adds default logging info to it, and logs the request with ermrest
-         * @params {Object} headerObj - object of key/value pairs that are specific to this action
+         * Takes a object, adds default logging info to it, and logs the request with ermrest
+         * @params {Object} logObj - object of key/value pairs that are specific to this action
          * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests
          */
-        function logClientAction(headerObj, commonLogInfo) {
+        function logClientAction(logObj, commonLogInfo) {
+            var cc = ConfigUtils.getConfigJSON();
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
+
             if (!cc.logClientActions) return;
 
             if (commonLogInfo) {
-                headerObj.catalog = commonLogInfo.catalog;
-                headerObj.schema_table = commonLogInfo.schema_table;
+                // TODO this could just use all the attribues in the commonLogInfo
+                logObj.catalog = commonLogInfo.catalog;
+                logObj.schema_table = commonLogInfo.schema_table;
             }
 
-            context.server.logClientAction(headerObj).catch(function (err) {
-                $log.debug("An error may have occured when logging: ", headerObj);
+            var headers = {};
+
+            // in the case of static websites, the getHTTPService might return $http,
+            // which doesn't have the contextHeaderParams, so we should add them here just in case
+            for (var key in contextHeaderParams) {
+                if (!contextHeaderParams.hasOwnProperty(key) || (key in logObj)) continue;
+                logObj[key] = contextHeaderParams[key];
+            }
+            headers[ERMrest.contextHeaderName] = logObj;
+            ConfigUtils.getHTTPService().head(cc.ermrestLocation + "/client_action", {headers: headers}).catch(function (err) {
+                $log.debug("An error may have occured when logging: ", logObj);
                 $log.debug(err);
             });
         }
 
-        return {
-            logClientAction: logClientAction
+        /**
+         * Returns the appropriate stack object that should be used.
+         * If childStackElement passed, it will append it to the existing logStack of the app.
+         * @param {Object} childStackElement
+         */
+        function getStackObject(childStackNode) {
+            if (childStackNode) {
+                return $rootScope.logStack.concat(childStackNode);
+            }
+            return $rootScope.logStack;
         }
+
+        /**
+         * Returns the stack path that should be used in logs.
+         * @param {String=} currentPath - the existing stackPath
+         * @param {String} childPath - the current child stack path
+         */
+        function getStackPath(currentPath, childPath) {
+            if (!currentPath) {
+                currentPath = $rootScope.logStackPath;
+            }
+            return currentPath + separator + childPath;
+        }
+
+        /**
+         * Creates a new stack node given the type, table, and extra information.
+         * @param {String} type - one of the logStackTypes
+         * @param {ERMrest.Table} table - the table object of this node
+         * @param {Object=} extraInfo - if you want to attach more info to this node.
+         */
+        function getStackNode(type, table, extraInfo) {
+            var obj = {
+                type: type,
+                s_t: table.schema.name + ":" + table.name
+            };
+            if (typeof extraInfo === "object" && extraInfo !== null) {
+                for (var k in extraInfo) {
+                    if (!extraInfo.hasOwnProperty(k)) continue;
+                    obj[k] = extraInfo[k];
+                }
+            }
+            return obj;
+        }
+
+        /**
+         * Given an stack and new filterLogInfo, will remove the old ones and use the new ones.
+         * @param {Object} stack - if not passed, will use the app-wide one
+         * @param {Object} filterLogInfo
+         */
+        function updateStackFilterInfo(stack, filterLogInfo) {
+            if (!stack) {
+                stack = $rootScope.logStack;
+            }
+            var lastStackElement = stack[stack.length-1];
+            // TODO can be better? remove the existing filter info in stack
+            ['cfacet', 'cfacet_str', 'cfacet_path', 'filters', 'custom_filters'].forEach(function (k) {
+                delete lastStackElement[k];
+            });
+
+            // update the stack to have the latest filter info
+            for (var f in filterLogInfo) {
+                if (!filterLogInfo.hasOwnProperty(f)) continue;
+                lastStackElement[f] = filterLogInfo[f];
+            }
+        }
+
+        /**
+         * Given the array of causes and startTime, will return a new stack with appropriate variables.
+         * @param {Object=} stack - if not passed, will use the app-wide one
+         * @param {Array} causes
+         * @param {String} startTime - in milliseconds
+         */
+        function addCausesToStack(stack, causes, startTime) {
+            if (!stack) {
+                stack = $rootScope.logStack;
+            }
+            var newStack = DataUtils.simpleDeepCopy(stack);
+            var lastStackElement = newStack[stack.length-1];
+            lastStackElement.causes = causes;
+            lastStackElement.start_ms = startTime;
+            lastStackElement.end_ms = ERMrest.getElapsedTime();
+            return newStack;
+        }
+
+        /**
+         * Given an stack and object, will return a new stack with the object information added.
+         * @param {Object=} stack - if not passed, will use the app-wide one
+         * @param {Object} extraInfo
+         */
+        function addExtraInfoToStack(stack, extraInfo) {
+            if (!stack) {
+                stack = $rootScope.logStack;
+            }
+            var newStack = DataUtils.simpleDeepCopy(stack);
+            var lastStackElement = newStack[stack.length-1];
+
+            for (var f in extraInfo) {
+                if (!extraInfo.hasOwnProperty(f)) continue;
+                lastStackElement[f] = extraInfo[f];
+            }
+
+            return newStack;
+        }
+
+        /**
+         * Given the logStackPath and logActionVerb will return the appropriate action string.
+         * @param {String} logActionVerb - the action verb
+         * @param {String} logStackPath - if the given value is not a string, we will use the $rootScope.logStackPath instead.
+         * @param {String} appMode -if the given value is not a string, we will use te $rootScope.logAppMode instead.
+         */
+        function getActionString(logActionVerb, logStackPath, appMode) {
+            if (typeof logStackPath !== "string") {
+                logStackPath = $rootScope.logStackPath;
+            }
+            if (typeof appMode !== "string") {
+                appMode = $rootScope.logAppMode ? $rootScope.logAppMode : "";
+            }
+            return  appMode + appModeStackPathSeparator + logStackPath + stackPathClientPathSeparator + logActionVerb;
+        }
+
+        return {
+            appModes: appModes,
+            logStackTypes: logStackTypes,
+            logStackPaths: logStackPaths,
+            logActions: logActions,
+            reloadCauses: reloadCauses,
+            logClientAction: logClientAction,
+            getActionString: getActionString,
+            getStackNode: getStackNode,
+            updateStackFilterInfo: updateStackFilterInfo,
+            addCausesToStack: addCausesToStack,
+            getStackPath: getStackPath,
+            getStackObject: getStackObject,
+            addExtraInfoToStack: addExtraInfoToStack
+        };
     }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', 'UiUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, UiUtils, $window) {
 
         /**
          * adds a link tag to head with the custom css. It will be resolved when
@@ -2364,6 +2652,11 @@
             var defer = $q.defer();
             var chaiseConfig = ConfigUtils.getConfigJSON();
             if (chaiseConfig['customCSS'] !== undefined) {
+                // if the file is already injected
+                if (document.querySelector('link[href^="' + chaiseConfig['customCSS'] + '"]')) {
+                    return defer.resolve(), defer.promise;
+                }
+
                 var customCSSElement = document.createElement("link");
                 customCSSElement.setAttribute("rel", "stylesheet");
                 customCSSElement.setAttribute("type", "text/css");
@@ -2376,6 +2669,20 @@
                 defer.resolve();
             }
             return defer.promise;
+        }
+
+        /* Custom function to add styling based on browser type and operating system */
+        function addMacFirefoxClass(){
+          var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
+          var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
+
+          var bodyElement = document.querySelector(".chaise-body");
+          if (bodyElement){
+            if(osClass)
+              UiUtils.addClass(bodyElement, osClass);
+            if(browserClass)
+              UiUtils.addClass(bodyElement, browserClass);
+           }
         }
 
         function addTitle() {
@@ -2427,26 +2734,25 @@
         }
 
         function overrideDownloadClickBehavior() {
-            addClickListener("a.asset-permission", function (e) {
+            addClickListener("a.asset-permission", function (e, element) {
 
                 function hideSpinner() {
-                    e.target.innerHTML = e.target.innerHTML.slice(0, e.target.innerHTML.indexOf(spinnerHTML));
+                    element.innerHTML = element.innerHTML.slice(0, element.innerHTML.indexOf(spinnerHTML));
                 }
 
                 e.preventDefault();
 
                 var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
                 //show spinner
-                e.target.innerHTML += spinnerHTML;
+                element.innerHTML += spinnerHTML;
 
                 // if same origin, verify authorization
-                if (UriUtils.isSameOrigin(e.target.href)) {
+                if (UriUtils.isSameOrigin(element.href)) {
+                    var config = {skipRetryBrowserError: true, skipHTTP401Handling: true};
 
-                    var dcctx = ConfigUtils.getContextJSON();
                     // make a HEAD request to check if the user can fetch the file
-
-                    dcctx.server.http.head(e.target.href, {skipRetryBrowserError: true, skipHTTP401Handling: true}).then(function (response) {
-                        clickHref(e.target.href);
+                    ConfigUtils.getHTTPService().head(element.href, config).then(function (response) {
+                        clickHref(element.href);
                     }).catch(function (exception) {
                         // error/login modal was closed
                         if (typeof exception == 'string') return;
@@ -2469,7 +2775,7 @@
         }
 
         function overrideExternalLinkBehavior() {
-            addClickListener('a.external-link', function (e) {
+            addClickListener('a.external-link', function (e, element) {
                 e.preventDefault();
 
                 // asset-permission will be appended via display annotation or by heuristic if no annotation
@@ -2484,7 +2790,7 @@
                 }
                 // show modal dialog with countdown before redirecting to "asset"
                 modalUtils.showModal(modalProperties, function () {
-                    clickHref(e.target.href);
+                    clickHref(element.href);
                 }, false);
             });
         }
@@ -2492,12 +2798,19 @@
         /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
-         * @param {function} handler  the handler callback function
+         * @param {function} handler  the handler callback function.
+         * handler parameters are:
+         *  - Event object that is returned.
+         *  - The target (element that is described by the selector)
+         * NOTE since we're checking the closest element to the target, the e.target might
+         * be different from the actual target that we want. That's why we have to send the target too.
+         * We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
+         * the image as the value of e.target and not the link
          */
         function addClickListener(selector, handler) {
             document.querySelector("body").addEventListener("click", function (e) {
                 if (e.target.closest(selector)) {
-                    handler(e);
+                    handler(e, e.target.closest(selector));
                 }
             });
         }
@@ -2534,6 +2847,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
+            addMacFirefoxClass();
             return addCustomCSS();
         }
 
