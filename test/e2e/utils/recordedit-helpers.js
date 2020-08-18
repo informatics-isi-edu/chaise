@@ -75,6 +75,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         expect(linkEl.getAttribute('uib-tooltip')).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
+    it("should have 'Save' text for the submit button", function () {
+        // test text for submit button
+        expect(element(by.id('submit-record-button')).getText()).toBe("Save", "save button text is wrong");
+    });
+
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
         var columns = tableParams.columns;
         chaisePage.recordEditPage.getAllColumnCaptions().then(function(pageColumns) {
