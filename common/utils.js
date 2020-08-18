@@ -3,12 +3,24 @@
 
     angular.module('chaise.utils', ['chaise.errors'])
 
+    .constant("chaiseConfigPropertyNames", [
+        "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
+        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
+        "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
+        "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+        "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
+        "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+        "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "configRules"
+    ])
+
     .constant("defaultChaiseConfig", {
           "internalHosts": [window.location.host],
           "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
+          "dataBrowser": "/chaise/recordset",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
           "deleteRecord": false,
@@ -1760,7 +1772,9 @@
         }
     }])
 
-    .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
+    .factory("ConfigUtils", ['chaiseConfigPropertyNames', 'defaultChaiseConfig', '$http', '$log', '$rootScope', '$window', function(chaiseConfigPropertyNames, defaultConfig, $http, $log, $rootScope, $window) {
+        // List of all accepted chaiseConfig properties in defined case from chaise-config.md
+
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)
@@ -1788,20 +1802,51 @@
          *     a. Apply base level configuration properties
          *     b. Apply config-rules in order depending on matching host definitions
          *
+         * NOTE: Chaise Config properties can be case-insensitive since we check the properties against a whitelist of accepted property names.
+         * If the same property is defined in the same "chaise config" more than once with different case, the latter defined property will be used.
+         *
+         * For instance, given the below object, defaultCATALOG will be used over defaultCatalog:
+         * chaise-config.js = {
+         *   "defaultCatalog": 1,
+         *   "defaultCATALOG": 2
+         * }
+         *
          * @params {Object} catalogAnnotation - the chaise-config object returned from the 2019 chaise-config annotation tag attached to the catalog object
          *
          */
         function setConfigJSON(catalogAnnotation) {
+            function matchKey(collection, keyToMatch) {
+                return collection.filter(function (key) {
+                    // toLowerCase both keys for a case insensitive comparison
+                    return keyToMatch.toLowerCase() === key.toLowerCase();
+                });
+            }
             var cc = {};
             // check to see if global chaise-config (chaise-config.js) is available
-            if (typeof chaiseConfig != 'undefined') cc = Object.assign({}, chaiseConfig);
+            if (typeof chaiseConfig != 'undefined') {
+                // loop through properties and compare to defaultConfig to see if they are valid
+                // chaiseConfigPropertyNames is a whitelist of all accepted values
+                for (var key in chaiseConfig) {
+                    // see if returned key is in the list we accept
+                    var matchedKey = matchKey(chaiseConfigPropertyNames, key);
+
+                    // if we found a match for the current key in chaiseConfig, use the match from chaiseConfigPropertyNames as the key and set the value
+                    if (matchedKey.length > 0 && matchedKey[0]) {
+                        cc[matchedKey[0]] = chaiseConfig[key];
+                    }
+                }
+            }
 
             // Loop over default properties (global chaise config (chaise-config.js) may not be defined)
             // Handles case 1 and 2a
             for (var property in defaultConfig) {
                 // use chaise-config.js property instead of default if defined
-                if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
-                    cc[property] = chaiseConfig[property];
+                if (typeof chaiseConfig != 'undefined') {
+                    // see if "property" matches a key in chaiseConfig
+                    var matchedKey = matchKey(Object.keys(chaiseConfig), property);
+
+                    // property will be in proper case already since it comes from our config object in JS
+                    cc[property] = ((matchedKey.length > 0 && matchedKey[0]) ? chaiseConfig[property] : defaultConfig[property]);
                 } else {
                     // property doesn't exist
                     cc[property] = defaultConfig[property];
@@ -1829,7 +1874,12 @@
                                 // $window.location.hostname refers to just the hostname (www.something.com)
                                 if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
                                     for (var property in ruleset.config) {
-                                        cc[property] = ruleset.config[property];
+                                        var matchedKey = matchKey(chaiseConfigPropertyNames, property);
+
+                                        // if we found a match for the current key in ruleset.config, use the match from chaiseConfigPropertyNames as the key and set the value
+                                        if (matchedKey.length > 0 && matchedKey[0]) {
+                                            cc[matchedKey[0]] = ruleset.config[property];
+                                        }
                                     }
                                     break;
                                 }
@@ -1848,7 +1898,12 @@
             if (typeof catalogAnnotation == "object") {
                 // case 3a
                 for (var property in catalogAnnotation) {
-                    cc[property] = catalogAnnotation[property];
+                    var matchedKey = matchKey(chaiseConfigPropertyNames, property);
+
+                    // if we found a match for the current key in catalogAnnotation, use the match from chaiseConfigPropertyNames as the key and set the value
+                    if (matchedKey.length > 0 && matchedKey[0]) {
+                        cc[matchedKey[0]] = catalogAnnotation[property];
+                    }
                 }
 
                 // case 3b
@@ -1912,10 +1967,12 @@
             var cc = getConfigJSON();
 
             var mode = null;
-            if (context.indexOf('compact') != -1 && cc.SystemColumnsDisplayCompact)  {
-                mode = cc.SystemColumnsDisplayCompact;
-            } else if (context == 'detailed' && cc.SystemColumnsDisplayDetailed) {
-                mode = cc.SystemColumnsDisplayDetailed;
+            if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
+                mode = cc.systemColumnsDisplayCompact;
+            } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
+                mode = cc.systemColumnsDisplayDetailed;
+            } else if (context.indexOf('entry') != -1 && cc.systemColumnsDisplayEntry) {
+                mode = cc.systemColumnsDisplayEntry;
             }
 
             return mode;
