@@ -63,13 +63,13 @@ describe('View existing record,', function() {
             var keys = [];
             browser.ignoreSynchronization=true;
             browser.get(testParams.html_table_name_record_url);
-            // TODO use recordPageReady
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+            chaisePage.recordPageReady();
         });
 
         it("should display the entity subtitle name with html in it.", function() {
-            expect(chaisePage.recordPage.getEntitySubTitleElement().getText()).toBe(testParams.html_table_display);
+            var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
+            chaisePage.waitForElement(subTitleEl);
+            expect(subTitleEl.getText()).toBe(testParams.html_table_display);
         });
 
         it("should load chaise-config.js and have resolverImplicitCatalog=false,", function() {
@@ -154,9 +154,7 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            // TODO use recordPageReady
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+            chaisePage.recordPageReady();
         });
 
         it("should load chaise-config.js and have editRecord=true", function() {
@@ -170,10 +168,13 @@ describe('View existing record,', function() {
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
 
             it("should display the entity title and subtitle based on their markdown patterns.", function() {
+                var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
+                chaisePage.waitForElement(subTitleEl);
+                
                 // page-title and page-subtitle are attached to chaise-title,
                 // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
                 // title structure is: chaise-title -> span -> span (therefore we need to be more specific)
-                var subtitleElement = chaisePage.recordPage.getEntitySubTitleElement().element(by.css("span")),
+                var subtitleElement = subTitleEl.element(by.css("span")),
                     titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.css("span span"));
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {

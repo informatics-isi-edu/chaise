@@ -296,8 +296,8 @@ describe("Record Edit with immutable columns", function() {
                             expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
 
                             // test the tooltip on hover
-                            // NOTE: the mouse over isn't always occurring properly. Maybe it needs to be scrolled to first?
-                            // maybe change the visible columns order instead?
+                            // NOTE: for the mouse move function to move properly, the column should be visible otherwise we have to scroll to it.
+                            // that's why the asset column must be added to the begining of visible columns list
                             browser.actions().mouseMove(input).perform();
                             var tooltip = chaisePage.getTooltipDiv();
                             chaisePage.waitForElement(tooltip).then(function () {

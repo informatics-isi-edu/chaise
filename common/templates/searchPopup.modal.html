@@ -8,7 +8,7 @@
                         <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'"
                                 tooltip-placement="bottom" uib-tooltip="Apply the selected rows" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1 || ctrl.disableSubmit">
                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
-                            <span>Submit</span>
+                            <span>{{ctrl.mode == "selectFaceting" ? "Submit" : "Save" }}</span>
                         </button>
                         <button class="chaise-btn chaise-btn-secondary pull-right modal-close" type="button" ng-click="ctrl.cancel()" tooltip-placement="bottom" uib-tooltip="Close the dialog">
                             <strong class="chaise-btn-icon">X</strong>
@@ -19,16 +19,20 @@
                         <div ng-switch-when="popup/foreignkey/create">
                             <span>Select </span>
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
-                            <span> for new </span>
-                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                            <span ng-if="ctrl.tableModel.parentReference">
+                                <span> for new </span>
+                                <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                            </span>
                         </div>
                         <div ng-switch-when="popup/foreignkey/edit">
                             <span>Select </span>
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
-                            <span> for </span>
-                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
-                            <span ng-if="ctrl.tableModel.parentTuple">:
-                                <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
+                            <span ng-if="ctrl.tableModel.parentReference">
+                                <span> for </span>
+                                <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                                <span ng-if="ctrl.tableModel.parentTuple">:
+                                    <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
+                                </span>
                             </span>
                         </div>
                         <div ng-switch-when="popup/purebinary/add">
@@ -57,7 +61,7 @@
         <!-- switch when 'selectFaceting' -->
         <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged"></recordset-select-faceting>
         <!-- swtich default -->
-        <recordset test="yeah" ng-switch-default vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" get-disabled-tuples="getDisabledTuples"></recordset>
+        <recordset ng-switch-default vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" get-disabled-tuples="getDisabledTuples"></recordset>
     </div>
 
 </div>

@@ -104,40 +104,11 @@
 
         // this function assumes tuple and reference are attached to the $rootScope
         vm.sharePopup = function() {
-            var tuple = $rootScope.tuple;
-            var ref = $rootScope.reference;
-            var refTable = ref.table;
-
-            var params = {
-                displayname: refTable.name+'_'+tuple.uniqueId,
-                reference: ref
-            }
-
-            var versionString = "@" + (ref.location.version || refTable.schema.catalog.snaptime);
-            params.permalink = UriUtils.resolvePermalink(tuple, ref);
-            params.versionLink = UriUtils.resolvePermalink(tuple, ref, versionString);
-            params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-            params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-
-            var snaptimeHeader = {
-                action: logService.getActionString(logService.logActions.SHARE_OPEN),
-                stack: logService.getStackObject(),
-                catalog: ref.defaultLogInfo.catalog,
-                schema_table: ref.defaultLogInfo.schema_table
-            }
-            refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
-                // if current fetched snpatime doesn't match old snaptime, show a warning
-                params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
-            }).finally(function() {
-                modalUtils.showModal({
-                    templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
-                    controller: "ShareCitationController",
-                    windowClass: "chaise-share-citation",
-                    controllerAs: "ctrl",
-                    resolve: {
-                        params: params
-                    }
-                }, false, false, false); // not defining any extra callbacks
+            vm.waitingForSharePopup = true;
+            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference).then(function () {
+                vm.waitingForSharePopup = false;
+            }).catch(function (err) {
+                // the promise won't be rejected
             });
         };
 

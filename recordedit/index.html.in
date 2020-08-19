@@ -27,7 +27,7 @@
                                     <div class="title-buttons">
                                         <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
-                                            <span>Submit</span>
+                                            <span>Save</span>
                                         </button>
                                     </div>
                                     <h1 id="page-title">
@@ -219,7 +219,6 @@
                                                             <!-- longtext/textarea input -->
                                                             <div ng-switch-when="longtext">
                                                                 <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
-                                                                <a href id="previewLinkId-form-{{rowIndex}}-{{::column.name}}" class="live-preview" markdown-preview textinput="form.recordEditModel.rows[rowIndex][column.name]"></a>
                                                             </div>
 
 

@@ -11,9 +11,15 @@ The default styling for specific elements can be altered by adding a custom css 
 
 Custom style classes with modified styling attributes can be added in `chaise.css`. Make sure to use same class names and hierarchy as described below to avoid any discrepancy.
 
+## Changing chaise styles
+With the current HTML structure, it is possible to apply different styles to different parts of chaise and to further style the chaise tables based on model information :
 
-## Changing chaise table styles
-With the current HTML structure, it is possible to apply different styles to the table directive. There are a few key HTML ids/classes to be aware of:
+ - `.chaise-mac`
+   - Added a class to deal with table column spacing on Mac OS. This class can be used to apply any custom styling specific to the Mac OS
+     irrespective of the browser type.
+ - `.chaise-firefox`
+   - Added a class to deal with table column spacing in Firefox browser. This class can be used to apply any custom styling specific to
+     the Firefox browser irrespective of the operating system.
  - `navbar`
    - identifies the navbar that is displayed on top of every app.
  - `recordset` identifier (`#recordset`)
@@ -88,7 +94,6 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
 ### Examples:
 
 - Hide everything except the result table in recordset:
-
 ```css
 .rs_s_schema.rs_t_table .top-left-panel,
 .rs_s_schema.rs_t_table .side-panel-resizable,

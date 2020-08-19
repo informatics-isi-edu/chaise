@@ -39,8 +39,6 @@ angular.module('configure-search', [
 var ermrestApp = angular.module('ermrestApp', [
   'ngSanitize',
   'ngGrid',
-  'rzModule',
-  '720kb.datepicker',
   'ui.select',
   'ngCookies',
   'ermrestjs',

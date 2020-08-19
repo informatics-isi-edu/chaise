@@ -103,12 +103,12 @@ var testParams = {
                 luxurious: "true",
                 json_col: "9876.3543",
                 json_col_with_markdown: "Status is: “Processing”",
-                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt:",
+                no_of_beds: "beds: 1, id: 4004, has gym, image id cnt: 0",
                 no_of_baths: "baths: 1, id: 4004",
                 category: "Hotel",
                 type_of_facilities: "Upscale",
-                count_image_id: "",
-                count_distinct_image_id: "",
+                count_image_id: "0",
+                count_distinct_image_id: "0",
                 min_image_id: "",
                 max_image_id: ""
             }
@@ -226,8 +226,8 @@ var testParams = {
             [
                 "main two", "", "1,234,502",
                 "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "",
-                "", "", "", "", "", "", "",
+                "", "", "", "", "", "", "0",
+                "", "0", "", "", "", "", "",
                 ""
             ]
         ]
@@ -235,10 +235,12 @@ var testParams = {
     system_columns: {
         table_name: "system-columns",
         compactConfig: ['RCB', 'RMT'],
-        detailedCofnig: true,
+        detailedConfig: true,
+        entryConfig: ['RCB', 'RMB', 'RMT'],
         compactColumnsSystemColumnsTable: ['id', 'text', 'int', 'RCB', 'RMT'],
         detailedColumns: ['RID', 'id', 'text', 'int', 'RCB', 'RMB', 'RCT', 'RMT'],
-        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
+        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'], // no int column because it's the foreign key link (would be redundent)
+        entryColumns: ['id', 'text', 'int', 'RCB', 'RMB', 'RMT']
     }
 };
 
@@ -893,7 +895,7 @@ describe('View recordset,', function() {
             browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
         });
 
-        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function() {
+        it("should load the table with " + fileParams.custom_page_size + " rows of data based on the page size annotation.", function(done) {
             // Verify page count and on first page
             var e = chaisePage.recordsetPage.getPageLimitSelector(fileParams.custom_page_size);
 
@@ -907,7 +909,10 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.custom_page_size);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
         it("should display the proper row count and total row count.", function () {
@@ -916,8 +921,9 @@ describe('View recordset,', function() {
             });
         });
 
-        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function() {
-            var previousBtn = chaisePage.recordsetPage.getPreviousButton();
+        it("should have " + fileParams.page_size + " rows after paging to the second page, back to the first, and then changing page size to " + fileParams.page_size + ".", function(done) {
+            var previousBtn = chaisePage.recordsetPage.getPreviousButton(),
+                pageLimitBtn = chaisePage.recordsetPage.getPageLimitDropdown();
             // page to the next page then page back to the first page so the @before modifier is applied
             chaisePage.recordsetPage.getNextButton().click().then(function() {
                 // wait for it to be on the second page
@@ -928,7 +934,10 @@ describe('View recordset,', function() {
                 //wait for it to be on the first page again
                 browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getPageLimitDropdown().click();
+                //make sure the button is clickable
+                browser.wait(EC.elementToBeClickable(pageLimitBtn), browser.params.defaultTimeout);
+
+                return pageLimitBtn.click();
             }).then(function() {
                 var dropdownOption = chaisePage.recordsetPage.getPageLimitSelector(fileParams.page_size);
                 browser.wait(EC.elementToBeClickable(dropdownOption), browser.params.defaultTimeout);
@@ -945,10 +954,13 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(fileParams.page_size);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
-        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function() {
+        it("should have 14 rows and paging buttons disabled when changing the page size to 25.", function(done) {
             var nextBtn = chaisePage.recordsetPage.getNextButton(),
                 prevBtn = chaisePage.recordsetPage.getPreviousButton();
 
@@ -963,7 +975,10 @@ describe('View recordset,', function() {
                 return chaisePage.recordsetPage.getRows().count();
             }).then(function(ct) {
                 expect(ct).toBe(14);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
     });
 
@@ -1053,7 +1068,8 @@ describe('View recordset,', function() {
             }).then(function(config) {
                 chaiseConfig = config;
                 expect(chaiseConfig.confirmDelete).toBeTruthy();
-                expect(chaiseConfig.defaultCatalog).toBe(1);
+                // use "deFAuLtCaTAlog" since we are grabbing the property directly from chaise config. The application will use the right value
+                expect(chaiseConfig.deFAuLtCaTAlog).toBe(1);
                 expect(chaiseConfig.defaultTables['1'].schema).toBe("isa");
                 expect(chaiseConfig.defaultTables['1'].table).toBe("dataset");
             }).catch(function(error) {
@@ -1116,10 +1132,13 @@ describe('View recordset,', function() {
                     chaisePage.recordsetPageReady();
                 });
 
-                it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
+                it('should have values defined in config with odd cases', function() {
                     browser.executeScript('return chaiseConfig').then(function(config) {
-                        expect(config.SystemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
+                        // testing the following based on case defined in chaise-config.js
+                        // the application will digest this properly and test that below by inspecting the UI
+                        expect(config.systemcolumnsdisplaycompact).toEqual(systemColumnsParams.compactConfig);
                         expect(config.SystemColumnsDisplayDetailed).toBeTruthy();
+                        expect(config.systemColumnsDisplayENTRY).toEqual(systemColumnsParams.entryConfig);
                     }).catch(function(error) {
                         console.log('ERROR:', error);
                         // Fail the test
@@ -1127,7 +1146,7 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("with SystemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
+                it("with systemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
                     chaisePage.recordsetPage.getColumnNames().then(function(columns) {
                         expect(columns.length).toBe(systemColumnsParams.compactColumnsSystemColumnsTable.length);
                         for (var i = 0; i < columns.length; i++) {
@@ -1136,7 +1155,7 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("SystemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
                     chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
                         expect(buttons.length).toBe(1);
                         return buttons[0].click();
@@ -1158,11 +1177,28 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("on record page, SystemColumnsDisplayCompact should also be honored for related tables.", function () {
+                it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
                     chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
                         expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
                         for (var i = 0; i < columns.length; i++) {
                             expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
+                    });
+                });
+
+                it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
+                    // click create
+                    chaisePage.recordPage.getCreateRecordButton().click().then(function () {
+                        // test columns length
+
+                        chaisePage.recordeditPageReady();
+                        return chaisePage.recordEditPage.getAllColumnCaptions();
+                    }).then(function(pageColumns) {
+                        expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
+
+                        // test each column
+                        for (var i=0; i<pageColumns.length; i++) {
+                            expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
                         }
                     });
                 });

@@ -488,7 +488,12 @@
                             "column_name": "accommodation_id"
                         }
                     ],
-                    "annotations": {},
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "from_comment": "booking inline comment",
+                            "from_comment_display": "inline"
+                        }
+                    },
                     "referenced_columns": [
                         {
                             "table_name": "accommodation",

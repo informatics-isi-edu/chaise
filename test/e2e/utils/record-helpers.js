@@ -173,6 +173,10 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    it("should show inline comment for inline table with one defined", function () {
+        expect(chaisePage.recordPage.getInlineRelatedTableInlineComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
+    });
+
     it("should render columns based on their markdown pattern.", function(done) {
         var columns = tableParams.columns.filter(function(c) {return c.markdown_title;});
         chaisePage.recordPage.getColumnCaptionsWithHtml().then(function(pageColumns) {
@@ -624,7 +628,15 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
     if (!params.isInline) {
         it("title should be correct.", function () {
-            expect(chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname).getText()).toBe(params.displayname, "heading missmatch.");
+            var titleEl = chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname);
+            chaisePage.waitForElement(titleEl);
+            expect(titleEl.getText()).toBe(params.displayname, "heading missmatch.");
+        });
+    }
+
+    if (params.inlineComment) {
+        it("comment should be displayed and correct", function () {
+            expect(chaisePage.recordPage.getRelatedTableInlineComment(params.displayname).getText()).toBe(params.comment, "inline comment is not correct");
         });
     }
 
@@ -1061,6 +1073,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
         it ("user should be able to select new values and submit.", function (done) {
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
             chaisePage.clickButton(inp).then(function (){
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Save", "Submit button text for add pure and binary popup is incorrect");
+
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
                 browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);

@@ -54,10 +54,18 @@
             return alert;
         }
 
+        /**
+         * delete all alerts
+         */
+        function deleteAllAlerts() {
+            alerts.length = 0;
+        }
+
         return {
             alerts: alerts,
             addAlert: addAlert,
             deleteAlert: deleteAlert,
+            deleteAllAlerts: deleteAllAlerts,
             addURLLimitAlert: addURLLimitAlert,
             deleteURLLimitAlert: deleteURLLimitAlert
         };

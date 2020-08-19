@@ -75,6 +75,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         expect(linkEl.getAttribute('uib-tooltip')).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
     });
 
+    it("should have 'Save' text for the submit button", function () {
+        // test text for submit button
+        expect(element(by.id('submit-record-button')).getText()).toBe("Save", "save button text is wrong");
+    });
+
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
         var columns = tableParams.columns;
         chaisePage.recordEditPage.getAllColumnCaptions().then(function(pageColumns) {
@@ -600,9 +605,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }
                                     markdownField.sendKeys(input);
                                     modalPrevBtn.click();
-                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.params.markdownOut"]'));
+                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.renderedMarkdown"]'));
                                     browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
+                                    browser.wait(EC.elementToBeClickable(element(by.className('modal-close'))), browser.params.defaultTimeout);
                                     element(by.className('modal-close')).click();
                                     PrevBtn.click();        //generate preview
                                     let mdPrevDiv = element(by.className("md-preview"));
