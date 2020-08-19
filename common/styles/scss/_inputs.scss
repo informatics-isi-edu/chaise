@@ -334,6 +334,29 @@
     padding: $btn-padding-y $btn-padding-x;
 
     @include border-radius($btn-border-radius);
+
+    // adds a grey placeholder into input fields (inputs) that are also editable
+    // NOTE: should be prefered for placeholders with HTML
+    .chaise-input-placeholder{
+        position: absolute;
+        top: $btn-padding-y;
+        left: $btn-padding-x;
+        color: $placeholder-color;
+
+        // to make sure it doesn't go to the next line
+        white-space: nowrap;
+
+        // users should not be able to select the tooltip
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+}
+
+.rid-search .chaise-input-control-sm {
+    width: 100px;
+    border-radius: 4px 0px 0px 4px;
 }
 
 .chaise-input-control-lg {
