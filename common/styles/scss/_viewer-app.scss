@@ -788,11 +788,23 @@
                 .itemRow{
                     display: flex;
                     flex-direction: row;
-                }
-
-                .itemRow .anatomy{
-                    flex : 1;
-                    padding: 3px;
+                    .annotation-color-container {
+                        width: 10px;
+                        height: 10px;
+                        background-color: transparent;
+                        margin-top: 8px;
+                        margin-right: 2px;
+                        
+                        .annotation-color-item {
+                            height: 100%;
+                            float: left;
+                        }
+                    }
+                    
+                    .anatomy {
+                        flex : 1;
+                        padding: 3px;
+                    }
                 }
 
                 .itemMenu{

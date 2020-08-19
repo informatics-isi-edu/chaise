@@ -392,7 +392,8 @@
                     name: name,
                     id: id,
                     url: url,
-                    tuple: null
+                    tuple: null,
+                    stroke: Array.isArray(items[i].stroke) ? items[i].stroke : []
                 };
 
                 row = $rootScope.annotationTuples.find(function (tuple, index) {
@@ -961,6 +962,9 @@
                     savedItem.tuple = tuple;
                     savedItem.isStoredInDB = true;
                     savedItem.isNew = false;
+                    
+                    // update the color
+                    savedItem.stroke = data.content[0].stroke;
 
                     // update the annotationModels
                     var rowIndex = vm.editingAnatomyIndex;
