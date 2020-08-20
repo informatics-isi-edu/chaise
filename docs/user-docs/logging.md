@@ -92,6 +92,9 @@ Depending on the request, we might log extra attributes that we are gong to list
 
   If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
 
+- `paction`: The action in the parent page that fired the current request. Acceptable values are:
+  - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
+
 - `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:
   - Required attributes:
     - `s_t`: The end table of this node in the format of `schema:table`.

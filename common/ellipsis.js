@@ -121,7 +121,9 @@
 
                     // view link
                     if (scope.config.viewable) {
-                        scope.viewLink = tupleReference.contextualize.detailed.appLink;
+                        var viewLink = tupleReference.contextualize.detailed.appLink;
+                        var qCharacter = viewLink.indexOf("?") !== -1 ? "&" : "?";
+                        scope.viewLink = viewLink + qCharacter + "paction=view";
                     }
 
                     // if tupleReference is not defined

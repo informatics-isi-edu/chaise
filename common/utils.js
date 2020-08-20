@@ -258,7 +258,7 @@
             var ermrestUri = {},
                 queryParams = {},
                 queryParamsString = "",
-                catalogId, ppid, pcid;
+                catalogId, ppid, pcid, paction;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
@@ -278,6 +278,9 @@
                     }
                     if (queries[i].indexOf("ppid=") === 0) {
                         ppid = queries[i].split("=")[1];
+                    }
+                    if (queries[i].indexOf("paction=") === 0) {
+                        paction = queries[i].split("=")[1];
                     }
                     var q_parts = queries[i].split("=");
                     queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
@@ -380,6 +383,7 @@
                     hash: originalHash,
                     ppid: ppid,
                     pcid: pcid,
+                    paction: paction,
                     queryParamsString: queryParamsString,
                     queryParams: queryParams,
                     isQueryParameter: isQueryParameter
