@@ -646,7 +646,10 @@
                 }, function () {
                     if (!vm.editingAnatomy.isNew) {
                         // send a message to osd viewer to cancel
-                        AnnotationsService.discardAnnotationChanges();
+                        AnnotationsService.discardAnnotationChange({
+                            svgID: vm.editingAnatomy.svgID,
+                            groupID: vm.editingAnatomy.groupID
+                        });
                     }
                     
                     close();
@@ -720,6 +723,13 @@
                 } else {
                     recordCreate.populateEditModelValues(annotationEditForm, annotationEditForm.reference, item.tuple, 0, false);
                 }
+                
+                
+                // send a message to osd viewer to signal the start
+                AnnotationsService.startAnnotationChange({
+                    svgID: item.svgID,
+                    groupID: item.groupID
+                });
             }
             
             // if item is null, we just wanted to switch away from edit/create mode

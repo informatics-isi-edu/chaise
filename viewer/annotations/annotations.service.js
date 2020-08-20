@@ -160,8 +160,12 @@
             iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
         }
         
-        function discardAnnotationChanges() {
-            iframe.postMessage({messageType: 'discardAnnotationChanges'}, origin);
+        function startAnnotationChange(data) {
+            iframe.postMessage({messageType: 'startAnnotationChange', content: data}, origin);
+        }
+        
+        function discardAnnotationChange(data) {
+            iframe.postMessage({messageType: 'discardAnnotationChange', content: data}, origin);
         }
 
         return {
@@ -182,7 +186,8 @@
             removeEntry : removeEntry,
             removeSVG : removeSVG,
             saveAnnotationRecord : saveAnnotationRecord,
-            discardAnnotationChanges: discardAnnotationChanges
+            discardAnnotationChange: discardAnnotationChange,
+            startAnnotationChange: startAnnotationChange
         };
 
     }]);
