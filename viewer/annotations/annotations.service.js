@@ -160,6 +160,10 @@
             iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
         }
         
+        function loadAnnotations(data) {
+            iframe.postMessage({messageType: 'loadAnnotations', content: data}, origin);
+        }
+        
         function startAnnotationChange(data) {
             iframe.postMessage({messageType: 'startAnnotationChange', content: data}, origin);
         }
@@ -186,6 +190,7 @@
             removeEntry : removeEntry,
             removeSVG : removeSVG,
             saveAnnotationRecord : saveAnnotationRecord,
+            loadAnnotations: loadAnnotations,
             discardAnnotationChange: discardAnnotationChange,
             startAnnotationChange: startAnnotationChange
         };

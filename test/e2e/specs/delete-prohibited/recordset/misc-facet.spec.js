@@ -217,6 +217,8 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getModalOptions().then(function (options) {
                 return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption]);
             }).then(function () {
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Submit", "Submit button text for add pure and binary popup is incorrect");
+
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
 

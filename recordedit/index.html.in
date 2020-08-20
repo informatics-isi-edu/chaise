@@ -27,7 +27,7 @@
                                     <div class="title-buttons">
                                         <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
-                                            <span>Submit</span>
+                                            <span>Save</span>
                                         </button>
                                     </div>
                                     <h1 id="page-title">
