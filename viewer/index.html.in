@@ -208,6 +208,9 @@
                                     <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels track by $index" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
                                         <div class='itemContent'>
                                             <div class='itemRow'>
+                                                <span class="annotation-color-container">
+                                                    <span class="annotation-color-item" ng-repeat="annotColor in item.stroke" ng-style="{'background-color': annotColor, 'width': (100/item.stroke.length) + '%'}"></span>
+                                                </span>
                                                 <span class='anatomy'>
                                                     {{ item.name }}
                                                     <a ng-if="item.id"  href="{{item.url}}" target="_blank" tooltip-placement="auto" uib-tooltip="Click to view details and associated data">
