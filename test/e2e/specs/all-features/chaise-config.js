@@ -46,6 +46,10 @@ var chaiseConfig = {
                 name: "RecordEdit",
                 children: [
                     {
+                        name: "For Mutating Data",
+                        header: true
+                    },
+                    {
                         name: "Add Records",
                         url: "/chaise/recordedit/#1/isa:dataset",
                         acls: {
