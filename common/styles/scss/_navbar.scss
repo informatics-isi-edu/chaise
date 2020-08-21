@@ -114,6 +114,10 @@ body > .container {
     border-radius: 6px 0 6px 6px;
 }
 
+#rid-search-input {
+    background-color: $table-striped-background-color;
+}
+
 #mainnav {
     border-radius: 0;
 }

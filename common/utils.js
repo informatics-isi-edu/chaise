@@ -11,7 +11,7 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideSearchRID", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -35,7 +35,8 @@
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
-          "logClientActions": true
+          "logClientActions": true,
+          "hideSearchRID": false
     })
 
     .constant("appTagMapping", {
@@ -919,6 +920,19 @@
 
             return hash;
         }
+
+        /**
+         *
+         */
+        function splitVersionFromCatalog(id) {
+            var split = id.split('@');
+
+            return {
+                catalog: split[0],
+                version: split[1]
+            }
+        }
+
         /**
          * @param {String} hash - window.location.hash string
          */
@@ -1062,6 +1076,7 @@
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
+            splitVersionFromCatalog: splitVersionFromCatalog,
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
             getAbsoluteURL: getAbsoluteURL
@@ -2463,7 +2478,8 @@
             NAVBAR_MENU_INTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-internal",
             NAVBAR_MENU_OPEN: "navbar/menu" + clientPathActionSeparator + "open",
             NAVBAR_ACCOUNT_DROPDOWN: "navbar/account" + clientPathActionSeparator + "open",
-            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open"
+            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open",
+            NAVBAR_RID_SEARCH: "navbar/rid" + clientPathActionSeparator + "search"
         });
 
         var logStackTypes = Object.freeze({

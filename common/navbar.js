@@ -284,11 +284,33 @@
 
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
+                    scope.showRidSearch = function () {
+                        return chaiseConfig.resolverImplicitCatalog !== null && !chaiseConfig.hideSearchRID
+                    }
+
+                    // catalog id is not present
                     scope.ridSearch = function () {
-                        $window.location = "/id/" + scope.ridSearchTerm;
+                        logService.logClientAction({
+                            action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
+                            term: scope.ridSearchTerm
+                        });
+
+                        $window.open("/id/" + scope.ridSearchTerm, '_blank');
                     }
 
                     if (isCatalogDefined(catalogId)) {
+                        //if id present, override previous function
+                        scope.ridSearch = function () {
+                            var splitId = UriUtils.splitVersionFromCatalog(catalogId);
+                            var url = "/id/" + splitId.catalog + "/" + scope.ridSearchTerm;
+                            if (scope.isVersioned()) url += "@" + splitId.version
+                            logService.logClientAction({
+                                action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
+                                term: scope.ridSearchTerm
+                            });
+                            $window.open(url, '_blank');
+                        }
+
                         scope.isVersioned = function () {
                             return catalogId.split("@")[1] ? true : false;
                         }
