@@ -57,7 +57,7 @@ describe('Navbar ', function() {
             var editMenu = menuDropdowns.get(3);
             // need to open menu so it renders and has a value
             editMenu.click().then(function () {
-                subMenuHeader = editMenu.all(by.css("strong.chaise-dropdown-header"));
+                subMenuHeader = editMenu.all(by.css("span.chaise-dropdown-header"));
                 expect(subMenuHeader.get(0).getText()).toBe("For Mutating Data", "Sub menu header is incorrect or not showing");
 
                 return editMenu.all(by.css("a.disable-link"));
