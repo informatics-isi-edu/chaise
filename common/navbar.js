@@ -285,32 +285,49 @@
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
                     scope.showRidSearch = function () {
-                        return chaiseConfig.resolverImplicitCatalog !== null && !chaiseConfig.hideSearchRID
+                        return chaiseConfig.resolverImplicitCatalog !== null && chaiseConfig.hideSearchRID !== true
                     }
 
-                    // catalog id is not present
+                    // RID search turned off in the cases of:
+                    //  - resolverImplicitCatalog == null
+                    //  - OR hideSearchRID == true
                     scope.ridSearch = function () {
+                        var resolverId = chaiseConfig.resolverImplicitCatalog,
+                            url = "/id/", catId, splitId;
+
+                        if (isCatalogDefined(catalogId)) {
+                            splitId = UriUtils.splitVersionFromCatalog(catalogId);
+
+                            // use `/id/catalog/ridSearchTerm` format if:
+                            //   - resolver id is a different catalog id than current page
+                            //   - resolver id is NaN and !null
+                            if (isNaN(resolverId) || resolverId !== catalogId) {
+                                url += splitId.catalog + "/"
+                            }
+                        } else {
+                            // we don't have a catalog id, check if reolverId is a number and use as catalog id
+                            // basically catalogId !== resolverId for this case
+                            // use `/id/catalog/ridSearchTerm` format if:
+                            //   - resolver id is a number
+                            if (!isNaN(resolverId)) {
+                                url += resolverId + "/"
+                            }
+
+                        }
+
+                        url += scope.ridSearchTerm;
+                        // implicitly does the isCatalogDefined(catalogId) check with how function returns true/false
+                        if (scope.isVersioned()) url += "@" + splitId.version;
+
                         logService.logClientAction({
                             action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
                             term: scope.ridSearchTerm
                         });
 
-                        $window.open("/id/" + scope.ridSearchTerm, '_blank');
+                        $window.open(url, '_blank');
                     }
 
                     if (isCatalogDefined(catalogId)) {
-                        //if id present, override previous function
-                        scope.ridSearch = function () {
-                            var splitId = UriUtils.splitVersionFromCatalog(catalogId);
-                            var url = "/id/" + splitId.catalog + "/" + scope.ridSearchTerm;
-                            if (scope.isVersioned()) url += "@" + splitId.version
-                            logService.logClientAction({
-                                action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
-                                term: scope.ridSearchTerm
-                            });
-                            $window.open(url, '_blank');
-                        }
-
                         scope.isVersioned = function () {
                             return catalogId.split("@")[1] ? true : false;
                         }

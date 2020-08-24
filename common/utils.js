@@ -899,7 +899,7 @@
                 return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
-            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
+            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current catalog
             if (!isNaN(resolverId) && resolverId == currCatalog) {
                 return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
             }
