@@ -291,6 +291,16 @@
                     // RID search turned off in the cases of:
                     //  - resolverImplicitCatalog == null
                     //  - OR hideSearchRID == true
+                    //
+                    // The following cases need to be handled for the resolverImplicitCatalog value:
+                    //  - if catalogId is defined:
+                    //    - if resolverImplicitCatalog === null:        turn off config
+                    //    - if resolverImplicitCatalog === catalogId:   /id/RID
+                    //    - otherwise:                                  /id/catalogId/RID
+                    //  - else:
+                    //    - if resolverImplicitCatalog === null:        turn off config
+                    //    - if resolverImplicitCatalog is Not a Number: /id/RID
+                    //    - otherwise:                                  /id/resolverImplicitCatalog/RID
                     scope.ridSearch = function () {
                         var resolverId = chaiseConfig.resolverImplicitCatalog,
                             url = "/id/", catId, splitId;
