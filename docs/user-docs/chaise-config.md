@@ -4,6 +4,17 @@
 
 A Chaise deployment includes a sample config file ([chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js)) at the root directory that you can edit and then rename to `chaise-config.js`.
 
+Each chaise config property below can be defined in each place that we allow for a chaise configuration with a few exceptions noted below. Chaise config uses a set order for determining which chaise configuration's properties will be used. The order that the properties will be checked and then applied are as follows:
+  1. Default values defined in [chaise configuration document](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/chaise-config.md).
+  2. Any properties defined at the root of the object returned from [chaise-config.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js).
+  3. Any matching `configRules` in the order they appear in the `configRules` array. Properties in the last matching rule will take precedence
+  4. Any properties defined at the root of the object returned from this annotation.
+  5. Step 3 from above, but with the `configRules` from this annotation.
+
+Notes: is that as the `configRules` are checked, properties set in step 2 will be overridden by properties defined in step 3 that have the same name. This allows the server wide configuration to be a base configuration for the chaise apps and allows for further configuration based on a combination of hostname and catalog id. This applies for step 4 and 5 as well when reading the values from the catalog annotation.
+
+If a property appears in the same configuration twice, the property defined later will be used.
+
 The below table explains the usage of the default parameters:
 
 | Parameter | Values | Default Value | chaise-config.js | URL | Remarks |
@@ -26,7 +37,7 @@ The below table explains the usage of the default parameters:
 | defaultTables | An object that specifies a catalog's the default schema and table | N/A | "defaultTables": {N: {"schema": S, "table": T}, ...} | N/A | Use this parameter to specify for each catalog `N`, which table `T` Chaise shows by default. |
 | signUpURL | A URL | N/A | "signUpURL":\<your_URL\> | N/A | Use this parameter to specify what the "Sign Up" link in the navbar should link to. If `signUpURL` is unspecified, the navbar will not display a "Sign Up" link. |
 | profileURL | A URL | N/A | "profileURL":\<your_URL\> | N/A | When a user is logged in, the navbar displays the user's username. Use this parameter to specify what the username in the navbar should link to (e.g. `https://app.globus.org/account` if your deployment uses Globus authentication). If `profileURL` is unspecified, the navbar will display the username as regular text. |
-| navbarMenu | An object | N/A | "navbarMenu":\{...\} | N/A | Use this parameter to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with your links and/or dropdown menus. Each option accepts an 'acls' object that has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. The `url` property of each menu object allows for templating of the catalog id parameter using handlebars. Consult the _chaise-config.js_ file for more details about format. |
+| navbarMenu | An object | N/A | "navbarMenu":\{...\} | N/A | Use this parameter to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with your links and/or dropdown menus. Each option accepts an 'acls' object that has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. The `url` property of each menu object allows for templating of the catalog id parameter using handlebars. The `header` property of each menu object will create an unclickable bold header with class `chaise-dropdown-header`. Consult the _chaise-config-sample.js_ file for more details about format. |
 | sidebarPosition | "left" <br> "right" | "right" | "sidebarPosition": \<value\> | N/A | Applies to the Search app only. If \<value\> is "left", the sidebar will be on the left and the main content will shift left correspondingly. If \<value\> is "right", the sidebar will be on the right. |
 | attributesSidebarHeading | String | "Choose Attributes" | "attributesSidebarHeading": \<value\> | N/A | Applies to Search app only. Use this parameter to customize the heading displayed in at the top of the Attributes sidebar (usually the first sidebar that appears when the Search app loads). |
 | userGroups | An object | N/A | "userGroups" : {"curators": <group id>, "annotators": <group id>, "curators": <group id>} | N/A | For Viewer app only. The Viewer app assigns an authenticated user one of three permission levels depending on the user's Globus memberships. The permission levels, from highest to lowest, are `curator`, `annotator`, `user`. The default Globus group IDs that determine who's a `curator`, `annotator`, or `user` are set by [RBK](https://github.com/informatics-isi-edu/rbk-project). To override these default group IDs for each permission level, you may specify your own via this `userGroups` setting.

@@ -70,6 +70,13 @@ body > .container {
     color: $disabled-color;
 }
 
+.dropdown-menu>li>a.chaise-dropdown-header,
+.chaise-dropdown-header {
+    font-size: $font-size;
+    color: $black-color;
+    font-weight: 600;
+}
+
 .dropdown-submenu {
     position: relative;
 }
