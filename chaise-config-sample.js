@@ -73,9 +73,14 @@ var chaiseConfig = {
             //      }
             // },
             // {
-            //      // URLs support templating primarily for catalog substition
+            //     // URLs support templating primarily for catalog substition
             //     name: "Create",
             //     url: "/chaise/recordedit/#{{$catalog.snapshot}}/YOUR_SCHEMA:YOUR_TABLE"
+            // },
+            // {
+            //     // set header to true to create an unclickable bold menu option with class `chaise-dropdown-header`
+            //     name: "A header",
+            //     header: true
             // }
         ]
     },
