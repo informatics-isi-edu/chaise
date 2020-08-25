@@ -717,8 +717,8 @@
                     size: "sm",
                     resolve: {
                         params: {
-                            buttonAction: "Discard",
-                            message: "Are you sure you want to discard your changes?"
+                            buttonAction: "Ok",
+                            message: "Any unsaved change will be discarded. Do you want to continue?"
                         }
                     }
                 }, close, null, false);
