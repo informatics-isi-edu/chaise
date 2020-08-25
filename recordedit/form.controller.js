@@ -269,7 +269,7 @@
             params.facetPanelOpen = false;
 
             var columnModel = vm.recordEditModel.columnModels[columnIndex];
-            params.logStack = columnModel.logStack;
+            params.logStack = recordCreate.getColumnModelLogStack(columnModel);
             params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
             modalUtils.showModal({
@@ -588,8 +588,8 @@
 
             var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
             logService.logClientAction({
-                action: logService.getActionString(action, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(model, action),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             if (selectAllOpen) {
@@ -653,8 +653,8 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(logService.logActions.SET_ALL_CANCEL, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(model, logService.logActions.SET_ALL_CANCEL),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             model.showSelectAll = false;
@@ -752,8 +752,8 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(logService.logActions.SET_ALL_APPLY, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(model, logService.logActions.SET_ALL_APPLY),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             setValueAllInputs(index, model.allInput);
@@ -764,8 +764,8 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(logService.logActions.SET_ALL_CLEAR, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(model, logService.logActions.SET_ALL_CLEAR),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             var value = null;

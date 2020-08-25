@@ -4,9 +4,9 @@
     angular.module('chaise.viewer')
 
     .factory('viewerAppUtils', [
-        'annotationCreateForm', 'annotationEditForm', 'ConfigUtils', 'context', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConstant', 
+        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConstant', 
         '$q', '$rootScope', 
-        function (annotationCreateForm, annotationEditForm, ConfigUtils, context, ERMrest, logService, recordCreate, UriUtils, viewerConstant, 
+        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, ERMrest, logService, recordCreate, UriUtils, viewerConstant, 
                   $q, $rootScope) {
         
         var annotConstant = viewerConstant.annotation;
@@ -118,8 +118,8 @@
         function _readAnnotations (ref) {
             var defer = $q.defer();
             var logObj = {
-                action: logService.getActionString(logService.logActions.VIEWER_ANNOT_LOAD),
-                stack: logService.getStackObject()
+                action: AnnotationsService.getAnnotationLogAction(logService.logActions.VIEWER_ANNOT_LOAD),
+                stack: AnnotationsService.getAnnotationLogStack()
             };
 
             ref.read(annotConstant.PAGE_COUNT, logObj, false, true).then(function (page){

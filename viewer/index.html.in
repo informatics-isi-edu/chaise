@@ -23,7 +23,7 @@
                                 <h3 class="side-panel-heading">{{anno.editingAnatomy == null ? "Annotations" :  (anno.editingAnatomy.isNew ? "Create annotation" : "Edit annotation")}}</h3>
                             </div>
                             <div class="pull-right">
-                                <button ng-disabled="anno.annotationFormPendingResult" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
+                                <button ng-disabled="anno.annotationEditForm.submissionButtonDisabled || anno.annotationCreateForm.submissionButtonDisabled" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
                                     <span class="fas fa-arrow-left"></span>
                                     <span>Back</span>
                                 </button>
@@ -78,9 +78,9 @@
                                 </div>
                             </div>
                             <div class='annotation-form-container' ng-form="anno.annoForm" ng-if="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
-                                <div class="form-spinner-overlay" ng-if="anno.annotationFormPendingResult">
+                                <div class="form-spinner-overlay" ng-if="anno.annotationEditForm.submissionButtonDisabled || anno.annotationCreateForm.submissionButtonDisabled">
                                 </div>
-                                <loading-spinner class="form-spinner" ng-if="anno.annotationFormPendingResult" message="Saving the changes..."></loading-spinner>
+                                <loading-spinner class="form-spinner" ng-if="anno.annotationEditForm.submissionButtonDisabled || anno.annotationCreateForm.submissionButtonDisabled" message="Saving the changes..."></loading-spinner>
                                 <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowValue" ng-show="!anno.editingAnatomy.isNew && !anno.editingAnatomy.isStoredInDB">
@@ -130,7 +130,7 @@
                                                           parent-model="anno.annotationEditForm" model="anno.annotationEditForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="edit" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
                                                           on-search-popup-value-change="anno.onSearchPopupValueChange" search-popup-get-disabled-tuples="anno.getAnnotatedTermDisabledTuples"
-                                                          is-required="columnModel.isRequired"></input-switch>
+                                                          is-required="columnModel.isRequired"  parent-log-stack="anno.annotationEditForm.logStack" parent-log-stack-path="anno.annotationEditForm.logStackPath"></input-switch>
                                         </div>
                                     </div>
                                 </div>
@@ -148,7 +148,7 @@
                                                           parent-model="anno.annotationCreateForm" model="anno.annotationCreateForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="create" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
                                                           on-search-popup-value-change="anno.onSearchPopupValueChange" search-popup-get-disabled-tuples="anno.getAnnotatedTermDisabledTuples"
-                                                          is-required="columnModel.isRequired"></input-switch>
+                                                          is-required="columnModel.isRequired" parent-log-stack="anno.annotationCreateForm.logStack" parent-log-stack-path="anno.annotationCreateForm.logStackPath"></input-switch>
                                         </div>
                                     </div>
                                 </div>
@@ -161,7 +161,7 @@
                                                 <span>Save</span>
                                             </button>
                                         </div>
-                                        <div class='annotationRowValue' ng-disabled="anno.annotationFormPendingResult || !canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
+                                        <div class='annotationRowValue' ng-disabled="!canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
                                             <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>

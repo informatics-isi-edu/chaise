@@ -522,27 +522,31 @@
                 inputType: type,
                 highlightRow: false,
                 showSelectAll: false,
-                logStack: logService.getStackObject(stackNode),
-                logStackPath: logService.getStackPath("", stackPath)
+                logStackNode: stackNode,
+                logStackPathChild: stackPath
             };
         }
 
+        function getColumnModelLogStack(colModel, parentLogStack) {
+            return logService.getStackObject(colModel.logStackNode, parentLogStack);
+        }
+
+        function getColumnModelLogAction(colModel, action, parentLogStackPath) {
+            var logStackPath = logService.getStackPath(parentLogStackPath, colModel.logStackPathChild);
+            return logService.getActionString(action, logStackPath);
+        }
 
         /**
          * In case of prefill and default we only have a reference to the foreignkey,
          * we should do extra reads to get the actual data.
          *
+         * @param  {Object} model the tableModel object
          * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
          * @param  {string[]} colNames Array of foreignkey names that can be prefilled
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
-         * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
+         * @param  {Object} logObj the object will be passed to read as contextHeaderParams
          */
-        function _getForeignKeyData (model, rowIndex, colNames, fkRef, logAction, logStack) {
-            var stackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY);
-            var logObj = {
-                action: logService.getActionString(logAction, stackPath),
-                stack: logStack
-            };
+        function _getForeignKeyData (model, rowIndex, colNames, fkRef, logObj) {
             fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
                     // default value is validated
@@ -596,13 +600,19 @@
                         break;
                     }
                 }
+
+                // create proper logObject
                 var stackNode = logService.getStackNode(
                     logService.logStackTypes.FOREIGN_KEY,
                     ref.table,
                     {source: source, entity: true}
                 );
-                var logStack = logService.getStackObject(stackNode);
-                _getForeignKeyData(model, newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT, logStack);
+                var logStackPath = logService.getStackPath(model.logStackPath, logService.logStackPaths.FOREIGN_KEY);
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.FOREIGN_KEY_PRESELECT, logStackPath),
+                    stack: logService.getStackObject(stackNode, model.logStack)
+                }
+                _getForeignKeyData(model, newRow, fkColumnNames, ref, logObj);
             }).catch(function (err) {
                 fkColumnNames.forEach(function (cn) {
                     $rootScope.showColumnSpinner[newRow][cn] = false;
@@ -716,7 +726,7 @@
                             });
 
                             if (allPrefilled || allInitialized) {
-                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues);
+                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues), logObj;
 
                                 if (allPrefilled) {
                                     colModel.isDisabled = true;
@@ -726,14 +736,36 @@
                                 initialModelValue = defaultDisplay.rowname.value;
                                 // initialize foreignKey data
                                 model.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.values;
+
+                                // populate the log object
+                                logObj = {
+                                    action: getColumnModelLogAction(
+                                        colModel,
+                                        logService.logActions.FOREIGN_KEY_PRESELECT,
+                                        model.logStackPath
+                                    ),
+                                    stack: getColumnModelLogStack(colModel, model.logStack)
+                                };
+
                                 // get the actual foreign key data
-                                _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT, colModel.logStack);
+                                _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logObj);
                             } else if (defaultValue != null) {
                                 initialModelValue = defaultValue;
                                 // initialize foreignKey data
                                 model.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+
+                                // populate the log object
+                                logObj = {
+                                    action: getColumnModelLogAction(
+                                        colModel,
+                                        logService.logActions.FOREIGN_KEY_DEFAULT,
+                                        model.logStackPath
+                                    ),
+                                    stack: getColumnModelLogStack(colModel, model.logStack)
+                                };
+
                                 // get the actual foreign key data
-                                _getForeignKeyData(model, 0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT, colModel.logStack);
+                                _getForeignKeyData(model, 0, [column.name], column.defaultReference, logObj);
                             }
                         } else {
                             // all other column types
@@ -923,6 +955,8 @@
             addRelatedRecordFact: addRelatedRecordFact,
             addRecords: addRecords,
             columnToColumnModel: columnToColumnModel,
+            getColumnModelLogStack: getColumnModelLogStack,
+            getColumnModelLogAction: getColumnModelLogAction,
             populateCreateModelValues: populateCreateModelValues,
             populateEditModelValues: populateEditModelValues,
             populateSubmissionRow: populateSubmissionRow

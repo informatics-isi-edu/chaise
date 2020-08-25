@@ -296,7 +296,7 @@
             }
         }
     }])
-    
+
     /**
      * This directive can be used to display an appropriate input element based on the given columnModel in a form.
      * Based on the passed values, it can be used in two different modes:
@@ -305,7 +305,7 @@
      * The mode is determined by the directive itself based on the given attributes.
      * If you pass parentModel and parentReference, it will assume that you want the form mode, otherwise it will be in standalone mode.
      * The only noticable difference is just how the scope.model value works (especially in the case of foreignkey inputs).
-     * In standalone mode, 
+     * In standalone mode,
      *  - the initial value of scope.model for foreignkeys is ignored.
      *  - the value of scope.model for foreignkeys is a "tuple" (instead of rowname).
      *  - since we don't have access to the parentModel, there must be a translation layer to properly set the value of foreignkey columns.
@@ -322,6 +322,8 @@
                 columnModel: '=',
                 model: "=",
                 mode: "@",
+                parentLogStack: "=?",
+                parentLogStackPath: "=?",
                 inputContainer: "=?",
                 formContainer: "=?",
                 isRequired: "=?", // we cannot derive this from the columnModel (for select-all none of the inputs are required)
@@ -465,8 +467,10 @@
                     }
 
                     // log attributes
-                    params.logStack = vm.columnModel.logStack;
-                    params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
+                    // TODO should eventually be moved outside this function and directly under link
+                    //      if we want to do more logs for other column types as well
+                    params.logStack = recordCreate.getColumnModelLogStack(vm.columnModel, vm.parentLogStack);
+                    params.logStackPath = logService.getStackPath(vm.parentLogStackPath, logService.logStackPaths.FOREIGN_KEY_POPUP);
 
                     modalUtils.showModal({
                         animation: false,
