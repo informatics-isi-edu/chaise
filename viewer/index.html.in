@@ -62,11 +62,11 @@
             <div class="bottom-panel-container" id="viewer-content">
                 <div class="side-panel-resizable" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
                     <div class="side-panel-container">
-                        <div class='annotation-list-container facet-panel'>
+                        <div class='annotation-list-container'>
                             <div class='strokeScale'>
                                 <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
                                 <div class='slider'>
-                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
+                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()" ng-mousedown="anno.changeStrokeScaleStart()" ng-mouseup="anno.changeStrokeScaleStop()">
                                 </div>
                                 <div class='sliderTicks'>
                                     <span class='currentScale'>1</span>

@@ -2458,6 +2458,7 @@
             // VIEWER_ZOOM_IN_MOUSE: "mouse" + clientPathActionSeparator + "zoom-in",
             // VIEWER_ZOOM_OUT_MOUSE: "mouse" + clientPathActionSeparator + "zoom-out",
 
+            VIEWER_ANNOT_LINE_THICKNESS: "line-thickness" + clientPathActionSeparator + "adjust",
             VIEWER_ANNOT_DISPLAY_ALL: clientPathActionSeparator + "display-all",
             VIEWER_ANNOT_DISPLAY_NONE: clientPathActionSeparator + "display-none",
             VIEWER_ANNOT_SHOW: clientPathActionSeparator + "show",

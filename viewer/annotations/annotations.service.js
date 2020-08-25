@@ -15,14 +15,14 @@
          * @param {String} action - the actions string
          * @param {Object=}
          */
-        function logAnnotationClientAction(action, item) {
+        function logAnnotationClientAction(action, item, extraInfo) {
             var commonLogInfo = null;
             if ($rootScope.annotationEditReference) {
                 commonLogInfo = $rootScope.annotationEditReference.defaultLogInfo;
             }
             logService.logClientAction({
                 action: getAnnotationLogAction(action, item),
-                stack: getAnnotationLogStack(item)
+                stack: getAnnotationLogStack(item, extraInfo)
             }, commonLogInfo);
         }
 

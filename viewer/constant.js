@@ -2,7 +2,7 @@
     'use strict';
 
     angular.module('chaise.viewer')
-    
+
     /**
      * TODO eventually this should be moved to a more configurable location,
      * either a standalone js file like chaise-config, or as part of the chaise-config file.
@@ -14,9 +14,14 @@
             DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z" // the default value of the zindex in the form TODO
         },
         annotation: {
+            // how much should we wait for user action and then log
+            SEARCH_LOG_TIMEOUT: 500,
+            LINE_THICKNESS_LOG_TIMEOUT: 1000,
+
+
             // how many annotations at a time should we read from database
             PAGE_COUNT: 25,
-            
+
             // annotation table
             ANNOTATION_TABLE_NAME: "Image_Annotation",
             ANNOTATION_TABLE_SCHEMA_NAME: "Gene_Expression",

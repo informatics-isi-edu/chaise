@@ -70,6 +70,8 @@
         vm.addNewTerm = addNewTerm;
         vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
         vm.changeStrokeScale = changeStrokeScale;
+        vm.changeStrokeScaleStart = changeStrokeScaleStart;
+        vm.changeStrokeScaleStop = changeStrokeScaleStop;
         vm.changeSelectingAnnotation = changeSelectingAnnotation;
         vm.clearSearch = clearSearch;
         vm.closeAnnotationForm = closeAnnotationForm;
@@ -288,9 +290,18 @@
 
         // Scroll a DOM element into visible part of the browser
         function scrollIntoView(elementId) {
-            // Using native JS b/c angular.element returns a jQuery/jqLite object,
-            // which is incompatible with .scrollIntoView()
-            document.getElementById(elementId).scrollIntoView({block: 'start', behavior: 'smooth'});
+            var container = angular.element(document.getElementsByClassName('annotation-list-container')[0]);
+            var el = angular.element(document.getElementById(elementId));
+
+            // the elements might not be available
+            if (el.length === 0 || container.length === 0) return;
+
+            container.scrollToElementAnimated(el, 5).then(function () {
+                // we're not doing anything after the scroll is done
+            }).catch(function(err) {
+                //it will be rejected only if scroll is cancelled
+                //we don't need to handle the rejection, so we can fail silently.
+            });
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
@@ -502,6 +513,38 @@
             }
         }
 
+
+        // log the stroke change:
+        var strokeScalePromise = null, oldStrokeScale = null;
+        function changeStrokeScaleStart() {
+            // cancel any existing timeout
+            if (strokeScalePromise) {
+                $timeout.cancel(strokeScalePromise);
+            }
+            // save the starting value
+            else {
+                oldStrokeScale = vm.strokeScale;
+            }
+        }
+        function changeStrokeScaleStop() {
+            // set a timer to log the action
+            strokeScalePromise = $timeout(function() {
+                if (oldStrokeScale != vm.strokeScale) {
+                    AnnotationsService.logAnnotationClientAction(
+                        logService.logActions.VIEWER_ANNOT_LINE_THICKNESS,
+                        null,
+                        {
+                            old_value: oldStrokeScale,
+                            new_value: vm.strokeScale
+                        }
+                    );
+                }
+
+                oldStrokeScale = null;
+                strokeScalePromise = null;
+            }, annotConstant.LINE_THICKNESS_LOG_TIMEOUT);
+        }
+
         // Notify openseadragon to change stroke width
         function changeStrokeScale(){
             AnnotationsService.changeStrokeScale(vm.strokeScale);
@@ -620,6 +663,9 @@
         function clearSearch(){
             vm.searchKeyword = "";
             updateDisplayNum();
+
+            // log the client action
+            AnnotationsService.logAnnotationClientAction(logService.logActions.SEARCH_BOX_CLEAR);
         }
 
         /**
@@ -940,8 +986,28 @@
         }
 
         // Search based on the keyword
+        var searchPromise = null;
         function search(){
             vm.updateDisplayNum();
+
+            // if a log promise is already fired, remove it
+            if (searchPromise) {
+                $timeout.cancel(searchPromise);
+            }
+
+            // create a timeout to log the search
+            searchPromise = $timeout(function () {
+                if (vm.searchKeyword) {
+                    AnnotationsService.logAnnotationClientAction(
+                        logService.logActions.SEARCH_BOX_AUTO,
+                        null,
+                        {
+                            search_str: vm.searchKeyword
+                        }
+                    );
+                }
+                searchPromise = null;
+            }, annotConstant.SEARCH_LOG_TIMEOUT);
         }
 
         /**
