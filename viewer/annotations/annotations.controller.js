@@ -421,6 +421,12 @@
                         row.reference.table,
                         row.reference.filterLogInfo
                     );
+                } else {
+                    obj.logStackNode = logService.getStackNode(
+                        logService.logStackTypes.ANNOTATION,
+                        null,
+                        {"file": 1}
+                    );
                 }
 
                 vm.annotationModels.push(obj);
@@ -534,8 +540,8 @@
                         logService.logActions.VIEWER_ANNOT_LINE_THICKNESS,
                         null,
                         {
-                            old_value: oldStrokeScale,
-                            new_value: vm.strokeScale
+                            old_thickness: oldStrokeScale,
+                            new_thickness: vm.strokeScale
                         }
                     );
                 }
@@ -1086,6 +1092,7 @@
             // TODO why pass vm??
             // TODO the last element is logObject, should be changed later...
             recordCreate.addRecords(isUpdate, null, formModel, false, formModel.reference, [originalTuple], {}, vm, function (formModel, result) {
+                formModel.submissionButtonDisabled = true;
 
                 var afterMutation = function (tuple) {
 
@@ -1117,6 +1124,7 @@
 
                     vm.updateDisplayNum();
                     vm.closeAnnotationForm();
+                    formModel.submissionButtonDisabled = false;
 
                     AlertsService.addAlert("Your data has been saved.", "success");
                 };

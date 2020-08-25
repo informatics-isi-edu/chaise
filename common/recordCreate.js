@@ -522,17 +522,31 @@
                 inputType: type,
                 highlightRow: false,
                 showSelectAll: false,
-                logStackNode: stackNode,
-                logStackPathChild: stackPath
+                logStackNode: stackNode, // should not be used directly, take a look at getColumnModelLogStack
+                logStackPathChild: stackPath // should not be used directly, use getColumnModelLogAction getting the action string
             };
         }
 
-        function getColumnModelLogStack(colModel, parentLogStack) {
-            return logService.getStackObject(colModel.logStackNode, parentLogStack);
+        /**
+         * Given a columnModel and the parent model that it belongs to, return the log stack that should be used.
+         * NOTES:
+         *   - The parentModel might have a logStack object that is different from $rootScope,
+         *     so this function will merge the columnModel.logStackNode with its parent object.
+         *   - In some cases (currently viewer annotation form), the logStack that is present on the
+         *     parentModel might change, so we cannot create the whole stack while creating the columnModel.
+         *     So while creating columnModel I'm just creating the node and on run time the parentLogStack will be added.
+         *
+         */
+        function getColumnModelLogStack(colModel, parentModel) {
+            return logService.getStackObject(colModel.logStackNode, parentModel ? parentModel.logStack : null);
         }
 
-        function getColumnModelLogAction(colModel, action, parentLogStackPath) {
-            var logStackPath = logService.getStackPath(parentLogStackPath, colModel.logStackPathChild);
+        /**
+         * Given a columnModel and the parent model that is belogns to, returns the action string that should be used.
+         * Take a look at the Notes on getColumnModelLogStack function for more info
+         */
+        function getColumnModelLogAction(action, colModel, parentModel) {
+            var logStackPath = logService.getStackPath(parentModel ? parentModel.logStackPath : null, colModel.logStackPathChild);
             return logService.getActionString(action, logStackPath);
         }
 
@@ -740,11 +754,11 @@
                                 // populate the log object
                                 logObj = {
                                     action: getColumnModelLogAction(
-                                        colModel,
                                         logService.logActions.FOREIGN_KEY_PRESELECT,
-                                        model.logStackPath
+                                        colModel,
+                                        model
                                     ),
-                                    stack: getColumnModelLogStack(colModel, model.logStack)
+                                    stack: getColumnModelLogStack(colModel, model)
                                 };
 
                                 // get the actual foreign key data
@@ -757,11 +771,11 @@
                                 // populate the log object
                                 logObj = {
                                     action: getColumnModelLogAction(
-                                        colModel,
                                         logService.logActions.FOREIGN_KEY_DEFAULT,
-                                        model.logStackPath
+                                        colModel,
+                                        model
                                     ),
-                                    stack: getColumnModelLogStack(colModel, model.logStack)
+                                    stack: getColumnModelLogStack(colModel, model)
                                 };
 
                                 // get the actual foreign key data

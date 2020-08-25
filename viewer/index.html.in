@@ -130,7 +130,7 @@
                                                           parent-model="anno.annotationEditForm" model="anno.annotationEditForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="edit" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
                                                           on-search-popup-value-change="anno.onSearchPopupValueChange" search-popup-get-disabled-tuples="anno.getAnnotatedTermDisabledTuples"
-                                                          is-required="columnModel.isRequired"  parent-log-stack="anno.annotationEditForm.logStack" parent-log-stack-path="anno.annotationEditForm.logStackPath"></input-switch>
+                                                          is-required="columnModel.isRequired"></input-switch>
                                         </div>
                                     </div>
                                 </div>
@@ -148,7 +148,7 @@
                                                           parent-model="anno.annotationCreateForm" model="anno.annotationCreateForm.rows[0][columnModel.column.name]"
                                                           column-index="columnIndex" mode="create" form-container="anno.annoForm" input-container="anno.annoForm.row[0][columnModel.column.name]"
                                                           on-search-popup-value-change="anno.onSearchPopupValueChange" search-popup-get-disabled-tuples="anno.getAnnotatedTermDisabledTuples"
-                                                          is-required="columnModel.isRequired" parent-log-stack="anno.annotationCreateForm.logStack" parent-log-stack-path="anno.annotationCreateForm.logStackPath"></input-switch>
+                                                          is-required="columnModel.isRequired"></input-switch>
                                         </div>
                                     </div>
                                 </div>

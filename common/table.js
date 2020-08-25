@@ -53,6 +53,7 @@
      *        config,       // set of config to disable or enable features
      *        logStack,     // (required) used to capture the stack related to this table.
      *        logStackPath, // (required) used to capture the stack-path related to this table.
+     *        logAppMode,  // (optional) if defined, will be used instead of the default app mode.
      *        logObject (optional) // used only on the first request of main entity read.
      *       }
      *      available config options:

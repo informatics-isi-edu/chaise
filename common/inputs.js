@@ -322,8 +322,6 @@
                 columnModel: '=',
                 model: "=",
                 mode: "@",
-                parentLogStack: "=?",
-                parentLogStackPath: "=?",
                 inputContainer: "=?",
                 formContainer: "=?",
                 isRequired: "=?", // we cannot derive this from the columnModel (for select-all none of the inputs are required)
@@ -361,6 +359,8 @@
                 vm.hasParentModel = false;
                 if (typeof vm.parentModel === "object" && typeof vm.parentReference === "object") {
                     vm.hasParentModel = true;
+                    vm.parentLogStack = vm.parentModel.logStack;
+                    vm.parentLogStackPath = vm.parentModel.parentLogStackPath;
                 }
 
                 vm.customErrorMessage = null;
@@ -469,7 +469,7 @@
                     // log attributes
                     // TODO should eventually be moved outside this function and directly under link
                     //      if we want to do more logs for other column types as well
-                    params.logStack = recordCreate.getColumnModelLogStack(vm.columnModel, vm.parentLogStack);
+                    params.logStack = recordCreate.getColumnModelLogStack(vm.columnModel, vm.parentModel);
                     params.logStackPath = logService.getStackPath(vm.parentLogStackPath, logService.logStackPaths.FOREIGN_KEY_POPUP);
 
                     modalUtils.showModal({

@@ -235,7 +235,7 @@
          * @desc
          * Converts a chaise URI to an ermrest resource URI object or string.
          * @returns {string|Object}
-         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', `paction`, and `isQueryParameter`
          * otherwise it will return the ermrest uri string.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
@@ -2596,6 +2596,7 @@
          * Returns the appropriate stack object that should be used.
          * If childStackElement passed, it will append it to the existing logStack of the app.
          * @param {Object} childStackElement
+         * @param {Object=} logStack if passed, will be used instead of the default value of the app.
          */
         function getStackObject(childStackNode, logStack) {
             if (!logStack) {
@@ -2622,7 +2623,7 @@
         /**
          * Creates a new stack node given the type, table, and extra information.
          * @param {String} type - one of the logStackTypes
-         * @param {ERMrest.Table} table - the table object of this node
+         * @param {ERMrest.Table=} table - the table object of this node
          * @param {Object=} extraInfo - if you want to attach more info to this node.
          */
         function getStackNode(type, table, extraInfo) {

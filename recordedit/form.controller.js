@@ -588,7 +588,7 @@
 
             var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
             logService.logClientAction({
-                action: recordCreate.getColumnModelLogAction(model, action),
+                action: recordCreate.getColumnModelLogAction(action, model),
                 stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
@@ -653,7 +653,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: recordCreate.getColumnModelLogAction(model, logService.logActions.SET_ALL_CANCEL),
+                action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_CANCEL, model),
                 stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
@@ -752,7 +752,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: recordCreate.getColumnModelLogAction(model, logService.logActions.SET_ALL_APPLY),
+                action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_APPLY, model),
                 stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
@@ -764,7 +764,7 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: recordCreate.getColumnModelLogAction(model, logService.logActions.SET_ALL_CLEAR),
+                action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_CLEAR, model),
                 stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
