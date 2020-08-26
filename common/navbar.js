@@ -285,22 +285,17 @@
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
                     scope.showRidSearch = function () {
-                        return chaiseConfig.resolverImplicitCatalog !== null && chaiseConfig.hideSearchRID !== true
+                        return chaiseConfig.resolverImplicitCatalog !== null && chaiseConfig.hideGoToRID !== true
                     }
 
                     // RID search turned off in the cases of:
                     //  - resolverImplicitCatalog == null
-                    //  - OR hideSearchRID == true
+                    //  - OR hideGoToRID == true
                     //
                     // The following cases need to be handled for the resolverImplicitCatalog value:
-                    //  - if catalogId is defined:
-                    //    - if resolverImplicitCatalog === null:        turn off config
-                    //    - if resolverImplicitCatalog === catalogId:   /id/RID
-                    //    - otherwise:                                  /id/catalogId/RID
-                    //  - else:
-                    //    - if resolverImplicitCatalog === null:        turn off config
-                    //    - if resolverImplicitCatalog is Not a Number: /id/RID
-                    //    - otherwise:                                  /id/resolverImplicitCatalog/RID
+                    //  - if resolverImplicitCatalog === null:        turn off config
+                    //  - if resolverImplicitCatalog === catalogId:   /id/RID
+                    //  - otherwise:                                  /id/catalogId/RID
                     scope.ridSearch = function () {
                         var resolverId = chaiseConfig.resolverImplicitCatalog,
                             url = "/id/", catId, splitId;
@@ -309,20 +304,11 @@
                             splitId = UriUtils.splitVersionFromCatalog(catalogId);
 
                             // use `/id/catalog/ridSearchTerm` format if:
-                            //   - resolver id is a different catalog id than current page
                             //   - resolver id is NaN and !null
-                            if (isNaN(resolverId) || resolverId !== catalogId) {
+                            //   - resolver id is a different catalog id than current page
+                            if (isNaN(resolverId) || resolverId != catalogId) {
                                 url += splitId.catalog + "/"
                             }
-                        } else {
-                            // we don't have a catalog id, check if reolverId is a number and use as catalog id
-                            // basically catalogId !== resolverId for this case
-                            // use `/id/catalog/ridSearchTerm` format if:
-                            //   - resolver id is a number
-                            if (!isNaN(resolverId)) {
-                                url += resolverId + "/"
-                            }
-
                         }
 
                         url += scope.ridSearchTerm;
@@ -331,7 +317,7 @@
 
                         logService.logClientAction({
                             action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
-                            term: scope.ridSearchTerm
+                            rid: scope.ridSearchTerm
                         });
 
                         $window.open(url, '_blank');

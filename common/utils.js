@@ -11,7 +11,7 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideSearchRID", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -36,7 +36,7 @@
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
           "logClientActions": true,
-          "hideSearchRID": false
+          "hideGoToRID": false
     })
 
     .constant("appTagMapping", {
@@ -2479,7 +2479,7 @@
             NAVBAR_MENU_OPEN: "navbar/menu" + clientPathActionSeparator + "open",
             NAVBAR_ACCOUNT_DROPDOWN: "navbar/account" + clientPathActionSeparator + "open",
             NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open",
-            NAVBAR_RID_SEARCH: "navbar/rid" + clientPathActionSeparator + "search"
+            NAVBAR_RID_SEARCH: "navbar/go-to-rid" + clientPathActionSeparator + "navigate"
         });
 
         var logStackTypes = Object.freeze({
