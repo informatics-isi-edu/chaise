@@ -74,6 +74,7 @@
         var ermrestUri = res.ermrestUri,
             pcid = res.pcid,
             ppid = res.ppid,
+            paction = res.paction,
             isQueryParameter = res.isQueryParameter;
 
         context.catalogID = res.catalogId;
@@ -104,6 +105,7 @@
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
+                if (paction) logObj.paction = paction;
                 if (isQueryParameter) logObj.cqp = 1;
 
 

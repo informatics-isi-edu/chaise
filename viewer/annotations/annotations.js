@@ -3,7 +3,7 @@
     'use strict';
 
     angular.module('chaise.viewer')
-    
+
     // TODO not used
     .value('annotations', [])
 
@@ -25,9 +25,12 @@
      *  - tuple
      */
     .value('annotationModels', [])
-    
+
     // NOTE: if we change the recordedit vm model object, we should update this one as well.
     .value('annotationCreateForm', {
+        logStack: null,
+        logStackPath: null,
+        submissionButtonDisabled: false, //used in recordCreate to signal whether we're sending data or not
         reference: null,
         columnModels: [],
         rows: [{}], // rows of data in the form, not the table from ERMrest
@@ -38,6 +41,9 @@
 
     // NOTE: if we change the recordedit vm model object, we should update this one as well.
     .value('annotationEditForm', {
+        logStack: null,
+        logStackPath: null,
+        submissionButtonDisabled: false, //used in recordCreate to signal whether we're sending data or not
         reference: null,
         columnModels: [],
         rows: [{}], // rows of data in the form, not the table from ERMrest

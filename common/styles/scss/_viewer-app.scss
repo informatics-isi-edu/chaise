@@ -261,7 +261,7 @@
                 margin-bottom: 20px;
                 position: relative;
             }
-            
+
             .annotation-spinner {
                 #spinner {
                     top: 200px;
@@ -274,7 +274,7 @@
                 border: 1px solid #d9d9d9;
                 border-radius: 3px;
                 background: #f8f8f8;
-                
+
                 .form-spinner-overlay {
                     position: absolute;
                     top: 0;
@@ -285,7 +285,7 @@
                     opacity: 0.5;
                     z-index: 6; // higher than the clear button
                 }
-                
+
                 .form-spinner {
                     // make sure the text is visible in one line
                     #spinner {
@@ -435,6 +435,7 @@
                 position: absolute;
                 right: 5px;
                 top: 5px;
+                cursor: pointer;
             }
 
 
@@ -746,7 +747,7 @@
                     flex-direction: row;
                     align-items: center;
                 }
-                
+
                 // TODO it's called editBtn but used for all the annotation buttons
                 .editBtn{
                     text-decoration: none;
@@ -761,16 +762,16 @@
                     align-items: center;
                     border: none;
                     background: none;
-                    
+
                     // change chaise default color
                     .glyphicon-refresh {
                         color: $primary-color;
                     }
-                    
+
                     &:focus {
                         outline: none;
                     }
-                    
+
                     &:last-child{
                         margin-right: 8px;
                     }
@@ -794,13 +795,13 @@
                         background-color: transparent;
                         margin-top: 8px;
                         margin-right: 2px;
-                        
+
                         .annotation-color-item {
                             height: 100%;
                             float: left;
                         }
                     }
-                    
+
                     .anatomy {
                         flex : 1;
                         padding: 3px;
@@ -909,7 +910,7 @@
 
 // modify the chaise share citation that is displayed for annotations
 #viewer .chaise-share-citation {
-    
+
     li:not(#share-link) {
         h3.share-item-header {
             display: inline-block;
@@ -917,22 +918,22 @@
                 content: ":";
             }
         }
-        
+
         .share-item-value {
             padding-left: 0px;
         }
     }
-    
+
     h3.share-item-header {
         font-size: 1.1em;
         margin-top: 5px;
         margin-bottom: 0px;
     }
-    
+
     .share-item-value {
         padding-left: 10px;
     }
-    
+
     #share-link {
         padding-top: 10px;
     }

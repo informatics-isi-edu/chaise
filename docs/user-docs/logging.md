@@ -85,6 +85,7 @@ Depending on the request, we might log extra attributes that we are gong to list
   - `record`
   - `recordset`
   - `recordedit`
+  - `viewer`
   - `navbar`
   - `navbar/record`
   - `navbar/recordset`
@@ -92,11 +93,15 @@ Depending on the request, we might log extra attributes that we are gong to list
 
   If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
 
+- `paction`: The action in the parent page that fired the current request. Acceptable values are:
+  - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
+
 - `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:
   - Required attributes:
     - `s_t`: The end table of this node in the format of `schema:table`.
+      - As an exception, in viewer app, if an image annotation is derived from file (not database), this value will not be available on the stack object.
 
-    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related`, `related-inline`, `related-link-picker`, `fk-picker`, `facet-popup`.
+    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related` (inline or related table), `annotation` (image annotation in viewer app).
 
   - Optional attributes:
     - `filters`: The facet object using the [compressed syntax](#facet-compressed-syntax).
@@ -127,7 +132,7 @@ Depending on the request, we might log extra attributes that we are gong to list
         - `facet-search-box`: Facet search box changed.
         - `facet-plot-relayout`: Users interact with plot and we need to get new info for it.
         - `facet-retry`: Users click on retry for a facet that timed out.
-        - `page-limit`: Change page limit.
+        - `page-limit`: Change displayed number of rows per page.
         - `page-next`: Go to next page,
         - `page-prev`: Go to previous page.
         - `related-create`: New rows have been created for a related table.
@@ -148,9 +153,13 @@ Depending on the request, we might log extra attributes that we are gong to list
 
     - `num_updated`: The number of rows that have been asked to be updated in that request.
 
-    - `updated_keys`: Available only on "update" request, it will return the key columns and their submitted values. It's an object that and the `cols` attribute returns an array of key column names, while `vals` returns an array of values that corresponds to the given `cols` array (So it's an array of arrays).
+    - `updated_keys`: Available only on "update" request, will return the key columns and submitted values. It's an object that and the `cols` attribute returns an array of key column names, while `vals` returns an array of values that corresponds to the given `cols` array (So it's an array of arrays).
 
     - `template`: Used only for the "export" request and will return an object with `displayname` and `type` attributes to give more information about the used export template.
+
+    - `old_thickness`, `new_thickness`: Available only on "line thickness adjustment" client log in viewer app. It will capture the old and new value after user interacted with the UI to change the line thickness.
+
+    - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
 
     - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
@@ -166,11 +175,16 @@ As it is mentioned in the previous section, `action` is one of the required attr
 
 Where,
 
-- `app-mode` (optional) is used when for apps that have different modes. Currently only recordedit is using app-mode and the possible values are:
-  - `edit`: Edit mode of the app.
-  - `create-copy`: When users end up in this app by clicking on "copy" button in record app.
-  - `create-preselect`: When users end up in this app by clicking on "Add" button of related entities (In this case, we're preselecting the foreignkey relationship between related entity and the main).
-  - `create`: Create mode of the app that is not the other more specific versions.
+- `app-mode` (optional) is used when for apps that have different modes. The following are apps that are using this and the possible values:
+  - recordedit:
+    - `edit`: Edit mode of the app.
+    - `create-copy`: When users end up in this app by clicking on "copy" button in record app.
+    - `create-preselect`: When users end up in this app by clicking on "Add" button of related entities (In this case, we're preselecting the foreignkey relationship between related entity and the main).
+    - `create`: Create mode of the app that is not the other more specific versions.
+  - viewer:
+    - `edit`: When users are editing an annotation.
+    - `create`: When users are creating an annotation.
+    - `create-preselect`: When users click on "edit" button of an annotation that was imported from a file. In this case, technically they are going to create a new annotation record in the database and the annotated term is preselected.
 
 - `stack-path` (optional) is available only when `stack` is used and summarizes the `stack`. To distinguish between each stack nodes in this string, we're using `/`. The values used for each node are:
   - `entity`: Based on `entity` stack node `type`.
@@ -183,6 +197,8 @@ Where,
   - `facet-picker`: Used for facet picker.
   - `fk`: Based on `fk` stack node `type`.
   - `fk-picker`: Used for foreign key picker.
+  - `annotation-set`: Annotation list displayed on the viewer app.
+  - `annotation-entity`: Each individual annotation displayed in annotation list of viewer app.
 
   Based on this, `entity/related-inline` is a possible `stack-path`.
 
@@ -364,6 +380,15 @@ The following url patterns are what's unique about each of these requests and yo
 
 In recordset app, or any of the other places that use the recordset view, e.g, modal pickers, chaise will communicate with server as soon as user interacts with the page as long as we have enough flow-control slots to send the request. So there might be some requests that we generate while the user is interacting with the page that will be discarded. To find the actual request that the user sees on the page, you can use `start_ms`, and `end_ms`. All these reload requests will have these two attributes. If you join all the reload request by `start_ms`, you can find all the requests that we sent when the user started interacting at `start_ms`. So the request with the longest `end_ms` would give you the actual request that users will see on the page.
 
+#### Find number of clicks on the "view" button in recordset app
+
+Clicking on "view" button will navigate users to record page with a specific `paction` value. So you would need to find requests with the following values:
+
+- `cid=record`
+- `pcid=recordset`
+- `paction=view`
+
+If you're interested in doing this for each specific table, you can choose to do so by further filtering this with the value of `schema_table`.
 
 ## Change Log
 

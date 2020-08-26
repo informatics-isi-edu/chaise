@@ -23,7 +23,7 @@
                                 <h3 class="side-panel-heading">{{anno.editingAnatomy == null ? "Annotations" :  (anno.editingAnatomy.isNew ? "Create annotation" : "Edit annotation")}}</h3>
                             </div>
                             <div class="pull-right">
-                                <button ng-disabled="anno.annotationFormPendingResult" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
+                                <button ng-disabled="anno.annotationEditForm.submissionButtonDisabled || anno.annotationCreateForm.submissionButtonDisabled" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
                                     <span class="fas fa-arrow-left"></span>
                                     <span>Back</span>
                                 </button>
@@ -62,11 +62,11 @@
             <div class="bottom-panel-container" id="viewer-content">
                 <div class="side-panel-resizable" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
                     <div class="side-panel-container">
-                        <div class='annotation-list-container facet-panel'>
+                        <div class='annotation-list-container'>
                             <div class='strokeScale'>
                                 <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
                                 <div class='slider'>
-                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
+                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()" ng-mousedown="anno.changeStrokeScaleStart()" ng-mouseup="anno.changeStrokeScaleStop()">
                                 </div>
                                 <div class='sliderTicks'>
                                     <span class='currentScale'>1</span>
@@ -78,9 +78,9 @@
                                 </div>
                             </div>
                             <div class='annotation-form-container' ng-form="anno.annoForm" ng-if="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
-                                <div class="form-spinner-overlay" ng-if="anno.annotationFormPendingResult">
+                                <div class="form-spinner-overlay" ng-if="anno.annotationEditForm.submissionButtonDisabled || anno.annotationCreateForm.submissionButtonDisabled">
                                 </div>
-                                <loading-spinner class="form-spinner" ng-if="anno.annotationFormPendingResult" message="Saving the changes..."></loading-spinner>
+                                <loading-spinner class="form-spinner" ng-if="anno.annotationEditForm.submissionButtonDisabled || anno.annotationCreateForm.submissionButtonDisabled" message="Saving the changes..."></loading-spinner>
                                 <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowValue" ng-show="!anno.editingAnatomy.isNew && !anno.editingAnatomy.isStoredInDB">
@@ -161,7 +161,7 @@
                                                 <span>Save</span>
                                             </button>
                                         </div>
-                                        <div class='annotationRowValue' ng-disabled="anno.annotationFormPendingResult || !canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
+                                        <div class='annotationRowValue' ng-disabled="!canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
                                             <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>

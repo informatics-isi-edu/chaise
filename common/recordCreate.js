@@ -522,27 +522,45 @@
                 inputType: type,
                 highlightRow: false,
                 showSelectAll: false,
-                logStack: logService.getStackObject(stackNode),
-                logStackPath: logService.getStackPath("", stackPath)
+                logStackNode: stackNode, // should not be used directly, take a look at getColumnModelLogStack
+                logStackPathChild: stackPath // should not be used directly, use getColumnModelLogAction getting the action string
             };
         }
 
+        /**
+         * Given a columnModel and the parent model that it belongs to, return the log stack that should be used.
+         * NOTES:
+         *   - The parentModel might have a logStack object that is different from $rootScope,
+         *     so this function will merge the columnModel.logStackNode with its parent object.
+         *   - In some cases (currently viewer annotation form), the logStack that is present on the
+         *     parentModel might change, so we cannot create the whole stack while creating the columnModel.
+         *     So while creating columnModel I'm just creating the node and on run time the parentLogStack will be added.
+         *
+         */
+        function getColumnModelLogStack(colModel, parentModel) {
+            return logService.getStackObject(colModel.logStackNode, parentModel ? parentModel.logStack : null);
+        }
+
+        /**
+         * Given a columnModel and the parent model that is belogns to, returns the action string that should be used.
+         * Take a look at the Notes on getColumnModelLogStack function for more info
+         */
+        function getColumnModelLogAction(action, colModel, parentModel) {
+            var logStackPath = logService.getStackPath(parentModel ? parentModel.logStackPath : null, colModel.logStackPathChild);
+            return logService.getActionString(action, logStackPath);
+        }
 
         /**
          * In case of prefill and default we only have a reference to the foreignkey,
          * we should do extra reads to get the actual data.
          *
+         * @param  {Object} model the tableModel object
          * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
          * @param  {string[]} colNames Array of foreignkey names that can be prefilled
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
-         * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
+         * @param  {Object} logObj the object will be passed to read as contextHeaderParams
          */
-        function _getForeignKeyData (model, rowIndex, colNames, fkRef, logAction, logStack) {
-            var stackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY);
-            var logObj = {
-                action: logService.getActionString(logAction, stackPath),
-                stack: logStack
-            };
+        function _getForeignKeyData (model, rowIndex, colNames, fkRef, logObj) {
             fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
                     // default value is validated
@@ -596,13 +614,19 @@
                         break;
                     }
                 }
+
+                // create proper logObject
                 var stackNode = logService.getStackNode(
                     logService.logStackTypes.FOREIGN_KEY,
                     ref.table,
                     {source: source, entity: true}
                 );
-                var logStack = logService.getStackObject(stackNode);
-                _getForeignKeyData(model, newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT, logStack);
+                var logStackPath = logService.getStackPath(model.logStackPath, logService.logStackPaths.FOREIGN_KEY);
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.FOREIGN_KEY_PRESELECT, logStackPath),
+                    stack: logService.getStackObject(stackNode, model.logStack)
+                }
+                _getForeignKeyData(model, newRow, fkColumnNames, ref, logObj);
             }).catch(function (err) {
                 fkColumnNames.forEach(function (cn) {
                     $rootScope.showColumnSpinner[newRow][cn] = false;
@@ -716,7 +740,7 @@
                             });
 
                             if (allPrefilled || allInitialized) {
-                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues);
+                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues), logObj;
 
                                 if (allPrefilled) {
                                     colModel.isDisabled = true;
@@ -726,14 +750,36 @@
                                 initialModelValue = defaultDisplay.rowname.value;
                                 // initialize foreignKey data
                                 model.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.values;
+
+                                // populate the log object
+                                logObj = {
+                                    action: getColumnModelLogAction(
+                                        logService.logActions.FOREIGN_KEY_PRESELECT,
+                                        colModel,
+                                        model
+                                    ),
+                                    stack: getColumnModelLogStack(colModel, model)
+                                };
+
                                 // get the actual foreign key data
-                                _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT, colModel.logStack);
+                                _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logObj);
                             } else if (defaultValue != null) {
                                 initialModelValue = defaultValue;
                                 // initialize foreignKey data
                                 model.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+
+                                // populate the log object
+                                logObj = {
+                                    action: getColumnModelLogAction(
+                                        logService.logActions.FOREIGN_KEY_DEFAULT,
+                                        colModel,
+                                        model
+                                    ),
+                                    stack: getColumnModelLogStack(colModel, model)
+                                };
+
                                 // get the actual foreign key data
-                                _getForeignKeyData(model, 0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT, colModel.logStack);
+                                _getForeignKeyData(model, 0, [column.name], column.defaultReference, logObj);
                             }
                         } else {
                             // all other column types
@@ -923,6 +969,8 @@
             addRelatedRecordFact: addRelatedRecordFact,
             addRecords: addRecords,
             columnToColumnModel: columnToColumnModel,
+            getColumnModelLogStack: getColumnModelLogStack,
+            getColumnModelLogAction: getColumnModelLogAction,
             populateCreateModelValues: populateCreateModelValues,
             populateEditModelValues: populateEditModelValues,
             populateSubmissionRow: populateSubmissionRow
