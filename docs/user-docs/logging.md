@@ -160,6 +160,8 @@ Depending on the request, we might log extra attributes that we are gong to list
     - `old_thickness`, `new_thickness`: Available only on "line thickness adjustment" client log in viewer app. It will capture the old and new value after user interacted with the UI to change the line thickness.
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
+    
+    - `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
 
     - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
@@ -391,6 +393,20 @@ Clicking on "view" button will navigate users to record page with a specific `pa
 If you're interested in doing this for each specific table, you can choose to do so by further filtering this with the value of `schema_table`.
 
 ## Change Log
+
+### 08/26/20
+
+###### Commit/PR Links
+  - [chaise (viewer changes)](https://github.com/informatics-isi-edu/chaise/pull/2001)
+  - [chaise (go to RID changes)](https://github.com/informatics-isi-edu/chaise/pull/2000)
+  
+###### Changed
+  - Changed the initial load requests of viewer app to be aligned with the rest of the apps.
+  
+###### Added
+  - Added proper log support to viewer app. This includes properly logging the requests that viewer app was already making and adding client logs. Please refer to the PR and documentation for more information.
+  
+  - Added client log action for "go to RID" feature.
 
 ### 02/12/20
 
