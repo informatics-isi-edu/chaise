@@ -1043,7 +1043,7 @@
 
             /**
              * This will create checkbox rows for already applied filters.
-             * It will also make sure that not-null and null fitlers are the first two choices.
+             * It will also make sure that not-null and null filters are the first two choices.
              *
              * NOTE this will be called everytime that we are updating the facet column.
              * The updateFacetColumn is calling this function.

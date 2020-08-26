@@ -126,7 +126,7 @@
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
-            showMore: "Click to show more available fitlers",
+            showMore: "Click to show more available filters",
             showDetails: "Click to show more details about the filters"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
