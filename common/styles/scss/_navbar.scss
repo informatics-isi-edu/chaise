@@ -121,6 +121,22 @@ body > .container {
     border-radius: 6px 0 6px 6px;
 }
 
+// positioning of searh box in navbar
+.rid-search {
+    .chaise-search-box {
+        padding: 13px;
+    }
+
+    .chaise-input-control-sm {
+        width: 100px;
+        border-radius: 4px 0px 0px 4px;
+    }
+}
+
+#rid-search-input {
+    background-color: $table-striped-background-color;
+}
+
 #mainnav {
     border-radius: 0;
 }
