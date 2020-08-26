@@ -37,10 +37,9 @@ body > .container {
 }
 
 #live-btn {
-    margin-right: 10px;
+    margin-right: 0px; // offset marging-right: -15px from navbar-right
     color: #59C4FF;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding: 15px;
 }
 
 .navbar-inverse .navbar-nav.navbar-right > li > a:hover{
@@ -123,12 +122,15 @@ body > .container {
 
 // positioning of searh box in navbar
 .rid-search {
+    margin-right: 0px; // offset marging-right: -15px from navbar-right
+
     .chaise-search-box {
-        padding: 13px;
+        padding: 13px 15px;
     }
 
     .chaise-input-control-sm {
         width: 100px;
+        border-color: $black-color;
         border-radius: 4px 0px 0px 4px;
     }
 }
