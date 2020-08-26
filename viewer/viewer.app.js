@@ -149,7 +149,7 @@
         var config = ConfigUtils.getContextJSON();
         var annotConstant = viewerConstant.annotation;
         var imageConstant = viewerConstant.image;
-        
+
         // TODO are these needed?
         context.server = config.server;
         context.wid = config.contextHeaderParams.wid;
@@ -230,7 +230,7 @@
                     )
                 ];
                 $rootScope.logAppMode = null;
-                    
+
                 var logObj = {
                     action: logService.getActionString(logService.logActions.LOAD),
                     stack: logService.getStackObject()

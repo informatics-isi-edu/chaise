@@ -98,7 +98,9 @@
                         AnnotationsService.loadAnnotations($rootScope.annotationURLs);
                         break;
                     case 'annotationsLoaded':
-                        $rootScope.loadingAnnotations = false;
+                        $scope.$apply(function(){
+                            $rootScope.loadingAnnotations = false;
+                        });
                         break;
                     case 'annotationDrawn':
                         vm.newAnnotation.shape = data.content.shape;
@@ -146,10 +148,12 @@
                     case "saveGroupSVGContent":
                         $scope.$apply(function(){
                             vm.saveAnatomySVGFile(data);
-                        })
+                        });
                         break;
                     case 'disableAnnotationSidebar':
-                        $rootScope.disableAnnotationSidebar = (data === true);
+                        $scope.$apply(function(){
+                            $rootScope.disableAnnotationSidebar = (data.content === true);
+                        });
                         break;
                     case 'errorAnnotation':
                         AlertsService.addAlert("Couldn't parse the given annotation.", "warning");

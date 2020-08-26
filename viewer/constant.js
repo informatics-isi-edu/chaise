@@ -15,7 +15,7 @@
         },
         annotation: {
             // how much should we wait for user action and then log
-            SEARCH_LOG_TIMEOUT: 500,
+            SEARCH_LOG_TIMEOUT: 2000,
             LINE_THICKNESS_LOG_TIMEOUT: 1000,
 
 
