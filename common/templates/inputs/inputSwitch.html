@@ -15,38 +15,30 @@
 
     <!-- timestamp[tz] input -->
     <div ng-switch-when="timestamp">
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="chaise-input-group">
-                    <span class="chaise-input-group-prepend">
-                        <div class="chaise-input-group-text dt-width">Date</div>
-                    </span>
-                    <div class="chaise-input-control has-feedback">
-                        <input class="input-timestamptz" type="text" ng-model="vm.model.date" placeholder="{{vm.dataFormats.placeholder.date}}" name="{{::vm.column.name}}" ui-mask="{{vm.maskOptions.date.mask}}" ui-options="vm.maskOptions.date.options" model-view-value="true" date timestamp validate-values="vm.model">
-                        <chaise-clear-input btn-class="ts-date-remove" click-callback="::vm.clearDate()" show="vm.showDateRemove()"></chaise-clear-input>
-                    </div>
-                </div>
+        <div class="chaise-input-group">
+            <span class="chaise-input-group-prepend">
+                <div class="chaise-input-group-text dt-width">Date</div>
+            </span>
+            <div class="chaise-input-control has-feedback">
+                <input class="input-timestamptz" type="text" ng-model="vm.model.date" placeholder="{{vm.dataFormats.placeholder.date}}" name="{{::vm.column.name}}" ui-mask="{{vm.maskOptions.date.mask}}" ui-options="vm.maskOptions.date.options" model-view-value="true" date timestamp validate-values="vm.model">
+                <chaise-clear-input btn-class="ts-date-remove" click-callback="::vm.clearDate()" show="vm.showDateRemove()"></chaise-clear-input>
             </div>
-            <div class="col-xs-12">
-                <div class="chaise-input-group">
-                    <span class="chaise-input-group-prepend">
-                        <div class="chaise-input-group-text dt-width">Time</div>
-                    </span>
-                    <div class="chaise-input-control has-feedback">
-                        <input type="text" ng-model="vm.model.time" placeholder="{{vm.dataFormats.placeholder.time}}" name="{{::vm.column.name}}" model-view-value="true" ng-required="vm.isRequired" time timestamp validate-values="vm.model">
-                        <chaise-clear-input btn-class="ts-time-remove" click-callback="::vm.clearTime()" show="vm.showTimeRemove()"></chaise-clear-input>
-                    </div>
-                    <span class="chaise-input-group-append">
-                        <button class="chaise-btn chaise-btn-secondary" name="{{::vm.column.name}}" type="button" ng-click="::vm.toggleMeridiem();" ng-bind="vm.model.meridiem || 'AM'">AM</button>
-                    </span>
-                </div>
+        </div>
+        <div class="chaise-input-group">
+            <span class="chaise-input-group-prepend">
+                <div class="chaise-input-group-text dt-width">Time</div>
+            </span>
+            <div class="chaise-input-control has-feedback">
+                <input type="text" ng-model="vm.model.time" placeholder="{{vm.dataFormats.placeholder.time}}" name="{{::vm.column.name}}" model-view-value="true" ng-required="vm.isRequired" time timestamp validate-values="vm.model">
+                <chaise-clear-input btn-class="ts-time-remove" click-callback="::vm.clearTime()" show="vm.showTimeRemove()"></chaise-clear-input>
             </div>
-            <div class="col-xs-12">
-                <div class="chaise-btn-group pull-right" role="group">
-                    <button type="button" name="{{::vm.column.name}}-now" class="chaise-btn chaise-btn-secondary" ng-click="::vm.applyCurrentDatetime();">Now</button>
-                    <button type="button" name="{{::vm.column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::vm.clearDatetime();">Clear</button>
-                </div>
-            </div>
+            <span class="chaise-input-group-append">
+                <button class="chaise-btn chaise-btn-secondary" name="{{::vm.column.name}}" type="button" ng-click="::vm.toggleMeridiem();" ng-bind="vm.model.meridiem || 'AM'">AM</button>
+            </span>
+        </div>
+        <div class="chaise-btn-group pull-right" role="group">
+            <button type="button" name="{{::vm.column.name}}-now" class="chaise-btn chaise-btn-secondary" ng-click="::vm.applyCurrentDatetime();">Now</button>
+            <button type="button" name="{{::vm.column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::vm.clearDatetime();">Clear</button>
         </div>
     </div>
 
