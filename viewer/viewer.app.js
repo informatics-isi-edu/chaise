@@ -150,6 +150,7 @@
         var annotConstant = viewerConstant.annotation;
         var imageConstant = viewerConstant.image;
 
+        // TODO are these needed?
         context.server = config.server;
         context.wid = config.contextHeaderParams.wid;
         context.cid = config.contextHeaderParams.cid;
@@ -159,8 +160,8 @@
 
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
         var ermrestUri = res.ermrestUri,
-            pcid = config.contextHeaderParams.cid,
-            ppid = config.contextHeaderParams.pid,
+            pcid = res.cid,
+            ppid = res.pid,
             isQueryParameter = res.isQueryParameter,
             queryParamsString = res.queryParamsString,
             queryParams = res.queryParams;
@@ -171,7 +172,7 @@
 
         FunctionUtils.registerErmrestCallbacks();
 
-        var session, annotationEditReference;
+        var session;
         var osdViewerQueryParams = queryParamsString, // what will be passed onto osd viewer
             hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
             hasImageQueryParam = false, // if there is an image in query, we should just use it and shouldn't use the image uri from db
@@ -218,10 +219,7 @@
                 // TODO is it needed?
                 $rootScope.session = session;
 
-                var logObj = {};
-                if (pcid) logObj.pcid = pcid;
-                if (ppid) logObj.ppid = ppid;
-                if (isQueryParameter) logObj.cqp = 1;
+                $rootScope.reference = imageReference;
 
                 $rootScope.logStackPath = logService.logStackPaths.ENTITY;
                 $rootScope.logStack = [
@@ -231,7 +229,15 @@
                         imageReference.filterLogInfo
                     )
                 ];
+                $rootScope.logAppMode = null;
 
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.LOAD),
+                    stack: logService.getStackObject()
+                };
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                if (isQueryParameter) logObj.cqp = 1;
                 return imageReference.contextualize.detailed.read(1, logObj, true, true);
             })
             // read the main (image) reference

@@ -27,6 +27,16 @@
             <login> will be pulled right first, then versioned data pulled right next to it (on the left) -->
             <login></login>
             <a ng-if="isVersioned()" id="live-btn" class="nav navbar-nav navbar-right" ng-click="::toLive()" uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom">View Live Data</a>
+            <span ng-show="showRidSearch()" class="nav navbar-nav navbar-right rid-search">
+                <div class="chaise-search-box chaise-input-group">
+                    <input id="rid-search-input" class="chaise-input-control chaise-input-control-sm has-feedback" type="text" ng-model="ridSearchTerm" on-enter="::ridSearch()" placeholder="Go to RID"></input>
+                    <div class="chaise-input-group-append">
+                        <button class="chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary" ng-click="::ridSearch()" role="button">
+                            <span class="glyphicon glyphicon-share-alt"></span>
+                        </button>
+                    </div>
+                </div>
+            </span>
         </div><!--/.nav-collapse -->
     </nav>
 </header>

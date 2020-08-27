@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
+    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', 'logService', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, logService, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -75,7 +75,7 @@
         });
 
         function downloadView() {
-            var filename = vm.image.entity.slide_id;
+            var filename = context.imageID;
             if (!filename) {
                 filename = 'image';
             }
@@ -86,18 +86,42 @@
 
             vm.waitingForScreenshot = true;
             iframe.postMessage(obj, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_SCREENSHOT, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function zoomInView() {
             iframe.postMessage({messageType: 'zoomInView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_IN, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function zoomOutView() {
             iframe.postMessage({messageType: 'zoomOutView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_OUT, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function homeView() {
             iframe.postMessage({messageType: 'homeView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_RESET, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function toggleAnnotations() {
@@ -125,7 +149,15 @@
                 sidebarptr.css("display","none");
             }
             // iframe.postMessage({messageType: 'openAnnotations'}, origin);
+
+            var action = $rootScope.hideAnnotationSidebar ? logService.logActions.VIEWER_ANNOT_PANEL_SHOW : logService.logActions.VIEWER_ANNOT_PANEL_HIDE;
             $rootScope.hideAnnotationSidebar = !$rootScope.hideAnnotationSidebar;
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(action, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function covered() {
@@ -149,8 +181,18 @@
             //   if(covered())
                 //   sidebarptr.css("display","none");
             // }
+
+            var action = vm.filterChannelsAreHidden ? logService.logActions.VIEWER_CHANNEL_HIDE : logService.logActions.VIEWER_CHANNEL_SHOW;
+
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+
+            // log the click
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(action, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function testSafari() {

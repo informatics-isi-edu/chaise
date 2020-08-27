@@ -65,12 +65,13 @@
         vm.onSearchPopupValueChange = onSearchPopupValueChange; // if anatomy changed, we should do some updates
         vm.getAnnotatedTermDisabledTuples = getAnnotatedTermDisabledTuples; // disable the existing anatomy, in the popup
         vm.displayDrawingRequiredError = false;
-        vm.annotationFormPendingResult = false;
         vm.shareAnnotation = shareAnnotation;
 
         vm.addNewTerm = addNewTerm;
         vm.changeAllAnnotationsVisibility = changeAllAnnotationsVisibility;
         vm.changeStrokeScale = changeStrokeScale;
+        vm.changeStrokeScaleStart = changeStrokeScaleStart;
+        vm.changeStrokeScaleStop = changeStrokeScaleStop;
         vm.changeSelectingAnnotation = changeSelectingAnnotation;
         vm.clearSearch = clearSearch;
         vm.closeAnnotationForm = closeAnnotationForm;
@@ -97,7 +98,9 @@
                         AnnotationsService.loadAnnotations($rootScope.annotationURLs);
                         break;
                     case 'annotationsLoaded':
-                        $rootScope.loadingAnnotations = false;
+                        $scope.$apply(function(){
+                            $rootScope.loadingAnnotations = false;
+                        });
                         break;
                     case 'annotationDrawn':
                         vm.newAnnotation.shape = data.content.shape;
@@ -144,12 +147,13 @@
                         break;
                     case "saveGroupSVGContent":
                         $scope.$apply(function(){
-                            console.log("save svg files");
                             vm.saveAnatomySVGFile(data);
-                        })
+                        });
                         break;
                     case 'disableAnnotationSidebar':
-                        $rootScope.disableAnnotationSidebar = (data === true);
+                        $scope.$apply(function(){
+                            $rootScope.disableAnnotationSidebar = (data.content === true);
+                        });
                         break;
                     case 'errorAnnotation':
                         AlertsService.addAlert("Couldn't parse the given annotation.", "warning");
@@ -290,9 +294,18 @@
 
         // Scroll a DOM element into visible part of the browser
         function scrollIntoView(elementId) {
-            // Using native JS b/c angular.element returns a jQuery/jqLite object,
-            // which is incompatible with .scrollIntoView()
-            document.getElementById(elementId).scrollIntoView({block: 'start', behavior: 'smooth'});
+            var container = angular.element(document.getElementsByClassName('annotation-list-container')[0]);
+            var el = angular.element(document.getElementById(elementId));
+
+            // the elements might not be available
+            if (el.length === 0 || container.length === 0) return;
+
+            container.scrollToElementAnimated(el, 5).then(function () {
+                // we're not doing anything after the scroll is done
+            }).catch(function(err) {
+                //it will be rejected only if scroll is cancelled
+                //we don't need to handle the rejection, so we can fail silently.
+            });
         }
 
         // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
@@ -373,9 +386,11 @@
                   }
                 }
 
+                // TOOD should be more systematic
                 var url = "/chaise/record/#" + context.catalogID;
                 url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME);
                 url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(id);
+                url += "?pcid=" + context.cid + "&ppid=" + context.pid;
 
                 // default values for new anatomy's annotation
                 obj = {
@@ -404,6 +419,18 @@
                 if(row){
                     obj.isStoredInDB = true;
                     obj.tuple = row;
+
+                    obj.logStackNode = logService.getStackNode(
+                        logService.logStackTypes.ANNOTATION,
+                        row.reference.table,
+                        row.reference.filterLogInfo
+                    );
+                } else {
+                    obj.logStackNode = logService.getStackNode(
+                        logService.logStackTypes.ANNOTATION,
+                        null,
+                        {"file": 1}
+                    );
                 }
 
                 vm.annotationModels.push(obj);
@@ -434,8 +461,17 @@
             annotationCreateForm.submissionRows = [{}];
             annotationCreateForm.foreignKeyData = [{}];
             annotationCreateForm.oldRows = [{}];
+            annotationCreateForm.logStack = AnnotationsService.getAnnotationLogStack();
+            annotationCreateForm.logStackPath = AnnotationsService.getAnnotationLogStackPath(true);
 
-            recordCreate.populateCreateModelValues(annotationCreateForm, annotationCreateForm.reference);
+            $rootScope.logAppMode = logService.appModes.CREATE;
+
+            recordCreate.populateCreateModelValues(
+                annotationCreateForm,
+                annotationCreateForm.reference,
+                null,
+                null
+            );
 
             // Set it to show the setting panel
             vm.editAnatomyAnnotations(newAnnotation);
@@ -451,6 +487,8 @@
             vm.displayDrawingRequiredError = false;
             AlertsService.deleteAllAlerts();
 
+            // log the client action
+            AnnotationsService.logAnnotationClientAction(logService.logActions.ADD_INTEND);
         }
 
         // Click to toggle overlay visibility in Openseadragon
@@ -461,7 +499,10 @@
             });
             AnnotationsService.changeAllAnnotationVisibility({
                 isDisplay : vm.isDisplayAll
-            })
+            });
+
+            var action = vm.isDisplayAll ? logService.logActions.VIEWER_ANNOT_DISPLAY_ALL : logService.logActions.VIEWER_ANNOT_DISPLAY_NONE;
+            AnnotationsService.logAnnotationClientAction(action);
         }
 
         // Change the selecting anatomy's item
@@ -480,6 +521,38 @@
                 item.isSelected = !item.isSelected;
                 vm.selectedItem = item;
             }
+        }
+
+
+        // log the stroke change:
+        var strokeScalePromise = null, oldStrokeScale = null;
+        function changeStrokeScaleStart() {
+            // cancel any existing timeout
+            if (strokeScalePromise) {
+                $timeout.cancel(strokeScalePromise);
+            }
+            // save the starting value
+            else {
+                oldStrokeScale = vm.strokeScale;
+            }
+        }
+        function changeStrokeScaleStop() {
+            // set a timer to log the action
+            strokeScalePromise = $timeout(function() {
+                if (oldStrokeScale != vm.strokeScale) {
+                    AnnotationsService.logAnnotationClientAction(
+                        logService.logActions.VIEWER_ANNOT_LINE_THICKNESS,
+                        null,
+                        {
+                            old_thickness: oldStrokeScale,
+                            new_thickness: vm.strokeScale
+                        }
+                    );
+                }
+
+                oldStrokeScale = null;
+                strokeScalePromise = null;
+            }, annotConstant.LINE_THICKNESS_LOG_TIMEOUT);
         }
 
         // Notify openseadragon to change stroke width
@@ -522,6 +595,7 @@
             var url = "/chaise/record/#" + context.catalogID;
             url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME);
             url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(data[idColName]);
+            url += "?pcid=" + context.cid + "&ppid=" + context.pid;
 
             item["groupID"] = data[idColName] + "," + data[nameColName];
             item["name"] = data[nameColName];
@@ -533,7 +607,7 @@
         /**
          * This function is used for all the foreignkey columns presented in the annotation form,
          * but the only purpose of this is to actually return a function for just the annotated term (anatomy).
-         * This will disable the rows that already exist in the database. 
+         * This will disable the rows that already exist in the database.
          *
          * The displayed table (in the popup) is the annotated table, and we want to disable
          * rows from this table that already have the combination of Image in database.
@@ -599,6 +673,9 @@
         function clearSearch(){
             vm.searchKeyword = "";
             updateDisplayNum();
+
+            // log the client action
+            AnnotationsService.logAnnotationClientAction(logService.logActions.SEARCH_BOX_CLEAR);
         }
 
         /**
@@ -633,7 +710,7 @@
                 // Set editing item to null to hide the metadata panel
                 vm.editAnatomyAnnotations(null);
             }
-            
+
             // show confirmation on back button
             if (confirm) {
                 modalUtils.showModal({
@@ -644,8 +721,8 @@
                     size: "sm",
                     resolve: {
                         params: {
-                            buttonAction: "Discard",
-                            message: "Are you sure you want to discard your changes?"
+                            buttonAction: "Ok",
+                            message: "Any unsaved change will be discarded. Do you want to continue?"
                         }
                     }
                 }, function () {
@@ -656,9 +733,9 @@
                             groupID: vm.editingAnatomy.groupID
                         });
                     }
-                    
+
                     close();
-                }, null, false); 
+                }, null, false);
             } else {
                 close();
             }
@@ -670,7 +747,7 @@
          * @param {object} item : the anatomy's annotations object
          * @param {object} event : click event object
          */
-        function drawAnnotation(item, event){
+        function drawAnnotation(item, event, changeColor) {
 
             // remove current drawing annotation
             if(vm.editingAnatomy && vm.editingAnatomy != item){
@@ -690,10 +767,18 @@
             AnnotationsService.drawAnnotation({
                 svgID : vm.editingAnatomy.svgID,
                 groupID : vm.editingAnatomy.groupID,
-                mode : (vm.editingAnatomy.isDrawing) ? "ON" : "OFF"
+                mode : (vm.editingAnatomy.isDrawing) ? "ON" : "OFF",
+                setStroke: (changeColor === true) // change the color that is used in toolbar
             });
-            
+
             if (event) {
+                // log the client action
+                var action = logService.logActions.VIEWER_ANNOT_DRAW_MODE_HIDE;
+                if (vm.editingAnatomy.isDrawing) {
+                    action = logService.logActions.VIEWER_ANNOT_DRAW_MODE_SHOW;
+                }
+                AnnotationsService.logAnnotationClientAction(action, item);
+
                 event.stopPropagation();
             }
         }
@@ -706,12 +791,17 @@
         function editAnatomyAnnotations(item, index, event){
             if(event){
                 event.stopPropagation();
+
+                // unselect (unhighlight) the annotation
+                if (item && item.isSelected) {
+                    highlightGroup(item);
+                }
             }
 
             vm.editingAnatomy = item || null;
             vm.editingAnatomyIndex = index || -1;
             vm.showPanel = (item !== null) ? true : false;
-            
+
             // only in edit mode
             if (typeof index == 'number') {
                 // TODO is this unnecessary?
@@ -719,30 +809,50 @@
                 annotationEditForm.submissionRows = [{}];
                 annotationEditForm.foreignKeyData = [{}];
                 annotationEditForm.oldRows = [{}];
+                annotationEditForm.logStack = AnnotationsService.getAnnotationLogStack(!item.tuple ? null : item);
+                annotationEditForm.logStackPath = AnnotationsService.getAnnotationLogStackPath(!item.tuple ? true : item);
 
                 // TODO if the data is not in database, the form is create right? default values etc.
                 if (!item.tuple) {
+                    $rootScope.logAppMode = logService.appModes.CREATE_PRESELECT;
                     var values = {};
                     values[annotConstant.ANNOTATED_TERM_COLUMN_NAME] = item.id;
-                    recordCreate.populateCreateModelValues(annotationEditForm, annotationEditForm.reference, null, values);
+                    recordCreate.populateCreateModelValues(
+                        annotationEditForm,
+                        annotationEditForm.reference,
+                        null,
+                        values
+                    );
                 } else {
-                    recordCreate.populateEditModelValues(annotationEditForm, annotationEditForm.reference, item.tuple, 0, false);
+                    // log the client action
+                    AnnotationsService.logAnnotationClientAction(logService.logActions.EDIT_INTEND, item);
+
+                    $rootScope.logAppMode = logService.appModes.EDIT;
+                    recordCreate.populateEditModelValues(
+                        annotationEditForm,
+                        annotationEditForm.reference,
+                        item.tuple,
+                        0,
+                        false
+                    );
                 }
-                
-                
+
+
                 // send a message to osd viewer to signal the start
                 AnnotationsService.startAnnotationChange({
                     svgID: item.svgID,
                     groupID: item.groupID
                 });
             }
-            
+
             // if item is null, we just wanted to switch away from edit/create mode
             if (item != null) {
                 // switch to drawing mode by default
-                vm.drawAnnotation(vm.editingAnatomy);
+                vm.drawAnnotation(vm.editingAnatomy, null, true);
+            } else {
+                $rootScope.logAppMode = null;
             }
-            
+
             vm.displayDrawingRequiredError = false;
             AlertsService.deleteAllAlerts();
         }
@@ -763,22 +873,24 @@
 
             return (id.indexOf(keyword) >= 0) || (name.indexOf(keyword) >= 0);
         }
-        
+
         /**
          * Open a share dialog for the given annotation
          */
         function shareAnnotation (item, index, event) {
             // make sure it's highlighted
             if (!item.isSelected) {
-                highlightGroup(item, event);
+                highlightGroup(item);
             }
 
             // TODO could be refactored
             var url = "/chaise/record/#" + context.catalogID;
             url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_NAME);
             url += "/RID=" + UriUtils.fixedEncodeURIComponent(item.tuple.data.RID);
-            
+
             var moreInfo = {
+                logStack: AnnotationsService.getAnnotationLogStack(item),
+                logStackPath: AnnotationsService.getAnnotationLogStackPath(item),
                 title: "Annotation",
                 hideHeader: true,
                 hideCitation: true,
@@ -795,16 +907,16 @@
                     }
                 ]
             };
-                
+
             // to disable all the share buttons
             vm.waitingForSharePopup = true;
-            
+
             // to show the loader
             item.waitingForSharePopup = true;
 
             modalUtils.openSharePopup(item.tuple, $rootScope.annotationEditReference, moreInfo).then(function () {
                 if (!item.isSelected) {
-                    highlightGroup(item, event);
+                    highlightGroup(item);
                 }
                 vm.waitingForSharePopup = false;
                 item.waitingForSharePopup = false;
@@ -833,7 +945,15 @@
                 groupID : item.groupID
             });
 
-            event.stopPropagation();
+            // event is only passed if user initiated the highlight
+            if (event) {
+                // log the client action
+                if (item.isSelected) {
+                    AnnotationsService.logAnnotationClientAction(logService.logActions.VIEWER_ANNOT_HIGHLIGHT, item);
+                }
+
+                event.stopPropagation();
+            }
         }
 
         /**
@@ -846,6 +966,9 @@
                 row = null,
                 isFound = false;
 
+            // log intend
+            AnnotationsService.logAnnotationClientAction(logService.logActions.DELETE_INTEND, item);
+
             modalUtils.showModal({
                 animation: false,
                 templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
@@ -853,10 +976,10 @@
                 controllerAs: "ctrl",
                 size: "sm"
             }, function onSuccess(res) {
-                vm.annotationFormPendingResult = true;
+                annotationEditForm.submissionButtonDisabled = true;
                 AnnotationsService.removeEntry(item).then(function(){
-                    vm.annotationFormPendingResult = false;
- 
+                    annotationEditForm.submissionButtonDisabled = false;
+
                     // OPTIMIZE: do we need to go over the list?
                     for(i = 0; i < vm.annotationModels.length; i++){
                         row = vm.annotationModels[i];
@@ -884,12 +1007,35 @@
                 }).catch(function (err) {
                     console.log("error while deleteing:", err);
                 });
-            }, null, false);
+            }, function () {
+                // log cancel
+                AnnotationsService.logAnnotationClientAction(logService.logActions.DELETE_CANCEL, item);
+            }, false);
         }
 
         // Search based on the keyword
+        var searchPromise = null;
         function search(){
             vm.updateDisplayNum();
+
+            // if a log promise is already fired, remove it
+            if (searchPromise) {
+                $timeout.cancel(searchPromise);
+            }
+
+            // create a timeout to log the search
+            searchPromise = $timeout(function () {
+                if (vm.searchKeyword) {
+                    AnnotationsService.logAnnotationClientAction(
+                        logService.logActions.SEARCH_BOX_AUTO,
+                        null,
+                        {
+                            search_str: vm.searchKeyword
+                        }
+                    );
+                }
+                searchPromise = null;
+            }, annotConstant.SEARCH_LOG_TIMEOUT);
         }
 
         /**
@@ -903,19 +1049,20 @@
                 noAnnot = true;
                 vm.displayDrawingRequiredError = true;
             }
-            
+
             if(noAnnot || vm.annoForm.$invalid){
                 _displaySubmitError();
                 return;
             }
-            vm.annotationFormPendingResult = true;
 
             var formModel = vm.editingAnatomy.isNew ? annotationCreateForm : annotationEditForm,
                 isUpdate = !vm.editingAnatomy.isNew && vm.editingAnatomy.isStoredInDB,
                 originalTuple = null,
                 imageRID = context.imageID,
+                savedItem = vm.editingAnatomy,
                 fileName,
-                file;
+                file,
+                logObj;
 
             if (isUpdate) {
                 originalTuple = vm.editingAnatomy.tuple;
@@ -940,7 +1087,7 @@
 
             // add the image value
             formModel.submissionRows[0][annotConstant.REFERENCE_IMAGE_COLUMN_NAME] = imageRID;
-            
+
             // add the default z index value
             if (context.defaultZIndex != null) {
                 formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME] = context.defaultZIndex;
@@ -958,12 +1105,18 @@
                 })
             };
 
+            var action = vm.editingAnatomy.isNew ? logService.logActions.CREATE : logService.logActions.UPDATE;
+            logObj = {
+                action: AnnotationsService.getAnnotationLogAction(action, savedItem),
+                stack: AnnotationsService.getAnnotationLogStack(savedItem)
+            };
+
             // TODO why pass vm??
             // TODO the last element is logObject, should be changed later...
             recordCreate.addRecords(isUpdate, null, formModel, false, formModel.reference, [originalTuple], {}, vm, function (formModel, result) {
+                formModel.submissionButtonDisabled = true;
+
                 var afterMutation = function (tuple) {
-                    vm.annotationFormPendingResult = false;
-                    var savedItem = vm.editingAnatomy;
 
                     // update SVG ID (NEW_SVG) after successfully created
                     var newSvgID = (!isUpdate && savedItem.svgID === "NEW_SVG") ? Date.parse(new Date()) + parseInt(Math.random() * 10000) : savedItem.svgID;
@@ -979,7 +1132,7 @@
                     savedItem.tuple = tuple;
                     savedItem.isStoredInDB = true;
                     savedItem.isNew = false;
-                    
+
                     // update the color
                     savedItem.stroke = data.content[0].stroke;
 
@@ -993,6 +1146,7 @@
 
                     vm.updateDisplayNum();
                     vm.closeAnnotationForm();
+                    formModel.submissionButtonDisabled = false;
 
                     AlertsService.addAlert("Your data has been saved.", "success");
                 };
@@ -1007,19 +1161,30 @@
                     return;
                 }
 
-                // TODO properly pass log object
+                // update the stacknode
+                savedItem.logStackNode = logService.getStackNode(
+                    logService.logStackTypes.ANNOTATION,
+                    resultTuple.reference.table,
+                    resultTuple.reference.filterLogInfo
+                );
+
+                // populate the logobject for the read request
+                logObj = {
+                    action: AnnotationsService.getAnnotationLogAction(logService.logActions.VIEWER_ANNOT_FETCH, savedItem),
+                    stack: AnnotationsService.getAnnotationLogStack(savedItem)
+                };
+
                 // read the currently saved data, so we can capture the tuple in correct context
-                resultTuple.reference.contextualize.entryEdit.read(1).then(function (page) {
+                resultTuple.reference.contextualize.entryEdit.read(1, logObj).then(function (page) {
                     if (page.length != 1) {
                         console.log("the currently added row was not visible.");
                     }
                     afterMutation(page.length == 1 ? page.tuples[0] : resultTuple);
                 }).catch(function (err) {
                     console.log("error while reading after create/update:", err);
-                    afterMutation(resultTuple)
+                    afterMutation(resultTuple);
                 });
-
-            }, {});
+            }, logObj);
         }
 
         /**
@@ -1058,6 +1223,10 @@
             });
 
             if(event){
+                // log the client action
+                var action = item.isDisplay ? logService.logActions.VIEWER_ANNOT_SHOW : logService.logActions.VIEWER_ANNOT_HIDE;
+                AnnotationsService.logAnnotationClientAction(action, item);
+
                 event.stopPropagation();
             }
         }

@@ -53,6 +53,7 @@
      *        config,       // set of config to disable or enable features
      *        logStack,     // (required) used to capture the stack related to this table.
      *        logStackPath, // (required) used to capture the stack-path related to this table.
+     *        logAppMode,  // (optional) if defined, will be used instead of the default app mode.
      *        logObject (optional) // used only on the first request of main entity read.
      *       }
      *      available config options:
@@ -438,8 +439,9 @@
             var hasCauses = Array.isArray(vm.reloadCauses) && vm.reloadCauses.length > 0;
             var act = hasCauses ? logService.logActions.RELOAD : logService.logActions.LOAD;
 
-            // fix the action for add pure and binary popup (the check could be based on getDisabledTuples as well)
-            if (vm.config.displayMode === recordsetDisplayModes.addPureBinaryPopup) {
+            // if getDisabledTuples exists, then this read will load everything (domain values) and the
+            // getDisabledTuples is the actual load/reload
+            if (vm.getDisabledTuples) {
                 act = hasCauses ? logService.logActions.RELOAD_DOMAIN : logService.logActions.LOAD_DOMAIN;
             }
 
@@ -951,7 +953,8 @@
             if (childStackPath) {
                 stackPath = logService.getStackPath(stackPath, childStackPath);
             }
-            return logService.getActionString(actionPath, stackPath);
+            var appMode = vm.logAppMode ? vm.logAppMode : null;
+            return logService.getActionString(actionPath, stackPath, appMode);
         }
 
         /**
