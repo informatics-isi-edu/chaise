@@ -737,7 +737,7 @@
          * @param {object} item : the anatomy's annotations object
          * @param {object} event : click event object
          */
-        function drawAnnotation(item, event){
+        function drawAnnotation(item, event, changeColor){
 
             // remove current drawing annotation
             if(vm.editingAnatomy && vm.editingAnatomy != item){
@@ -757,7 +757,8 @@
             AnnotationsService.drawAnnotation({
                 svgID : vm.editingAnatomy.svgID,
                 groupID : vm.editingAnatomy.groupID,
-                mode : (vm.editingAnatomy.isDrawing) ? "ON" : "OFF"
+                mode : (vm.editingAnatomy.isDrawing) ? "ON" : "OFF",
+                setStroke: (changeColor === true) // change the color that is used in toolbar
             });
 
             if (event) {
@@ -830,7 +831,7 @@
             // if item is null, we just wanted to switch away from edit/create mode
             if (item != null) {
                 // switch to drawing mode by default
-                vm.drawAnnotation(vm.editingAnatomy);
+                vm.drawAnnotation(vm.editingAnatomy, null, true);
             } else {
                 $rootScope.logAppMode = null;
             }
