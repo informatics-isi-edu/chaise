@@ -238,6 +238,14 @@
         function loadAnnotations(data) {
             iframe.postMessage({messageType: 'loadAnnotations', content: data}, origin);
         }
+        
+        function startAnnotationChange(data) {
+            iframe.postMessage({messageType: 'startAnnotationChange', content: data}, origin);
+        }
+        
+        function discardAnnotationChange(data) {
+            iframe.postMessage({messageType: 'discardAnnotationChange', content: data}, origin);
+        }
 
         return {
             logAnnotationClientAction: logAnnotationClientAction,
@@ -261,7 +269,9 @@
             removeEntry : removeEntry,
             removeSVG : removeSVG,
             saveAnnotationRecord : saveAnnotationRecord,
-            loadAnnotations: loadAnnotations
+            loadAnnotations: loadAnnotations,
+            discardAnnotationChange: discardAnnotationChange,
+            startAnnotationChange: startAnnotationChange
         };
 
     }]);
