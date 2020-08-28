@@ -63,15 +63,18 @@ html {
         font-size: $h1-font-size;
     }
 
-    h2, .h2-class {
+    // in iframe we're making the headers smaller
+    h2, .h2-class, &.chaise-iframe h1, &.chaise-iframe .h1-class {
         font-size: $h2-font-size;
     }
 
-    h3, .h3-class {
+    // in iframe we're making the headers smaller
+    h3, .h3-class, &.chaise-iframe h2, &.chaise-iframe .h2-class {
         font-size: $h3-font-size;
     }
 
-    h4, .h4-class {
+    // in iframe we're making the headers smaller
+    h4, .h4-class, &.chaise-iframe h3, &.chaise-iframe .h3-class{
         font-size: $h4-font-size;
     }
 

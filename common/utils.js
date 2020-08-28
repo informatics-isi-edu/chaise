@@ -2778,18 +2778,28 @@
             return defer.promise;
         }
 
-        /* Custom function to add styling based on browser type and operating system */
-        function addMacFirefoxClass(){
-          var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
-          var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
+        /**
+         * Detects the running enviornments and adss the following classes to chaise-body:
+         *  - chaise-mac: if it's running on macOS
+         *  - chaise-firefox: if it's running on Firefox
+         *  - chaise-iframe: if running in an iframe
+         */
+        function addBodyClasses(){
+            var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
+            var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
 
-          var bodyElement = document.querySelector(".chaise-body");
-          if (bodyElement){
-            if(osClass)
-              UiUtils.addClass(bodyElement, osClass);
-            if(browserClass)
-              UiUtils.addClass(bodyElement, browserClass);
-           }
+            var bodyElement = document.querySelector(".chaise-body");
+            if (!bodyElement) return;
+
+            if(osClass) {
+                UiUtils.addClass(bodyElement, osClass);
+            }
+            if(browserClass) {
+                UiUtils.addClass(bodyElement, browserClass);
+            }
+            if ($window.self !== $window.parent) {
+                UiUtils.addClass(bodyElement, "chaise-iframe");
+            }
         }
 
         function addTitle() {
@@ -2954,7 +2964,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
-            addMacFirefoxClass();
+            addBodyClasses();
             return addCustomCSS();
         }
 
