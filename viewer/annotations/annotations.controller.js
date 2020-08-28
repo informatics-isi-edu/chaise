@@ -62,7 +62,6 @@
         // TODO  the following should be renamed evnetually (we're editing annotation not anatomy)
         vm.editingAnatomy = null; // current setting anatomy from annotationModels
         vm.editingAnatomyIndex = null;
-        vm.editingAnatomyOriginalGroupID = null;
         vm.onSearchPopupValueChange = onSearchPopupValueChange; // if anatomy changed, we should do some updates
         vm.getAnnotatedTermDisabledTuples = getAnnotatedTermDisabledTuples; // disable the existing anatomy, in the popup
         vm.displayDrawingRequiredError = false;
