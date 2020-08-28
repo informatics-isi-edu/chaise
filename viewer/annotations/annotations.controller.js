@@ -976,9 +976,9 @@
                 controllerAs: "ctrl",
                 size: "sm"
             }, function onSuccess(res) {
-                annotationEditForm.submissionButtonDisabled = true;
+                vm.submissionButtonDisabled = true;
                 AnnotationsService.removeEntry(item).then(function(){
-                    annotationEditForm.submissionButtonDisabled = false;
+                    vm.submissionButtonDisabled = false;
 
                     // OPTIMIZE: do we need to go over the list?
                     for(i = 0; i < vm.annotationModels.length; i++){
@@ -1111,10 +1111,13 @@
                 stack: AnnotationsService.getAnnotationLogStack(savedItem)
             };
 
+            // show the spinner
+            vm.submissionButtonDisabled = true;
+
             // TODO why pass vm??
             // TODO the last element is logObject, should be changed later...
             recordCreate.addRecords(isUpdate, null, formModel, false, formModel.reference, [originalTuple], {}, vm, function (formModel, result) {
-                formModel.submissionButtonDisabled = true;
+                vm.submissionButtonDisabled = true;
 
                 var afterMutation = function (tuple) {
 
@@ -1146,7 +1149,7 @@
 
                     vm.updateDisplayNum();
                     vm.closeAnnotationForm();
-                    formModel.submissionButtonDisabled = false;
+                    vm.submissionButtonDisabled = false;
 
                     AlertsService.addAlert("Your data has been saved.", "success");
                 };
