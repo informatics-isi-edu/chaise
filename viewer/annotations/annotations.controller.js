@@ -62,6 +62,7 @@
         // TODO  the following should be renamed evnetually (we're editing annotation not anatomy)
         vm.editingAnatomy = null; // current setting anatomy from annotationModels
         vm.editingAnatomyIndex = null;
+        vm.editingAnatomyOriginalGroupID = null;
         vm.onSearchPopupValueChange = onSearchPopupValueChange; // if anatomy changed, we should do some updates
         vm.getAnnotatedTermDisabledTuples = getAnnotatedTermDisabledTuples; // disable the existing anatomy, in the popup
         vm.displayDrawingRequiredError = false;
@@ -597,6 +598,7 @@
             url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(data[idColName]);
             url += "?pcid=" + context.cid + "&ppid=" + context.pid;
 
+            item["anatomy"] = data[nameColName] + " (" + data[idColName] + ")";
             item["groupID"] = data[idColName] + "," + data[nameColName];
             item["name"] = data[nameColName];
             item["id"] = data[idColName];
@@ -682,11 +684,11 @@
          * Close the annotation metadata panel
          */
         function closeAnnotationForm(confirm){
+            var item = vm.editingAnatomy;
+
             var close = function () {
                 vm.annoForm.$setPristine();
                 vm.annoForm.$setUntouched();
-
-                var item = vm.editingAnatomy;
 
                 // Close the drawing tool if opened
                 if(item && item.isDrawing){
@@ -726,11 +728,27 @@
                         }
                     }
                 }, function () {
-                    if (!vm.editingAnatomy.isNew) {
+                    if (!item.isNew) {
+                        // if anatomy has changed, change it back
+                        if (item.originalAnnotatedTermData && item.originalAnnotatedTermData.groupID != item.groupID) {
+                            // signal osd to change the groupID back
+                            AnnotationsService.changeGroupInfo({
+                                svgID : item.svgID,
+                                groupID : item.groupID,
+                                newGroupID : item.originalAnnotatedTermData.groupID,
+                                newAnatomy : item.originalAnnotatedTermData.anatomy
+                            });
+
+                            // change the extra attributes back
+                            for (var k in item.originalAnnotatedTermData) {
+                                item[k] = item.originalAnnotatedTermData[k];
+                            }
+                        }
+
                         // send a message to osd viewer to cancel
                         AnnotationsService.discardAnnotationChange({
-                            svgID: vm.editingAnatomy.svgID,
-                            groupID: vm.editingAnatomy.groupID
+                            svgID: item.svgID,
+                            groupID: item.groupID
                         });
                     }
 
@@ -837,8 +855,17 @@
                     );
                 }
 
+                // TODO all these attributes related to anatmoy should go to one place
+                // keep the original values in case they are changed by the user
+                item.originalAnnotatedTermData = {
+                    groupID: item.groupID,
+                    anatomy: item.anatomy,
+                    name: item.name,
+                    id: item.id,
+                    url: item.url
+                };
 
-                // send a message to osd viewer to signal the start
+                // send a message to osd viewer to signal the start of edit
                 AnnotationsService.startAnnotationChange({
                     svgID: item.svgID,
                     groupID: item.groupID
