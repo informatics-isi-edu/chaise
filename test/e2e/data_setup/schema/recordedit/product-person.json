@@ -907,7 +907,7 @@
                 "typename": "int4"
             },
             "nullok": true,
-            "default": 0
+            "default": 1
         }
       ],
       "annotations": {
