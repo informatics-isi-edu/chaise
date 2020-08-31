@@ -2,10 +2,11 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     table_name: "accommodation",
-    column_names: ["first_name", "last_name", "0YGNuO_bvxoczJ6ms2k0tQ"],
+    column_names: ["first_name", "last_name", "index", "0YGNuO_bvxoczJ6ms2k0tQ"],
     column_values: {
         first_name: "John",
         last_name: "Doe",
+        index: "0",
         "0YGNuO_bvxoczJ6ms2k0tQ": "John Doe" // person foreignkey column
     }
 };

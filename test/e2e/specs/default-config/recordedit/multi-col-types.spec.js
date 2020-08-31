@@ -128,7 +128,7 @@ describe('When editing a record', function() {
     beforeAll(function() {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
-        chaisePage.waitForElement(element(by.id("submit-record-button")));
+        chaisePage.recordeditPageReady();
 
         if (!process.env.TRAVIS && files.length > 0) {
             // create files that will be uploaded
@@ -158,7 +158,7 @@ describe('When editing a record', function() {
     describe('if the user made no edits', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+            chaisePage.recordeditPageReady().then(function() {
                 return recordEditPage.submitForm();
             });
         });
@@ -186,7 +186,7 @@ describe('When editing a record', function() {
     describe('if the user did make edits', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
-            chaisePage.waitForElement(element(by.id("submit-record-button")));
+            chaisePage.recordeditPageReady();
         });
 
         // Test each column type to check that the app converts the submission data correctly for each type

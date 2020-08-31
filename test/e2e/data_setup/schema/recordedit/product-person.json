@@ -45,6 +45,11 @@
               "table_name": "accommodation",
               "schema_name": "product-person",
               "column_name": "last_name"
+            },
+            {
+              "table_name": "accommodation",
+              "schema_name": "product-person",
+              "column_name": "index"
             }
           ],
           "annotations": {},
@@ -58,6 +63,11 @@
               "table_name": "person",
               "schema_name": "product-person",
               "column_name": "last_name"
+            },
+            {
+              "table_name": "person",
+              "schema_name": "product-person",
+              "column_name": "index"
             }
           ]
         },
@@ -379,6 +389,15 @@
               "name": "Last Name"
             }
           }
+        },
+        {
+          "comment": "this column was added to make sure we can accept falsy values",
+          "name": "index",
+          "type": {
+            "typename": "int4"
+          },
+          "nullok": true,
+          "default": 0
         }
       ],
       "annotations": {
@@ -828,7 +847,8 @@
           "annotations": {},
           "unique_columns": [
             "first_name",
-            "last_name"
+            "last_name",
+            "index"
           ]
         }
       ],
@@ -879,6 +899,15 @@
               "name": "Last Name"
             }
           }
+        },
+        {
+            "comment": "this column was added to make sure we can accept falsy values",
+            "name": "index",
+            "type": {
+                "typename": "int4"
+            },
+            "nullok": true,
+            "default": 1
         }
       ],
       "annotations": {
