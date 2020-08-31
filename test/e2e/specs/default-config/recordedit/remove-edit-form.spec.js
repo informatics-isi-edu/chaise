@@ -27,7 +27,7 @@ describe('Edit a record,', function() {
             filters.push(testParams.filter.key + testParams.filter.operator + testParams.filter.value);
             browser.ignoreSynchronization=true;
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-edit:" + testParams.table_name + "/" + filters.join("&"));
-            chaisePage.waitForElement(element(by.id("submit-record-button")));
+            chaisePage.recordeditPageReady();
         });
 
         it("remove 2 forms and edit some of the data", function(done) {
