@@ -407,6 +407,8 @@ If you're interested in doing this for each specific table, you can choose to do
   - Added proper log support to viewer app. This includes properly logging the requests that viewer app was already making and adding client logs. Please refer to the PR and documentation for more information.
   
   - Added client log action for "go to RID" feature.
+  
+  - Added `paction=view` to first request in record app, to indicates user clicked on "view" button in tabular displays.
 
 ### 02/12/20
 
