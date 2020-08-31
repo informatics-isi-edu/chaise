@@ -45,6 +45,7 @@
       } else if (parent.scrollTop > 0) {
           menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
       }
+      immediateParent.style.backgroundColor = "cornflowerblue";
       menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
 
       var open = !menuTarget.classList.contains("show");
@@ -52,6 +53,7 @@
       // if we're opening this, close all the other dropdowns on navbar.
       if (open) {
         $event.target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+          el.parentElement.style.backgroundColor = "";
           el.classList.remove("show");
         });
       }

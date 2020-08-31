@@ -95,6 +95,7 @@ body > .container {
     border-left-color: #428bca; /* was #ccc */
     margin-top: 5px;
     margin-right: -15px;
+		padding-right: 10px;
 }
 
 .dropdown-submenu:hover>a:after {
@@ -138,4 +139,5 @@ body > .container {
 		max-height: 250px;
 		overflow-x: hidden;
 		overflow-y: auto;
+		width: 250px;
 }
