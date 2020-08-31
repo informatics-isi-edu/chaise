@@ -484,9 +484,6 @@
                 description : ""
             });
 
-            vm.displayDrawingRequiredError = false;
-            AlertsService.deleteAllAlerts();
-
             // log the client action
             AnnotationsService.logAnnotationClientAction(logService.logActions.ADD_INTEND);
         }
@@ -574,13 +571,15 @@
             var item = vm.editingAnatomy,
                 data = tuple.data;
 
-            // allow itself to be selected
-            if (data[idColName] !== item.id) {
-                // manually make sure the ID doesn't exist in the list,
-                // because some of the annotations might not be stored in the database
-                if(vm.annotationModels.find(function (row) { return row.id === data[idColName]})){
-                    return {error: true, message: "An annotation already exists for this Anatomy, please select other terms."};
-                }
+            // allow itself to be selected, but there's no reason to update the info
+            if (data[idColName] === item.id) {
+                return true;
+            }
+
+            // manually make sure the ID doesn't exist in the list,
+            // because some of the annotations might not be stored in the database
+            if(vm.annotationModels.find(function (row) { return row.id === data[idColName]})){
+                return {error: true, message: "An annotation already exists for this Anatomy, please select other terms."};
             }
 
             // Update the new Anatomy name and ID at openseadragon viewer
@@ -816,7 +815,7 @@
             }
 
             vm.editingAnatomy = item || null;
-            vm.editingAnatomyIndex = index || -1;
+            vm.editingAnatomyIndex = (typeof index == 'number') ? index : -1;
             vm.showPanel = (item !== null) ? true : false;
 
             // only in edit mode
@@ -1074,6 +1073,8 @@
             if (data.content.length <= 0 || data.content[0].svg === "" || data.content[0].numOfAnnotations === 0) {
                 noAnnot = true;
                 vm.displayDrawingRequiredError = true;
+            } else {
+                vm.displayDrawingRequiredError = false;
             }
 
             if(noAnnot || vm.annoForm.$invalid){
