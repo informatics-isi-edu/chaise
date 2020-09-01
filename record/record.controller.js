@@ -557,7 +557,7 @@
 
             var elementObj = determineScrollElement(queryParam);
             // no element was returned, means there wasn't a matching displayname on the page
-            if (!elementObj.element) return;
+            if (!elementObj || !elementObj.element) return;
 
             scrollToElement(elementObj.element);
         }
