@@ -367,7 +367,12 @@
 .markdown-container table,
 .markdown-container ul {
     margin-top: 0;
-    margin-bottom: 16px
+    // changed the following from 16 to 8
+    // in the cases that there's just a single p and ul,
+    // the space between them were too much, so we reduced it.
+    // we couldn't reduce this any further since in the cases of multiple p,
+    // they would be too close each other and it was hard to read.
+    margin-bottom: 8px;
 }
 
 .markdown-container hr {
