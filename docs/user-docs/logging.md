@@ -399,9 +399,12 @@ If you're interested in doing this for each specific table, you can choose to do
 ###### Commit/PR Links
   - [chaise (viewer changes)](https://github.com/informatics-isi-edu/chaise/pull/2001)
   - [chaise (go to RID changes)](https://github.com/informatics-isi-edu/chaise/pull/2000)
-  
+
+###### Removed
+  - Removed the anatomy, comment, and annotation_comment requests of viewer app and therefore their log actions.
+
 ###### Changed
-  - Changed the initial load requests of viewer app to be aligned with the rest of the apps.
+  - Changed the annotation request in viewer app to be aligned with the rest of the apps (Action changed from `:entity,annotation;read` to `:entity/annotation-set,;load` and stack structure modified.)
   
 ###### Added
   - Added proper log support to viewer app. This includes properly logging the requests that viewer app was already making and adding client logs. Please refer to the PR and documentation for more information.
