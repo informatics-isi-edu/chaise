@@ -750,6 +750,10 @@ var recordsetPage = function() {
         return this.getPageTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
     };
 
+    this.getPageTitleInlineComment = function () {
+        return this.getPageTitleElement().element(by.css(".inline-tooltip"));
+    };
+
     this.getPageSubtitle = function() {
         return browser.executeScript("return $('#page-subtitle).text();')");
     };
