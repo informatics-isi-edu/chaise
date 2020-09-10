@@ -2198,13 +2198,18 @@
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                if (typeof scope.displayname !== "object" && scope.reference) {
-                    scope.displayname = scope.reference.displayname;
-                }
+                scope.showTooltip = scope.comment ? true : false;
 
-                scope.showTooltip = scope.reference.commentDisplay == 'tooltip' && (scope.comment || scope.reference.comment);
-                if (!scope.comment && scope.reference && scope.reference.comment) {
-                    scope.comment = scope.reference.comment;
+                if (scope.reference) {
+                    if (typeof scope.displayname !== "object") {
+                        scope.displayname = scope.reference.displayname;
+                    }
+
+                    if (!scope.comment && scope.reference.comment) {
+                        scope.comment = scope.reference.comment;
+                    }
+
+                    scope.showTooltip = scope.reference.commentDisplay == 'tooltip' && (scope.comment || scope.reference.comment);
                 }
             }
         };
