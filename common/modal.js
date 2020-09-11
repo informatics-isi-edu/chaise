@@ -4,7 +4,7 @@
     angular.module('chaise.modal', ['chaise.utils'])
 
     //TODO
-    .factory('modalUtils', ["logService", "UiUtils", "UriUtils", "$log", "$uibModal", "$window", function (logService, UiUtils, UriUtils, $log, $uibModal, $window) {
+    .factory('modalUtils', ["logService", "UiUtils", "UriUtils", "$log", "$q", "$uibModal", "$window", function (logService, UiUtils, UriUtils, $log, $q, $uibModal, $window) {
 
         /**
          * Given the parameters that are used to generate a modal, returns the appropriate size.
@@ -62,15 +62,20 @@
         }
 
         /**
-         * Given a tuple and reference will open the share popup.
+         * Given a tuple and reference will open the share popup. It will return a promise
+         * that will be resolved when the modal is displayed.
          * You can also pass extra parameters if you want. The acceptable extra params are:
          *  - title: will be displayed in the modal title
          *  - hideCitation: hide the citation section
          *  - hideHeader: hides all the section headers.
          *  - extraInformation: An array of objects that will be displayed. Each element can be either
-         *    {value: "string", title: "string"} or {title: "string", value: "string", link: "string", ype: "link"}
+         *    {value: "string", title: "string"} or {title: "string", value: "string", link: "string", type: "link"}
+         *  - logStackPath: if you want to change the default log stack path of the app
+         *  - logStack: if you want to change the default log stack object of the app
          */
         function openSharePopup (tuple, reference, extraParams) {
+            var defer = $q.defer();
+            
             var refTable = reference.table;
             var params = extraParams || {};
 
@@ -82,10 +87,11 @@
             params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-
+            
+            var stack = params.logStack ? params.logStack : logService.getStackObject();
             var snaptimeHeader = {
-                action: logService.getActionString(logService.logActions.SHARE_OPEN),
-                stack: logService.getStackObject(),
+                action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
+                stack: stack,
                 catalog: reference.defaultLogInfo.catalog,
                 schema_table: reference.defaultLogInfo.schema_table
             }
@@ -102,7 +108,11 @@
                         params: params
                     }
                 }, false, false, false); // not defining any extra callbacks
+                
+                defer.resolve();
             });
+            
+            return defer.promise;
         }
 
         return {
@@ -344,7 +354,8 @@
 
             // log related attributes
             logStack:                  logStack,
-            logStackPath:               params.logStackPath ? params.logStackPath : null,
+            logStackPath:              params.logStackPath ? params.logStackPath : null,
+            logAppMode:                params.logAppMode ? params.logAppMode : null, 
 
             // used for the recordset height and sticky section logic
             // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
@@ -467,7 +478,13 @@
      *   - {String} versionDateRelative - version decoded to it's datetime then presented as relative to today's date
      *   - {boolean} showVersionWarning - decides whether to show "out of date content" warning
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
-     *
+     *   - {String} title (optional) - will be displayed in the modal title
+     *   - {boolean} hideCitation (optional) - hide the citation section
+     *   - {boolean} hideHeader (optional) - hides all the section headers.
+     *   - {Object[]} extraInformation (optional) - An array of objects that will be displayed. Each element can be either
+     *                {value: "string", title: "string"} or {title: "string", value: "string", link: "string", type: "link"}
+     *   - {Object} logStackPath (optional) - if you want to change the default log stack path of the app
+     *   - {Object} logStack (optional) - if you want to change the default log stack object of the app 
      */
     .controller('ShareCitationController', ['logService', 'params', '$rootScope', '$uibModalInstance', '$window', function (logService, params, $rootScope, $uibModalInstance, $window) {
         var vm = this;
@@ -519,8 +536,8 @@
 
         vm.copyToClipboard = function (text, action) {
             logService.logClientAction({
-                action: logService.getActionString(action),
-                stack: logService.getStackObject()
+                action: logService.getActionString(action, params.logStackPath),
+                stack: params.logStack ? params.logStack : logService.getStackObject()
             }, params.reference.defaultLogInfo);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
@@ -541,8 +558,8 @@
 
         vm.logCitationDownload = function (action) {
             logService.logClientAction({
-                action: logService.getActionString(action),
-                stack: logService.getStackObject()
+                action: logService.getActionString(action, params.logStackPath),
+                stack: params.logStack ? params.logStack : logService.getStackObject()
             }, params.reference.defaultLogInfo);
         }
 

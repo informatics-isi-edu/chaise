@@ -1073,6 +1073,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
         it ("user should be able to select new values and submit.", function (done) {
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
             chaisePage.clickButton(inp).then(function (){
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Save", "Submit button text for add pure and binary popup is incorrect");
+
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
                 browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);

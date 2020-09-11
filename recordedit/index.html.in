@@ -12,7 +12,7 @@
     </div>
     <div class="app-container re_s_{{idSafeSchemaName}} re_t_{{idSafeTableName}}">
         <navbar></navbar>
-        <loading-spinner ng-show="!displayReady && !error"></loading-spinner>
+        <loading-spinner id="recordedit-main-spinner" ng-show="!displayReady && !error"></loading-spinner>
         <div class="recordedit-container" ng-if="reference && (reference.canCreate || reference.canUpdate)" ng-controller="FormController as form">
             <div class="form-container">
                 <div class="app-content-container" ng-hide="form.resultset">
@@ -27,7 +27,7 @@
                                     <div class="title-buttons">
                                         <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
-                                            <span>Submit</span>
+                                            <span>Save</span>
                                         </button>
                                     </div>
                                     <h1 id="page-title">
@@ -111,38 +111,30 @@
 
                                                             <!-- timestamp[tz] input -->
                                                             <div ng-switch-when="timestamp">
-                                                                <div class="row">
-                                                                    <div class="col-xs-12">
-                                                                        <div class="chaise-input-group">
-                                                                            <span class="chaise-input-group-prepend">
-                                                                                <div class="chaise-input-group-text dt-width">Date</div>
-                                                                            </span>
-                                                                            <div class="chaise-input-control has-feedback">
-                                                                                <input class="input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="{{form.dataFormats.placeholder.date}}" name="{{::column.name}}" ui-mask="{{form.maskOptions.date.mask}}" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(columnIndex);" date timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
-                                                                                <chaise-clear-input btn-class="ts-date-remove" click-callback="::form.clearDate(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, column.type.name, 'date')"></chaise-clear-input>
-                                                                            </div>
-                                                                        </div>
+                                                                <div class="chaise-input-group">
+                                                                    <span class="chaise-input-group-prepend">
+                                                                        <div class="chaise-input-group-text dt-width">Date</div>
+                                                                    </span>
+                                                                    <div class="chaise-input-control has-feedback">
+                                                                        <input class="input-timestamptz" type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].date" placeholder="{{form.dataFormats.placeholder.date}}" name="{{::column.name}}" ui-mask="{{form.maskOptions.date.mask}}" ui-options="form.maskOptions.date.options" model-view-value="true" ng-required="::form.isRequired(columnIndex);" date timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                        <chaise-clear-input btn-class="ts-date-remove" click-callback="::form.clearDate(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, column.type.name, 'date')"></chaise-clear-input>
                                                                     </div>
-                                                                    <div class="col-xs-12">
-                                                                        <div class="chaise-input-group">
-                                                                            <span class="chaise-input-group-prepend">
-                                                                                <div class="chaise-input-group-text dt-width">Time</div>
-                                                                            </span>
-                                                                            <div class="chaise-input-control has-feedback">
-                                                                                <input type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="{{form.dataFormats.placeholder.time}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
-                                                                                <chaise-clear-input btn-class="ts-time-remove" click-callback="::form.clearTime(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, column.type.name, 'time')"></chaise-clear-input>
-                                                                            </div>
-                                                                            <span class="chaise-input-group-append">
-                                                                                <button class="chaise-btn chaise-btn-secondary" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'">AM</button>
-                                                                            </span>
-                                                                        </div>
+                                                                </div>
+                                                                <div class="chaise-input-group">
+                                                                    <span class="chaise-input-group-prepend">
+                                                                        <div class="chaise-input-group-text dt-width">Time</div>
+                                                                    </span>
+                                                                    <div class="chaise-input-control has-feedback">
+                                                                        <input type="text" ng-model="form.recordEditModel.rows[rowIndex][column.name].time" placeholder="{{form.dataFormats.placeholder.time}}" name="{{::column.name}}" model-view-value="true" time timestamp validate-values="form.recordEditModel.rows[rowIndex][column.name]"></input>
+                                                                        <chaise-clear-input btn-class="ts-time-remove" click-callback="::form.clearTime(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, column.type.name, 'time')"></chaise-clear-input>
                                                                     </div>
-                                                                    <div class="col-xs-12">
-                                                                        <div class="chaise-btn-group pull-right" role="group">
-                                                                            <button type="button" name="{{::column.name}}-now" class="chaise-btn chaise-btn-secondary" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
-                                                                            <button type="button" name="{{::column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
-                                                                        </div>
-                                                                    </div>
+                                                                    <span class="chaise-input-group-append">
+                                                                        <button class="chaise-btn chaise-btn-secondary" name="{{::column.name}}" type="button" ng-click="::form.toggleMeridiem(rowIndex, column.name);" ng-bind="form.recordEditModel.rows[rowIndex][column.name].meridiem || 'AM'">AM</button>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="chaise-btn-group pull-right" role="group">
+                                                                    <button type="button" name="{{::column.name}}-now" class="chaise-btn chaise-btn-secondary" ng-click="::form.applyCurrentDatetime(rowIndex, column.name, column.type.name);">Now</button>
+                                                                    <button type="button" name="{{::column.name}}-clear" class="chaise-btn chaise-btn-secondary" ng-click="::form.clearDatetime(rowIndex, column.name, column.type.name);">Clear</button>
                                                                 </div>
                                                             </div>
 

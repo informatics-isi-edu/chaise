@@ -49,6 +49,35 @@ describe('View existing record,', function() {
         });
 
         if (process.env.TRAVIS) {
+            it('should navigate to a record page if a proper RID is typed into the RID search box', function (done) {
+                var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "2004"}]).RID
+                var allWindows;
+
+                element(by.id('rid-search-input')).sendKeys(rid);
+                element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
+                    return browser.getAllWindowHandles();
+                }).then(function (tabs) {
+                    allWindows = tabs;
+                    expect(allWindows.length).toBe(2, "new tab wasn't opened");
+
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+                    chaisePage.recordPageReady();
+                    return browser.driver.getCurrentUrl();
+                }).then(function (url) {
+                    var newTabUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + "RID=" + rid;
+                    expect(url).toBe(newTabUrl, "new tab url is doesn't include the rid");
+                    browser.close();
+
+                    return browser.switchTo().window(allWindows[0]);
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
                 var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
 

@@ -336,6 +336,45 @@
 
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
 
+                    scope.showRidSearch = function () {
+                        return chaiseConfig.resolverImplicitCatalog !== null && chaiseConfig.hideGoToRID !== true
+                    }
+
+                    // RID search turned off in the cases of:
+                    //  - resolverImplicitCatalog == null
+                    //  - OR hideGoToRID == true
+                    //
+                    // The following cases need to be handled for the resolverImplicitCatalog value:
+                    //  - if resolverImplicitCatalog === null:        turn off config
+                    //  - if resolverImplicitCatalog === catalogId:   /id/RID
+                    //  - otherwise:                                  /id/catalogId/RID
+                    scope.ridSearch = function () {
+                        var resolverId = chaiseConfig.resolverImplicitCatalog,
+                            url = "/id/", catId, splitId;
+
+                        if (isCatalogDefined(catalogId)) {
+                            splitId = UriUtils.splitVersionFromCatalog(catalogId);
+
+                            // use `/id/catalog/ridSearchTerm` format if:
+                            //   - resolver id is NaN and !null
+                            //   - resolver id is a different catalog id than current page
+                            if (isNaN(resolverId) || resolverId != catalogId) {
+                                url += splitId.catalog + "/"
+                            }
+                        }
+
+                        url += scope.ridSearchTerm;
+                        // implicitly does the isCatalogDefined(catalogId) check with how function returns true/false
+                        if (scope.isVersioned()) url += "@" + splitId.version;
+
+                        logService.logClientAction({
+                            action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
+                            rid: scope.ridSearchTerm
+                        });
+
+                        $window.open(url, '_blank');
+                    }
+
                     if (isCatalogDefined(catalogId)) {
                         scope.isVersioned = function () {
                             return catalogId.split("@")[1] ? true : false;

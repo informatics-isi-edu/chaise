@@ -37,6 +37,7 @@ var chaiseConfig = {
             },
             {
                 name: "Records",
+                url: "/chaise/search/#1/isa:dataset",
                 acls: {
                     show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
                     enable: []
@@ -45,6 +46,10 @@ var chaiseConfig = {
             {
                 name: "RecordEdit",
                 children: [
+                    {
+                        name: "For Mutating Data",
+                        header: true
+                    },
                     {
                         name: "Add Records",
                         url: "/chaise/recordedit/#1/isa:dataset",

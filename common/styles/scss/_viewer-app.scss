@@ -259,14 +259,22 @@
 
             .annotation-form-container, .annotation-list{
                 margin-bottom: 20px;
+                position: relative;
+            }
+
+            .annotation-spinner {
+                #spinner {
+                    top: 200px;
+                    // width: 160px;
+                    // height: 90px;
+                }
             }
 
             .annotation-form-container{
                 border: 1px solid #d9d9d9;
                 border-radius: 3px;
                 background: #f8f8f8;
-                position: relative;
-                
+
                 .form-spinner-overlay {
                     position: absolute;
                     top: 0;
@@ -277,7 +285,7 @@
                     opacity: 0.5;
                     z-index: 6; // higher than the clear button
                 }
-                
+
                 .form-spinner {
                     // make sure the text is visible in one line
                     #spinner {
@@ -427,6 +435,7 @@
                 position: absolute;
                 right: 5px;
                 top: 5px;
+                cursor: pointer;
             }
 
 
@@ -642,7 +651,7 @@
                 display: flex;
                 flex-direction: row;
                 overflow: hidden;
-                background: #fff;
+                background: $white-color;
                 flex-shrink: 0;
                 min-height: 40px;
                 cursor: pointer;
@@ -657,20 +666,20 @@
 
                 &.current input.edit,
                 &.current .anatomy{
-                    color : #fff;
+                    color : $white-color;
                 }
 
                 &.current .anatomy a{
-                    color : #fff;
+                    color : $white-color;
                 }
 
 
-                &.current .editBtn{
-                    color: #fff;
+                &.current .editBtn, &.current .editBtn i{
+                    color: $white-color;
                 }
                 .editBtn.selected{
                     background: #3669ac;
-                    color: #ffffff;
+                    color: $white-color;
                     padding: 3px;
                 }
 
@@ -739,18 +748,29 @@
                     align-items: center;
                 }
 
+                // TODO it's called editBtn but used for all the annotation buttons
                 .editBtn{
                     text-decoration: none;
                     padding: 3px;
                     border-radius: 2px;
                     margin: 2px;
-                    color: #407cca;
+                    color: $primary-color;
                     cursor: pointer;
                     font-size: 12px;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     border: none;
+                    background: none;
+
+                    // change chaise default color
+                    .glyphicon-refresh {
+                        color: $primary-color;
+                    }
+
+                    &:focus {
+                        outline: none;
+                    }
 
                     &:last-child{
                         margin-right: 8px;
@@ -760,21 +780,32 @@
                         color: #0099cce0;
                     }
 
-                    &.disabled{
-                        background: none;
-                        color: #424242;
-                        cursor: default;
+                    &.disabled,&:disabled{
+                        color: $disabled-color;
+                        cursor: not-allowed;
                     }
                 }
 
                 .itemRow{
                     display: flex;
                     flex-direction: row;
-                }
+                    .annotation-color-container {
+                        width: 10px;
+                        height: 10px;
+                        background-color: transparent;
+                        margin-top: 8px;
+                        margin-right: 2px;
 
-                .itemRow .anatomy{
-                    flex : 1;
-                    padding: 3px;
+                        .annotation-color-item {
+                            height: 100%;
+                            float: left;
+                        }
+                    }
+
+                    .anatomy {
+                        flex : 1;
+                        padding: 3px;
+                    }
                 }
 
                 .itemMenu{
@@ -879,7 +910,7 @@
 
 // modify the chaise share citation that is displayed for annotations
 #viewer .chaise-share-citation {
-    
+
     li:not(#share-link) {
         h3.share-item-header {
             display: inline-block;
@@ -887,22 +918,22 @@
                 content: ":";
             }
         }
-        
+
         .share-item-value {
             padding-left: 0px;
         }
     }
-    
+
     h3.share-item-header {
         font-size: 1.1em;
         margin-top: 5px;
         margin-bottom: 0px;
     }
-    
+
     .share-item-value {
         padding-left: 10px;
     }
-    
+
     #share-link {
         padding-top: 10px;
     }

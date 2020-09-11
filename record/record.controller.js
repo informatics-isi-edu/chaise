@@ -104,7 +104,12 @@
 
         // this function assumes tuple and reference are attached to the $rootScope
         vm.sharePopup = function() {
-            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference);
+            vm.waitingForSharePopup = true;
+            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference).then(function () {
+                vm.waitingForSharePopup = false;
+            }).catch(function (err) {
+                // the promise won't be rejected
+            });
         };
 
         vm.toRecordSet = function(ref) {
@@ -552,7 +557,7 @@
 
             var elementObj = determineScrollElement(queryParam);
             // no element was returned, means there wasn't a matching displayname on the page
-            if (!elementObj.element) return;
+            if (!elementObj || !elementObj.element) return;
 
             scrollToElement(elementObj.element);
         }

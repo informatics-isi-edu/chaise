@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
+    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', 'logService', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, logService, $window, $rootScope, $scope) {
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -50,34 +50,22 @@
                 var messageType = data.messageType;
 
                 switch (messageType) {
-                    case "disableAnnotationList":
-                        $scope.$apply(function(){
-                            // Note: This logic need to change
-                            // users should still be able to open annotation list if there's no annotation
-                            // the following two lines are commented for demo purpose
-                            // $rootScope.disableAnnotationSidebar = data.content;
-                            // TODO should be moved to annotation controller
-                            $rootScope.hideAnnotationSidebar = data.content;
-                            // var sidebarptr=$('#sidebar');
-                            // if(data.content) {
-                            //   sidebarptr.css("display","none");
-                            //   } else {
-                            //     sidebarptr.css("display","block");
-                            // }
-
-                        });
-                        break;
-                    case "errorAnnotation":
-                        $scope.$apply(function(){
-                            vm.error = "No data in svg found.";
-                        });
-                        break;
                     case "hideChannelList":
                         $scope.$apply(function(){
                           vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
                         });
                         break;
-
+                    case "downloadViewDone":
+                        $scope.$apply(function(){
+                          vm.waitingForScreenshot = false;
+                        });
+                        break;
+                    case "downloadViewError":
+                        $scope.$apply(function(){
+                          vm.waitingForScreenshot = false;
+                          AlertsService.addAlert("Couldn't process the screenshot.", "warning");
+                        });
+                        break;
                     default:
                         // other messages are handled by other controllers
                 }
@@ -87,7 +75,7 @@
         });
 
         function downloadView() {
-            var filename = vm.image.entity.slide_id;
+            var filename = context.imageID;
             if (!filename) {
                 filename = 'image';
             }
@@ -95,19 +83,45 @@
                 messageType: 'downloadView',
                 content: filename
             }
+
+            vm.waitingForScreenshot = true;
             iframe.postMessage(obj, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_SCREENSHOT, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function zoomInView() {
             iframe.postMessage({messageType: 'zoomInView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_IN, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function zoomOutView() {
             iframe.postMessage({messageType: 'zoomOutView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_OUT, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function homeView() {
             iframe.postMessage({messageType: 'homeView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_RESET, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function toggleAnnotations() {
@@ -135,7 +149,15 @@
                 sidebarptr.css("display","none");
             }
             // iframe.postMessage({messageType: 'openAnnotations'}, origin);
+
+            var action = $rootScope.hideAnnotationSidebar ? logService.logActions.VIEWER_ANNOT_PANEL_SHOW : logService.logActions.VIEWER_ANNOT_PANEL_HIDE;
             $rootScope.hideAnnotationSidebar = !$rootScope.hideAnnotationSidebar;
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(action, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function covered() {
@@ -159,8 +181,18 @@
             //   if(covered())
                 //   sidebarptr.css("display","none");
             // }
+
+            var action = vm.filterChannelsAreHidden ? logService.logActions.VIEWER_CHANNEL_HIDE : logService.logActions.VIEWER_CHANNEL_SHOW;
+
             iframe.postMessage({messageType: 'filterChannels'}, origin);
             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+
+            // log the click
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(action, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function testSafari() {

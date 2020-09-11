@@ -3,12 +3,24 @@
 
     angular.module('chaise.utils', ['chaise.errors'])
 
+    .constant("chaiseConfigPropertyNames", [
+        "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
+        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
+        "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
+        "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+        "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
+        "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+        "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "configRules"
+    ])
+
     .constant("defaultChaiseConfig", {
           "internalHosts": [window.location.host],
           "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
+          "dataBrowser": "/chaise/recordset",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
           "deleteRecord": false,
@@ -23,7 +35,8 @@
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
-          "logClientActions": true
+          "logClientActions": true,
+          "hideGoToRID": false
     })
 
     .constant("appTagMapping", {
@@ -113,7 +126,7 @@
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
-            showMore: "Click to show more available fitlers",
+            showMore: "Click to show more available filters",
             showDetails: "Click to show more details about the filters"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
@@ -223,7 +236,7 @@
          * @desc
          * Converts a chaise URI to an ermrest resource URI object or string.
          * @returns {string|Object}
-         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', `paction`, and `isQueryParameter`
          * otherwise it will return the ermrest uri string.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
@@ -246,7 +259,7 @@
             var ermrestUri = {},
                 queryParams = {},
                 queryParamsString = "",
-                catalogId, ppid, pcid;
+                catalogId, ppid, pcid, paction;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
@@ -266,6 +279,9 @@
                     }
                     if (queries[i].indexOf("ppid=") === 0) {
                         ppid = queries[i].split("=")[1];
+                    }
+                    if (queries[i].indexOf("paction=") === 0) {
+                        paction = queries[i].split("=")[1];
                     }
                     var q_parts = queries[i].split("=");
                     queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
@@ -368,6 +384,7 @@
                     hash: originalHash,
                     ppid: ppid,
                     pcid: pcid,
+                    paction: paction,
                     queryParamsString: queryParamsString,
                     queryParams: queryParams,
                     isQueryParameter: isQueryParameter
@@ -886,7 +903,7 @@
                 return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
-            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
+            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current catalog
             if (!isNaN(resolverId) && resolverId == currCatalog) {
                 return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
             }
@@ -907,6 +924,19 @@
 
             return hash;
         }
+
+        /**
+         *
+         */
+        function splitVersionFromCatalog(id) {
+            var split = id.split('@');
+
+            return {
+                catalog: split[0],
+                version: split[1]
+            }
+        }
+
         /**
          * @param {String} hash - window.location.hash string
          */
@@ -1050,6 +1080,7 @@
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
+            splitVersionFromCatalog: splitVersionFromCatalog,
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
             getAbsoluteURL: getAbsoluteURL
@@ -1760,7 +1791,9 @@
         }
     }])
 
-    .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
+    .factory("ConfigUtils", ['chaiseConfigPropertyNames', 'defaultChaiseConfig', '$http', '$log', '$rootScope', '$window', function(chaiseConfigPropertyNames, defaultConfig, $http, $log, $rootScope, $window) {
+        // List of all accepted chaiseConfig properties in defined case from chaise-config.md
+
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)
@@ -1788,20 +1821,51 @@
          *     a. Apply base level configuration properties
          *     b. Apply config-rules in order depending on matching host definitions
          *
+         * NOTE: Chaise Config properties can be case-insensitive since we check the properties against a whitelist of accepted property names.
+         * If the same property is defined in the same "chaise config" more than once with different case, the latter defined property will be used.
+         *
+         * For instance, given the below object, defaultCATALOG will be used over defaultCatalog:
+         * chaise-config.js = {
+         *   "defaultCatalog": 1,
+         *   "defaultCATALOG": 2
+         * }
+         *
          * @params {Object} catalogAnnotation - the chaise-config object returned from the 2019 chaise-config annotation tag attached to the catalog object
          *
          */
         function setConfigJSON(catalogAnnotation) {
+            function matchKey(collection, keyToMatch) {
+                return collection.filter(function (key) {
+                    // toLowerCase both keys for a case insensitive comparison
+                    return keyToMatch.toLowerCase() === key.toLowerCase();
+                });
+            }
             var cc = {};
             // check to see if global chaise-config (chaise-config.js) is available
-            if (typeof chaiseConfig != 'undefined') cc = Object.assign({}, chaiseConfig);
+            if (typeof chaiseConfig != 'undefined') {
+                // loop through properties and compare to defaultConfig to see if they are valid
+                // chaiseConfigPropertyNames is a whitelist of all accepted values
+                for (var key in chaiseConfig) {
+                    // see if returned key is in the list we accept
+                    var matchedKey = matchKey(chaiseConfigPropertyNames, key);
+
+                    // if we found a match for the current key in chaiseConfig, use the match from chaiseConfigPropertyNames as the key and set the value
+                    if (matchedKey.length > 0 && matchedKey[0]) {
+                        cc[matchedKey[0]] = chaiseConfig[key];
+                    }
+                }
+            }
 
             // Loop over default properties (global chaise config (chaise-config.js) may not be defined)
             // Handles case 1 and 2a
             for (var property in defaultConfig) {
                 // use chaise-config.js property instead of default if defined
-                if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
-                    cc[property] = chaiseConfig[property];
+                if (typeof chaiseConfig != 'undefined') {
+                    // see if "property" matches a key in chaiseConfig
+                    var matchedKey = matchKey(Object.keys(chaiseConfig), property);
+
+                    // property will be in proper case already since it comes from our config object in JS
+                    cc[property] = ((matchedKey.length > 0 && matchedKey[0]) ? chaiseConfig[property] : defaultConfig[property]);
                 } else {
                     // property doesn't exist
                     cc[property] = defaultConfig[property];
@@ -1829,7 +1893,12 @@
                                 // $window.location.hostname refers to just the hostname (www.something.com)
                                 if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
                                     for (var property in ruleset.config) {
-                                        cc[property] = ruleset.config[property];
+                                        var matchedKey = matchKey(chaiseConfigPropertyNames, property);
+
+                                        // if we found a match for the current key in ruleset.config, use the match from chaiseConfigPropertyNames as the key and set the value
+                                        if (matchedKey.length > 0 && matchedKey[0]) {
+                                            cc[matchedKey[0]] = ruleset.config[property];
+                                        }
                                     }
                                     break;
                                 }
@@ -1848,7 +1917,12 @@
             if (typeof catalogAnnotation == "object") {
                 // case 3a
                 for (var property in catalogAnnotation) {
-                    cc[property] = catalogAnnotation[property];
+                    var matchedKey = matchKey(chaiseConfigPropertyNames, property);
+
+                    // if we found a match for the current key in catalogAnnotation, use the match from chaiseConfigPropertyNames as the key and set the value
+                    if (matchedKey.length > 0 && matchedKey[0]) {
+                        cc[matchedKey[0]] = catalogAnnotation[property];
+                    }
                 }
 
                 // case 3b
@@ -1912,10 +1986,12 @@
             var cc = getConfigJSON();
 
             var mode = null;
-            if (context.indexOf('compact') != -1 && cc.SystemColumnsDisplayCompact)  {
-                mode = cc.SystemColumnsDisplayCompact;
-            } else if (context == 'detailed' && cc.SystemColumnsDisplayDetailed) {
-                mode = cc.SystemColumnsDisplayDetailed;
+            if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
+                mode = cc.systemColumnsDisplayCompact;
+            } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
+                mode = cc.systemColumnsDisplayDetailed;
+            } else if (context.indexOf('entry') != -1 && cc.systemColumnsDisplayEntry) {
+                mode = cc.systemColumnsDisplayEntry;
             }
 
             return mode;
@@ -2281,6 +2357,9 @@
             RELOAD: clientPathActionSeparator + "reload",
             DELETE: clientPathActionSeparator + "delete",
             EXPORT: clientPathActionSeparator + "export",
+            SHARE_OPEN: "share" + clientPathActionSeparator + "open",
+            CREATE: clientPathActionSeparator + "create",
+            UPDATE: clientPathActionSeparator + "update",
 
             // - client:
             CANCEL: clientPathActionSeparator + "cancel",
@@ -2291,6 +2370,9 @@
             EDIT_INTEND: "edit" + clientPathActionSeparator + "intend",
             DELETE_INTEND: "delete" + clientPathActionSeparator + "intend",
             DELETE_CANCEL: "delete" + clientPathActionSeparator + "cancel",
+            SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
+            SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
+            CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
 
             // recordset app and table:
 
@@ -2333,7 +2415,6 @@
             // record app:
 
             // - server:
-            SHARE_OPEN: "share" + clientPathActionSeparator + "open",
             LOAD_DOMAIN: clientPathActionSeparator + "load-domain", // add pure and binary first request
             RELOAD_DOMAIN: clientPathActionSeparator + "reload-domain",
             LINK: clientPathActionSeparator + "link",
@@ -2353,19 +2434,12 @@
             TOC_SCROLL_TOP: "toc" + separator + "main" + clientPathActionSeparator + "scroll-to",
             TOC_SCROLL_RELATED: "toc" + separator + "section" + clientPathActionSeparator + "scroll-to",
 
-            SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
-            SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
-
-            CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
-
 
             // recordedit app:
 
             // - server:
             FOREIGN_KEY_PRESELECT: clientPathActionSeparator +  "preselect",
             FOREIGN_KEY_DEFAULT: clientPathActionSeparator + "default",
-            CREATE: clientPathActionSeparator + "create",
-            UPDATE: clientPathActionSeparator + "update",
 
             // - client:
             FORM_CLONE: clientPathActionSeparator + "clone",
@@ -2379,13 +2453,35 @@
 
 
             // viewer app:
+            // TODO viewer logs are a bit different, so for now I just used a prefix for them.
+            //      I should later evaluate this decision and see whether I should remove these prefixes
+            //      after that we should be able to merge some of the actions with the rest of the chaise
 
             // - server:
-            VIEWER_ANNOT_LOAD: "annotation" + clientPathActionSeparator + "read",
-            VIEWER_ANNOT_COMMENT_LOAD: "annotation_comment" + clientPathActionSeparator + "read",
-            VIEWER_COMMENT_LOAD: "commnet" + clientPathActionSeparator + "read",
-            VIEWER_ANATOMY_LOAD: "anatomy" + clientPathActionSeparator + "read",
+            VIEWER_ANNOT_LOAD: clientPathActionSeparator + "load",
+            VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
 
+            // - client:
+            VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",
+            VIEWER_ANNOT_PANEL_HIDE: "toolbar/panel" + clientPathActionSeparator + "hide",
+            VIEWER_CHANNEL_SHOW: "toolbar/channel" + clientPathActionSeparator + "show",
+            VIEWER_CHANNEL_HIDE: "toolbar/channel" + clientPathActionSeparator + "hide",
+            VIEWER_SCREENSHOT: "toolbar" + clientPathActionSeparator + "screenshot",
+            VIEWER_ZOOM_RESET: "toolbar" + clientPathActionSeparator + "zoom-reset",
+            VIEWER_ZOOM_IN: "toolbar" + clientPathActionSeparator + "zoom-in",
+            VIEWER_ZOOM_OUT: "toolbar" + clientPathActionSeparator + "zoom-out",
+            // VIEWER_ZOOM_IN_MOUSE: "mouse" + clientPathActionSeparator + "zoom-in",
+            // VIEWER_ZOOM_OUT_MOUSE: "mouse" + clientPathActionSeparator + "zoom-out",
+
+            VIEWER_ANNOT_LINE_THICKNESS: "line-thickness" + clientPathActionSeparator + "adjust",
+            VIEWER_ANNOT_DISPLAY_ALL: clientPathActionSeparator + "display-all",
+            VIEWER_ANNOT_DISPLAY_NONE: clientPathActionSeparator + "display-none",
+            VIEWER_ANNOT_SHOW: clientPathActionSeparator + "show",
+            VIEWER_ANNOT_HIDE: clientPathActionSeparator + "hide",
+            VIEWER_ANNOT_HIGHLIGHT: clientPathActionSeparator + "highlight",
+
+            VIEWER_ANNOT_DRAW_MODE_SHOW: "draw-mode" + clientPathActionSeparator + "show",
+            VIEWER_ANNOT_DRAW_MODE_HIDE: "draw-mode" + clientPathActionSeparator + "hide",
 
             // - authen:
             LOGOUT_NAVBAR: "navbar/account" + clientPathActionSeparator + "logout",
@@ -2406,7 +2502,8 @@
             NAVBAR_MENU_INTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-internal",
             NAVBAR_MENU_OPEN: "navbar/menu" + clientPathActionSeparator + "open",
             NAVBAR_ACCOUNT_DROPDOWN: "navbar/account" + clientPathActionSeparator + "open",
-            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open"
+            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open",
+            NAVBAR_RID_SEARCH: "navbar/go-to-rid" + clientPathActionSeparator + "navigate"
         });
 
         var logStackTypes = Object.freeze({
@@ -2416,7 +2513,10 @@
             FOREIGN_KEY: "fk",
             COLUMN: "col",
             PSEUDO_COLUMN: "pcol",
-            FACET: "facet"
+            FACET: "facet",
+
+            // used in viewer app:
+            ANNOTATION: "annotation"
         });
 
         var logStackPaths = Object.freeze({
@@ -2434,7 +2534,11 @@
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",
-            RESULT_FAILED_SET: "result-failed-set"
+            RESULT_FAILED_SET: "result-failed-set",
+
+            // used in viewer app:
+            ANNOTATION_ENTITY: "annotation-entity",
+            ANNOTATION_SET: "annotation-set"
         });
 
         var appModes = Object.freeze({
@@ -2508,12 +2612,16 @@
          * Returns the appropriate stack object that should be used.
          * If childStackElement passed, it will append it to the existing logStack of the app.
          * @param {Object} childStackElement
+         * @param {Object=} logStack if passed, will be used instead of the default value of the app.
          */
-        function getStackObject(childStackNode) {
-            if (childStackNode) {
-                return $rootScope.logStack.concat(childStackNode);
+        function getStackObject(childStackNode, logStack) {
+            if (!logStack) {
+                logStack = $rootScope.logStack;
             }
-            return $rootScope.logStack;
+            if (childStackNode) {
+                return logStack.concat(childStackNode);
+            }
+            return logStack;
         }
 
         /**
@@ -2531,14 +2639,14 @@
         /**
          * Creates a new stack node given the type, table, and extra information.
          * @param {String} type - one of the logStackTypes
-         * @param {ERMrest.Table} table - the table object of this node
+         * @param {ERMrest.Table=} table - the table object of this node
          * @param {Object=} extraInfo - if you want to attach more info to this node.
          */
         function getStackNode(type, table, extraInfo) {
-            var obj = {
-                type: type,
-                s_t: table.schema.name + ":" + table.name
-            };
+            var obj = {type: type};
+            if (table) {
+                obj.s_t = table.schema.name + ":" + table.name;
+            }
             if (typeof extraInfo === "object" && extraInfo !== null) {
                 for (var k in extraInfo) {
                     if (!extraInfo.hasOwnProperty(k)) continue;
@@ -2670,18 +2778,28 @@
             return defer.promise;
         }
 
-        /* Custom function to add styling based on browser type and operating system */
-        function addMacFirefoxClass(){
-          var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
-          var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
+        /**
+         * Detects the running enviornments and adss the following classes to chaise-body:
+         *  - chaise-mac: if it's running on macOS
+         *  - chaise-firefox: if it's running on Firefox
+         *  - chaise-iframe: if running in an iframe
+         */
+        function addBodyClasses(){
+            var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
+            var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
 
-          var bodyElement = document.querySelector(".chaise-body");
-          if (bodyElement){
-            if(osClass)
-              UiUtils.addClass(bodyElement, osClass);
-            if(browserClass)
-              UiUtils.addClass(bodyElement, browserClass);
-           }
+            var bodyElement = document.querySelector(".chaise-body");
+            if (!bodyElement) return;
+
+            if(osClass) {
+                UiUtils.addClass(bodyElement, osClass);
+            }
+            if(browserClass) {
+                UiUtils.addClass(bodyElement, browserClass);
+            }
+            if ($window.self !== $window.parent) {
+                UiUtils.addClass(bodyElement, "chaise-iframe");
+            }
         }
 
         function addTitle() {
@@ -2846,7 +2964,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
-            addMacFirefoxClass();
+            addBodyClasses();
             return addCustomCSS();
         }
 

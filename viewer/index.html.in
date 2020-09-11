@@ -23,7 +23,7 @@
                                 <h3 class="side-panel-heading">{{anno.editingAnatomy == null ? "Annotations" :  (anno.editingAnatomy.isNew ? "Create annotation" : "Edit annotation")}}</h3>
                             </div>
                             <div class="pull-right">
-                                <button ng-disabled="anno.annotationFormPendingResult" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
+                                <button ng-disabled="anno.submissionButtonDisabled" ng-show="anno.editingAnatomy !== null" class="chaise-btn chaise-btn-tertiary" ng-click="anno.closeAnnotationForm(true)">
                                     <span class="fas fa-arrow-left"></span>
                                     <span>Back</span>
                                 </button>
@@ -41,12 +41,6 @@
                             <button ng-click="osd.filterChannels();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" uib-tooltip="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
-                            <!-- <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" title="edit annotations" id="edit-btn">
-                                <span class="glyphicon glyphicon-edit"></span> Annotations
-                            </button> -->
-                            <!-- <button ng-click="osd.toggleAnnotations();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick': osd.annotationsAreHidden}" type="button" role="button" title="hide or show annotations" id="hide-btn">
-                                <span class="glyphicon glyphicon-eye-close"></span> Hide
-                            </button> -->
                             <button ng-click="osd.zoomInView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
@@ -56,8 +50,10 @@
                             <button ng-click="osd.homeView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="reset" id="gohome-btn">
                                 <span class="glyphicon glyphicon-home"></span> Reset
                             </button>
-                            <button ng-click="osd.downloadView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="take snapshot" id="download-btn">
-                                <span class="glyphicon glyphicon-camera"></span> Take a Screenshot </button>
+                            <button ng-click="osd.downloadView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="take snapshot" id="download-btn" ng-disabled="osd.waitingForScreenshot">
+                                <span class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': osd.waitingForScreenshot, 'glyphicon-camera': !osd.waitingForScreenshot}"></span>
+                                <span>Take a Screenshot</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -66,11 +62,11 @@
             <div class="bottom-panel-container" id="viewer-content">
                 <div class="side-panel-resizable" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" resizable r-directions=["right"] r-flex="true" r-partners="osd.resizePartners">
                     <div class="side-panel-container">
-                        <div class='annotation-list-container facet-panel'>
+                        <div class='annotation-list-container'>
                             <div class='strokeScale'>
                                 <span class='name'>Line Thickness <span class='strokeValue'>{{ anno.strokeScale }}</span></span>
                                 <div class='slider'>
-                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()">
+                                    <input type="range" class='strokeSlider' min="1" max="6" step="0.05" ng-model="anno.strokeScale" ng-change="anno.changeStrokeScale()" ng-mousedown="anno.changeStrokeScaleStart()" ng-mouseup="anno.changeStrokeScaleStop()">
                                 </div>
                                 <div class='sliderTicks'>
                                     <span class='currentScale'>1</span>
@@ -82,9 +78,9 @@
                                 </div>
                             </div>
                             <div class='annotation-form-container' ng-form="anno.annoForm" ng-if="anno.showPanel" ng-class="{'open' : anno.editingAnatomy !== null}">
-                                <div class="form-spinner-overlay" ng-if="anno.annotationFormPendingResult">
+                                <div class="form-spinner-overlay" ng-if="anno.submissionButtonDisabled">
                                 </div>
-                                <loading-spinner class="form-spinner" ng-if="anno.annotationFormPendingResult" message="Saving the changes..."></loading-spinner>
+                                <loading-spinner class="form-spinner" ng-if="anno.submissionButtonDisabled" message="Saving the changes..."></loading-spinner>
                                 <div class="annotationRow">
                                     <div class="flex-column entity-key">
                                         <div class="annotationRowValue" ng-show="!anno.editingAnatomy.isNew && !anno.editingAnatomy.isStoredInDB">
@@ -165,7 +161,7 @@
                                                 <span>Save</span>
                                             </button>
                                         </div>
-                                        <div class='annotationRowValue' ng-disabled="anno.annotationFormPendingResult || !canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
+                                        <div class='annotationRowValue' ng-disabled="!canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
                                             <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>
@@ -175,6 +171,8 @@
                                 </div>
                             </div>
                             <div class='annotation-list' ng-show="anno.editingAnatomy == null">
+                                <!-- message="Loading annotations..." -->
+                                <loading-spinner class="annotation-spinner" ng-if="loadingAnnotations"></loading-spinner>
                                 <span class='row filter' data-type='overlayVisibility'>
                                     <span class='name'> Display : </span>
                                     <span ng-click="anno.changeAllAnnotationsVisibility();" ng-class="anno.isDisplayAll ?'displayAllBtn selected' : 'displayAllBtn'" data-type='all'>
@@ -201,7 +199,7 @@
                                     <button ng-show="canCreate" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                                 </div>
                                 <span class='resultCount'>
-                                    <span>Displaying {{ anno.matchCount }} of {{ anno.totalCount }} Annotations</span>
+                                    <span>Displaying {{ anno.matchCount }} <span ng-if="!loadingAnnotations"> of {{ anno.totalCount }} </span>Annotations</span>
                                 </span>
                                 <div ng-if="osd.error != ''" class="annotation-error">
                                     {{osd.error}}
@@ -210,6 +208,9 @@
                                     <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels track by $index" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
                                         <div class='itemContent'>
                                             <div class='itemRow'>
+                                                <span class="annotation-color-container">
+                                                    <span class="annotation-color-item" ng-repeat="annotColor in item.stroke" ng-style="{'background-color': annotColor, 'width': (100/item.stroke.length) + '%'}"></span>
+                                                </span>
                                                 <span class='anatomy'>
                                                     {{ item.name }}
                                                     <a ng-if="item.id"  href="{{item.url}}" target="_blank" tooltip-placement="auto" uib-tooltip="Click to view details and associated data">
@@ -217,15 +218,15 @@
                                                     </a>
                                                 </span>
                                                 <span class='editRow'>
-                                                    <span class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
+                                                    <button class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
                                                         <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
-                                                    </span>
-                                                    <span ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
+                                                    </button>
+                                                    <button ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
                                                         <i class="glyphicon glyphicon-pencil"></i>
-                                                    </span>
-                                                    <span ng-if="item.tuple" class="editBtn" tooltip-placement="bottom" uib-tooltip="Share Annotation" ng-click="anno.shareAnnotation(item, $index, $event)">
-                                                        <span class="chaise-btn-icon glyphicon glyphicon-share"></span>
-                                                    </span>
+                                                    </button>
+                                                    <button ng-if="item.tuple" class="editBtn" tooltip-placement="bottom" uib-tooltip="Share Annotation" ng-click="anno.shareAnnotation(item, $index, $event)" ng-disabled="anno.waitingForSharePopup">
+                                                        <i class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': item.waitingForSharePopup, 'glyphicon-share': !item.waitingForSharePopup}"></i>
+                                                    </button>
                                                 </span>
                                             </div>
                                         </span>

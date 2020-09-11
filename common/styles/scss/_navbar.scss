@@ -37,10 +37,9 @@ body > .container {
 }
 
 #live-btn {
-    margin-right: 10px;
+    margin-right: 0px; // offset marging-right: -15px from navbar-right
     color: #59C4FF;
-    padding-top: 15px;
-    padding-bottom: 15px;
+    padding: 15px;
 }
 
 .navbar-inverse .navbar-nav.navbar-right > li > a:hover{
@@ -68,6 +67,13 @@ body > .container {
     pointer-events: none;
     cursor: default;
     color: $disabled-color;
+}
+
+.dropdown-menu>li>a.chaise-dropdown-header,
+.chaise-dropdown-header {
+    font-size: $font-size;
+    color: $black-color;
+    font-weight: 600;
 }
 
 .dropdown-submenu {
@@ -112,6 +118,25 @@ body > .container {
     -webkit-border-radius: 6px 0 6px 6px;
     -moz-border-radius: 6px 0 6px 6px;
     border-radius: 6px 0 6px 6px;
+}
+
+// positioning of searh box in navbar
+.rid-search {
+    margin-right: 0px; // offset marging-right: -15px from navbar-right
+
+    .chaise-search-box {
+        padding: 13px 15px;
+    }
+
+    .chaise-input-control-sm {
+        width: 100px;
+        border-color: $black-color;
+        border-radius: 4px 0px 0px 4px;
+    }
+}
+
+#rid-search-input {
+    background-color: $table-striped-background-color;
 }
 
 #mainnav {
