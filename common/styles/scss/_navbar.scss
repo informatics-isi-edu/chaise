@@ -140,6 +140,7 @@ body > .container {
 
 /*Adding the scroll bar to the menu */
 .navbar-nav ul.dropdown-menu {
+    min-height: 50px;
     overflow-x: hidden;
     overflow-y: auto;
 }

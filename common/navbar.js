@@ -29,7 +29,7 @@
 
         var dropdownHeight = ele.offsetHeight;
         var fromTop = ele.offsetTop;
-        var footerBuffer = 30;
+        var footerBuffer = 50;
 
         if ((dropdownHeight + fromTop) > winHeight) {
             var newHeight = winHeight - fromTop - footerBuffer;
