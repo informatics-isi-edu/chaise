@@ -9,11 +9,32 @@
       }
     };
 
-    function onToggle(open, menuText) {
-      var elems = document.querySelectorAll(".dropdown-menu.show");
-      [].forEach.call(elems, function(el) {
-        el.classList.remove("show");
-      });
+    // triggered when top level menu is opened/closed
+    function onToggle(open) {
+        var elems = document.querySelectorAll(".dropdown-menu.show");
+        [].forEach.call(elems, function(el) {
+            el.classList.remove("show");
+        });
+
+        var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
+        [].forEach.call(highlightedParents, function(el) {
+            el.classList.remove("child-opened");
+        });
+    }
+
+    // ele - dropdown ul element
+    function checkHeight(ele, winHeight) {
+        // no dropdown is open
+        if (!ele) return;
+
+        var dropdownHeight = ele.offsetHeight;
+        var fromTop = ele.offsetTop;
+        var footerBuffer = 30;
+
+        if ((dropdownHeight + fromTop) > winHeight) {
+            var newHeight = winHeight - fromTop - footerBuffer;
+            ele.style.height = newHeight + "px";
+        }
     }
 
     /* Function to calculate the left of the toggleSubMenu*/
@@ -27,7 +48,7 @@
     }
 
     /**
-     * It will toggle the dropdown that this event is based on. If we're going to open it,
+     * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
      * it will close all the other dropdowns and also will return `true`.
      * @return{boolean} if true, it means that we opened the menu
      */
@@ -40,12 +61,12 @@
       var parent = immediateParent.offsetParent;
       var posValues = getOffsetValue(immediateParent);
 
-      if(parent.scrollTop == 0){
+      if (parent.scrollTop == 0){
           menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
       } else if (parent.scrollTop > 0) {
           menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
       }
-      immediateParent.style.backgroundColor = "cornflowerblue";
+
       menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
 
       var open = !menuTarget.classList.contains("show");
@@ -53,13 +74,14 @@
       // if we're opening this, close all the other dropdowns on navbar.
       if (open) {
         $event.target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
-          el.parentElement.style.backgroundColor = "";
+          el.parentElement.classList.remove("child-opened");
           el.classList.remove("show");
         });
       }
 
       // toggle the class
       menuTarget.classList.toggle("show");
+      immediateParent.classList.toggle("child-opened");
 
       return open;
     }
@@ -182,7 +204,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -275,12 +297,20 @@
 
                     scope.onToggle = function (open, menuObject) {
                         if (open) {
+                            // when menu opens, calculate height needed
                             logService.logClientAction({
                                 action: logService.getActionString(logService.logActions.NAVBAR_MENU_OPEN, "", ""),
                                 names: menuObject.names
                             });
                         }
+
                         onToggle(open);
+                        // unset height on dropdowns first
+                        var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                        [].forEach.call(openDropdowns, function(el) {
+                            el.style.height = "unset";
+                            checkHeight(el, $window.innerHeight);
+                        });
                     }
 
                     scope.canShow = function (item) {
@@ -315,6 +345,20 @@
                             $window.location = addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), ConfigUtils.getContextHeaderParams());
                         }
                     }
+
+                    // Listen to window resize event to change the width of div form-edit
+                    angular.element($window).bind('resize', function() {
+                        $timeout(function () {
+                            // find an open dropdown
+                            // NOTE: might be multiple
+                            // unset height on dropdowns first
+                            var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                            [].forEach.call(openDropdowns, function(el) {
+                                el.style.height = "unset";
+                                checkHeight(el, $window.innerHeight);
+                            });
+                        }, 0)
+                    });
                 });
             }
         };
@@ -355,6 +399,12 @@
                                 names: menuObject.names
                             });
                         }
+
+                        var openSubmenues = document.querySelectorAll(".dropdown-menu.show");
+                        [].forEach.call(openSubmenues, function(el) {
+                            el.style.height = "unset";
+                            checkHeight(el, $window.innerHeight);
+                        });
                     };
 
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);

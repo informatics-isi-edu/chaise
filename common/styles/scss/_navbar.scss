@@ -75,7 +75,7 @@ body > .container {
 }
 
 .dropdown-submenu>.dropdown-menu {
-		position: fixed;
+    position: fixed;
     margin-top: -6px;
     margin-left: -1px;
     -webkit-border-radius: 0 6px 6px 6px;
@@ -95,7 +95,7 @@ body > .container {
     border-left-color: #428bca; /* was #ccc */
     margin-top: 5px;
     margin-right: -15px;
-		padding-right: 10px;
+    padding-right: 10px;
 }
 
 .dropdown-submenu:hover>a:after {
@@ -134,10 +134,12 @@ body > .container {
     color: #fff;
 }
 
+.child-opened {
+    background-color: $table-header-background-color;
+}
+
 /*Adding the scroll bar to the menu */
-.navbar-nav>li>.dropdown-menu {
-		max-height: 250px;
-		overflow-x: hidden;
-		overflow-y: auto;
-		width: 250px;
+.navbar-nav ul.dropdown-menu {
+    overflow-x: hidden;
+    overflow-y: auto;
 }
