@@ -1365,9 +1365,8 @@ function chaisePage() {
 
     this.catchTestError = function (done) {
         return function (err) {
-            console.log(err);
-            done.fail();
-        }
+            done.fail(err);
+        };
     };
 
     this.performLogin = function(cookie, isAlertPresent, defer) {

@@ -7,20 +7,16 @@ describe("Domain filter pattern support,", function() {
 
     var EC = protractor.ExpectedConditions;
 
-    var testModalCount = function (colName, expectedCount, done, choose) {
-        var errorCB = function (err) {
-            console.log(err);
-            done.fail();
-        };
-        var successCB = function () {
-            done();
-        };
-
-        var fk,modal, rows;
+    var testModalCount = function (colName, expectedCount, done, choose, filterValue) {
+        var fk,modal, rows, filters;
+        var fkModal = chaisePage.searchPopup.getForeignKeyPopup();
 
         fk = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, 0);
         browser.wait(EC.elementToBeClickable(fk));
         fk.click().then(function () {
+            chaisePage.waitForElement(fkModal)
+            fkModal.allowAnimations(false);
+
             modal = chaisePage.recordEditPage.getModalTitle();
             browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
 
@@ -28,30 +24,32 @@ describe("Domain filter pattern support,", function() {
         }).then(function(text) {
             expect(text.indexOf("Select")).toBeGreaterThan(-1);
 
-            browser.wait(function () {
+            // make sure the number of displayed rows ar ecorrect
+            return browser.wait(function () {
                 return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                    return (ct > 0);
+                    return ct === expectedCount;
                 });
             });
-
-            rows = chaisePage.recordsetPage.getRows();
-            return rows.count();
-        }).then(function(ct) {
-            expect(ct).toBe(expectedCount, "count missmatch.");
-
-            if (!choose) {
-                chaisePage.recordEditPage.getModalCloseBtn().click().then(function () {
-                    successCB();
-                }).catch(errorCB);
+        }).then(function () {
+            //make sure the filter chiclet is displayed or not
+            filters = chaisePage.recordsetPage.getFacetFilters();
+            if (filterValue) {
+                expect(filters.isPresent()).toBe(true, "filter was not present");
+                expect(filters.count()).toBe(1, "more than one filter was present.");
+                expect(filters.first().getText()).toEqual(filterValue, "filter value missmatch");
             } else {
-                rows.get(0).all(by.css(".select-action-button")).then(function(selectButtons) {
-                    // select the row
-                    return selectButtons[0].click();
-                }).then(function () {
-                    successCB();
-                }).catch(errorCB);
+                expect(filters.isPresent()).toBe(false, "filter was present");
             }
-        }).catch(errorCB);
+
+            // close the modal if we don't need to select anything
+            if (!choose) {
+                chaisePage.recordEditPage.getModalCloseBtn().click().then(done).catch(chaisePage.catchTestError(done));
+            // select the first row
+            } else {
+                var selectBtn = chaisePage.recordsetPage.getRows().first().all(by.css(".select-action-button")).first();
+                selectBtn.click().then(done).catch(chaisePage.catchTestError(done));
+            }
+        }).catch(chaisePage.catchTestError(done));
     };
 
     describe("For table " + testParams.table_name + ',', function() {
@@ -68,6 +66,7 @@ describe("Domain filter pattern support,", function() {
                 browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
 
                 chaisePage.waitForElement(element(by.id("submit-record-button")));
+                browser.pause();
             });
 
             beforeEach(function () {
@@ -158,7 +157,7 @@ describe("Domain filter pattern support,", function() {
             });
 
             it("with a domain filter with a conjunction, should limit the set.", function(done) {
-                testModalCount(multiColName, 1, done, true);
+                testModalCount(multiColName, 1, done, true, "fk2 is 1");
             });
 
             describe("with a domain filter with a dynamic value from other foreignkey tables.", function () {
@@ -169,7 +168,7 @@ describe("Domain filter pattern support,", function() {
 
                 // open col_w_fkeys_default, select something.
                 it ("should limit the set before setting the value if other foreignkey has default value.", function (done) {
-                    testModalCount(colWFkeysDefault, 2, done, true);
+                    testModalCount(colWFkeysDefault, 2, done, true, "other fk values: 1, fixed");
                 });
 
                 //open col_w_fkeys again
@@ -222,7 +221,7 @@ describe("Domain filter pattern support,", function() {
 
             describe("with a domain filter with a dynamic value from other foreignkey tables.", function () {
                 it ("if foreign key has value, the foreignkey that is using its value should be limited.", function (done) {
-                    testModalCount(colWFkeysDefault, 1, done);
+                    testModalCount(colWFkeysDefault, 1, done, false, "other fk values: 3, absolute");
                 });
 
                 it ("otherwise it should not be limited.", function (done) {
