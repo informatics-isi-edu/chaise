@@ -66,7 +66,6 @@ describe("Domain filter pattern support,", function() {
                 browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
 
                 chaisePage.waitForElement(element(by.id("submit-record-button")));
-                browser.pause();
             });
 
             beforeEach(function () {
