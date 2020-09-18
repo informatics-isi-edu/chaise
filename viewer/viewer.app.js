@@ -43,7 +43,6 @@
         'ui.mask',
         'ui.select',
         'ui.bootstrap',
-        'ng.deviceDetector',
         'angular-markdown-editor'
     ])
 
@@ -175,8 +174,7 @@
         var session;
         var osdViewerQueryParams = queryParamsString, // what will be passed onto osd viewer
             hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
-            hasImageQueryParam = false, // if there is an image in query, we should just use it and shouldn't use the image uri from db
-            osdCanShowAnnotation = false; // whether we can show image annotations or not (if not, we will disable the sidebar)
+            hasImageQueryParam = false; // if there is an image in query, we should just use it and shouldn't use the image uri from db
 
         // HACK: this is just a hack to allow quick testing
         // if there are any svg files in the query params, ignore the annotation table.
@@ -283,11 +281,9 @@
 
                 // TODO throw an error if there wasn't any image
 
-                osdCanShowAnnotation = viewerAppUtils.canOSDShowAnnotation(osdViewerQueryParams);
-
                 // if there's svg query param, don't fetch the annotations from DB.
                 // if we cannot show any overlay, there's no point in reading
-                if (hasAnnotationQueryParam || !osdCanShowAnnotation) {
+                if (hasAnnotationQueryParam) {
                     return false;
                 }
 
