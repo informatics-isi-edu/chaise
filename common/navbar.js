@@ -16,10 +16,19 @@
             el.classList.remove("show");
         });
 
+        // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
         var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
         [].forEach.call(highlightedParents, function(el) {
             el.classList.remove("child-opened");
         });
+
+        // calculate height for each open dropdown menu
+        if (open) {
+            var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+            [].forEach.call(openDropdowns, function(el) {
+                checkHeight(el, window.innerHeight);
+            });
+        }
     }
 
     // ele - dropdown ul element
@@ -56,11 +65,12 @@
       $event.stopPropagation();
       $event.preventDefault();
 
-      var menuTarget = getNextSibling($event.target,".dropdown-menu");
-      var immediateParent = $event.target.offsetParent;
-      var parent = immediateParent.offsetParent;
+      var menuTarget = getNextSibling($event.target,".dropdown-menu"); // dropdown submenu <ul>
+      var immediateParent = $event.target.offsetParent; // parent, <li>
+      var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
       var posValues = getOffsetValue(immediateParent);
 
+      // calculate the position the submenu should open from the top fo the viewport
       if (parent.scrollTop == 0){
           menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
       } else if (parent.scrollTop > 0) {
@@ -79,9 +89,17 @@
         });
       }
 
-      // toggle the class
-      menuTarget.classList.toggle("show");
-      immediateParent.classList.toggle("child-opened");
+      menuTarget.classList.toggle("show"); // toggle the class
+      menuTarget.style.height = "unset"; // remove height in case it was set for a different position
+      immediateParent.classList.toggle("child-opened"); // used for setting highlight color
+
+      if (open) {
+          // recalculate the height for each open submenu, <ul>
+          var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
+          [].forEach.call(openSubmenus, function(el) {
+              checkHeight(el, window.innerHeight);
+          });
+      }
 
       return open;
     }
@@ -296,6 +314,7 @@
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                     scope.onToggle = function (open, menuObject) {
+                        console.log(this);
                         if (open) {
                             // when menu opens, calculate height needed
                             logService.logClientAction({
@@ -305,12 +324,14 @@
                         }
 
                         onToggle(open);
-                        // unset height on dropdowns first
-                        var openDropdowns = document.querySelectorAll(".dropdown.open ul");
-                        [].forEach.call(openDropdowns, function(el) {
-                            el.style.height = "unset";
-                            checkHeight(el, $window.innerHeight);
-                        });
+                    }
+
+                    // remove the height when the dropdown is toggled
+                    // NOTE: $event can't be passed to function attached to on-toggle listener
+                    // use this function on a click event
+                    scope.resetHeight = function ($event) {
+                        var menuTarget = getNextSibling($event.target,".dropdown-menu");
+                        if (menuTarget) menuTarget.style.height = "unset";
                     }
 
                     scope.canShow = function (item) {
@@ -438,12 +459,6 @@
                                 names: menuObject.names
                             });
                         }
-
-                        var openSubmenues = document.querySelectorAll(".dropdown-menu.show");
-                        [].forEach.call(openSubmenues, function(el) {
-                            el.style.height = "unset";
-                            checkHeight(el, $window.innerHeight);
-                        });
                     };
 
                     scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
