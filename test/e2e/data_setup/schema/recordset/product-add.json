@@ -330,7 +330,15 @@
           "default"
         ],
         "tag:misd.isi.edu,2015:display": {
-          "name": "Accommodations"
+          "name": "Accommodations",
+          "comment": {
+              "compact": "Recordset inline comment"
+          },
+          "comment_display": {
+              "compact": {
+                  "table_comment_display": "inline"
+              }
+          }
         },
         "description": {
           "display": "Accommodations",

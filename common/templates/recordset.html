@@ -31,6 +31,7 @@
                     <h1 id="page-title">
                         <chaise-title add-link="false" reference="vm.reference"></chaise-title>
                         <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
+                        <span ng-if="vm.reference.commentDisplay == 'inline' && vm.reference.comment" class="inline-tooltip">{{vm.reference.comment}}</span>
                     </h1>
                 </div>
                 <div class="recordset-controls-container">
