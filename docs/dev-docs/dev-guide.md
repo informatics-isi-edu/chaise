@@ -41,6 +41,10 @@ To make sure you're familiar with both CSS and SASS. The following are some guid
     (part - 2)
   - [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority but they
     too can be overwritten when the element is accessed as shown in the document.
+  - [Important Information on CSS position](https://css-tricks.com/almanac/properties/p/position/) : Adding scrolling to a collapsible navbar can be
+    tricky. This link explains how you can add scrolling without affecting any level of dropdown menus.
+  - [Calculating position of element](https://javascript.info/size-and-scroll) : This link gives an in-depth understanding of how we can manually
+    calculate the position of any element dynamically in the DOM
 
 ### Useful CSS rules
 How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc). Hence we need to keep in mind the following while writing print rules in css.
@@ -58,6 +62,8 @@ How each browser renders printing styles is different from the other. Mac and Wi
 
   - The print preview that is seen when doing a `Ctrl-P` on Windows or a `Cmd-P` on Mac doesn't necessarily give you the right picture of
     the document to be printed. To view what will be printed, either save to PDF file or chose to switch to the 'Print mode' as described above.
+
+  - Scrolling can be persisted by using the `scrolling : scroll` option.
 
 ### SCSS structure
 

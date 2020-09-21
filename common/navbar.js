@@ -9,15 +9,55 @@
       }
     };
 
-    function onToggle(open, menuText) {
-      var elems = document.querySelectorAll(".dropdown-menu.show");
-      [].forEach.call(elems, function(el) {
-        el.classList.remove("show");
-      });
+    // triggered when top level menu is opened/closed
+    function onToggle(open) {
+        var elems = document.querySelectorAll(".dropdown-menu.show");
+        [].forEach.call(elems, function(el) {
+            el.classList.remove("show");
+        });
+
+        // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
+        var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
+        [].forEach.call(highlightedParents, function(el) {
+            el.classList.remove("child-opened");
+        });
+
+        // calculate height for each open dropdown menu
+        if (open) {
+            var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+            [].forEach.call(openDropdowns, function(el) {
+                checkHeight(el, window.innerHeight);
+            });
+        }
+    }
+
+    // ele - dropdown ul element
+    function checkHeight(ele, winHeight) {
+        // no dropdown is open
+        if (!ele) return;
+
+        var dropdownHeight = ele.offsetHeight;
+        var fromTop = ele.offsetTop;
+        var footerBuffer = 50;
+
+        if ((dropdownHeight + fromTop) > winHeight) {
+            var newHeight = winHeight - fromTop - footerBuffer;
+            ele.style.height = newHeight + "px";
+        }
+    }
+
+    /* Function to calculate the left of the toggleSubMenu*/
+    function getOffsetValue(element){
+       var offsetLeft = 0
+       while(element) {
+          offsetLeft += element.offsetLeft;
+          element = element.offsetParent;
+       }
+       return offsetLeft;
     }
 
     /**
-     * It will toggle the dropdown that this event is based on. If we're going to open it,
+     * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
      * it will close all the other dropdowns and also will return `true`.
      * @return{boolean} if true, it means that we opened the menu
      */
@@ -25,19 +65,41 @@
       $event.stopPropagation();
       $event.preventDefault();
 
-      var menuTarget = getNextSibling($event.target,".dropdown-menu");
+      var menuTarget = getNextSibling($event.target,".dropdown-menu"); // dropdown submenu <ul>
+      var immediateParent = $event.target.offsetParent; // parent, <li>
+      var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
+      var posValues = getOffsetValue(immediateParent);
+
+      // calculate the position the submenu should open from the top fo the viewport
+      if (parent.scrollTop == 0){
+          menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
+      } else if (parent.scrollTop > 0) {
+          menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
+      }
+
+      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
 
       var open = !menuTarget.classList.contains("show");
 
       // if we're opening this, close all the other dropdowns on navbar.
       if (open) {
         $event.target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+          el.parentElement.classList.remove("child-opened");
           el.classList.remove("show");
         });
       }
 
-      // toggle the class
-      menuTarget.classList.toggle("show");
+      menuTarget.classList.toggle("show"); // toggle the class
+      menuTarget.style.height = "unset"; // remove height in case it was set for a different position
+      immediateParent.classList.toggle("child-opened"); // used for setting highlight color
+
+      if (open) {
+          // recalculate the height for each open submenu, <ul>
+          var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
+          [].forEach.call(openSubmenus, function(el) {
+              checkHeight(el, window.innerHeight);
+          });
+      }
 
       return open;
     }
@@ -160,7 +222,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -252,13 +314,24 @@
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                     scope.onToggle = function (open, menuObject) {
+                        console.log(this);
                         if (open) {
+                            // when menu opens, calculate height needed
                             logService.logClientAction({
                                 action: logService.getActionString(logService.logActions.NAVBAR_MENU_OPEN, "", ""),
                                 names: menuObject.names
                             });
                         }
+
                         onToggle(open);
+                    }
+
+                    // remove the height when the dropdown is toggled
+                    // NOTE: $event can't be passed to function attached to on-toggle listener
+                    // use this function on a click event
+                    scope.resetHeight = function ($event) {
+                        var menuTarget = getNextSibling($event.target,".dropdown-menu");
+                        if (menuTarget) menuTarget.style.height = "unset";
                     }
 
                     scope.canShow = function (item) {
@@ -332,6 +405,20 @@
                             $window.location = addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), ConfigUtils.getContextHeaderParams());
                         }
                     }
+
+                    // Listen to window resize event to change the width of div form-edit
+                    angular.element($window).bind('resize', function() {
+                        $timeout(function () {
+                            // find an open dropdown
+                            // NOTE: might be multiple
+                            // unset height on dropdowns first
+                            var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                            [].forEach.call(openDropdowns, function(el) {
+                                el.style.height = "unset";
+                                checkHeight(el, $window.innerHeight);
+                            });
+                        }, 0)
+                    });
                 });
             }
         };
