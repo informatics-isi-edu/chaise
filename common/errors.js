@@ -28,7 +28,10 @@
         differentUserConflict1: "Continuing on this page requires that you be logged in as ",
         differentUserConflict2: ". However, you are currently logged in as ",
         anonUserConflict: "Your session has expired. Continuing on this page requires that you be logged in as ",
-        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
+        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator.",
+
+        viewerOSDFailed: "Couldn't process the image. If you continue to face this issue, please contact the system administrator.",
+        viewerScreenshotFailed: "Couldn't process the screenshot."
     })
 
     .factory('Errors', ['ConfigUtils', 'errorNames', 'errorMessages', 'messageMap', function(ConfigUtils, errorNames, errorMessages, messageMap) {

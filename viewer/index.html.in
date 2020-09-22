@@ -201,9 +201,6 @@
                                 <span class='resultCount'>
                                     <span>Displaying {{ anno.matchCount }} <span ng-if="!loadingAnnotations"> of {{ anno.totalCount }} </span>Annotations</span>
                                 </span>
-                                <div ng-if="osd.error != ''" class="annotation-error">
-                                    {{osd.error}}
-                                </div>
                                 <div class='groups'>
                                     <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels track by $index" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
                                         <div class='itemContent'>
