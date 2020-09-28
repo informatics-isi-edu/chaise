@@ -2016,6 +2016,9 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
             scope: {
                 message: "@?"
+            },
+            link: function (scope, elem, attrs) {
+                scope.spinnerPath = UriUtils.chaiseDeploymentPath() + "/common/styles/images/loader.gif";
             }
         }
     }])
