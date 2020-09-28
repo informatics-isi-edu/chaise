@@ -430,7 +430,6 @@ $(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
 	$(call bundle_js_files,$(VIEWER_JS_SOURCE_MIN),$(VIEWER_JS_SOURCE))
 
 VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
-	$(COMMON)/vendor/ng-device-detector.js \
 	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \

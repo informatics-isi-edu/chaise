@@ -2168,19 +2168,19 @@
     .directive('chaiseTitle', [function () {
         return {
             restrict: 'E',
-            // there shouldn't be any extra between closing span tag and a
+            // there shouldn't be any extra between closing <span> tag and <a>
             // if added, it will show an extra underline for the space
-            template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+            template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</a>' +
-                      '<a ng-if="addLink && displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '<a ng-if="addLink && displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</a>' +
-                      '<span ng-if="!addLink && !displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '<span ng-if="!addLink && !displayname.isHTML" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</span>' +
-                      '<span ng-if="!addLink && displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '<span ng-if="!addLink && displayname.isHTML" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</span>',
             scope: {
                 reference: "=?",
@@ -2201,13 +2201,18 @@
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                if (typeof scope.displayname !== "object" && scope.reference) {
-                    scope.displayname = scope.reference.displayname;
-                }
+                scope.showTooltip = scope.comment ? true : false;
 
-                // TODO: this needs to be extended to use reference.comment once table display is being digested for the title of each app
-                if (!scope.comment && scope.reference && scope.reference.table.comment) {
-                    scope.comment = scope.reference.table.comment;
+                if (scope.reference) {
+                    if (typeof scope.displayname !== "object") {
+                        scope.displayname = scope.reference.displayname;
+                    }
+
+                    if (!scope.comment && scope.reference.comment) {
+                        scope.comment = scope.reference.comment;
+                    }
+
+                    scope.showTooltip = scope.reference.commentDisplay == 'tooltip' && (scope.comment || scope.reference.comment);
                 }
             }
         };

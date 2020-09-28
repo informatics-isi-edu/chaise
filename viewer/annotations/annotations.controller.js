@@ -3,8 +3,8 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant',
-    function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant) {
+    .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant',
+    function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant) {
 
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var annotConstant = viewerConstant.annotation;
@@ -94,6 +94,13 @@
                 var messageType = data.messageType;
                 // console.log("event received : ", event);
                 switch (messageType) {
+                    case "osdInitializeFailed":
+                        $scope.$apply(function () {
+                            AlertsService.addAlert(errorMessages.viewerOSDFailed, "error");
+
+                            $rootScope.loadingAnnotations = false;
+                        });
+                        break;
                     case 'osdInitialized':
                         AnnotationsService.loadAnnotations($rootScope.annotationURLs);
                         break;
