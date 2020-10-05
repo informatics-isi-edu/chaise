@@ -9,7 +9,55 @@
         function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, ERMrest, logService, recordCreate, UriUtils, viewerConstant,
                   $q, $rootScope) {
 
-        var annotConstant = viewerConstant.annotation;
+        var annotConstant = viewerConstant.annotation,
+            channelConstant = viewerConstant.channel;
+
+        function getChannelInfo() {
+            var defer = $q.defer(), channelList = [];
+
+            // TODO should be done in ermrestjs
+            var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.CHANNE_TABLE_SCHEMA_NAME) + ":";
+            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.CHANNEL_TABLE_NAME) + "/";
+            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            imageChannelURL += "=" + UriUtils.fixedEncodeURIComponent(context.imageID);
+
+            ERMrest.resolve(imageChannelURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+                if (!ref) {
+                    return false;
+                }
+
+                var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.LOAD, stackPath),
+                    stack: logService.getStackObject(logService.getStackNode(logService.logStackTypes.CHANNEL, ref.table))
+                };
+
+                var cb = function (page) {
+                    channelList = page.tuples.map(function (t) {
+                        // TODO what if name and url are not defined?
+                        return {
+                            url: t.data[channelConstant.IMAGE_URL_COLUMN_NAME],
+                            channelName: t.data[channelConstant.CHANNEL_NAME_COLUMN_NAME],
+                            channelRGB: t.data[channelConstant.PSEUDO_COLOR_COLUMN_NAME]
+                        };
+                    });
+                }
+
+                ref = ref.sort(channelConstant.CHANNEL_TABLE_COLUMN_ORDER);
+                return _readPageByPage(ref, channelConstant.PAGE_COUNT, logObj, cb);
+            }).then(function () {
+                defer.resolve(channelList);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        function isAnnotationURL(url) {
+            return url.indexOf(".svg") != -1 || url.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1;
+        }
 
         function readAllAnnotations () {
             var defer = $q.defer();
@@ -77,30 +125,12 @@
                 $rootScope.annotationTuples = [];
                 $rootScope.annotationURLs = [];
 
-                // using edit, because the tuples are used in edit context (for populating edit form)
-                return _readAnnotations(ref);
-            }).then(function (res) {
-                defer.resolve(res);
-            }).catch(function (err) {
-                defer.reject(err);
-            });
+                var logObj = {
+                    action: AnnotationsService.getAnnotationLogAction(logService.logActions.LOAD),
+                    stack: AnnotationsService.getAnnotationLogStack()
+                };
 
-            return defer.promise;
-        }
-
-        /**
-         * read all the annotaitons on the image.
-         * depending on the number of annotations in db, it might send multiple requests
-         */
-        function _readAnnotations (ref) {
-            var defer = $q.defer();
-            var logObj = {
-                action: AnnotationsService.getAnnotationLogAction(logService.logActions.VIEWER_ANNOT_LOAD),
-                stack: AnnotationsService.getAnnotationLogStack()
-            };
-
-            ref.read(annotConstant.PAGE_COUNT, logObj, false, true).then(function (page){
-                if (page && page.length > 0) {
+                var cb = function (page) {
                     $rootScope.annotationTuples = $rootScope.annotationTuples.concat(page.tuples);
 
                     page.tuples.forEach(function (tuple) {
@@ -110,12 +140,30 @@
                             $rootScope.hideAnnotationSidebar = false;
                         }
                     });
+                }
+
+                // using edit, because the tuples are used in edit context (for populating edit form)
+                return _readPageByPage(ref, annotConstant.PAGE_COUNT, logObj, cb);
+            }).then(function (res) {
+                defer.resolve(res);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        function _readPageByPage (ref, pageSize, logObj, cb) {
+            var defer = $q.defer();
+            ref.read(pageSize, logObj, false, true).then(function (page){
+                if (page && page.length > 0) {
+                    cb(page);
                 } else {
                     return false;
                 }
 
                 if (page.hasNext) {
-                    return _readAnnotations(page.next);
+                    return _readPageByPage(page.next);
                 }
                 return true;
             }).then(function (res) {
@@ -128,7 +176,9 @@
         }
 
         return {
-            readAllAnnotations: readAllAnnotations
+            getChannelInfo: getChannelInfo,
+            readAllAnnotations: readAllAnnotations,
+            isAnnotationURL: isAnnotationURL
         };
 
     }]);

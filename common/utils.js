@@ -2466,7 +2466,6 @@
             //      after that we should be able to merge some of the actions with the rest of the chaise
 
             // - server:
-            VIEWER_ANNOT_LOAD: clientPathActionSeparator + "load",
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
 
             // - client:
@@ -2524,7 +2523,8 @@
             FACET: "facet",
 
             // used in viewer app:
-            ANNOTATION: "annotation"
+            ANNOTATION: "annotation",
+            CHANNEL: "channel"
         });
 
         var logStackPaths = Object.freeze({
@@ -2546,7 +2546,8 @@
 
             // used in viewer app:
             ANNOTATION_ENTITY: "annotation-entity",
-            ANNOTATION_SET: "annotation-set"
+            ANNOTATION_SET: "annotation-set",
+            CHANNEL_SET: "channel-set"
         });
 
         var appModes = Object.freeze({

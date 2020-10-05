@@ -148,6 +148,7 @@
         var config = ConfigUtils.getContextJSON();
         var annotConstant = viewerConstant.annotation;
         var imageConstant = viewerConstant.image;
+        var osdConstant = viewerConstant.osdViewer;
 
         // TODO are these needed?
         context.server = config.server;
@@ -184,9 +185,9 @@
         if (queryParamsString && queryParamsString.length > 0) {
             queryParamsString.split('&').forEach(function (queryStr) {
                 var qpart = queryStr.split("=");
-                if (qpart.length != 2 || qpart[0] !== "url") return;
+                if (qpart.length != 2 || qpart[0] !== osdConstant.IMAGE_URL_QPARAM) return;
 
-                if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
+                if (viewerAppUtils.isAnnotationURL(qpart[1])) {
                     $rootScope.hideAnnotationSidebar = false;
                     $rootScope.loadingAnnotations = true;
                     hasAnnotationQueryParam = true;
@@ -287,10 +288,14 @@
                     return false;
                 }
 
+                // read the annotation reference
                 return viewerAppUtils.readAllAnnotations();
-            })
-            // read the annotation reference
-            .then(function (res) {
+            }).then(function () {
+
+                // read channel info
+                return viewerAppUtils.getChannelInfo();
+            }).then(function (channelInfo) {
+
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
@@ -300,6 +305,35 @@
 
                 if ($rootScope.annotationTuples.length > 0) {
                     $rootScope.loadingAnnotations = true;
+                }
+
+                // use the channel info from database if available
+                if (channelInfo.length > 0) {
+                    var channelQueryParams = [osdConstant.CHANNEL_NAME_QPARAM, osdConstant.CHANNEL_RGB_QPARAM, osdConstant.IMAGE_URL_QPARAM];
+                    var newQueryParams = [];
+
+                    //add the query params
+                    channelInfo.forEach(function (info) {
+                        newQueryParams.push(osdConstant.IMAGE_URL_QPARAM + "=" + info.url);
+                        if (info.channelName) {
+                            newQueryParams.push(osdConstant.CHANNEL_NAME_QPARAM + "=" + info.channelName);
+                        }
+
+                        if (info.channelRGB) {
+                            newQueryParams.push(osdConstant.CHANNEL_RGB_QPARAM + "=" + info.channelRGB);
+                        }
+                    });
+
+                    // add non-channel-related query parameters in the uri or browser url
+                    osdViewerQueryParams.split("&").forEach(function (queryStr) {
+                        var qpart = queryStr.split("=");
+                        if (qpart.length != 2) return;
+                        if (channelQueryParams.indexOf(qpart[0]) !== -1) return;
+
+                        newQueryParams.push(queryStr);
+                    });
+
+                    osdViewerQueryParams = newQueryParams.join("&");
                 }
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;

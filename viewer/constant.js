@@ -9,9 +9,32 @@
      * For now, we decided to have a centeral location for these constant without deciding how this should be configurable
      */
     .constant('viewerConstant', {
+        osdViewer: {
+            CHANNEL_NAME_QPARAM: "channelName",
+            CHANNEL_RGB_QPARAM: "channelRGB",
+            IMAGE_URL_QPARAM: "url"
+        },
         image: {
             URI_COLUMN_NAME: "uri",
             DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z" // the default value of the zindex in the form TODO
+        },
+        channel: {
+            CHANNEL_TABLE_NAME: "Image_Channel",
+            CHANNE_TABLE_SCHEMA_NAME: "Gene_Expression",
+
+            CHANNEL_TABLE_COLUMN_ORDER: [{
+                "column": "Channel_Number",
+                "descending": false
+            }],
+
+            REFERENCE_IMAGE_COLUMN_NAME: "Image",
+
+            CHANNEL_NAME_COLUMN_NAME: "Name",
+            PSEUDO_COLOR_COLUMN_NAME: "Pseudo_Color",
+            IMAGE_URL_COLUMN_NAME: "Image_URL",
+
+            // how many channels at a time should we read from database
+            PAGE_COUNT: 25,
         },
         annotation: {
             // how much should we wait for user action and then log
