@@ -188,6 +188,7 @@
                         sortOrder: null,
                         page: failedPage,
                         pageLimit: model.rows.length,
+                        removePseudoColumns: true,
                         rowValues: DataUtils.getRowValuesFromTuples(failedTuples),
                         selectedRows: [],
                         search: null,
