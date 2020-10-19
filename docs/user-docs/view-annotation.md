@@ -10,9 +10,6 @@
 7. You can de-select the current shape by click on the same shape from the `Annotation Toolbar`.
 8. To save the annotation click on the `Save` button in the `Create annotation` panel.
 
-![alt text](https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Circle.png)
-*Image Caption*
-
 ### Edit/Delete an existing Annotation
 1. Make sure that you are logged in.
 2. Click on the `Edit Annotation` icon, of the annotation that you want to edit.
@@ -49,3 +46,36 @@
 	3. A new vertex can only be added between the first and last vertices that are already present. To add a new vertex, press and hold the mouse button. Move to pointer around to adjust the position of this vertex. You also see an edge between the first vertex & new vertex, and last vertex & new vertex as you move the pointer around.
 	4. Let go of the mouse button when you are done placing the edge on the image.
 	5. To add subsequent polygons, de-select the polygon icon from the annotation toolbar and select it again. -->
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Login%20Check.png" alt="drawing" width="500"/></img><br>
+*Login Check*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/NewButton.png" alt="drawing" width="500"/></img><br>
+*New Button*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/CreateAnnotationPanel.png" alt="drawing" width="500"/></img><br>
+*Create Annotation Panel*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/AnnotationToolbar.png" alt="drawing" width="500"/></img><br>
+*Annotation Toolbar*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/SaveButton.png" alt="drawing" width="500"/></img><br>
+*Save Button*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/ColorPicker.png" alt="drawing" width="500"/></img><br>
+*Color Picker*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/EditAnnotationPanel.png" alt="drawing" width="500"/></img><br>
+*Edit Annotation Panel*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/DeleteButton.png" alt="drawing" width="500"/></img><br>
+*Delete Button*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Path.png" alt="drawing" width="500"/></img><br>
+*Path*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Circle.png" alt="drawing" width="500"/></img><br>
+*Circle*
+
+<img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Rectangle.png" alt="drawing" width="500"/></img><br>
+*Rectangle*
