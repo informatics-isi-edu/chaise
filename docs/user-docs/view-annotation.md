@@ -11,6 +11,7 @@
 8. To save the annotation click on the `Save` button in the `Create annotation` panel.
 
 ![alt text](https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Circle.png)
+*Image Caption*
 
 ### Edit/Delete an existing Annotation
 1. Make sure that you are logged in.
