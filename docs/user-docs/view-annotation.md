@@ -10,6 +10,8 @@
 7. You can de-select the current shape by click on the same shape from the `Annotation Toolbar`.
 8. To save the annotation click on the `Save` button in the `Create annotation` panel.
 
+![alt text](https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Circle.png)
+
 ### Edit/Delete an existing Annotation
 1. Make sure that you are logged in.
 2. Click on the `Edit Annotation` icon, of the annotation that you want to edit.
