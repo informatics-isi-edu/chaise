@@ -109,7 +109,8 @@ html {
         border-left: 5px solid transparent;
     }
 
-    a.external-link-icon:not(:empty):not(.external-link-no-icon) {
+    a.external-link-icon:not(:empty):not(.external-link-no-icon),
+    a span.external-link-icon:not(:empty):not(.external-link-no-icon) {
         &::after {
             display: inline-block;
             font-size: .85rem;
