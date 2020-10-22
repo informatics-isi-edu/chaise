@@ -900,12 +900,7 @@
             if (vm.attributesAlreadyAttached) return;
             vm.attributesAlreadyAttached = true;
             vm.columnModels = [];
-
             vm.reference.columns.forEach(function (col) {
-                // if flag set, remove pseudo columns that are path columns
-                // NOTE: could check isPseudo, isPathColumn, and isForeignKey
-                if (vm.removePseudoColumns && col.isPseudo && col.isPathColumn) return;
-
                 vm.columnModels.push({
                     column: col,
                     isLoading: col.hasWaitFor === true || col.isUnique === false

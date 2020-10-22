@@ -98,7 +98,7 @@
         function onSuccess (model, result){
             var page = result.successful;
             var failedPage = result.failed;
-            var resultsReference = page.reference;
+
             vm.successfulSubmission = true;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
@@ -116,7 +116,11 @@
                     resultsReference.filterLogInfo
                 );
 
+                var resultsReference = page.reference.contextualize.entryCompact;
                 // includes identifiers for specific records modified
+                // TODO: ^^ this comment seems wrong
+                // NOTE: I think we are using the base reference for the page so we go to either an unconstrained recordset (multi create)
+                // or a constrained recordset (multi edit we entered recordedit with)
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
 
                 // set values for the view to flip to recordedit resultset view
@@ -128,8 +132,7 @@
                     sortOrder: null,
                     page: page,
                     pageLimit: model.rows.length,
-                    removePseudoColumns: true,
-                    rowValues: DataUtils.getRowValuesFromTuples(resultsTuples),
+                    rowValues: DataUtils.getRowValuesFromTuples(page.tuples),
                     selectedRows: [],
                     search: null,
                     config: {
@@ -146,16 +149,17 @@
                 // NOTE: This case is for a pseudo-failure case
                 // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
                 if (failedPage !== null) {
+                    var failedReference = failedPage.reference.contextualize.entryCompact;
+
                     vm.omittedResultsetModel = {
                         hasLoaded: true,
-                        reference: resultsReference,
+                        reference: failedReference,
                         enableSort: false,
                         sortby: null,
                         sortOrder: null,
                         page: failedPage,
                         pageLimit: model.rows.length,
-                        removePseudoColumns: true,
-                        rowValues: DataUtils.getRowValuesFromTuples(failedTuples),
+                        rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
                         selectedRows: [],
                         search: null,
                         config: {
