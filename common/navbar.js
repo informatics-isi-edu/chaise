@@ -223,12 +223,12 @@
         };
     }
 
-    function renderInlineMarkdown(item) {
+    function renderInlineMarkdown(item, sce) {
         if (item.markdownName) {
-            return ERMrest.renderMarkdown(item.markdownName, {inline: true});
+            return sce.trustAsHtml(ERMrest.renderMarkdown(item.markdownName, {inline: true}));
         }
 
-        return item.name;
+        return sce.trustAsHtml(item.name);
     }
 
     'use strict';
@@ -236,7 +236,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $timeout, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -341,7 +341,7 @@
 
                     // prefer to use markdownName over name
                     scope.renderName = function (item) {
-                        return renderInlineMarkdown(item);
+                        return renderInlineMarkdown(item, $sce);
                     }
 
                     // remove the height when the dropdown is toggled
@@ -442,7 +442,7 @@
         };
     }])
 
-    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logService', 'Session', 'UriUtils', '$window', function($compile, ConfigUtils, logService, Session, UriUtils, $window) {
+    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logService', 'Session', 'UriUtils', '$sce', '$window', function($compile, ConfigUtils, logService, Session, UriUtils, $sce, $window) {
         return {
             restrict: 'EA',
             scope: {
@@ -462,7 +462,7 @@
 
                     // prefer to use markdownName over name
                     scope.renderName = function (item) {
-                        return renderInlineMarkdown(item);
+                        return renderInlineMarkdown(item, $sce);
                     }
 
                     scope.canShow = function (item) {
