@@ -63,6 +63,10 @@ var chaiseConfig = {
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
             //     name: "Create",
+            //     // Some default classes are already available without adding anything to customCSS
+            //     // overrides "name" property above
+            //     // example below and https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#13-span-attach-attributes-to-text
+            //     markdownName: ":span:Create:/span:{.external-link}",
             //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE",
             //     // Define globus groups or users that can see and and be able to click the link or navigate the submenu
             //     // If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default

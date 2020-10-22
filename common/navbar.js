@@ -65,8 +65,14 @@
       $event.stopPropagation();
       $event.preventDefault();
 
-      var menuTarget = getNextSibling($event.target,".dropdown-menu"); // dropdown submenu <ul>
-      var immediateParent = $event.target.offsetParent; // parent, <li>
+      var target = $event.target;
+      // added markdownName support allows for inline template to be defined like :span:TEXT:/span:{.class-name}
+      if ($event.target.localName != "a") {
+          target = $event.target.parentElement;
+      }
+
+      var menuTarget = getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+      var immediateParent = target.offsetParent; // parent, <li>
       var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
       var posValues = getOffsetValue(immediateParent);
 
@@ -83,7 +89,7 @@
 
       // if we're opening this, close all the other dropdowns on navbar.
       if (open) {
-        $event.target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+        target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
           el.parentElement.classList.remove("child-opened");
           el.classList.remove("show");
         });
@@ -217,6 +223,14 @@
         };
     }
 
+    function renderInlineMarkdown(item) {
+        if (item.markdownName) {
+            return ERMrest.renderMarkdown(item.markdownName, {inline: true});
+        }
+
+        return item.name;
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -314,7 +328,6 @@
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                     scope.onToggle = function (open, menuObject) {
-                        console.log(this);
                         if (open) {
                             // when menu opens, calculate height needed
                             logService.logClientAction({
@@ -324,6 +337,11 @@
                         }
 
                         onToggle(open);
+                    }
+
+                    // prefer to use markdownName over name
+                    scope.renderName = function (item) {
+                        return renderInlineMarkdown(item);
                     }
 
                     // remove the height when the dropdown is toggled
@@ -440,6 +458,11 @@
                 return function(scope, el) {
                     if (!compiled) {
                         compiled = $compile(contents);
+                    }
+
+                    // prefer to use markdownName over name
+                    scope.renderName = function (item) {
+                        return renderInlineMarkdown(item);
                     }
 
                     scope.canShow = function (item) {

@@ -43,6 +43,20 @@ describe('Navbar ', function() {
         });
     });
 
+    it('should prefer markdownName over name when both are defined', function () {
+        // option #2 has both name and markdownName defined
+        expect(element.all(by.css('#navbar-menu > li.dropdown')).get(1).getText()).toBe("Test Recordsets", "name was used instead of markdownName");
+    });
+
+    it('should render a markdown pattern using proper HTML', function () {
+        // in travis we don't have the same globus groups so the "show" ACL hides the 3rd link ("Records")
+        var idx = (!process.env.TRAVIS ? 3 : 2);
+        // option #4 has only markdownName defined
+        element.all(by.css('#navbar-menu > li.dropdown')).get(3).element(by.css("a")).getAttribute('innerHTML').then(function (aInnerHTML) {
+            expect(aInnerHTML.indexOf("<strong>")).toBeGreaterThan(-1, "name was used instead of markdownName");
+        });
+    });
+
     if (!process.env.TRAVIS) {
         var menuDropdowns, disabledSubMenuOptions;
         it('should have a disabled "Records" link.', function () {
