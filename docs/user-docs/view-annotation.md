@@ -2,7 +2,8 @@
 
 ### Add new Annotation
 1. Make sure that you are logged in.
-2. On the left hand side, beside the image you will see a `New` button. Clicking on it will `Create annotation` panel.
+<br><img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Login%20Check.png" alt="drawing" width="500"/></img><br>
+2. On the left hand side, beside the image you will see a `New` button. Clicking on it will open the `Create annotation` panel.
 3. Select the `Anatomy`
 4. Select the `Principal Investigator`
 5. Select the shape from the `Annotation Toolbar`.
