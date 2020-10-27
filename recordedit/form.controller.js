@@ -102,10 +102,10 @@
             vm.successfulSubmission = true;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
-            }
-            else {
+            } else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
+                var resultsReference = page.reference.contextualize.compactEntry;
                 // NOTE currently this has been added just to make sure nothing is broken,
                 // but it's not used since the displayed table doesn't have any controls.
                 // if we end up adding more controls and needed to log them, we might want to
@@ -116,9 +116,8 @@
                     resultsReference.filterLogInfo
                 );
 
-                var resultsReference = page.reference.contextualize.entryCompact;
                 // includes identifiers for specific records modified
-                // TODO: ^^ this comment seems wrong
+                // TODO: the above comment seems wrong
                 // NOTE: I think we are using the base reference for the page so we go to either an unconstrained recordset (multi create)
                 // or a constrained recordset (multi edit we entered recordedit with)
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
