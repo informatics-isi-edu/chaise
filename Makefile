@@ -194,7 +194,8 @@ HTML=login/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
-	 $(DIST)/chaise-dependencies.html
+	 $(DIST)/chaise-dependencies.html \
+	 wiki/index.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
@@ -512,6 +513,22 @@ SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
 	$(info - creating lib/switchUserAccounts.html)
 	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
+
+# -------------------------- wiki app -------------------------- #
+WIKI_JS_SOURCE=wiki/wiki.app.js
+
+WIKI_VENDOR_ASSET=$(JS)/vendor/angular-route.min.js
+
+.make-wiki-includes: $(BUILD_VERSION)
+	@> .make-wiki-includes
+	$(info - creating .make-wiki-includes)
+	@$(call add_css_link,.make-wiki-includes,)
+	@$(call add_js_script,.make-wiki-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(WIKI)/$(WIKI_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(WIKI_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-wiki-includes)
+
+wiki/index.html: wiki/index.html.in .make-wiki-includes
+	$(info - creating wiki/index.html)
+	@$(call build_html,.make-wiki-includes,wiki/index.html)
 
 
 # -------------------------- utility functions -------------------------- #

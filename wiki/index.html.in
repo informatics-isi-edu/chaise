@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" id="wiki">
+
+<head>
+    <title>Wiki pages</title>
+    %INCLUDES%
+</head>
+
+<body class="chaise-body">
+    <div class="configure-container" ng-app="chaise.configure-wiki">
+        <loading-spinner></loading-spinner>
+    </div>
+    <div class="app-container wiki-container">
+        <navbar></navbar>
+        <loading-spinner ng-show="!displayReady"></loading-spinner>
+        <div class="app-content-container" ng-show="displayReady" id="wiki-content">
+            <!-- <div class="top-panel-container">
+
+            </div> -->
+            <div class="bottom-panel-container">
+                <div class="side-panel-resizable close-panel"></div>
+                <div class="main-container">
+                    <div class="main-body">
+                        <div ng-bind-html="wikiContent" class="markdown-container"></div>
+                    </div>
+                    <footer></footer>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+</html>

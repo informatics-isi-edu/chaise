@@ -2,7 +2,9 @@
 
 ### Add new Annotation
 1. Make sure that you are logged in.
-<br><img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/Login%20Check.png" alt="drawing" width="500"/></img><br>
+
+	![](resources/annotation-documentation-images/Login%20Check.png){.chaise-wiki-image}
+
 2. On the left hand side, beside the image you will see a `New` button. Clicking on it will open the `Create annotation` panel.
 <br><img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/NewButton.png" alt="drawing" width="500"/></img><br>
 <br><img src="https://github.com/informatics-isi-edu/chaise/blob/annotation-documentation/docs/resources/annotation-documentation-images/CreateAnnotationPanel.png" alt="drawing" width="500"/></img><br>
@@ -52,8 +54,7 @@
 	4. To add subsequent lines repeat steps ii & iii.
 - #### Polygon
 	1. Select the polygon tool (polygon icon) from the annotation tool bar.
-	2. Press and hold the left mouse button to draw the first polygon edge on the image. Drag the mouse pointer to draw. 
+	2. Press and hold the left mouse button to draw the first polygon edge on the image. Drag the mouse pointer to draw.
 	3. A new vertex can only be added between the first and last vertices that are already present. To add a new vertex, press and hold the mouse button. Move to pointer around to adjust the position of this vertex. You also see an edge between the first vertex & new vertex, and last vertex & new vertex as you move the pointer around.
 	4. Let go of the mouse button when you are done placing the edge on the image.
 	5. To add subsequent polygons, de-select the polygon icon from the annotation toolbar and select it again. -->
-

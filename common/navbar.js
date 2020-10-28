@@ -139,7 +139,7 @@
 
     // TODO we might want to refactor this
     function isChaise(link, dcctx) {
-        var appNames = ["record", "recordset", "recordedit", "login"];
+        var appNames = ["record", "recordset", "recordedit", "login", "wiki"];
 
         // parses the url into a location object
         var eleUrl = document.createElement('a');
