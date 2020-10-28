@@ -105,7 +105,7 @@
             } else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
-                var resultsReference = page.reference.contextualize.compactEntry;
+                var resultsReference = page.reference;
                 // NOTE currently this has been added just to make sure nothing is broken,
                 // but it's not used since the displayed table doesn't have any controls.
                 // if we end up adding more controls and needed to log them, we might want to
@@ -148,7 +148,7 @@
                 // NOTE: This case is for a pseudo-failure case
                 // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
                 if (failedPage !== null) {
-                    var failedReference = failedPage.reference.contextualize.entryCompact;
+                    var failedReference = failedPage.reference;
 
                     vm.omittedResultsetModel = {
                         hasLoaded: true,
