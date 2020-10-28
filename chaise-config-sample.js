@@ -2,7 +2,6 @@
 
 var chaiseConfig = {
     name: "Sample",
-    layout: 'list',
     allowErrorDismissal: true,
     confirmDelete: true,
     headTitle: 'Chaise',
@@ -13,29 +12,18 @@ var chaiseConfig = {
     // signUpURL: '', The URL at a which a user can create a new account
     // profileURL: '', Globus deployments can use https://www.globus.org/app/account
     dataBrowser: '',
+    shareCiteAcls: {
+        show: ["*"],  // [] <- hide
+        enable: ["*"] // [] <- disable
+    },
     maxColumns: 6,
-    showUnfilteredResults: false,
     defaultAnnotationColor: 'red',
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     helpURL: '/help/using-the-data-browser/',
-    showBadgeCounts: false,
-    plotViewEnabled: false,
-    recordUiGridEnabled: false,
-    recordUiGridExportCSVEnabled: true,
-    recordUiGridExportPDFEnabled: true,
     editRecord: true,
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
     showFaceting: true,
-    tour: {
-      pickRandom: false,
-      searchInputAttribute: "Data",
-      searchChosenAttribute: "Data Type",
-      searchInputValue: "micro",
-      extraAttribute: "Mouse Anatomic Source",
-      chosenAttribute: "Data Type",
-      chosenValue: "Expression microarray - gene"
-    },
     navbarMenu: {
         // The optional newTab property can be defined at any level. If undefined at root, newTab is treated as true
         // Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.
@@ -63,10 +51,6 @@ var chaiseConfig = {
             //     // Use the "url" key to specify this menu item's url
             //     // URLs can be absolute or relative to the document root.
             //     name: "Create",
-            //     // Some default classes are already available without adding anything to customCSS
-            //     // overrides "name" property above
-            //     // example below and https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md#13-span-attach-attributes-to-text
-            //     markdownName: ":span:Create:/span:{.external-link}",
             //     url: "/chaise/recordedit/#1/YOUR_SCHEMA:YOUR_TABLE",
             //     // Define globus groups or users that can see and and be able to click the link or navigate the submenu
             //     // If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default
