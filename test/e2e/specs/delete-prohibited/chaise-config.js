@@ -11,10 +11,7 @@ var chaiseConfig = {
     disableExternalLinkModal: true,
     logClientActions: false,
     hideTableOfContents: true,
-    resolverImplicitCatalog: 4, // when run in parallel config mode, this config runs for catalogId 4 in travis
-    shareCiteAcls: {
-        enable: []
-    }
+    resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in travis
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

@@ -24,16 +24,10 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4, and shareCiteAcls defined", function() {
+        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
                 expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
-
-                expect(chaiseConfig.shareCiteAcls).toBeDefined();
-                // test the default gets set properly when not defined
-                expect(chaiseConfig.shareCiteAcls.show).toEqual(["*"]);
-                // test it is disabled based on chaise-config (it case below)
-                expect(chaiseConfig.shareCiteAcls.enable).toEqual([]);
             });
         });
 
@@ -96,21 +90,6 @@ describe('View existing record,', function() {
                     chaisePage.waitForElement(shareModal);
 
                     expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
-
-                    done();
-                }).catch(function(err){
-                    done.fail(err);
-                });
-            });
-        } else {
-            // test shareCiteAcls
-            it ("Should show the share popup btn, but it is disabled", function (done) {
-                var shareButton = chaisePage.recordPage.getShareButton();
-
-                shareButton.isDisplayed().then(function (bool) {
-                    expect(bool).toBeTruthy();
-
-                    expect(shareButton.getAttribute("disabled")).toBeTruthy();
 
                     done();
                 }).catch(function(err){
