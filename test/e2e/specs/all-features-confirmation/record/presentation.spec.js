@@ -208,7 +208,7 @@ describe('View existing record,', function() {
             });
         });
 
-        it('should load document title defined in chaise-config.js and have deleteRecord=true and resolverImplicitCatalog=2', function() {
+        it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCiteAcls defined', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
@@ -219,6 +219,11 @@ describe('View existing record,', function() {
                     }
 
                     expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
+
+                    expect(chaiseConfig.shareCiteAcls).toBeDefined();
+                    // both defined in chiase-config
+                    expect(chaiseConfig.shareCiteAcls.show).toEqual(["*"]);
+                    expect(chaiseConfig.shareCiteAcls.enable).toEqual(["*"]);
                 });
             });
 

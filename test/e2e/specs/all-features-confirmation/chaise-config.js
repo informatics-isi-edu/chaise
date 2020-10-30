@@ -23,6 +23,10 @@ var chaiseConfig = {
             "table": "dataset"
         }
     },
+    shareCiteAcls: {
+        show: ["*"],
+        enable: ["*"]
+    },
     // configuration for navbar spec with no logo or brand text
     headTitle: 'show me on the navbar!',
     navbarMenu: {

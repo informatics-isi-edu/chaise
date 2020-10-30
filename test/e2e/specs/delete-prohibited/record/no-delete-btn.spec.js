@@ -24,10 +24,16 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog=4", function() {
+        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4, and shareCiteAcls defined", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
                 expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
+
+                expect(chaiseConfig.shareCiteAcls).toBeDefined();
+                // test the default gets set properly when not defined
+                expect(chaiseConfig.shareCiteAcls.show).toEqual(["*"]);
+                // test it is disabled based on chaise-config (it case below)
+                expect(chaiseConfig.shareCiteAcls.enable).toEqual([]);
             });
         });
 
@@ -49,6 +55,7 @@ describe('View existing record,', function() {
         });
 
         if (process.env.TRAVIS) {
+            // test RID search and resolverImplicitCatalog
             it('should navigate to a record page if a proper RID is typed into the RID search box', function (done) {
                 var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "2004"}]).RID
                 var allWindows;
@@ -89,6 +96,21 @@ describe('View existing record,', function() {
                     chaisePage.waitForElement(shareModal);
 
                     expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
+
+                    done();
+                }).catch(function(err){
+                    done.fail(err);
+                });
+            });
+        } else {
+            // test shareCiteAcls
+            it ("Should show the share popup btn, but it is disabled", function (done) {
+                var shareButton = chaisePage.recordPage.getShareButton();
+
+                shareButton.isDisplayed().then(function (bool) {
+                    expect(bool).toBeTruthy();
+
+                    expect(shareButton.getAttribute("disabled")).toBeTruthy();
 
                     done();
                 }).catch(function(err){
