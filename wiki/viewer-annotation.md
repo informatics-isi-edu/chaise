@@ -1,7 +1,7 @@
 ## How to Annotate an Image
 
 * [Add a new Annotation](#add-a-new-annotation)
-* [Edit/Delete an existing Annotation](#edit-delete-an-existing-annotation)
+* [Edit/Delete an existing Annotation](#editdelete-an-existing-annotation)
 * [Draw a Shape](#draw-a-shape)
 
 ### Add a new Annotation
