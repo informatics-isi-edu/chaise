@@ -465,6 +465,24 @@
                 return id;
             },
 
+            // groupArray should be the array of globus group
+            isGroupIncluded: function(groupArray, checkSession) {
+                if (groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
+                if (checkSession && !_session) return false; // no "*" exists and no session, hide the option
+
+                for (var i=0; i < groupArray.length; i++) {
+                    var attribute = groupArray[i];
+
+                    var match = _session.attributes.some(function (attr) {
+                        return attr.id === attribute;
+                    });
+
+                    if (match) return true;
+                };
+
+                return false;
+            },
+
             unsubscribeOnChange: function(id) {
                 delete _changeCbs[id];
             },

@@ -160,38 +160,16 @@
         return false;
     }
 
+    // item - navbar menu object form children array
+    // session - Session factory
     function canShow (item, session) {
-        if (item.acls.show.indexOf("*") > -1) return true; // if "*" acl, show the option
-        if (!session) return false; // no "*" exists and no session, hide the option
-
-        for (var i=0; i < item.acls.show.length; i++) {
-            var attribute = item.acls.show[i];
-
-            var match = session.attributes.some(function (attr) {
-                return attr.id === attribute;
-            });
-
-            if (match) return true;
-        };
-
-        return false;
+        return session.isGroupIncluded(item.acls.show, true);
     }
 
+    // item - navbar menu object form children array
+    // session - Session factory
     function canEnable (item, session) {
-        if (item.acls.enable.indexOf("*") > -1) return true; // if "*" acl, enable the option
-        if (!session) return false; // no "*" exists and no session, disable the option
-
-        for (var i=0; i < item.acls.enable.length; i++) {
-            var attribute = item.acls.enable[i];
-
-            var match = session.attributes.some(function (attr) {
-                return attr.id === attribute;
-            });
-
-            if (match) return true;
-        };
-
-        return false;
+        return session.isGroupIncluded(item.acls.enable, true);
     }
 
     /**
@@ -353,11 +331,11 @@
                     }
 
                     scope.canShow = function (item) {
-                        return canShow(item, Session.getSessionValue());
+                        return canShow(item, Session);
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, Session.getSessionValue());
+                        return canEnable(item, Session);
                     }
 
                     scope.logBranding = function ($event, link) {
@@ -466,11 +444,11 @@
                     }
 
                     scope.canShow = function (item) {
-                        return canShow(item, Session.getSessionValue());
+                        return canShow(item, Session);
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, Session.getSessionValue());
+                        return canEnable(item, Session);
                     }
 
                     scope.toggleSubMenu = function (event, menuObject) {

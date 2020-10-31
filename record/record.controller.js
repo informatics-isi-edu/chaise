@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -113,37 +113,11 @@
         };
 
         vm.canShowSharePopup = function() {
-            var showAcls = chaiseConfig.shareCiteAcls.show;
-            if (showAcls.indexOf("*") > -1) return true; // if "*" acl, show the button
-
-            for (var i=0; i < showAcls.length; i++) {
-                var attribute = showAcls[i];
-
-                var match = $rootScope.session.attributes.some(function (attr) {
-                    return attr.id === attribute;
-                });
-
-                if (match) return true;
-            };
-
-            return false;
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.show, false);
         }
 
         vm.canEnableSharePopup = function() {
-            var enableAcls = chaiseConfig.shareCiteAcls.enable;
-            if (enableAcls.indexOf("*") > -1) return true; // if "*" acl, enable the button
-
-            for (var i=0; i < enableAcls.length; i++) {
-                var attribute = enableAcls[i];
-
-                var match = $rootScope.session.attributes.some(function (attr) {
-                    return attr.id === attribute;
-                });
-
-                if (match) return true;
-            };
-
-            return false;
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.enable, false);
         }
 
         vm.toRecordSet = function(ref) {
