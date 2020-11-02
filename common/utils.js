@@ -36,7 +36,11 @@
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
           "logClientActions": true,
-          "hideGoToRID": false
+          "hideGoToRID": false,
+          "shareCiteAcls": {
+              "show": ["*"],
+              "enable": ["*"]
+          }
     })
 
     .constant("appTagMapping", {
@@ -1928,6 +1932,13 @@
                 // case 3b
                 applyHostConfigRules(catalogAnnotation);
             }
+
+            // shareCiteAcls is a nested object, user could define shareCiteAcls:
+            //     { show: ["*"] }
+            // with no enable array defined
+            // make sure the object has both defined and apply the default if one or the other is missing
+            if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = defaultConfig.shareCiteAcls.show;
+            if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = defaultConfig.shareCiteAcls.enable;
 
             if (!$window.dcctx) $window.dcctx = {};
             $window.dcctx.chaiseConfig = cc;
