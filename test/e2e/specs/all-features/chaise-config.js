@@ -24,6 +24,8 @@ var chaiseConfig = {
             },
             {
                 name: "Recordsets",
+                // tests markdownName is prefered
+                markdownName: "Test Recordsets",
                 children: [
                     {
                         name: "Dataset",
@@ -44,7 +46,8 @@ var chaiseConfig = {
                 }
             },
             {
-                name: "RecordEdit",
+                // should bold value instead of showing ** before and after
+                markdownName: "**Recordedit**",
                 children: [
                     {
                         name: "For Mutating Data",

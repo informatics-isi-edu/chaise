@@ -24,7 +24,7 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog=4", function() {
+        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
                 expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
@@ -49,6 +49,7 @@ describe('View existing record,', function() {
         });
 
         if (process.env.TRAVIS) {
+            // test RID search and resolverImplicitCatalog
             it('should navigate to a record page if a proper RID is typed into the RID search box', function (done) {
                 var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "2004"}]).RID
                 var allWindows;
