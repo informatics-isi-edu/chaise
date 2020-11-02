@@ -163,13 +163,13 @@
     // item - navbar menu object form children array
     // session - Session factory
     function canShow (item, session) {
-        return session.isGroupIncluded(item.acls.show, true);
+        return session.isGroupIncluded(item.acls.show);
     }
 
     // item - navbar menu object form children array
     // session - Session factory
     function canEnable (item, session) {
-        return session.isGroupIncluded(item.acls.enable, true);
+        return session.isGroupIncluded(item.acls.enable);
     }
 
     /**

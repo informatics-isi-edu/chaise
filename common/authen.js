@@ -466,9 +466,9 @@
             },
 
             // groupArray should be the array of globus group
-            isGroupIncluded: function(groupArray, checkSession) {
+            isGroupIncluded: function(groupArray) {
                 if (groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
-                if (checkSession && !_session) return false; // no "*" exists and no session, hide the option
+                if (!_session) return false; // no "*" exists and no session, hide the option
 
                 for (var i=0; i < groupArray.length; i++) {
                     var attribute = groupArray[i];

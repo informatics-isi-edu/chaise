@@ -113,11 +113,11 @@
         };
 
         vm.canShowSharePopup = function() {
-            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.show, false);
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.show);
         }
 
         vm.canEnableSharePopup = function() {
-            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.enable, false);
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.enable);
         }
 
         vm.toRecordSet = function(ref) {
