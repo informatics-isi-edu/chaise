@@ -10,9 +10,17 @@
      */
     .constant('viewerConstant', {
         osdViewer: {
+            IMAGE_URL_QPARAM: "url",
             CHANNEL_NAME_QPARAM: "channelName",
-            CHANNEL_RGB_QPARAM: "channelRGB",
-            IMAGE_URL_QPARAM: "url"
+            PSEUDO_COLOR_QPARAM: "pseudoColor",
+            IS_RGB_QPARAM: "isRGB",
+            CHANNEL_QPARAMS: [
+                "url", "aliasName", "channelName", "pseudoColor", "isRGB"
+            ],
+            OTHER_QPARAMS: [
+                "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
+                "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness"
+            ]
         },
         image: {
             URI_COLUMN_NAME: "uri",
@@ -31,6 +39,7 @@
 
             CHANNEL_NAME_COLUMN_NAME: "Name",
             PSEUDO_COLOR_COLUMN_NAME: "Pseudo_Color",
+            IS_RGB_COLUMN_NAME: "IS_RGB",
             IMAGE_URL_COLUMN_NAME: "Image_URL",
 
             // how many channels at a time should we read from database
@@ -40,7 +49,6 @@
             // how much should we wait for user action and then log
             SEARCH_LOG_TIMEOUT: 2000,
             LINE_THICKNESS_LOG_TIMEOUT: 1000,
-
 
             // how many annotations at a time should we read from database
             PAGE_COUNT: 25,
