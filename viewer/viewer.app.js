@@ -54,6 +54,7 @@
         }]);
     }])
 
+    // TODO this should be removed, viewer shouldn't parse the url
     // Configure the context info from the URI
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();
@@ -62,8 +63,7 @@
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
 
-        // TODO this should be removed, viewer shouldn't parse the url
-        console.log('Context', context);
+        // console.log('Context', context);
     }])
 
     // Configure all tooltips to be attached to the body by default. To attach a
@@ -114,7 +114,7 @@
                 user.role = null;
             }
 
-            console.log('User: ', user);
+            // console.log('User: ', user);
             return;
         }, function error(response) {
             throw response;

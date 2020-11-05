@@ -11,7 +11,8 @@
 
         var annotConstant = viewerConstant.annotation,
             osdConstant = viewerConstant.osdViewer,
-            channelConstant = viewerConstant.channel;
+            channelConstant = viewerConstant.channel,
+            URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
 
         /**
          * @private
@@ -20,6 +21,12 @@
         function _addChannelParams(dest, src) {
             osdConstant.CHANNEL_QPARAMS.forEach(function (qp) {
                 if (qp in src) {
+                    // there might be annotation urls in dest
+                    if (qp === URLQParamAttr && Array.isArray(dest[qp])) {
+                        dest[qp] = dest[qp].concat(src[qp])
+                        return;
+                    }
+
                     dest[qp] = src[qp];
                 }
             });
@@ -30,25 +37,50 @@
          * If lookForAnnotation is passed, it will also check for the url value being annotation.
          * @param {Object} queryParams - query params object
          * @param {Boolean=} lookForAnnotation - if true, will also check for annotation
+         * @param {Object=} annotationQueryParams - pass an object so the function stores the annotation query params in there
          * @returns {Boolean}
          */
-        function hasURLQueryParam(queryParams, lookForAnnotation) {
-            if (!(osdConstant.IMAGE_URL_QPARAM in queryParams)) {
+        function hasURLQueryParam(queryParams, lookForAnnotation, annotationQueryParams) {
+            if (!(URLQParamAttr in queryParams)) {
                 return false;
             }
 
-            // see if any of the urls are for annotation
-            // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
-            for (var queryKey in queryParams[osdConstant.IMAGE_URL_QPARAM]) {
-                var url = queryParams[osdConstant.IMAGE_URL_QPARAM][queryKey];
+            var urlQParam = queryParams[URLQParamAttr], res, i;
+
+            var checkURL = function (url) {
+                // see if any of the urls are for annotation
+                // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
                 if (url.indexOf(".svg") != -1 || url.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
+                    // store the annotation urls
+                    if (typeof annotationQueryParams === "object") {
+                        if (!(URLQParamAttr in annotationQueryParams)) {
+                            annotationQueryParams[URLQParamAttr] = []
+                        }
+                        annotationQueryParams[URLQParamAttr].push(url);
+                    }
+
                     // found a url query parameter that is annotation
                     if (lookForAnnotation) return true;
                 } else {
                     // found a url query parameter that is not annotation
                     if (!lookForAnnotation) return true;
                 }
+                return null;
             }
+
+            if (typeof urlQParam === "string") {
+                return checkURL(urlQParam) === true;
+            }
+
+            if (Array.isArray(urlQParam)){
+                for (i = 0; i < urlQParam.length; i++) {
+                    res = checkURL(urlQParam[i]);
+                    if (typeof res === "boolean") {
+                        return res;
+                    }
+                }
+            }
+
 
             return false;
         }
@@ -66,9 +98,7 @@
          *   - otherwise if defined on imageURI, use it.
          */
         function populateOSDViewerQueryParams (pageQueryParams, imageURI) {
-            var imageURIQueryParams = {},
-                readChannelInfo = true, osdViewerQueryParams = {},
-                urlQParam = osdConstant.IMAGE_URL_QPARAM;
+            var readChannelInfo = true, osdViewerQueryParams = {}, imageURIQueryParams = {};
 
             if (DataUtils.isNoneEmptyString(imageURI)) {
                 if (imageURI.indexOf("?") === -1) {
@@ -77,13 +107,16 @@
                 imageURIQueryParams = UriUtils.getQueryParams(imageURI, true);
             }
 
-            // get all the channel query parameters  from the page query paramter
-            if (hasURLQueryParam(pageQueryParams)) {
+            // get all the channel query parameters from the page query paramter
+            if (hasURLQueryParam(pageQueryParams, false, osdViewerQueryParams)) {
+                // the annotation urls might have been added
+                osdViewerQueryParams = {};
+
                 readChannelInfo = false;
                 _addChannelParams(osdViewerQueryParams, pageQueryParams);
             }
             // get all the channel query parameters from image
-            else if (hasURLQueryParam(imageURIQueryParams)) {
+            else if (hasURLQueryParam(imageURIQueryParams, false, osdViewerQueryParams)) {
                 readChannelInfo = false;
                 _addChannelParams(osdViewerQueryParams, imageURIQueryParams)
             }
@@ -148,9 +181,9 @@
 
                         // create the channel info
                         var res = {};
-                        res[osdConstant.IMAGE_URL_QPARAM] = channelURL;
+                        res[URLQParamAttr] = channelURL;
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
-                        res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "";
+                        res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
                         res[osdConstant.IS_RGB_QPARAM] = t.data[channelConstant.IS_RGB_COLUMN_NAME] == true ? "true" : "false";
                         channelList.push(res);
                     }
