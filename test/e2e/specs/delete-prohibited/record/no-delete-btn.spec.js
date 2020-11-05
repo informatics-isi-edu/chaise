@@ -48,7 +48,8 @@ describe('View existing record,', function() {
             done();
         });
 
-        if (process.env.TRAVIS) {
+        if (!process.env.TRAVIS) {
+            // test RID search and resolverImplicitCatalog
             it('should navigate to a record page if a proper RID is typed into the RID search box', function (done) {
                 var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "2004"}]).RID
                 var allWindows;
@@ -77,6 +78,7 @@ describe('View existing record,', function() {
                     done.fail();
                 });
             });
+        } else {
 
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
                 var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
