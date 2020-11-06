@@ -3,7 +3,10 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['AlertsService', 'context', 'errorMessages', 'image', 'logService', '$window', '$rootScope','$scope', function OSDController(AlertsService,context, errorMessages, image, logService, $window, $rootScope, $scope) {
+    .controller('OSDController',
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', '$window', '$rootScope','$scope', '$timeout',
+        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, $window, $rootScope, $scope, $timeout) {
+
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -42,6 +45,11 @@
                 var messageType = data.messageType;
 
                 switch (messageType) {
+                    case "osdLoaded":
+                        if (DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters)) {
+                            iframe.postMessage({messageType: 'initializeViewer', content: $rootScope.osdViewerParameters}, origin);
+                        }
+                        break;
                     case "hideChannelList":
                         $scope.$apply(function(){
                             vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;

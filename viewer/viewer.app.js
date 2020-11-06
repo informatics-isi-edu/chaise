@@ -302,14 +302,16 @@
                     $rootScope.loadingAnnotations = true;
                 }
 
-                var osdQueryParamsString = UriUtils.queryParamsToString(osdViewerQueryParams, true);
-                if (osdQueryParamsString.length === 0) {
-                    console.log("there wasn't any query parameters that we could send to OSD viewer");
+                // osd controller uses this attribute to parameterize OSD viewer
+                // TODO should eventually be a proper object and not just query parameters
+                $rootScope.osdViewerParameters = osdViewerQueryParams;
+                if (!DataUtils.isObjectAndNotNull(osdViewerQueryParams)) {
+                    console.log("there wasn't any parameters that we could send to OSD viewer");
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");
                 }
 
-                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdQueryParamsString;
+                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
                 console.log('osd viewer location: ', osdViewerURI);
                 iframe.location.replace(osdViewerURI);
 
