@@ -63,11 +63,13 @@ describe('View existing record,', function() {
 
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function () {
-                    chaisePage.recordPageReady();
+
                     return browser.driver.getCurrentUrl();
                 }).then(function (url) {
-                    var newTabUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + "RID=" + rid;
-                    expect(url).toBe(newTabUrl, "new tab url is doesn't include the rid");
+                    // runs in travis when resolverImplicitCatalog is the same as catalogId on catalog 4
+                    var newTabUrl = browser.params.origin + "/id/" + rid;
+                    // resolver isn't on in travis so testing the output of search by RID without a redirect
+                    expect(url).toBe(newTabUrl, "new tab url doesn't include the resolver path with rid and no catalog");
                     browser.close();
 
                     return browser.switchTo().window(allWindows[0]);
