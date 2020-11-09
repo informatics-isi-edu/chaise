@@ -314,22 +314,6 @@
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
                 console.log('osd viewer location: ', osdViewerURI);
                 iframe.location.replace(osdViewerURI);
-
-                // TODO there should be a way that osd tells us it's done doing it's setup.
-                $rootScope.displayReady = true;
-
-                /**
-                 * fix the size of main-container and sticky areas, and then show the iframe.
-                 * these have to be done in a digest cycle after setting the displayReady.
-                 * Because this way, we will ensure to run the height logic after the page
-                 * content is visible and therefore it can set a correct height for the bottom-container.
-                 * otherwise the iframe will be displayed in a small box first.
-                 */
-                $timeout(function () {
-                    UiUtils.attachContainerHeightSensors();
-                    $rootScope.displayIframe = true;
-                });
-
             }).catch(function (err) {
                 // TODO errors.js is not showing the errors coming from viewer,
                 // so if we decided to show errors from this app, we should change that one as well.
