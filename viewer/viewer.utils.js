@@ -193,7 +193,7 @@
                 ref = ref.sort(channelConstant.CHANNEL_TABLE_COLUMN_ORDER);
 
                 // send request to server
-                return _readPageByPage(ref, channelConstant.PAGE_COUNT, logObj, cb);
+                return _readPageByPage(ref, channelConstant.PAGE_COUNT, logObj, true, cb);
             }).then(function () {
                 defer.resolve(channelList);
             }).catch(function (err) {
@@ -292,7 +292,7 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                return _readPageByPage(ref, annotConstant.PAGE_COUNT, logObj, cb);
+                return _readPageByPage(ref, annotConstant.PAGE_COUNT, logObj, false, cb);
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {
@@ -306,9 +306,9 @@
          * since we don't know the size of our requests, this will make sure the
          * requests are done in batches until all the values are processed.
          */
-        function _readPageByPage (ref, pageSize, logObj, cb) {
+        function _readPageByPage (ref, pageSize, logObj, useEntity, cb) {
             var defer = $q.defer();
-            ref.read(pageSize, logObj, false, true).then(function (page){
+            ref.read(pageSize, logObj, useEntity, true).then(function (page){
                 if (page && page.length > 0) {
                     var cb_res = cb(page);
                     if (cb_res === false) {
@@ -319,7 +319,7 @@
                 }
 
                 if (page.hasNext) {
-                    return _readPageByPage(page.next);
+                    return _readPageByPage(page.next, pageSize, logObj, useEntity, cb);
                 }
                 return true;
             }).then(function (res) {
