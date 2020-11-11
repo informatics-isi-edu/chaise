@@ -46,25 +46,10 @@
 
                 switch (messageType) {
                     case "osdLoaded":
-                        if (DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters)) {
-                            iframe.postMessage({messageType: 'initializeViewer', content: $rootScope.osdViewerParameters}, origin);
-                        }
-
                         $scope.$apply(function(){
-                            // show the page while the image info will be loaded by osd viewer
-                            $rootScope.displayReady = true;
-
-                            /**
-                             * fix the size of main-container and sticky areas, and then show the iframe.
-                             * these have to be done in a digest cycle after setting the displayReady.
-                             * Because this way, we will ensure to run the height logic after the page
-                             * content is visible and therefore it can set a correct height for the bottom-container.
-                             * otherwise the iframe will be displayed in a small box first.
-                             */
-                            $timeout(function () {
-                                UiUtils.attachContainerHeightSensors();
-                                $rootScope.displayIframe = true;
-                            });
+                            if (DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters)) {
+                                iframe.postMessage({messageType: 'initializeViewer', content: $rootScope.osdViewerParameters}, origin);
+                            }
                         });
                         break;
                     case "hideChannelList":

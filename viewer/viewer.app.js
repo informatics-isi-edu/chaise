@@ -312,8 +312,28 @@
                 }
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
-                console.log('osd viewer location: ', osdViewerURI);
+                console.log('osd viewer location: ', osdViewerURI + "?" + UriUtils.queryParamsToString(osdViewerQueryParams, true));
+
                 iframe.location.replace(osdViewerURI);
+
+                // NOTE if we move displayReady and displayIframe to be after the osdLoaded,
+                //      the scalebar value doesn't properly display. the viewport must be visible
+                //      before initializing the osd viewer (and its scalebar)
+                // show the page while the image info will be loaded by osd viewer
+                $rootScope.displayReady = true;
+
+                /**
+                 * fix the size of main-container and sticky areas, and then show the iframe.
+                 * these have to be done in a digest cycle after setting the displayReady.
+                 * Because this way, we will ensure to run the height logic after the page
+                 * content is visible and therefore it can set a correct height for the bottom-container.
+                 * otherwise the iframe will be displayed in a small box first.
+                 */
+                $timeout(function () {
+                    UiUtils.attachContainerHeightSensors();
+                    $rootScope.displayIframe = true;
+                });
+
             }).catch(function (err) {
                 // TODO errors.js is not showing the errors coming from viewer,
                 // so if we decided to show errors from this app, we should change that one as well.
