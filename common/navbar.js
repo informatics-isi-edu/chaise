@@ -286,10 +286,11 @@
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
+                var dcctx = ConfigUtils.getContextJSON();
+                scope.hideNavbar = dcctx.hideNavbar;
                 // Subscribe to on change event for session
                 // navbar doesn't need to have functionality until the session returns, just like app.js blocks
                 var subFunctionId = Session.subscribeOnChange(function() {
-
                     // signal the ancestors that navbar is now displayed
                     $rootScope.$emit("navbar-done");
 
@@ -297,9 +298,7 @@
                     Session.unsubscribeOnChange(subFunctionId);
 
                     var chaiseConfig = ConfigUtils.getConfigJSON();
-                    var dcctx = ConfigUtils.getContextJSON();
 
-                    scope.hideNavbar = dcctx.hideNavbar;
                     scope.brandURL = chaiseConfig.navbarBrand;
                     scope.brandText = chaiseConfig.navbarBrandText;
                     scope.brandImage = chaiseConfig.navbarBrandImage;
