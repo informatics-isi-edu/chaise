@@ -292,7 +292,7 @@
                     }
 
                     // capture the special values
-                    switch (q_val) {
+                    switch (q_key) {
                         case "limit":
                             acceptedQueries.push(queries[i]);
                             break;
