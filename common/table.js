@@ -1638,7 +1638,7 @@
                 scope.editRecord = function() {
                     var link = scope.vm.page.reference.contextualize.entryEdit.appLink;
                     // TODO ermrestJS needs to handle the case when no limit is defined in the URL
-                    if (link.indexOf("?limit=") === -1 || link.indexOf("&limit=") === -1)
+                    if (link.indexOf("?limit=") === -1 && link.indexOf("&limit=") === -1)
                         link = link + (link.indexOf('?') === -1 ? "?limit=" : "&limit=" ) + scope.vm.pageLimit;
 
                     location.href = link;
