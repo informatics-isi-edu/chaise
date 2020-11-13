@@ -117,7 +117,7 @@ The flow-control of record page is the same as recordset. We don't have a queue 
     }
     ```
 
-    The following would be the order of sending the requests (paranthesis has been added for readibility purposes):
+    The following would be the order of sending the requests (parentheses has been added for readability purposes):
 
     ```
     (es_4), (i_3, es_1, es_2), (i_4), (agg_1), (i_1, agg_2), (i_2, es_3, agg_3), (agg_4)
@@ -137,15 +137,15 @@ The flow-control of record page is the same as recordset. We don't have a queue 
 
 As we mentioned the logic of ordering the secondary requests is hidden from Chaise and all Chaise knows is the list of `requests` that it has to create. Each returned `Request` object from ERMrestJS is going to have different attributes depending on the type of the request. Each object has a boolean attribute to indicate its type. The following are the list of available attributes for each type:
 
-- aggregates: If the `"aggregate": true` is avaiable in the returned object, we know that it's pseudo-column aggregate. The other available attributes are:
+- aggregates: If the `"aggregate": true` is available in the returned object, we know that it's pseudo-column aggregate. The other available attributes are:
   - `column`: An `ERMrest.PseudoColumn` object that can be used for generating the requests.
   - `objects`: An array of objects that signal which part of the page needs this pseudo-column value.
     - If `"citation": true` is available on an object, citation is waiting for this value.
     - If `"column": true` is available on an object, a visible column is waiting for this value. `index` attribute can be used to find the column.
     - If `"related": true` is available on an object, a related entity is waiting for this value. `index` attribute can be used to find the related entity.
 - entity sets: If the `"entityset": true` is available in the returned object, we know that it's pseudo-column entity set. It will have the same attributes as aggregate but we had to distinguish between them because Chaise has to use a different API call to get the value.
-- inline entities: If `"inline": true` is available in the returened object, the request belongs to an inline table. `index` is the other attribute that Chaise is using to generate a request for the inline entity.
-- related entities: If `"related": true` is available in the returened object, the request belongs to an inline table. `index` is the other attribute that Chaise is using to generate a request for the inline entity.
+- inline entities: If `"inline": true` is available in the returned object, the request belongs to an inline table. `index` is the other attribute that Chaise is using to generate a request for the inline entity.
+- related entities: If `"related": true` is available in the returned object, the request belongs to an inline table. `index` is the other attribute that Chaise is using to generate a request for the inline entity.
 
 
 ‌Based on this, Chaise uses the returned list of requests and creates its own copy called `requestModels`. This will allow chaise to add extra attributes for book-keeping. `requestModels` is an array of object with the following attributes:

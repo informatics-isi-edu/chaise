@@ -58,7 +58,7 @@ var testParams = {
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
-        { title: "accommodation_collections", value: "<p>Sherathon Hotel, accommodation_outbound1_outbound2 one</p>", comment: "collections", type: "inline" },
+        { title: "accommodation_collections", value: "<p>Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel</p>", comment: "collections", type: "inline" },
         { title: "table_w_aggregates", value: "3", comment: "has aggregates", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:table_w_aggregates/", table_name: "table_w_aggregates", key_value: [{column: "id", value: "3"}]} },
         { title: "# thumbnail collection", comment: "Count of thumbnail collection", value: "1", markdown_title: "# thumbnail collection"},
         { title: "# distinct thumbnail collection", comment: "Count distinct of thumbnail collection", value: "1", markdown_title: "# distinct thumbnail collection"},

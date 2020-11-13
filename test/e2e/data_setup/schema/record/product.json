@@ -402,8 +402,8 @@
                             "comment": "collections",
                             "display": {
                                 "template_engine": "handlebars",
-                                "markdown_pattern": "{{#each $self}}{{#unless @first}}| {{/unless}}{{{this.rowName}}}{{/each}}, {{{entity_all_outbound_outbound1_outbound2.rowName}}}",
-                                "wait_for": ["entity_all_outbound_outbound1_outbound2"]
+                                "markdown_pattern": "{{#each $self}}{{#unless @first}}| {{/unless}}{{{this.rowName}}}{{/each}}, {{{entity_all_outbound_outbound1_outbound2.rowName}}}, max: {{{max_title_accommodation_collection_cover}}}",
+                                "wait_for": ["entity_all_outbound_outbound1_outbound2", "max_title_accommodation_collection_cover"]
                             }
                         },
                         {
