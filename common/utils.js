@@ -240,11 +240,17 @@
          * @desc
          * Converts a chaise URI to an ermrest resource URI object or string.
          * @returns {string|Object}
-         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', `paction`, and `isQueryParameter`
+         * if returnObject = true: an object with the following attributes:
+         *  - 'ermrestURI': the uri that should be used for communicating with ermrestjs
+         *  - `isQueryParameter`: whether the hash was written using ? (not #)
+         *  - `ppid`, 'pcid', `paction`: parent context
+         *  - `queryParams`: an object containing query parameters of the url.
+         *                   The keys are query params names, and value either a
+         *                   string value or an array containing multiple strings.
          * otherwise it will return the ermrest uri string.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-        function chaiseURItoErmrestURI(location, returnObject) {
+        function chaiseURItoErmrestURI(location, returnObject, dontDecodeQueryParams) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing,
                 chaiseConfig = ConfigUtils.getConfigJSON();
@@ -269,26 +275,47 @@
             if (hash && hash.indexOf('?') !== -1) {
                 queryParamsString = hash.match(/\?(.+)/)[1];
                 var queries = queryParamsString.split("&"); // get the query params
-                var acceptedQueries = [], i;
+                var acceptedQueries = [], i, q_parts, q_key, q_val;
 
-                hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                // add back only the valid queries
+                hash = hash.slice(0, hash.indexOf('?'));
+
+                // remove queries add back only the valid queries
                 // "valid queries" are ones that the ermrest APIs allow in the uri (like limit)
                 for (i = 0; i < queries.length; i++) {
-                    if (queries[i].indexOf("limit=") === 0) {
-                        acceptedQueries.push(queries[i]);
+                    q_parts = queries[i].split("=");
+                    if (q_parts.length != 2) continue;
+
+                    if (dontDecodeQueryParams) {
+                        q_key = q_parts[0], q_val = q_parts[1];
+                    } else {
+                        q_key = decodeURIComponent(q_parts[0]), q_val = decodeURIComponent(q_parts[1]);
                     }
-                    if (queries[i].indexOf("pcid=") === 0) {
-                        pcid = queries[i].split("=")[1];
+
+                    // capture the special values
+                    switch (q_key) {
+                        case "limit":
+                            acceptedQueries.push(queries[i]);
+                            break;
+                        case "pcid":
+                            pcid = q_val;
+                            break;
+                        case "ppid":
+                            ppid = q_val;
+                            break;
+                        case "paction":
+                            paction = q_val;
+                            break;
                     }
-                    if (queries[i].indexOf("ppid=") === 0) {
-                        ppid = queries[i].split("=")[1];
+
+                    // save the query param
+                    if (q_key in queryParams) {
+                        if (!Array.isArray(queryParams[q_key])) {
+                            queryParams[q_key] = [queryParams[q_key]]
+                        }
+                        queryParams[q_key].push(q_val);
+                    } else {
+                        queryParams[q_key] = q_val;
                     }
-                    if (queries[i].indexOf("paction=") === 0) {
-                        paction = queries[i].split("=")[1];
-                    }
-                    var q_parts = queries[i].split("=");
-                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
                 if (acceptedQueries.length != 0) {
                     hash = hash + "?" + acceptedQueries.join("&");
@@ -957,10 +984,11 @@
          * Given a location href and key, return the query param value that matches that key
          * @param {String} url - the full url for the current page
          * @param {String} key - the key of the query parameter you want the value of
-         * @returns {String} the value of that key or null, if that key doesn't exist as a query parameter
+         * @returns {String|Array|Null} the value of that key or null, if that key doesn't exist as a query parameter
          *
-         * Note: This won't handle the case where the url might be like this:
-         * '?catalog/schema:table/limit=20' where limit is a column name
+         * Note: This won't handle urls that use `?` instead of `#` for hash fragment.
+         * so should not be used for the main url. if we're looking for the query params
+         * of the main url, we should just use the queryParams that chaiseURItoErmrestURI returns
          */
         function getQueryParam(url, key) {
             return getQueryParams(url)[key];
@@ -969,22 +997,71 @@
         /**
          * Given a location href, return all the query parameters available on the url.
          * @param {String} url - the full url for the current page
+         * @param {Boolean=} dontDecodeQueryParams - if true, the values will not be decoded.
          * @returns {Object} an object, containing the query parameters.
+         *                   The keys are query params names, and value either a
+         *                   string value or an array containing multiple strings.
          *
-         * Note: This won't handle the case where the url might be like this:
-         * '?catalog/schema:table/limit=20' where limit is a column name
+         * Note: This won't handle urls that use `?` instead of `#` for hash fragment.
+         * so should not be used for the main url. if we're looking for the query params
+         * of the main url, we should just use the queryParams that chaiseURItoErmrestURI returns
          */
-        function getQueryParams(url) {
+        function getQueryParams(url, dontDecodeQueryParams) {
             var params = {};
             var idx = url.lastIndexOf("?");
             if (idx !== -1) {
                 var queries = url.slice(idx+1).split("&");
                 for (var i = 0; i < queries.length; i++) {
                     var q_parts = queries[i].split("=");
-                    params[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
+                    if (q_parts.length != 2) continue;
+
+                    var q_key, q_val;
+                    if (dontDecodeQueryParams) {
+                        q_key = q_parts[0], q_val = q_parts[1];
+                    } else {
+                        q_key = decodeURIComponent(q_parts[0]), q_val = decodeURIComponent(q_parts[1]);
+                    }
+
+                    if (q_key in params) {
+                        if (!Array.isArray(params[q_key])) {
+                            params[q_key] = [params[q_key]]
+                        }
+                        params[q_key].push(q_val);
+                    } else {
+                        params[q_key] = q_val;
+                    }
                 }
             }
             return params;
+        }
+
+        /**
+         * Given a queryParams object, will return the string representation of it.
+         * @param {Object} queryParams - the query params object
+         * @param {Boolean=} dontEncodeQueryParams - if true, the values will not be encoded.
+         * @returns {String} the string representation of the query params (doesn't include ? at the beginning)
+         *
+         */
+        function queryParamsToString(queryParams, dontEncodeQueryParams) {
+            var res = [];
+            var addKeyValue = function(k, v) {
+                if (dontEncodeQueryParams) {
+                    res.push(k + "=" + v);
+                } else {
+                    res.push(fixedEncodeURIComponent(k) + "=" + fixedEncodeURIComponent(v));
+                }
+            }
+
+            for (var k in queryParams) {
+                if (Array.isArray(queryParams[k])) {
+                    queryParams[k].forEach(function (q) {
+                        addKeyValue(k, q);
+                    });
+                } else {
+                    addKeyValue(k, queryParams[k])
+                }
+            }
+            return res.join("&");
         }
 
         /**
@@ -1075,6 +1152,7 @@
             getHash: getHash,
             getQueryParam: getQueryParam,
             getQueryParams: getQueryParams,
+            queryParamsToString: queryParamsToString,
             isBrowserIE: isBrowserIE,
             isSameOrigin: isSameOrigin,
             OSDViewerDeploymentPath: OSDViewerDeploymentPath,
@@ -1259,6 +1337,15 @@
             return (typeof data === 'number') && (data % 1 === 0);
         }
 
+        /**
+         * Verifies that the given data is a non-empty string.
+         * @param {Object} data
+         * @return {Boolean} whether it is non-empty string.
+         */
+        function isNoneEmptyString (data) {
+            return typeof data === "string" && data.length > 0;
+        }
+
         var ID_SAFE_REGEX = /[^\w-]+/g;
         /**
         *
@@ -1345,6 +1432,7 @@
             isObjectAndKeyDefined: isObjectAndKeyDefined,
             isObjectAndNotNull: isObjectAndNotNull,
             isInteger: isInteger,
+            isNoneEmptyString: isNoneEmptyString,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
             addSpaceAfterLogicalOperators: addSpaceAfterLogicalOperators,
@@ -2477,7 +2565,6 @@
             //      after that we should be able to merge some of the actions with the rest of the chaise
 
             // - server:
-            VIEWER_ANNOT_LOAD: clientPathActionSeparator + "load",
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
 
             // - client:
@@ -2535,7 +2622,8 @@
             FACET: "facet",
 
             // used in viewer app:
-            ANNOTATION: "annotation"
+            ANNOTATION: "annotation",
+            CHANNEL: "channel"
         });
 
         var logStackPaths = Object.freeze({
@@ -2557,7 +2645,8 @@
 
             // used in viewer app:
             ANNOTATION_ENTITY: "annotation-entity",
-            ANNOTATION_SET: "annotation-set"
+            ANNOTATION_SET: "annotation-set",
+            CHANNEL_SET: "channel-set"
         });
 
         var appModes = Object.freeze({
