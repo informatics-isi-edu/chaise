@@ -214,7 +214,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+    .directive('navbar', ['AlertsService', 'ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(AlertsService, ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -365,6 +365,7 @@
                     //  - if resolverImplicitCatalog === catalogId:   /id/RID
                     //  - otherwise:                                  /id/catalogId/RID
                     scope.ridSearch = function () {
+                        $rootScope.showSpinner = true;
                         var resolverId = chaiseConfig.resolverImplicitCatalog,
                             url = "/id/", catId, splitId;
 
@@ -388,7 +389,24 @@
                             rid: scope.ridSearchTerm
                         });
 
-                        $window.open(url, '_blank');
+                        // try to fetch the resolver link to see if the path resolves before sending the user
+                        // NOTE: .head returns a 405 error (not allowed) for proper RIDs, maybe ask Karl if this is expected
+                        ConfigUtils.getHTTPService().head(url, {}).then(function (response) {
+                            $rootScope.showSpinner = false;
+                            $window.open(url, '_blank');
+                        }, function (rejResponse) {
+                            $rootScope.showSpinner = false;
+
+                            if (rejResponse.status == 405) {
+                                $window.open(url, '_blank');
+                            } else {
+                                throw rejResponse;
+                            }
+                        }).catch(function (err) {
+                            console.log(err);
+                            AlertsService.addAlert("No record with input RID, " + scope.ridSearchTerm + ", exists. Please check the input value is valid and try again.", "warning");
+                        });
+
                     }
 
                     if (isCatalogDefined(catalogId)) {
