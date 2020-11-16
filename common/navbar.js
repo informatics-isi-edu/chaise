@@ -390,18 +390,9 @@
                         });
 
                         // try to fetch the resolver link to see if the path resolves before sending the user
-                        // NOTE: .head returns a 405 error (not allowed) for proper RIDs, maybe ask Karl if this is expected
-                        ConfigUtils.getHTTPService().head(url, {}).then(function (response) {
+                        ConfigUtils.getHTTPService().get(url, {}).then(function (response) {
                             $rootScope.showSpinner = false;
                             $window.open(url, '_blank');
-                        }, function (rejResponse) {
-                            $rootScope.showSpinner = false;
-
-                            if (rejResponse.status == 405) {
-                                $window.open(url, '_blank');
-                            } else {
-                                throw rejResponse;
-                            }
                         }).catch(function (err) {
                             console.log(err);
                             AlertsService.addAlert("No record with input RID, " + scope.ridSearchTerm + ", exists. Please check the input value is valid and try again.", "warning");
