@@ -4,7 +4,7 @@
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
     .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
-        var booleanValues = [true, false];
+        var defaultBooleanValues = [true, false];
 
         /* Functions for all input types */
         // determines if input should be disabled based on ermrestJS API
@@ -114,7 +114,7 @@
         return {
             applyCurrentDatetime: applyCurrentDatetime,
             blurElement: blurElement,
-            booleanValues: booleanValues,
+            defaultBooleanValues: defaultBooleanValues,
             clearDatetime: clearDatetime,
             fileExtensionTypes: fileExtensionTypes,
             formatDatetime: formatDatetime,
@@ -365,7 +365,7 @@
 
                 vm.customErrorMessage = null;
                 vm.blurElement = InputUtils.blurElement;
-                vm.booleanValues = InputUtils.booleanValues;
+                vm.defaultBooleanValues = InputUtils.defaultBooleanValues;
                 vm.dataFormats = dataFormats;
                 vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
                 vm.maskOptions = maskOptions;

@@ -48,7 +48,8 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
-        vm.booleanValues = InputUtils.booleanValues;
+        vm.booleanValues = booleanValues;
+        vm.defaultBooleanValues = InputUtils.defaultBooleanValues;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
@@ -508,6 +509,10 @@
             }
 
             return disabledValue;
+        }
+
+        function booleanValues() {
+            return vm.defaultBooleanValues;
         }
 
         // Assigns the current date or timestamp to a column's model
