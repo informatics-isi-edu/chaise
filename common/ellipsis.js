@@ -3,12 +3,6 @@
 
     angular.module('chaise.ellipsis', ['chaise.utils'])
 
-    .filter('trustedHTML', ['$sce', function($sce){
-        return function(text) {
-            return $sce.trustAsHtml(text);
-        };
-    }])
-
     .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
         function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),

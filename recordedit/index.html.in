@@ -230,6 +230,11 @@
                                                                 <textarea array column-type="{{column.type.rootName}}" custom-error-message="form.customErrorMessage[rowIndex][column.name]" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null></textarea>
                                                             </div>
 
+                                                            <!-- color input -->
+                                                            <div ng-switch-when="color">
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="color" ng-required="::form.isRequired(columnIndex);" empty-to-null>
+                                                            </div>
+
                                                             <!-- disabled -->
                                                             <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
 

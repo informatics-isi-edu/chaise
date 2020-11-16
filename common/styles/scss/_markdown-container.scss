@@ -26,6 +26,15 @@
         border: 2px solid #ccc;
     }
 
+    // chaise-color-preview
+    .chaise-color-preview {
+        display: inline-block;
+        height: 11px;
+        width: 11px;
+        padding-left: 2px;
+        border-radius: 3px;
+    }
+
     .vocab {
         color: darkblue;
         background-color: rgba(220, 220, 220, 0.68);
