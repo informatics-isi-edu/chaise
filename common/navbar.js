@@ -395,6 +395,7 @@
                             $window.open(url, '_blank');
                         }).catch(function (err) {
                             console.log(err);
+                            $rootScope.showSpinner = false;
                             AlertsService.addAlert("No record with input RID, " + scope.ridSearchTerm + ", exists. Please check the input value is valid and try again.", "warning");
                         });
 
