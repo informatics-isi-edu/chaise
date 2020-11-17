@@ -49,7 +49,6 @@
         vm.int8max = integerLimits.INT_8_MAX;
 
         vm.booleanValues = booleanValues;
-        vm.defaultBooleanValues = InputUtils.defaultBooleanValues;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
@@ -87,7 +86,7 @@
             }
 
             // Redirect to record or recordset app..
-            $window.location = redirectUrl;
+            // $window.location = redirectUrl;
         }
 
         /**
@@ -511,8 +510,9 @@
             return disabledValue;
         }
 
-        function booleanValues() {
-            return vm.defaultBooleanValues;
+        // returns columnModel.booleanArray for use in boolean dropdown
+        function booleanValues(colIndex) {
+            return vm.recordEditModel.columnModels[colIndex].booleanArray;
         }
 
         // Assigns the current date or timestamp to a column's model
