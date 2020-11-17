@@ -9,15 +9,46 @@
      * For now, we decided to have a centeral location for these constant without deciding how this should be configurable
      */
     .constant('viewerConstant', {
+        osdViewer: {
+            IMAGE_URL_QPARAM: "url",
+            CHANNEL_NAME_QPARAM: "channelName",
+            PSEUDO_COLOR_QPARAM: "pseudoColor",
+            IS_RGB_QPARAM: "isRGB",
+            CHANNEL_QPARAMS: [
+                "url", "aliasName", "channelName", "pseudoColor", "isRGB"
+            ],
+            OTHER_QPARAMS: [
+                "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
+                "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness"
+            ]
+        },
         image: {
             URI_COLUMN_NAME: "uri",
             DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z" // the default value of the zindex in the form TODO
+        },
+        channel: {
+            CHANNEL_TABLE_NAME: "Image_Channel",
+            CHANNE_TABLE_SCHEMA_NAME: "Gene_Expression",
+
+            CHANNEL_TABLE_COLUMN_ORDER: [{
+                "column": "Channel_Number",
+                "descending": false
+            }],
+
+            REFERENCE_IMAGE_COLUMN_NAME: "Image",
+
+            CHANNEL_NAME_COLUMN_NAME: "Name",
+            PSEUDO_COLOR_COLUMN_NAME: "Pseudo_Color",
+            IS_RGB_COLUMN_NAME: "IS_RGB",
+            IMAGE_URL_COLUMN_NAME: "Image_URL",
+
+            // how many channels at a time should we read from database
+            PAGE_COUNT: 25,
         },
         annotation: {
             // how much should we wait for user action and then log
             SEARCH_LOG_TIMEOUT: 2000,
             LINE_THICKNESS_LOG_TIMEOUT: 1000,
-
 
             // how many annotations at a time should we read from database
             PAGE_COUNT: 25,
