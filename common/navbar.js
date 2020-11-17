@@ -365,7 +365,7 @@
                     //  - if resolverImplicitCatalog === catalogId:   /id/RID
                     //  - otherwise:                                  /id/catalogId/RID
                     scope.ridSearch = function () {
-                        $rootScope.showSpinner = true;
+                        scope.showRidSpinner = true;
                         var resolverId = chaiseConfig.resolverImplicitCatalog,
                             url = "/id/", catId, splitId;
 
@@ -384,18 +384,20 @@
                         // implicitly does the isCatalogDefined(catalogId) check with how function returns true/false
                         if (scope.isVersioned()) url += "@" + splitId.version;
 
-                        logService.logClientAction({
-                            action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
-                            rid: scope.ridSearchTerm
-                        });
+                        var logObj = ConfigUtils.getContextHeaderParams(), headers = {};
+
+                        logObj.action = logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", "");
+                        logObj.rid = scope.ridSearchTerm;
+
+                        headers[ERMrest.contextHeaderName] = logObj;
 
                         // try to fetch the resolver link to see if the path resolves before sending the user
-                        ConfigUtils.getHTTPService().get(url, {}).then(function (response) {
-                            $rootScope.showSpinner = false;
+                        ConfigUtils.getHTTPService().get(url, {headers: headers}).then(function (response) {
+                            scope.showRidSpinner = false;
                             $window.open(url, '_blank');
                         }).catch(function (err) {
                             console.log(err);
-                            $rootScope.showSpinner = false;
+                            scope.showRidSpinner = false;
                             AlertsService.addAlert("No record with input RID, " + scope.ridSearchTerm + ", exists. Please check the input value is valid and try again.", "warning");
                         });
 
