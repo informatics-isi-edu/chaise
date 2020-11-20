@@ -97,10 +97,10 @@ exports.testPresentation = function (tableParams) {
     });
 
     if (!process.env.TRAVIS) {
-        it("should have 'search results (csv)' as a download option and download the file.", function(done) {
+        it("should have 'This record (CSV)' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
-                expect(csvOption.getText()).toBe("search results (csv)");
+                var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
+                expect(csvOption.getText()).toBe("This record (CSV)");
                 return csvOption.click();
             }).then(function () {
                 browser.wait(function() {

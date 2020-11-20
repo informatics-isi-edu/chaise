@@ -48,7 +48,7 @@ describe('View existing record,', function() {
             expect(element.all(by.css('.panel-open')).count()).toEqual(0);
         });
 
-        it ("should have only 'search results (csv)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
+        it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
             var options = chaisePage.recordsetPage.getExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
         });
@@ -170,7 +170,7 @@ describe('View existing record,', function() {
             it("should display the entity title and subtitle based on their markdown patterns.", function() {
                 var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
                 chaisePage.waitForElement(subTitleEl);
-                
+
                 // page-title and page-subtitle are attached to chaise-title,
                 // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
                 // title structure is: chaise-title -> span -> span (therefore we need to be more specific)

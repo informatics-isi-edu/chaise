@@ -41,11 +41,11 @@ describe('View existing record,', function() {
                     recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
                 });
 
-                it ("first option must be `search results (csv)` and user should be able to download the file.", function (done) {
+                it ("first option must be `This record (CSV)` and user should be able to download the file.", function (done) {
                     browser.wait(EC.elementToBeClickable(exportBtn));
                     chaisePage.clickButton(exportBtn).then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
-                        expect(csvOption.getText()).toBe("search results (csv)");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
+                        expect(csvOption.getText()).toBe("This record (CSV)");
                         return chaisePage.clickButton(csvOption);
                     }).then(function () {
                         browser.wait(function() {
@@ -60,12 +60,12 @@ describe('View existing record,', function() {
                     });
                 });
 
-                it ("second option must be default `BAG` and user should be able to download the file.", function (done) {
+                it ("second option must be default `BDBag` and user should be able to download the file.", function (done) {
                     var exportModal = chaisePage.recordsetPage.getExportModal();
                     browser.wait(EC.elementToBeClickable(exportBtn));
                     exportBtn.click().then(function () {
-                        var bagOption = chaisePage.recordsetPage.getExportOption("BAG");
-                        expect(bagOption.getText()).toBe("BAG");
+                        var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                        expect(bagOption.getText()).toBe("BDBag");
                         return bagOption.click();
                     }).then(function () {
                         return chaisePage.waitForElement(exportModal);
