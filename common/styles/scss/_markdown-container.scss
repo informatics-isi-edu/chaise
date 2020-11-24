@@ -35,6 +35,28 @@
         margin: 2px;
     }
 
+    ul.chaise-list-csv {
+        list-style: none;
+        display: inline;
+        li {
+            display: inline;
+            > p {
+                display: inline;
+            }
+
+            margin: 0 !important;
+
+            &:after {
+                content: ", ";
+            }
+            &:last-child:after {
+                content: "";
+            }
+        }
+    }
+
+
+
     a.download {
         @include chaise-btn();
         @include chaise-btn-primary();
