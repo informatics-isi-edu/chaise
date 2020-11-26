@@ -319,7 +319,7 @@
                 // osd controller uses this attribute to parameterize OSD viewer
                 // TODO should eventually be a proper object and not just query parameters
                 $rootScope.osdViewerParameters = osdViewerQueryParams;
-                if (!DataUtils.isObjectAndKeyDefined(osdViewerQueryParams, "url")) {
+                if (!DataUtils.isObjectAndNotNull(osdViewerQueryParams) || !(osdConstant.IMAGE_URL_QPARAM in osdViewerQueryParams)) {
                     console.log("there wasn't any parameters that we could send to OSD viewer");
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");
