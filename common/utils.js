@@ -2566,6 +2566,7 @@
 
             // - server:
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
+            VIEWER_CHANNEL_DEFAULT_LOAD: "z-default" + clientPathActionSeparator + "load",
 
             // - client:
             VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",
