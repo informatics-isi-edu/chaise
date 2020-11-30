@@ -34,7 +34,8 @@ var testParams = {
             { name: "float4_array", title: "float4_array", type: "array", baseType: "number" },
             { name: "date_array", title: "date_array", type: "array", baseType: "date" },
             { name: "timestamp_array", title: "timestamp_array", type: "array", baseType: "timestamp" },
-            { name: "timestamptz_array", title: "timestamptz_array", type: "array", baseType: "timestamptz" }
+            { name: "timestamptz_array", title: "timestamptz_array", type: "array", baseType: "timestamptz" },
+            { name: "color_rgb_hex_column", title: "color_rgb_hex_column", type: "color" }
         ],
         inputs: [
             {
@@ -44,7 +45,8 @@ var testParams = {
                 "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
                 "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
                 "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
-                "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]"
+                "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]",
+                "color_rgb_hex_column": "#123456"
             },
             {
                 "title": "new title 2", "website": "https://example2.com", "category": {index: 1, value: "Ranch"},
@@ -53,27 +55,28 @@ var testParams = {
                 "no_of_rooms": "2", "opened_on": moment("2017-02-02 02:02:02", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-02-02", "luxurious":  true,
                 "text_array": "[\"v2\", \"v3\"]", "boolean_array": "[false]", "int4_array": "[1, 2]", "float4_array": "[2, 3.3]",
                 "date_array": "[\"2002-02-02\", null]", "timestamp_array": "[\"2002-02-02T02:02:02\"]",
-                "timestamptz_array": "[\"2002-02-02T02:02:02-08:00\"]"
+                "timestamptz_array": "[\"2002-02-02T02:02:02-08:00\"]",
+                "color_rgb_hex_column": "#654321"
             }
         ],
         formsAfterInput: 3,
         result_columns: [
             "title", "website", "product-add_fk_category", "rating", "summary", "description",
             "json_col", "no_of_rooms", "opened_on", "date_col", "luxurious",
-            "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+            "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array", "color_rgb_hex_column"
         ],
         results: [
             [
                 "new title 1",  {"link":"https://example1.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Hotel", "value":"Hotel"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01 01:01:01", "No value, 2001-01-01 01:01:01",
+                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01 01:01:01", "No value, 2001-01-01 01:01:01", "#123456"
             ],
             [
                 "new title 2",  {"link":"https://example2.com/", "value":"Link to Website"}, {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-add:category/term=Ranch", "value":"Ranch"},
                 "2.0000", "This is the summary of this column 2.", "Description 2", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "2", "2017-02-02 02:02:02", "2017-02-02", "true",
-                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02 02:02:02", "2002-02-02 02:02:02",
+                "v2, v3", "false", "1, 2", "2.0000, 3.3000", "2002-02-02, No value", "2002-02-02 02:02:02", "2002-02-02 02:02:02", "#654321"
             ]
         ],
         files: []

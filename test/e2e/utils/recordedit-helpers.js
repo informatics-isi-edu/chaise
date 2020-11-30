@@ -192,10 +192,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         var fileCols = filterColumns(function(c) { if (c.type == "text" && c.isFile && !c.isForeignKey) return true; });
         var jsonCols = filterColumns(function(c) { if ((c.type === "json") && !c.isForeignKey) return true; });
         var arrayCols = filterColumns(function(c) { if ((c.type === "array") && !c.isForeignKey) return true; });
+        var colorCols = filterColumns(function(c) { if ((c.type === "color")) return true; });
 
 
         var JSONDataTypeFields = [],longTextDataTypeFields = [], textDataTypeFields = [], markdownDataTypeFields = [], arrayDataTypeFields = [],
-        booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [], timeInputFields = [];
+        booleanDataTypeFields = [], foreignKeyFields = [], datePickerFields = [], integerDataTypeFields = [], floatDataTypeFields = [], timeInputFields = [], colorDataTypeFields = [];
 
         // test cases:
         describe(title + ",",function() {
@@ -1422,6 +1423,133 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 });
             }
 
+/*TODO
+            if (colorCols.length > 0) {
+                describe("Color fields", function () {
+                    it ("should render color input and show the color.", function () {
+                        colorCols.forEach(function (column) {
+                            chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function (colorInput) {
+                                expect(colorInput.isDisplayed()).toBeTruthy(colError(column.name, "Wasn't displayed."));
+
+                                colorInput.column = column;
+                                colorDataTypeFields.push(colorInput);
+
+                                var value = getRecordValue(column.name);
+                                if (value != undefined) {
+                                    // make sure the displayed value is correct
+                                    expect(colorInput.getAttribute('value')).toBe(value, colError(column.name , "Doesn't have the expected value."));
+
+                                    // make sure the background color is correct
+                                    expect(chaisePage.recordEditPage.getColorInputBackground()).toEqual(value, colError(column.name , "Doesn't have the expected background."));
+                                }
+                            });
+                        });
+                    });
+
+                    it ("should validate required and invalid color input.", function () {
+                        colorDataTypeFields.forEach(function(colorInput) {
+                            var c = colorInput.column;
+
+                            if (c.skipValidation) return;
+
+                            if (c.generated || c.immutable) return;
+
+                            var prevValue = "";
+
+                            // Clear value if it is in edit mode
+                            if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                                colorInput.getAttribute("value").then(function(value) {
+                                    prevValue = value + "";
+                                });
+                            }
+                            chaisePage.recordEditPage.clearInput(colorInput);
+                            browser.actions().sendKeys(protractor.Key.ENTER).perform();
+
+                            // if required, it will just have a default value (won't be able to submit empty)
+                            if (c.nullok == false) {
+                                expect(colorInput.getAttribute('value')).toEqual("black", colError(c.name, "Was able to clear the input."));
+                            }
+
+                            // Invalid text value
+                            var text = "invalidColor";
+                            colorInput.sendKeys(text);
+                            browser.actions().sendKeys(protractor.Key.ENTER).perform();
+
+                            expect(colorInput.getAttribute('value')).not.toBe(text);
+
+                            //Restore the value to the original one
+                            if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                                colorInput.sendKeys(prevValue);
+                            }
+
+                        });
+                    });
+
+                    it("clicking on input should open the color popup, clear btn should be available based on nullok, and should be able to change value", function () {
+                        colorDataTypeFields.forEach(function (colorInput) {
+                            var c = colorInput.column;
+                            if (c.skipValidation) return;
+
+                            if (c.generated || c.immutable) return;
+
+                            var popup = chaisePage.recordEditPage.getColorInputPopup(),
+                                value = "#555555";
+
+                            // click the button to open popup
+                            chaisePage.recordEditPage.getColorInputBtn().click().then(function () {
+
+                                // make sure popup is displayed
+                                browser.waitForElement(popup);
+
+                                // make sure nullok is offered or not
+                                var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
+                                expect(clearBtn.isDisplayed()).toEqual(c.nullok, colError(c.name, "color popup: clear btn invalid state"));
+
+                                // write a color and submit
+                                var popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
+                                expect(popupInput.isDisplayed).toBeTruthy(colError(c.name, "color popup: input is missing"));
+
+                                // change the input
+                                popupInput.sendKeys(value);
+
+                                // close the popup
+                                return chaisePage.recordEditPage.getColorInputPopupSelectBtn().click();
+                            }).then(function () {
+                                browser.waitForElementInverse(popup);
+                                expect(colorInput.getAttribute('value')).toBe(value, colError(c.name, "color popup: value didn't change"));
+                            }).catch(function (err) {
+                                console.log(err);
+                            });
+                        });
+                    });
+
+                    it ("should be able to input the given values", function () {
+                        colorDataTypeFields.forEach(function(colorInput) {
+                            var c = colorInput.column;
+
+                            if (c.generated || c.immutable) return;
+
+                            chaisePage.recordEditPage.clearInput(colorInput);
+                            browser.actions().sendKeys(protractor.Key.ENTER).perform();
+                            browser.sleep(10);
+
+                            var text = getRecordInput(c.name, "#123456");
+                            console.log("text is ", text);
+                            colorInput.sendKeys(text);
+                            browser.actions().sendKeys(protractor.Key.ENTER).perform();
+                            browser.pause();
+
+                            // make sure the displayed value is correct
+                            expect(colorInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
+
+                            // make sure the background color is correct
+                            expect(chaisePage.recordEditPage.getColorInputBackground()).toEqual(text, colError(c.name , "Doesn't have the expected background."));
+                        });
+                    });
+                })
+            }
+*/
+
             if (!process.env.TRAVIS && tableParams.files.length > 0 && fileCols.length > 0) {
                 describe("File fields,", function() {
                     it("should render input type as file input ", function() {
@@ -1464,6 +1592,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
     it("should have no errors.", function() {
         chaisePage.recordEditPage.getAlertError().then(function(err) {
             if (err) {
+                browser.pause();
                 expect("Page has errors").toBe("No errors", "expected pge to have no errors");
                 hasErrors = true;
             } else {

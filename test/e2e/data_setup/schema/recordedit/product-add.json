@@ -357,6 +357,13 @@
               "typename": "int4"
             }
           }
+        },
+        {
+          "name": "color_rgb_hex_column",
+          "nullok": true,
+          "type": {
+            "typename": "color_rgb_hex"
+          }
         }
       ],
       "annotations": {
@@ -371,7 +378,8 @@
           "entry/create": [
             "id", "title", "website", ["product-add", "fk_category"], "rating",
             "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious",
-            "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+            "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array",
+            "color_rgb_hex_column"
           ],
           "entry/edit": [
               "id", "title", "website", ["product-add", "fk_category"], "rating", "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col","luxurious"
@@ -379,7 +387,8 @@
           "compact" : [
               "title", "website", ["product-add", "fk_category"],  "rating",
               "summary", "description","json_col", "no_of_rooms", "opened_on", "date_col", "luxurious",
-              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array",
+              "color_rgb_hex_column"
           ]
         },
         "tag:isrd.isi.edu,2016:visible-foreign-keys" : {

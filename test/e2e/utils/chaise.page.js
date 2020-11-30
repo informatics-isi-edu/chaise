@@ -68,6 +68,35 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
 
+    this.getColorInputBackground = function (name, index) {
+        index = index || 0;
+        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').css('background-color');";
+        script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
+        script += "return ctx.fillStyle;";
+        return browser.executeScript(script);
+    };
+
+    this.getColorInputBtn = function (columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
+    }
+
+    this.getColorInputPopup = function () {
+        return element(by.css('.chaise-color-picker-popup:not(.sp-hidden)'));
+    };
+
+    this.getColorInputPopupInput = function () {
+        return this.getColorInputPopup().element(by.css('.sp-input'));
+    };
+
+    this.getColorInputPopupClearBtn = function () {
+        return this.getColorInputPopup().element(by.css('.sp-clear'));
+    };
+
+    this.getColorInputPopupSelectBtn = function () {
+        return this.getColorInputPopup().element(by.css('.sp-choose'));
+    };
+
     this.getHelpTextBlock = function(el) {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };

@@ -3,7 +3,11 @@ var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var momentTz = require('moment-timezone');
 var testParams = {
     // for verifying data is present
-    column_names: ["text", "text_disabled", "markdown", "markdown_disabled", "iKS50idGfVCGnnS6lUoZ8Q", "WnsyE4pJ1O0IW8zsj6MDHg", "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default"],
+    column_names: [
+        "text", "text_disabled", "markdown", "markdown_disabled", "iKS50idGfVCGnnS6lUoZ8Q", "WnsyE4pJ1O0IW8zsj6MDHg", "int", "int_disabled",
+        "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled",
+        "timestamptz", "timestamptz_disabled", "json", "json_disabled", "json_disabled_no_default", "color_rgb_hex", "color_rgb_hex_disabled"
+    ],
     table_name: "defaults-table",
     default_column_values: {
     // data values
@@ -38,6 +42,8 @@ var testParams = {
         asset_value: "28110_191_z.jpg",
         asset_disabled_value: "28110_191_z.jpg",
         asset_disabled_no_default_value: "Automatically generated",
+        color_rgb_hex_value: "#123456",
+        color_rgb_hex_disabled_value: "#654321",
         rid_disabled_value: "Automatically generated",
         rcb_disabled_value: "Automatically generated",
         rmb_disabled_value: "Automatically generated",
@@ -69,10 +75,15 @@ var testParams = {
         timestamptz_disabled: "2010-06-13 17:22:00",
         json: JSON.stringify({"name":"testing_json"},undefined,2),
         json_disabled: JSON.stringify(98.786),
-        json_disabled_no_default: JSON.stringify(null)
+        json_disabled_no_default: JSON.stringify(null),
+        color_rgb_hex: "#123456",
+        color_rgb_hex_disabled: "#654321"
     },
     edit_key: { name: "id", value: "2", operator: "="},
-    re_column_names: ["text_disabled", "markdown_disabled", "foreign_key_disabled", "int_disabled", "float_disabled", "boolean_disabled", "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled"],
+    re_column_names: [
+        "text_disabled", "markdown_disabled", "foreign_key_disabled", "int_disabled", "float_disabled", "boolean_disabled",
+        "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled", "color_rgb_hex_disabled"
+    ],
     re_column_values: {
         text_disabled: "Disabled input",
         markdown_disabled: "*italics*",
@@ -87,7 +98,8 @@ var testParams = {
         json_disabled: JSON.stringify(98.786),
         // Value of "filename" column for the current record
         // asset_disabled: "Four Points Sherathon 3"
-        asset_disabled: "28110_191_z.jpg"
+        asset_disabled: "28110_191_z.jpg",
+        color_rgb_hex_disabled: "#654321"
     }
 };
 
@@ -105,7 +117,8 @@ describe('Record Add with defaults', function() {
             dateInput, dateDisabledInput,
             timestampInputs, timestampDisabledInput, timestampDisabledNoDefaultInput,
             timestamptzInputs, timestamptzDisabledInput, timestamptzDisabledNoDefaultInput,
-            jsonInput, jsonDisabledInput, jsonDisabledNoDefaultInput
+            jsonInput, jsonDisabledInput, jsonDisabledNoDefaultInput,
+            colorRGBHexInput, colorRGBHexDisabledInput;
 
         beforeAll(function () {
             browser.ignoreSynchronization=true;
@@ -122,6 +135,7 @@ describe('Record Add with defaults', function() {
             booleanFalseInput = chaisePage.recordEditPage.getBooleanInputDisplay("boolean_false", 0);
             dateInput = chaisePage.recordEditPage.getInputById(0, "date");
             jsonInput = chaisePage.recordEditPage.getInputById(0, "json");
+            colorRGBHexInput = chaisePage.recordEditPage.getInputById(0, "color_rgb_hex");
 
             expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
             expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");
@@ -131,6 +145,7 @@ describe('Record Add with defaults', function() {
             expect(booleanFalseInput.getText()).toBe(values.boolean_false_value, "Boolean input is not set to false");
             expect(dateInput.element(by.tagName("input")).getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
             expect(jsonInput.getAttribute("value")).toBe(values.json_value, "JSON input default is incorrect");
+            expect(colorRGBHexInput.getAttribute("value")).toBe(values.color_rgb_hex_value, "Text input default is incorrect");
         });
 
         it("should prefill simple input fields that are disabled with their default value.", function() {
@@ -141,6 +156,7 @@ describe('Record Add with defaults', function() {
             booleanDisabledInput = chaisePage.recordEditPage.getInputById(0, "boolean_disabled");
             dateDisabledInput = chaisePage.recordEditPage.getInputById(0, "date_disabled");
             jsonInputDisabled= chaisePage.recordEditPage.getInputById(0, "json_disabled");
+            colorRGBHexDisabledInput = chaisePage.recordEditPage.getInputById(0, "color_rgb_hex_disabled");
 
             expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
             expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
@@ -149,6 +165,7 @@ describe('Record Add with defaults', function() {
             expect(booleanDisabledInput.getAttribute("value")).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
             expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
             expect(jsonInputDisabled.getAttribute("value")).toBe(values.json_disabled_value, "JSON disabled input default is incorrect");
+            expect(colorRGBHexDisabledInput.getAttribute("value")).toBe(values.color_rgb_hex_disabled_value, "Text input default is incorrect");
 
         });
 
