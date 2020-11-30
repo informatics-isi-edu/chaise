@@ -538,7 +538,7 @@
 
     // If app is not search, viewer and login then attach the unauthorised 401 http handler to ermrestjs
 
-    if (pathname.indexOf('/search/') == -1 && pathname.indexOf('/viewer/') == -1 && pathname.indexOf('/login') == -1) {
+    if (pathname.indexOf('/login') == -1) {
 
         angular.module('chaise.authen')
 

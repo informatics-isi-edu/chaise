@@ -144,7 +144,7 @@
         var rectangles = [];
         var sections = [];
         var session;
-        var imageURI, svgURIs = [];
+        var imageURI, svgURIs = [], imageTuple;
         var config = ConfigUtils.getContextJSON();
         var annotConstant = viewerConstant.annotation;
         var imageConstant = viewerConstant.image;
@@ -225,7 +225,7 @@
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-                return imageReference.contextualize.detailed.read(1, logObj, true, true);
+                return imageReference.contextualize.detailed.read(1, logObj, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {
@@ -237,13 +237,13 @@
                     return false;
                 }
 
-                image.entity = imagePage.tuples[0].data;
+                imageTuple = imagePage.tuples[0];
+                image.entity = imageTuple.data;
                 context.imageID = image.entity.RID;
                 imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
 
-                // TODO some sort of warning maybe?
                 if (!imageURI) {
-                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty. We cannot show any image from database.");
+                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty in Image table.");
                 }
 
                 // TODO this feels hacky
@@ -256,6 +256,20 @@
                 var res = viewerAppUtils.populateOSDViewerQueryParams(pageQueryParams, imageURI);
 
                 osdViewerQueryParams = res.osdViewerQueryParams;
+
+                // add meterScaleInPixels query param if missing
+                var val = parseFloat(imageTuple.data[imageConstant.PIXEL_PER_METER_COLUMN_NAME]);
+                var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
+                if (!(qParamName in osdViewerQueryParams) && !isNaN(val)) {
+                    osdViewerQueryParams[qParamName] = val;
+                }
+
+                // add waterMark query param if missing
+                val = imageTuple.linkedData[imageConstant.CONSORTIUM_VISIBLE_COLUMN_NAME];
+                qParamName = osdConstant.WATERMARK_QPARAM;
+                if (!(qParamName in osdViewerQueryParams) && DataUtils.isObjectAndNotNull(val) && DataUtils.isNoneEmptyString(val[imageConstant.CONSORTIUM_URL_COLUMN_NAME])) {
+                    osdViewerQueryParams[qParamName] = val[imageConstant.CONSORTIUM_URL_COLUMN_NAME];
+                }
 
                 // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.
                 if (!res.readChannelInfo) {
@@ -305,7 +319,7 @@
                 // osd controller uses this attribute to parameterize OSD viewer
                 // TODO should eventually be a proper object and not just query parameters
                 $rootScope.osdViewerParameters = osdViewerQueryParams;
-                if (!DataUtils.isObjectAndNotNull(osdViewerQueryParams)) {
+                if (!DataUtils.isObjectAndNotNull(osdViewerQueryParams) || !(osdConstant.IMAGE_URL_QPARAM in osdViewerQueryParams)) {
                     console.log("there wasn't any parameters that we could send to OSD viewer");
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");

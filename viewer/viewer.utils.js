@@ -11,8 +11,11 @@
 
         var annotConstant = viewerConstant.annotation,
             osdConstant = viewerConstant.osdViewer,
+            pImageConstant = viewerConstant.processedImage,
             channelConstant = viewerConstant.channel,
             URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
+
+        var encode = UriUtils.fixedEncodeURIComponent;
 
         /**
          * @private
@@ -140,8 +143,9 @@
         /**
          * Send request to image channel table and returns a promise that is resolved
          * by an array containing the channel information that can be used to send to osd viewer.
+         * NOTE added for backward compatibility and eventually should be removed
          */
-        function getChannelInfo() {
+        function _readImageChannelTable() {
             var defer = $q.defer(), channelList = [];
 
             // TODO should be done in ermrestjs
@@ -151,22 +155,28 @@
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.REFERENCE_IMAGE_COLUMN_NAME);
             imageChannelURL += "=" + UriUtils.fixedEncodeURIComponent(context.imageID);
 
+            var hasNull = false;
             ERMrest.resolve(imageChannelURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
                 if (!ref) {
                     return false;
                 }
 
                 var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
+                var stack = logService.getStackObject(
+                    logService.getStackNode(
+                        logService.logStackTypes.CHANNEL,
+                        ref.table,
+                        { "z_index": context.defaultZIndex}
+                    )
+                );
                 var logObj = {
-                    action: logService.getActionString(logService.logActions.LOAD, stackPath),
-                    stack: logService.getStackObject(logService.getStackNode(logService.logStackTypes.CHANNEL, ref.table))
+                    action: logService.getActionString(logService.logActions.VIEWER_CHANNEL_DEFAULT_LOAD, stackPath),
+                    stack: stack
                 };
-
-                var hasNull = false;
 
                 // the callback that will be used for populating the result values
                 var cb = function (page) {
-                    for (var i = 0; i < page.tuples.length; i++) {
+                    for (var i = 0; i < page.tuples.length && !hasNull; i++) {
                         var t = page.tuples[i];
 
                         var channelURL = t.data[channelConstant.IMAGE_URL_COLUMN_NAME];
@@ -191,16 +201,140 @@
                 }
 
                 // make sure it's properly sorted
-                ref = ref.sort(channelConstant.CHANNEL_TABLE_COLUMN_ORDER);
+                ref = ref.contextualize.compact.sort(channelConstant.CHANNEL_TABLE_COLUMN_ORDER);
 
                 // send request to server
-                return _readPageByPage(ref, channelConstant.PAGE_COUNT, logObj, true, cb);
+                return _readPageByPage(ref, channelConstant.PAGE_SIZE, logObj, true, cb);
             }).then(function () {
+                if (hasNull) {
+                    channelList = [];
+                }
                 defer.resolve(channelList);
             }).catch(function (err) {
                 defer.reject(err);
             });
 
+            return defer.promise;
+        }
+
+        /**
+         * Send request to processed image table and returns a promise that is resolved
+         * by an array containing the channel information that can be used to send to osd viewer.
+         */
+        function _readProcessedImageTable() {
+            var defer = $q.defer(), channelList = [];
+
+
+            // TODO should be done in ermrestjs
+            var url = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+            url += encode(pImageConstant.PROCESSED_IMAGE_TABLE_SCHEMA_NAME) + ":";
+            url += encode(pImageConstant.PROCESSED_IMAGE_TABLE_NAME) + "/";
+            url += encode(pImageConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            url += "=" + encode(context.imageID);
+
+            if (context.defaultZIndex) {
+                url += "&" + encode(pImageConstant.Z_INDEX_COLUMN_NAME);
+                url += "=" + encode(context.defaultZIndex);
+            }
+
+            var hasNull = false;
+            ERMrest.resolve(url, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+                if (!ref) {
+                    return false;
+                }
+
+                var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
+                var stack = logService.getStackObject(
+                    logService.getStackNode(
+                        logService.logStackTypes.CHANNEL,
+                        ref.table,
+                        { "z_index": context.defaultZIndex}
+                    )
+                );
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.LOAD, stackPath),
+                    stack: stack
+                };
+
+                // the callback that will be used for populating the result values
+                var cb = function (page) {
+
+                    for (var i = 0; i < page.tuples.length && !hasNull; i++) {
+                        var t = page.tuples[i];
+                        var channelURL = t.data[pImageConstant.IMAGE_URL_COLUMN_NAME];
+
+                        // if any of the urls are null, then none of the values are valid
+                        if (!DataUtils.isNoneEmptyString(channelURL)) {
+                            hasNull = true;
+                            return false;
+                        }
+
+                        // for different methods we might have to format the url
+                        var displayMethod = t.data[pImageConstant.DISPLAY_METHOD_COLUMN_NAME];
+                        if (displayMethod in pImageConstant.IMAGE_URL_PATTERN) {
+                            channelURL = UriUtils.getAbsoluteURL(channelURL);
+
+                            channelURL = ERMrest.renderHandlebarsTemplate(pImageConstant.IMAGE_URL_PATTERN[displayMethod], {"url": channelURL, "iiif_version": pImageConstant.IIIF_VERSION});
+                        }
+
+                        // get the channel extra data
+                        var channelData = {};
+                        var channelVisColName = pImageConstant.CHANNEL_VISIBLE_COLUMN_NAME;
+                        if (t.linkedData && (channelVisColName in t.linkedData) && DataUtils.isObjectAndNotNull(t.linkedData[channelVisColName])) {
+                            channelData = t.linkedData[channelVisColName];
+                        }
+
+                        var channelName = channelData[channelConstant.CHANNEL_NAME_COLUMN_NAME];
+                        var pseudoColor = channelData[channelConstant.PSEUDO_COLOR_COLUMN_NAME];
+
+                        // create the channel info
+                        var res = {};
+                        res[URLQParamAttr] = channelURL;
+                        res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
+                        res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
+                        // null should be treated the same as true
+                        res[osdConstant.IS_RGB_QPARAM] = channelData[channelConstant.IS_RGB_COLUMN_NAME] === false ? "false" : "true";
+                        channelList.push(res);
+                    }
+                }
+
+                // make sure it's properly sorted
+                ref = ref.contextualize.compact.sort(pImageConstant.COLUMN_ORDER);
+
+                // send request to server
+                return _readPageByPage(ref, pImageConstant.PAGE_SIZE, logObj, false, cb);
+            }).then(function () {
+                if (hasNull) {
+                    channelList = [];
+                }
+
+                defer.resolve(channelList);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        /**
+         * first try the processedImage table and then the ImageChannel to get the channel info
+         * that can be sent to osd viewer.
+         */
+        function getChannelInfo() {
+            var defer = $q.defer();
+            console.log("reading processed image");
+            _readProcessedImageTable().then(function (res) {
+                if (res.length !== 0) {
+                    return res;
+                }
+
+                console.log("reading image channel");
+                return _readImageChannelTable();
+            }).then(function (channelList) {
+                defer.resolve(channelList);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
             return defer.promise;
         }
 
@@ -212,10 +346,10 @@
 
             // TODO should be done in ermrestjs
             var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-            imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":";
-            imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_NAME) + "/";
-            imageAnnotationURL += UriUtils.fixedEncodeURIComponent(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
-            imageAnnotationURL += "=" + UriUtils.fixedEncodeURIComponent(context.imageID);
+            imageAnnotationURL += encode(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":";
+            imageAnnotationURL += encode(annotConstant.ANNOTATION_TABLE_NAME) + "/";
+            imageAnnotationURL += encode(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            imageAnnotationURL += "=" + encode(context.imageID);
 
             ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
 
@@ -293,7 +427,7 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                return _readPageByPage(ref, annotConstant.PAGE_COUNT, logObj, false, cb);
+                return _readPageByPage(ref, annotConstant.PAGE_SIZE, logObj, false, cb);
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {
