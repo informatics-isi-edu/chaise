@@ -214,7 +214,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['AlertsService', 'ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(AlertsService, ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+    .directive('navbar', ['AlertsService', 'ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(AlertsService, ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -396,9 +396,11 @@
                             scope.showRidSpinner = false;
                             $window.open(url, '_blank');
                         }).catch(function (err) {
-                            console.log(err);
                             scope.showRidSpinner = false;
-                            AlertsService.addAlert("No record with input RID, " + scope.ridSearchTerm + ", exists. Please check the input value is valid and try again.", "warning");
+                            if (err.status == 404) {
+                                err = new Errors.NoRecordRidError();
+                            }
+                            throw err;
                         });
 
                     }

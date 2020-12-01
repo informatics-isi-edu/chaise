@@ -19,7 +19,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
+        noDataMessage: 'The record does not exist or may be hidden. <br> If you continue to face this issue, please contact the system administrator.',
         multipleDataErrorCode: "Multiple Records Found",
         multipleDataMessage: "There are more than 1 record found for the filters provided.",
         facetFilterMissing: "No filtering criteria was specified to identify a specific record.",
@@ -28,9 +28,9 @@
         differentUserConflict1: "Continuing on this page requires that you be logged in as ",
         differentUserConflict2: ". However, you are currently logged in as ",
         anonUserConflict: "Your session has expired. Continuing on this page requires that you be logged in as ",
-        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator.",
+        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.",
 
-        viewerOSDFailed: "Couldn't process the image. If you continue to face this issue, please contact the system administrator.",
+        viewerOSDFailed: "Couldn't process the image. <br> If you continue to face this issue, please contact the system administrator.",
         viewerScreenshotFailed: "Couldn't process the screenshot."
     })
 
@@ -124,6 +124,38 @@
         }
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
+
+        /**
+         * NoRecordRidError - In case resolveable link has invalid RID
+         *
+         * @param  {string} message Error message
+         * @return {object}         Error Object
+         */
+        function NoRecordRidError(message) {
+            /**
+             * @type {object}
+             * @desc  custom object to store miscellaneous elements viz. stacktrace
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = errorNames.notFound;
+
+            this.clickOkToDismiss = true;
+
+            /**
+             * @type {string}
+             * @desc   Error message
+             */
+            this.message = message || errorMessages.noDataMessage;
+
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+        };
+        NoRecordRidError.prototype = Object.create(Error.prototype);
+        NoRecordRidError.prototype.constructor = NoRecordRidError;
 
         //TODO
         // InvalidInputError and MalformedUriError should be going away as they are redundant
@@ -386,6 +418,7 @@
         return {
             multipleRecordError: multipleRecordError,
             noRecordError: noRecordError,
+            NoRecordRidError: NoRecordRidError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
             UnauthorizedAssetAccess: UnauthorizedAssetAccess,
@@ -532,7 +565,7 @@
 
             var assetPermissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess || exception instanceof Errors.DifferentUserConflictError);
 
-            if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
+            if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError || exception instanceof Errors.NoRecordRidError){
                 // change defaults
                 pageName = "Recordset";
                 redirectLink = exception.errorData.redirectUrl;
@@ -553,18 +586,19 @@
 
             if (!Session.getSessionValue() && !assetPermissionError) {
                 showLogin = true;
-                if (exception instanceof Errors.noRecordError) {
+                if (exception instanceof Errors.noRecordError || exception instanceof Errors.NoRecordRidError) {
                     // if no logged in user, change the message
-                    message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
-                } else {
+                    var messageReplacement = (exception instanceof Errors.noRecordError ? messageMap.noRecordForFilter : messageMap.noRecordForRid);
+                    message = messageReplacement + '<br>' + messageMap.maybeUnauthorizedMessage;
+                }else {
                     message += " " + messageMap.maybeNeedLogin;
                 }
             }
 
             errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
 
-            // if not a dismissible errror then exception should be suppressed
-            if (!isDismissible && !exception.showContinueBtn) exceptionFlag = true;
+            // if not a dismissible error then exception should be suppressed
+            if (!isDismissible && !exception.showContinueBtn && !exception.clickOkToDismiss) exceptionFlag = true;
         }
 
         return {
@@ -617,7 +651,7 @@ var offlineModalTemplate = function (error, dialogMessage, redirectLink, canClos
                     + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
                 + '</div>'
                 + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. ' + dialogMessage + 'If you continue to face this issue, please contact the system administrator.'
+                    + 'An unexpected error has occurred. ' + dialogMessage + '<br>If you continue to face this issue, please contact the system administrator.'
                     + '<br><br>'
                     + 'Click OK to return to the Home Page.'
                     + '<br>'
