@@ -60,7 +60,7 @@ var testParams = {
                 "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
                 "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
                 "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]",
-                "color_rgb_hex_column": "#7623456"
+                "color_rgb_hex_column": "#723456"
             }
         ],
         result_columns: [
@@ -75,7 +75,7 @@ var testParams = {
                 {"link":"{{{chaise_url}}}/record/#{{catalog_id}}/product-edit:category/id=10004", "value":"Castle"},
                 "1.0000", "This is the summary of this column 1.", "Description 1", JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
                 "1", "2017-01-01 01:01:01", "2017-01-01", "false",
-                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01", "#7623456"
+                "v1, v2", "true", "1, 2", "1.0000, 2.2000", "2001-01-01, 2002-02-02", "No value, 2001-01-01T01:01:01", "No value, 2001-01-01 01:01:01", "#723456"
             ]
         ],
         files: []

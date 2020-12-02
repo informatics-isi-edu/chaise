@@ -68,17 +68,17 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
 
-    this.getColorInputBackground = function (name, index) {
+    this.getColorInputBackground = function (index, name) {
         index = index || 0;
-        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').css('background-color');";
+        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
         return browser.executeScript(script);
     };
 
-    this.getColorInputBtn = function (columnDisplayName, index) {
+    this.getColorInputBtn = function (index, columnDisplayName) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("form-" + index + '-' + columnDisplayName + "-display"));
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
     }
 
     this.getColorInputPopup = function () {

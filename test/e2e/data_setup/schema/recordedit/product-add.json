@@ -360,7 +360,7 @@
         },
         {
           "name": "color_rgb_hex_column",
-          "nullok": true,
+          "nullok": false,
           "type": {
             "typename": "color_rgb_hex"
           }

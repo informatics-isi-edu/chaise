@@ -35,7 +35,7 @@ var testParams = {
             { name: "date_array", title: "date_array", type: "array", baseType: "date" },
             { name: "timestamp_array", title: "timestamp_array", type: "array", baseType: "timestamp" },
             { name: "timestamptz_array", title: "timestamptz_array", type: "array", baseType: "timestamptz" },
-            { name: "color_rgb_hex_column", title: "color_rgb_hex_column", type: "color" }
+            { name: "color_rgb_hex_column", title: "color_rgb_hex_column", type: "color", nullok: false }
         ],
         inputs: [
             {
