@@ -463,7 +463,6 @@
         //Round blobs of links
         .markdown-container {
             .vocab {
-                float:left!important;
                 padding: 2px!important;
                 margin:2px!important;
             }
@@ -475,8 +474,9 @@
 
         //Removes bubbles and represents the vocab as a dot separated list
         #rt-container{
-            .vocab::after{
-                content: "\2002\2022" !important;
+            .vocab+.vocab::before{
+                content: "\2022" !important;
+                padding-right: 6px;
             }
 
             .markdown-container a:last-child:after{

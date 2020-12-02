@@ -37,7 +37,7 @@
                                     <span>{{!showEmptyRelatedTables ? 'Show' : 'Hide'}} empty sections</span>
                                 </button>
                                 <!-- download CSV included by default -->
-                                <export reference="reference" style="position:relative;" disabled="!displayReady"></export>
+                                <export reference="reference" style="position:relative;" disabled="!displayReady" csv-option-name="This record (CSV)"></export>
                                 <button ng-show="ctrl.canShowSharePopup()" ng-disabled="!displayReady || tuple == null || ctrl.waitingForSharePopup || !ctrl.canEnableSharePopup()" id="share" class="chaise-btn chaise-btn-primary" ng-click="ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
                                     <span class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': ctrl.waitingForSharePopup, 'glyphicon-share': !ctrl.waitingForSharePopup}"></span>
                                     <span>Share and cite</span>

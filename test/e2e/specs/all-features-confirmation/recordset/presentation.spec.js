@@ -425,8 +425,8 @@ describe('View recordset,', function() {
             if (!process.env.TRAVIS) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
-                        expect(csvOption.getText()).toBe("search results (csv)");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("Search results (CSV)");
+                        expect(csvOption.getText()).toBe("Search results (CSV)");
                         return csvOption.click();
                     }).then(function () {
                         browser.wait(function() {
