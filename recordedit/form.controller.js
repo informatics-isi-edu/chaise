@@ -86,7 +86,7 @@
             }
 
             // Redirect to record or recordset app..
-            // $window.location = redirectUrl;
+            $window.location = redirectUrl;
         }
 
         /**
