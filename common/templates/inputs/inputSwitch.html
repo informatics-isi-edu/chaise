@@ -138,6 +138,19 @@
         <textarea array column-type="{{vm.column.type.rootName}}" custom-error-message="vm.customErrorMessage" ng-model="vm.model"  rows="5" name="{{::vm.column.name}}" class="chaise-input-control" ng-required="vm.isRequired" empty-to-null></textarea>
     </div>
 
+    <!-- color input -->
+    <div ng-switch-when="color" class="chaise-input-group">
+        <div class="chaise-input-control chaise-color-picker">
+            <input color-picker toggle-callback="vm.toggleColorPicker" is-required="vm.isRequired"  ng-model="vm.model" name="{{::vm.column.name}}" type="text" empty-to-null>
+            <chaise-clear-input btn-class="text-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
+        </div>
+        <span class="chaise-input-group-append">
+            <button ng-click="vm.toggleColorPicker($event)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary" type="button" tooltip-placement="bottom" uib-tooltip="Select a color.">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+        </span>
+    </div>
+
     <!-- disabled -->
     <input ng-switch-when="disabled" ng-model="vm.model" name="{{::vm.column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::vm.getDisabledInputValue();}}" empty-to-null>
 

@@ -34,6 +34,9 @@
         vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
+        // placeholder for the color picker callbacks
+        vm.toggleColorPickerCallbacks = [{}];
+
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;

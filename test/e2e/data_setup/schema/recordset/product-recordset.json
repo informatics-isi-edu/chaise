@@ -364,6 +364,15 @@
             "type": {
                 "typename": "int4"
             }
+        },
+        {
+            "comment": null,
+            "name": "color_rgb_hex_column",
+            "default": null,
+            "nullok": true,
+            "type": {
+                "typename": "color_rgb_hex"
+            }
         }
       ],
       "annotations": {
@@ -462,7 +471,8 @@
                 "markdown_pattern": "rating: {{{self_link_id.values.rating}}}, max: {{{image_id_aggregate_max}}}, count: {{_image_id_aggregate_cnt_d}}, category: {{{$fkey_product-recordset_fk_category.rowName}}}",
                 "template_engine": "handlebars"
               }
-            }
+            },
+            "color_rgb_hex_column"
           ]
         },
 
