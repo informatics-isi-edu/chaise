@@ -806,7 +806,7 @@
                 if (DataUtils.isObjectAndNotNull(value) && value.url) noValue = false;
             } else if (columnModel.inputType === "boolean") {
                 // check if the selected value is a boolean (true|false)
-                if (typeof value === "boolean") noValue = false;
+                if (typeof value === "boolean" || (typeof value === "string" && value.length > 0)) noValue = false;
             } else {
                 if (value != null) noValue = false;
             }
