@@ -40,11 +40,6 @@
             var modalInstance = $uibModal.open(params);
 
             modalInstance.rendered.then(function () {
-                try {
-                    // angular.element(document.querySelector(".modal-body")).scrollTop(0);
-                } catch (err) {
-                    $log.warn(err);
-                }
                 if (postRenderCB) postRenderCB();
             }).catch(function (error) {
                 $log.warn(error);

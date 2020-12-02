@@ -590,7 +590,7 @@
                     // if no logged in user, change the message
                     var messageReplacement = (exception instanceof Errors.noRecordError ? messageMap.noRecordForFilter : messageMap.noRecordForRid);
                     message = messageReplacement + '<br>' + messageMap.maybeUnauthorizedMessage;
-                }else {
+                } else {
                     message += " " + messageMap.maybeNeedLogin;
                 }
             }

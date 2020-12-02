@@ -214,7 +214,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['AlertsService', 'ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(AlertsService, ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
