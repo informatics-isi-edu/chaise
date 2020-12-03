@@ -118,6 +118,9 @@
 
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                    // send string to prepend to "headTitle"
+                    // <table-name>
+                    headInjector.updateHeadTitle(reference.displayname.value);
                     session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 

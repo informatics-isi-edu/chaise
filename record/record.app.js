@@ -122,7 +122,9 @@
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
-
+                // send string to prepend to "headTitle"
+                // <table-name>: <row-name>
+                headInjector.updateHeadTitle($rootScope.reference.displayname.value + ": " + tuple.displayname.value);
 
                 // update the window location with tuple to remove query params (namely ppid and pcid)
                 // and also change the url to always be based on RID

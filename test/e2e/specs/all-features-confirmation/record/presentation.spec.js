@@ -213,11 +213,6 @@ describe('View existing record,', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
-                    if (chaiseConfig.headTitle) {
-                        browser.getTitle().then(function(title) {
-                            expect(title).toEqual(chaiseConfig.headTitle);
-                        });
-                    }
 
                     expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
 

@@ -253,14 +253,22 @@
                                 throw new Errors.noRecordError({}, page.reference.displayname.value, recordSetLink);
                             }
 
-                            var column, value;
-
+                            var column, value, headTitle;
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
-                            if (context.mode == context.modes.EDIT && page.tuples.length == 1) {
-                                $rootScope.displayname = page.tuples[0].displayname;
+                            if (context.mode == context.modes.EDIT) {
+                                headTitle = "Edit " + $rootScope.reference.displayname.value;
+                                if (page.tuples.length == 1) {
+                                    $rootScope.displayname = page.tuples[0].displayname;
+                                    // Edit <table>: <rowname>
+                                    headTitle += ": " + $rootScope.displayname.value;
+                                }
                             }
+                            // send string to prepend to "headTitle"
+                            // For editing ==1 record - "Edit <table>: <rowname>"
+                            // For editing >1 record - "Edit <table>"
+                            headInjector.updateHeadTitle(headTitle);
                             $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                             $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
@@ -300,6 +308,9 @@
                         throw notAuthorizedError;
                     }
                 } else if (context.mode == context.modes.CREATE) {
+                    // send string to prepend to "headTitle"
+                    // Create new <table-name>
+                    headInjector.updateHeadTitle("Create new " + $rootScope.reference.displayname.value);
                     if ($rootScope.reference.canCreate) {
                         $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                         $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);

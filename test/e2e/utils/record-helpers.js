@@ -34,6 +34,19 @@ exports.testPresentation = function (tableParams) {
         expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
     });
 
+    it ("should have the correct head title using the heuristics for record app", function (done) {
+        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+            // <table-name>: <row-name> | chaiseConfig.headTitle
+            // NOTE: subTitle and title are badly named
+            expect(browser.getTitle()).toBe(tableParams.subTitle + ": " + tableParams.title + " | " + chaiseConfig.headTitle);
+
+            done();
+        }).catch(function (err) {
+            console.log(err);
+            done.fail();
+        });
+    });
+
     it("should show " +notNullColumns.length + " columns only", function() {
         expect(chaisePage.recordPage.getColumns().count()).toBe(notNullColumns.length);
     });

@@ -31,6 +31,18 @@ describe('Navbar ', function() {
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
     });
 
+    it('should include the headTitle from chaiseConfig in the tab title (head > title)', function(done) {
+        browser.getTitle().then(function (title) {
+            // only testing headTitle is included. Tests for full head title are distributed between each presentation spec
+            expect(title.indexOf(chaiseConfig.headTitle)).toBeGreaterThan(-1, "the headTitle from the chaise config is not included in the head title element");
+
+            done();
+        }).catch(function (err) {
+            done.fail();
+            console.log(err);
+        });
+    });
+
     it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
         // Count the number of nodes that are being shown (top level and submenus)

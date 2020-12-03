@@ -51,13 +51,39 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " : " + tableParams.record_displayname, "Edit mode title is incorrect.");
         });
 
+        it ("should have the correct head title using the heuristics for recordedit app in entry/edit mode", function (done) {
+            browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                // Edit <table-name>: <row-name> | chaiseConfig.headTitle
+                // not using same value as above becuase of whitespace before the `:`
+                expect(browser.getTitle()).toBe("Edit " + tableParams.table_displayname + ": " + tableParams.record_displayname + " | " + chaiseConfig.headTitle);
+
+                done();
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
+        });
+
         it("should not allow to add new rows/columns", function() {
             expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeFalsy("Add x rows is visible in edit mode");
         });
 
     } else {
+        var titleText = "Create new " + tableParams.table_displayname;
         it("should have create record title", function() {
-            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Create new " + tableParams.table_displayname, "Create mode title is incorrect.");
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe(titleText, "Create mode title is incorrect.");
+        });
+
+        it ("should have the correct head title using the heuristics for recordedit app in entry/create mode", function (done) {
+            browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                // <table-name> | chaiseConfig.headTitle
+                expect(browser.getTitle()).toBe(titleText + " | " + chaiseConfig.headTitle);
+
+                done();
+            }).catch(function (err) {
+                console.log(err);
+                done.fail();
+            });
         });
 
         it("should allow to add new rows/columns", function() {
