@@ -70,8 +70,9 @@ var testParams = {
         { title: "table_w_invalid_row_markdown_pattern"},
         { title: "virtual column wait_for all-outbound", "value": "virtual value of 2002 with title Sherathon Hotel", markdown_title: "virtual column wait_for all-outbound"},
         { title: "virtual column wait_for agg", "value": "virtual Sherathon Hotel", markdown_title: "virtual column wait_for agg"},
-        { title: "virtual column wait_for entity set", "value": "Sherathon Hotel", markdown_title: "virtual column wait_for entity set"}
-      ],
+        { title: "virtual column wait_for entity set", "value": "Sherathon Hotel", markdown_title: "virtual column wait_for entity set"},
+        { title: "color_rgb_hex_column", value: '<p><span class="chaise-color-preview" style="background-color:#323456"> </span> #323456</p>\n', match: "html"}
+    ],
     no_related_data: {
         key: {
             name: "id",

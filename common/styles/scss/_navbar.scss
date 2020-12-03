@@ -133,6 +133,10 @@ body > .container {
         border-color: $black-color;
         border-radius: 4px 0px 0px 4px;
     }
+
+    .chaise-search-btn .glyphicon-refresh {
+        color: white;
+    }
 }
 
 #rid-search-input {

@@ -40,11 +40,6 @@
             var modalInstance = $uibModal.open(params);
 
             modalInstance.rendered.then(function () {
-                try {
-                    // angular.element(document.querySelector(".modal-body")).scrollTop(0);
-                } catch (err) {
-                    $log.warn(err);
-                }
                 if (postRenderCB) postRenderCB();
             }).catch(function (error) {
                 $log.warn(error);
@@ -207,9 +202,11 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (exception instanceof Errors.NoRecordRidError) {
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (exception instanceof Errors.DifferentUserConflictError) {
             vm.showOkBtn = false;
-            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showReloadBtn = exception.showReloadBtn;
             vm.showContinueBtn = exception.showContinueBtn;
             // contains the `reloadMessage` already since it's customized in the error
             vm.clickActionMessage = exception.errorData.clickActionMessage;

@@ -3,10 +3,7 @@
         @include chaise-btn();
 
         &.chaise-btn-sm {
-            height: $btn-height-sm;
-            min-width: $btn-height-sm;
-            font-size: 1rem;
-            padding: 2px 5px;
+            @include chaise-btn-sm();
         }
 
         > .chaise-btn-icon {
@@ -38,13 +35,7 @@
         }
 
         &.chaise-btn-secondary {
-            color: $primary-color;
-            background-color: $white-color;
-            border: 1px solid $primary-color;
-
-            &:focus {
-                background-color: darken($white-color, 10%);
-            }
+            @include chaise-btn-secondary();
         }
 
         &.chaise-btn.chaise-btn-primary[disabled], &.chaise-btn.chaise-btn-secondary[disabled] {

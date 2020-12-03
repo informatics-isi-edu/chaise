@@ -110,7 +110,7 @@
         <!-- So that the boolean input can be validated -->
         <input type="hidden" ng-model="vm.model" ng-required="vm.isRequired" />
         <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu" ng-style="inputWidth">
-            <li ng-repeat="option in ::vm.booleanValues" ng-click="vm.model = option">
+            <li ng-repeat="option in ::vm.columnModel.booleanArray" ng-click="vm.model = option">
                 <a ng-bind-html="option" style="min-height: 20px;"></a>
             </li>
         </ul>
@@ -136,6 +136,19 @@
     <!--array input -->
     <div ng-switch-when="array">
         <textarea array column-type="{{vm.column.type.rootName}}" custom-error-message="vm.customErrorMessage" ng-model="vm.model"  rows="5" name="{{::vm.column.name}}" class="chaise-input-control" ng-required="vm.isRequired" empty-to-null></textarea>
+    </div>
+
+    <!-- color input -->
+    <div ng-switch-when="color" class="chaise-input-group">
+        <div class="chaise-input-control chaise-color-picker">
+            <input color-picker toggle-callback="vm.toggleColorPicker" is-required="vm.isRequired"  ng-model="vm.model" name="{{::vm.column.name}}" type="text" empty-to-null>
+            <chaise-clear-input btn-class="text-remove" click-callback="::vm.clearInput()" show="vm.showRemove()"></chaise-clear-input>
+        </div>
+        <span class="chaise-input-group-append">
+            <button ng-click="vm.toggleColorPicker($event)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary" type="button" tooltip-placement="bottom" uib-tooltip="Select a color.">
+                <span class="glyphicon glyphicon-chevron-down"></span>
+            </button>
+        </span>
     </div>
 
     <!-- disabled -->

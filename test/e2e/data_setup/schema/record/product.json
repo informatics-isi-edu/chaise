@@ -362,6 +362,15 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "comment": null,
+                    "name": "color_rgb_hex_column",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    }
                 }
             ],
             "annotations": {
@@ -493,7 +502,8 @@
                                  "markdown_pattern": "{{# each entity_set_accommodation_collection_cover}}{{#unless @first}}| {{/unless}}{{this.rowName}}{{/each}}",
                                  "wait_for": ["entity_set_accommodation_collection_cover"]
                              }
-                        }
+                        },
+                        "color_rgb_hex_column"
                     ]
                 },
                 "tag:isrd.isi.edu,2016:visible-foreign-keys": {

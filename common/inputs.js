@@ -4,8 +4,6 @@
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
     .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
-        var booleanValues = [true, false];
-
         /* Functions for all input types */
         // determines if input should be disabled based on ermrestJS API
         function isDisabled(column) {
@@ -22,6 +20,18 @@
             } else if (column.isAsset) {
                 return "No file Selected";
             }
+        }
+
+        /* boolean specific function */
+        var defaultBooleanValues = [true, false];
+
+        // checks for preformat config before returning true/false
+        function formatBoolean(column, value) {
+            return column.formatvalue(value);
+        }
+
+        function unformatBoolean(columnModel, value) {
+            return columnModel.booleanMap[value];
         }
 
         /* numeric specific functions */
@@ -114,9 +124,11 @@
         return {
             applyCurrentDatetime: applyCurrentDatetime,
             blurElement: blurElement,
-            booleanValues: booleanValues,
+            defaultBooleanValues: defaultBooleanValues,
             clearDatetime: clearDatetime,
             fileExtensionTypes: fileExtensionTypes,
+            formatBoolean: formatBoolean,
+            unformatBoolean: unformatBoolean,
             formatDatetime: formatDatetime,
             formatFloat: formatFloat,
             formatInt: formatInt,
@@ -298,6 +310,65 @@
     }])
 
     /**
+     * NOTE: this directive uses spectrum library which uses jQuery
+     */
+    .directive('colorPicker',[function () {
+        return {
+            require: '?ngModel',
+            scope: {
+                toggleCallback: "=?",
+                isRequired: "="
+            },
+            link: function (scope, elem, attrs, ngModel) {
+                if (!ngModel) return;
+
+                // create the spectrum color picker
+                elem.spectrum({
+                    containerClassName: 'chaise-color-picker-popup',
+                    showAlpha: false,
+                    showPalette: false,
+                    showInitial: true,
+                    showInput: true,
+                    allowEmpty: (scope.isRequired !== true)
+                });
+
+                // when the model changed, change the input
+                ngModel.$render = function () {
+                    elem.spectrum('set', ngModel.$viewValue);
+                };
+
+                // keep it updated on change
+                elem.on('change', function () {
+                    scope.$apply(function () {
+                        var val = null;
+                        try {
+                            val = elem.spectrum("get").toHexString();
+                        } catch(exp) {
+                            // if the value is empty (null), it might throw an error
+                            // fail silently and use null
+                        }
+
+                        elem.spectrum("set", val);
+                        ngModel.$setViewValue(val);
+                    });
+                });
+
+                var togglePopup = function ($event) {
+                    elem.spectrum("toggle");
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    return false;
+                }
+
+                // clicking on the color should open the picker
+                elem.prev().on('click', togglePopup);
+
+                scope.toggleCallback = togglePopup;
+            }
+        }
+    }])
+
+    /**
      * This directive can be used to display an appropriate input element based on the given columnModel in a form.
      * Based on the passed values, it can be used in two different modes:
      *  - standalone: As an standalone input element (used in select-all feature in recordedit).
@@ -365,7 +436,7 @@
 
                 vm.customErrorMessage = null;
                 vm.blurElement = InputUtils.blurElement;
-                vm.booleanValues = InputUtils.booleanValues;
+                vm.defaultBooleanValues = InputUtils.defaultBooleanValues;
                 vm.dataFormats = dataFormats;
                 vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
                 vm.maskOptions = maskOptions;
@@ -591,6 +662,10 @@
                         "margin-top": '14px'
                     };
                 }
+
+                // just a placeholder to make sure this is defined
+                // this function will be defiend by color-picker directive
+                vm.toggleColorPicker = function () {}
             }
         }
     }]);

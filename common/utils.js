@@ -114,6 +114,7 @@
         "unauthorizedMessage" : "You are not authorized to perform this action.",
         "reportErrorToAdmin" : " Please report this problem to your system administrators.",
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
+        "noRecordForRid" : "No matching record found for the given RID.",
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
         "loginStatusChanged": "Unexpected Change of Login Status",
@@ -215,6 +216,16 @@
         INT_8_MIN: -9223372036854775808,
         INT_8_MAX: 9223372036854775807
     })
+
+    // should be used in combination with ng-bind-html
+    // if we use ng-bind-html without this filter:
+    //  - it will throw error when encounterd and "unsafe" html, while with this, we fail silently.
+    //  - it might ignore style tags
+    .filter('trustedHTML', ['$sce', function($sce){
+        return function(text) {
+            return $sce.trustAsHtml(text);
+        };
+    }])
 
     .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
         function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
@@ -1575,6 +1586,9 @@
                 case 'json':
                 case 'jsonb':
                     inputType = 'json';
+                    break;
+                case 'color_rgb_hex':
+                    inputType = 'color';
                     break;
                 case 'shorttext':
                 default:

@@ -214,7 +214,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -365,6 +365,7 @@
                     //  - if resolverImplicitCatalog === catalogId:   /id/RID
                     //  - otherwise:                                  /id/catalogId/RID
                     scope.ridSearch = function () {
+                        scope.showRidSpinner = true;
                         var resolverId = chaiseConfig.resolverImplicitCatalog,
                             url = "/id/", catId, splitId;
 
@@ -383,12 +384,25 @@
                         // implicitly does the isCatalogDefined(catalogId) check with how function returns true/false
                         if (scope.isVersioned()) url += "@" + splitId.version;
 
-                        logService.logClientAction({
-                            action: logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", ""),
-                            rid: scope.ridSearchTerm
+                        var logObj = ConfigUtils.getContextHeaderParams(), headers = {};
+
+                        logObj.action = logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", "");
+                        logObj.rid = scope.ridSearchTerm;
+
+                        headers[ERMrest.contextHeaderName] = logObj;
+
+                        // try to fetch the resolver link to see if the path resolves before sending the user
+                        ConfigUtils.getHTTPService().get(url, {headers: headers}).then(function (response) {
+                            scope.showRidSpinner = false;
+                            $window.open(url, '_blank');
+                        }).catch(function (err) {
+                            scope.showRidSpinner = false;
+                            if (err.status == 404) {
+                                err = new Errors.NoRecordRidError();
+                            }
+                            throw err;
                         });
 
-                        $window.open(url, '_blank');
                     }
 
                     if (isCatalogDefined(catalogId)) {

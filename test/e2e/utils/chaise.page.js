@@ -68,6 +68,35 @@ var recordEditPage = function() {
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
     };
 
+    this.getColorInputBackground = function (index, name) {
+        index = index || 0;
+        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+        script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
+        script += "return ctx.fillStyle;";
+        return browser.executeScript(script);
+    };
+
+    this.getColorInputBtn = function (index, columnDisplayName) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
+    }
+
+    this.getColorInputPopup = function () {
+        return element(by.css('.chaise-color-picker-popup:not(.sp-hidden)'));
+    };
+
+    this.getColorInputPopupInput = function () {
+        return this.getColorInputPopup().element(by.css('.sp-input'));
+    };
+
+    this.getColorInputPopupClearBtn = function () {
+        return this.getColorInputPopup().element(by.css('.sp-clear'));
+    };
+
+    this.getColorInputPopupSelectBtn = function () {
+        return this.getColorInputPopup().element(by.css('.sp-choose'));
+    };
+
     this.getHelpTextBlock = function(el) {
         return browser.executeScript("return $(arguments[0].siblings('.help-block'));", el);
     };
@@ -112,8 +141,14 @@ var recordEditPage = function() {
         return element(by.id("select-all-cancel-"+columnDisplayName));
     }
 
+    // gets dropdowns relative to el
     this.getDropdownElements = function(el) {
         return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
+    };
+
+    // gets all dropdowns
+    this.getDropdowns = function() {
+        return element.all(by.css(".chaise-input-control.dropdown-toggle"));
     };
 
     this.getDropdownText = function(el) {
@@ -138,9 +173,14 @@ var recordEditPage = function() {
 
     // Gets the boolean dropdown options when the dropdown is closed/hidden
     // the list is relative to the input when hidden
-    this.getRelataiveDropdownOptions = function(el) {
+    this.getRelativeDropdownOptions = function(el) {
         // el is "form-x-colname-display"
         return el.element(by.xpath('ancestor::td')).all(by.tagName('li'));
+    }
+
+    this.getRelativeDropdownOptionsATag = function(el) {
+        // el is "form-x-colname-display"
+        return el.element(by.xpath('ancestor::td')).all(by.css('li a'));
     }
 
     this.getDropdownClear = function (el) {

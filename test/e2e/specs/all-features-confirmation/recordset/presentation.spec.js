@@ -30,6 +30,7 @@ var testParams = {
             { title: "Image Distinct Count", comment: "Image Distinct Count"},
             { title: "Min Image ID", comment: "Min Image ID"},
             { title: "summary of Image ID", comment: "Summary of Image ID"},
+            { title: "color_rgb_hex_column"}
         ],
         data: [
             {
@@ -50,7 +51,8 @@ var testParams = {
                 count_image_id: "1",
                 count_distinct_image_id: "1",
                 min_image_id: "3001",
-                max_image_id: "rating: 3.2000, max: 3001, count: 1, category: Resort"
+                max_image_id: "rating: 3.2000, max: 3001, count: 1, category: Resort",
+                color_rgb_hex_column: "#123456"
             },
             {
                 id: 2002,
@@ -70,7 +72,8 @@ var testParams = {
                 count_image_id: "4",
                 count_distinct_image_id: "4",
                 min_image_id: "3005",
-                max_image_id: "rating: 4.3000, max: 30007, count: 4, category: Hotel"
+                max_image_id: "rating: 4.3000, max: 30007, count: 4, category: Hotel",
+                color_rgb_hex_column: "#323456"
             },
             {
                 id: 2004,
@@ -90,7 +93,8 @@ var testParams = {
                 count_image_id: "3",
                 count_distinct_image_id: "3",
                 min_image_id: "3009",
-                max_image_id: "rating: 2.8000, max: 3011, count: 3, category: Motel"
+                max_image_id: "rating: 2.8000, max: 3011, count: 3, category: Motel",
+                color_rgb_hex_column: "#423456"
             },
             {
                 id: 4004,
@@ -110,7 +114,8 @@ var testParams = {
                 count_image_id: "0",
                 count_distinct_image_id: "0",
                 min_image_id: "",
-                max_image_id: ""
+                max_image_id: "",
+                color_rgb_hex_column: "#523456"
             }
         ],
         sortedData:[

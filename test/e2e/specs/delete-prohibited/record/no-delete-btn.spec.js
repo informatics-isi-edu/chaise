@@ -1,4 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js');
+var EC = protractor.ExpectedConditions;
 var testParams = {
     table_name: "accommodation",
     key: {
@@ -48,39 +49,38 @@ describe('View existing record,', function() {
             done();
         });
 
-        if (process.env.TRAVIS) {
-            // test RID search and resolverImplicitCatalog
-            it('should navigate to a record page if a proper RID is typed into the RID search box', function (done) {
-                var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "2004"}]).RID
-                var allWindows;
+        // test RID search and resolverImplicitCatalog
+        // NOTE: resolverImplicitCatalog=4 so locally catalog 4 does not exist and resolver should fail since no RID exists in catalog 4
+        // in travis, resolver isn't configured
+        it('should show an error dialog if an improper RID is typed into the RID search box', function (done) {
+            var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID,
+                pageUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/RID=" + rid;
 
-                element(by.id('rid-search-input')).sendKeys(rid);
-                element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
-                    return browser.getAllWindowHandles();
-                }).then(function (tabs) {
-                    allWindows = tabs;
-                    expect(allWindows.length).toBe(2, "new tab wasn't opened");
+            element(by.id('rid-search-input')).sendKeys(rid);
+            element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
+                // wait for modal to show
+                chaisePage.waitForElement(element(by.css('.modal-dialog ')));
 
-                    return browser.switchTo().window(allWindows[1]);
-                }).then(function () {
+                expect(chaisePage.recordPage.getErrorModalTitle()).toBe("Record Not Found", "The title of no table error pop is not correct");
 
-                    return browser.driver.getCurrentUrl();
-                }).then(function (url) {
-                    // runs in travis when resolverImplicitCatalog is the same as catalogId on catalog 4
-                    var newTabUrl = browser.params.origin + "/id/" + rid;
-                    // resolver isn't on in travis so testing the output of search by RID without a redirect
-                    expect(url).toBe(newTabUrl, "new tab url doesn't include the resolver path with rid and no catalog");
-                    browser.close();
+                var modalText = "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to dismiss this dialog.";
+                expect(chaisePage.recordPage.getModalText().getText()).toBe(modalText, "The message in modal pop is not correct");
 
-                    return browser.switchTo().window(allWindows[0]);
-                }).then(function () {
-                    done();
-                }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
-                });
+                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+            }).then (function (){
+                // should close modal and NOT change page
+                return browser.driver.getCurrentUrl();
+            }).then(function (currentUrl) {
+                expect(currentUrl).toBe(pageUrl, "The OK button redirected instead of closing the modal");
+
+                done();
+            }).catch(function (err) {
+                console.dir(err);
+                done.fail();
             });
+        });
 
+        if (process.env.TRAVIS) {
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
                 var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
 
