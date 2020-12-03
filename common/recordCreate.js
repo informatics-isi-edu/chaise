@@ -515,15 +515,9 @@
             }
 
             if (type == 'boolean') {
-                var booleanArray = InputUtils.defaultBooleanValues,
-                    trueVal = "true",
-                    falseVal = "false";
-
-                if (column.display.preformatConfig) {
-                    trueVal = InputUtils.formatBoolean(column, true, "entry");
-                    falseVal = InputUtils.formatBoolean(column, false, "entry");
+                var trueVal = InputUtils.formatBoolean(column, true),
+                    falseVal = InputUtils.formatBoolean(column, false),
                     booleanArray = [trueVal, falseVal];
-                }
 
                 // create map
                 var booleanMap = {};
@@ -738,7 +732,7 @@
                         break;
                     case "boolean":
                         if (defaultValue != null) {
-                            initialModelValue = InputUtils.formatBoolean(column, defaultValue, "entry/create");
+                            initialModelValue = InputUtils.formatBoolean(column, defaultValue);
                         }
                         break;
                     default:
@@ -875,7 +869,7 @@
                         value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
                         break;
                     case "boolean":
-                        value = InputUtils.formatBoolean(column, values[i], "entry/edit");
+                        value = InputUtils.formatBoolean(column, values[i]);
                         break;
                     default:
                         // the structure for asset type columns is an object with a 'url' property
@@ -981,6 +975,7 @@
                                 rowVal = JSON.parse(rowVal);
                                 break;
                             case "boolean":
+                                // call columnToColumnModel to set booleanArray and booleanMap for proper un-formatting
                                 rowVal = InputUtils.unformatBoolean(columnToColumnModel(column), rowVal);
                                 break;
                             default:

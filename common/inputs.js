@@ -26,12 +26,8 @@
         var defaultBooleanValues = [true, false];
 
         // checks for preformat config before returning true/false
-        function formatBoolean(column, value, context) {
-            if (column.display.preformatConfig) {
-                return column.formatvalue(value, context, {});
-            }
-
-            return value;
+        function formatBoolean(column, value) {
+            return column.formatvalue(value);
         }
 
         function unformatBoolean(columnModel, value) {
