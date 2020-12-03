@@ -50,6 +50,8 @@ var testParams = {
             {name: "timestamp_txt", displayType: "text", value: currentTimestampTime}, // used for generating the hatrac path
             {name: "asset_null_col", displayType: "asset", value: files[0]},
             {name: "asset_col", displayType: "asset"},
+            {name: "color_rgb_hex_null_col", displayType: "color", value: "#123456"},
+            {name: "color_rgb_hex_col", displayType: "color"},
         ],
         submitted_values: {
             int2_col: "32,767",
@@ -72,7 +74,8 @@ var testParams = {
             asset_col: {link: "/hatrac/js/chaise/somepath.png", value: "filenamevalue.png"},
             asset_col_filename: "filenamevalue.png",
             asset_col_bytes: "12,345",
-            asset_col_md5: "md5value"
+            asset_col_md5: "md5value",
+            color_rgb_hex_col: "#123456"
         },
         // the rest of the columns are null and therefore not displayed:
         null_submitted_values: {
@@ -96,7 +99,8 @@ var testParams = {
             timestamp_txt: currentTimestampTime,
             asset_null_col: {ignoreInTRAVIS: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
             asset_null_col_filename: {ignoreInTRAVIS: true, value: "testfile500kb_nulltest.png"},
-            asset_null_col_bytes: {ignoreInTRAVIS: true, value: "512,000"}
+            asset_null_col_bytes: {ignoreInTRAVIS: true, value: "512,000"},
+            color_rgb_hex_null_col: "#123456"
         }
     },
     table_w_generated_columns : {

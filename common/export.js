@@ -6,7 +6,6 @@
     .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var context = ConfigUtils.getContextJSON();
-        var DEFAULT_CSV_NAME = "search results (csv)";
         /**
          * Cancel the current export request
          */
@@ -40,7 +39,7 @@
             var formatType = template.type;
             switch (formatType) {
                 case "DIRECT":
-                    if (formatName === DEFAULT_CSV_NAME) {
+                    if (formatName === scope.csvOptionName) {
                         location.href = scope.reference.csvDownloadLink;
                     }
                     // NOTE: uncomment below when we want to support JSON
@@ -122,13 +121,18 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/export.html',
             scope: {
                 reference: "=",
-                disabled: "="
+                disabled: "=",
+                csvOptionName: "@?"
             },
             link: function (scope, element, attributes) {
                 scope.isLoading = false;
                 scope.exporter = null;
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                 scope.hideNavbar = context.hideNavbar;
+
+                if (!DataUtils.isNoneEmptyString(scope.csvOptionName)) {
+                    scope.csvOptionName = "Search results (CSV)";
+                }
 
                 scope.logDropdownOpened = function () {
                     logService.logClientAction({
@@ -141,7 +145,7 @@
                     supportedFormats: [
                         {
                             outputs: [],
-                            displayname: DEFAULT_CSV_NAME,
+                            displayname: scope.csvOptionName,
                             type: "DIRECT"
                         }
                     ]

@@ -26,6 +26,15 @@
         border: 2px solid #ccc;
     }
 
+    // chaise-color-preview
+    .chaise-color-preview {
+        display: inline-block;
+        height: 11px;
+        width: 11px;
+        border-radius: 3px;
+        border: 1px solid $black-color;
+    }
+
     .vocab {
         color: darkblue;
         background-color: rgba(220, 220, 220, 0.68);
@@ -34,6 +43,28 @@
         display: inline-block;
         margin: 2px;
     }
+
+    ul.chaise-list-csv {
+        list-style: none;
+        display: inline;
+        li {
+            display: inline;
+            > p {
+                display: inline;
+            }
+
+            margin: 0 !important;
+
+            &:after {
+                content: ", ";
+            }
+            &:last-child:after {
+                content: "";
+            }
+        }
+    }
+
+
 
     a.download {
         @include chaise-btn();

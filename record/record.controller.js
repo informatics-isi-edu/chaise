@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -111,6 +111,14 @@
                 // the promise won't be rejected
             });
         };
+
+        vm.canShowSharePopup = function() {
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.show);
+        }
+
+        vm.canEnableSharePopup = function() {
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.enable);
+        }
 
         vm.toRecordSet = function(ref) {
             event.preventDefault();

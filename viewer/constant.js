@@ -9,18 +9,93 @@
      * For now, we decided to have a centeral location for these constant without deciding how this should be configurable
      */
     .constant('viewerConstant', {
+        osdViewer: {
+            IMAGE_URL_QPARAM: "url",
+            CHANNEL_NAME_QPARAM: "channelName",
+            PSEUDO_COLOR_QPARAM: "pseudoColor",
+            PIXEL_PER_METER_QPARAM: "meterScaleInPixels",
+            WATERMARK_QPARAM: "waterMark",
+            IS_RGB_QPARAM: "isRGB",
+            CHANNEL_QPARAMS: [
+                "url", "aliasName", "channelName", "pseudoColor", "isRGB"
+            ],
+            OTHER_QPARAMS: [
+                "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
+                "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness"
+            ]
+        },
         image: {
             URI_COLUMN_NAME: "uri",
-            DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z" // the default value of the zindex in the form TODO
+            DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z", // the default value of the zindex in the form
+
+            // used for meterScaleInPixels qparam
+            PIXEL_PER_METER_COLUMN_NAME: "Pixels_Per_Meter",
+
+            // used for watermark
+            CONSORTIUM_VISIBLE_COLUMN_NAME: "Pq797msQqRnD3Je3Jp01HQ",
+            CONSORTIUM_URL_COLUMN_NAME: "URL"
+        },
+        processedImage: {
+            // how many at a time should we read from database
+            PAGE_SIZE: 25,
+
+            PROCESSED_IMAGE_TABLE_SCHEMA_NAME: "Gene_Expression",
+            PROCESSED_IMAGE_TABLE_NAME: "Processed_Image",
+
+            // the sort criteria
+            COLUMN_ORDER: [{
+                "column": "Z_Index",
+                "descending": false
+            }, {
+                "column": "Channel_Number",
+                "descending": false
+            }],
+
+            // where to filter based on z_index and the iamge
+            Z_INDEX_COLUMN_NAME: "Z_Index",
+            REFERENCE_IMAGE_COLUMN_NAME: "Reference_Image",
+
+            IMAGE_URL_COLUMN_NAME: "File_URL",
+
+            //{"source": [{"outbound": ["Gene_Expression", "Processed_Image_Reference_Image_Channel_Number_fkey"]}, "RID"], "entity": true}
+            CHANNEL_VISIBLE_COLUMN_NAME: "AeweZsAMVSdW7Vf91boEfw",
+
+            DISPLAY_METHOD_COLUMN_NAME: "Display_Method",
+
+            // how to generate the url
+            IIIF_VERSION: "2",
+            IMAGE_URL_PATTERN: {
+                "iiif": "/iiif/{{{iiif_version}}}/{{#encode url}}{{/encode}}/info.json"
+            }
+
+        },
+        channel: {
+            // how many channels at a time should we read from database
+            PAGE_SIZE: 25,
+
+            CHANNEL_TABLE_NAME: "Image_Channel",
+            CHANNE_TABLE_SCHEMA_NAME: "Gene_Expression",
+
+            // the sort criteria
+            CHANNEL_TABLE_COLUMN_ORDER: [{
+                "column": "Channel_Number",
+                "descending": false
+            }],
+
+            REFERENCE_IMAGE_COLUMN_NAME: "Image",
+            CHANNEL_NAME_COLUMN_NAME: "Name",
+            PSEUDO_COLOR_COLUMN_NAME: "Pseudo_Color",
+            IS_RGB_COLUMN_NAME: "Is_RGB",
+            IMAGE_URL_COLUMN_NAME: "Image_URL"
+
         },
         annotation: {
             // how much should we wait for user action and then log
             SEARCH_LOG_TIMEOUT: 2000,
             LINE_THICKNESS_LOG_TIMEOUT: 1000,
 
-
             // how many annotations at a time should we read from database
-            PAGE_COUNT: 25,
+            PAGE_SIZE: 25,
 
             // annotation table
             ANNOTATION_TABLE_NAME: "Image_Annotation",
@@ -47,7 +122,7 @@
             ANNOTATED_TERM_TABLE_NAME: "Anatomy",
             ANNOTATED_TERM_TABLE_SCHEMA_NAME: "Vocabulary",
             ANNOTATED_TERM_ID_COLUMN_NAME: "ID",
-            ANNOTATED_TERM_NAME_COLUMN_NAME: "Name",
+            ANNOTATED_TERM_NAME_COLUMN_NAME: "Name"
         }
     })
 })();

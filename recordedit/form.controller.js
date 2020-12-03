@@ -34,6 +34,9 @@
         vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
+        // placeholder for the color picker callbacks
+        vm.toggleColorPickerCallbacks = [{}];
+
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
@@ -98,14 +101,14 @@
         function onSuccess (model, result){
             var page = result.successful;
             var failedPage = result.failed;
-            var resultsReference = page.reference;
+
             vm.successfulSubmission = true;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
-            }
-            else {
+            } else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
+                var resultsReference = page.reference;
                 // NOTE currently this has been added just to make sure nothing is broken,
                 // but it's not used since the displayed table doesn't have any controls.
                 // if we end up adding more controls and needed to log them, we might want to
@@ -117,12 +120,15 @@
                 );
 
                 // includes identifiers for specific records modified
+                // TODO: the above comment seems wrong
+                // NOTE: I think we are using the base reference for the page so we go to either an unconstrained recordset (multi create)
+                // or a constrained recordset (multi edit we entered recordedit with)
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
-                //set values for the view to flip to recordedit resultset view
+
+                // set values for the view to flip to recordedit resultset view
                 vm.resultsetModel = {
                     hasLoaded: true,
                     reference: resultsReference,
-                    columns: resultsReference.columns,
                     enableSort: false,
                     sortby: null,
                     sortOrder: null,
@@ -145,14 +151,15 @@
                 // NOTE: This case is for a pseudo-failure case
                 // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
                 if (failedPage !== null) {
+                    var failedReference = failedPage.reference;
+
                     vm.omittedResultsetModel = {
                         hasLoaded: true,
-                        reference: resultsReference,
-                        columns: resultsReference.columns,
+                        reference: failedReference,
                         enableSort: false,
                         sortby: null,
                         sortOrder: null,
-                        page: page,
+                        page: failedPage,
                         pageLimit: model.rows.length,
                         rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
                         selectedRows: [],

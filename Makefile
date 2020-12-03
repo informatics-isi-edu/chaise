@@ -266,7 +266,8 @@ SHARED_JS_VENDOR_ASSET=$(JS)/vendor/angular-plotly.js \
 	$(COMMON)/vendor/css-element-queries.js \
 	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
 	$(JS)/vendor/select.js \
-	$(COMMON)/vendor/mask.min.js
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/spectrum/spectrum.min.js
 
 SHARED_JS_VENDOR_ASSET_MIN=chaise.vendor.min.js
 $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
@@ -274,6 +275,7 @@ $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
 
 SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/fontawesome.min.css \
+	$(COMMON)/vendor/spectrum/spectrum.min.css \
 	$(COMMON)/styles/app.css
 
 SASS=$(COMMON)/styles/app.css

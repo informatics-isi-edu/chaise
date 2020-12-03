@@ -54,6 +54,7 @@
         }]);
     }])
 
+    // TODO this should be removed, viewer shouldn't parse the url
     // Configure the context info from the URI
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();
@@ -62,8 +63,7 @@
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
 
-        // TODO this should be removed, viewer shouldn't parse the url
-        console.log('Context', context);
+        // console.log('Context', context);
     }])
 
     // Configure all tooltips to be attached to the body by default. To attach a
@@ -114,7 +114,7 @@
                 user.role = null;
             }
 
-            console.log('User: ', user);
+            // console.log('User: ', user);
             return;
         }, function error(response) {
             throw response;
@@ -144,10 +144,11 @@
         var rectangles = [];
         var sections = [];
         var session;
-        var imageURI, svgURIs = [];
+        var imageURI, svgURIs = [], imageTuple;
         var config = ConfigUtils.getContextJSON();
         var annotConstant = viewerConstant.annotation;
         var imageConstant = viewerConstant.image;
+        var osdConstant = viewerConstant.osdViewer;
 
         // TODO are these needed?
         context.server = config.server;
@@ -157,43 +158,31 @@
         context.chaiseBaseURL = UriUtils.chaiseBaseURL();
         UriUtils.setOrigin();
 
-        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
+        // NOTE: we're not decoding query parameters because it will mess with the encoding of url values
+        var res = UriUtils.chaiseURItoErmrestURI($window.location, true, true);
         var ermrestUri = res.ermrestUri,
             pcid = res.cid,
             ppid = res.pid,
             isQueryParameter = res.isQueryParameter,
-            queryParamsString = res.queryParamsString,
-            queryParams = res.queryParams;
+            pageQueryParamsString = res.pageQueryParamsString,
+            pageQueryParams = res.queryParams;
 
         context.catalogID = res.catalogId;
 
-        context.queryParams = res.queryParams;
+        context.queryParams = pageQueryParams;
 
         FunctionUtils.registerErmrestCallbacks();
 
-        var session;
-        var osdViewerQueryParams = queryParamsString, // what will be passed onto osd viewer
-            hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
-            hasImageQueryParam = false; // if there is an image in query, we should just use it and shouldn't use the image uri from db
+        var session,
+            osdViewerQueryParams = {}, // what will be passed onto osd viewer
+            hasAnnotationQueryParam = false; // if there are svgs in query param, we should just use it and shouldn't get it from db.
 
-        // HACK: this is just a hack to allow quick testing
         // if there are any svg files in the query params, ignore the annotation table.
-        // we cannot use the queryParams object that is returned since it only give us the last url
-        // (it's a key-value so it's not supporting duplicated key values)
-        // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
-        if (queryParamsString && queryParamsString.length > 0) {
-            queryParamsString.split('&').forEach(function (queryStr) {
-                var qpart = queryStr.split("=");
-                if (qpart.length != 2 || qpart[0] !== "url") return;
-
-                if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
-                    $rootScope.hideAnnotationSidebar = false;
-                    $rootScope.loadingAnnotations = true;
-                    hasAnnotationQueryParam = true;
-                } else {
-                    hasImageQueryParam = true;
-                }
-            });
+        // (added here because we want to hide the sidebar as soon as we can)
+        if (viewerAppUtils.hasURLQueryParam(pageQueryParams, true)) {
+            $rootScope.hideAnnotationSidebar = false;
+            $rootScope.loadingAnnotations = true;
+            hasAnnotationQueryParam = true;
         }
 
         // Subscribe to on change event for session
@@ -236,7 +225,7 @@
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-                return imageReference.contextualize.detailed.read(1, logObj, true, true);
+                return imageReference.contextualize.detailed.read(1, logObj, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {
@@ -248,13 +237,13 @@
                     return false;
                 }
 
-                image.entity = imagePage.tuples[0].data;
+                imageTuple = imagePage.tuples[0];
+                image.entity = imageTuple.data;
                 context.imageID = image.entity.RID;
                 imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
 
-                // TODO some sort of warning maybe?
                 if (!imageURI) {
-                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty. We cannot show any image from database.");
+                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty in Image table.");
                 }
 
                 // TODO this feels hacky
@@ -263,34 +252,59 @@
                     context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
                 }
 
-                /**
-                * - if url is passed in query parameters, don't use image.uri value
-                *   (TODO maybe we shouldn't even read the image? (we're reading image for RID value etc..)
-                * - otherwise, if image.uri value exists
-                *    - and has query parameter, use the image.uri query parameter.
-                *    - otherwise, use the image.uri value
-                */
-                if(!hasImageQueryParam && (typeof imageURI === "string")){
-                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
-                    if (imageURI.indexOf("?") !== -1) {
-                        osdViewerQueryParams += imageURI.split("?")[1];
-                    } else {
-                        osdViewerQueryParams += imageURI;
-                    }
+                // properly merge the query parameter and ImageURI
+                var res = viewerAppUtils.populateOSDViewerQueryParams(pageQueryParams, imageURI);
+
+                osdViewerQueryParams = res.osdViewerQueryParams;
+
+                // add meterScaleInPixels query param if missing
+                var val = parseFloat(imageTuple.data[imageConstant.PIXEL_PER_METER_COLUMN_NAME]);
+                var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
+                if (!(qParamName in osdViewerQueryParams) && !isNaN(val)) {
+                    osdViewerQueryParams[qParamName] = val;
                 }
 
-                // TODO throw an error if there wasn't any image
+                // add waterMark query param if missing
+                val = imageTuple.linkedData[imageConstant.CONSORTIUM_VISIBLE_COLUMN_NAME];
+                qParamName = osdConstant.WATERMARK_QPARAM;
+                if (!(qParamName in osdViewerQueryParams) && DataUtils.isObjectAndNotNull(val) && DataUtils.isNoneEmptyString(val[imageConstant.CONSORTIUM_URL_COLUMN_NAME])) {
+                    osdViewerQueryParams[qParamName] = val[imageConstant.CONSORTIUM_URL_COLUMN_NAME];
+                }
+
+                // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.
+                if (!res.readChannelInfo) {
+                    return [];
+                }
+
+                return viewerAppUtils.getChannelInfo();
+            }).then(function (imageChannelInfo) {
+                // use the channel info from database if available
+                if (imageChannelInfo && imageChannelInfo.length > 0) {
+                    // remove any existing channel related query parameter
+                    osdConstant.CHANNEL_QPARAMS.forEach(function (qp) {
+                        delete osdViewerQueryParams[qp];
+                    });
+
+                    // add the channel related query parameters from database
+                    imageChannelInfo.forEach(function (info) {
+                        for (var k in info) {
+                            if (!(k in osdViewerQueryParams)) {
+                                osdViewerQueryParams[k] = [];
+                            }
+                            osdViewerQueryParams[k].push(info[k]);
+                        }
+                    });
+                }
 
                 // if there's svg query param, don't fetch the annotations from DB.
-                // if we cannot show any overlay, there's no point in reading
                 if (hasAnnotationQueryParam) {
                     return false;
                 }
 
+                // read the annotation reference
                 return viewerAppUtils.readAllAnnotations();
-            })
-            // read the annotation reference
-            .then(function (res) {
+            }).then(function () {
+
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
@@ -302,11 +316,24 @@
                     $rootScope.loadingAnnotations = true;
                 }
 
-                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;
-                console.log('osd viewer location: ', osdViewerURI);
+                // osd controller uses this attribute to parameterize OSD viewer
+                // TODO should eventually be a proper object and not just query parameters
+                $rootScope.osdViewerParameters = osdViewerQueryParams;
+                if (!DataUtils.isObjectAndNotNull(osdViewerQueryParams) || !(osdConstant.IMAGE_URL_QPARAM in osdViewerQueryParams)) {
+                    console.log("there wasn't any parameters that we could send to OSD viewer");
+                    // TODO better error
+                    throw new ERMrest.MalformedURIError("Image information is missing.");
+                }
+
+                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
+                console.log('osd viewer location: ', osdViewerURI + "?" + UriUtils.queryParamsToString(osdViewerQueryParams, true));
+
                 iframe.location.replace(osdViewerURI);
 
-                // TODO there should be a way that osd tells us it's done doing it's setup.
+                // NOTE if we move displayReady and displayIframe to be after the osdLoaded,
+                //      the scalebar value doesn't properly display. the viewport must be visible
+                //      before initializing the osd viewer (and its scalebar)
+                // show the page while the image info will be loaded by osd viewer
                 $rootScope.displayReady = true;
 
                 /**

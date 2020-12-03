@@ -213,7 +213,6 @@
                                                                 <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
                                                             </div>
 
-
                                                             <!-- File input -->
                                                             <div ng-switch-when="file">
                                                                 <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])"
@@ -230,12 +229,26 @@
                                                                 <textarea array column-type="{{column.type.rootName}}" custom-error-message="form.customErrorMessage[rowIndex][column.name]" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null></textarea>
                                                             </div>
 
+                                                            <!-- color input -->
+                                                            <div ng-switch-when="color" class="chaise-input-group">
+                                                                <div class="chaise-input-control chaise-color-picker">
+                                                                    <input color-picker toggle-callback="form.toggleColorPickerCallbacks[rowIndex][columnIndex]" is-required="form.isRequired(columnIndex)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" empty-to-null>
+                                                                    <chaise-clear-input btn-class="text-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
+                                                                </div>
+                                                                <span class="chaise-input-group-append">
+                                                                    <button ng-click="form.toggleColorPickerCallbacks[rowIndex][columnIndex]($event)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary" type="button" tooltip-placement="bottom" uib-tooltip="Select a color.">
+                                                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                    </button>
+                                                                </span>
+                                                            </div>
+
                                                             <!-- disabled -->
                                                             <input ng-switch-when="disabled" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" class="chaise-input-control" disabled="true" placeholder="{{::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name]);}}" empty-to-null>
 
                                                             <!-- shorttext/default text input -->
                                                             <div ng-switch-default class="chaise-input-control has-feedback">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" empty-to-null>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}"
+                                                                       type="text" ng-required="::form.isRequired(columnIndex);" is-required="::form.isRequired(columnIndex)" is-disabled="form.isDisabled(columnIndex)" empty-to-null>
                                                                 <chaise-clear-input btn-class="text-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
 

@@ -514,8 +514,8 @@
             // if network is offline, use offline dialog workflow
             if (!$window.navigator.onLine) return offlineModalTemplate(exception, "Please check that you are still connected to your network. ", null, true);
 
-            // don't throw an angular error if in search/viewer or one has already been thrown
-            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
+            // don't throw an angular error if has already been thrown
+            if (exceptionFlag) return;
 
             // If not authorized, ask user to sign in first
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {

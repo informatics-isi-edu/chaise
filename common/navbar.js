@@ -65,8 +65,14 @@
       $event.stopPropagation();
       $event.preventDefault();
 
-      var menuTarget = getNextSibling($event.target,".dropdown-menu"); // dropdown submenu <ul>
-      var immediateParent = $event.target.offsetParent; // parent, <li>
+      var target = $event.target;
+      // added markdownName support allows for inline template to be defined like :span:TEXT:/span:{.class-name}
+      if ($event.target.localName != "a") {
+          target = $event.target.parentElement;
+      }
+
+      var menuTarget = getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+      var immediateParent = target.offsetParent; // parent, <li>
       var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
       var posValues = getOffsetValue(immediateParent);
 
@@ -83,7 +89,7 @@
 
       // if we're opening this, close all the other dropdowns on navbar.
       if (open) {
-        $event.target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+        target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
           el.parentElement.classList.remove("child-opened");
           el.classList.remove("show");
         });
@@ -154,38 +160,16 @@
         return false;
     }
 
+    // item - navbar menu object form children array
+    // session - Session factory
     function canShow (item, session) {
-        if (item.acls.show.indexOf("*") > -1) return true; // if "*" acl, show the option
-        if (!session) return false; // no "*" exists and no session, hide the option
-
-        for (var i=0; i < item.acls.show.length; i++) {
-            var attribute = item.acls.show[i];
-
-            var match = session.attributes.some(function (attr) {
-                return attr.id === attribute;
-            });
-
-            if (match) return true;
-        };
-
-        return false;
+        return session.isGroupIncluded(item.acls.show);
     }
 
+    // item - navbar menu object form children array
+    // session - Session factory
     function canEnable (item, session) {
-        if (item.acls.enable.indexOf("*") > -1) return true; // if "*" acl, enable the option
-        if (!session) return false; // no "*" exists and no session, disable the option
-
-        for (var i=0; i < item.acls.enable.length; i++) {
-            var attribute = item.acls.enable[i];
-
-            var match = session.attributes.some(function (attr) {
-                return attr.id === attribute;
-            });
-
-            if (match) return true;
-        };
-
-        return false;
+        return session.isGroupIncluded(item.acls.enable);
     }
 
     /**
@@ -217,12 +201,20 @@
         };
     }
 
+    function renderInlineMarkdown(item, sce) {
+        if (item.markdownName) {
+            return sce.trustAsHtml(ERMrest.renderMarkdown(item.markdownName, {inline: true}));
+        }
+
+        return sce.trustAsHtml(item.name);
+    }
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $timeout, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
@@ -294,10 +286,11 @@
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
+                var dcctx = ConfigUtils.getContextJSON();
+                scope.hideNavbar = dcctx.hideNavbar;
                 // Subscribe to on change event for session
                 // navbar doesn't need to have functionality until the session returns, just like app.js blocks
                 var subFunctionId = Session.subscribeOnChange(function() {
-
                     // signal the ancestors that navbar is now displayed
                     $rootScope.$emit("navbar-done");
 
@@ -305,16 +298,13 @@
                     Session.unsubscribeOnChange(subFunctionId);
 
                     var chaiseConfig = ConfigUtils.getConfigJSON();
-                    var dcctx = ConfigUtils.getContextJSON();
 
-                    scope.hideNavbar = dcctx.hideNavbar;
                     scope.brandURL = chaiseConfig.navbarBrand;
                     scope.brandText = chaiseConfig.navbarBrandText;
                     scope.brandImage = chaiseConfig.navbarBrandImage;
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                     scope.onToggle = function (open, menuObject) {
-                        console.log(this);
                         if (open) {
                             // when menu opens, calculate height needed
                             logService.logClientAction({
@@ -326,6 +316,11 @@
                         onToggle(open);
                     }
 
+                    // prefer to use markdownName over name
+                    scope.renderName = function (item) {
+                        return renderInlineMarkdown(item, $sce);
+                    }
+
                     // remove the height when the dropdown is toggled
                     // NOTE: $event can't be passed to function attached to on-toggle listener
                     // use this function on a click event
@@ -335,11 +330,11 @@
                     }
 
                     scope.canShow = function (item) {
-                        return canShow(item, Session.getSessionValue());
+                        return canShow(item, Session);
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, Session.getSessionValue());
+                        return canEnable(item, Session);
                     }
 
                     scope.logBranding = function ($event, link) {
@@ -424,7 +419,7 @@
         };
     }])
 
-    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logService', 'Session', 'UriUtils', '$window', function($compile, ConfigUtils, logService, Session, UriUtils, $window) {
+    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logService', 'Session', 'UriUtils', '$sce', '$window', function($compile, ConfigUtils, logService, Session, UriUtils, $sce, $window) {
         return {
             restrict: 'EA',
             scope: {
@@ -442,12 +437,17 @@
                         compiled = $compile(contents);
                     }
 
+                    // prefer to use markdownName over name
+                    scope.renderName = function (item) {
+                        return renderInlineMarkdown(item, $sce);
+                    }
+
                     scope.canShow = function (item) {
-                        return canShow(item, Session.getSessionValue());
+                        return canShow(item, Session);
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, Session.getSessionValue());
+                        return canEnable(item, Session);
                     }
 
                     scope.toggleSubMenu = function (event, menuObject) {

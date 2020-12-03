@@ -2,7 +2,6 @@
 
 var chaiseConfig = {
     name: "Sample",
-    layout: 'list',
     allowErrorDismissal: true,
     confirmDelete: true,
     headTitle: 'Chaise',
@@ -13,29 +12,18 @@ var chaiseConfig = {
     // signUpURL: '', The URL at a which a user can create a new account
     // profileURL: '', Globus deployments can use https://www.globus.org/app/account
     dataBrowser: '',
+    shareCiteAcls: {
+        show: ["*"],  // [] <- hide
+        enable: ["*"] // [] <- disable
+    },
     maxColumns: 6,
-    showUnfilteredResults: false,
     defaultAnnotationColor: 'red',
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     helpURL: '/help/using-the-data-browser/',
-    showBadgeCounts: false,
-    plotViewEnabled: false,
-    recordUiGridEnabled: false,
-    recordUiGridExportCSVEnabled: true,
-    recordUiGridExportPDFEnabled: true,
     editRecord: true,
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
     showFaceting: true,
-    tour: {
-      pickRandom: false,
-      searchInputAttribute: "Data",
-      searchChosenAttribute: "Data Type",
-      searchInputValue: "micro",
-      extraAttribute: "Mouse Anatomic Source",
-      chosenAttribute: "Data Type",
-      chosenValue: "Expression microarray - gene"
-    },
     navbarMenu: {
         // The optional newTab property can be defined at any level. If undefined at root, newTab is treated as true
         // Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.

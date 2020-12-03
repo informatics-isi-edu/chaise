@@ -36,6 +36,8 @@
         "asset_col_bytes": 12345,
         "asset_null_col": null,
         "asset_null_col_filename": null,
-        "asset_null_col_bytes": null
+        "asset_null_col_bytes": null,
+        "color_rgb_hex_null_col": null,
+        "color_rgb_hex_col": "#123456"
     }
 ]

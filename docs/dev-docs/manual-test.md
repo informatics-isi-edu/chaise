@@ -149,7 +149,7 @@ In [ErmrestDataUtils](https://github.com/informatics-isi-edu/ErmrestDataUtils), 
 The UX currently doesn't update the user when their session state has changed. In some cases a user could log in and navigate to a page that allows create or update, then have their log in status change prior to submitting the data to be mutated. They could have had their session time out (treated as an anonymous user) or changed to a  different user entirely. This pertains to create/update in `recordedit`, pure and binary add in `record`, and anywhere that we show tables with shows thatcan be deleted.
 
 ## Testing workflow
-For each of the pages listed below, the following should be done to verify that the appropriate errors occur and dialogs are shown: 
+For each of the pages listed below, the following should be done to verify that the appropriate errors occur and dialogs are shown:
 
  - Navigate to a creation form that requires a user to be logged in ([Example](https://dev.rebuildingakidney.org/chaise/recordedit/#2/RNASeq:Study))
    - fill in the required fields
@@ -174,7 +174,7 @@ For each of the pages listed below, the following should be done to verify that 
    - in another tab, log out again and log back in as the original user
    - go back to the original tab and click "continue" once the login state has been resolved
    - the rows should be properly added after clicking continue
-   
+
  - Navigate to a page with rows that can be deleted ([Example](https://dev.rebuildingakidney.org/~jchudy/chaise/recordset/#2/Gene_Expression:Specimen/))
    - open another tab and log out of the application
    - go back to the original tab and delete one of the rows
@@ -198,13 +198,21 @@ What should appear is a page of results with multiple tables. The first table sh
 
 # Testing UX that relies on data or model change events
 
-## Share dialog stale warning 
-The share dialog has an alert warning that shows when the user is viewing stale data. This can happen if the current record's values are updated after you laoded the record page or the model itself has changed. The data changed event is test in the e2e tests. The model change event requires manual testing. This can be tested on any table on `dev.isrd` as long as you can modify that table's model. [Here](https://github.com/informatics-isi-edu/chaise/wiki/Ermrest-Howto-(set-ACL,-cookies)#add-column-to-existing-table) is a template for the curl command.
+## Share dialog stale warning
+The share dialog has an alert warning that shows when the user is viewing stale data. This can happen if the current record's values are updated after you loaded the record page or the model itself has changed. The data changed event is test in the e2e tests. The model change event requires manual testing. This can be tested on any table on `dev.isrd` as long as you can modify that table's model. [Here](https://github.com/informatics-isi-edu/chaise/wiki/Ermrest-Howto-(set-ACL,-cookies)#add-column-to-existing-table) is a template for the curl command.
 
 # Testing assets
 
 ## asset hosted on www (different origin)
-When an asset is hosted on a differet origin, a modal dialog stating you will be redirected will be shown. Follow [this link](https://dev.gudmap.org/chaise/record/#2/Common:Publication/RID=17-EZ6C) to see an asset on a different origin to test this functionality.
+When an asset is hosted on a different origin, a modal dialog stating you will be redirected will be shown. Follow [this link](https://dev.gudmap.org/chaise/record/#2/Common:Publication/RID=17-EZ6C) to see an asset on a different origin to test this functionality.
 
 ## asset with permission to access required
 When an asset requires login, it should have the proper class attached to it. This is done automatically for the default asset presentation in ermrestJS. The class is called `asset-permission`. Follow [this link](https://dev.rebuildingakidney.org/chaise/record/#2/RNASeq:File/RID=16-1YDJ) and try to download the asset without being logged in. You should see a modal dialog that looks like an error that suggests you should login. After logging in, try downloading the asset again with a user with the proper permission to view it. Then try the same with a user who can't view the asset and verify the proper 403 modal is shown instead.
+
+# Testing shareCiteAcls chaise-config property to show/hide and enable/disable the button to open the share and cite popup
+
+## show button but disable it
+In the chaise-config document, define `shareCiteAcls` as `{ show: ["*"], enable: [] }`. This will show the button for everyone but have it disabled. Open a record page and make sure it is disabled with a grey color and unclickable.
+
+## hide button
+In the chaise-config document, define `shareCiteAcls` as `{ show: [] }`, the enable value doesn't matter since hiding takes precedence. This will hide the button for everyone. Open a record page and make sure it is hidden from the document after loading.

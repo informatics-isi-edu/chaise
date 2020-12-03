@@ -24,7 +24,7 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false && resolverImplicitCatalog=4", function() {
+        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
                 expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
@@ -49,6 +49,7 @@ describe('View existing record,', function() {
         });
 
         if (process.env.TRAVIS) {
+            // test RID search and resolverImplicitCatalog
             it('should navigate to a record page if a proper RID is typed into the RID search box', function (done) {
                 var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "2004"}]).RID
                 var allWindows;
@@ -62,11 +63,13 @@ describe('View existing record,', function() {
 
                     return browser.switchTo().window(allWindows[1]);
                 }).then(function () {
-                    chaisePage.recordPageReady();
+
                     return browser.driver.getCurrentUrl();
                 }).then(function (url) {
-                    var newTabUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + "RID=" + rid;
-                    expect(url).toBe(newTabUrl, "new tab url is doesn't include the rid");
+                    // runs in travis when resolverImplicitCatalog is the same as catalogId on catalog 4
+                    var newTabUrl = browser.params.origin + "/id/" + rid;
+                    // resolver isn't on in travis so testing the output of search by RID without a redirect
+                    expect(url).toBe(newTabUrl, "new tab url doesn't include the resolver path with rid and no catalog");
                     browser.close();
 
                     return browser.switchTo().window(allWindows[0]);
