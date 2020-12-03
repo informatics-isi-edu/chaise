@@ -40,11 +40,6 @@
             var modalInstance = $uibModal.open(params);
 
             modalInstance.rendered.then(function () {
-                try {
-                    // angular.element(document.querySelector(".modal-body")).scrollTop(0);
-                } catch (err) {
-                    $log.warn(err);
-                }
                 if (postRenderCB) postRenderCB();
             }).catch(function (error) {
                 $log.warn(error);
@@ -75,7 +70,7 @@
          */
         function openSharePopup (tuple, reference, extraParams) {
             var defer = $q.defer();
-            
+
             var refTable = reference.table;
             var params = extraParams || {};
 
@@ -87,7 +82,7 @@
             params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-            
+
             var stack = params.logStack ? params.logStack : logService.getStackObject();
             var snaptimeHeader = {
                 action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
@@ -108,10 +103,10 @@
                         params: params
                     }
                 }, false, false, false); // not defining any extra callbacks
-                
+
                 defer.resolve();
             });
-            
+
             return defer.promise;
         }
 
@@ -206,9 +201,11 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (exception instanceof Errors.NoRecordRidError) {
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (exception instanceof Errors.DifferentUserConflictError) {
             vm.showOkBtn = false;
-            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showReloadBtn = exception.showReloadBtn;
             vm.showContinueBtn = exception.showContinueBtn;
             // contains the `reloadMessage` already since it's customized in the error
             vm.clickActionMessage = exception.errorData.clickActionMessage;
@@ -355,7 +352,7 @@
             // log related attributes
             logStack:                  logStack,
             logStackPath:              params.logStackPath ? params.logStackPath : null,
-            logAppMode:                params.logAppMode ? params.logAppMode : null, 
+            logAppMode:                params.logAppMode ? params.logAppMode : null,
 
             // used for the recordset height and sticky section logic
             // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
@@ -484,7 +481,7 @@
      *   - {Object[]} extraInformation (optional) - An array of objects that will be displayed. Each element can be either
      *                {value: "string", title: "string"} or {title: "string", value: "string", link: "string", type: "link"}
      *   - {Object} logStackPath (optional) - if you want to change the default log stack path of the app
-     *   - {Object} logStack (optional) - if you want to change the default log stack object of the app 
+     *   - {Object} logStack (optional) - if you want to change the default log stack object of the app
      */
     .controller('ShareCitationController', ['logService', 'params', '$rootScope', '$uibModalInstance', '$window', function (logService, params, $rootScope, $uibModalInstance, $window) {
         var vm = this;
