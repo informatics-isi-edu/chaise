@@ -11,28 +11,6 @@
         }
     }
 
-    #toc-container {
-        padding-top: 20px;
-
-        .toc-list {
-            a {
-                color: #333;
-            }
-
-            li {
-                margin: 5px 0;
-                a {
-                    font-size: 1.2em;
-                }
-            }
-
-            .is-active-link::before {
-                background-color: $primary-color;
-            }
-        }
-    }
-
-
     // override the default that we have for markdown containers
     .markdown-container {
         h1 {

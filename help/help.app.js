@@ -57,15 +57,20 @@
 
         // find the help page based on the given query parameter
         var pageName = UriUtils.getQueryParam($window.location.href, "page"), helpContent, page;
+
+        // remove the hash (the qetQueryParam doesn't do that properly)
         if (typeof pageName === "string") {
             var parts = pageName.split("#");
-            if (parts.length > 1) {
+            if (parts.length > 0) {
                 pageName = parts[0];
             }
         }
+
+        // if there are no pageName, go to home
         if (!pageName || !(pageName in helpPages)) {
             pageName = "home";
         }
+
         page = helpPages[pageName];
 
         // change the title
@@ -80,92 +85,17 @@
             $rootScope.helpContent = ERMrest.renderMarkdown(helpContent);
             $rootScope.displayReady = true;
 
-        }).catch(function (err) {
-            throw err;
-        });
-    }])
+            $timeout(function () {
 
-    .controller('helpController', [ 'UiUtils', '$rootScope', '$timeout', '$window',
-        function (UiUtils, $rootScope, $timeout, $window) {
-
-        var vm = this;
-
-        vm.scrollToSection = function (element) {
-            if (!element || element.length == 0) return;
-
-            var mainContainerEl = angular.element(document.getElementsByClassName('main-container')[0]);
-            mainContainerEl.scrollToElementAnimated(element, 40).then(function () {
-
-                // we can add focus class if we want to
-            }).catch(function (err) {
-                console.log(err);
-                // the scroll promise might be rejected, but we should just fail silently
-                // we saw this happening when you double click on the element.
-                // in this case, the second promise will be rejected.
-            });
-        };
-
-        var _autoScrollOnLoad = function () {
-            try {
-                if ($window.location.hash) {
-                    vm.scrollToSection(angular.element($window.location.hash));
-                }
-            } catch (exp) {
-                console.log(exp);
-                // fail silently
-            }
-        }
-
-        // watch for the display to be ready before setting the main container height
-        var _unbindDisplayReady = $rootScope.$watch(function() {
-            return $rootScope.displayReady;
-        }, function (newValue, oldValue) {
-            if (newValue) {
                 // make sure the height is properly set
-                UiUtils.attachContainerHeightSensors(null, null, true, document.querySelector('#toc-container'));
+                UiUtils.attachContainerHeightSensors(null, null, true);
 
                 // make sure footer position is correct
                 UiUtils.attachFooterResizeSensor(0);
-
-                _unbindDisplayReady();
-
-                $timeout(function () {
-                    _autoScrollOnLoad();
-
-                    tocbot.init({
-                        // Where to render the table of contents.
-                        tocSelector: '#toc-container',
-
-                        // // Where to grab the headings to build the table of contents.
-                        contentSelector: '.help-content',
-
-                        // Which headings to grab inside of the contentSelector element.
-                        headingSelector: 'h1, h2, h3, h4',
-
-                        ignoreSelector: '.ignored-section',
-
-                        // For headings inside relative or absolute positioned containers within content.
-                        hasInnerContainers: true,
-
-                        // the scroll container
-                        scrollContainer: ".main-container",
-                        scrollSmooth: true,
-                        scrollSmoothDuration: 1000,
-                        collapseDepth: 1,
-                        disableTocScrollSync: true,
-                        onClick: function (event) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            try {
-                                vm.scrollToSection(angular.element(event.target.getAttribute("href")));
-                            } catch (exp) {
-                                // fail silently
-                            }
-                        }
-                    });
-                })
-            }
+            });
+        }).catch(function (err) {
+            throw err;
         });
-    }])
+    }]);
 
 })();

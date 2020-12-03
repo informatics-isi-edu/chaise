@@ -10,7 +10,7 @@
     <div class="configure-container" ng-app="chaise.configure-help">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container help-container" ng-controller="helpController as ctrl">
+    <div class="app-container help-container">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady"></loading-spinner>
         <div class="app-content-container" ng-show="displayReady">
@@ -21,13 +21,7 @@
                 <div class="side-panel-resizable close-panel"></div>
                 <div class="main-container">
                     <div class="main-body container">
-                        <div class="row">
-                            <div ng-bind-html="helpContent | trustedHTML" class="col-md-9 markdown-container help-content"></div>
-                            <div class="col-md-3">
-                                <nav class="hidden-sm hidden-xs toc" id="toc-container">
-                                </nav>
-                            </div>
-                        </div>
+                        <div ng-bind-html="helpContent | trustedHTML" class="markdown-container help-content"></div>
                     </div>
                     <footer></footer>
                 </div>

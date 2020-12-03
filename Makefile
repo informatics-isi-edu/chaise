@@ -524,9 +524,9 @@ HELP_JS_SOURCE_MIN=help.min.js
 $(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
 	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
 
-HELP_CSS_SOURCE=$(COMMON)/vendor/tocbot/tocbot.css
+HELP_CSS_SOURCE=
 
-HELP_VENDOR_ASSET=$(COMMON)/vendor/tocbot/tocbot.min.js
+HELP_VENDOR_ASSET=
 
 .make-help-includes: $(BUILD_VERSION)
 	@> .make-help-includes
