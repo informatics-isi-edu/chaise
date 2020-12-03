@@ -51,7 +51,7 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
-        vm.booleanValues = InputUtils.booleanValues;
+        vm.booleanValues = booleanValues;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
@@ -513,6 +513,11 @@
             return disabledValue;
         }
 
+        // returns columnModel.booleanArray for use in boolean dropdown
+        function booleanValues(colIndex) {
+            return vm.recordEditModel.columnModels[colIndex].booleanArray;
+        }
+
         // Assigns the current date or timestamp to a column's model
         function applyCurrentDatetime(modelIndex, columnName, columnType) {
             vm.recordEditModel.rows[modelIndex][columnName] = InputUtils.applyCurrentDatetime(columnType);
@@ -804,7 +809,7 @@
                 if (DataUtils.isObjectAndNotNull(value) && value.url) noValue = false;
             } else if (columnModel.inputType === "boolean") {
                 // check if the selected value is a boolean (true|false)
-                if (typeof value === "boolean") noValue = false;
+                if (typeof value === "boolean" || (typeof value === "string" && value.length > 0)) noValue = false;
             } else {
                 if (value != null) noValue = false;
             }

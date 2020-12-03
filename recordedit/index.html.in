@@ -202,7 +202,7 @@
                                                                 <!-- So that the boolean input can be validated -->
                                                                 <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
                                                                 <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu" ng-style="form.inputWidth">
-                                                                    <li ng-repeat="option in ::form.booleanValues" ng-click="form.recordEditModel.rows[rowIndex][column.name] = option">
+                                                                    <li ng-repeat="option in ::form.booleanValues(columnIndex)" ng-click="form.recordEditModel.rows[rowIndex][column.name] = option">
                                                                         <a ng-bind-html="option" style="min-height: 20px;"></a>
                                                                     </li>
                                                                 </ul>

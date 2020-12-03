@@ -514,8 +514,21 @@
                 type =  UiUtils.getInputType(column.type);
             }
 
+            if (type == 'boolean') {
+                var trueVal = InputUtils.formatBoolean(column, true),
+                    falseVal = InputUtils.formatBoolean(column, false),
+                    booleanArray = [trueVal, falseVal];
+
+                // create map
+                var booleanMap = {};
+                booleanMap[trueVal] = true;
+                booleanMap[falseVal] = false;
+            }
+
             return {
                 allInput: undefined,
+                booleanArray: booleanArray || [],
+                booleanMap: booleanMap || {},
                 column: column,
                 isDisabled: isDisabled,
                 isRequired: !column.nullok && !isDisabled,
@@ -717,6 +730,11 @@
                         // formatDatetime takes care of column.default if null || undefined
                         initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
                         break;
+                    case "boolean":
+                        if (defaultValue != null) {
+                            initialModelValue = InputUtils.formatBoolean(column, defaultValue);
+                        }
+                        break;
                     default:
                         if (column.isAsset) {
                             var metaObj = {};
@@ -850,6 +868,9 @@
                         // If input is disabled, there's no need to transform the column value.
                         value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
                         break;
+                    case "boolean":
+                        value = InputUtils.formatBoolean(column, values[i]);
+                        break;
                     default:
                         // the structure for asset type columns is an object with a 'url' property
                         if (column.isAsset) {
@@ -951,7 +972,11 @@
                                 break;
                             case "json":
                             case "jsonb":
-                                rowVal=JSON.parse(rowVal);
+                                rowVal = JSON.parse(rowVal);
+                                break;
+                            case "boolean":
+                                // call columnToColumnModel to set booleanArray and booleanMap for proper un-formatting
+                                rowVal = InputUtils.unformatBoolean(columnToColumnModel(column), rowVal);
                                 break;
                             default:
                                 break;
