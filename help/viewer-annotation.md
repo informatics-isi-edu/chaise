@@ -1,10 +1,10 @@
-## How to annotate an image {id=how-to-annotate-an-image}
+# How to annotate an image {id=how-to-annotate-an-image}
 
 * [Add a new Annotation](#add-a-new-annotation)
 * [Edit/Delete an existing Annotation](#editdelete-an-existing-annotation)
 * [Draw a Shape](#draw-a-shape)
 
-### Add a new annotation {id=add-a-new-annotation}
+## Add a new annotation {id=add-a-new-annotation}
 
 1. Make sure that you are logged in.
 
@@ -36,7 +36,7 @@
 
 	![](resources/annotation-documentation-images/SaveButton.png){.chaise-help-image}
 
-### Edit/Delete an existing annotation
+## Edit/Delete an existing annotation {id=edit-delete-an-existing-annotation}
 
 1. Make sure that you are logged in.
 
@@ -62,9 +62,9 @@ SCREENSHOT
 
 	![](resources/annotation-documentation-images/DeleteButton.png){.chaise-help-image}
 
-### Draw a shape
+## Draw a shape {id=draw-a-shape}
 
-#### Path
+### Path {id=path}
 
 1. Select the path tool (pencil icon) from the annotation tool bar.
 	![](resources/annotation-documentation-images/Path.png){.chaise-help-image}
@@ -75,7 +75,7 @@ SCREENSHOT
 
 4. To add subsequent paths, repeat steps 2 & 3.
 
-#### Rectangle
+### Rectangle {id=rectangle}
 
 1. Select the rectangle tool (square icon) from the annotation tool bar.
 
@@ -87,7 +87,7 @@ SCREENSHOT
 
 4. To add subsequent rectangles, repeat steps 2 & 3.
 
-#### Circle
+### Circle {id=circle}
 
 1. Select the circle tool (circle icon) from the annotation tool bar.
 
