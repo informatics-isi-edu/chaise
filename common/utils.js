@@ -1524,6 +1524,7 @@
          * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
          * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
          * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
+         * @param   {Node=} fixedContent - if there's a fixed element that we want to set the top
          * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
          * If you don't pass any parentContainer, it will use the body
          * It will assume the following structure in the given parentContainer:
@@ -1532,7 +1533,7 @@
          *    - .bottom-panel-container
          * Three ResizeSensors will be created for app-content, top-panel and bottom-panel to watch their size change.
          */
-        function attachContainerHeightSensors(parentContainer, parentContainerSticky, useDocHeight) {
+        function attachContainerHeightSensors(parentContainer, parentContainerSticky, useDocHeight, fixedContent) {
             try {
                 var parentUsableHeight,
                     appContent, // the container that we might set height for if container height is too small
@@ -1579,6 +1580,11 @@
 
                         // set the container's height
                         container.style.height = containerHeight + 'vh';
+
+                        if (fixedContent) {
+                            fixedContent.style.position = "fixed";
+                            fixedContent.style.top = (100 - containerHeight) + "vh";
+                        }
 
                         // now check based on actual pixel size
                         if (container.offsetHeight < 300) {

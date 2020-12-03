@@ -195,7 +195,7 @@ HTML=login/index.html \
 	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
 	 $(DIST)/chaise-dependencies.html \
-	 wiki/index.html
+	 help/index.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
@@ -204,7 +204,8 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(RECORDSET_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
 	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
-	$(DIST)/$(LOGIN_JS_SOURCE_MIN)
+	$(DIST)/$(LOGIN_JS_SOURCE_MIN) \
+	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
  DIST=dist
 
@@ -514,21 +515,27 @@ lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-inc
 	$(info - creating lib/switchUserAccounts.html)
 	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
 
-# -------------------------- wiki app -------------------------- #
-WIKI_JS_SOURCE=wiki/wiki.app.js
+# -------------------------- help app -------------------------- #
+HELP_JS_SOURCE=help/help.app.js
 
-WIKI_VENDOR_ASSET=$(JS)/vendor/angular-route.min.js
+HELP_JS_SOURCE_MIN=help.min.js
+$(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
+	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
 
-.make-wiki-includes: $(BUILD_VERSION)
-	@> .make-wiki-includes
-	$(info - creating .make-wiki-includes)
-	@$(call add_css_link,.make-wiki-includes,)
-	@$(call add_js_script,.make-wiki-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(WIKI)/$(WIKI_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(WIKI_JS_SOURCE))
-	@$(call add_ermrestjs_script,.make-wiki-includes)
+HELP_CSS_SOURCE=$(COMMON)/vendor/tocbot/tocbot.css
 
-wiki/index.html: wiki/index.html.in .make-wiki-includes
-	$(info - creating wiki/index.html)
-	@$(call build_html,.make-wiki-includes,wiki/index.html)
+HELP_VENDOR_ASSET=$(COMMON)/vendor/tocbot/tocbot.min.js
+
+.make-help-includes: $(BUILD_VERSION)
+	@> .make-help-includes
+	$(info - creating .make-help-includes)
+	@$(call add_css_link,.make-help-includes,$(HELP_CSS_SOURCE))
+	@$(call add_js_script,.make-help-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(HELP)/$(HELP_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(HELP_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-help-includes)
+
+help/index.html: help/index.html.in .make-help-includes
+	$(info - creating help/index.html)
+	@$(call build_html,.make-help-includes,help/index.html)
 
 
 # -------------------------- utility functions -------------------------- #
