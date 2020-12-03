@@ -110,7 +110,7 @@
         <!-- So that the boolean input can be validated -->
         <input type="hidden" ng-model="vm.model" ng-required="vm.isRequired" />
         <ul class="adjust-boolean-dropdown" uib-dropdown-menu role="menu" ng-style="inputWidth">
-            <li ng-repeat="option in ::vm.booleanValues" ng-click="vm.model = option">
+            <li ng-repeat="option in ::vm.columnModel.booleanArray" ng-click="vm.model = option">
                 <a ng-bind-html="option" style="min-height: 20px;"></a>
             </li>
         </ul>

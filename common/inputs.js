@@ -4,8 +4,6 @@
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
     .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
-        var booleanValues = [true, false];
-
         /* Functions for all input types */
         // determines if input should be disabled based on ermrestJS API
         function isDisabled(column) {
@@ -22,6 +20,18 @@
             } else if (column.isAsset) {
                 return "No file Selected";
             }
+        }
+
+        /* boolean specific function */
+        var defaultBooleanValues = [true, false];
+
+        // checks for preformat config before returning true/false
+        function formatBoolean(column, value) {
+            return column.formatvalue(value);
+        }
+
+        function unformatBoolean(columnModel, value) {
+            return columnModel.booleanMap[value];
         }
 
         /* numeric specific functions */
@@ -114,9 +124,11 @@
         return {
             applyCurrentDatetime: applyCurrentDatetime,
             blurElement: blurElement,
-            booleanValues: booleanValues,
+            defaultBooleanValues: defaultBooleanValues,
             clearDatetime: clearDatetime,
             fileExtensionTypes: fileExtensionTypes,
+            formatBoolean: formatBoolean,
+            unformatBoolean: unformatBoolean,
             formatDatetime: formatDatetime,
             formatFloat: formatFloat,
             formatInt: formatInt,
@@ -424,7 +436,7 @@
 
                 vm.customErrorMessage = null;
                 vm.blurElement = InputUtils.blurElement;
-                vm.booleanValues = InputUtils.booleanValues;
+                vm.defaultBooleanValues = InputUtils.defaultBooleanValues;
                 vm.dataFormats = dataFormats;
                 vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
                 vm.maskOptions = maskOptions;

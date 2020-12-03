@@ -114,6 +114,7 @@
         "unauthorizedMessage" : "You are not authorized to perform this action.",
         "reportErrorToAdmin" : " Please report this problem to your system administrators.",
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
+        "noRecordForRid" : "No matching record found for the given RID.",
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
         "loginStatusChanged": "Unexpected Change of Login Status",

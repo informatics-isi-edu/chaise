@@ -119,7 +119,7 @@ describe('View existing record,', function() {
             });
         });
 
-        it("Clicking the subtitle should redirect to recordset app", function() {
+        it("Clicking the subtitle should redirect to recordset app", function(done) {
             var subtitleLink = chaisePage.recordPage.getEntitySubTitleLink();
 
             browser.wait(EC.elementToBeClickable(subtitleLink), browser.params.defaultTimeout);
@@ -128,7 +128,47 @@ describe('View existing record,', function() {
                 return browser.driver.getCurrentUrl();
             }).then(function(url) {
                 expect(url.indexOf('recordset')).toBeGreaterThan(-1);
+
+                chaisePage.recordsetPageReady();
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
             });
         });
+
+        if (!process.env.TRAVIS) {
+            // resolver is only configured to work locally
+            it("Searching in go to RID input should navigate the user to the resolved record page matching that RID", function (done) {
+                var rid = chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;
+
+                element(by.id('rid-search-input')).sendKeys(rid);
+                element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
+                    browser.wait(function() {
+                        return browser.getAllWindowHandles().then(function(tabs) {
+                            return (tabs.length == 2);
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    return browser.getAllWindowHandles();
+                }).then(function (tabs) {
+                    allWindows = tabs;
+
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+
+                    return browser.driver.getCurrentUrl();
+                }).then(function (url) {
+                    var newTabUrl = "chaise/record/#" + browser.params.catalogId + "/links:" + testParams.table_name + "/RID=" + rid;
+
+                    expect(url.indexOf(newTabUrl)).toBeGreaterThan(-1, "new tab url is not the right page");
+
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+        }
     });
 });

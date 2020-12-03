@@ -2,13 +2,15 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var testParams = {
     table_name: "accommodation",
-    column_names: ["first_name", "last_name", "index", "0YGNuO_bvxoczJ6ms2k0tQ"],
+    column_names: ["luxurious", "first_name", "last_name", "index", "0YGNuO_bvxoczJ6ms2k0tQ"],
     column_values: {
+        luxurious: "Luxurious",
         first_name: "John",
         last_name: "Doe",
         index: "0",
         "0YGNuO_bvxoczJ6ms2k0tQ": "John Doe" // person foreignkey column
-    }
+    },
+    booleanOptions: ["Luxurious", "Not Luxurious"]
 };
 
 describe('Edit a record,', function() {
@@ -22,7 +24,7 @@ describe('Edit a record,', function() {
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-person:" + testParams.table_name);
         });
 
-        describe("Presentation and validation for an entity with a composite key,", function() {
+        describe("Presentation and validation for an entity with a composite key and formatted boolean,", function() {
 
             var rows;
 
@@ -65,6 +67,30 @@ describe('Edit a record,', function() {
                     done();
                 }).catch(function (err) {
                     console.log(err);
+                    done.fail();
+                });
+            });
+
+            it("should show 'Luxurious' and 'Not Luxurious' as the options in the boolean dropdown menu", function (done) {
+                var trueOption = testParams.booleanOptions[0],
+                    dropdown;
+
+                chaisePage.recordEditPage.getDropdowns().then(function(el) {
+                    dropdown = el[0];
+
+                    return chaisePage.recordEditPage.getRelativeDropdownOptionsATag(dropdown);
+                }).then(function (options) {
+                    options.forEach(function (opt, idx) {
+                        expect(opt.getAttribute("innerHTML")).toBe(testParams.booleanOptions[idx], "Boolean option text with idx: " + idx + " is incorrect");
+                    });
+
+                    return chaisePage.recordEditPage.selectDropdownValue(dropdown, trueOption);
+                }).then(function(option) {
+                    expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe(trueOption, "The truthy option was not selected");
+
+                    done();
+                }).catch(function (error) {
+                    console.dir(error);
                     done.fail();
                 });
             });

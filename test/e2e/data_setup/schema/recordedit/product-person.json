@@ -357,6 +357,15 @@
             "tag:misd.isi.edu,2015:display": {
               "name": "Is Luxurious"
             },
+            "tag:isrd.isi.edu,2016:column-display": {
+                "*": {
+                    "pre_format": {
+                        "format": "%t",
+                        "bool_true_value": "Luxurious",
+                        "bool_false_value": "Not Luxurious"
+                    }
+                }
+            },
             "tag:isrd.isi.edu,2016:ignore" : ["record"]
           }
         },

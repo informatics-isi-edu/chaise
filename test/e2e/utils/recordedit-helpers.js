@@ -762,7 +762,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should render options for a boolean field", function() {
                         dropdowns.forEach(function(dropdown) {
-                            chaisePage.recordEditPage.getRelataiveDropdownOptions(dropdown.dropdownInput).then(function(items) {
+                            chaisePage.recordEditPage.getRelativeDropdownOptions(dropdown.dropdownInput).then(function(items) {
                                 expect(items.length).toBe(2, colError(dropdown.column.name, "Number of available options is not as expected."));
                             });
                         });
