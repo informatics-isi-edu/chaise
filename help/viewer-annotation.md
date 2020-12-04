@@ -115,7 +115,11 @@ to draw. As you drag the mouse, you will see the the line change its end point.
 ### Polygon
 1. Select the polygon tool (polygon icon) from the annotation tool bar.
 	![](resources/annotation-documentation-images/Polygon.png){.chaise-help-image}
+
 2. Press and hold the left mouse button to draw the first polygon edge on the image. Drag the mouse pointer to draw.
+
 3. A new vertex can only be added between the first and last vertices that are already present. To add a new vertex, press and hold the mouse button. Move to pointer around to adjust the position of this vertex. You also see an edge between the first vertex & new vertex, and last vertex & new vertex as you move the pointer around.
+
 4. Let go of the mouse button when you are done placing the edge on the image.
+
 5. To add subsequent polygons, de-select the polygon icon from the annotation toolbar and select it again.
