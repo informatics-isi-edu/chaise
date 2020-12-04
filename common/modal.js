@@ -76,7 +76,7 @@
 
             params.displayname = refTable.name+'_'+tuple.uniqueId,
             params.reference = reference;
-            if (reference.citation) params.title = "and Cite";
+            params.title = (extraParams.title ? extraParams.title : "Share");
 
             var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
             params.permalink = UriUtils.resolvePermalink(tuple, reference);

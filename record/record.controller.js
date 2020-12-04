@@ -105,7 +105,9 @@
         // this function assumes tuple and reference are attached to the $rootScope
         vm.sharePopup = function() {
             vm.waitingForSharePopup = true;
-            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference).then(function () {
+            var params = {};
+            if ($rootScope.reference.citation) params.title = "Share and Cite";
+            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference, params).then(function () {
                 vm.waitingForSharePopup = false;
             }).catch(function (err) {
                 // the promise won't be rejected
