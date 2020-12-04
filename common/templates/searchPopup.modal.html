@@ -29,8 +29,7 @@
                             <chaise-title displayname="ctrl.tableModel.displayname"></chaise-title>
                             <span ng-if="ctrl.tableModel.parentReference">
                                 <span> for </span>
-                                <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
-                                <span ng-if="ctrl.tableModel.parentTuple">:
+                                <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title><span ng-if="ctrl.tableModel.parentTuple">:
                                     <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
                                 </span>
                             </span>
@@ -39,8 +38,7 @@
                             <span>Add </span>
                             <chaise-title reference="ctrl.tableModel.reference"></chaise-title>
                             <span> to </span>
-                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
-                            <span>:</span>
+                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title><span>:</span>
                             <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
                         </div>
                         <div ng-switch-when="popup/facet">

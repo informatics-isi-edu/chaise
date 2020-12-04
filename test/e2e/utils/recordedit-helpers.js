@@ -46,16 +46,17 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     var visibleFields = [];
 
     if (isEditMode) {
+        var pageTitle = "Edit " + tableParams.table_displayname + ": " + tableParams.record_displayname;
         it("should have edit record title", function() {
             var title = chaisePage.recordEditPage.getEntityTitleElement();
-            expect(title.getText()).toEqual("Edit " + tableParams.table_displayname + " : " + tableParams.record_displayname, "Edit mode title is incorrect.");
+            expect(title.getText()).toEqual(pageTitle, "Edit mode title is incorrect.");
         });
 
         it ("should have the correct head title using the heuristics for recordedit app in entry/edit mode", function (done) {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 // Edit <table-name>: <row-name> | chaiseConfig.headTitle
                 // not using same value as above becuase of whitespace before the `:`
-                expect(browser.getTitle()).toBe("Edit " + tableParams.table_displayname + ": " + tableParams.record_displayname + " | " + chaiseConfig.headTitle);
+                expect(browser.getTitle()).toBe(pageTitle + " | " + chaiseConfig.headTitle);
 
                 done();
             }).catch(function (err) {
@@ -881,7 +882,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(text) {
                                         var expectedTitle = "Select " + col.title + " for ";
                                         if (isEditMode) {
-                                            expectedTitle += tableParams.table_displayname + " : " + tableParams.record_displayname;
+                                            expectedTitle += tableParams.table_displayname + ": " + tableParams.record_displayname;
                                         } else {
                                             expectedTitle += "new " + tableParams.table_displayname;
                                         }
