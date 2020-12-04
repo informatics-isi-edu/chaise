@@ -4,7 +4,7 @@
 * [Edit/Delete an existing Annotation](#editdelete-an-existing-annotation)
 * [Draw a Shape](#draw-a-shape)
 
-## Add a new annotation
+## Add a new annotation {id=add-a-new-annotation}
 
 1. Make sure that you are logged in.
 
@@ -36,25 +36,25 @@
 
 	![](resources/annotation-documentation-images/SaveButton.png){.chaise-help-image}
 
-## Edit/Delete an existing annotation
+## Edit/Delete an existing annotation {id=editdelete-an-existing-annotation}
 
 1. Make sure that you are logged in.
 
 2. Click on the `Edit Annotation` icon of the annotation that you want to edit.
-
-SCREENSHOT
+	![](resources/annotation-documentation-images/EditButton.png){.chaise-help-image}
 
 3. To change the color of the annotation, pick a different color from the color picker (red square). This will change the color of all the shapes of the annotation that share the original color.
 
-![](resources/annotation-documentation-images/ColorPicker.png){.chaise-help-image}
+	![](resources/annotation-documentation-images/ColorPicker.png){.chaise-help-image}
+	![](resources/annotation-documentation-images/ColorPicker2.png){.chaise-help-image}
 
 4. To delete a shape from this annotation, select the `Erase` tool from the annotation toolbar and click on the shape that you want to delete.
 
-SCREENSHOT
+	![](resources/annotation-documentation-images/DeleteButton.png){.chaise-help-image}
 
 5. To add a new shape, select the shape that you want from the annotation toolbar and start drawing it on the image.
 
-SCREENSHOT
+	![](resources/annotation-documentation-images/ShapeIcons.png){.chaise-help-image}
 
 6. After you are done making your changes, click on the `Save` button in the `Edit annotation` panel.
 
@@ -62,7 +62,7 @@ SCREENSHOT
 
 	![](resources/annotation-documentation-images/DeleteButton.png){.chaise-help-image}
 
-## Draw a shape
+## Draw a shape {id=draw-a-shape}
 
 ### Path
 
@@ -98,3 +98,24 @@ SCREENSHOT
 3. Let go of the mouse button when you are done drawing.
 
 4. To add subsequent circles, repeat steps 2 & 3.
+
+### Line
+1. Select the line tool (line icon) from the annotation tool bar.
+	![](resources/annotation-documentation-images/Line.png){.chaise-help-image}
+
+2. Press and hold the left mouse button to draw the line on the image. Drag the mouse pointer
+
+to draw. As you drag the mouse, you will see the the line change its end point.
+
+3. Let go of the mouse button when you are done drawing.
+
+4. To add subsequent lines, repeat steps 2 & 3.
+
+
+### Polygon
+1. Select the polygon tool (polygon icon) from the annotation tool bar.
+	![](resources/annotation-documentation-images/Polygon.png){.chaise-help-image}
+2. Press and hold the left mouse button to draw the first polygon edge on the image. Drag the mouse pointer to draw.
+3. A new vertex can only be added between the first and last vertices that are already present. To add a new vertex, press and hold the mouse button. Move to pointer around to adjust the position of this vertex. You also see an edge between the first vertex & new vertex, and last vertex & new vertex as you move the pointer around.
+4. Let go of the mouse button when you are done placing the edge on the image.
+5. To add subsequent polygons, de-select the polygon icon from the annotation toolbar and select it again.
