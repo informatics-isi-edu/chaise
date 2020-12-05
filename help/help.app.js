@@ -88,7 +88,7 @@
             $timeout(function () {
 
                 // make sure the height is properly set
-                UiUtils.attachContainerHeightSensors(null, null, true);
+                UiUtils.attachContainerHeightSensors();
 
                 // make sure footer position is correct
                 UiUtils.attachFooterResizeSensor(0);
