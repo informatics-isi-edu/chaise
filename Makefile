@@ -194,7 +194,8 @@ HTML=login/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
-	 $(DIST)/chaise-dependencies.html
+	 $(DIST)/chaise-dependencies.html \
+	 help/index.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
@@ -203,7 +204,8 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(RECORDSET_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
 	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
-	$(DIST)/$(LOGIN_JS_SOURCE_MIN)
+	$(DIST)/$(LOGIN_JS_SOURCE_MIN) \
+	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
  DIST=dist
 
@@ -514,6 +516,28 @@ SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
 	$(info - creating lib/switchUserAccounts.html)
 	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
+
+# -------------------------- help app -------------------------- #
+HELP_JS_SOURCE=help/help.app.js
+
+HELP_JS_SOURCE_MIN=help.min.js
+$(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
+	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
+
+HELP_CSS_SOURCE=
+
+HELP_VENDOR_ASSET=
+
+.make-help-includes: $(BUILD_VERSION)
+	@> .make-help-includes
+	$(info - creating .make-help-includes)
+	@$(call add_css_link,.make-help-includes,$(HELP_CSS_SOURCE))
+	@$(call add_js_script,.make-help-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(HELP)/$(HELP_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(HELP_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-help-includes)
+
+help/index.html: help/index.html.in .make-help-includes
+	$(info - creating help/index.html)
+	@$(call build_html,.make-help-includes,help/index.html)
 
 
 # -------------------------- utility functions -------------------------- #
