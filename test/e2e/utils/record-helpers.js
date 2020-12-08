@@ -483,7 +483,7 @@ exports.testSharePopup = function (citationParams) {
             chaisePage.waitForElement(modalTitle);
             chaisePage.recordPage.waitForCitation();
             // make sure the loader is not displayed
-            expect(modalTitle.getText()).toBe("Share", "Share citation modal title is incorrect");
+            expect(modalTitle.getText()).toBe(citationParams.title, "Share citation modal title is incorrect");
 
             // share link
             var num = 1;

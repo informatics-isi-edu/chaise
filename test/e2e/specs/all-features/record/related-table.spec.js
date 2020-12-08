@@ -80,7 +80,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
             permalink: RIDLink,
             verifyVersionedLink: false,
             citation: "Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (" + moment().format("YYYY") + ").",
-            bibtextFile: false // we don't need to test this here as well (it has been tested in record presentation)
+            bibtextFile: false, // we don't need to test this here as well (it has been tested in record presentation)
+            title: "Share and Cite"
         });
     })
 
