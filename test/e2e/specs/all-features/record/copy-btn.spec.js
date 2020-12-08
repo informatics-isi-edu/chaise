@@ -90,7 +90,8 @@ describe('View existing record,', function() {
             permalink: testParams.html_table_name_record_url,
             verifyVersionedLink: false,
             citation: null,
-            bibtextFile: null
+            bibtextFile: null,
+            title: "Share"
         });
 
         it("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {

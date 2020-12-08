@@ -49,37 +49,6 @@ describe('View existing record,', function() {
             done();
         });
 
-        // test RID search and resolverImplicitCatalog
-        // NOTE: resolverImplicitCatalog=4 so locally catalog 4 does not exist and resolver should fail since no RID exists in catalog 4
-        // in travis, resolver isn't configured
-        it('should show an error dialog if an improper RID is typed into the RID search box', function (done) {
-            var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID,
-                pageUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/RID=" + rid;
-
-            element(by.id('rid-search-input')).sendKeys(rid);
-            element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
-                // wait for modal to show
-                chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-
-                expect(chaisePage.recordPage.getErrorModalTitle()).toBe("Record Not Found", "The title of no table error pop is not correct");
-
-                var modalText = "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to dismiss this dialog.";
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(modalText, "The message in modal pop is not correct");
-
-                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
-            }).then (function (){
-                // should close modal and NOT change page
-                return browser.driver.getCurrentUrl();
-            }).then(function (currentUrl) {
-                expect(currentUrl).toBe(pageUrl, "The OK button redirected instead of closing the modal");
-
-                done();
-            }).catch(function (err) {
-                console.dir(err);
-                done.fail();
-            });
-        });
-
         if (process.env.TRAVIS) {
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
                 var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
@@ -96,6 +65,37 @@ describe('View existing record,', function() {
                     done();
                 }).catch(function(err){
                     done.fail(err);
+                });
+            });
+        } else {
+            // test RID search and resolverImplicitCatalog
+            // NOTE: resolverImplicitCatalog=4 so locally catalog 4 does not exist and resolver should fail since no RID exists in catalog 4
+            // in travis, resolver isn't configured, so not testing
+            it('should show an error dialog if an improper RID is typed into the RID search box', function (done) {
+                var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID,
+                    pageUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/RID=" + rid;
+
+                element(by.id('rid-search-input')).sendKeys(rid);
+                element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
+                    // wait for modal to show
+                    chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+
+                    expect(chaisePage.recordPage.getErrorModalTitle()).toBe("Record Not Found", "The title of no table error pop is not correct");
+
+                    var modalText = "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to dismiss this dialog.";
+                    expect(chaisePage.recordPage.getModalText().getText()).toBe(modalText, "The message in modal pop is not correct");
+
+                    return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+                }).then (function (){
+                    // should close modal and NOT change page
+                    return browser.driver.getCurrentUrl();
+                }).then(function (currentUrl) {
+                    expect(currentUrl).toBe(pageUrl, "The OK button redirected instead of closing the modal");
+
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
                 });
             });
         }

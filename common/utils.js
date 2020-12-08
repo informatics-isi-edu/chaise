@@ -2925,16 +2925,20 @@
             }
         }
 
-        function addTitle() {
+        function addTitle(title) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
+
+            if (typeof title !== "string" || title.length === 0) {
+                title = chaiseConfig.headTitle;
+            }
 
             var titleTag = document.head.getElementsByTagName('title')[0];
             if (titleTag) {
-                titleTag.innerHTML = chaiseConfig.headTitle;
+                titleTag.innerHTML = title;
             } else {
-                var title = document.createElement("title");
-                title.innerHTML = chaiseConfig.headTitle;
-                document.head.appendChild(title);
+                titleTag = document.createElement("title");
+                titleTag.innerHTML = title;
+                document.head.appendChild(titleTag);
             }
         }
 

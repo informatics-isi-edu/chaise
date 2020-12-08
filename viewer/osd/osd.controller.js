@@ -4,8 +4,8 @@
     angular.module('chaise.viewer')
 
     .controller('OSDController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', '$window', '$rootScope','$scope', '$timeout',
-        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, $window, $rootScope, $scope, $timeout) {
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', 'UriUtils', '$window', '$rootScope','$scope', '$timeout',
+        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, UriUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
@@ -47,10 +47,14 @@
                 switch (messageType) {
                     case "osdLoaded":
                         $scope.$apply(function(){
+                            // initialize viewer
                             if (DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters)) {
                                 iframe.postMessage({messageType: 'initializeViewer', content: $rootScope.osdViewerParameters}, origin);
                             }
                         });
+                        break;
+                    case "openDrawingHelpPage":
+                        $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
                         break;
                     case "hideChannelList":
                         $scope.$apply(function(){

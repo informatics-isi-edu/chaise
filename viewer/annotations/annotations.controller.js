@@ -923,7 +923,7 @@
             var moreInfo = {
                 logStack: AnnotationsService.getAnnotationLogStack(item),
                 logStackPath: AnnotationsService.getAnnotationLogStackPath(item),
-                title: "Annotation",
+                title: "Share Annotation",
                 hideHeader: true,
                 hideCitation: true,
                 extraInformation: [
