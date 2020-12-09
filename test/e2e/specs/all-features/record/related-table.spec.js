@@ -203,7 +203,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         add: {
             relatedDisplayname: "association_table",
             tableDisplayname: "related_table",
-            modalTitle: "Add related_table to Accommodations : Super 8 North Hollywood Motel",
+            modalTitle: "Add related_table to Accommodations: Super 8 North Hollywood Motel",
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
@@ -246,7 +246,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Add file to Accommodations : Super 8 North Hollywood Motel", "titlte missmatch.");
+                expect(title).toBe("Add file to Accommodations: Super 8 North Hollywood Motel", "titlte missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {

@@ -23,6 +23,18 @@ describe('Navbar ', function() {
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
+    it('should include the headTitle from chaiseConfig in the tab title (head > title)', function(done) {
+        browser.getTitle().then(function (title) {
+            // only testing headTitle is included. Tests for full head title are distributed between each presentation spec
+            expect(title.indexOf(chaiseConfig.headTitle)).toBeGreaterThan(-1, "the headTitle from the chaise config is not included in the head title element");
+
+            done();
+        }).catch(function (err) {
+            done.fail();
+            console.log(err);
+        });
+    });
+
     it('should not display a brand image/logo', function() {
         expect(element(by.id('brand-image')).isPresent()).toBeFalsy();
     });

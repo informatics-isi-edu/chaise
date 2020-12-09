@@ -231,6 +231,18 @@ describe('View existing record,', function() {
                 });
             });
 
+            it ("should have the correct head title using the heuristics for recordedit app", function (done) {
+                browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                    // Create new <table-name> | chaiseConfig.headTitle
+                    expect(browser.getTitle()).toBe("Create new " + testParams.table_inner_html_display + " | " + chaiseConfig.headTitle);
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
             it("should have 'Automatically Generated' in an input that is generated rather than copying the value from the copied record.", function() {
                 chaisePage.recordEditPage.getInputById(0, "generated").getAttribute("placeholder").then(function (text) {
                     expect(text).toBe("Automatically generated");

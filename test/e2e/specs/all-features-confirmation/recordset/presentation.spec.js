@@ -335,6 +335,18 @@ describe('View recordset,', function() {
                 expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
             });
 
+            it ("should have the correct head title using the heuristics for recordset app", function (done) {
+                browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                    // <table-name> | chaiseConfig.headTitle
+                    expect(browser.getTitle()).toBe(accommodationParams.title + " | " + chaiseConfig.headTitle);
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
             it('should display the permalink button & a tooltip on hovering over it', function () {
                 var permalink = chaisePage.recordsetPage.getPermalinkButton();
                 expect(permalink.isDisplayed()).toBe(true, "The permalink button is not visible on the recordset app");

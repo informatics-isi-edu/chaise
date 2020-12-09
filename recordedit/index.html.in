@@ -32,8 +32,7 @@
                                     </div>
                                     <h1 id="page-title">
                                         <span>{{ form.editMode ? "Edit " : "Create new " }}</span>
-                                        <chaise-title add-link="true" reference="reference"></chaise-title>
-                                        <span ng-if="displayname">:
+                                        <chaise-title add-link="true" reference="reference"></chaise-title><span ng-if="displayname">:
                                             <chaise-title displayname="displayname"></chaise-title>
                                         </span>
                                     </h1>

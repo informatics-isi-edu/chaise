@@ -2942,6 +2942,14 @@
             }
         }
 
+        // <title> should already be created in <head> and set to default chaiseConfig.headTitle from config app before app loads
+        function updateHeadTitle(contextTitle) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+
+            var titleTag = document.head.getElementsByTagName('title')[0];
+            titleTag.innerHTML = (contextTitle ? contextTitle + ' | ' : "") + chaiseConfig.headTitle;
+        }
+
         // sets the WID if it doesn't already exist
         function setWindowName() {
             if (!$window.name) {
@@ -3100,7 +3108,8 @@
             addCustomCSS: addCustomCSS,
             addTitle: addTitle,
             setWindowName: setWindowName,
-            setupHead: setupHead
+            setupHead: setupHead,
+            updateHeadTitle: updateHeadTitle
         };
     }]);
 })();
