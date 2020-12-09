@@ -264,6 +264,8 @@
                                     // Edit <table>: <rowname>
                                     headTitle += ": " + $rootScope.displayname.value;
                                 }
+                            } else {
+                                headTitle = "Create new " + $rootScope.reference.displayname.value
                             }
                             // send string to prepend to "headTitle"
                             // For editing ==1 record - "Edit <table>: <rowname>"
