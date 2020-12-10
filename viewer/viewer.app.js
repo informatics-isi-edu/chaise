@@ -251,6 +251,10 @@
                 if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
                     context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
                 }
+                // if missing, use 0 instead
+                if (context.defaultZIndex == null) {
+                    context.defaultZIndex = 0;
+                }
 
                 // properly merge the query parameter and ImageURI
                 var res = viewerAppUtils.populateOSDViewerQueryParams(pageQueryParams, imageURI);

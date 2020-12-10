@@ -232,7 +232,7 @@
             url += encode(pImageConstant.REFERENCE_IMAGE_COLUMN_NAME);
             url += "=" + encode(context.imageID);
 
-            if (context.defaultZIndex) {
+            if (context.defaultZIndex != null) {
                 url += "&" + encode(pImageConstant.Z_INDEX_COLUMN_NAME);
                 url += "=" + encode(context.defaultZIndex);
             }
