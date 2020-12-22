@@ -174,8 +174,8 @@
         FunctionUtils.registerErmrestCallbacks();
 
         var session,
-            osdViewerQueryParams = {}, // what will be passed onto osd viewer
-            hasAnnotationQueryParam = false; // if there are svgs in query param, we should just use it and shouldn't get it from db.
+            hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
+            noImageData = false; // if the main image request didnt return any rows
 
         // if there are any svg files in the query params, ignore the annotation table.
         // (added here because we want to hide the sidebar as soon as we can)
@@ -230,78 +230,67 @@
             // read the main (image) reference
             .then(function (imagePage) {
 
-                // TODO throw error
-                // what if the record doesn't exist (or there are multiple)
-                if (imagePage.length != 1) {
-                    console.log("Image request didn't return a row.");
-                    return false;
+                var tableDisplayName = imagePage.reference.displayname.value;
+
+                if (imagePage.length > 1) {
+                    recordSetLink = imagePage.reference.contextualize.compact.appLink;
+                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
                 }
 
-                imageTuple = imagePage.tuples[0];
-                image.entity = imageTuple.data;
-                context.imageID = image.entity.RID;
-                imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
+                if (imagePage.length == 1) {
+                    imageTuple = imagePage.tuples[0];
+                    image.entity = imageTuple.data;
+                    context.imageID = image.entity.RID;
+                    imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
 
-                if (!imageURI) {
-                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty in Image table.");
+                    if (!imageURI) {
+                        console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty in Image table.");
+                    }
+
+                    // TODO this feels hacky
+                    // get the default zindex value
+                    if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
+                        context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
+                    }
+                } else {
+                    noImageData = true;
                 }
 
-                // TODO this feels hacky
-                // get the default zindex value
-                if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
-                    context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
-                }
                 // if missing, use 0 instead
                 if (context.defaultZIndex == null) {
                     context.defaultZIndex = 0;
                 }
 
                 // properly merge the query parameter and ImageURI
-                var res = viewerAppUtils.populateOSDViewerQueryParams(pageQueryParams, imageURI);
+                var res = viewerAppUtils.initializeOSDParams(pageQueryParams, imageURI);
 
-                osdViewerQueryParams = res.osdViewerQueryParams;
+                $rootScope.osdViewerParameters = res.osdViewerParams;
 
                 // add meterScaleInPixels query param if missing
                 var val = parseFloat(imageTuple.data[imageConstant.PIXEL_PER_METER_COLUMN_NAME]);
                 var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
-                if (!(qParamName in osdViewerQueryParams) && !isNaN(val)) {
-                    osdViewerQueryParams[qParamName] = val;
+                if (!(qParamName in $rootScope.osdViewerParameters) && !isNaN(val)) {
+                    $rootScope.osdViewerParameters[qParamName] = val;
                 }
 
                 // add waterMark query param if missing
                 val = imageTuple.linkedData[imageConstant.CONSORTIUM_VISIBLE_COLUMN_NAME];
                 qParamName = osdConstant.WATERMARK_QPARAM;
-                if (!(qParamName in osdViewerQueryParams) && DataUtils.isObjectAndNotNull(val) && DataUtils.isNoneEmptyString(val[imageConstant.CONSORTIUM_URL_COLUMN_NAME])) {
-                    osdViewerQueryParams[qParamName] = val[imageConstant.CONSORTIUM_URL_COLUMN_NAME];
+                if (!(qParamName in $rootScope.osdViewerParameters) && DataUtils.isObjectAndNotNull(val) && DataUtils.isNoneEmptyString(val[imageConstant.CONSORTIUM_URL_COLUMN_NAME])) {
+                    $rootScope.osdViewerParameters[qParamName] = val[imageConstant.CONSORTIUM_URL_COLUMN_NAME];
                 }
 
                 // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.
-                if (!res.readChannelInfo) {
+                if (noImageData || !res.loadImageMetadata) {
                     return [];
                 }
 
-                return viewerAppUtils.getChannelInfo();
-            }).then(function (imageChannelInfo) {
-                // use the channel info from database if available
-                if (imageChannelInfo && imageChannelInfo.length > 0) {
-                    // remove any existing channel related query parameter
-                    osdConstant.CHANNEL_QPARAMS.forEach(function (qp) {
-                        delete osdViewerQueryParams[qp];
-                    });
-
-                    // add the channel related query parameters from database
-                    imageChannelInfo.forEach(function (info) {
-                        for (var k in info) {
-                            if (!(k in osdViewerQueryParams)) {
-                                osdViewerQueryParams[k] = [];
-                            }
-                            osdViewerQueryParams[k].push(info[k]);
-                        }
-                    });
-                }
-
-                // if there's svg query param, don't fetch the annotations from DB.
-                if (hasAnnotationQueryParam) {
+                return viewerAppUtils.loadImageMetadata();
+            }).then(function () {
+                // dont fetch annotation from db if:
+                // - we have annotation query params
+                // - or main image request didn't return any rows
+                if (hasAnnotationQueryParam || noImageData) {
                     return false;
                 }
 
@@ -320,18 +309,13 @@
                     $rootScope.loadingAnnotations = true;
                 }
 
-                // osd controller uses this attribute to parameterize OSD viewer
-                // TODO should eventually be a proper object and not just query parameters
-                $rootScope.osdViewerParameters = osdViewerQueryParams;
-                if (!DataUtils.isObjectAndNotNull(osdViewerQueryParams) || !(osdConstant.IMAGE_URL_QPARAM in osdViewerQueryParams)) {
+                if (!DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters) || $rootScope.osdViewerParameters.mainImage.info.length === 0) {
                     console.log("there wasn't any parameters that we could send to OSD viewer");
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");
                 }
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
-                console.log('osd viewer location: ', osdViewerURI + "?" + UriUtils.queryParamsToString(osdViewerQueryParams, true));
-
                 iframe.location.replace(osdViewerURI);
 
                 // NOTE if we move displayReady and displayIframe to be after the osdLoaded,

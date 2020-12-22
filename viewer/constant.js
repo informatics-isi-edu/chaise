@@ -11,13 +11,14 @@
     .constant('viewerConstant', {
         osdViewer: {
             IMAGE_URL_QPARAM: "url",
+            CHANNEL_NUMBER_QPARAM: "channelNumber",
             CHANNEL_NAME_QPARAM: "channelName",
             PSEUDO_COLOR_QPARAM: "pseudoColor",
             PIXEL_PER_METER_QPARAM: "meterScaleInPixels",
             WATERMARK_QPARAM: "waterMark",
             IS_RGB_QPARAM: "isRGB",
             CHANNEL_QPARAMS: [
-                "url", "aliasName", "channelName", "pseudoColor", "isRGB"
+                "aliasName", "channelName", "pseudoColor", "isRGB"
             ],
             OTHER_QPARAMS: [
                 "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
@@ -55,12 +56,14 @@
             Z_INDEX_COLUMN_NAME: "Z_Index",
             REFERENCE_IMAGE_COLUMN_NAME: "Reference_Image",
 
+            // the data used in this table
             IMAGE_URL_COLUMN_NAME: "File_URL",
+            CHANNEL_NUMBER_COLUMN_NAME: "Channel_Number",
+            DISPLAY_METHOD_COLUMN_NAME: "Display_Method",
 
             //{"source": [{"outbound": ["Gene_Expression", "Processed_Image_Reference_Image_Channel_Number_fkey"]}, "RID"], "entity": true}
-            CHANNEL_VISIBLE_COLUMN_NAME: "AeweZsAMVSdW7Vf91boEfw",
+            // CHANNEL_VISIBLE_COLUMN_NAME: "AeweZsAMVSdW7Vf91boEfw",
 
-            DISPLAY_METHOD_COLUMN_NAME: "Display_Method",
 
             // how to generate the url
             IIIF_VERSION: "2",
@@ -82,6 +85,7 @@
                 "descending": false
             }],
 
+            CHANNEL_NUMBER_COLUMN_NAME: "Channel_Number",
             REFERENCE_IMAGE_COLUMN_NAME: "Image",
             CHANNEL_NAME_COLUMN_NAME: "Name",
             PSEUDO_COLOR_COLUMN_NAME: "Pseudo_Color",
