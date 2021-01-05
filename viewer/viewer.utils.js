@@ -333,7 +333,9 @@
             }).then(function (channelList) {
                 defer.resolve(channelList);
             }).catch(function (err) {
-                defer.reject(err);
+                // just log the error and resolve with empty array
+                console.error("error while getting channel info: ", err);
+                defer.resolve([]);
             });
             return defer.promise;
         }
@@ -431,7 +433,11 @@
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {
-                defer.reject(err);
+                // just log the error and resolve with empty array
+                console.error("error while getting annotations: ", err);
+                $rootScope.annotationTuples = [];
+                $rootScope.canCreate = false;
+                defer.resolve(false);
             });
 
             return defer.promise;
