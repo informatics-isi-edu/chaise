@@ -194,8 +194,8 @@
                         res[URLQParamAttr] = channelURL;
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
                         res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
-                        // null should be treated the same as true
-                        res[osdConstant.IS_RGB_QPARAM] = t.data[channelConstant.IS_RGB_COLUMN_NAME] === false ? "false" : "true";
+                        var isRGB = t.data[channelConstant.IS_RGB_COLUMN_NAME];
+                        res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === "boolean") ? isRGB.toString() : "null";
                         channelList.push(res);
                     }
                 }
