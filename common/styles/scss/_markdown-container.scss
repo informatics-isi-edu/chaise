@@ -21,6 +21,15 @@
         margin: 5px 5px 5px 0;
     }
 
+    .chaise-fill-available {
+        height: 90%;
+        height: -webkit-fill-available;
+        height: -moz-available;
+        width: 100%;
+        width: -webkit-fill-available;
+        width: -moz-available;
+    }
+
     // override the browser's default border
     iframe {
         border: 2px solid #ccc;
