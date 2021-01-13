@@ -1357,6 +1357,21 @@
             return typeof data === "string" && data.length > 0;
         }
 
+        /**
+         * return the inner text of a displayname object ({value: string, isHTML:boolean})
+         * @param {Object} displayname {value: string, isHTML:boolean}
+         * @return {String}
+         */
+        function getDisplaynameInnerText(displayname) {
+            if (!displayname.isHTML) {
+                return displayname.value;
+            }
+            var dummy = document.createElement("div"), res;
+            dummy.innerHTML = displayname.value;
+            res = dummy.innerText;
+            return res;
+        }
+
         var ID_SAFE_REGEX = /[^\w-]+/g;
         /**
         *
@@ -1444,6 +1459,7 @@
             isObjectAndNotNull: isObjectAndNotNull,
             isInteger: isInteger,
             isNoneEmptyString: isNoneEmptyString,
+            getDisplaynameInnerText: getDisplaynameInnerText,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
             addSpaceAfterLogicalOperators: addSpaceAfterLogicalOperators,
