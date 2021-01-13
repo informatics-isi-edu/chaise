@@ -55,7 +55,7 @@
                         break;
                     case "fetchZPlaneList":
                         $scope.$apply(function () {
-                            viewerAppUtils.fetchZPlaneList(data.pageSize, data.before, data.after).then(function (res) {
+                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after).then(function (res) {
                                 iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
                             }).catch(function (err) {
                                 throw err;

@@ -472,7 +472,7 @@
             return defer.promise;
         }
 
-        function fetchZPlaneList(pageSize, beforeValue, afterValue) {
+        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
             console.log("fetching zplane page");
             var defer = $q.defer(),
                 pImageRef = $rootScope.processedImageReference;
@@ -559,6 +559,7 @@
                 }
 
                 defer.resolve({
+                    requestID: requestID,
                     images: res,
                     hasPrevious: page.hasPrevious,
                     hasNext: page.hasNext
