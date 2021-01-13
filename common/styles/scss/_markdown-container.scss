@@ -21,7 +21,11 @@
         margin: 5px 5px 5px 0;
     }
 
-    .chaise-fill-available {
+    figure {
+        overflow-x: auto;
+    }
+
+    .chaise-autofill {
         height: 90%;
         height: -webkit-fill-available;
         height: -moz-available;
