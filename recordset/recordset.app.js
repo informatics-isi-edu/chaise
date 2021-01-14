@@ -120,7 +120,7 @@
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                     // send string to prepend to "headTitle"
                     // <table-name>
-                    headInjector.updateHeadTitle(reference.displayname.value);
+                    headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));
                     session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 

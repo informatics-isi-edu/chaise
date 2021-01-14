@@ -16,14 +16,6 @@
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
         vm.alerts = AlertsService.alerts;
-        var showTitle = context.queryParams.showTitle;
-        if (showTitle === "true") {
-            vm.showTitle = true;
-        } else if (showTitle === "false") {
-            vm.showTitle = false;
-        } else {
-            vm.showTitle = true;
-        }
         vm.disablefilterChannels = false;
         vm.filterChannelsAreHidden = false;
         vm.filterChannels = filterChannels;

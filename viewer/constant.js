@@ -29,6 +29,12 @@
             URI_COLUMN_NAME: "uri",
             DEFAULT_Z_INDEX_COLUMN_NAME: "Default_Z", // the default value of the zindex in the form
 
+            // what should be displayed in the head title (the browser tab)
+            HEAD_TITLE_MARKDOWN_PATTERN: "",
+
+            // what should be displayed in the page title
+            PAGE_TITLE_MARKDOWN_PATTERN: "",
+
             // used for meterScaleInPixels qparam
             PIXEL_PER_METER_COLUMN_NAME: "Pixels_Per_Meter",
 

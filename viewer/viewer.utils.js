@@ -126,7 +126,7 @@
             }
 
             // both are empty
-            if (!DataUtils.isNonEmptyObject(pageQueryParams) &&  !DataUtils.isNonEmptyObject(pageQueryParams)) {
+            if (!DataUtils.isNonEmptyObject(pageQueryParams) &&  !DataUtils.isNonEmptyObject(imageURIQueryParams)) {
                 return {
                     osdViewerParams: osdViewerParams,
                     loadImageMetadata: true
@@ -146,7 +146,7 @@
 
             // populate mainImage info and channels if the array is not empty
             imageURLs.forEach(function (url, index) {
-                osdViewerParams.mainImage.info.push(url);
+                osdViewerParams.mainImage.info.push({url: url, channelNumber: index});
                 var channel = {};
 
                 // find the defined channelInfo
@@ -156,6 +156,7 @@
 
                 // if any of the channel properties were defined
                 if (DataUtils.isNonEmptyObject(channel)) {
+                    channel.channelNumber = index;
                     osdViewerParams.channels.push(channel);
                 }
             });
@@ -215,7 +216,7 @@
 
                 // the callback that will be used for populating the result values
                 var cb = function (page) {
-                    for (var i = 0; i < page.tuples.length && !hasNull; i++) {
+                    for (var i = 0; i < page.tuples.length; i++) {
                         var t = page.tuples[i];
 
 
@@ -228,8 +229,8 @@
                         res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
                         res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : null;
-                        // null should be treated the same as true
-                        res[osdConstant.IS_RGB_QPARAM] = t.data[channelConstant.IS_RGB_COLUMN_NAME] === false ? false : true;
+                        var isRGB = t.data[channelConstant.IS_RGB_COLUMN_NAME];
+                        res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === "boolean") ? isRGB : null;
                         channelList.push(res);
 
                         // if any of the urls are null, then none of the values are valid
@@ -446,7 +447,11 @@
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {
-                defer.reject(err);
+                // just log the error and resolve with empty array
+                console.error("error while getting annotations: ", err);
+                $rootScope.annotationTuples = [];
+                $rootScope.canCreate = false;
+                defer.resolve(false);
             });
 
             return defer.promise;
@@ -627,7 +632,9 @@
 
                 defer.resolve();
             }).catch(function (err) {
-                defer.reject(err);
+                // just log the error and resolve with empty array
+                console.error("error while getting channel info: ", err);
+                defer.resolve();
             });
 
             return defer.promise

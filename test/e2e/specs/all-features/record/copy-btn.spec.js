@@ -234,7 +234,8 @@ describe('View existing record,', function() {
             it ("should have the correct head title using the heuristics for recordedit app", function (done) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     // Create new <table-name> | chaiseConfig.headTitle
-                    expect(browser.getTitle()).toBe("Create new " + testParams.table_inner_html_display + " | " + chaiseConfig.headTitle);
+                    // should only use the inner text and should not have the <strong> tag
+                    expect(browser.getTitle()).toBe("Create new " + testParams.table_displayname + " | " + chaiseConfig.headTitle);
 
                     done();
                 }).catch(function (err) {

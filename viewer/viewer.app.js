@@ -123,8 +123,8 @@
 
     // Hydrate values providers and set up iframe
     .run([
-        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
 
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
@@ -174,6 +174,7 @@
         FunctionUtils.registerErmrestCallbacks();
 
         var session,
+            headTitleDisplayname, // used for generating the and head title
             hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
             noImageData = false; // if the main image request didnt return any rows
 
@@ -252,8 +253,59 @@
                     if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
                         context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
                     }
+
+                    /**
+                     * page title logic:
+                     * - if iframe, don't show it.
+                     * - otherwise, compute the markdown_pattern in constant, if it didn't work, use the tuple.rowName.
+                     *   if there wasn't any links in the computed value, add a link to the row.
+                     *
+                     * head title link:
+                     *  - if iframe, not applicable.
+                     *  - otherwise, compute the markdown_pattern in constant, if it didn't work, use the tuple.displayname.
+                     */
+                    if ($window.self == $window.parent) {
+                        // page title:
+
+                        // get it from the constant
+                        var pageTitleCaption = ERMrest.processMarkdownPattern(
+                            imageConstant.PAGE_TITLE_MARKDOWN_PATTERN,
+                            imageTuple.data,
+                            imageReference.table,
+                            "detailed",
+                            {templateEngine: "handlebars"}
+                        );
+                        // use the tuple rowName
+                        if (pageTitleCaption.value == "" || pageTitleCaption.value == null) {
+                            pageTitleCaption = imageTuple.rowName;
+                        }
+
+                        //attach link if it doesn't have any
+                        if (!pageTitleCaption.isHTML || !pageTitleCaption.value.match(/<a\b.+href=/)) {
+                            $rootScope.pageTitle = '<a href="' + imageTuple.reference.contextualize.detailed.appLink + '">' + pageTitleCaption.value + '</a>';
+                        } else {
+                            $rootScope.pageTitle = pageTitleCaption.value;
+                        }
+
+                        // head title:
+
+                        // get it from the constant
+                        headTitleDisplayname = ERMrest.processMarkdownPattern(
+                            imageConstant.HEAD_TITLE_MARKDOWN_PATTERN,
+                            imageTuple.data,
+                            imageReference.table,
+                            "detailed",
+                            {templateEngine: "handlebars"}
+                        );
+                        // use the tuple rowName
+                        if (headTitleDisplayname.value == "" || headTitleDisplayname.value == null) {
+                            headTitleDisplayname = imageTuple.displayname;
+                        }
+                    }
+
                 } else {
                     noImageData = true;
+                    $rootScope.pageTitle = "Image";
                 }
 
                 // if missing, use 0 instead
@@ -297,6 +349,13 @@
                 // read the annotation reference
                 return viewerAppUtils.readAllAnnotations();
             }).then(function () {
+
+                // view <table displayname>: tuple displayname
+                var headTitle = "View " + DataUtils.getDisplaynameInnerText($rootScope.reference.displayname);
+                if (headTitleDisplayname) {
+                    headTitle += ": " + DataUtils.getDisplaynameInnerText(headTitleDisplayname);
+                }
+                headInjector.updateHeadTitle(headTitle);
 
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
