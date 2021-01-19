@@ -119,7 +119,7 @@
             OVERLAY_HATRAC_PATH: "resources/gene_expression/annotations",
 
             // used internally and should be removed from the form
-            Z_INDEX_COLUMN_NAME: "Z_Index",
+            Z_INDEX_COLUMN_NAME: "Z_Index", // used for fetching annotations
             CHANNELS_COLUMN_NAME: "Channels",
 
             // anatomy fk in annotation table

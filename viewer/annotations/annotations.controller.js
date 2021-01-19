@@ -3,8 +3,8 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant',
-    function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant) {
+    .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant', 'viewerAppUtils',
+    function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant, viewerAppUtils) {
 
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
         var annotConstant = viewerConstant.annotation;
@@ -103,6 +103,56 @@
                         break;
                     case 'osdInitialized':
                         AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                        break;
+                    case 'updateMainImage':
+                        $scope.$apply(function () {
+                            // change defaultZIndex
+                            context.defaultZIndex = data.content.zIndex;
+
+                            // make sure it's not in edit/create mode
+                            if (vm.editingAnatomy != null) {
+                                vm.closeAnnotationForm();
+                            }
+
+                            // remove the existing annotations
+                            annotationModels = [];
+                            vm.annotationModels = annotationModels;
+                            vm.updateDisplayNum();
+
+                            // read annotations
+                            (function (currZIndex) {
+                                $rootScope.loadingAnnotations = true;
+                                viewerAppUtils.readAllAnnotations().then(function () {
+                                    // if main image changed while fetching annotations, ignore it
+                                    if (currZIndex != context.defaultZIndex) {
+                                        console.log('ignoring stale annotation data');
+                                        return;
+                                    }
+
+                                    if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate) {
+                                        $rootScope.disableAnnotationSidebar = true;
+                                    } else {
+                                        $rootScope.disableAnnotationSidebar = false;
+                                    }
+
+                                    // ask osd to load the annotation
+                                    if ($rootScope.annotationTuples.length > 0) {
+                                        AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                                    } else {
+                                        $rootScope.loadingAnnotations = false;
+                                    }
+                                }).catch(function (err) {
+                                    // if main image changed while fetching annotations, ignore it
+                                    if (currZIndex != context.defaultZIndex) return;
+
+                                    $rootScope.loadingAnnotations = false;
+                                    $rootScope.disableAnnotationSidebar = true;
+
+                                    // fail silently
+                                    console.log("erro while updating annotations ", err);
+                                });
+                            })(data.content.zIndex);
+                        });
                         break;
                     case 'annotationsLoaded':
                         $scope.$apply(function(){
@@ -621,6 +671,8 @@
          * So we start from the anotated term and add a filter based on the image value
          * that is in the annotation table.
          * TODO might be able to refactor this, it's the same as the one in recordCreate
+         * Image -> Anatomy
+         * so we do a call to schema:Anatomy/<facet that goes to Image_Annotation, image=context.imageID, z_index=context.defaultZIndex>
          */
         function getAnnotatedTermDisabledTuples (columnModel) {
             if (columnModel.column.name !== annotConstant.ANNOTATED_TERM_VISIBLE_COLUMN_NAME) {
@@ -641,16 +693,29 @@
                     stack: newStack
                 }
 
-                var facet = {};
-                 // TODO should be done in ermrestjs
-                 var existingRefURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":";
-                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME) + "/";
+                // TODO should be done in ermrestjs
+                var existingRefURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+                existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":";
+                existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME) + "/";
 
-                facet.choices = [context.imageID];
-                facet.source = [{"inbound": annotConstant.ANNOTATED_TERM_FOREIGN_KEY_CONSTRAINT}];
-                facet.source.push(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
-                existingRefURL += "*::facets::" + ERMrest.encodeFacet({and: [facet]});
+                // image value
+                var facet = {and: []};
+                facet.and[0] = {
+                    choices: [context.imageID]
+                }
+                facet.and[0].source = [{"inbound": annotConstant.ANNOTATED_TERM_FOREIGN_KEY_CONSTRAINT}];
+                facet.and[0].source.push(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
+
+                //z index value
+                if (context.defaultZIndex != null) {
+                    facet.and.push({
+                        choices: [context.defaultZIndex]
+                    })
+                    facet.and[1].source = [{"inbound": annotConstant.ANNOTATED_TERM_FOREIGN_KEY_CONSTRAINT}];
+                    facet.and[1].source.push(annotConstant.Z_INDEX_COLUMN_NAME);
+                }
+
+                existingRefURL += "*::facets::" + ERMrest.encodeFacet(facet);
 
                 ERMrest.resolve(existingRefURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
                     // TODO properly pass logObj

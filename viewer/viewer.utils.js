@@ -357,7 +357,8 @@
         /**
          * Send request to image annotation table and populates the values in the $rootScope
          */
-        function readAllAnnotations () {
+        function readAllAnnotations (initializeForm) {
+            console.log("fetching annotations for zIndex=" + context.defaultZIndex);
             var defer = $q.defer();
 
             // TODO should be done in ermrestjs
@@ -366,6 +367,10 @@
             imageAnnotationURL += encode(annotConstant.ANNOTATION_TABLE_NAME) + "/";
             imageAnnotationURL += encode(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
             imageAnnotationURL += "=" + encode(context.imageID);
+            if (context.defaultZIndex != null) {
+                imageAnnotationURL += "&" + encode(annotConstant.Z_INDEX_COLUMN_NAME);
+                imageAnnotationURL += "=" + encode(context.defaultZIndex);
+            }
 
             ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
 
@@ -399,6 +404,7 @@
                 ];
                 if ($rootScope.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
+                    annotationCreateForm.columnModels = [];
                     annotationCreateForm.reference.columns.forEach(function (column) {
                         // remove the invisible (asset, image, z-index, channels) columns
                         if (invisibleColumns.indexOf(column.name) !== -1) return;
@@ -409,6 +415,7 @@
 
                 if ($rootScope.canUpdate) {
                     annotationEditForm.reference = ref;
+                    annotationEditForm.columnModels = [];
                     annotationEditForm.reference.columns.forEach(function (column) {
                         // remove the invisible (asset, image, z-index, channels) columns
                         if (invisibleColumns.indexOf(column.name) !== -1) return;
