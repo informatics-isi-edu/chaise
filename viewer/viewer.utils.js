@@ -3,16 +3,127 @@
 
     angular.module('chaise.viewer')
 
+    .constant('viewerConstant', {
+        DEFAULT_PAGE_SIZE: 25,
+        DEFAULT_IIIF_VERSION: "2",
+        osdViewer: {
+            IMAGE_URL_QPARAM: "url",
+            CHANNEL_NAME_QPARAM: "channelName",
+            PSEUDO_COLOR_QPARAM: "pseudoColor",
+            PIXEL_PER_METER_QPARAM: "meterScaleInPixels",
+            WATERMARK_QPARAM: "waterMark",
+            IS_RGB_QPARAM: "isRGB",
+            CHANNEL_QPARAMS: [
+                "url", "aliasName", "channelName", "pseudoColor", "isRGB"
+            ],
+            OTHER_QPARAMS: [
+                "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
+                "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness"
+            ]
+        },
+        annotation: {
+            SEARCH_LOG_TIMEOUT: 2000,
+            LINE_THICKNESS_LOG_TIMEOUT: 1000
+        }
+    })
+
+    .constant("defaultViewerConfig", {
+        main_image: {},
+        processed_image: {},
+        image_annotation: {},
+        image_channel: {}
+    })
+
+    .factory("viewerConfig", ['DataUtils', 'defaultViewerConfig', 'UriUtils', '$window', function (DataUtils, defaultViewerConfig, UriUtils, $window) {
+            var all_configs = viewerConfigs, _config = null;
+
+            function _findConfig(configName) {
+                if (configName in all_configs) {
+                    var cnf = all_configs[configName];
+                    if (typeof cnf == "string") {
+                        return _findConfig(cnf);
+                    }
+                    return cnf;
+                }
+                return null;
+            }
+
+            function _getConfigAttr(attr) {
+                var cnf = getConfigJSON();
+                if (cnf && attr in cnf) {
+                    return cnf[attr];
+                }
+                return {};
+            }
+
+            function getConfigJSON() {
+                // if already computed, just return it
+                if (_config != null) {
+                    return _config;
+                }
+
+                // find the config that is defined in the viewer-config.js
+                var definedConfig = null;
+                if (DataUtils.isObjectAndNotNull(all_configs)) {
+                    var configName = UriUtils.getQueryParam($window.location.href, 'config');
+
+                    // if the config name is not passed, or wasn't defined in the config, use the default
+                    if (!DataUtils.isNoneEmptyString(configName) || !(configName in all_configs)) {
+                        configName = "*";
+                    }
+
+                    definedConfig = _findConfig(configName);
+                }
+
+                if (definedConfig == null) {
+                    console.log("couldn't find the appropriate viewer-config");
+                    _config = defaultViewerConfig;
+                    return _config;
+                }
+
+                // TODO validate the config
+                // TODO support case insensitive and ignore _ stuff..
+
+                _config = definedConfig;
+                return _config;
+            }
+
+            function getImageConfig() {
+                return _getConfigAttr("main_image");
+            }
+
+            function getProcesssedImageConfig() {
+                return _getConfigAttr("processed_image");
+            }
+
+            function getChannelConfig() {
+                return _getConfigAttr("image_channel");
+            }
+
+            function getAnnotationConfig() {
+                return _getConfigAttr("image_annotation");
+            }
+
+            return {
+                getConfigJSON: getConfigJSON,
+                getImageConfig: getImageConfig,
+                getProcesssedImageConfig: getProcesssedImageConfig,
+                getChannelConfig: getChannelConfig,
+                getAnnotationConfig: getAnnotationConfig
+            };
+    }])
+
     .factory('viewerAppUtils', [
-        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConstant',
+        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConfig', 'viewerConstant',
         '$q', '$rootScope',
-        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, logService, recordCreate, UriUtils, viewerConstant,
+        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, logService, recordCreate, UriUtils, viewerConfig, viewerConstant,
                   $q, $rootScope) {
 
-        var annotConstant = viewerConstant.annotation,
-            osdConstant = viewerConstant.osdViewer,
-            pImageConstant = viewerConstant.processedImage,
-            channelConstant = viewerConstant.channel,
+        var annotConfig = viewerConfig.getAnnotationConfig(),
+            pImageConfig = viewerConfig.getProcesssedImageConfig(),
+            channelConfig = viewerConfig.getChannelConfig();
+
+        var osdConstant = viewerConstant.osdViewer,
             URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
 
         var encode = UriUtils.fixedEncodeURIComponent;
@@ -53,7 +164,7 @@
             var checkURL = function (url) {
                 // see if any of the urls are for annotation
                 // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
-                if (url.indexOf(".svg") != -1 || url.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
+                if (url.indexOf(".svg") != -1 || url.indexOf(annotConfig.overlay_hatrac_path) != -1) {
                     // store the annotation urls
                     if (typeof annotationQueryParams === "object") {
                         if (!(URLQParamAttr in annotationQueryParams)) {
@@ -150,9 +261,9 @@
 
             // TODO should be done in ermrestjs
             var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.CHANNE_TABLE_SCHEMA_NAME) + ":";
-            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.CHANNEL_TABLE_NAME) + "/";
-            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.schema_name) + ":";
+            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
+            imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name);
             imageChannelURL += "=" + UriUtils.fixedEncodeURIComponent(context.imageID);
 
             var hasNull = false;
@@ -179,32 +290,32 @@
                     for (var i = 0; i < page.tuples.length && !hasNull; i++) {
                         var t = page.tuples[i];
 
-                        var channelURL = t.data[channelConstant.IMAGE_URL_COLUMN_NAME];
+                        var channelURL = t.data[channelConfig.image_url_column_name];
 
                         // if any of the urls are null, then none of the values are valid
                         if (!DataUtils.isNoneEmptyString(channelURL)) {
                             hasNull = true;
                             return false;
                         }
-                        var pseudoColor = t.data[channelConstant.PSEUDO_COLOR_COLUMN_NAME];
-                        var channelName = t.data[channelConstant.CHANNEL_NAME_COLUMN_NAME];
+                        var pseudoColor = t.data[channelConfig.pseudo_color_column_name];
+                        var channelName = t.data[channelConfig.channel_name_column_name];
 
                         // create the channel info
                         var res = {};
                         res[URLQParamAttr] = channelURL;
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
                         res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
-                        var isRGB = t.data[channelConstant.IS_RGB_COLUMN_NAME];
+                        var isRGB = t.data[channelConfig.is_rgb_column_name];
                         res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === "boolean") ? isRGB.toString() : "null";
                         channelList.push(res);
                     }
                 }
 
                 // make sure it's properly sorted
-                ref = ref.contextualize.compact.sort(channelConstant.CHANNEL_TABLE_COLUMN_ORDER);
+                ref = ref.contextualize.compact.sort(channelConfig.column_order);
 
                 // send request to server
-                return _readPageByPage(ref, channelConstant.PAGE_SIZE, logObj, true, cb);
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, true, cb);
             }).then(function () {
                 if (hasNull) {
                     channelList = [];
@@ -227,13 +338,13 @@
 
             // TODO should be done in ermrestjs
             var url = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-            url += encode(pImageConstant.PROCESSED_IMAGE_TABLE_SCHEMA_NAME) + ":";
-            url += encode(pImageConstant.PROCESSED_IMAGE_TABLE_NAME) + "/";
-            url += encode(pImageConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            url += encode(pImageConfig.schema_name) + ":";
+            url += encode(pImageConfig.table_name) + "/";
+            url += encode(pImageConfig.reference_image_column_name);
             url += "=" + encode(context.imageID);
 
             if (context.defaultZIndex != null) {
-                url += "&" + encode(pImageConstant.Z_INDEX_COLUMN_NAME);
+                url += "&" + encode(pImageConfig.z_index_column_name);
                 url += "=" + encode(context.defaultZIndex);
             }
 
@@ -261,7 +372,7 @@
 
                     for (var i = 0; i < page.tuples.length && !hasNull; i++) {
                         var t = page.tuples[i];
-                        var channelURL = t.data[pImageConstant.IMAGE_URL_COLUMN_NAME];
+                        var channelURL = t.data[pImageConfig.image_url_column_name];
 
                         // if any of the urls are null, then none of the values are valid
                         if (!DataUtils.isNoneEmptyString(channelURL)) {
@@ -270,22 +381,27 @@
                         }
 
                         // for different methods we might have to format the url
-                        var displayMethod = t.data[pImageConstant.DISPLAY_METHOD_COLUMN_NAME];
-                        if (displayMethod in pImageConstant.IMAGE_URL_PATTERN) {
+                        var displayMethod = t.data[pImageConfig.display_method_column_name];
+                        if (displayMethod in pImageConfig.image_url_pattern) {
                             channelURL = UriUtils.getAbsoluteURL(channelURL);
 
-                            channelURL = ERMrest.renderHandlebarsTemplate(pImageConstant.IMAGE_URL_PATTERN[displayMethod], {"url": channelURL, "iiif_version": pImageConstant.IIIF_VERSION});
+                            var iiifVersion = viewerConstant.DEFAULT_IIIF_VERSION;
+                            if (DataUtils.isNoneEmptyString(pImageConfig.iiif_version)) {
+                                iiifVersion = pImageConfig.iiif_version;
+                            }
+
+                            channelURL = ERMrest.renderHandlebarsTemplate(pImageConfig.image_url_pattern[displayMethod], {"url": channelURL, "iiif_version": iiifVersion});
                         }
 
                         // get the channel extra data
                         var channelData = {};
-                        var channelVisColName = pImageConstant.CHANNEL_VISIBLE_COLUMN_NAME;
+                        var channelVisColName = pImageConfig.channel_visible_column_name;
                         if (t.linkedData && (channelVisColName in t.linkedData) && DataUtils.isObjectAndNotNull(t.linkedData[channelVisColName])) {
                             channelData = t.linkedData[channelVisColName];
                         }
 
-                        var channelName = channelData[channelConstant.CHANNEL_NAME_COLUMN_NAME];
-                        var pseudoColor = channelData[channelConstant.PSEUDO_COLOR_COLUMN_NAME];
+                        var channelName = channelData[channelConfig.channel_name_column_name];
+                        var pseudoColor = channelData[channelConfig.pseudo_color_column_name];
 
                         // create the channel info
                         var res = {};
@@ -293,16 +409,16 @@
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
                         res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
                         // null should be treated the same as true
-                        res[osdConstant.IS_RGB_QPARAM] = channelData[channelConstant.IS_RGB_COLUMN_NAME] === false ? "false" : "true";
+                        res[osdConstant.IS_RGB_QPARAM] = channelData[channelConfig.is_rgb_column_name] === false ? "false" : "true";
                         channelList.push(res);
                     }
                 }
 
                 // make sure it's properly sorted
-                ref = ref.contextualize.compact.sort(pImageConstant.COLUMN_ORDER);
+                ref = ref.contextualize.compact.sort(pImageConfig.column_order);
 
                 // send request to server
-                return _readPageByPage(ref, pImageConstant.PAGE_SIZE, logObj, false, cb);
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, cb);
             }).then(function () {
                 if (hasNull) {
                     channelList = [];
@@ -348,9 +464,9 @@
 
             // TODO should be done in ermrestjs
             var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-            imageAnnotationURL += encode(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":";
-            imageAnnotationURL += encode(annotConstant.ANNOTATION_TABLE_NAME) + "/";
-            imageAnnotationURL += encode(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            imageAnnotationURL += encode(annotConfig.schema_name) + ":";
+            imageAnnotationURL += encode(annotConfig.table_name) + "/";
+            imageAnnotationURL += encode(annotConfig.reference_image_column_name);
             imageAnnotationURL += "=" + encode(context.imageID);
 
             ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
@@ -378,10 +494,10 @@
                 // TODO create and edit should be refactored to reuse the same code
                 // create the edit and create forms
                 var invisibleColumns = [
-                    annotConstant.OVERLAY_COLUMN_NAME,
-                    annotConstant.REFERENCE_IMAGE_VISIBLE_COLUMN_NAME,
-                    annotConstant.Z_INDEX_COLUMN_NAME,
-                    annotConstant.CHANNELS_COLUMN_NAME
+                    annotConfig.overlay_column_name,
+                    annotConfig.reference_image_visible_column_name,
+                    annotConfig.z_index_column_name,
+                    annotConfig.channels_column_name
                 ];
                 if ($rootScope.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
@@ -418,8 +534,8 @@
                     $rootScope.annotationTuples = $rootScope.annotationTuples.concat(page.tuples);
 
                     page.tuples.forEach(function (tuple) {
-                        if(tuple.data && tuple.data[annotConstant.OVERLAY_COLUMN_NAME]){
-                            $rootScope.annotationURLs.push(tuple.data[annotConstant.OVERLAY_COLUMN_NAME]);
+                        if(tuple.data && tuple.data[annotConfig.overlay_column_name]){
+                            $rootScope.annotationURLs.push(tuple.data[annotConfig.overlay_column_name]);
 
                             $rootScope.hideAnnotationSidebar = false;
                         }
@@ -429,7 +545,7 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                return _readPageByPage(ref, annotConstant.PAGE_SIZE, logObj, false, cb);
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, cb);
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {

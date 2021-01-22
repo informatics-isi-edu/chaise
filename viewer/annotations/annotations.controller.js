@@ -3,18 +3,17 @@
 
     angular.module('chaise.viewer')
 
-    .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant',
-    function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant) {
+    .controller('AnnotationsController', ['AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations','AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils', 'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window', 'viewerConstant', 'viewerConfig',
+    function AnnotationsController(AlertsService, annotationCreateForm, annotationEditForm, annotations,AnnotationsService, AuthService, comments, context, CommentsService, ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils , modalBox,recordsetDisplayModes, recordCreate, logService, annotationModels, $q, $rootScope, $scope, $timeout, $uibModal, $window, viewerConstant, viewerConfig) {
 
         var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
-        var annotConstant = viewerConstant.annotation;
-        var idColName = annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME,
-            nameColName = annotConstant.ANNOTATED_TERM_NAME_COLUMN_NAME
+        var annotConfig = viewerConfig.getAnnotationConfig();
+        var idColName = annotConfig.annotated_term_id_column_name,
+            nameColName = annotConfig.annotated_term_name_column_name;
         var vm = this;
 
         vm.annotationCreateForm = annotationCreateForm;
         vm.annotationEditForm = annotationEditForm;
-        vm.viewerConstant = viewerConstant;
         vm.annotations = annotations;
         vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
         vm.defaultColor = chaiseConfig.defaultAnnotationColor || 'red';
@@ -395,8 +394,8 @@
 
                 // TOOD should be more systematic
                 var url = "/chaise/record/#" + context.catalogID;
-                url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME);
-                url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(id);
+                url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_schema_name) + ":" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_name);
+                url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_id_column_name) + "=" + UriUtils.fixedEncodeURIComponent(id);
                 url += "?pcid=" + context.cid + "&ppid=" + context.pid;
 
                 // default values for new anatomy's annotation
@@ -419,7 +418,7 @@
                 };
 
                 row = $rootScope.annotationTuples.find(function (tuple, index) {
-                    return tuple.data && tuple.data[annotConstant.ANNOTATED_TERM_COLUMN_NAME] === id;
+                    return tuple.data && tuple.data[annotConfig.annotated_term_column_name] === id;
                 });
 
                 // if row with same anatomy id exists in the viewer model -> update it
@@ -556,7 +555,7 @@
 
                 oldStrokeScale = null;
                 strokeScalePromise = null;
-            }, annotConstant.LINE_THICKNESS_LOG_TIMEOUT);
+            }, viewerConstant.annotation.LINE_THICKNESS_LOG_TIMEOUT);
         }
 
         // Notify openseadragon to change stroke width
@@ -571,7 +570,7 @@
          *  - Signal OSD to change the groupID and svgID of drawing
          */
         function onSearchPopupValueChange(columnModel, tuple) {
-            if (columnModel.column.name !== annotConstant.ANNOTATED_TERM_VISIBLE_COLUMN_NAME) {
+            if (columnModel.column.name !== annotConfig.annotated_term_visible_column_name) {
                 return true;
             }
 
@@ -599,8 +598,8 @@
 
             // TODO should be part of a prototype (this is done twice)
             var url = "/chaise/record/#" + context.catalogID;
-            url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME);
-            url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_ID_COLUMN_NAME) + "=" + UriUtils.fixedEncodeURIComponent(data[idColName]);
+            url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_schema_name) + ":" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_name);
+            url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_id_column_name) + "=" + UriUtils.fixedEncodeURIComponent(data[idColName]);
             url += "?pcid=" + context.cid + "&ppid=" + context.pid;
 
             item["anatomy"] = data[nameColName] + " (" + data[idColName] + ")";
@@ -623,7 +622,7 @@
          * TODO might be able to refactor this, it's the same as the one in recordCreate
          */
         function getAnnotatedTermDisabledTuples (columnModel) {
-            if (columnModel.column.name !== annotConstant.ANNOTATED_TERM_VISIBLE_COLUMN_NAME) {
+            if (columnModel.column.name !== annotConfig.annotated_term_visible_column_name) {
                 return null;
             }
 
@@ -644,12 +643,12 @@
                 var facet = {};
                  // TODO should be done in ermrestjs
                  var existingRefURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_SCHEMA_NAME) + ":";
-                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATED_TERM_TABLE_NAME) + "/";
+                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_schema_name) + ":";
+                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_name) + "/";
 
                 facet.choices = [context.imageID];
-                facet.source = [{"inbound": annotConstant.ANNOTATED_TERM_FOREIGN_KEY_CONSTRAINT}];
-                facet.source.push(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
+                facet.source = [{"inbound": annotConfig.annotated_term_foreign_key_constraint}];
+                facet.source.push(annotConfig.reference_image_column_name);
                 existingRefURL += "*::facets::" + ERMrest.encodeFacet({and: [facet]});
 
                 ERMrest.resolve(existingRefURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
@@ -839,7 +838,7 @@
                 if (!item.tuple) {
                     $rootScope.logAppMode = logService.appModes.CREATE_PRESELECT;
                     var values = {};
-                    values[annotConstant.ANNOTATED_TERM_COLUMN_NAME] = item.id;
+                    values[annotConfig.annotated_term_column_name] = item.id;
                     recordCreate.populateCreateModelValues(
                         annotationEditForm,
                         annotationEditForm.reference,
@@ -917,7 +916,7 @@
 
             // TODO could be refactored
             var url = "/chaise/record/#" + context.catalogID;
-            url += "/" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_SCHEMA_NAME) + ":" + UriUtils.fixedEncodeURIComponent(annotConstant.ANNOTATION_TABLE_NAME);
+            url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.schema_name) + ":" + UriUtils.fixedEncodeURIComponent(annotConfig.table_name);
             url += "/RID=" + UriUtils.fixedEncodeURIComponent(item.tuple.data.RID);
 
             var moreInfo = {
@@ -934,7 +933,7 @@
                         type: "link"
                     },
                     {
-                        title: annotConstant.ANNOTATED_TERM_DISPLAYNAME,
+                        title: annotConfig.annotated_term_displayname,
                         value: item.name + (item.id ? (" (" + item.id + ")") : "")
                     }
                 ]
@@ -1067,7 +1066,7 @@
                     );
                 }
                 searchPromise = null;
-            }, annotConstant.SEARCH_LOG_TIMEOUT);
+            }, viewerConstant.annotation.SEARCH_LOG_TIMEOUT);
         }
 
         /**
@@ -1111,7 +1110,7 @@
             );
 
             // <Image_RID>_<Anatomy_ID>_z<Z_Index>.svg
-            fileName = imageRID + "_" + formModel.submissionRows[0][annotConstant.ANNOTATED_TERM_COLUMN_NAME];
+            fileName = imageRID + "_" + formModel.submissionRows[0][annotConfig.annotated_term_column_name];
             if (context.defaultZIndex != null) {
                 fileName += "_z" + context.defaultZIndex;
             }
@@ -1120,21 +1119,21 @@
             });
 
             // add the image value
-            formModel.submissionRows[0][annotConstant.REFERENCE_IMAGE_COLUMN_NAME] = imageRID;
+            formModel.submissionRows[0][annotConfig.reference_image_column_name] = imageRID;
 
             // add the default z index value
             if (context.defaultZIndex != null) {
-                formModel.submissionRows[0][annotConstant.Z_INDEX_COLUMN_NAME] = context.defaultZIndex;
+                formModel.submissionRows[0][annotConfig.z_index_column_name] = context.defaultZIndex;
             }
 
             // change the overlay file value
-            formModel.submissionRows[0][annotConstant.OVERLAY_COLUMN_NAME] = {
+            formModel.submissionRows[0][annotConfig.overlay_column_name] = {
                 uri : fileName,
                 file : file,
                 fileName : fileName,
                 fileSize : file.size,
                 hatracObj : new ERMrest.Upload(file, {
-                    column: formModel.reference.columns.find(function (column) {return column.name == annotConstant.OVERLAY_COLUMN_NAME}),
+                    column: formModel.reference.columns.find(function (column) {return column.name == annotConfig.overlay_column_name}),
                     reference: formModel.reference
                 })
             };

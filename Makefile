@@ -410,9 +410,13 @@ recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
 
+VIEWER_CONFIG=$(VIEWER_ROOT)/viewer-config.js
+$(VIEWER_CONFIG): $(VIEWER_ROOT)/viewer-config-sample.js
+	cp -n $(VIEWER_ROOT)/viewer-config-sample.js $(VIEWER_CONFIG) || true
+	touch $(VIEWER_CONFIG)
+
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
 	$(VIEWER_ROOT)/viewer.utils.js \
-	$(VIEWER_ROOT)/constant.js \
 	$(VIEWER_ROOT)/common/providers/context.js \
 	$(VIEWER_ROOT)/common/providers/image.js \
 	$(VIEWER_ROOT)/common/providers/user.js \
@@ -449,7 +453,7 @@ VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
 	@> .make-viewer-includes
 	$(info - creating .make-viewer-includes)
 	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
-	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
+	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(VIEWER_CONFIG) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-viewer-includes)
 
 viewer/index.html: viewer/index.html.in .make-viewer-includes
@@ -626,13 +630,13 @@ all: $(DIST)
 .PHONY: install dont_install_in_root
 install: $(DIST) dont_install_in_root
 	$(info - deploying the package)
-	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' --exclude=/chaise-config.js . $(CHAISEDIR)
+	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
 
 # Rule for installing during testing (build chaise and deploy with the chaise-config)
 .PHONY: install-w-config dont_install_in_root
-install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG)
-	$(info - deploying the package with the existing default chaise-config)
-	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
+	$(info - deploying the package with the existing default config files)
+	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 
 # Rule to create version.txt
 .PHONY: gitversion
