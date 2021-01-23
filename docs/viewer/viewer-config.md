@@ -11,7 +11,7 @@ The following is the assumed model of a fully-configured viewer app:
 
 ![record-page](../resources/viewer-erd.png)
 
-(All the table and column names are configurable and are explained in the next section)
+(All the table and column names are configurable)
 
 - `Image` table is the entry point of the viewer app.
 - The `Consortium` table is optional. It's only used for extracting the watermark.

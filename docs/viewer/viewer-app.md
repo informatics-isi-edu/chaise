@@ -4,9 +4,17 @@ In this section you can find all the information related to 2D image viewer appl
 
 ## Table of contents
 
+- [Features](#features)
+- [Dependencies](#dependencies)
+- [Deploying](#deploying)
+- [How it works](#how-it-works)
+  * [Query parameters](#query-parameters)
+  * [Configuration](#configuration)
+- [Testing](#testing)
+
 ## Features
 
-The current implementation is capable of:
+The viewer app is capable of:
 - Displaying one or more images by blending them together. We call each image a
 __channel__. So a view with multiple image is referred to as a __multi-channel__ view.
 - (_not implemented_) Offering a multi-z view for the images that have
@@ -27,9 +35,9 @@ depends on the [openseadragon-viewer](https://github.com/informatics-isi-edu/ope
 
 ## Deploying
 
-You need to deploy both chaise and openseadragon-viewer to make sure viewer app is properly installed. The following is going to mention the steps to install both packages:
+You need to deploy both chaise and openseadragon-viewer to make sure viewer app is properly installed. The following are the steps to install both packages:
 
-1. First you need to setup some environment variables. The following are the variables and their default values:
+1. First you need to setup some environment variables. The following are the variables and their default values,
 
     ```
     WEB_URL_ROOT=/
@@ -37,36 +45,35 @@ You need to deploy both chaise and openseadragon-viewer to make sure viewer app 
     CHAISE_REL_PATH=chaise/
     OSD_VIEWER_REL_PATH=openseadragon-viewer/
     ```
+    > - All the variables MUST have a trailing `/`.
+    > - If you're installing remotely, since we're using the `WEB_INSTALL_ROOT`
+    in `rsync` command, you can use a remote location `username@host:public_html/`
+    for this variable.
 
-  Which means,
+    Which means,
 
-    - Chaise build folder will be copied to `/var/www/html/chaise/` location.
-    - The URL path to access Chaise is `/chaise/`.
-    - openseadragon-viewer build folder will be copied to `/var/www/html/openseadragon-viewer/` location.
-    - The URL path to access openseadragon-viewer is `/openseadragon-viewer/`.
+      - Chaise build folder will be copied to `/var/www/html/chaise/` location.
+      - The URL path to access Chaise is `/chaise/`.
+      - openseadragon-viewer build folder will be copied to `/var/www/html/openseadragon-viewer/` location.
+      - The URL path to access openseadragon-viewer is `/openseadragon-viewer/`.
 
-  If that is not the case in your deployment, you should modify the variables accordingly.
-
-  Notes:
-
-    - All the variables MUST have a trailing `/`.
-    - If you're installing remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
+    If that is not the case in your deployment, you should modify the variables accordingly.
 
 
-2. Clone the openseadragon-viewer repository
+2. Clone the openseadragon-viewer repository,
     ```
     $ git clone git@github.com:informatics-isi-edu/openseadragon-viewer.git
     ```
 
 3. Run the following command in the openseadragon-viewer folder
+   (make sure to run this in the openseadragon-viewer folder),
     ```
-    # make sure to run this in the openseadragon-viewer folder
     $ make install
     ```
 
-3. Make sure Chaise is properly installed by calling the following command under Chaise:
+3. Make sure Chaise is properly installed by calling the following command under Chaise
+  (make sure to run this in the Chaise folder),
     ```
-    # make sure to run this in the Chaise folder
     $ make install
     ```
 
