@@ -1,7 +1,7 @@
 # Viewer app configuration file: viewer-config.js
 
 Upon loading the viewer app, it will make several requests for populating
-the data for different portions of the page. To avoid hard coding the requests
+the data for different portions of the page. To avoid hard coding the requests,
 we've deployed a configuration mechanism in this app.
 
 ## Model
@@ -15,7 +15,7 @@ The following is the assumed model of a fully-configured viewer app:
 
 - `Image` table is the entry point of the viewer app.
 - `Processed_Image` table is the actual table that stores the data for each image channels
-  in each z-plane. For example if there's a image with two stored z-indices and that has
+  in each z-plane. For example if an image has two stored z-indices and each one has
   two channels, there will be 4 records of `Processed_Image` table.
 - `Image_Channel` table stores the channel information (whether it's greyscale,
   the pseudo color, channel name)
@@ -41,10 +41,10 @@ var viewerConfigs = {
 
 Where
 - `<config-name>` is a string that will be matched with the given `config` query parameter.
-  - `"*"` can be used to indicate the default configuration. If the query parameter is missing or wasn't found, this configuration will be used.
-- `<configuration>` can be either
-  - another `<config-name>` to indicate that chaise should the configuration defined under another `<config-name>`
-  - or an object that its structure is explained in the [parameters](#parameters) section.
+  - `"*"` can be used to indicate the default configuration. If the query parameter is missing or given name wasn't found, this configuration will be used.
+- `<configuration>` can be one of the following:
+  - Another `<config-name>` to indicate that chaise should use the configuration defined under the other `<config-name>`.
+  - An object. The expected structure of object is explained in the [parameters](#parameters) section.
 
 
 For example, let's assume the following is how the `viewer-config.js` looks like:
