@@ -73,6 +73,9 @@
                             AlertsService.addAlert(errorMessages.viewerScreenshotFailed, "warning");
                         });
                         break;
+                    case "showAlert":
+                        AlertsService.addAlert(data.content.message, data.content.type);
+                        break;
                     default:
                         // other messages are handled by other controllers
                 }
