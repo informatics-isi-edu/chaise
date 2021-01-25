@@ -74,7 +74,7 @@
                         });
                         break;
                     case "showAlert":
-                        AlertsService.addAlert(data.content.message, data.content.type);
+                        AlertsService.addAlert(data.message, data.type);
                         break;
                     default:
                         // other messages are handled by other controllers
