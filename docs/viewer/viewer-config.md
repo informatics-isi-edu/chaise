@@ -14,15 +14,15 @@ The following is the assumed model of a fully-configured viewer app:
 (All the table and column names are configurable)
 
 - `Image` table is the entry point of the viewer app.
-- The `Consortium` table is optional. It's only used for extracting the watermark.
-  The watermark will be displayed in the image screenshot.
 - `Processed_Image` table is the actual table that stores the data for each image channels
   in each z-plane. For example if there's a image with two stored z-indices and that has
   two channels, there will be 4 records of `Processed_Image` table.
 - `Image_Channel` table stores the channel information (whether it's greyscale,
-  the pseudo color, name,)
+  the pseudo color, channel name)
 - `Image_Annotation` table stores the annotations. It MUST have an asset column that
   will be used for storing the annotation files.
+- `Annotated_Term` is the term that each annotation will be associated with.
+  For each image in each z-index, there can only be one annotation per term.
 
 ## Configuration
 

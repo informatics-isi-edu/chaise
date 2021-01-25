@@ -1,31 +1,34 @@
 # Image viewer
 
-In this section you can find all the information related to 2D image viewer application.
+Chaise 2D image viewer utilizes [OpenSeadragon](https://openseadragon.github.io/) to provide support for:
+
+- **Greyscale and RGB images**. If an image is marked
+as greyscale, data-modelers can define a default _pseudo color_ that will be used
+to properly add color to the image. Users have the ability to change that color
+using the appropriate channel UI.
+- **Single or multiple channel images**. In case of multi-channel images, viewer app 
+  will blend the images together. Users have the ability to toggle images and manipulate
+  the blending.
+- **Image annotations** that overlay on top of main images. If data-modelers have 
+  properly configured the application, viewer app will fetch and display the annotations. 
+  Users have the ability to edit, delete, or create new annotation.
+- (_not implemented_) **Multi-z images**. If data-modelers have properly configured the application,
+  viewer app provides a mechanism to navigate through the z-plane to
+  display the images with different z-indices.
+- **IIIF, DZI, and other browser compatible images**. Viewer app uses the location
+of the images to find the appropriate mechanism in order to fetch the image based on their types.
+In case of IIIF images, the proper image API will be used for fetching the tile images,
+while DZI relies on precomputed tile images to be present in the file system.
+
 
 ## Table of contents
 
-- [Features](#features)
 - [Dependencies](#dependencies)
 - [Deploying](#deploying)
 - [How it works](#how-it-works)
   * [Query parameters](#query-parameters)
   * [Configuration](#configuration)
 - [Testing](#testing)
-
-## Features
-
-The viewer app is capable of:
-- Displaying one or more images by blending them together. We call each image a
-__channel__. So a view with multiple image is referred to as a __multi-channel__ view.
-- (_not implemented_) Offering a multi-z view for the images that have
-the proper z-plane data. Users can navigate from one z-index to another if they choose to.
-- Allowing the manipulation of color for the greyscale channels. If an image is marked
-as greyscale, data-modelers can define a default __pseudo color__ that will be used
-to properly add color to the image. Users have the ability to change that color
-using the appropriate channel UI.
-- Adding overlay on top of images. We call these overlays __image annotations__.
-If data-modelers have properly configured the application, viewer app will fetch
-and display the annotations. Users have the ability to edit, delete, or create new annotation.
 
 ## Dependencies
 
@@ -79,38 +82,48 @@ You need to deploy both chaise and openseadragon-viewer to make sure viewer app 
 
 ## How it works
 
-Chaise viewer app is a user-friendly interface to openseadragon-viewer.  In the end,
-Chaise must provide the appropriate parameters to that application. Chaise derives
-the list of parameters from the following sources:
+Chaise viewer app uses ERMrest to fetch the proper metadata and utilizes
+openseadragon-viewer to render the fetched imaging metadata, and provide UI tools 
+so users can interact with the image. To use openseadragon-viewer, viewer
+app must provide some parameters. The following are different sources for deriving 
+these parameters:
 
-- URL query parameters that are passed to the viewer app. URL query parameters are
-  mainly used to ignore what's stored in the database.
+- URL query parameters that are passed to viewer app. URL query parameters have
+  priority over other ways of providing parameters, and override the behavior.
 
-- The stored data in the database. For more information about how the database
+- Metadata stored in ERMrest. For more information about how the database
   model works and can be configured please refer to [configuration  document](viewer-config.md).
 
 
 ### Query parameters
 
-As it was mentioned, query parameters are used to avoid sending queries to database.
-You should only use query parameters in either of these cases:
-- The required model and data are not defined in the database
+Different browsers have different rules about the length limitation of query parameters.
+Users can also manipulate the query parameters. So we generally advise against 
+usage of query parameters. Although, in some cases query parameters are the 
+most convenient way to use viewer app. For example:
+- The required model and metadata are not defined in the database and you just
+  want to show an image without the extra features
   (Refer to [viewer-config.js documentation](viewer-config.md) for more information
-  about the required model structure).
-- You want to show only a small set of images or annotations.
+  about the required model structure.)
+- You want to override the default behavior and show only a small set of images or annotations. For example, 
+  assume in the database the image has multiple annotations and you just want to 
+  show that one specific annotation in a record page. You can provide an iframe 
+  with a query parameter that specifies the annotation url. 
 - For debugging or testing.
-- Modifying the default value of a parameter.
+- Modifying the default value of a general parameter.
 
 Query parameters will be passed without any modification to the openseadragon-viewer.
 So you can use any of the parameters that are defined in the
 [openseadragon-viewer usage document](https://github.com/informatics-isi-edu/openseadragon-viewer/blob/master/docs/user-docs/usage.md). There are two categories of parameteres:
 
-- **Channel parameters**: these parameters provide information about the image channel.
+<!-- TODO add links to each section -->
+
+- [**Channel parameters**](https://github.com/informatics-isi-edu/openseadragon-viewer/blob/master/docs/user-docs/usage.md#channel-parameters): these parameters provide information about the image channel.
   The main channel parameter is `url`. The value of this parameter must be the location
   of the image file (`info.json`, `ImageProperties.xml`, etc) and if present, we will
   ignore the data stored in database.
 
-- **General parameters**: parameters that will not affect the actual displayed image data,
+- [**General parameters**](https://github.com/informatics-isi-edu/openseadragon-viewer/blob/master/docs/user-docs/usage.md#general-parameters): parameters that will not affect the actual displayed image data,
   and will modify other parts of the page. These parameters can be used in conjunction
   of image data stored in the database.
 

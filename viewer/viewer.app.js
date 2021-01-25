@@ -290,10 +290,10 @@
 
                 image.entity = imageTuple.data;
                 context.imageID = image.entity.RID;
-                imageURI = image.entity[imageConfig.uri_column_name];
+                imageURI = image.entity[imageConfig.legacy_osd_url_column_name];
 
                 if (!imageURI) {
-                    console.log("The " + imageConfig.uri_column_name + " value is empty in Image table.");
+                    console.log("The " + imageConfig.legacy_osd_url_column_name + " value is empty in Image table.");
                 }
 
                 // TODO this feels hacky

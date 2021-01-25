@@ -28,7 +28,7 @@
     })
 
     .constant("defaultViewerConfig", {
-        main_image: {},
+        image: {},
         processed_image: {},
         image_annotation: {},
         image_channel: {}
@@ -89,7 +89,7 @@
             }
 
             function getImageConfig() {
-                return _getConfigAttr("main_image");
+                return _getConfigAttr("image");
             }
 
             function getProcesssedImageConfig() {
