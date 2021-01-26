@@ -13,26 +13,28 @@
             osdConstant = viewerConstant.osdViewer,
             pImageConstant = viewerConstant.processedImage,
             channelConstant = viewerConstant.channel,
-            URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
-
-        var encode = UriUtils.fixedEncodeURIComponent;
+            URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM,
+            encode = UriUtils.fixedEncodeURIComponent;
 
         /**
-         * @private
-         * add channel query parameters that are in src to dest
+         * same logic as OSD viewer
          */
-        function _addChannelParams(dest, src) {
-            osdConstant.CHANNEL_QPARAMS.forEach(function (qp) {
-                if (qp in src) {
-                    // there might be annotation urls in dest
-                    if (qp === URLQParamAttr && Array.isArray(dest[qp])) {
-                        dest[qp] = dest[qp].concat(src[qp])
-                        return;
-                    }
+        function _isURLAnnotation(url) {
+            return url.indexOf(".svg") != -1 || url.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1;
+        }
 
-                    dest[qp] = src[qp];
-                }
-            });
+        function _getQueryParamByIndex(qParamVal, i) {
+            var _sanitizeVal = function (v) {
+                return v === "null" ? null : v;
+            };
+
+            if (typeof qParamVal === "string") {
+                return i === 0 ? _sanitizeVal(qParamVal) : null;
+            }
+            if (Array.isArray(qParamVal)) {
+                return i < qParamVal.length ? _sanitizeVal(qParamVal[i]) : null;
+            }
+            return null;
         }
 
         /**
@@ -40,10 +42,9 @@
          * If lookForAnnotation is passed, it will also check for the url value being annotation.
          * @param {Object} queryParams - query params object
          * @param {Boolean=} lookForAnnotation - if true, will also check for annotation
-         * @param {Object=} annotationQueryParams - pass an object so the function stores the annotation query params in there
          * @returns {Boolean}
          */
-        function hasURLQueryParam(queryParams, lookForAnnotation, annotationQueryParams) {
+        function hasURLQueryParam(queryParams, lookForAnnotation, imageURLs, annotationURLs) {
             if (!(URLQParamAttr in queryParams)) {
                 return false;
             }
@@ -53,42 +54,48 @@
             var checkURL = function (url) {
                 // see if any of the urls are for annotation
                 // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
-                if (url.indexOf(".svg") != -1 || url.indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
-                    // store the annotation urls
-                    if (typeof annotationQueryParams === "object") {
-                        if (!(URLQParamAttr in annotationQueryParams)) {
-                            annotationQueryParams[URLQParamAttr] = []
-                        }
-                        annotationQueryParams[URLQParamAttr].push(url);
+                if (_isURLAnnotation(url)) {
+                    if (Array.isArray(annotationURLs)) {
+                        annotationURLs.push(url);
                     }
 
                     // found a url query parameter that is annotation
-                    if (lookForAnnotation) return true;
+                    return lookForAnnotation === true;
                 } else {
+                    if (Array.isArray(imageURLs)) {
+                        imageURLs.push(url);
+                    }
+
                     // found a url query parameter that is not annotation
-                    if (!lookForAnnotation) return true;
+                    return lookForAnnotation != true;
                 }
-                return null;
+                return false;
             }
 
             if (typeof urlQParam === "string") {
                 return checkURL(urlQParam) === true;
             }
 
+            var finalRes = false;
             if (Array.isArray(urlQParam)){
                 for (i = 0; i < urlQParam.length; i++) {
                     res = checkURL(urlQParam[i]);
-                    if (typeof res === "boolean") {
-                        return res;
+                    if (res && !finalRes) {
+                        // if we want to capture the urls, we shouldn't return the result right away
+                        if (Array.isArray(imageURLs) || Array.isArray(annotationURLs)) {
+                            finalRes = res;
+                        } else {
+                            return res;
+                        }
                     }
                 }
             }
 
-
-            return false;
+            return finalRes;
         }
 
         /**
+         * TODO
          * Using what's in the query parameters and the value of Image.uri,
          * create a queryParams object that will be sent to osd viewer.
          * The logic is as follows:
@@ -100,8 +107,16 @@
          *   - if defined on query parameter, use it.
          *   - otherwise if defined on imageURI, use it.
          */
-        function populateOSDViewerQueryParams (pageQueryParams, imageURI) {
-            var readChannelInfo = true, osdViewerQueryParams = {}, imageURIQueryParams = {};
+        function initializeOSDParams (pageQueryParams, imageURI) {
+            var loadImageMetadata = true, imageURIQueryParams = {};
+            var  osdViewerParams = {
+                mainImage: {zIndex: context.defaultZIndex, info: []},
+                zPlaneList: [],
+                channels: [],
+                annotationSetURLs: [],
+                zPlaneTotalCount: 1,
+                isProcessed: true
+            };
 
             if (DataUtils.isNoneEmptyString(imageURI)) {
                 if (imageURI.indexOf("?") === -1) {
@@ -110,43 +125,68 @@
                 imageURIQueryParams = UriUtils.getQueryParams(imageURI, true);
             }
 
-            // get all the channel query parameters from the page query paramter
-            if (hasURLQueryParam(pageQueryParams, false, osdViewerQueryParams)) {
-                // the annotation urls might have been added
-                osdViewerQueryParams = {};
+            // both are empty
+            if (!DataUtils.isNonEmptyObject(pageQueryParams) &&  !DataUtils.isNonEmptyObject(imageURIQueryParams)) {
+                return {
+                    osdViewerParams: osdViewerParams,
+                    loadImageMetadata: true
+                };
+            }
 
-                readChannelInfo = false;
-                _addChannelParams(osdViewerQueryParams, pageQueryParams);
+            var usedQParams = null, imageURLs = [];
+
+            // get all the channel query parameters from the page query paramter
+            if (hasURLQueryParam(pageQueryParams, false, imageURLs, osdViewerParams.annotationSetURLs)) {
+                usedQParams = pageQueryParams;
             }
             // get all the channel query parameters from image
-            else if (hasURLQueryParam(imageURIQueryParams, false, osdViewerQueryParams)) {
-                readChannelInfo = false;
-                _addChannelParams(osdViewerQueryParams, imageURIQueryParams)
+            else if (hasURLQueryParam(imageURIQueryParams, false, imageURLs, osdViewerParams.annotationSetURLs)) {
+                usedQParams = imageURIQueryParams;
             }
+
+            // populate mainImage info and channels if the array is not empty
+            imageURLs.forEach(function (url, index) {
+                osdViewerParams.mainImage.info.push({url: url, channelNumber: index});
+                var channel = {};
+
+                // find the defined channelInfo
+                osdConstant.CHANNEL_QPARAMS.forEach(function (qp) {
+                    channel[qp] = _getQueryParamByIndex(usedQParams[qp], index);
+                });
+
+                // if any of the channel properties were defined
+                if (DataUtils.isNonEmptyObject(channel)) {
+                    channel.channelNumber = index;
+                    osdViewerParams.channels.push(channel);
+                }
+            });
 
             // add the rest of query parameters
             osdConstant.OTHER_QPARAMS.forEach(function (qp) {
-
                 if (qp in imageURIQueryParams) {
-                    osdViewerQueryParams[qp] = imageURIQueryParams[qp];
+                    osdViewerParams[qp] = imageURIQueryParams[qp];
                 } else if (qp in pageQueryParams) {
-                    osdViewerQueryParams[qp] = pageQueryParams[qp];
+                    osdViewerParams[qp] = pageQueryParams[qp];
                 }
             });
 
             return {
-                osdViewerQueryParams: osdViewerQueryParams,
-                readChannelInfo: readChannelInfo
-            }
+                osdViewerParams: osdViewerParams,
+                loadImageMetadata: usedQParams == null
+            };
         }
 
         /**
          * Send request to image channel table and returns a promise that is resolved
-         * by an array containing the channel information that can be used to send to osd viewer.
-         * NOTE added for backward compatibility and eventually should be removed
+         * returns {
+         *   channelURLs: [{url, channelNumber}], // used for backward compatibility
+         *   channelList: [{channelNumber, channelName, isRGB, pseudoColor}]
+         * }
+         *
          */
         function _readImageChannelTable() {
-            var defer = $q.defer(), channelList = [];
+            console.log("reading channel table");
+            var defer = $q.defer(), channelList = [], channelURLs = [];
 
             // TODO should be done in ermrestjs
             var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
@@ -176,27 +216,30 @@
 
                 // the callback that will be used for populating the result values
                 var cb = function (page) {
-                    for (var i = 0; i < page.tuples.length && !hasNull; i++) {
+                    for (var i = 0; i < page.tuples.length; i++) {
                         var t = page.tuples[i];
 
-                        var channelURL = t.data[channelConstant.IMAGE_URL_COLUMN_NAME];
 
-                        // if any of the urls are null, then none of the values are valid
-                        if (!DataUtils.isNoneEmptyString(channelURL)) {
-                            hasNull = true;
-                            return false;
-                        }
-                        var pseudoColor = t.data[channelConstant.PSEUDO_COLOR_COLUMN_NAME];
-                        var channelName = t.data[channelConstant.CHANNEL_NAME_COLUMN_NAME];
+                        var pseudoColor = t.data[channelConstant.PSEUDO_COLOR_COLUMN_NAME],
+                            channelName = t.data[channelConstant.CHANNEL_NAME_COLUMN_NAME],
+                            channelNumber = t.data[channelConstant.CHANNEL_NUMBER_COLUMN_NAME];
 
                         // create the channel info
                         var res = {};
-                        res[URLQParamAttr] = channelURL;
+                        res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
-                        res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
+                        res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : null;
                         var isRGB = t.data[channelConstant.IS_RGB_COLUMN_NAME];
-                        res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === "boolean") ? isRGB.toString() : "null";
+                        res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === "boolean") ? isRGB : null;
                         channelList.push(res);
+
+                        // if any of the urls are null, then none of the values are valid
+                        var channelURL = t.data[channelConstant.IMAGE_URL_COLUMN_NAME];
+                        if (DataUtils.isNoneEmptyString(channelURL)) {
+                            channelURLs.push({channelNumber: channelNumber, url: channelURL});
+                        } else {
+                            hasNull = true;
+                        }
                     }
                 }
 
@@ -206,10 +249,14 @@
                 // send request to server
                 return _readPageByPage(ref, channelConstant.PAGE_SIZE, logObj, true, cb);
             }).then(function () {
+                // if any of the urls are null, we shouldn't use any of the urls
                 if (hasNull) {
-                    channelList = [];
+                    channelURLs = [];
                 }
-                defer.resolve(channelList);
+                defer.resolve({
+                    channelURLs: channelURLs, // backward compatibility
+                    channelList: channelList
+                });
             }).catch(function (err) {
                 defer.reject(err);
             });
@@ -219,23 +266,17 @@
 
         /**
          * Send request to processed image table and returns a promise that is resolved
-         * by an array containing the channel information that can be used to send to osd viewer.
+         * returns [{url, channelNumber}]
          */
-        function _readProcessedImageTable() {
-            var defer = $q.defer(), channelList = [];
+        function _readProcessedImageTable(pImageReference) {
+            console.log("reading processed image table");
+            var defer = $q.defer(), mainImageInfo = [];
 
 
-            // TODO should be done in ermrestjs
-            var url = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
-            url += encode(pImageConstant.PROCESSED_IMAGE_TABLE_SCHEMA_NAME) + ":";
-            url += encode(pImageConstant.PROCESSED_IMAGE_TABLE_NAME) + "/";
-            url += encode(pImageConstant.REFERENCE_IMAGE_COLUMN_NAME);
-            url += "=" + encode(context.imageID);
-
-            if (context.defaultZIndex != null) {
-                url += "&" + encode(pImageConstant.Z_INDEX_COLUMN_NAME);
-                url += "=" + encode(context.defaultZIndex);
-            }
+            // TODO does this make sense?
+            var url = pImageReference.location.uri;
+            url += "&" + encode(pImageConstant.Z_INDEX_COLUMN_NAME);
+            url += "=" + encode(context.defaultZIndex);
 
             var hasNull = false;
             ERMrest.resolve(url, ConfigUtils.getContextHeaderParams()).then(function (ref) {
@@ -261,40 +302,18 @@
 
                     for (var i = 0; i < page.tuples.length && !hasNull; i++) {
                         var t = page.tuples[i];
-                        var channelURL = t.data[pImageConstant.IMAGE_URL_COLUMN_NAME];
+                        var imageURL = _createImageURL(t.data);
 
                         // if any of the urls are null, then none of the values are valid
-                        if (!DataUtils.isNoneEmptyString(channelURL)) {
+                        if (!DataUtils.isNoneEmptyString(imageURL)) {
                             hasNull = true;
                             return false;
                         }
 
-                        // for different methods we might have to format the url
-                        var displayMethod = t.data[pImageConstant.DISPLAY_METHOD_COLUMN_NAME];
-                        if (displayMethod in pImageConstant.IMAGE_URL_PATTERN) {
-                            channelURL = UriUtils.getAbsoluteURL(channelURL);
-
-                            channelURL = ERMrest.renderHandlebarsTemplate(pImageConstant.IMAGE_URL_PATTERN[displayMethod], {"url": channelURL, "iiif_version": pImageConstant.IIIF_VERSION});
-                        }
-
-                        // get the channel extra data
-                        var channelData = {};
-                        var channelVisColName = pImageConstant.CHANNEL_VISIBLE_COLUMN_NAME;
-                        if (t.linkedData && (channelVisColName in t.linkedData) && DataUtils.isObjectAndNotNull(t.linkedData[channelVisColName])) {
-                            channelData = t.linkedData[channelVisColName];
-                        }
-
-                        var channelName = channelData[channelConstant.CHANNEL_NAME_COLUMN_NAME];
-                        var pseudoColor = channelData[channelConstant.PSEUDO_COLOR_COLUMN_NAME];
-
-                        // create the channel info
                         var res = {};
-                        res[URLQParamAttr] = channelURL;
-                        res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
-                        res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : "null";
-                        // null should be treated the same as true
-                        res[osdConstant.IS_RGB_QPARAM] = channelData[channelConstant.IS_RGB_COLUMN_NAME] === false ? "false" : "true";
-                        channelList.push(res);
+                        res.url = imageURL;
+                        res.channelNumber = t.data[pImageConstant.CHANNEL_NUMBER_COLUMN_NAME];
+                        mainImageInfo.push(res);
                     }
                 }
 
@@ -305,10 +324,10 @@
                 return _readPageByPage(ref, pImageConstant.PAGE_SIZE, logObj, false, cb);
             }).then(function () {
                 if (hasNull) {
-                    channelList = [];
+                    mainImageInfo = [];
                 }
 
-                defer.resolve(channelList);
+                defer.resolve(mainImageInfo);
             }).catch(function (err) {
                 defer.reject(err);
             });
@@ -316,34 +335,30 @@
             return defer.promise;
         }
 
-        /**
-         * first try the processedImage table and then the ImageChannel to get the channel info
-         * that can be sent to osd viewer.
-         */
-        function getChannelInfo() {
-            var defer = $q.defer();
-            console.log("reading processed image");
-            _readProcessedImageTable().then(function (res) {
-                if (res.length !== 0) {
-                    return res;
-                }
+        function _createImageURL(data) {
+            var imageURL = data[pImageConstant.IMAGE_URL_COLUMN_NAME];
 
-                console.log("reading image channel");
-                return _readImageChannelTable();
-            }).then(function (channelList) {
-                defer.resolve(channelList);
-            }).catch(function (err) {
-                // just log the error and resolve with empty array
-                console.error("error while getting channel info: ", err);
-                defer.resolve([]);
-            });
-            return defer.promise;
+            // if any of the urls are null, then none of the values are valid
+            if (!DataUtils.isNoneEmptyString(imageURL)) {
+                return null;
+            }
+
+            // for different methods we might have to format the url
+            var displayMethod = data[pImageConstant.DISPLAY_METHOD_COLUMN_NAME];
+            if (displayMethod in pImageConstant.IMAGE_URL_PATTERN) {
+                imageURL = UriUtils.getAbsoluteURL(imageURL);
+
+                imageURL = ERMrest.renderHandlebarsTemplate(pImageConstant.IMAGE_URL_PATTERN[displayMethod], {"url": imageURL, "iiif_version": pImageConstant.IIIF_VERSION});
+            }
+
+            return imageURL;
         }
 
         /**
          * Send request to image annotation table and populates the values in the $rootScope
          */
-        function readAllAnnotations () {
+        function readAllAnnotations (initializeForm) {
+            console.log("fetching annotations for zIndex=" + context.defaultZIndex);
             var defer = $q.defer();
 
             // TODO should be done in ermrestjs
@@ -352,6 +367,10 @@
             imageAnnotationURL += encode(annotConstant.ANNOTATION_TABLE_NAME) + "/";
             imageAnnotationURL += encode(annotConstant.REFERENCE_IMAGE_COLUMN_NAME);
             imageAnnotationURL += "=" + encode(context.imageID);
+            if (context.defaultZIndex != null) {
+                imageAnnotationURL += "&" + encode(annotConstant.Z_INDEX_COLUMN_NAME);
+                imageAnnotationURL += "=" + encode(context.defaultZIndex);
+            }
 
             ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
 
@@ -385,6 +404,7 @@
                 ];
                 if ($rootScope.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
+                    annotationCreateForm.columnModels = [];
                     annotationCreateForm.reference.columns.forEach(function (column) {
                         // remove the invisible (asset, image, z-index, channels) columns
                         if (invisibleColumns.indexOf(column.name) !== -1) return;
@@ -395,6 +415,7 @@
 
                 if ($rootScope.canUpdate) {
                     annotationEditForm.reference = ref;
+                    annotationEditForm.columnModels = [];
                     annotationEditForm.reference.columns.forEach(function (column) {
                         // remove the invisible (asset, image, z-index, channels) columns
                         if (invisibleColumns.indexOf(column.name) !== -1) return;
@@ -443,6 +464,190 @@
             return defer.promise;
         }
 
+        function _createProcessedImageReference() {
+            var defer = $q.defer();
+            var path = encode(pImageConstant.PROCESSED_IMAGE_TABLE_SCHEMA_NAME) + ":";
+            path += encode(pImageConstant.PROCESSED_IMAGE_TABLE_NAME) + "/";
+            path += encode(pImageConstant.REFERENCE_IMAGE_COLUMN_NAME);
+            path += "=" + encode(context.imageID);
+            var url = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + path;
+
+            ERMrest.resolve(url, ConfigUtils.getContextHeaderParams()).then(function (res) {
+                if (!res) {
+                    return false;
+                }
+                defer.resolve(res.contextualize.compact);
+            }).catch(function (err) {
+                defer.reject(err);
+            });
+
+            return defer.promise;
+        }
+
+        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
+            console.log("fetching zplane page");
+            var defer = $q.defer(),
+                pImageRef = $rootScope.processedImageReference;
+
+            var context = "compact",
+                table = pImageRef.table,
+                catalog = pImageRef.table.schema.catalog,
+                zIndexColName = pImageConstant.Z_INDEX_COLUMN_NAME,
+                imagesArrayName = "images";
+
+            // group by Z_Index
+            var keyColumns = [
+                new ERMrest.AttributeGroupColumn(null, encode(zIndexColName), null, "z_index", "int4", "", true, true)
+            ];
+
+            // porject the image data
+            var aggregateColumns = [
+                new ERMrest.AttributeGroupColumn(imagesArrayName, "array(*)", null, imagesArrayName, "markdown", "", false, false)
+            ]
+
+            // get it from the input
+            var afterObject = null, beforeObject = null;
+            if (beforeValue != null) {
+                beforeObject = [beforeValue];
+            }
+            if (afterValue != null) {
+                afterObject = [afterValue];
+            }
+
+            // sort by Z_Index
+            var sortObj = [{"column": pImageConstant.Z_INDEX_COLUMN_NAME, "descending": false}];
+            var loc = new ERMrest.AttributeGroupLocation(
+                pImageRef.location.service,
+                catalog.id,
+                pImageRef.location.ermrestCompactPath,
+                null, //search object
+                sortObj,
+                afterObject,
+                beforeObject
+            );
+
+            var ref = new ERMrest.AttributeGroupReference(keyColumns, aggregateColumns, loc, catalog, table, context);
+
+            // log object
+            var logObj = {};
+            ref.read(pageSize, logObj).then(function (page) {
+                var res = [];
+                for (var i = 0; i < page.tuples.length; i++) {
+                    var data = page.tuples[i].data, imgInfo = [];
+
+                    // TODO if any of the data is null, the whole thing should be empty?
+                    if (!data) {
+                        return defer.resolve([]), defer.promise;
+                    }
+
+                    // TODO should we check for z_index not being null?
+                    if (data[zIndexColName] == null) {
+                        return defer.resolve([]), defer.promise;
+                    }
+
+                    // TODO should we make sure the array image data is not empty?
+                    if (!Array.isArray(data[imagesArrayName]) || data[imagesArrayName].length === 0) {
+                        return defer.resolve([]), defer.promise;
+                    }
+
+                    for (var j = 0; j < data[imagesArrayName].length; j++) {
+                        var d = data[imagesArrayName][j];
+
+                        var imageURL = _createImageURL(d);
+                        if (!DataUtils.isNoneEmptyString(imageURL)) {
+                            return defer.resolve([]), defer.promise;
+                        }
+
+                        imgInfo.push({
+                            channelNumber: d[pImageConstant.CHANNEL_NUMBER_COLUMN_NAME],
+                            url: imageURL
+                        });
+                    }
+
+                    res.push({
+                        zIndex: data[zIndexColName],
+                        info: imgInfo
+                    });
+                }
+
+                defer.resolve({
+                    requestID: requestID,
+                    images: res,
+                    hasPrevious: page.hasPrevious,
+                    hasNext: page.hasNext
+                });
+            }).catch(function (err) {
+                defer.reject(err);
+            })
+
+            return defer.promise;
+        }
+
+        /**
+         * 1. read the image_channel info
+         */
+        function loadImageMetadata() {
+            var channelURLs = [];
+            var defer = $q.defer(), pImageReference;
+
+            // first read the channel info
+            _readImageChannelTable().then(function (res) {
+                $rootScope.osdViewerParameters.channels = res.channelList;
+
+                // backward compatibility
+                channelURLs = res.channelURLs;
+
+                return _createProcessedImageReference();
+            }).then(function (res) {
+                // needed this for creating the attributegroup reference
+                $rootScope.processedImageReference = res;
+
+                // needed for doing the aggregate
+                pImageReference = res;
+
+                // read the main image (processed data)
+                return _readProcessedImageTable(pImageReference);
+            }).then (function (mainImageInfo) {
+                if (mainImageInfo.length == 0) {
+                    // TODO backward compatibility
+                    if (channelURLs.length > 0) {
+                        mainImageInfo = channelURLs;
+                    } else {
+                        return null;
+                    }
+                }
+
+                $rootScope.osdViewerParameters.mainImage = {
+                    zIndex: context.defaultZIndex,
+                    info: mainImageInfo
+                };
+
+                // then read the aggregate number of Zs
+                var zIndexCol = pImageReference.columns.find(function (col) {
+                    return col.name === pImageConstant.Z_INDEX_COLUMN_NAME;
+                });
+
+                if (zIndexCol != null) {
+                    // TODO log object
+                    return pImageReference.getAggregates([zIndexCol.aggregate.countDistinctAgg]);
+                }
+                return null;
+            }).then(function (res) {
+                if (res != null && Array.isArray(res) && res.length == 1) {
+                    $rootScope.osdViewerParameters.zPlaneTotalCount = res[0];
+                }
+
+                defer.resolve();
+            }).catch(function (err) {
+                // just log the error and resolve with empty array
+                console.error("error while getting channel info: ", err);
+                defer.resolve();
+            });
+
+            return defer.promise
+        }
+
+
         /**
          * since we don't know the size of our requests, this will make sure the
          * requests are done in batches until all the values are processed.
@@ -473,10 +678,11 @@
         }
 
         return {
-            populateOSDViewerQueryParams: populateOSDViewerQueryParams,
-            getChannelInfo: getChannelInfo,
             readAllAnnotations: readAllAnnotations,
-            hasURLQueryParam: hasURLQueryParam
+            hasURLQueryParam: hasURLQueryParam,
+            initializeOSDParams: initializeOSDParams,
+            loadImageMetadata: loadImageMetadata,
+            fetchZPlaneList: fetchZPlaneList
         };
 
     }]);

@@ -1332,6 +1332,10 @@
             return (obj && typeof obj[keyName] == 'string' && obj[keyName] != '')
         }
 
+        function isNonEmptyObject(obj) {
+            return typeof obj === "object" && obj !== null && Object.keys(obj).length > 0;
+        }
+
         /**
          * Verifies that the object is not null and is defined.
          */
@@ -1457,6 +1461,7 @@
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
             isObjectAndNotNull: isObjectAndNotNull,
+            isNonEmptyObject: isNonEmptyObject,
             isInteger: isInteger,
             isNoneEmptyString: isNoneEmptyString,
             getDisplaynameInnerText: getDisplaynameInnerText,

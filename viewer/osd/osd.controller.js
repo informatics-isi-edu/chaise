@@ -4,8 +4,8 @@
     angular.module('chaise.viewer')
 
     .controller('OSDController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', 'UriUtils', '$window', '$rootScope','$scope', '$timeout',
-        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, UriUtils, $window, $rootScope, $scope, $timeout) {
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
@@ -33,8 +33,8 @@
 
         $window.addEventListener('message', function channelControllerListener(event) {
             if (event.origin === window.location.origin) {
-                var data = event.data;
-                var messageType = data.messageType;
+                var data = event.data.content;
+                var messageType = event.data.messageType;
 
                 switch (messageType) {
                     case "osdLoaded":
@@ -45,8 +45,14 @@
                             }
                         });
                         break;
-                    case "showAlert":
-                        AlertsService.addAlert(data.content.message, data.content.type);
+                    case "fetchZPlaneList":
+                        $scope.$apply(function () {
+                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after).then(function (res) {
+                                iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
+                            }).catch(function (err) {
+                                throw err;
+                            });
+                        });
                         break;
                     case "openDrawingHelpPage":
                         $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
@@ -66,6 +72,9 @@
                             vm.waitingForScreenshot = false;
                             AlertsService.addAlert(errorMessages.viewerScreenshotFailed, "warning");
                         });
+                        break;
+                    case "showAlert":
+                        AlertsService.addAlert(data.message, data.type);
                         break;
                     default:
                         // other messages are handled by other controllers
