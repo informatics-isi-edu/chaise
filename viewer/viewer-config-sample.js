@@ -42,7 +42,7 @@ var viewerConfigs = {
              * As a hack, if the stored value has query parameters, we will only
              * use the query parameters. Otherwise it will use the stored value as is.
              */
-            "legacy_osd_url_column_name": "uri", // TODO rename in code
+            "legacy_osd_url_column_name": "uri",
         },
         /**
          * the table that stores each individual image for each channel in each z-plane
@@ -67,10 +67,9 @@ var viewerConfigs = {
 
             // the actual location of image file (info.json, ImageProperties.xml, etc)
             "image_url_column_name": "File_URL",
-
-            //{"source": [{"outbound": ["Gene_Expression", "Processed_Image_Reference_Image_Channel_Number_fkey"]}, "RID"], "entity": true}
-            // TODO: this will be removed with the multi-z support
-            "channel_visible_column_name": "AeweZsAMVSdW7Vf91boEfw",
+            
+            // the channel number column
+            "channel_number_column_name": "Channel_Number",
 
             // what is the display method (`iiif`, `dzi`, etc)
             "display_method_column_name": "Display_Method",
@@ -100,6 +99,9 @@ var viewerConfigs = {
 
             // the channelName column
             "channel_name_column_name": "Name",
+            
+            // the channelNumber column
+            "channel_number_column_name": "Channel_Number",
 
             // the pseudoColor column (the value must be in color hex format)
             "pseudo_color_column_name": "Pseudo_Color",
