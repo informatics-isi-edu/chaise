@@ -600,11 +600,9 @@
 
             return defer.promise;
         }
-
-        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
-            console.log("fetching zplane page");
-            var defer = $q.defer(),
-                pImageRef = $rootScope.processedImageReference;
+        
+        function _createProcessedImageAttributeGroupReference(beforeValue, afterValue, appendPath) {
+            var pImageRef = $rootScope.processedImageReference;
 
             var context = "compact",
                 table = pImageRef.table,
@@ -633,58 +631,80 @@
 
             // sort by Z_Index
             var sortObj = [{"column": pImageConfig.z_index_column_name, "descending": false}];
+            
+            // attach the path
+            var locationPath = pImageRef.location.ermrestCompactPath;
+            if (DataUtils.isNoneEmptyString(appendPath)) {
+                locationPath += appendPath;
+            }
+            
             var loc = new ERMrest.AttributeGroupLocation(
                 pImageRef.location.service,
                 catalog.id,
-                pImageRef.location.ermrestCompactPath,
+                locationPath,
                 null, //search object
                 sortObj,
                 afterObject,
                 beforeObject
             );
 
-            var ref = new ERMrest.AttributeGroupReference(keyColumns, aggregateColumns, loc, catalog, table, context);
+            return new ERMrest.AttributeGroupReference(keyColumns, aggregateColumns, loc, catalog, table, context);
+        }
+        
+        function _processAttributeGroupPage(page) {
+            var res = [];
+            for (var i = 0; i < page.tuples.length; i++) {
+                var data = page.tuples[i].data, imgInfo = [];
 
-            // log object
+                // TODO if any of the data is null, the whole thing should be empty?
+                if (!data) {
+                    return [];
+                }
+
+                // TODO should we check for z_index not being null?
+                if (data[zIndexColName] == null) {
+                    return [];
+                }
+
+                // TODO should we make sure the array image data is not empty?
+                if (!Array.isArray(data[imagesArrayName]) || data[imagesArrayName].length === 0) {
+                    return [];
+                }
+
+                for (var j = 0; j < data[imagesArrayName].length; j++) {
+                    var d = data[imagesArrayName][j];
+
+                    var imageURL = _createImageURL(d);
+                    if (!DataUtils.isNoneEmptyString(imageURL)) {
+                        return [];
+                    }
+
+                    imgInfo.push({
+                        channelNumber: d[pImageConfig.channel_number_column_name],
+                        url: imageURL
+                    });
+                }
+
+                res.push({
+                    zIndex: data[zIndexColName],
+                    info: imgInfo
+                });
+            }
+            return res;
+        }
+
+        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
+            console.log("fetching zplane page");
+            var defer = $q.defer();
+            
+            var ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
+            
+            // TODO log object
             var logObj = {};
             ref.read(pageSize, logObj).then(function (page) {
-                var res = [];
-                for (var i = 0; i < page.tuples.length; i++) {
-                    var data = page.tuples[i].data, imgInfo = [];
-
-                    // TODO if any of the data is null, the whole thing should be empty?
-                    if (!data) {
-                        return defer.resolve([]), defer.promise;
-                    }
-
-                    // TODO should we check for z_index not being null?
-                    if (data[zIndexColName] == null) {
-                        return defer.resolve([]), defer.promise;
-                    }
-
-                    // TODO should we make sure the array image data is not empty?
-                    if (!Array.isArray(data[imagesArrayName]) || data[imagesArrayName].length === 0) {
-                        return defer.resolve([]), defer.promise;
-                    }
-
-                    for (var j = 0; j < data[imagesArrayName].length; j++) {
-                        var d = data[imagesArrayName][j];
-
-                        var imageURL = _createImageURL(d);
-                        if (!DataUtils.isNoneEmptyString(imageURL)) {
-                            return defer.resolve([]), defer.promise;
-                        }
-
-                        imgInfo.push({
-                            channelNumber: d[pImageConfig.channel_number_column_name],
-                            url: imageURL
-                        });
-                    }
-
-                    res.push({
-                        zIndex: data[zIndexColName],
-                        info: imgInfo
-                    });
+                var res = _processAttributeGroupPage(page);
+                if (res == null || res.length == 0) {
+                    return defer.resolve([]), defer.promise;
                 }
 
                 defer.resolve({
@@ -697,6 +717,60 @@
                 defer.reject(err);
             })
 
+            return defer.promise;
+        }
+        
+        function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
+            var defer = $q.defer();
+            
+            // leq: lower than equal
+            // lt: lower than
+            // geq: greater than equal
+            // gt: greater than
+            // TODO you might want to modify the lt, geq, etc...
+            var beforeRef = _createProcessedImageAttributeGroupReference(
+                null, 
+                null,
+                encode(pImageConfig.z_index_column_name) + "::lt::" + zIndex
+            );
+            
+            var afterRef = _createProcessedImageAttributeGroupReference(
+                null, 
+                null,
+                encode(pImageConfig.z_index_column_name) + "::geq::" + zIndex
+            );
+            
+            // TODO log object
+            var beforeImages, beforePage, afterImages, afterPage;
+            beforeRef.read(pageSize, {}).then(function (page1) {
+                beforePage = page1;
+                beforeImages = _processAttributeGroupPage(page1);
+                return afterRef.read(pageSize, {});
+            }).then(function (page2) {
+                var res = []; // what will be sent to osd viewer
+                
+                afterPage = page2;
+                afterImages = _processAttributeGroupPage(page2);
+                
+                /**
+                 * afterImages and beforeImages are arrays that could be empty ([]),
+                 * you need to create a result array from that that with pageSize length
+                 * also need to properly set hasPrevious and hasNext.
+                 */
+                
+                //TODO @bhavya add your code here
+                
+                
+                defer.resolve({
+                    requestID: requestID,
+                    images: res,
+                    hasPrevious: page.hasPrevious,
+                    hasNext: page.hasNext
+                });
+            }).catch(function (err) {
+                defer.reject(err)
+            });
+            
             return defer.promise;
         }
 
@@ -799,7 +873,8 @@
             hasURLQueryParam: hasURLQueryParam,
             initializeOSDParams: initializeOSDParams,
             loadImageMetadata: loadImageMetadata,
-            fetchZPlaneList: fetchZPlaneList
+            fetchZPlaneList: fetchZPlaneList,
+            fetchZPlaneListByZIndex: fetchZPlaneListByZIndex
         };
 
     }]);

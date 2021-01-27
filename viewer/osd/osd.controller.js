@@ -54,6 +54,16 @@
                             });
                         });
                         break;
+                    // TODO change this to a better name
+                    case "fetchZPlaneListByZIndex":
+                        $scope.$apply(function () {
+                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex).then(function (res) {
+                                iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
+                            }).catch(function (err) {
+                                throw err;
+                            });
+                        });
+                        break;
                     case "openDrawingHelpPage":
                         $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
                         break;
