@@ -155,4 +155,4 @@ var viewerConfigs = {
             "annotated_term_name_column_name": "Name"
         }
     }
-}
+};

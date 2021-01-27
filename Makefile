@@ -67,8 +67,7 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
-# Viewer tests
-E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
+
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
@@ -100,7 +99,6 @@ DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
 FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
 PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
-VIEWER_TESTS=$(E2EDviewer)
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
@@ -136,10 +134,6 @@ testrecordedit: test-RECORDEDIT_TESTS
 
 .PHONY: testpermissions
 testpermissions:test-PERMISSIONS_TESTS
-
-#Rule to run viewer app tests
-.PHONY: testviewer
-testviewer: test-VIEWER_TESTS
 
 #Rule to run recordset app tests
 .PHONY: testrecordset
