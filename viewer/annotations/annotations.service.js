@@ -3,7 +3,7 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', 'viewerConstant', '$rootScope', 'logService', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q, viewerConstant, $rootScope, logService) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', '$rootScope', 'logService', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q, $rootScope, logService) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var table = null;
@@ -238,11 +238,11 @@
         function loadAnnotations(data) {
             iframe.postMessage({messageType: 'loadAnnotations', content: data}, origin);
         }
-        
+
         function startAnnotationChange(data) {
             iframe.postMessage({messageType: 'startAnnotationChange', content: data}, origin);
         }
-        
+
         function discardAnnotationChange(data) {
             iframe.postMessage({messageType: 'discardAnnotationChange', content: data}, origin);
         }

@@ -123,8 +123,8 @@
 
     // Hydrate values providers and set up iframe
     .run([
-        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConfig', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConfig, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
 
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
@@ -146,8 +146,7 @@
         var session;
         var imageURI, svgURIs = [], imageTuple;
         var config = ConfigUtils.getContextJSON();
-        var annotConstant = viewerConstant.annotation;
-        var imageConstant = viewerConstant.image;
+        var imageConfig = viewerConfig.getImageConfig();
         var osdConstant = viewerConstant.osdViewer;
 
         // TODO are these needed?
@@ -242,16 +241,16 @@
                     imageTuple = imagePage.tuples[0];
                     image.entity = imageTuple.data;
                     context.imageID = image.entity.RID;
-                    imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
+                    imageURI = image.entity[imageConfig.legacy_osd_url_column_name];
 
                     if (!imageURI) {
-                        console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty in Image table.");
+                        console.log("The " + imageConfig.legacy_osd_url_column_name + " value is empty in Image table.");
                     }
 
                     // TODO this feels hacky
                     // get the default zindex value
-                    if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
-                        context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
+                    if (imageConfig.default_z_index_column_name in image.entity) {
+                        context.defaultZIndex = image.entity[imageConfig.default_z_index_column_name];
                     }
 
                     /**
@@ -269,7 +268,7 @@
 
                         // get it from the constant
                         var pageTitleCaption = ERMrest.processMarkdownPattern(
-                            imageConstant.PAGE_TITLE_MARKDOWN_PATTERN,
+                            imageConfig.page_title_markdown_pattern,
                             imageTuple.data,
                             imageReference.table,
                             "detailed",
@@ -291,7 +290,7 @@
 
                         // get it from the constant
                         headTitleDisplayname = ERMrest.processMarkdownPattern(
-                            imageConstant.HEAD_TITLE_MARKDOWN_PATTERN,
+                            imageConfig.head_title_markdown_pattern,
                             imageTuple.data,
                             imageReference.table,
                             "detailed",
@@ -319,17 +318,28 @@
                 $rootScope.osdViewerParameters = res.osdViewerParams;
 
                 // add meterScaleInPixels query param if missing
-                var val = parseFloat(imageTuple.data[imageConstant.PIXEL_PER_METER_COLUMN_NAME]);
+                var val = parseFloat(imageTuple.data[imageConfig.pixel_per_meter_column_name]);
                 var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
                 if (!(qParamName in $rootScope.osdViewerParameters) && !isNaN(val)) {
                     $rootScope.osdViewerParameters[qParamName] = val;
                 }
 
                 // add waterMark query param if missing
-                val = imageTuple.linkedData[imageConstant.CONSORTIUM_VISIBLE_COLUMN_NAME];
+                var watermark = null;
+                if (DataUtils.isNoneEmptyString(imageConfig.watermark_column_name)) {
+                    // get it from the vis columns
+                    watermark = imageTuple.data[imageConfig.watermark_column_name]
+                } else if (DataUtils.isNoneEmptyString(imageConfig.watermark_foreign_key_visible_column_name)) {
+                    // get it from foreign key relationship
+                    val = imageTuple.linkedData[imageConfig.watermark_foreign_key_visible_column_name];
+                    if (DataUtils.isObjectAndNotNull(val)) {
+                        watermark = val[imageConfig.watermark_foreign_key_data_column_name];
+                    }
+                }
+
                 qParamName = osdConstant.WATERMARK_QPARAM;
-                if (!(qParamName in $rootScope.osdViewerParameters) && DataUtils.isObjectAndNotNull(val) && DataUtils.isNoneEmptyString(val[imageConstant.CONSORTIUM_URL_COLUMN_NAME])) {
-                    $rootScope.osdViewerParameters[qParamName] = val[imageConstant.CONSORTIUM_URL_COLUMN_NAME];
+                if (!(qParamName in $rootScope.osdViewerParameters) && DataUtils.isNoneEmptyString(watermark)) {
+                    $rootScope.osdViewerParameters[qParamName] = watermark;
                 }
 
                 // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.

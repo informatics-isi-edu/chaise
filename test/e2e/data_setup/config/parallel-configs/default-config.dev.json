@@ -12,8 +12,7 @@
             "recordedit/submission-disabled.config.json",
 
             "recordset/add.config.json",
-            "recordset/edit.config.json",
-            "viewer/config.json"
+            "recordset/edit.config.json"
         ]
     },
     "cleanup" : true

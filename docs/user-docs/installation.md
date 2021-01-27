@@ -38,7 +38,7 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
 
 ## Deploying
 
-1. First you need to setup some environment variables to tell ERMRestJS where it should install the package. The following are the variables and their default values:
+1. First you need to setup some environment variables to tell Chaise where it should install the package. The following are the variables and their default values:
 
     ```
     WEB_URL_ROOT=/
