@@ -22,7 +22,8 @@
     }
 
     figure {
-        overflow-x: auto;
+        // NOTE: breaks record pages where first column is hidden. Requires hide column headers PR change first
+        // overflow-x: auto;
     }
 
     .chaise-autofill {
