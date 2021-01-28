@@ -21,11 +21,6 @@
         margin: 5px 5px 5px 0;
     }
 
-    figure {
-        // NOTE: breaks record pages where first column is hidden. Requires hide column headers PR change first
-        // overflow-x: auto;
-    }
-
     .chaise-autofill {
         height: 90%;
         height: -webkit-fill-available;
