@@ -21,6 +21,26 @@
         margin: 5px 5px 5px 0;
     }
 
+    figure {
+        // overflow-x: auto;
+    }
+
+    .iframe-btn-container {
+        width: 20%;
+        text-align: right;
+
+        .chaise-btn.chaise-btn-iframe {
+            border: 2px solid #ccc;
+            border-bottom: none;
+            border-bottom-right-radius: 0px;
+            border-bottom-left-radius: 0px;
+        }
+    }
+
+    .chaise-btn-iframe:hover {
+        text-decoration: none;
+    }
+
     .chaise-autofill {
         height: 90%;
         height: -webkit-fill-available;
