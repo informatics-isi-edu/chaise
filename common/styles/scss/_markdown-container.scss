@@ -22,23 +22,39 @@
     }
 
     figure {
-        // overflow-x: auto;
-    }
-
-    .iframe-btn-container {
-        width: 20%;
-        text-align: right;
-
-        .chaise-btn.chaise-btn-iframe {
-            border: 2px solid #ccc;
-            border-bottom: none;
-            border-bottom-right-radius: 0px;
-            border-bottom-left-radius: 0px;
+        figcaption {
+            min-height: 20px;
         }
-    }
 
-    .chaise-btn-iframe:hover {
-        text-decoration: none;
+        .figcaption-wrapper {
+            min-height: 35px; // to account for margin + button height since button is "floating"
+            margin-top: 5px;
+
+            figcaption {
+                display: inline;
+            }
+        }
+
+        .iframe-btn-container {
+            text-align: right;
+            margin-top: 5px;
+
+            .chaise-btn.chaise-btn-iframe {
+                border: 2px solid #ccc;
+                border-bottom: none;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+            }
+
+            .chaise-btn-iframe:hover {
+                text-decoration: none;
+            }
+        }
+
+        // override the browser's default border
+        iframe {
+            border: 2px solid #ccc;
+        }
     }
 
     .chaise-autofill {
@@ -48,11 +64,6 @@
         width: 100%;
         width: -webkit-fill-available;
         width: -moz-available;
-    }
-
-    // override the browser's default border
-    iframe {
-        border: 2px solid #ccc;
     }
 
     // chaise-color-preview
