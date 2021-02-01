@@ -635,7 +635,7 @@
             // attach the path
             var locationPath = pImageRef.location.ermrestCompactPath;
             if (DataUtils.isNoneEmptyString(appendPath)) {
-                locationPath += appendPath;
+                locationPath += "/" + appendPath;
             }
             
             var loc = new ERMrest.AttributeGroupLocation(
