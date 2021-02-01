@@ -652,7 +652,10 @@
         }
         
         function _processAttributeGroupPage(page) {
-            var res = [];
+            var res = [],
+                zIndexColName = pImageConfig.z_index_column_name,
+                imagesArrayName = "images";
+            
             for (var i = 0; i < page.tuples.length; i++) {
                 var data = page.tuples[i].data, imgInfo = [];
 
