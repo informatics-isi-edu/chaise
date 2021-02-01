@@ -10,9 +10,6 @@ on:
 jobs:
   install-and-test:
     runs-on: ubuntu-16.04
-    defaults:
-      run:
-        working-directory: '$GITHUB_WORKSPACE'
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
