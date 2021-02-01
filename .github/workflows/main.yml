@@ -10,21 +10,98 @@ on:
 jobs:
   install-and-test:
     runs-on: ubuntu-16.04
-
+    defaults:
+      run:
+        shell: bash
+        working-directory: '$GITHUB_WORKSPACE'
     steps:
-      - name: setup-system
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+        with:
+          path: chaise
+      - name: Setup the system
         run: |
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
-      - name: setup-postgresql-10
+      - name: Setup nodejs
         run: |
+          curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+      - name: Setup postgresql-10
+        run: |
+          sudo service postgresql stop || true
+          sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6
           sudo service postgresql start 10
-      - name: setup-apache
+      - name: Setup apache
         run: |
           sudo apt-get install apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3
           sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
           sudo a2enmod ssl
           sudo a2ensite default-ssl
           sudo groupadd -o -g $(id -g www-data) apache 
-      - name: Checkout repository code
-        uses: actions/checkout@v2
+      - name: Setup python
+        run: |
+          sudo pip3 --version
+          sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
+          sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
+          sudo pip3 install requests
+          sudo pip3 install psycopg2-binary
+          sudo pip3 install git+https://github.com/informatics-isi-edu/webpy.git
+      - name: Install webauthn
+        run: |
+          sudo useradd -m -r webauthn
+          sudo su -c '/usr/bin/python3 -c "import sys;import pprint;pprint.pprint(sys.path)"' - webauthn
+          git clone https://github.com/informatics-isi-edu/webauthn.git
+          cd webauthn
+          sudo make testvars
+          sudo make install
+          sudo make deploy
+          sudo bash ./test/ubuntu-travis-setup.sh
+          sudo a2enmod webauthn
+          sudo service apache2 restart
+          cd ..
+      - name: Install hatrac
+        run: |
+          git clone https://github.com/informatics-isi-edu/hatrac.git
+          cd hatrac
+          sudo python3 ./setup.py install
+          sudo useradd -m -r hatrac
+          sudo -H -u postgres createuser -d hatrac
+          sudo -H -u postgres psql -c "GRANT webauthn TO hatrac"
+          sudo -H -u hatrac createdb hatrac
+          sudo cp test/hatrac_config.json ~hatrac/
+          sudo -H -u hatrac hatrac-deploy admin
+          sudo su -c 'python3 -c "import hatrac as m;m.sample_httpd_config()"' - hatrac > ../wsgi_hatrac.conf
+          sudo cp ../wsgi_hatrac.conf /etc/apache2/conf.d/wsgi_hatrac.conf
+          sudo mkdir /var/www/hatrac
+          sudo chown hatrac /var/www/hatrac
+          cd ..
+      - name: Install ermrest
+        run: |
+          git clone https://github.com/informatics-isi-edu/ermrest.git
+          cd ermrest
+          sudo -H make install PLATFORM=ubuntu1604
+          sudo which ermrest-deploy
+          sudo -H make deploy PLATFORM=ubuntu1604
+          cd ../chaise
+          sudo cp test/ermrest_config.json /home/ermrest/
+          sudo chmod a+r /home/ermrest/ermrest_config.json
+          cd ..
+      - name: Install ermrest-data-utils
+        run: |
+          git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
+          cd ErmrestDataUtils
+          sudo npm install
+          cd ..
+      - name: Install ermrestjs
+        run: |
+          git clone https://github.com/informatics-isi-edu/ermrestjs.git
+          cd ermrestjs
+          sudo make install
+      - name: Install chaise
+        run: |
+          sudo mkdir -p /var/www/html/chaise
+          cd chaise
+          sudo make install
+          sudo service apache2 restart
+
