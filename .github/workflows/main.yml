@@ -121,5 +121,6 @@ jobs:
           sudo -H -u webauthn webauthn2-manage assign test1 admin
       - name: Test full features confirmation
         run: |
+          cd chaise
           make testfullfeaturesconfirmation
 
