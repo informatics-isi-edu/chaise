@@ -10,6 +10,15 @@ on:
 jobs:
   install-and-test:
     runs-on: ubuntu-16.04
+    env:
+      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      COOKIES: ~/cookies
+      VERBOSE: brief
+      HTTPD_ERROR_LOG: /var/log/apache2/error.log
+      CHAISE_BASE_URL: http://127.0.0.1/chaise
+      ERMREST_URL: http://127.0.0.1/ermrest
+      SHARDING: true
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -19,6 +28,7 @@ jobs:
         run: |
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
+          echo "$SAUCE_USERNAME $SAUCE_ACCESS_KEY $SHARDING"
           sudo apt-get -y install libcurl4-openssl-dev libjson-c-dev
       - name: Setup nodejs
         run: |
@@ -103,4 +113,13 @@ jobs:
           cd chaise
           sudo make install
           sudo service apache2 restart
+      - name: Add tests users
+        run: |
+          sudo -H -u webauthn webauthn2-manage adduser test1
+          sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
+          sudo -H -u webauthn webauthn2-manage addattr admin
+          sudo -H -u webauthn webauthn2-manage assign test1 admin
+      - name: Test full features confirmation
+        run: |
+          make testfullfeaturesconfirmation
 
