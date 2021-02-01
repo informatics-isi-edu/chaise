@@ -27,8 +27,6 @@
         }
 
         .figcaption-wrapper {
-            min-height: 35px; // to account for margin + button height since button is "floating"
-
             figcaption {
                 display: inline;
             }
@@ -47,6 +45,12 @@
 
             .chaise-btn-iframe:hover {
                 text-decoration: none;
+            }
+        }
+
+        &.fullscreen-off  {
+            .iframe-btn-container {
+                display: none;
             }
         }
 
