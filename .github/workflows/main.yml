@@ -37,7 +37,9 @@ jobs:
           sudo groupadd -o -g $(id -g www-data) apache 
       - name: Setup python
         run: |
+          sudo python3 --version
           sudo pip3 --version
+          sudo apt-get install -y python3-setuptools
           sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
           sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
           sudo pip3 install requests
