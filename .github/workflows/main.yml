@@ -1,0 +1,30 @@
+
+name: Chaise e2e test
+
+on: 
+  push:
+    branches: 
+      - 'master'
+      - 'github-workflow-setup'
+
+jobs:
+  install-and-test:
+    runs-on: ubuntu-16.04
+
+    steps:
+      - name: setup-system
+        run: |
+          export TZ=America/Los_Angeles
+          export PATH="$(systemd-path user-binaries):$PATH"
+      - name: setup-postgresql-10
+        run: |
+          sudo service postgresql start 10
+      - name: setup-apache
+        run: |
+          sudo apt-get install apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3
+          sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+          sudo a2enmod ssl
+          sudo a2ensite default-ssl
+          sudo groupadd -o -g $(id -g www-data) apache 
+      - name: Checkout repository code
+        uses: actions/checkout@v2
