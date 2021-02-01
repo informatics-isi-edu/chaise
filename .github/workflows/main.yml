@@ -19,7 +19,7 @@ jobs:
         run: |
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
-          sudo apt-get -y install libcurl-dev libjson-c-dev
+          sudo apt-get -y install libcurl4-openssl-dev libjson-c-dev
       - name: Setup nodejs
         run: |
           curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
