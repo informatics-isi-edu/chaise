@@ -14,6 +14,7 @@ jobs:
   install-and-test:
     runs-on: ubuntu-16.04
     env:
+      GITHUB_ACTION_TUNNEL: github-action-tunnel
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       SHARDING: true
@@ -119,6 +120,12 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
+      - name: Connect to saucelabs
+        uses: saucelabs/sauce-connect-action@v1
+        with:
+          username: ${{ secrets.SAUCE_USERNAME }}
+          accesKey: ${{ secrets.SAUCE_ACCESS_KEY }}
+          tunnelIdentifier: github-action-tunnel
       - name: Test full features confirmation config
         run: |
           cd chaise
