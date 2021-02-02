@@ -697,7 +697,7 @@
         }
 
         function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
-            console.log("fetching zplane page");
+            console.log("fetching zplane page", requestID, pageSize, beforeValue, afterValue);
             var defer = $q.defer();
             
             var ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
@@ -724,6 +724,7 @@
         }
         
         function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
+            console.log(requestID, pageSize, zIndex);
             var defer = $q.defer();
             
             // leq: lower than equal
@@ -762,13 +763,14 @@
                  */
                 
                 //TODO @bhavya add your code here
+                console.log(beforeImages, afterImages)
                 
                 
                 defer.resolve({
                     requestID: requestID,
                     images: res,
-                    hasPrevious: page.hasPrevious,
-                    hasNext: page.hasNext
+                    hasPrevious: page2.hasPrevious,
+                    hasNext: page2.hasNext
                 });
             }).catch(function (err) {
                 defer.reject(err)
