@@ -601,7 +601,7 @@
             return defer.promise;
         }
         
-        function _createProcessedImageAttributeGroupReference(beforeValue, afterValue, appendPath) {
+        function _createProcessedImageAttributeGroupReference(beforeValue, afterValue) {
             var pImageRef = $rootScope.processedImageReference;
 
             var context = "compact",
@@ -634,9 +634,6 @@
             
             // attach the path
             var locationPath = pImageRef.location.ermrestCompactPath;
-            if (DataUtils.isNoneEmptyString(appendPath)) {
-                locationPath += "/" + appendPath;
-            }
             
             var loc = new ERMrest.AttributeGroupLocation(
                 pImageRef.location.service,
@@ -726,22 +723,18 @@
         function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
             console.log(requestID, pageSize, zIndex);
             var defer = $q.defer();
+                
             
-            // leq: lower than equal
-            // lt: lower than
-            // geq: greater than equal
-            // gt: greater than
-            // TODO you might want to modify the lt, geq, etc...
+            // before includes the z_index as well: @before(zIndex+1)
             var beforeRef = _createProcessedImageAttributeGroupReference(
-                null, 
-                null,
-                encode(pImageConfig.z_index_column_name) + "::lt::" + zIndex
+                parseInt(zIndex) + 1,
+                null
             );
             
+            // after will only include what's after: @after(zIndex)
             var afterRef = _createProcessedImageAttributeGroupReference(
-                null, 
                 null,
-                encode(pImageConfig.z_index_column_name) + "::geq::" + zIndex
+                parseInt(zIndex)
             );
             
             // TODO log object
