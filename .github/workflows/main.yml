@@ -51,7 +51,7 @@ jobs:
         run: |
           sudo python3 --version
           sudo pip3 --version
-          sudo apt-get install -y python3-setuptools
+          sudo apt-get install -y python3-setuptools python3-ply
           sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
           sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
           sudo pip3 install requests
@@ -71,7 +71,6 @@ jobs:
           sudo service apache2 restart
       - name: Install hatrac
         run: |
-          pwd
           git clone https://github.com/informatics-isi-edu/hatrac.git
           cd hatrac
           sudo python3 ./setup.py install
@@ -87,7 +86,6 @@ jobs:
           sudo chown hatrac /var/www/hatrac
       - name: Install ermrest
         run: |
-          pwd
           git clone https://github.com/informatics-isi-edu/ermrest.git
           cd ermrest
           sudo -H make install PLATFORM=ubuntu1604
@@ -96,22 +94,18 @@ jobs:
           cd ../chaise
           sudo cp test/ermrest_config.json /home/ermrest/
           sudo chmod a+r /home/ermrest/ermrest_config.json
-          cat /home/ermrest/ermrest_config.json
       - name: Install ermrest-data-utils
         run: |
-          pwd
           git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
           cd ErmrestDataUtils
           sudo npm install
       - name: Install ermrestjs
         run: |
-          pwd
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
           sudo make install
       - name: Install chaise
         run: |
-          pwd
           sudo mkdir -p /var/www/html/chaise
           cd chaise
           sudo npm install
