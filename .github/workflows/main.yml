@@ -121,7 +121,7 @@ jobs:
         run: |
           sudo service apache2 restart
       - name: Connect to saucelabs
-        uses: saucelabs/sauce-connect-action@v1
+        uses: saucelabs/sauce-connect-action@v1.1.1
         with:
           username: ${{ secrets.SAUCE_USERNAME }}
           accesKey: ${{ secrets.SAUCE_ACCESS_KEY }}
