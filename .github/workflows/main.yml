@@ -16,12 +16,10 @@ jobs:
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      SHARDING: true
       COOKIES: ~/cookies
       VERBOSE: brief
       HTTPD_ERROR_LOG: /var/log/apache2/error.log
-      CHAISE_BASE_URL: http://localhost/chaise
-      ERMREST_URL: http://localhost/ermrest
-      SHARDING: true
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2

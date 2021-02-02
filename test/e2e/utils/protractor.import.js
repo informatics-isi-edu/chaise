@@ -181,8 +181,12 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
 
     // reuse the same catalogid
     if (catalogId) settings.setup.catalog.id = catalogId;
-
-    ermrestUtils.createSchemasAndEntities(settings).then(function (data) {
+    
+    http.get(proces.env.ERMREST_URL).then(function (res) {
+        console.log("ermrest is installed:");
+        console.log(res);
+        return ermrestUtils.createSchemasAndEntities(settings);
+    }).then(function (data) {
         process.env.catalogId = data.catalogId;
         if (data.schemas) {
             for(schemaName in data.schemas) {

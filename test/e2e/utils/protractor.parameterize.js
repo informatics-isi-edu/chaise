@@ -25,11 +25,12 @@ exports.parameterize = function(config, configParams) {
 
   if (process.env.CI) {
     console.log("In CI");
+    console.log("sauce username is: " + process.env.SAUCE_USERNAME);
     config.sauceUser = process.env.SAUCE_USERNAME
     config.sauceKey = process.env.SAUCE_ACCESS_KEY
-    config.capabilities['tunnel-identifier'] =  process.env.CI_JOB_NUMBER;
+    config.capabilities['tunnel-identifier'] =  process.env.GITHUB_RUN_ID;
     config.capabilities['build'] = process.env.CI_BUILD_NUMBER;
-    config.capabilities['name'] = "chaise #" + process.env.CI_BUILD_NUMBER;
+    config.capabilities['name'] = process.env.GITHUB_WORKFLOW;
   }
 
   var onErmrestLogin = function(defer) {
