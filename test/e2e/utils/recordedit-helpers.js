@@ -1668,7 +1668,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 })
             }
 
-            if (!process.env.TRAVIS && tableParams.files.length > 0 && fileCols.length > 0) {
+            if (!process.env.CI && tableParams.files.length > 0 && fileCols.length > 0) {
                 describe("File fields,", function() {
                     it("should render input type as file input ", function() {
                         fileCols.forEach(function(column) {
@@ -1718,7 +1718,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
         });
 
         // if there is a file upload
-        if (!process.env.TRAVIS && tableParams.files.length > 0) {
+        if (!process.env.CI && tableParams.files.length > 0) {
             var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
             browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')),timeout).catch(function (err) {
                 // if the element is not available (there is no file) it will return error which we should ignore.
@@ -1772,8 +1772,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
             });
 
-            //NOTE: in travis we're not uploading the file and therefore this test case will fail
-            if (tableParams.not_travis) {
+            //NOTE: in ci we're not uploading the file and therefore this test case will fail
+            if (tableParams.not_ci) {
                 it('table must show correct results.', function() {
 
                     chaisePage.recordsetPage.getTableHeader().all(by.tagName("th")).then(function (headerCells) {
@@ -1840,8 +1840,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
             });
         });
 
-        //NOTE: in travis we're not uploading the file and therefore this test case will fail
-        if (!process.env.TRAVIS && tableParams.files.length > 0) {
+        //NOTE: in ci we're not uploading the file and therefore this test case will fail
+        if (!process.env.CI && tableParams.files.length > 0) {
             it('should have the correct submitted values.', function () {
                 if (hasErrors) {
                     expect(undefined).toBeDefined('submission had errors.');
@@ -1866,8 +1866,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
  * column_values - hash of column_name: column_value
  * acceptable column_value formats:
  *   - string
- *   - {value: string, ignoreInTRAVIS: boolean}
- *   - {link: true, value: string, ignoreInTRAVIS: boolean}
+ *   - {value: string, ignoreInCI: boolean}
+ *   - {link: true, value: string, ignoreInCI: boolean}
  *
  * Checks for if values are defined and set properly
  */
@@ -1883,7 +1883,7 @@ exports.testRecordAppValuesAfterSubmission = function(column_names, column_value
     for (var i = 0; i < column_names.length; i++) {
         var columnName = column_names[i];
         var column = chaisePage.recordPage.getColumnValue(columnName);
-        if (process.env.TRAVIS && column_values[columnName].ignoreInTRAVIS) {
+        if (process.env.CI && column_values[columnName].ignoreInCI) {
             continue;
         }
         else if (typeof column_values[columnName].link === 'string') {

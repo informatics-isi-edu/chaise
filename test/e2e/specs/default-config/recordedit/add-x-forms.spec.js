@@ -129,7 +129,7 @@ describe('Record Add', function() {
 
         describe("set the value for all forms at once for:", function () {
 
-            if (!process.env.TRAVIS && testParams.files.length > 0) {
+            if (!process.env.CI && testParams.files.length > 0) {
                 beforeAll(function(done) {
                     // create files that will be uploaded
                     recordEditHelpers.createFiles(testParams.files);
@@ -266,7 +266,7 @@ describe('Record Add', function() {
                 });
             });
 
-            if (!process.env.TRAVIS && testParams.files.length > 0) {
+            if (!process.env.CI && testParams.files.length > 0) {
                 it(testParams.uri_col_name, function (done) {
                     var colName = testParams.uri_col_name,
                         file = testParams.files[0];
@@ -402,7 +402,7 @@ describe('Record Add', function() {
                 expect(intArrInput3.getAttribute("value")).toBe(testParams.values.int_array.initial, "input 3 missmatch.");
             });
 
-            if (!process.env.TRAVIS && testParams.files.length > 0) {
+            if (!process.env.CI && testParams.files.length > 0) {
                 it("should clear the uri value in form 3.", function () {
                     var file = testParams.files[0];
                     chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(removeBtns) {
@@ -440,7 +440,7 @@ describe('Record Add', function() {
                 });
             });
 
-            if (!process.env.TRAVIS && testParams.files.length > 0) {
+            if (!process.env.CI && testParams.files.length > 0) {
                 afterAll(function(done) {
                     recordEditHelpers.deleteFiles(testParams.files);
                     done();

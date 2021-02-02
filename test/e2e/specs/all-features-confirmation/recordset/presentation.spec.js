@@ -255,7 +255,7 @@ describe('View recordset,', function() {
         fileParams = testParams.file_tuple;
 
 
-    if (!process.env.TRAVIS) {
+    if (!process.env.CI) {
         describe("For recordset with columns with waitfor, ", function () {
             var activeListParams = testParams.activeList;
             var activeListData = activeListParams.data;
@@ -317,7 +317,7 @@ describe('View recordset,', function() {
 
         describe("Presentation ,", function() {
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 beforeAll(function() {
                     // delete files that may have been downloaded before
                     console.log("delete files");
@@ -439,7 +439,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                         var csvOption = chaisePage.recordsetPage.getExportOption("Search results (CSV)");
@@ -740,7 +740,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 afterAll(function() {
                     // delete files that have been downloaded during tests
                     console.log("delete files");
@@ -1096,7 +1096,7 @@ describe('View recordset,', function() {
             });
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.CI) {
             describe("For when no catalog or schema:table is specified,", function() {
                 var baseUrl;
 

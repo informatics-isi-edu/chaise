@@ -109,7 +109,7 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    if (!process.env.TRAVIS) {
+    if (!process.env.CI) {
         it("should have 'This record (CSV)' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
@@ -573,7 +573,7 @@ exports.testSharePopup = function (citationParams) {
             });
         }
 
-        if (!process.env.TRAVIS && citationParams.bibtextFile) {
+        if (!process.env.CI && citationParams.bibtextFile) {
             it("should download the citation in BibTex format.", function (done) {
                 chaisePage.recordPage.getBibtex().click().then(function () {
                     browser.wait(function() {

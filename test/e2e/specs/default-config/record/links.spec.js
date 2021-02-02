@@ -31,7 +31,7 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.CI) {
             describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
@@ -137,7 +137,7 @@ describe('View existing record,', function() {
             });
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.CI) {
             // resolver is only configured to work locally
             it("Searching in go to RID input should navigate the user to the resolved record page matching that RID", function (done) {
                 var rid = chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;

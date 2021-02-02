@@ -23,13 +23,13 @@ exports.parameterize = function(config, configParams) {
 
   var launchPromise;
 
-  if (process.env.TRAVIS) {
-    console.log("In TRAVIS");
+  if (process.env.CI) {
+    console.log("In CI");
     config.sauceUser = process.env.SAUCE_USERNAME
     config.sauceKey = process.env.SAUCE_ACCESS_KEY
-    config.capabilities['tunnel-identifier'] =  process.env.TRAVIS_JOB_NUMBER;
-    config.capabilities['build'] = process.env.TRAVIS_BUILD_NUMBER;
-    config.capabilities['name'] = "chaise #" + process.env.TRAVIS_BUILD_NUMBER;
+    config.capabilities['tunnel-identifier'] =  process.env.CI_JOB_NUMBER;
+    config.capabilities['build'] = process.env.CI_BUILD_NUMBER;
+    config.capabilities['name'] = "chaise #" + process.env.CI_BUILD_NUMBER;
   }
 
   var onErmrestLogin = function(defer) {
@@ -66,13 +66,14 @@ exports.parameterize = function(config, configParams) {
   config.beforeLaunch = function() {
     var  defer = Q.defer();
 
-    if (process.env.TRAVIS) {
+    if (process.env.CI) {
       var exec = require('child_process').exec;
       exec("hostname", function (error, stdout, stderr) {
 
           process.env.ERMREST_URL = "http://" + stdout.trim() + "/ermrest";
           process.env.CHAISE_BASE_URL = "http://" + stdout.trim() + "/chaise";
-
+          
+          console.log("ERMrest url is " + process.env.ERMREST_URL);
           require('request')({
               url:  process.env.ERMREST_URL.replace('ermrest', 'authn') + '/session',
               method: 'POST',
@@ -92,6 +93,7 @@ exports.parameterize = function(config, configParams) {
                   onErmrestLogin(defer);
                 } else defer.reject(error);
               } else {
+                console.dir("Unable to retrieve userinfo")
                 console.dir(error);
                 defer.reject(error);
               }

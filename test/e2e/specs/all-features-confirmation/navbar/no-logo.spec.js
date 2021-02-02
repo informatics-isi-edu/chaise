@@ -51,7 +51,7 @@ describe('Navbar ', function() {
             });
         });
 
-        if (!process.env.TRAVIS){
+        if (!process.env.CI){
             // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
             it('top level menu with no children should use default "newTab" value and navigate in a new tab', function (done) {
                 var searchOption = menu.all(by.tagName('li')).get(0);

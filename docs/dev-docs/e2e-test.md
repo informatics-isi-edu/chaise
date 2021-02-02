@@ -8,7 +8,7 @@ For now, we only have E2E tests in Chaise. E2E tests are automation tests that s
 - **Jasmine**: the way in which the automation tests are written
 - **NPM**: to install necessary NodeJS packages
 - **SauceLabs**: platform for executing E2E tests and record (in video) the testing results by Travis CI
-- **Travis CI**: to test automatically every time code is pushed to Github repo
+- **Github workflow**: to do continuous integration (CI) by automatically testing every time code is pushed to Github repo
 - **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
 - **ErmrestDataUtils**: tool created in house for catalog/schema creation and seeding data ([Found here](https://github.com/informatics-isi-edu/ErmrestDataUtils))
 
@@ -222,7 +222,7 @@ $ ssh-add PATH/TO/KEY
 $ export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise
 ```
 
-**TRAVIS**: For TRAVIS there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
+**CI**: For CI there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
 
 ### Test Configuration JSON file
 
@@ -320,9 +320,9 @@ export SAUCE_ACCESS_KEY="your_access_key"
 
 Now when you run the tests, they will be executed on Sauce Labs instead of your machine. You can monitor them on their dashboard.
 
-## Running tests in TRAVIS
+## Running tests in CI
 
-### Travis Testing workflow
+### CI Testing workflow
 in the Chaise folder, invoke command
 ```sh
 npm test
@@ -345,12 +345,12 @@ sauceKey: process.env.SAUCE_ACCESS_KEY,
 ```
 These lines will set up credentials necessary to login SauceLabs and when detected, will execute these tests on SauceLabs. SauceLabs will then print the testing result on terminal and record the testing video on that account as well. When tests are finished, there will be a URL printed on terminal directing you to see the recorded results.
 
-When the code is pushed to ISI repo, the existence of **.travis.yml** will run "npm test" command in Travis CI, which will trigger the testing chain specified above.
+When the code is pushed to ISI repo, the Chaise e2e test Github workflow will run appropriate make commands, which will trigger the testing chain specified above.
 
 ### Environment Variables
 
-**.travis.yml**: [.travis.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.travis.yml)
-specifies environment variables in Travis CI so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in Travis CI one has to configure .travis.yml file.
+**./.github/workflows/main.yml**: [.travis.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.github/workflows/main.yml)
+specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure main.yml file.
 
 ```sh
 env:
@@ -362,7 +362,7 @@ env:
 ```
 The two "secure"s above set up the SauceLabs username and password and the ERMRest authCookie, and encrypt them. The last 2 lines set up env variable "CHAISE_BASE_URL" and "ERMREST_URL" without encryption. More details about it, take a look at Travis CI official website.
 
-While running tests on **TRAVIS** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **travis.yml** file.
+While running tests on **CI** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **main.yml** file.
 
 
 ## Writing test

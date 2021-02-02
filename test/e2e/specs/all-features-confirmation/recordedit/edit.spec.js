@@ -17,7 +17,7 @@ var testParams = {
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
         key: { name: "id", value: "2000", operator: "="},
-        not_travis: true,
+        not_ci: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -85,7 +85,7 @@ var testParams = {
        record_displayname: "90008", //since this is in single-edit, displayname is rowname.
        table_displayname: "file",
        table_comment: "asset/object",
-       not_travis: !process.env.TRAVIS,
+       not_ci: !process.env.CI,
        primary_keys: ["id"],
        key: { name: "id", value: "90008", operator: "="},
        columns: [
@@ -115,7 +115,7 @@ var testParams = {
     }]
 };
 
-if (!process.env.TRAVIS) {
+if (!process.env.CI) {
     // keep track of namespaces that we use, so we can delete them afterwards
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
@@ -126,7 +126,7 @@ describe('Edit existing record,', function() {
 
         (function(tableParams, index) {
 
-            if (!process.env.TRAVIS && tableParams.files.length > 0) {
+            if (!process.env.CI && tableParams.files.length > 0) {
                 beforeAll(function() {
                     // create files that will be uploaded
                     recordEditHelpers.createFiles(tableParams.files);
@@ -168,7 +168,7 @@ describe('Edit existing record,', function() {
                     recordEditHelpers.testSubmission(tableParams, true);
                 });
 
-                if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                if (!process.env.CI && tableParams.files.length > 0) {
                     afterAll(function(done) {
                         recordEditHelpers.deleteFiles(tableParams.files);
                         console.log("\n");

@@ -6,6 +6,9 @@ on:
     branches: 
       - 'master'
       - 'github-workflow-setup'
+  pull_request:
+    branches:
+      - 'master'
 
 jobs:
   install-and-test:
@@ -16,8 +19,8 @@ jobs:
       COOKIES: ~/cookies
       VERBOSE: brief
       HTTPD_ERROR_LOG: /var/log/apache2/error.log
-      CHAISE_BASE_URL: http://127.0.0.1/chaise
-      ERMREST_URL: http://127.0.0.1/ermrest
+      CHAISE_BASE_URL: http://localhost/chaise
+      ERMREST_URL: http://localhost/ermrest
       SHARDING: true
     steps:
       - name: Checkout repository code
@@ -120,8 +123,19 @@ jobs:
           sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
           sudo -H -u webauthn webauthn2-manage addattr admin
           sudo -H -u webauthn webauthn2-manage assign test1 admin
-      - name: Test full features confirmation
+      - name: Test full features confirmation config
         run: |
           cd chaise
           make testfullfeaturesconfirmation
-
+      - name: Test default config
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Test full features config
+        run: |
+          cd chaise
+          make testfullfeatures
+      - name: Test delete prohibited config
+        run: |
+          cd chaise
+          make testdeleteprohibited
