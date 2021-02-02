@@ -182,6 +182,7 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     // reuse the same catalogid
     if (catalogId) settings.setup.catalog.id = catalogId;
     
+    console.log("making sure ermrest can be accessible")
     http.get(process.env.ERMREST_URL).then(function (res) {
         console.log("ermrest is installed:");
         console.log(res);
@@ -205,6 +206,8 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
         }
         defer.resolve({entities: entities, catalogId: data.catalogId});
     }).catch(function (err) {
+        console.log("error while trying to create model and data:");
+        console.log(err);
         defer.reject(err);
     });
 };
