@@ -5,7 +5,6 @@ on:
   push:
     branches: 
       - 'master'
-      - 'github-workflow-setup'
   pull_request:
     branches:
       - 'master'
