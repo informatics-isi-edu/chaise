@@ -345,7 +345,7 @@ sauceKey: process.env.SAUCE_ACCESS_KEY,
 ```
 These lines will set up credentials necessary to login SauceLabs and when detected, will execute these tests on SauceLabs. SauceLabs will then print the testing result on terminal and record the testing video on that account as well. When tests are finished, there will be a URL printed on terminal directing you to see the recorded results.
 
-When the code is pushed to ISI repo, the Chaise e2e test Github workflow will run appropriate make commands, which will trigger the testing chain specified above.
+When the code is pushed to ISI repo, the "Chaise end-to-end tests" Github workflow will run appropriate make commands, which will trigger the testing chain specified above.
 
 ### Environment Variables
 

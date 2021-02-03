@@ -1,4 +1,4 @@
-# Chaise [![Build Status](https://github.com/informatics-isi-edu/chaise/workflows/Chaise%20e2e%20test/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+e2e+test%22+branch%3Amaster)
+# Chaise [![Build Status](https://github.com/informatics-isi-edu/chaise/workflows/Chaise%20end-to-end%20tests/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+end-to-end+tests%22+branch%3Amaster)
 _Computer-human access interface with schema evolution!_
 
 ## Overview
