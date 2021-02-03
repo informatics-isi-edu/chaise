@@ -128,12 +128,16 @@ jobs:
           done;
       - name: Run e2e test specs
         id: e2e-test
+        continue-on-error: true
         run: |
           cd chaise
           make testfullfeaturesconfirmation
           make testdefaultconfig
           make testfullfeatures
           make testdeleteprohibited
+      - name: Check on e2e test failures
+        if: (${{ steps.e2e-test.outcome }} == 'failure')
+        run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
