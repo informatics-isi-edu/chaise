@@ -47,7 +47,7 @@ describe('Navbar ', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
         // Count the number of nodes that are being shown (top level and submenus)
         //   - Local: config has 13 but 1 is hidden by ACLs
-        //   - Travis: config has 13 but 7 are hidden based on ACLs
+        //   - CI: config has 13 but 7 are hidden based on ACLs
         var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
@@ -143,7 +143,7 @@ describe('Navbar ', function() {
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
-    // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
+    // e.g. On CI, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
     xit('should have a "Log In" link', function() {
         var actualLink = element(by.id('login-link'));
         browser.wait(EC.elementToBeClickable(actualLink), browser.params.defaultTimeout).then(function() {

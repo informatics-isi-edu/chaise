@@ -14,13 +14,10 @@ jobs:
   install-and-test:
     runs-on: ubuntu-16.04
     env:
-      GITHUB_ACTION_TUNNEL: github-action-tunnel
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: true
-      COOKIES: ~/cookies
-      VERBOSE: brief
       PYTHONWARNINGS: ignore:Unverified HTTPS request
     steps:
       - name: Checkout repository code
@@ -129,25 +126,13 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Test full features confirmation config
-        continue-on-error: true
+      - name: Run e2e test specs
+        id: e2e-test
         run: |
           cd chaise
           make testfullfeaturesconfirmation
-      - name: Test default config
-        continue-on-error: true
-        run: |
-          cd chaise
           make testdefaultconfig
-      - name: Test full features config
-        continue-on-error: true
-        run: |
-          cd chaise
           make testfullfeatures
-      - name: Test delete prohibited config
-        continue-on-error: true
-        run: |
-          cd chaise
           make testdeleteprohibited
       - name: Diagnosis after failure
         if: ${{ failure() }}

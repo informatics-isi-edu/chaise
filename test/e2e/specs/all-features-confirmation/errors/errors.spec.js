@@ -107,7 +107,7 @@ describe('Error related test cases,', function() {
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
                   homePage =   homeAppUrl.slice(0, homeAppUrl.slice(0, homeAppUrl.lastIndexOf("/")).lastIndexOf("/") + 1);
-                  //Travis local URL has different structure
+                  // CI local URL has different structure
                   if (process.env.CI) {
                       homePage = currentUrl;
                   }
@@ -185,7 +185,7 @@ describe('Error related test cases,', function() {
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
                   homePage =   homeAppUrl.slice(0, homeAppUrl.slice(0, homeAppUrl.lastIndexOf("/")).lastIndexOf("/") + 1);
-                  //Travis local URL has different structure
+                  // CI local URL has different structure
                   if (process.env.CI) {
                       homePage = currentUrl;
                   }
