@@ -719,6 +719,21 @@
 
             return defer.promise;
         }
+
+        function getCenterList(beforeImages, afterImages, pageSize) {
+            var res = [];
+            var lenAfterImages = Math.min(afterImages.length, pageSize - parseInt(afterImages.length / 2))
+            // console.log(beforeImages.length, afterImages.length, lenAfterImages, typeof beforeImages);
+            // res = beforeImages;
+            // // console.log(res);
+            // res = res.concat(afterImages.splice(0, lenAfterImages));
+            // // console.log(res);
+            // if (res.length > pageSize) {
+            //     res = res.splice(lenAfterImages, res.length);
+            // }
+            console.log(res);
+            return beforeImages;
+        }
         
         function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
             console.log(requestID, pageSize, zIndex);
@@ -756,7 +771,10 @@
                  */
                 
                 //TODO @bhavya add your code here
-                console.log(beforeImages, afterImages)
+                console.log('before = ', beforeImages);
+                console.log('after =', afterImages);
+
+                res = getCenterList(beforeImages, afterImages, pageSize);
                 
                 
                 defer.resolve({
