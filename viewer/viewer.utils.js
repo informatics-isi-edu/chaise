@@ -720,19 +720,53 @@
             return defer.promise;
         }
 
+        /**
+         * After fetching the images before and after the inptu z index, this function combines the two array, by taking the second half from the before array and first half from the after array. The size of the array returned is equal to the pagesize
+         * @param {object} beforeImages
+         * @param {object} afterImages
+         * @param {integer} pageSize
+         */
         function getCenterList(beforeImages, afterImages, pageSize) {
             var res = [];
-            var lenAfterImages = Math.min(afterImages.length, pageSize - parseInt(afterImages.length / 2))
-            // console.log(beforeImages.length, afterImages.length, lenAfterImages, typeof beforeImages);
-            // res = beforeImages;
-            // // console.log(res);
-            // res = res.concat(afterImages.splice(0, lenAfterImages));
-            // // console.log(res);
-            // if (res.length > pageSize) {
-            //     res = res.splice(lenAfterImages, res.length);
-            // }
-            console.log(res);
-            return beforeImages;
+            var lenBI = beforeImages.length;
+            var lenAI = afterImages.length;
+            var half = parseInt(pageSize / 2);
+
+            if (lenBI + lenAI <= pageSize) {
+                res = beforeImages.concat(afterImages);
+            } else if (lenBI < half) {
+                // if the content in before images is less than half the page size, more content would be needed from the after images
+                res = beforeImages.concat(afterImages.splice(0, pageSize - lenBI));
+            } else if (lenAI < half) {
+                // if the content in after images is less than half the page size, more content would be needed from the before images 
+                res = beforeImages.splice(lenBI - (pageSize - lenAI), lenBI);
+                res = res.concat(afterImages);
+            } else {
+                res = beforeImages.concat(afterImages.splice(0, half));
+                res = res.splice(res.length - pageSize, res.length);
+            }
+            // console.log(res);
+            return res;
+        }
+
+        /**
+         * this function finds the location(position) of the image having the z index closest to the input z index
+         * @param {object} images
+         * @param {integer} inputZIndex
+         */
+        function getActiveZIndex (images, inputZIndex) {
+            // TODO find a better negation value
+            if (images.length == 0) {
+                return -1;
+            }
+
+            var res = 0;
+
+            for (var i = 1; i < images.length; i++) {
+                res = Math.abs(inputZIndex - images[i].zIndex) < Math.abs(images[res].zIndex - inputZIndex) ? i : res;
+            }
+
+            return res;
         }
         
         function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
@@ -754,10 +788,10 @@
             
             // TODO log object
             var beforeImages, beforePage, afterImages, afterPage;
-            beforeRef.read(pageSize, {}).then(function (page1) {
+            beforeRef.read(pageSize, {}, true).then(function (page1) {
                 beforePage = page1;
                 beforeImages = _processAttributeGroupPage(page1);
-                return afterRef.read(pageSize, {});
+                return afterRef.read(pageSize, {}, true);
             }).then(function (page2) {
                 var res = []; // what will be sent to osd viewer
                 
@@ -771,17 +805,18 @@
                  */
                 
                 //TODO @bhavya add your code here
-                console.log('before = ', beforeImages);
-                console.log('after =', afterImages);
+                // console.log('before = ', beforeImages);
+                // console.log('after =', afterImages);
 
                 res = getCenterList(beforeImages, afterImages, pageSize);
-                
                 
                 defer.resolve({
                     requestID: requestID,
                     images: res,
                     hasPrevious: page2.hasPrevious,
-                    hasNext: page2.hasNext
+                    hasNext: page2.hasNext,
+                    updateMainImage: true,
+                    mainImageZIndex: getActiveZIndex(res, zIndex)
                 });
             }).catch(function (err) {
                 defer.reject(err)
