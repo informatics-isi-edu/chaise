@@ -151,16 +151,16 @@ jobs:
           cd chaise
           make testdeleteprohibited
       - name: Check on full features confirmation test spec
-        if: steps.test-full-features-confirmation.outcome != 'success'
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-full-features-confirmation.outcome }} != 'success')
         run: exit 1
       - name: Check on default config test spec
-        if: steps.test-default-config.outcome != 'success'
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-default-config.outcome }} != 'success')
         run: exit 1
       - name: Check on full features test spec
-        if: steps.test-full-features.outcome != 'success'
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-full-features.outcome }} != 'success')
         run: exit 1
       - name: Check on delete prohibited test spec
-        if: steps.test-delete-prohibited.outcome != 'success'
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-delete-prohibited.outcome }} != 'success')
         run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
