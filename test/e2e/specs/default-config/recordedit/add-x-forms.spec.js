@@ -218,10 +218,18 @@ describe('Record Add', function() {
                             return (ct == 5);
                         });
                     }, browser.params.defaultTimeout);
+                    
+                    var displayingText = "Displayingall 5of 5 records";
+                        displayingTextError = "The total count display in the foreign key popup is incorrect";
+
+                    chaisePage.waitForTextInElement(chaisePage.recordsetPage.getTotalCount(), displayingText, null, displayingTextError);
 
                     // select value (the third row)
                     return chaisePage.recordsetPage.getRows().get(2).all(by.css(".select-action-button")).click();
                 }).then(function () {
+                    // wait for modal to close
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
+
                     return applyBtn.click();
                 }).then(function () {
                     return cancelBtn.click();
@@ -233,8 +241,7 @@ describe('Record Add', function() {
 
                     done();
                 }).catch(function (err) {
-                    console.dir(err);
-                    done.fail();
+                    done.fail(err);
                 });
             });
 
