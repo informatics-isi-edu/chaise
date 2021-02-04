@@ -25,6 +25,7 @@ jobs:
           path: chaise
       - name: Setup the system
         run: |
+          sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
           echo "$SAUCE_USERNAME $SAUCE_ACCESS_KEY $SHARDING"
@@ -130,12 +131,9 @@ jobs:
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeaturesconfirmation
-          make testdefaultconfig
-          make testfullfeatures
-          make testdeleteprohibited
+          make testparallel
       - name: Check on e2e test failures
-        if: (${{ steps.e2e-test.outcome }} == 'failure')
+        if: (${{ success() }} && (${{ steps.e2e-test.outcome }} == 'failure'))
         run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
