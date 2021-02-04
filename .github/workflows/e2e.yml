@@ -126,14 +126,41 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run e2e test specs
-        id: e2e-test
+      - name: Run full features confirmation test spec
+        id: test-full-features-confirmation
         continue-on-error: true
         run: |
           cd chaise
-          make testparallel
-      - name: Check on e2e test failures
-        if: (${{ success() }} && (${{ steps.e2e-test.outcome }} == 'failure'))
+          make testfullfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run full features test spec
+        id: test-full-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfullfeatures
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
+      - name: Check on full features confirmation test spec
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-full-features-confirmation.outcome }} == 'failure')
+        run: exit 1
+      - name: Check on default config test spec
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-default-config.outcome }} == 'failure')
+        run: exit 1
+      - name: Check on full features test spec
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-full-features.outcome }} == 'failure')
+        run: exit 1
+      - name: Check on delete prohibited test spec
+        if: (${{ success() }} || ${{ failure() }}) && (${{ steps.test-delete-prohibited.outcome }} == 'failure')
         run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
