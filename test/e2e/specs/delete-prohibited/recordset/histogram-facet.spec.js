@@ -271,7 +271,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in once more, unzoom once, then reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
-                                    testInputValue(facetParams.name, minInput facetParams.zoom3.min, "min input after zoom 3 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom3.min, "min input after zoom 3 is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.zoom3.max, "max input after zoom 3 is incorrect");
 
                                     if (facetParams.name == "int_col") {
