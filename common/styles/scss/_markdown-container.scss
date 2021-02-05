@@ -21,6 +21,46 @@
         margin: 5px 5px 5px 0;
     }
 
+    figure {
+        figcaption {
+            min-height: 20px;
+        }
+
+        .figcaption-wrapper {
+            figcaption {
+                display: inline;
+            }
+        }
+
+        .iframe-btn-container {
+            float: right;
+            text-align: right;
+            margin-top: 10px;
+
+            .chaise-btn.chaise-btn-iframe {
+                border: 2px solid #ccc;
+                border-bottom: none;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+            }
+
+            .chaise-btn-iframe:hover {
+                text-decoration: none;
+            }
+        }
+
+        &.fullscreen-off  {
+            .iframe-btn-container {
+                display: none;
+            }
+        }
+
+        // override the browser's default border
+        iframe {
+            border: 2px solid #ccc;
+        }
+    }
+
     .chaise-autofill {
         height: 90%;
         height: -webkit-fill-available;
@@ -28,11 +68,6 @@
         width: 100%;
         width: -webkit-fill-available;
         width: -moz-available;
-    }
-
-    // override the browser's default border
-    iframe {
-        border: 2px solid #ccc;
     }
 
     // chaise-color-preview
