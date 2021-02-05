@@ -16,12 +16,12 @@ var testParams = {
             zoom3: { min: "11", max: "19" }
         }, {
             name: "float_col",
-            absMin: "1.1",
-            absMax: "30.3",
-            zoom1: { min: "6.93", max: "24.46" },
-            zoom2: { min: "10.44", max: "20.95" },
+            absMin: "1.10",
+            absMax: "30.30",
+            zoom1: { min: "6.94", max: "24.46" },
+            zoom2: { min: "10.44", max: "20.96" },
             allRecords: "Displaying\nfirst 25\nof 155 matching results",
-            zoom3: { min: "12.54", max: "18.85" }
+            zoom3: { min: "12.55", max: "18.85" }
         }, {
             name: "date_col",
             absMin: "2001-01-01",
@@ -87,10 +87,10 @@ describe("Viewing Recordset with Faceting,", function() {
             expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "Displayed list of facets is incorrect");
         });
         
-        // if (!process.env.CI) {
-        //     console.log("histogram test cases only work on CI environments.");
-        //     return;
-        // }
+        if (!process.env.CI) {
+            console.log("histogram test cases only work on CI environments.");
+            return;
+        }
 
         describe("testing histogram functions for each facet type", function () {
 
