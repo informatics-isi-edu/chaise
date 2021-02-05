@@ -7,8 +7,8 @@ For now, we only have E2E tests in Chaise. E2E tests are automation tests that s
 - **Protractor**: E2E framework tailored for AngularJS apps
 - **Jasmine**: the way in which the automation tests are written
 - **NPM**: to install necessary NodeJS packages
-- **SauceLabs**: platform for executing E2E tests and record (in video) the testing results by Travis CI
-- **Travis CI**: to test automatically every time code is pushed to Github repo
+- **SauceLabs**: platform for executing E2E tests and record (in video) the testing results by CI
+- **Github workflow**: to do continuous integration (CI) by automatically testing every time code is pushed to Github repo
 - **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
 - **ErmrestDataUtils**: tool created in house for catalog/schema creation and seeding data ([Found here](https://github.com/informatics-isi-edu/ErmrestDataUtils))
 
@@ -222,7 +222,7 @@ $ ssh-add PATH/TO/KEY
 $ export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise
 ```
 
-**TRAVIS**: For TRAVIS there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
+**CI**: For CI there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
 
 ### Test Configuration JSON file
 
@@ -320,9 +320,9 @@ export SAUCE_ACCESS_KEY="your_access_key"
 
 Now when you run the tests, they will be executed on Sauce Labs instead of your machine. You can monitor them on their dashboard.
 
-## Running tests in TRAVIS
+## Running tests in CI
 
-### Travis Testing workflow
+### CI Testing workflow
 in the Chaise folder, invoke command
 ```sh
 npm test
@@ -345,24 +345,20 @@ sauceKey: process.env.SAUCE_ACCESS_KEY,
 ```
 These lines will set up credentials necessary to login SauceLabs and when detected, will execute these tests on SauceLabs. SauceLabs will then print the testing result on terminal and record the testing video on that account as well. When tests are finished, there will be a URL printed on terminal directing you to see the recorded results.
 
-When the code is pushed to ISI repo, the existence of **.travis.yml** will run "npm test" command in Travis CI, which will trigger the testing chain specified above.
+When the code is pushed to ISI repo, the "Chaise end-to-end tests" Github workflow will run appropriate make commands, which will trigger the testing chain specified above.
 
 ### Environment Variables
 
-**.travis.yml**: [.travis.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.travis.yml)
-specifies environment variables in Travis CI so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in Travis CI one has to configure .travis.yml file.
+**./.github/workflows/main.yml**: [.e2e.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.github/workflows/e2e.yml)
+specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure e2e.yml file. 
 
-```sh
-env:
-    global:
-        - CHAISE_BASE_URL: http://localhost/chaise
-        - ERMREST_URL: http://localhost/ermrest
-        - secure: KKPijZEdaQ7wyubNojHcJi/pgqwemhOzD8lHBV9c521+iybrHJRyR8fJE22OoMrn9UVPlk2pYgljpF1Vjubms10Kga4GT3vxjZ7kbadkgs09vIzo4SUQDi7XBrm3NbWIgYgcLhE8ZqhZo75idtkFMJCQclwLQ7vn5P5xSzNI3CUVxoQJ+uB6ZgVDn0b2ldfmqCBM5B52ocOBF1c4yLTmJwCkSRNdM2aVj4scf+S0h3InGCitHNyuu0WUYNvrIVIFhjCi7VuadCtJ7fy7Z2uFksHIxkT5Lx9WkdZX1M522ckvKhlFrOOB8ejIl//JsPsvy7cPAs7R9w+8LwiE3lmU376fxO9cKCrY7vnW78zHhbs3q6iFO2hhAiPILlcK3H626zbblHms8wsqUHkXlFx19FyTU8pqW86/4LKr6sdVRPyutokMdrFtgjFC1KevseK7GUWzOepOBJazXCc0WvQvUOUIWET5auRztLPEt0P9fh0hNamKWqYUiaW/nl0cUGAL/70PWSQBwIAHAry9mI9xVsBVVl0JhF5ljzqGmzFxRik7ylaYSZh1nTrjwjZDmBEOvycNsDqZBmU6Vc0KXtHaWF/AbCj1Lyng72YCe5jks058DGzv4nKonphNsG0bn3sb1oNHzFoHMncx8FxjZACsmuVzvzXtWTcv9O/iu+rbYxg=
-        - secure: hSGHl2cRYx9gmE2lrjRWu3H45ogd8hIiI9QlLZpvXonROZJSw8VqQWpLe/7m+95L8UDhOpnCXKct/V9+qUDsQM2kDpEP+9bNCf3skg7MFLkpr1te+y1mCkO0xu2vhoqrzJKtvXGIenZ/aEY1nQrnIYuF/5MaOzNRliHQ+7rmhigW7M4LSFqDQdj7CvqXsyk3cfNMbIeUI9H8/SrG9mxYfAa61H1zJtPmdDegvjFNcQeeT57lgYyoArOw4lcGm9KHQp2Hn4EtXv1L65DS7eogFit0CnS/1QHEinU2ibpgfb/vnAnRun5OAmjsiPAURLb6AuhevzDHeyMZrTPIGUHiIyuzG8qP264sWq1ukyjolyarwcwJoifJAdGWhVPT41XAlgAy+xgfN4xSKNp+tGPo9+iJqVGgccbpKAYqMQKvWSXO6DVQEqPHtpFuXsqNBBwvzCBAS+VdHFoKOy9bv2AEIpVOZJszIkuaNAQVqG/iD0pXQT9rEsZ4Ghm0N/RQf7qhGA4Ot1u5yOko1zgm15ATzpacy6qEzqQQwG3qilO2hUNK8xehqU52a4KQu79yGOG8zFkyvcUS3H/e4NQVeBFQ8GIrfcjg1vD5PXzdnun3iiLwwSXSk9CMHMW0B2z34qvg0q4++LWP2UMHkrx+yf/MzABoYuiZ6LshCvobftU7zmQ=
-```
-The two "secure"s above set up the SauceLabs username and password and the ERMRest authCookie, and encrypt them. The last 2 lines set up env variable "CHAISE_BASE_URL" and "ERMREST_URL" without encryption. More details about it, take a look at Travis CI official website.
+- Since CI e2e test require connecting to saucelabs, `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY`, 
+  and `SAUCE_TUNNEL_IDENTIFIER` are defined . `SAUCE_TUNNEL_IDENTIFIER` is used 
+  internally in the `e2e.yml` to create a saucelab tunnel with that identifier. And then
+  during the setup the same identifier is used to ensure connecting to the correct tunnel.
+- `SHARDING: true` ensures running test cases in parallel.
 
-While running tests on **TRAVIS** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **travis.yml** file.
+While running tests on **CI** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **main.yml** file.
 
 
 ## Writing test

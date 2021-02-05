@@ -49,7 +49,7 @@ describe('View existing record,', function() {
             done();
         });
 
-        if (process.env.TRAVIS) {
+        if (process.env.CI) {
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {
                 var permalink = browser.params.origin+"/id/"+chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID;
 
@@ -70,7 +70,7 @@ describe('View existing record,', function() {
         } else {
             // test RID search and resolverImplicitCatalog
             // NOTE: resolverImplicitCatalog=4 so locally catalog 4 does not exist and resolver should fail since no RID exists in catalog 4
-            // in travis, resolver isn't configured, so not testing
+            // in ci, resolver isn't configured, so not testing
             it('should show an error dialog if an improper RID is typed into the RID search box', function (done) {
                 var rid = chaisePage.getEntityRow("product-record", testParams.table_name, [{column: "id",value: "4004"}]).RID,
                     pageUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/RID=" + rid;

@@ -13,7 +13,7 @@ var testParams = {
         table_name: "accommodation",
         table_displayname: "Accommodations",
         table_comment: "List of different types of accommodations",
-        not_travis: true,
+        not_ci: true,
         primary_keys: ["id"],
         columns: [
             { name: "id", generated: true, immutable: true, title: "Id", type: "serial4", nullok: false},
@@ -86,7 +86,7 @@ var testParams = {
        table_name: "file",
        table_displayname: "file",
        table_comment: "asset/object",
-       not_travis: !process.env.TRAVIS,
+       not_ci: !process.env.CI,
        primary_keys: ["id"],
        columns: [
            { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
@@ -133,7 +133,7 @@ var testParams = {
       table_name: "file",
       table_displayname: "file",
       table_comment: "asset/object",
-      not_travis: !process.env.TRAVIS,
+      not_ci: !process.env.CI,
       primary_keys: ["id"],
       columns: [
           { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
@@ -174,7 +174,7 @@ var testParams = {
       table_name: "file",
       table_displayname: "file",
       table_comment: "asset/object",
-      not_travis: !process.env.TRAVIS,
+      not_ci: !process.env.CI,
       primary_keys: ["id"],
       columns: [
           { name: "fileid", title: "fileid", type: "int4", skipValidation: true },
@@ -213,7 +213,7 @@ var testParams = {
 };
 
 // keep track of namespaces that we use, so we can delete them afterwards
-if (!process.env.TRAVIS) {
+if (!process.env.CI) {
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
 
@@ -239,7 +239,7 @@ describe('Record Add', function() {
 
                 describe("Presentation and validation,", function() {
 
-                    if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                    if (!process.env.CI && tableParams.files.length > 0) {
                         beforeAll(function() {
                             // create files that will be uploaded
                             recordEditHelpers.createFiles(tableParams.files);
@@ -297,7 +297,7 @@ describe('Record Add', function() {
                     recordEditHelpers.testSubmission(tableParams);
                 });
 
-                if (!process.env.TRAVIS && tableParams.files.length > 0) {
+                if (!process.env.CI && tableParams.files.length > 0) {
                     afterAll(function() {
                         recordEditHelpers.deleteFiles(tableParams.files);
                         console.log("\n");
