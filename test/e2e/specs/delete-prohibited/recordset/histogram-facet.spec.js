@@ -243,7 +243,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return zoomBtn.click();
                                 }).then(function () {
                                     expect(getInputValue(minInput,facetParams.name)).toBe(facetParams.zoom1.min, "min input after zoom 1 is incorrect");
-                                    expect(getInputValue(maxInput, facetParams.name).toBe(facetParams.zoom1.max, "max input after zoom 1 is incorrect");
+                                    expect(getInputValue(maxInput, facetParams.name)).toBe(facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
