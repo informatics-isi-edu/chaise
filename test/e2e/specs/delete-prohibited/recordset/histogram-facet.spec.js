@@ -51,9 +51,9 @@ var testParams = {
     ]
 };
 
-function testInputValue (input, name, expectedVal, errorMessage) {
+function testInputValue (name, input, expectedVal, errorMessage) {
     input.getAttribute("value").then(function (val) {
-        if (name == "facet_col") {
+        if (name == "float_col") {
             val = parseFloat(val).toFixed(2);
         }
         expect(val).toEqual(expectedVal, errorMessage);
@@ -228,8 +228,8 @@ describe("Viewing Recordset with Faceting,", function() {
                                 minInput = chaisePage.recordsetPage.getRangeMinInput(idx, "range-min");
                                 maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "range-max");
 
-                                testInputValue(minInput, facetParams.name, facetParams.absMin, "initial min value is incorrect");
-                                testInputValue(maxInput, facetParams.name, facetParams.absMax, "initial max value is incorrect");
+                                testInputValue(facetParams.name, minInput, facetParams.absMin, "initial min value is incorrect");
+                                testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value is incorrect");
                             });
 
                             it("unzoom should be disabled, clicking zoom should zoom in and enable the unzoom button.", function () {
@@ -243,8 +243,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return zoomBtn.click();
                                 }).then(function () {
-                                    testInputValue(minInput, facetParams.name, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
-                                    testInputValue(maxInput, facetParams.name, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
@@ -254,8 +254,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in again and submit the range filter should display the proper resultset.", function () {
                                 zoomBtn.click().then(function () {
-                                    testInputValue(minInput, facetParams.name, facetParams.zoom2.min, "min input after zoom 2 is incorrect");
-                                    testInputValue(maxInput, facetParams.name, facetParams.zoom2.max, "max input after zoom 2 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom2.min, "min input after zoom 2 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom2.max, "max input after zoom 2 is incorrect");
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
@@ -271,8 +271,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in once more, unzoom once, then reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
-                                    testInputValue(minInput,facetParams.name, facetParams.zoom3.min, "min input after zoom 3 is incorrect");
-                                    testInputValue(maxInput,facetParams.name, facetParams.zoom3.max, "max input after zoom 3 is incorrect");
+                                    testInputValue(facetParams.name, minInput facetParams.zoom3.min, "min input after zoom 3 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom3.max, "max input after zoom 3 is incorrect");
 
                                     if (facetParams.name == "int_col") {
                                         expect(zoomBtnDisabled.count()).toBe(1, "zoom button is not disabled");
@@ -280,27 +280,27 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return unzoomBtn.click();
                                 }).then(function () {
-                                    testInputValue(minInput, facetParams.name, facetParams.zoom2.min, "min input after unzoom is incorrect");
-                                    testInputValue(maxInput, facetParams.name, facetParams.zoom2.max, "max input after unzoom is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom2.min, "min input after unzoom is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom2.max, "max input after unzoom is incorrect");
 
                                     return chaisePage.recordsetPage.getPlotlyReset(idx).click();
                                 }).then(function () {
-                                    testInputValue(minInput, facetParams.name, facetParams.absMin,  "initial min value after reset is incorrect");
-                                    testInputValue(maxInput, facetParams.name, facetParams.absMax, "initial max value after reset is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.absMin,  "initial min value after reset is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value after reset is incorrect");
                                 });
                             });
 
                             it("clear all filters should reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
-                                    testInputValue(minInput, facetParams.name, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
-                                    testInputValue(maxInput, facetParams.name, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return chaisePage.recordsetPage.getClearAllFilters().click();
                                 }).then(function () {
                                     chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-                                    testInputValue(minInput, facetParams.name, facetParams.absMin,  "initial min value after clear all is incorrect");
-                                    testInputValue(maxInput, facetParams.name, facetParams.absMax, "initial max value after clear all is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.absMin,  "initial min value after clear all is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value after clear all is incorrect");
                                 });
                             });
                         }
