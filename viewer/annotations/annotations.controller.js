@@ -142,6 +142,7 @@
 
                                     if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate) {
                                         $rootScope.disableAnnotationSidebar = true;
+                                        $rootScope.hideAnnotationSidebar = true;
                                     } else {
                                         $rootScope.disableAnnotationSidebar = false;
                                     }

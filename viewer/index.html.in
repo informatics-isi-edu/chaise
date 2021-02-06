@@ -41,14 +41,14 @@
                             <button ng-click="osd.filterChannels();" class="btn chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" uib-tooltip="channel filtering" id="filter-btn">
                                 <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
                             </button>
-                            <button ng-click="osd.zoomInView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="zoom in" id="zoomin-btn">
+                            <button ng-click="osd.zoomInView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="Zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
                             </button>
-                            <button ng-click="osd.zoomOutView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="zoom out" id="zoomout-btn">
+                            <button ng-click="osd.zoomOutView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="Zoom out" id="zoomout-btn">
                                 <span class="glyphicon glyphicon-zoom-out"></span> Zoom Out
                             </button>
-                            <button ng-click="osd.homeView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="reset" id="gohome-btn">
-                                <span class="glyphicon glyphicon-home"></span> Reset
+                            <button ng-click="osd.homeView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="Reset zoom" id="gohome-btn">
+                                <span class="fas fa-undo"></span> Reset Zoom
                             </button>
                             <button ng-click="osd.downloadView();" class="btn chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="take snapshot" id="download-btn" ng-disabled="osd.waitingForScreenshot">
                                 <span class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': osd.waitingForScreenshot, 'glyphicon-camera': !osd.waitingForScreenshot}"></span>
