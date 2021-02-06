@@ -47,8 +47,8 @@ describe('Navbar ', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
         // Count the number of nodes that are being shown (top level and submenus)
         //   - Local: config has 13 but 1 is hidden by ACLs
-        //   - Travis: config has 13 but 7 are hidden based on ACLs
-        var counter = (!process.env.TRAVIS ? 12 : 6); // counted from chaise config doc rather than having code count
+        //   - CI: config has 13 but 7 are hidden based on ACLs
+        var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
             expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
@@ -61,15 +61,15 @@ describe('Navbar ', function() {
     });
 
     it('should render a markdown pattern using proper HTML', function () {
-        // in travis we don't have the same globus groups so the "show" ACL hides the 3rd link ("Records")
-        var idx = (!process.env.TRAVIS ? 3 : 2);
+        // in ci we don't have the same globus groups so the "show" ACL hides the 3rd link ("Records")
+        var idx = (!process.env.CI ? 3 : 2);
         // option #4 has only markdownName defined
         element.all(by.css('#navbar-menu > li.dropdown')).get(idx).element(by.css("a")).getAttribute('innerHTML').then(function (aInnerHTML) {
             expect(aInnerHTML.indexOf("<strong>")).toBeGreaterThan(-1, "name was used instead of markdownName");
         });
     });
 
-    if (!process.env.TRAVIS) {
+    if (!process.env.CI) {
         var menuDropdowns, disabledSubMenuOptions;
         it('should have a disabled "Records" link.', function () {
             menuDropdowns = element.all(by.css('#navbar-menu > li.dropdown'));
@@ -102,7 +102,7 @@ describe('Navbar ', function() {
     }
 
     it('should show the "Full Name" of the logged in user in the top right', function () {
-        var name = (!process.env.TRAVIS ? browser.params.client.full_name : browser.params.client.display_name);
+        var name = (!process.env.CI ? browser.params.client.full_name : browser.params.client.display_name);
         expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
     });
 
@@ -143,7 +143,7 @@ describe('Navbar ', function() {
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
-    // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
+    // e.g. On CI, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
     xit('should have a "Log In" link', function() {
         var actualLink = element(by.id('login-link'));
         browser.wait(EC.elementToBeClickable(actualLink), browser.params.defaultTimeout).then(function() {

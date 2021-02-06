@@ -51,7 +51,7 @@ describe('Navbar ', function() {
             });
         });
 
-        if (!process.env.TRAVIS){
+        if (!process.env.CI){
             // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
             it('top level menu with no children should use default "newTab" value and navigate in a new tab', function (done) {
                 var searchOption = menu.all(by.tagName('li')).get(0);
@@ -113,7 +113,7 @@ describe('Navbar ', function() {
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
-    // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
+    // e.g. On CI, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
     xit('should have a "Log In" link', function() {
         var actualLink = element(by.id('login-link'));
         browser.wait(EC.elementToBeClickable(actualLink), browser.params.defaultTimeout).then(function() {

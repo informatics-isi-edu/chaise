@@ -227,7 +227,7 @@ describe('View existing record,', function() {
         });
 
         describe("Presentation ,", function() {
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 beforeAll(function() {
                     // delete files that may have been downloaded before
                     console.log("delete files");
@@ -237,7 +237,7 @@ describe('View existing record,', function() {
 
             recordHelpers.testPresentation(testParams);
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 afterAll(function() {
                     // delete files that have been downloaded during tests
                     console.log("delete files");

@@ -1,0 +1,176 @@
+
+name: Chaise end-to-end tests
+
+on: 
+  push:
+    branches: 
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+
+jobs:
+  install-and-test:
+    runs-on: ubuntu-16.04
+    env:
+      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
+      SHARDING: true
+      PYTHONWARNINGS: ignore:Unverified HTTPS request
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v2
+        with:
+          path: chaise
+      - name: Setup the system
+        run: |
+          sudo timedatectl set-timezone America/Los_Angeles
+          export TZ=America/Los_Angeles
+          export PATH="$(systemd-path user-binaries):$PATH"
+          echo "$SAUCE_USERNAME $SAUCE_ACCESS_KEY $SHARDING"
+          sudo apt-get -y install libcurl4-openssl-dev libjson-c-dev
+          curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          sudo service postgresql stop || true
+          sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6
+          sudo service postgresql start 10
+          sudo apt-get install apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3
+          sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
+          sudo a2enmod ssl
+          sudo a2ensite default-ssl
+          sudo groupadd -o -g $(id -g www-data) apache 
+          sudo python3 --version
+          sudo pip3 --version
+          sudo apt-get install -y python3-setuptools python3-ply
+          sudo su -c 'python3 -c "import site;print(site.PREFIXES);"'
+          sudo su -c 'python3 -c "import site;print(site.getsitepackages())"'
+          sudo pip3 install requests
+          sudo pip3 install psycopg2-binary
+          sudo pip3 install git+https://github.com/informatics-isi-edu/webpy.git
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Install webauthn
+        run: |
+          sudo useradd -m -r webauthn
+          sudo su -c '/usr/bin/python3 -c "import sys;import pprint;pprint.pprint(sys.path)"' - webauthn
+          git clone https://github.com/informatics-isi-edu/webauthn.git
+          cd webauthn
+          sudo make testvars
+          sudo make install
+          sudo make deploy
+          sudo bash ./test/ubuntu-travis-setup.sh
+          sudo a2enmod webauthn
+          sudo service apache2 restart
+      - name: Install hatrac
+        run: |
+          git clone https://github.com/informatics-isi-edu/hatrac.git
+          cd hatrac
+          sudo python3 ./setup.py install
+          sudo useradd -m -r hatrac
+          sudo -H -u postgres createuser -d hatrac
+          sudo -H -u postgres psql -c "GRANT webauthn TO hatrac"
+          sudo -H -u hatrac createdb hatrac
+          sudo cp test/hatrac_config.json ~hatrac/
+          sudo -H -u hatrac hatrac-deploy admin
+          sudo su -c 'python3 -c "import hatrac as m;m.sample_httpd_config()"' - hatrac > ../wsgi_hatrac.conf
+          sudo cp ../wsgi_hatrac.conf /etc/apache2/conf.d/wsgi_hatrac.conf
+          sudo mkdir /var/www/hatrac
+          sudo chown hatrac /var/www/hatrac
+      - name: Install ermrest
+        run: |
+          git clone https://github.com/informatics-isi-edu/ermrest.git
+          cd ermrest
+          sudo -H make install PLATFORM=ubuntu1604
+          sudo which ermrest-deploy
+          sudo -H make deploy PLATFORM=ubuntu1604
+          cd ../chaise
+          sudo cp test/ermrest_config.json /home/ermrest/
+          sudo chmod a+r /home/ermrest/ermrest_config.json
+      - name: Install ermrest-data-utils
+        run: |
+          git clone https://github.com/informatics-isi-edu/ErmrestDataUtils.git
+          cd ErmrestDataUtils
+          sudo npm install
+      - name: Install ermrestjs
+        run: |
+          git clone https://github.com/informatics-isi-edu/ermrestjs.git
+          cd ermrestjs
+          sudo make install
+      - name: Install chaise
+        run: |
+          sudo mkdir -p /var/www/html/chaise
+          cd chaise
+          sudo npm install
+          sudo make install
+      - name: Add tests users
+        run: |
+          sudo -H -u webauthn webauthn2-manage adduser test1
+          sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
+          sudo -H -u webauthn webauthn2-manage addattr admin
+          sudo -H -u webauthn webauthn2-manage assign test1 admin
+      - name: Restart apache
+        run: |
+          sudo service apache2 restart
+      - name: Setup and connect to saucelabs
+        run: |
+          curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
+          tar -xzf saucelabs.tar.gz
+          cd sc-*
+          bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
+      - name: Check sauce connect
+        run: |
+          while [ ! -f /tmp/sc_ready ]; do
+            echo "Waiting for Sauce Connect..."
+            sleep 5;
+          done;
+      - name: Run full features confirmation test spec
+        id: test-full-features-confirmation
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfullfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run full features test spec
+        id: test-full-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfullfeatures
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
+      - name: Check on full features confirmation test spec
+        if: always() && steps.test-full-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec
+        if: always() && steps.test-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on full features test spec
+        if: always() && steps.test-full-features.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
+      - name: Diagnosis after failure
+        if: ${{ failure() }}
+        run: |
+          sudo ls -lR /etc/apache2
+          sudo ls -lR /var/run/apache2
+          sudo cat /etc/apache2/conf.d/webauthn.conf
+          sudo cat /etc/apache2/conf.d/wsgi_webauthn2.conf
+          sudo cat /etc/apache2/conf.d/wsgi_ermrest.conf
+          sudo cat /var/log/apache2/error.log
+          sudo cat /var/log/apache2/access.log
+          sudo -H -u webauthn psql -c 'select * from webauthn2_db.session' webauthn
+                    
