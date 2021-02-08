@@ -84,7 +84,9 @@
                         });
                         break;
                     case "showAlert":
-                        AlertsService.addAlert(data.message, data.type);
+                        $scope.$apply(function(){
+                            AlertsService.addAlert(data.message, data.type);
+                        });
                         break;
                     default:
                         // other messages are handled by other controllers
