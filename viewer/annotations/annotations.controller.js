@@ -95,7 +95,15 @@
         vm.saveAnnotationRecord = saveAnnotationRecord;
         vm.toggleDisplay = toggleDisplay;
         vm.updateDisplayNum = updateDisplayNum;
-
+        
+        // we have to make sure the main image is loaded before 
+        // asking osd to update the annotations, 
+        // so there's a race-condition between annotation request
+        // and main image load time, and we have to make sure
+        // we're only loading time if both conidtions are met.
+        var mainImageLoaded = false,
+            annotationsRecieved = true; // we're loading the annotations as part of viewer app run block
+        
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             // TODO: Check if origin is valid first; if not, return and exit.
@@ -105,20 +113,25 @@
                 var messageType = data.messageType;
                 // console.log("event received : ", event);
                 switch (messageType) {
-                    case "osdInitializeFailed":
+                    case "mainImageLoadFailed":
                         $scope.$apply(function () {
                             AlertsService.addAlert(errorMessages.viewerOSDFailed, "error");
 
                             $rootScope.loadingAnnotations = false;
                         });
                         break;
-                    case 'osdInitialized':
-                        AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                    case 'mainImageLoaded':
+                        mainImageLoaded= true;
+                        
+                        if (annotationsRecieved) {
+                            AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                        }
                         break;
                     case 'updateMainImage':
                         $scope.$apply(function () {
                             // change defaultZIndex
                             context.defaultZIndex = data.content.zIndex;
+                        
 
                             // make sure it's not in edit/create mode
                             if (vm.editingAnatomy != null) {
@@ -129,16 +142,21 @@
                             annotationModels = [];
                             vm.annotationModels = annotationModels;
                             vm.updateDisplayNum();
+                            
+                            mainImageLoaded = false;
+                            annotationsRecieved = false;
+                            $rootScope.loadingAnnotations = true;
 
                             // read annotations
                             (function (currZIndex) {
-                                $rootScope.loadingAnnotations = true;
                                 viewerAppUtils.readAllAnnotations().then(function () {
                                     // if main image changed while fetching annotations, ignore it
                                     if (currZIndex != context.defaultZIndex) {
                                         console.log('ignoring stale annotation data');
                                         return;
                                     }
+
+                                    annotationsRecieved = true;
 
                                     if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate) {
                                         $rootScope.disableAnnotationSidebar = true;
@@ -147,9 +165,11 @@
                                         $rootScope.disableAnnotationSidebar = false;
                                     }
 
-                                    // ask osd to load the annotation
                                     if ($rootScope.annotationTuples.length > 0) {
-                                        AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                                        // ask osd to load the annotation
+                                        if (mainImageLoaded) {
+                                            AnnotationsService.loadAnnotations($rootScope.annotationURLs);
+                                        }
                                     } else {
                                         $rootScope.loadingAnnotations = false;
                                     }
