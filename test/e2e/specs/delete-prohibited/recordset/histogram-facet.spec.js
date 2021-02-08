@@ -16,12 +16,12 @@ var testParams = {
             zoom3: { min: "11", max: "19" }
         }, {
             name: "float_col",
-            absMin: "1.1",
-            absMax: "30.3",
+            absMin: "1.10",
+            absMax: "30.30",
             zoom1: { min: "6.94", max: "24.46" },
-            zoom2: { min: "10.444", max: "20.956" },
+            zoom2: { min: "10.44", max: "20.96" },
             allRecords: "Displaying\nfirst 25\nof 155 matching results",
-            zoom3: { min: "12.5464", max: "18.8536" }
+            zoom3: { min: "12.55", max: "18.85" }
         }, {
             name: "date_col",
             absMin: "2001-01-01",
@@ -51,6 +51,15 @@ var testParams = {
     ]
 };
 
+function testInputValue (name, input, expectedVal, errorMessage) {
+    input.getAttribute("value").then(function (val) {
+        if (name == "float_col") {
+            val = parseFloat(val).toFixed(2);
+        }
+        expect(val).toEqual(expectedVal, errorMessage);
+    });
+}
+
 
 describe("Viewing Recordset with Faceting,", function() {
 
@@ -77,6 +86,11 @@ describe("Viewing Recordset with Faceting,", function() {
         it("should have " + testParams.totalNumFacets + " facets", function () {
             expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "Displayed list of facets is incorrect");
         });
+        
+        if (!process.env.CI) {
+            console.log("histogram test cases only work on CI environments.");
+            return;
+        }
 
         describe("testing histogram functions for each facet type", function () {
 
@@ -214,8 +228,8 @@ describe("Viewing Recordset with Faceting,", function() {
                                 minInput = chaisePage.recordsetPage.getRangeMinInput(idx, "range-min");
                                 maxInput = chaisePage.recordsetPage.getRangeMaxInput(idx, "range-max");
 
-                                expect(minInput.getAttribute("value")).toBe(facetParams.absMin, "initial min value is incorrect");
-                                expect(maxInput.getAttribute("value")).toBe(facetParams.absMax, "initial max value is incorrect");
+                                testInputValue(facetParams.name, minInput, facetParams.absMin, "initial min value is incorrect");
+                                testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value is incorrect");
                             });
 
                             it("unzoom should be disabled, clicking zoom should zoom in and enable the unzoom button.", function () {
@@ -229,8 +243,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return zoomBtn.click();
                                 }).then(function () {
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.zoom1.min, "min input after zoom 1 is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.zoom1.max, "max input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
@@ -240,8 +254,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in again and submit the range filter should display the proper resultset.", function () {
                                 zoomBtn.click().then(function () {
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.zoom2.min, "min input after zoom 2 is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.zoom2.max, "max input after zoom 2 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom2.min, "min input after zoom 2 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom2.max, "max input after zoom 2 is incorrect");
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
@@ -257,8 +271,8 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in once more, unzoom once, then reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.zoom3.min, "min input after zoom 3 is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.zoom3.max, "max input after zoom 3 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom3.min, "min input after zoom 3 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom3.max, "max input after zoom 3 is incorrect");
 
                                     if (facetParams.name == "int_col") {
                                         expect(zoomBtnDisabled.count()).toBe(1, "zoom button is not disabled");
@@ -266,27 +280,27 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return unzoomBtn.click();
                                 }).then(function () {
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.zoom2.min, "min input after unzoom is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.zoom2.max, "max input after unzoom is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom2.min, "min input after unzoom is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom2.max, "max input after unzoom is incorrect");
 
                                     return chaisePage.recordsetPage.getPlotlyReset(idx).click();
                                 }).then(function () {
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.absMin, "initial min value after reset is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.absMax, "initial max value after reset is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.absMin,  "initial min value after reset is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value after reset is incorrect");
                                 });
                             });
 
                             it("clear all filters should reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.zoom1.min, "min input after zoom 1 is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.zoom1.max, "max input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return chaisePage.recordsetPage.getClearAllFilters().click();
                                 }).then(function () {
                                     chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-                                    expect(minInput.getAttribute("value")).toBe(facetParams.absMin, "initial min value after clear all is incorrect");
-                                    expect(maxInput.getAttribute("value")).toBe(facetParams.absMax, "initial max value after clear all is incorrect");
+                                    testInputValue(facetParams.name, minInput, facetParams.absMin,  "initial min value after clear all is incorrect");
+                                    testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value after clear all is incorrect");
                                 });
                             });
                         }

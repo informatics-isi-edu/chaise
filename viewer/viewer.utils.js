@@ -36,7 +36,8 @@
     })
 
     .factory("viewerConfig", ['DataUtils', 'defaultViewerConfig', 'UriUtils', '$window', function (DataUtils, defaultViewerConfig, UriUtils, $window) {
-            var all_configs = viewerConfigs, _config = null;
+            var all_configs = (typeof viewerConfigs == "object") ? viewerConfigs : null,
+                _config = null;
 
             function _findConfig(configName) {
                 if (configName in all_configs) {

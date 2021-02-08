@@ -1,4 +1,4 @@
-# Chaise [![Build Status](https://travis-ci.org/informatics-isi-edu/chaise.svg?branch=master)](https://travis-ci.org/informatics-isi-edu/chaise)
+# Chaise [![Build Status](https://github.com/informatics-isi-edu/chaise/workflows/Chaise%20end-to-end%20tests/badge.svg?branch=master)](https://github.com/informatics-isi-edu/chaise/actions?query=workflow%3A%22Chaise+end-to-end+tests%22+branch%3Amaster)
 _Computer-human access interface with schema evolution!_
 
 ## Overview
@@ -92,7 +92,7 @@ When developing new code for Chaise, please make sure you're following these ste
   - Try to provide as much information as you can on your PR. Explain the issues that the PR is fixing, and the changes that you've done in the PR.
   - Provide examples if applicable.
   - Deploy your changes to a server if applicable and provide links. You should not expect reviewers to deploy your code.
-  - Make sure Travis build is successful before merging your PR.
+  - Make sure Github Action build is successful before merging your PR.
   - Resolve the conflicts with master before merging the code (and go through the process of making sure tests are good to go).
 
 ## Help and Contact

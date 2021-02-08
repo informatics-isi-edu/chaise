@@ -12,7 +12,7 @@ using the appropriate channel UI.
 - **Image annotations** that overlay on top of main images. If data-modelers have 
   properly configured the application, viewer app will fetch and display the annotations. 
   Users have the ability to edit, delete, or create new annotation.
-- (_not implemented_) **Multi-z images**. If data-modelers have properly configured the application,
+- **Multi-z images**. If data-modelers have properly configured the application,
   viewer app provides a mechanism to navigate through the z-plane to
   display the images with different z-indices.
 - **IIIF, DZI, and other browser compatible images**. Viewer app uses the location

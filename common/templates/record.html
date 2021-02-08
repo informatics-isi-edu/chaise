@@ -8,7 +8,6 @@
             <span ng-show="showLoader($index)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader pull-right"></span>
         </td>
         <td class="entity-value col-xs-8 col-sm-8 col-md-9 col-lg-10" id="entity-{{makeSafeIdAttr(col.column.displayname.value)}}">
-
             <span ng-if="showColumn($index)" ng-hide="showError($index) || showLoader($index)">
                 <span ng-if="values[$index].isHTML" class="markdown-container" ng-bind-html="values[$index].value | trustedHTML"></span>
                 <span ng-if="!values[$index].isHTML">{{values[$index].value}}</span>

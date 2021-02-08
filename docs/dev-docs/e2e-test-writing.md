@@ -98,13 +98,13 @@ chaisePage.waitForUrl(url, 5000).then(function() {
 });
 ```
 
-### Detecting Travis Environment
+### Detecting CI Environment
 
-There're scenarios where you might need to determine which environment are your tests running; TRAVIS or locally. To determine that you can simply refer the variable `process.env.TRAVIS`. If it is true then the environment is Travis else it is something else.
+There're scenarios where you might need to determine which environment are your tests running; CI or locally. To determine that you can simply refer the variable `process.env.CI`. If it is true then the environment is CI else it is something else.
 
 ```js
-if (process.env.TRAVIS) {
-   // DO something Travis specific
+if (process.env.CI) {
+   // DO something CI specific
 } else {
   // DO something specific to local environment
 }
@@ -135,7 +135,7 @@ describe("Setting Login cookie", function() {
 
 You should try to put the performLogin function inside an `it` statement or `beforeAll`/`beforeEach` statement, so that it is executed in the flow of test.
 
-**NOTE**: Our Travis environment doesn't uses HTTPS for CHAISE. When we setup the cookie we set the secure flag in the path for cookie depending on environment. [Reference](http://resources.infosecinstitute.com/securing-cookies-httponly-secure-flags/#gref)
+**NOTE**: Our CI environment doesn't uses HTTPS for CHAISE. When we setup the cookie we set the secure flag in the path for cookie depending on environment. [Reference](http://resources.infosecinstitute.com/securing-cookies-httponly-secure-flags/#gref)
 
 ## Asynchronous actions
 
