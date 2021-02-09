@@ -25,6 +25,13 @@
                     "name": "text",
                     "type": {
                         "typename": "text"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:column-display" : {
+                            "detailed" : {
+                                "hide_column_header": true
+                            }
+                        }
                     }
                 }, {
                     "name": "int",
@@ -36,9 +43,6 @@
             "annotations": {}
         }
     },
-    "table_names": [
-        "html-name-table"
-    ],
     "comment": null,
     "annotations": {}
 }

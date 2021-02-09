@@ -93,6 +93,20 @@ describe('View existing record,', function() {
             });
         }
 
+        it("should hide the text column based on hide_column_header property of column-display annotation", function (done) {
+            chaisePage.recordPage.getColumns().then(function (cols) {
+                // shown column headers
+                expect(cols[0].isDisplayed()).toBeTruthy("Column header is hidden for id column");
+                expect(cols[2].isDisplayed()).toBeTruthy("Column header is hidden for int column");
+                // hidden column headers
+                expect(cols[1].isDisplayed()).toBeFalsy("Column header is shown for text column");
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+
         it ("The proper permalink (browser url) should appear in the share popup if resolverImplicitCatalog is undefined", function (done) {
             var shareButton = chaisePage.recordPage.getShareButton(),
                 shareModal = chaisePage.recordPage.getShareModal();
