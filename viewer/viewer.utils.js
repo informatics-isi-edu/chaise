@@ -735,16 +735,16 @@
 
             if (lenBI + lenAI <= pageSize) {
                 res = beforeImages.concat(afterImages);
-            } else if (lenBI < half) {
+            } else if (lenBI <= half) {
                 // if the content in before images is less than half the page size, more content would be needed from the after images
-                res = beforeImages.concat(afterImages.splice(0, pageSize - lenBI));
-            } else if (lenAI < half) {
+                res = beforeImages.concat(afterImages.slice(0, pageSize - lenBI));
+            } else if (lenAI <= half) {
                 // if the content in after images is less than half the page size, more content would be needed from the before images 
-                res = beforeImages.splice(lenBI - (pageSize - lenAI), lenBI);
+                res = beforeImages.slice(lenBI - (pageSize - lenAI), lenBI);
                 res = res.concat(afterImages);
             } else {
-                res = beforeImages.concat(afterImages.splice(0, half));
-                res = res.splice(res.length - pageSize, res.length);
+                res = beforeImages.concat(afterImages.slice(0, half));
+                res = res.slice(res.length - pageSize, res.length);
             }
             // console.log(res);
             return res;
@@ -806,8 +806,8 @@
                  */
                 
                 //TODO @bhavya add your code here
-                // console.log('before = ', beforeImages);
-                // console.log('after =', afterImages);
+                console.log('before = ', beforeImages);
+                console.log('after =', afterImages);
 
                 res = getCenterList(beforeImages, afterImages, pageSize);
                 
