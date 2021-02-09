@@ -806,8 +806,8 @@
                  */
                 
                 //TODO @bhavya add your code here
-                console.log('before = ', beforeImages);
-                console.log('after =', afterImages);
+                // console.log('before = ', beforeImages);
+                // console.log('after =', afterImages);
 
                 res = getCenterList(beforeImages, afterImages, pageSize);
                 
