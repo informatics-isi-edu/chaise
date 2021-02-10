@@ -28,6 +28,9 @@
         }
 
         .figcaption-wrapper {
+            // min height should include enough space for the button height and the margin above
+            min-height: 40px;
+
             figcaption {
                 display: inline;
             }
