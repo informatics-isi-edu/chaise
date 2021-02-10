@@ -116,9 +116,9 @@
     }])
 
     .factory('viewerAppUtils', [
-        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConfig', 'viewerConstant',
+        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'recordCreate', 'messageMap', 'UriUtils', 'viewerConfig', 'viewerConstant',
         '$q', '$rootScope',
-        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, logService, recordCreate, UriUtils, viewerConfig, viewerConstant,
+        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, Errors, ErrorService, logService, recordCreate, messageMap, UriUtils, viewerConfig, viewerConstant,
                   $q, $rootScope) {
 
         var annotConfig = viewerConfig.getAnnotationConfig(),
@@ -456,7 +456,7 @@
             if (!DataUtils.isNoneEmptyString(imageURL)) {
                 return null;
             }
-            
+
             var displayMethod = data[pImageConfig.display_method_column_name];
             if (displayMethod in pImageConfig.image_url_pattern) {
                 imageURL = UriUtils.getAbsoluteURL(imageURL);
@@ -601,7 +601,7 @@
 
             return defer.promise;
         }
-        
+
         function _createProcessedImageAttributeGroupReference(beforeValue, afterValue) {
             var pImageRef = $rootScope.processedImageReference;
 
@@ -632,10 +632,10 @@
 
             // sort by Z_Index
             var sortObj = [{"column": pImageConfig.z_index_column_name, "descending": false}];
-            
+
             // attach the path
             var locationPath = pImageRef.location.ermrestCompactPath;
-            
+
             var loc = new ERMrest.AttributeGroupLocation(
                 pImageRef.location.service,
                 catalog.id,
@@ -648,12 +648,12 @@
 
             return new ERMrest.AttributeGroupReference(keyColumns, aggregateColumns, loc, catalog, table, context);
         }
-        
+
         function _processAttributeGroupPage(page) {
             var res = [],
                 zIndexColName = pImageConfig.z_index_column_name,
                 imagesArrayName = "images";
-            
+
             for (var i = 0; i < page.tuples.length; i++) {
                 var data = page.tuples[i].data, imgInfo = [];
 
@@ -697,9 +697,9 @@
         function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
             console.log("fetching zplane page", requestID, pageSize, beforeValue, afterValue);
             var defer = $q.defer();
-            
+
             var ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
-            
+
             // TODO log object
             var logObj = {};
             ref.read(pageSize, logObj).then(function (page) {
@@ -739,7 +739,7 @@
                 // if the content in before images is less than half the page size, more content would be needed from the after images
                 res = beforeImages.concat(afterImages.slice(0, pageSize - lenBI));
             } else if (lenAI <= half) {
-                // if the content in after images is less than half the page size, more content would be needed from the before images 
+                // if the content in after images is less than half the page size, more content would be needed from the before images
                 res = beforeImages.slice(lenBI - (pageSize - lenAI), lenBI);
                 res = res.concat(afterImages);
             } else {
@@ -761,32 +761,46 @@
                 return -1;
             }
 
-            var res = 0;
+            var res = 0, found = (inputZIndex == images[0].zIndex);
 
             for (var i = 1; i < images.length; i++) {
+                found = found || (inputZIndex == images[i].zIndex);
                 res = Math.abs(inputZIndex - images[i].zIndex) < Math.abs(images[res].zIndex - inputZIndex) ? i : res;
+            }
+
+            if (!found) {
+                // TODO better header?
+                var header = "Z index out of range";
+
+                // TODO better error message
+                var message = "Couldn't find any image with Z index value of <code>" + inputZIndex + "</code>.";
+                message += "Say something about matching with closest."; // TODO
+
+                var err = new Errors.CustomError(header, message, null, messageMap.clickActionMessage.dismissDialog, true);
+
+                ErrorService.handleException(err, true);
             }
 
             return res;
         }
-        
+
         function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
             console.log(requestID, pageSize, zIndex);
             var defer = $q.defer();
-                
-            
+
+
             // before includes the z_index as well: @before(zIndex+1)
             var beforeRef = _createProcessedImageAttributeGroupReference(
                 parseInt(zIndex) + 1,
                 null
             );
-            
+
             // after will only include what's after: @after(zIndex)
             var afterRef = _createProcessedImageAttributeGroupReference(
                 null,
                 parseInt(zIndex)
             );
-            
+
             // TODO log object
             var beforeImages, beforePage, afterImages, afterPage;
             beforeRef.read(pageSize, {}, true).then(function (page1) {
@@ -795,22 +809,22 @@
                 return afterRef.read(pageSize, {}, true);
             }).then(function (page2) {
                 var res = []; // what will be sent to osd viewer
-                
+
                 afterPage = page2;
                 afterImages = _processAttributeGroupPage(page2);
-                
+
                 /**
                  * afterImages and beforeImages are arrays that could be empty ([]),
                  * you need to create a result array from that that with pageSize length
                  * also need to properly set hasPrevious and hasNext.
                  */
-                
+
                 //TODO @bhavya add your code here
                 // console.log('before = ', beforeImages);
                 // console.log('after =', afterImages);
 
                 res = getCenterList(beforeImages, afterImages, pageSize);
-                
+
                 defer.resolve({
                     requestID: requestID,
                     images: res,
@@ -822,7 +836,7 @@
             }).catch(function (err) {
                 defer.reject(err)
             });
-            
+
             return defer.promise;
         }
 
