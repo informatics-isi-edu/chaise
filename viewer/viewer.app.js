@@ -317,23 +317,26 @@
 
                 $rootScope.osdViewerParameters = res.osdViewerParams;
 
-                // add meterScaleInPixels query param if missing
-                var val = parseFloat(imageTuple.data[imageConfig.pixel_per_meter_column_name]);
-                var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
-                if (!(qParamName in $rootScope.osdViewerParameters) && !isNaN(val)) {
-                    $rootScope.osdViewerParameters[qParamName] = val;
-                }
+                // fetch the missing parameters from database
+                if (imageTuple) {
+                    // add meterScaleInPixels query param if missing
+                    var val = parseFloat(imageTuple.data[imageConfig.pixel_per_meter_column_name]);
+                    var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
+                    if (!(qParamName in $rootScope.osdViewerParameters) && !isNaN(val)) {
+                        $rootScope.osdViewerParameters[qParamName] = val;
+                    }
 
-                // add waterMark query param if missing
-                var watermark = null;
-                if (DataUtils.isNoneEmptyString(imageConfig.watermark_column_name)) {
-                    // get it from the vis columns
-                    watermark = imageTuple.data[imageConfig.watermark_column_name]
-                } else if (DataUtils.isNoneEmptyString(imageConfig.watermark_foreign_key_visible_column_name)) {
-                    // get it from foreign key relationship
-                    val = imageTuple.linkedData[imageConfig.watermark_foreign_key_visible_column_name];
-                    if (DataUtils.isObjectAndNotNull(val)) {
-                        watermark = val[imageConfig.watermark_foreign_key_data_column_name];
+                    // add waterMark query param if missing
+                    var watermark = null;
+                    if (DataUtils.isNoneEmptyString(imageConfig.watermark_column_name)) {
+                        // get it from the vis columns
+                        watermark = imageTuple.data[imageConfig.watermark_column_name]
+                    } else if (DataUtils.isNoneEmptyString(imageConfig.watermark_foreign_key_visible_column_name)) {
+                        // get it from foreign key relationship
+                        val = imageTuple.linkedData[imageConfig.watermark_foreign_key_visible_column_name];
+                        if (DataUtils.isObjectAndNotNull(val)) {
+                            watermark = val[imageConfig.watermark_foreign_key_data_column_name];
+                        }
                     }
                 }
 

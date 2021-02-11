@@ -1,9 +1,9 @@
 
 name: Chaise end-to-end tests
 
-on: 
+on:
   push:
-    branches: 
+    branches:
       - 'master'
   pull_request:
     branches:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   install-and-test:
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-20.04
     env:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
@@ -28,18 +28,15 @@ jobs:
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
-          echo "$SAUCE_USERNAME $SAUCE_ACCESS_KEY $SHARDING"
+          sudo apt-get -y update
           sudo apt-get -y install libcurl4-openssl-dev libjson-c-dev
-          curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
-          sudo apt-get install -y nodejs
           sudo service postgresql stop || true
-          sudo apt-get -y purge postgresql-9.1 postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6
-          sudo service postgresql start 10
+          sudo service postgresql start 12
           sudo apt-get install apache2 apache2-dev ssl-cert libapache2-mod-wsgi-py3
           sudo ln -s /etc/apache2/conf-enabled /etc/apache2/conf.d
           sudo a2enmod ssl
           sudo a2ensite default-ssl
-          sudo groupadd -o -g $(id -g www-data) apache 
+          sudo groupadd -o -g $(id -g www-data) apache
           sudo python3 --version
           sudo pip3 --version
           sudo apt-get install -y python3-setuptools python3-ply
@@ -173,4 +170,3 @@ jobs:
           sudo cat /var/log/apache2/error.log
           sudo cat /var/log/apache2/access.log
           sudo -H -u webauthn psql -c 'select * from webauthn2_db.session' webauthn
-                    
