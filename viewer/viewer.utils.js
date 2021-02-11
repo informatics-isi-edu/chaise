@@ -728,25 +728,38 @@
          * @param {integer} pageSize
          */
         function getCenterList(beforeImages, afterImages, pageSize) {
-            var res = [];
+            var images = [];
             var lenBI = beforeImages.length;
             var lenAI = afterImages.length;
             var half = parseInt(pageSize / 2);
+            var hasNext = true;
+            var hasPrevious = true;
 
-            if (lenBI + lenAI <= pageSize) {
-                res = beforeImages.concat(afterImages);
+            if (lenBI + lenAI < pageSize) {
+                images = beforeImages.concat(afterImages);
+                hasNext = false;
+                hasPrevious = false;
             } else if (lenBI <= half) {
                 // if the content in before images is less than half the page size, more content would be needed from the after images
-                res = beforeImages.concat(afterImages.slice(0, pageSize - lenBI));
+                images = beforeImages.concat(afterImages.slice(0, pageSize - lenBI));
+                // there are no indexes before the first BI
+                hasPrevious = false;
             } else if (lenAI <= half) {
                 // if the content in after images is less than half the page size, more content would be needed from the before images
-                res = beforeImages.slice(lenBI - (pageSize - lenAI), lenBI);
-                res = res.concat(afterImages);
+                images = beforeImages.slice(lenBI - (pageSize - lenAI), lenBI);
+                images = images.concat(afterImages);
+                // there are no indexes after the last AI
+                hasNext = false;
             } else {
-                res = beforeImages.concat(afterImages.slice(0, half));
-                res = res.slice(res.length - pageSize, res.length);
+                images = beforeImages.concat(afterImages.slice(0, half));
+                images = images.slice(images.length - pageSize, images.length);
             }
-            // console.log(res);
+
+            var res = {
+                images: images,
+                hasNext: hasNext,
+                hasPrevious: hasPrevious
+            }
             return res;
         }
 
@@ -827,11 +840,11 @@
 
                 defer.resolve({
                     requestID: requestID,
-                    images: res,
-                    hasPrevious: page2.hasPrevious,
-                    hasNext: page2.hasNext,
+                    images: res.images,
+                    hasPrevious: res.hasPrevious,
+                    hasNext: res.hasNext,
                     updateMainImage: true,
-                    mainImageZIndex: getActiveZIndex(res, zIndex)
+                    mainImageZIndex: getActiveZIndex(res.images, zIndex)
                 });
             }).catch(function (err) {
                 defer.reject(err)
