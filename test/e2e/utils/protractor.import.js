@@ -157,6 +157,10 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     configs.forEach(function (config) {
         // copy annotations and ACLs over to the submitted catalog object
         if (config.catalog && typeof config.catalog === "object") {
+            if (!("acls" in config.catalog)) {
+                config.catalog["acls"] = { "select": ["*"] };
+            }
+
             // if empty object, this loop is skipped
             for (var prop in config.catalog) {
                 // if property is set already
@@ -181,7 +185,7 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
 
     // reuse the same catalogid
     if (catalogId) settings.setup.catalog.id = catalogId;
-    
+
     http.get(process.env.ERMREST_URL).then(function (res) {
         return ermrestUtils.createSchemasAndEntities(settings);
     }).then(function (data) {
