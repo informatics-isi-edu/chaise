@@ -2515,6 +2515,7 @@
             SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
             SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
             CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
+            IFRAME_FULLSCREEN: "iframe" + clientPathActionSeparator + "fullscreen",
 
             // recordset app and table:
 
@@ -2893,7 +2894,7 @@
         };
     }])
 
-    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', 'UiUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, MathUtils, modalUtils, $q, $rootScope, UriUtils, UiUtils, $window) {
+    .service('headInjector', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'MathUtils', 'modalUtils', '$q', '$rootScope', 'UriUtils', 'UiUtils', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, MathUtils, modalUtils, $q, $rootScope, UriUtils, UiUtils, $window) {
 
         /**
          * adds a link tag to head with the custom css. It will be resolved when
@@ -3068,6 +3069,21 @@
             });
         }
 
+        function logIframeFullscreen() {
+            addClickListener('a.chaise-btn-iframe', function (e, element) {
+                // prevent the default link behavior, so we log the action first
+                e.preventDefault();
+                e.stopPropagation();
+
+                logService.logClientAction({
+                    action: logService.getActionString(logService.logActions.IFRAME_FULLSCREEN, "", "")
+                });
+
+                // change the window location (do the default link behavior)
+                $window.location = element.href;
+            });
+        }
+
         /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
@@ -3120,6 +3136,7 @@
             setWindowName();
             overrideDownloadClickBehavior();
             overrideExternalLinkBehavior();
+            logIframeFullscreen();
             addBodyClasses();
             return addCustomCSS();
         }
