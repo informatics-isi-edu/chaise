@@ -783,11 +783,11 @@
 
             if (!found) {
                 // TODO better header?
-                var header = "Z index out of range";
+                var header = "Z index not found";
 
                 // TODO better error message
-                var message = "Couldn't find any image with Z index value of <code>" + inputZIndex + "</code>.";
-                message += "Say something about matching with closest."; // TODO
+                var message = "Couldn't find any image with Z index value of <code>" + inputZIndex + "</code>, among the generated indexes. ";
+                message += "Displaying the closest generated index."; // TODO
 
                 var err = new Errors.CustomError(header, message, null, messageMap.clickActionMessage.dismissDialog, true);
 
