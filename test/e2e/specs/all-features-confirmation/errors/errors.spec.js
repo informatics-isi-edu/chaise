@@ -152,7 +152,7 @@ describe('Error related test cases,', function() {
             chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-                var newapplink = url.replace("record", "recordset");
+                var newapplink = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable;
                 expect(currentUrl).toContain(newapplink, "The redirection from record page to recordset in case of multiple records failed");
                 done();
             }).catch(chaisePage.catchTestError(done));
