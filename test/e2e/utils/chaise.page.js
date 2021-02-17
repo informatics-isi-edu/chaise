@@ -1413,6 +1413,12 @@ function chaisePage() {
         };
     };
 
+    /**
+     * Simulate the login process by navigating to a chaise page and
+     * changing cookie and localStorage values.
+     * NOTE if we change the cookie/localStorage that we're adding during login,
+     *      this function needs to be updated too.
+     */
     this.performLogin = function(cookie, isAlertPresent, defer) {
         defer = defer || require('q').defer();
 
@@ -1425,12 +1431,14 @@ function chaisePage() {
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
-            browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"')).then(function() {
-              browser.ignoreSynchronization = false;
-              defer.resolve();
-            });
-        }, function() {
-            defer.reject();
+            return browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"'))
+        }).then(function() {
+            return browser.driver.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
+        }).then(function () {
+            browser.ignoreSynchronization = false;
+            defer.resolve();
+        }).catch(function (err) {
+            defer.reject(err);
         });
 
         return defer.promise;
