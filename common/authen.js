@@ -161,7 +161,7 @@
             else {
                 window.addEventListener('message', function(args) {
                     if (args && args.data && (typeof args.data == 'string')) {
-                        _setKeyInStorage(PREVIOUS_SESSION_KEY);
+                        _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
                         _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
                         var obj = UriUtils.queryStringToJSON(args.data);
                         if (obj.referrerid == referrerId && (typeof cb== 'function')) {

@@ -121,6 +121,10 @@
                     > td {
                         border-top: 0;
                         padding: $record-table-cell-padding;
+
+                        &.entity-value {
+                            overflow-wrap: break-word;
+                        }
                     }
 
                     &.row-focus{
@@ -371,18 +375,18 @@
         .bottom-panel-container{
             .table {
                 .entity-key {
-                  padding-left:20px;
-                  width: 15%;
-                  min-width: 150px;
-                  float: left;
+                    padding-left:20px;
+                    width: 15%;
+                    min-width: 150px;
+                    float: left;
                 }
 
-            .entity-value {
-                  width: 85%;
-                  padding-left: 15%;
-                  padding-right: 8px;
-                  padding-top: 8px;
-                  padding-bottom: 8px;
+                .entity-value {
+                    width: 85%;
+                    padding-left: 15%;
+                    padding-right: 8px;
+                    padding-top: 8px;
+                    padding-bottom: 8px;
                 }
             }
         }
