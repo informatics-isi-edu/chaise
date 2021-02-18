@@ -884,7 +884,8 @@
          * Gives the path of the chaise deployment directory.
          *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
          *   - otherwise, returns the default value '/chaise/'
-        */
+         * Assume this function will return a value with a leading and trailing `/`
+         */
         function chaiseDeploymentPath() {
             if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
                 var path = chaiseBuildVariables.chaiseBasePath;
@@ -2152,7 +2153,7 @@
                 message: "@?"
             },
             link: function (scope, elem, attrs) {
-                scope.spinnerPath = UriUtils.chaiseDeploymentPath() + "/common/styles/images/loader.gif";
+                scope.spinnerPath = UriUtils.chaiseDeploymentPath() + "common/styles/images/loader.gif";
             }
         }
     }])
