@@ -1276,7 +1276,7 @@ function chaisePage() {
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
     this.recordeditPageReady = function() {
-        this.waitForElement(element(by.id("submit-record-button")));
+        this.waitForClickableElement(element(by.id("submit-record-button")));
         return this.waitForElementInverse(element(by.id("recordedit-main-spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
@@ -1348,6 +1348,10 @@ function chaisePage() {
               return new RegExp(expectedUrlFragment).test(url);
             });
         }, timeout || browser.params.defaultTimeout);
+    };
+
+    this.waitForClickableElement = function (locator, timeout) {
+        return browser.wait(protractor.ExpectedConditions.elementToBeClickable(locator), timeout || browser.params.defaultTimeout);
     };
 
     this.waitForElement = function (locator, timeout) {
