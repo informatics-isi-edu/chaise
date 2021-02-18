@@ -295,8 +295,8 @@ describe('View existing record,', function() {
         });
 
         it('A error modal window should appear with multiple records found error with correct title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
 
         });
 

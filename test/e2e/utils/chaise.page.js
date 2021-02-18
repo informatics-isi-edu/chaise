@@ -701,10 +701,6 @@ var recordPage = function() {
         return element(by.id("bibtex-download"));
     };
 
-    this.getErrorModalTitle = function(){
-        return browser.executeScript("return $('.modal-title')[0].innerHTML;");
-    };
-
     this.getErrorModalReloadButton = function(){
         return element(by.id('error-reload-button'));
     };
@@ -1223,6 +1219,10 @@ var errorModal = function () {
 
     this.getErrorDetails = function () {
         return element(by.id('error-details'));
+    }
+
+    this.getTitle = function () {
+        return element(by.css(".modal-title"));
     }
 };
 
