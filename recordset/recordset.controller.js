@@ -15,7 +15,6 @@
         function updateLocation() {
             $window.scrollTo(0, 0);
             $window.history.replaceState({}, '', UriUtils.getRecordsetLink(recordsetModel.reference));
-            $rootScope.location = $window.location.href;
         }
 
         $rootScope.$on('reference-modified', function() {
