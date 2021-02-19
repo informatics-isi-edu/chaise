@@ -1650,7 +1650,7 @@
 
         /**
          * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
-         * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
+         * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#navheader` will be used.
          * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
          * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
          * If you don't pass any parentContainer, it will use the body
@@ -1723,7 +1723,7 @@
 
                 // get the parent sticky
                 if (parentContainerSticky == null) {
-                    parentContainerSticky = document.querySelector("#mainnav");
+                    parentContainerSticky = document.querySelector("#navheader");
                 }
 
                 // the content that we should make scrollable if the content height is too small

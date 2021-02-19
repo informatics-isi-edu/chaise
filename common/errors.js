@@ -516,7 +516,7 @@
             }, false, moveErrorModal);
 
             function moveErrorModal() {
-                var mainnav = $document[0].getElementById('mainnav');
+                var mainnav = $document[0].getElementById('navheader');
                 if (mainnav !== null) {
                     var errorModal = $document[0].getElementsByClassName('modal-error')[0];
                     if (errorModal !== null && errorModal !== undefined) {
