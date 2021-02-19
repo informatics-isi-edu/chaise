@@ -782,12 +782,10 @@
             }
 
             if (!found) {
-                // TODO better header?
-                var header = "Z index not found";
+                var header = "Z Index Not Found";
 
-                // TODO better error message
-                var message = "Couldn't find any image with Z index value of <code>" + inputZIndex + "</code>, among the generated indexes. ";
-                message += "Displaying the closest generated index."; // TODO
+                var message = "Could not find any image with Z index of <code>" + inputZIndex + "</code>. <br/>";
+                message += "Displaying the closest generated Z index of <code>" + res + "</code> instead.";
 
                 var err = new Errors.CustomError(header, message, null, messageMap.clickActionMessage.dismissDialog, true);
 
@@ -825,16 +823,6 @@
 
                 afterPage = page2;
                 afterImages = _processAttributeGroupPage(page2);
-
-                /**
-                 * afterImages and beforeImages are arrays that could be empty ([]),
-                 * you need to create a result array from that that with pageSize length
-                 * also need to properly set hasPrevious and hasNext.
-                 */
-
-                //TODO @bhavya add your code here
-                // console.log('before = ', beforeImages);
-                // console.log('after =', afterImages);
 
                 res = getCenterList(beforeImages, afterImages, pageSize);
 
