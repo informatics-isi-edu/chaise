@@ -1,9 +1,5 @@
 {
-    "catalog": {
-        "acls": {
-            "enumerate": ["*"]
-        }
-    },
+    "catalog": {},
     "schema": {
         "name": "links",
         "createNew": true,

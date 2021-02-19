@@ -701,10 +701,6 @@ var recordPage = function() {
         return element(by.id("bibtex-download"));
     };
 
-    this.getErrorModalTitle = function(){
-        return browser.executeScript("return $('.modal-title')[0].innerHTML;");
-    };
-
     this.getErrorModalReloadButton = function(){
         return element(by.id('error-reload-button'));
     };
@@ -1224,6 +1220,10 @@ var errorModal = function () {
     this.getErrorDetails = function () {
         return element(by.id('error-details'));
     }
+
+    this.getTitle = function () {
+        return element(by.css(".modal-title"));
+    }
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
@@ -1276,7 +1276,7 @@ function chaisePage() {
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
     this.recordeditPageReady = function() {
-        this.waitForElement(element(by.id("submit-record-button")));
+        this.waitForClickableElement(element(by.id("submit-record-button")));
         return this.waitForElementInverse(element(by.id("recordedit-main-spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
@@ -1350,6 +1350,10 @@ function chaisePage() {
         }, timeout || browser.params.defaultTimeout);
     };
 
+    this.waitForClickableElement = function (locator, timeout) {
+        return browser.wait(protractor.ExpectedConditions.elementToBeClickable(locator), timeout || browser.params.defaultTimeout);
+    };
+
     this.waitForElement = function (locator, timeout) {
         return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), timeout || browser.params.defaultTimeout);
     };
@@ -1413,6 +1417,12 @@ function chaisePage() {
         };
     };
 
+    /**
+     * Simulate the login process by navigating to a chaise page and
+     * changing cookie and localStorage values.
+     * NOTE if we change the cookie/localStorage that we're adding during login,
+     *      this function needs to be updated too.
+     */
     this.performLogin = function(cookie, isAlertPresent, defer) {
         defer = defer || require('q').defer();
 
@@ -1425,12 +1435,14 @@ function chaisePage() {
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
-            browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"')).then(function() {
-              browser.ignoreSynchronization = false;
-              defer.resolve();
-            });
-        }, function() {
-            defer.reject();
+            return browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"'))
+        }).then(function() {
+            return browser.driver.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
+        }).then(function () {
+            browser.ignoreSynchronization = false;
+            defer.resolve();
+        }).catch(function (err) {
+            defer.reject(err);
         });
 
         return defer.promise;

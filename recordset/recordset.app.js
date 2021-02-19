@@ -91,7 +91,7 @@
                 displayMode: recordsetDisplayModes.fullscreen
             };
 
-            recordsetModel.parentStickyAreaSelector = "#mainnav";
+            recordsetModel.parentStickyAreaSelector = "#navheader";
 
             recordsetModel.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
             $rootScope.alerts = AlertsService.alerts;
