@@ -529,7 +529,7 @@
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception, isDismissible) {
+        function handleException(exception, isDismissible, skipLogging) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             $log.info(exception);
 
@@ -573,10 +573,14 @@
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
             } else if (exception instanceof Errors.CustomError ) {
-                logError(exception);
+                if (!skipLogging) {
+                    logError(exception);
+                }
                 redirectLink = exception.errorData.redirectUrl;
             } else if (!assetPermissionError) {
-                logError(exception);
+                if (!skipLogging) {
+                    logError(exception);
+                }
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
             }

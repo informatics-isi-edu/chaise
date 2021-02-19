@@ -116,9 +116,9 @@
     }])
 
     .factory('viewerAppUtils', [
-        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'recordCreate', 'messageMap', 'UriUtils', 'viewerConfig', 'viewerConstant',
+        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConfig', 'viewerConstant',
         '$q', '$rootScope',
-        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, Errors, ErrorService, logService, recordCreate, messageMap, UriUtils, viewerConfig, viewerConstant,
+        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, logService, recordCreate, UriUtils, viewerConfig, viewerConstant,
                   $q, $rootScope) {
 
         var annotConfig = viewerConfig.getAnnotationConfig(),
@@ -781,17 +781,6 @@
                 res = Math.abs(inputZIndex - images[i].zIndex) < Math.abs(images[res].zIndex - inputZIndex) ? i : res;
             }
 
-            if (!found) {
-                var header = "Z Index Not Found";
-
-                var message = "Could not find any image with Z index of <code>" + inputZIndex + "</code>. <br/>";
-                message += "Displaying the closest generated Z index of <code>" + res + "</code> instead.";
-
-                var err = new Errors.CustomError(header, message, null, messageMap.clickActionMessage.dismissDialog, true);
-
-                ErrorService.handleException(err, true);
-            }
-
             return res;
         }
 
@@ -799,17 +788,18 @@
             console.log(requestID, pageSize, zIndex);
             var defer = $q.defer();
 
+            zIndex = parseInt(zIndex);
 
             // before includes the z_index as well: @before(zIndex+1)
             var beforeRef = _createProcessedImageAttributeGroupReference(
-                parseInt(zIndex) + 1,
+                zIndex + 1,
                 null
             );
 
             // after will only include what's after: @after(zIndex)
             var afterRef = _createProcessedImageAttributeGroupReference(
                 null,
-                parseInt(zIndex)
+                zIndex
             );
 
             // TODO log object
@@ -832,7 +822,8 @@
                     hasPrevious: res.hasPrevious,
                     hasNext: res.hasNext,
                     updateMainImage: true,
-                    mainImageZIndex: getActiveZIndex(res.images, zIndex)
+                    inputZIndex: zIndex,
+                    mainImageIndex: getActiveZIndex(res.images, zIndex)
                 });
             }).catch(function (err) {
                 defer.reject(err)

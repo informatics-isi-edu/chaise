@@ -4,8 +4,8 @@
     angular.module('chaise.viewer')
 
     .controller('OSDController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
-        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'image', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function OSDController(AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, image, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
@@ -86,6 +86,16 @@
                     case "showAlert":
                         $scope.$apply(function(){
                             AlertsService.addAlert(data.message, data.type);
+                        });
+                        break;
+                    case "showPopupError":
+                        $scope.$apply(function(){
+                            var clickActionMessage = data.clickActionMessage;
+                            if (data.isDismissible && !DataUtils.isNoneEmptyString(clickActionMessage)) {
+                                clickActionMessage = messageMap.clickActionMessage.dismissDialog
+                            }
+                            var err = new Errors.CustomError(data.header, data.message, null, clickActionMessage, data.isDismissible);
+                            ErrorService.handleException(err, data.isDismissible, true);
                         });
                         break;
                     default:
