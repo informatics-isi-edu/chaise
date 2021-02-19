@@ -701,10 +701,6 @@ var recordPage = function() {
         return element(by.id("bibtex-download"));
     };
 
-    this.getErrorModalTitle = function(){
-        return browser.executeScript("return $('.modal-title')[0].innerHTML;");
-    };
-
     this.getErrorModalReloadButton = function(){
         return element(by.id('error-reload-button'));
     };
@@ -1224,6 +1220,10 @@ var errorModal = function () {
     this.getErrorDetails = function () {
         return element(by.id('error-details'));
     }
+
+    this.getTitle = function () {
+        return element(by.css(".modal-title"));
+    }
 };
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
@@ -1276,7 +1276,7 @@ function chaisePage() {
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
     this.recordeditPageReady = function() {
-        this.waitForElement(element(by.id("submit-record-button")));
+        this.waitForClickableElement(element(by.id("submit-record-button")));
         return this.waitForElementInverse(element(by.id("recordedit-main-spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
@@ -1348,6 +1348,10 @@ function chaisePage() {
               return new RegExp(expectedUrlFragment).test(url);
             });
         }, timeout || browser.params.defaultTimeout);
+    };
+
+    this.waitForClickableElement = function (locator, timeout) {
+        return browser.wait(protractor.ExpectedConditions.elementToBeClickable(locator), timeout || browser.params.defaultTimeout);
     };
 
     this.waitForElement = function (locator, timeout) {

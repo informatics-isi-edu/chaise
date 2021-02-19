@@ -47,8 +47,8 @@ describe('Error related test cases,', function() {
         });
 
         it('An error modal window should appear with Record Not Found title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Record Not Found", "The title of no record error pop is not correct");
         });
 
         it('Error modal text indicates users about error and provides them with navigation options', function(){
@@ -92,8 +92,8 @@ describe('Error related test cases,', function() {
         });
 
         it('An error modal window should appear with Item Not Found title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Item Not Found", "The title of no table error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Item Not Found", "The title of no table error pop is not correct");
         });
 
         it('Error modal text indicates users about error and provides them with navigation options', function(){
@@ -127,8 +127,8 @@ describe('Error related test cases,', function() {
         });
 
         it('An error modal window should appear with Multiple Records Found title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Multiple Records Found", "The title of no record error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Multiple Records Found", "The title of no record error pop is not correct");
         });
 
         it('Error modal text indicates users about error and provides them with navigation options', function(){
@@ -170,8 +170,8 @@ describe('Error related test cases,', function() {
         });
 
         it('An error modal window should appear with Invalid Input title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
         });
 
         it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
@@ -220,6 +220,8 @@ describe('Error related test cases,', function() {
             }).then(function (errorText) {
                 // Added OR case to avoid discrepancy in error message when table is deleted
                 expect(errorText == testParams.conflictRecordEditErrorBooking || errorText == testParams.conflictRecordEditErrorAccommodationImg ).toBe(true, "409 Conflict could not be matched! Check conflict during deletion in RecordEdit.");
+
+                expect(chaisePage.errorModal.getTitle().getText()).toBe(testParams.conflict, "Error title missmatch");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -264,6 +266,7 @@ describe('Error related test cases,', function() {
           }).then(function (errorText) {
               // Added OR case to avoid discrepancy in error message when table is deleted
               expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "409 Conflict could not be matched! Check conflict during deletion.");
+              expect(chaisePage.errorModal.getTitle().getText()).toBe(testParams.conflict, "Error title missmatch");
               done();
           }).catch(chaisePage.catchTestError(done));
       });
@@ -315,6 +318,7 @@ describe('Error related test cases,', function() {
                 closeModal = chaisePage.recordEditPage.getModalCloseBtn();
                 chaisePage.waitForElement(closeModal);
                 expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
+                expect(chaisePage.errorModal.getTitle().getText()).toBe(testParams.conflict, "Error title missmatch");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -340,6 +344,7 @@ describe('Error related test cases,', function() {
                 closeModal = chaisePage.recordEditPage.getModalCloseBtn();
                 chaisePage.waitForElement(closeModal);
                 expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
+                expect(chaisePage.errorModal.getTitle().getText()).toBe(testParams.conflict, "Error title missmatch");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -400,7 +405,7 @@ describe('Error related test cases,', function() {
         pageTestUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002@after()";
         browser.refresh();
         browser.get(pageTestUrl);
-        modalTitle = chaisePage.recordEditPage.getModalTitle();
+        modalTitle = chaisePage.errorModal.getTitle();
         chaisePage.waitForElement(element(by.css('.modal-dialog ')));
       });
 
@@ -440,7 +445,7 @@ describe('Error related test cases,', function() {
       });
 
       it("should be returned Invalid Page Criteria", function (done) {
-          var modalTitle = chaisePage.recordEditPage.getModalTitle(),
+          var modalTitle = chaisePage.errorModal.getTitle(),
               modalActionBody = chaisePage.recordEditPage.getModalActionBody();
 
           chaisePage.waitForElement(modalTitle).then(function(){
@@ -477,9 +482,9 @@ describe('Error related test cases,', function() {
 
         it('An error modal window should appear with Record Not Found title', function(done){
           chaisePage.waitForElement(element(by.css('.modal-dialog '))).then(function() {
-              return chaisePage.recordPage.getErrorModalTitle();
+              return chaisePage.errorModal.getTitle();
             }).then(function(modalTitle) {
-              expect(modalTitle).toBe("Record Not Found", "The title of no record error pop is not correct");
+              expect(modalTitle.getText()).toBe("Record Not Found", "The title of no record error pop is not correct");
               done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -508,8 +513,8 @@ describe('Error related test cases,', function() {
         });
 
         it('An error modal window should appear with Invalid Input title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Invalid Input", "The title of Invalid Input error pop is not correct");
         });
 
         it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
