@@ -100,6 +100,13 @@
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
 
+                // send string to prepend to "headTitle"
+                // <table-name>: pending... until we get row information back
+                headInjector.updateHeadTitle(
+                    DataUtils.getDisplaynameInnerText($rootScope.reference.displayname) +
+                    ": pending..."
+                );
+
                 $log.info("Reference: ", $rootScope.reference);
 
                 var logObj = {};
@@ -137,9 +144,9 @@
 
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
-                $window.history.replaceState('', '', url);
+                $window.history.replaceState({}, '', url);
 
-                //NOTE when the read is called, reference.activeList will be generated
+                // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,
                 // so the links are based on facet. We might be able to improve this and avoid
                 // duplicated logic.

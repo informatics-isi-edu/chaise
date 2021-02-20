@@ -139,7 +139,6 @@ describe('When viewing RecordEdit app', function() {
 
             browser.get(url);
             chaisePage.waitForElement(modalBody).then(function() {
-                expect(element(by.id('page-title')).isDisplayed()).toBe(false, "Page title is present");
                 expect(modalBody.isDisplayed()).toBe(true, "modal body is not displayed");
                 expect(element(by.css('.modal-title')).isPresent()).toBe(true, "modal title is not present");
                 expect(element(by.css('.modal-title')).getText()).toBe('You need to be logged in to continue.', "modal title text is incorrect");

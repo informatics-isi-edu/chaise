@@ -21,10 +21,14 @@ Users can add new related entities by click on the "Add" button on top right cor
 - If it's a pure and binary association related entity, Chaise will open a modal picker that will allow users to select entities for the related table.
   - [Associative entities](https://en.wikipedia.org/wiki/Associative_entity) are entities in another table that establish _many-to-many_ relationships between entities. To illustrate this, let's assume table `A` has two foreign keys, one to table `B` and another to `C` (`B <- A -> C`). Then we can say that `C` and `B` are in associative relationship and for a reference that encapsulates `B`, a reference that encapsulates `C` is a related reference. Table `A` must have the following properties to be counted as pure and binary associative table:
 
-    - Should have only two foreign keys (binary).
-    - Must have a unique constraint key of the foreign key columns.
-    - Cannot have any other unique constraint key (As an exception to this rule, table can have an extra key that is made of one serial type column.).
-    - There is no extra column that is not part of any keys (pure).
+    - Must have only two outbound foreign keys.
+      - Exception: foreign keys that are based on system columns are allowed.
+    - Must have a unique constraint key based on the columns of the two outbound foreign keys.
+    - Cannot have any other unique constraint keys.
+      - Exception: simple keys that are based on system columns or `serial` typed columns are allowed.
+    - Cannot have any extra column that is not part of any keys.
+      - Exception: system columns are allowed.
+    - Cannot have any inbound foreign keys.
 
 - Otherwise, Chaise will open a recordedit page in a new tab. In this page, some of the visible data are going to be pre-filled. Chaise will pre-fill any data that is defined by the one-to-one relationship between the parent and related table. This includes,
   - The foreign key relationship that is defining the related table (let's call this foreign key "original").
