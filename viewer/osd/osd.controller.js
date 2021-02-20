@@ -4,8 +4,8 @@
     angular.module('chaise.viewer')
 
     .controller('OSDController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'image', 'logService', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
-        function OSDController(AlertsService, context, DataUtils, errorMessages, image, logService, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'image', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function OSDController(AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, image, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
@@ -54,6 +54,16 @@
                             });
                         });
                         break;
+                    // TODO change this to a better name
+                    case "fetchZPlaneListByZIndex":
+                        $scope.$apply(function () {
+                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex).then(function (res) {
+                                iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
+                            }).catch(function (err) {
+                                throw err;
+                            });
+                        });
+                        break;
                     case "openDrawingHelpPage":
                         $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
                         break;
@@ -74,7 +84,19 @@
                         });
                         break;
                     case "showAlert":
-                        AlertsService.addAlert(data.message, data.type);
+                        $scope.$apply(function(){
+                            AlertsService.addAlert(data.message, data.type);
+                        });
+                        break;
+                    case "showPopupError":
+                        $scope.$apply(function(){
+                            var clickActionMessage = data.clickActionMessage;
+                            if (data.isDismissible && !DataUtils.isNoneEmptyString(clickActionMessage)) {
+                                clickActionMessage = messageMap.clickActionMessage.dismissDialog
+                            }
+                            var err = new Errors.CustomError(data.header, data.message, null, clickActionMessage, data.isDismissible);
+                            ErrorService.handleException(err, data.isDismissible, true);
+                        });
                         break;
                     default:
                         // other messages are handled by other controllers

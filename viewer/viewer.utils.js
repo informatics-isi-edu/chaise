@@ -456,7 +456,7 @@
             if (!DataUtils.isNoneEmptyString(imageURL)) {
                 return null;
             }
-            
+
             var displayMethod = data[pImageConfig.display_method_column_name];
             if (displayMethod in pImageConfig.image_url_pattern) {
                 imageURL = UriUtils.getAbsoluteURL(imageURL);
@@ -602,10 +602,8 @@
             return defer.promise;
         }
 
-        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
-            console.log("fetching zplane page");
-            var defer = $q.defer(),
-                pImageRef = $rootScope.processedImageReference;
+        function _createProcessedImageAttributeGroupReference(beforeValue, afterValue) {
+            var pImageRef = $rootScope.processedImageReference;
 
             var context = "compact",
                 table = pImageRef.table,
@@ -634,58 +632,80 @@
 
             // sort by Z_Index
             var sortObj = [{"column": pImageConfig.z_index_column_name, "descending": false}];
+
+            // attach the path
+            var locationPath = pImageRef.location.ermrestCompactPath;
+
             var loc = new ERMrest.AttributeGroupLocation(
                 pImageRef.location.service,
                 catalog.id,
-                pImageRef.location.ermrestCompactPath,
+                locationPath,
                 null, //search object
                 sortObj,
                 afterObject,
                 beforeObject
             );
 
-            var ref = new ERMrest.AttributeGroupReference(keyColumns, aggregateColumns, loc, catalog, table, context);
+            return new ERMrest.AttributeGroupReference(keyColumns, aggregateColumns, loc, catalog, table, context);
+        }
 
-            // log object
+        function _processAttributeGroupPage(page) {
+            var res = [],
+                zIndexColName = pImageConfig.z_index_column_name,
+                imagesArrayName = "images";
+
+            for (var i = 0; i < page.tuples.length; i++) {
+                var data = page.tuples[i].data, imgInfo = [];
+
+                // TODO if any of the data is null, the whole thing should be empty?
+                if (!data) {
+                    return [];
+                }
+
+                // TODO should we check for z_index not being null?
+                if (data[zIndexColName] == null) {
+                    return [];
+                }
+
+                // TODO should we make sure the array image data is not empty?
+                if (!Array.isArray(data[imagesArrayName]) || data[imagesArrayName].length === 0) {
+                    return [];
+                }
+
+                for (var j = 0; j < data[imagesArrayName].length; j++) {
+                    var d = data[imagesArrayName][j];
+
+                    var imageURL = _createImageURL(d);
+                    if (!DataUtils.isNoneEmptyString(imageURL)) {
+                        return [];
+                    }
+
+                    imgInfo.push({
+                        channelNumber: d[pImageConfig.channel_number_column_name],
+                        url: imageURL
+                    });
+                }
+
+                res.push({
+                    zIndex: data[zIndexColName],
+                    info: imgInfo
+                });
+            }
+            return res;
+        }
+
+        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
+            console.log("fetching zplane page", requestID, pageSize, beforeValue, afterValue);
+            var defer = $q.defer();
+
+            var ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
+
+            // TODO log object
             var logObj = {};
             ref.read(pageSize, logObj).then(function (page) {
-                var res = [];
-                for (var i = 0; i < page.tuples.length; i++) {
-                    var data = page.tuples[i].data, imgInfo = [];
-
-                    // TODO if any of the data is null, the whole thing should be empty?
-                    if (!data) {
-                        return defer.resolve([]), defer.promise;
-                    }
-
-                    // TODO should we check for z_index not being null?
-                    if (data[zIndexColName] == null) {
-                        return defer.resolve([]), defer.promise;
-                    }
-
-                    // TODO should we make sure the array image data is not empty?
-                    if (!Array.isArray(data[imagesArrayName]) || data[imagesArrayName].length === 0) {
-                        return defer.resolve([]), defer.promise;
-                    }
-
-                    for (var j = 0; j < data[imagesArrayName].length; j++) {
-                        var d = data[imagesArrayName][j];
-
-                        var imageURL = _createImageURL(d);
-                        if (!DataUtils.isNoneEmptyString(imageURL)) {
-                            return defer.resolve([]), defer.promise;
-                        }
-
-                        imgInfo.push({
-                            channelNumber: d[pImageConfig.channel_number_column_name],
-                            url: imageURL
-                        });
-                    }
-
-                    res.push({
-                        zIndex: data[zIndexColName],
-                        info: imgInfo
-                    });
+                var res = _processAttributeGroupPage(page);
+                if (res == null || res.length == 0) {
+                    return defer.resolve([]), defer.promise;
                 }
 
                 defer.resolve({
@@ -697,6 +717,117 @@
             }).catch(function (err) {
                 defer.reject(err);
             })
+
+            return defer.promise;
+        }
+
+        /**
+         * After fetching the images before and after the inptu z index, this function combines the two array, by taking the second half from the before array and first half from the after array. The size of the array returned is equal to the pagesize
+         * @param {object} beforeImages
+         * @param {object} afterImages
+         * @param {integer} pageSize
+         */
+        function getCenterList(beforeImages, afterImages, pageSize) {
+            var images = [];
+            var lenBI = beforeImages.length;
+            var lenAI = afterImages.length;
+            var half = parseInt(pageSize / 2);
+            var hasNext = true;
+            var hasPrevious = true;
+
+            if (lenBI + lenAI < pageSize) {
+                images = beforeImages.concat(afterImages);
+                hasNext = false;
+                hasPrevious = false;
+            } else if (lenBI <= half) {
+                // if the content in before images is less than half the page size, more content would be needed from the after images
+                images = beforeImages.concat(afterImages.slice(0, pageSize - lenBI));
+                // there are no indexes before the first BI
+                hasPrevious = false;
+            } else if (lenAI <= half) {
+                // if the content in after images is less than half the page size, more content would be needed from the before images
+                images = beforeImages.slice(lenBI - (pageSize - lenAI), lenBI);
+                images = images.concat(afterImages);
+                // there are no indexes after the last AI
+                hasNext = false;
+            } else {
+                images = beforeImages.concat(afterImages.slice(0, half));
+                images = images.slice(images.length - pageSize, images.length);
+            }
+
+            var res = {
+                images: images,
+                hasNext: hasNext,
+                hasPrevious: hasPrevious
+            }
+            return res;
+        }
+
+        /**
+         * this function finds the location(position) of the image having the z index closest to the input z index
+         * @param {object} images
+         * @param {integer} inputZIndex
+         */
+        function getActiveZIndex (images, inputZIndex) {
+            // TODO find a better negation value
+            if (images.length == 0) {
+                return -1;
+            }
+
+            var res = 0, found = (inputZIndex == images[0].zIndex);
+
+            for (var i = 1; i < images.length; i++) {
+                found = found || (inputZIndex == images[i].zIndex);
+                res = Math.abs(inputZIndex - images[i].zIndex) < Math.abs(images[res].zIndex - inputZIndex) ? i : res;
+            }
+
+            return res;
+        }
+
+        function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
+            console.log(requestID, pageSize, zIndex);
+            var defer = $q.defer();
+
+            zIndex = parseInt(zIndex);
+
+            // before includes the z_index as well: @before(zIndex+1)
+            var beforeRef = _createProcessedImageAttributeGroupReference(
+                zIndex + 1,
+                null
+            );
+
+            // after will only include what's after: @after(zIndex)
+            var afterRef = _createProcessedImageAttributeGroupReference(
+                null,
+                zIndex
+            );
+
+            // TODO log object
+            var beforeImages, beforePage, afterImages, afterPage;
+            beforeRef.read(pageSize, {}, true).then(function (page1) {
+                beforePage = page1;
+                beforeImages = _processAttributeGroupPage(page1);
+                return afterRef.read(pageSize, {}, true);
+            }).then(function (page2) {
+                var res = []; // what will be sent to osd viewer
+
+                afterPage = page2;
+                afterImages = _processAttributeGroupPage(page2);
+
+                res = getCenterList(beforeImages, afterImages, pageSize);
+
+                defer.resolve({
+                    requestID: requestID,
+                    images: res.images,
+                    hasPrevious: res.hasPrevious,
+                    hasNext: res.hasNext,
+                    updateMainImage: true,
+                    inputZIndex: zIndex,
+                    mainImageIndex: getActiveZIndex(res.images, zIndex)
+                });
+            }).catch(function (err) {
+                defer.reject(err)
+            });
 
             return defer.promise;
         }
@@ -800,7 +931,8 @@
             hasURLQueryParam: hasURLQueryParam,
             initializeOSDParams: initializeOSDParams,
             loadImageMetadata: loadImageMetadata,
-            fetchZPlaneList: fetchZPlaneList
+            fetchZPlaneList: fetchZPlaneList,
+            fetchZPlaneListByZIndex: fetchZPlaneListByZIndex
         };
 
     }]);
