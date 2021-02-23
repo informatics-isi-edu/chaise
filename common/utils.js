@@ -2516,7 +2516,9 @@
             SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
             SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
             CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
-            IFRAME_FULLSCREEN: "iframe" + clientPathActionSeparator + "fullscreen",
+            IFRAME_FULLSCREEN_INTERNAL: "iframe/fullscreen" + clientPathActionSeparator + "navigate-internal",
+            IFRAME_FULLSCREEN_EXTERNAL: "iframe/fullscreen" + clientPathActionSeparator + "navigate-external",
+
 
             // recordset app and table:
 
@@ -3076,8 +3078,10 @@
                 e.preventDefault();
                 e.stopPropagation();
 
+                var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.IFRAME_FULLSCREEN_INTERNAL : logService.logActions.IFRAME_FULLSCREEN_EXTERNAL;
                 logService.logClientAction({
-                    action: logService.getActionString(logService.logActions.IFRAME_FULLSCREEN, "", "")
+                    action: logService.getActionString(action, "", ""),
+                    stack: logService.getStackObject() // will use the logstack from the $rootScope (catalog, s_t. filters)
                 });
 
                 // change the window location (do the default link behavior)
