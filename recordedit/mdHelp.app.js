@@ -4,7 +4,9 @@
 /* Configuration of the md help App */
     angular.module('chaise.configure-mdHelp', ['chaise.config'])
 
-    .constant('appName', 'mdHelp')
+    .constant('settings', {
+        appName: "mdHelp"
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM

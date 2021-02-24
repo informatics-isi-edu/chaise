@@ -15,8 +15,12 @@ The following is how you should define the configuration app:
 // define the configure-appname app which is using the chaise.config
 angular.module('<NAMESPACE>.configure-<APP_NAME>', ['chaise.config'])
 
-// this constant is used for `cid` (e.g. recordset)
-.constant('appName', '<APP_NAME>')
+// this constant is used to control the configuration of the angular app
+.constant('settings', {
+    appName: '<APP_NAME>',              // used for `cid` (e.g. recordset)
+    disableHeadTitle: true|false,       // set to true to disable chaise's heuristics for the headTitle
+    disableOnclickBehavior: true|false, // set to true to disable onclick behavior overrides
+})
 
 .run(['$rootScope', function ($rootScope) {
     $rootScope.$on("configuration-done", function () {
@@ -65,7 +69,7 @@ This will,
   - Hide the main content and show a loading spinner while getting the catalog annotation.
 
 Note:
-Each app will need to handle making sure the dependencies are available still. `record`, `recordset`, and `recordedit` all include the dependencies as part of the `make all` command. When that is run, the dependencies are added to the `index.html` templates as proper source tags. 
+Each app will need to handle making sure the dependencies are available still. `record`, `recordset`, and `recordedit` all include the dependencies as part of the `make all` command. When that is run, the dependencies are added to the `index.html` templates as proper source tags.
 
 `Login` and `Navbar` app handle this differently. Those depencies are defined in `*.app.js` because of how those apps are used. The intent is that they can be injected into a static page and all you need to do is include the `app.js` as a source and the rest of the dependencies are handled by that script. Those 2 scripts will attach the necesssary dependencies to the html as part of the execution of the script.
 

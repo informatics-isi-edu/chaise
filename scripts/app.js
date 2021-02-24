@@ -23,7 +23,9 @@ angular.module('configure-search', [
     'ngCookies'
 ])
 
-.constant('appName', 'search')
+.constant('settings', {
+    appName: "search"
+})
 
 .run(['$rootScope', function ($rootScope) {
     // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
