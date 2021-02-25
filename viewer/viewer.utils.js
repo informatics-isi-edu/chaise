@@ -116,12 +116,17 @@
     }])
 
     .factory('viewerAppUtils', [
-        'annotationCreateForm', 'annotationEditForm', 'AnnotationsService', 'ConfigUtils', 'context', 'DataUtils', 'ERMrest', 'logService', 'recordCreate', 'UriUtils', 'viewerConfig', 'viewerConstant',
+        'AlertsService', 'annotationCreateForm', 'annotationEditForm', 'AnnotationsService',
+        'ConfigUtils', 'context', 'DataUtils', 'ERMrest',  'Errors', 'ErrorService',
+        'logService', 'Session', 'recordCreate', 'UriUtils', 'viewerConfig', 'viewerConstant',
         '$q', '$rootScope',
-        function (annotationCreateForm, annotationEditForm, AnnotationsService, ConfigUtils, context, DataUtils, ERMrest, logService, recordCreate, UriUtils, viewerConfig, viewerConstant,
+        function (AlertsService, annotationCreateForm, annotationEditForm, AnnotationsService,
+                  ConfigUtils, context, DataUtils, ERMrest, Errors, ErrorService,
+                  logService, Session, recordCreate, UriUtils, viewerConfig, viewerConstant,
                   $q, $rootScope) {
 
         var annotConfig = viewerConfig.getAnnotationConfig(),
+            imageConfig = viewerConfig.getImageConfig(),
             pImageConfig = viewerConfig.getProcesssedImageConfig(),
             channelConfig = viewerConfig.getChannelConfig();
 
@@ -224,7 +229,7 @@
         function initializeOSDParams (pageQueryParams, imageURI) {
             var loadImageMetadata = true, imageURIQueryParams = {};
             var  osdViewerParams = {
-                mainImage: {zIndex: context.defaultZIndex, info: []},
+                mainImage: {zIndex: context.defaultZIndex, info: [], acls: {canUpdate: false}},
                 zPlaneList: [],
                 channels: [],
                 annotationSetURLs: [],
@@ -493,6 +498,7 @@
             ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
 
                 if (!ref) {
+                    // TODO should be changed to say annotation
                     $rootScope.canCreate = false;
                     $rootScope.canUpdate = false;
                     $rootScope.canDelete = false;
@@ -897,6 +903,48 @@
         }
 
 
+        function updateDefaultZIndex(zIndex) {
+            var defer = $q.defer();
+
+            Session.validateSessionBeforeMutation(function () {
+                // TODO hacky
+                var oldData = $rootScope.tuple.data;
+                var newData = JSON.parse(JSON.stringify(oldData));
+                newData[imageConfig.default_z_index_column_name] = zIndex;
+
+                var tuples = [
+                    {data: newData, _oldData: oldData}
+                ];
+
+                // TODO log object
+                $rootScope.reference.contextualize.entryEdit.update(tuples, {}).then(function () {
+                    AlertsService.addAlert("Default Z index value has been updated.", "success");
+                    defer.resolve();
+                }).catch(function (exception) {
+                    Session.validateSession().then(function (session) {
+                        if (!session && exception instanceof ERMrest.ConflictError) {
+                            // login in a modal should show (Session timed out)
+                            throw new ERMrest.UnauthorizedError();
+                        }
+
+                        if (exception instanceof ERMrest.NoDataChangedError) {
+                            // TODO should we show a warning or something?
+                            // do nothing
+                        } else if (exception instanceof Errors.DifferentUserConflictError) {
+                            ErrorService.handleException(exception, true);
+                        } else {
+                            AlertsService.addAlert(exception.message, 'error' );
+                        }
+
+                        defer.resolve();
+                    });
+                })
+            });
+
+            return defer.promise;
+        }
+
+
         /**
          * since we don't know the size of our requests, this will make sure the
          * requests are done in batches until all the values are processed.
@@ -932,7 +980,8 @@
             initializeOSDParams: initializeOSDParams,
             loadImageMetadata: loadImageMetadata,
             fetchZPlaneList: fetchZPlaneList,
-            fetchZPlaneListByZIndex: fetchZPlaneListByZIndex
+            fetchZPlaneListByZIndex: fetchZPlaneListByZIndex,
+            updateDefaultZIndex: updateDefaultZIndex
         };
 
     }]);

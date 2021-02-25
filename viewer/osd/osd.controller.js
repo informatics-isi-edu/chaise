@@ -83,6 +83,19 @@
                             AlertsService.addAlert(errorMessages.viewerScreenshotFailed, "warning");
                         });
                         break;
+                    case "updateDefaultZIndex":
+                        $scope.$apply(function () {
+                            viewerAppUtils.updateDefaultZIndex(data.zIndex).then(function (res) {
+                                // we don't need to do anything on success.
+                                // the alerts are disaplyed by the updateDefaultZIndex function
+                            }).catch(function (error) {
+                                throw error;
+                            }).finally(function () {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({messageType: "updateDefaultZIndexDone", content: {}}, origin);
+                            })
+                        });
+                        break;
                     case "showAlert":
                         $scope.$apply(function(){
                             AlertsService.addAlert(data.message, data.type);
