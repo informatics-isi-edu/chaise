@@ -5,16 +5,16 @@
 
     .controller('AnnotationsController', [
         'AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations',
-        'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService', 
-        'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils', 
-        'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels', 
+        'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService',
+        'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils',
+        'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels',
         'viewerConfig', 'viewerConstant', 'viewerAppUtils',
         '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
         function AnnotationsController(
             AlertsService, annotationCreateForm, annotationEditForm, annotations,
-            AnnotationsService, AuthService, comments, context, CommentsService, 
+            AnnotationsService, AuthService, comments, context, CommentsService,
             ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils ,
-            modalBox, recordsetDisplayModes, recordCreate, logService, annotationModels, 
+            modalBox, recordsetDisplayModes, recordCreate, logService, annotationModels,
             viewerConfig, viewerConstant, viewerAppUtils,
             $q, $rootScope, $scope, $timeout, $uibModal, $window) {
 
@@ -95,15 +95,15 @@
         vm.saveAnnotationRecord = saveAnnotationRecord;
         vm.toggleDisplay = toggleDisplay;
         vm.updateDisplayNum = updateDisplayNum;
-        
-        // we have to make sure the main image is loaded before 
-        // asking osd to update the annotations, 
+
+        // we have to make sure the main image is loaded before
+        // asking osd to update the annotations,
         // so there's a race-condition between annotation request
         // and main image load time, and we have to make sure
         // we're only loading time if both conidtions are met.
         var mainImageLoaded = false,
             annotationsRecieved = true; // we're loading the annotations as part of viewer app run block
-        
+
         // Listen to events of type 'message' (from Annotorious)
         $window.addEventListener('message', function annotationControllerListener(event) {
             // TODO: Check if origin is valid first; if not, return and exit.
@@ -122,7 +122,7 @@
                         break;
                     case 'mainImageLoaded':
                         mainImageLoaded= true;
-                        
+
                         if (annotationsRecieved) {
                             AnnotationsService.loadAnnotations($rootScope.annotationURLs);
                         }
@@ -131,7 +131,7 @@
                         $scope.$apply(function () {
                             // change defaultZIndex
                             context.defaultZIndex = data.content.zIndex;
-                        
+
 
                             // make sure it's not in edit/create mode
                             if (vm.editingAnatomy != null) {
@@ -142,7 +142,7 @@
                             annotationModels = [];
                             vm.annotationModels = annotationModels;
                             vm.updateDisplayNum();
-                            
+
                             mainImageLoaded = false;
                             annotationsRecieved = false;
                             $rootScope.loadingAnnotations = true;
@@ -158,12 +158,12 @@
 
                                     annotationsRecieved = true;
 
-                                    if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate) {
-                                        $rootScope.disableAnnotationSidebar = true;
-                                        $rootScope.hideAnnotationSidebar = true;
-                                    } else {
-                                        $rootScope.disableAnnotationSidebar = false;
-                                    }
+                                    // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate) {
+                                    //     $rootScope.disableAnnotationSidebar = true;
+                                    //     $rootScope.hideAnnotationSidebar = true;
+                                    // } else {
+                                    //     $rootScope.disableAnnotationSidebar = false;
+                                    // }
 
                                     if ($rootScope.annotationTuples.length > 0) {
                                         // ask osd to load the annotation
@@ -178,7 +178,7 @@
                                     if (currZIndex != context.defaultZIndex) return;
 
                                     $rootScope.loadingAnnotations = false;
-                                    $rootScope.disableAnnotationSidebar = true;
+                                    // $rootScope.disableAnnotationSidebar = true;
 
                                     // fail silently
                                     console.log("erro while updating annotations ", err);
@@ -215,6 +215,9 @@
                             var svgID = data.content.svgID,
                                 groupID = data.content.groupID;
 
+                            // make sure the sidebar is displayed
+                            $rootScope.hideAnnotationSidebar = false;
+
                             item = vm.annotationModels.find(function(item){
                                 return item.svgID == svgID && item.groupID == groupID;
                             })
@@ -237,11 +240,6 @@
                     case "saveGroupSVGContent":
                         $scope.$apply(function(){
                             vm.saveAnatomySVGFile(data);
-                        });
-                        break;
-                    case 'disableAnnotationSidebar':
-                        $scope.$apply(function(){
-                            $rootScope.disableAnnotationSidebar = (data.content === true);
                         });
                         break;
                     case 'errorAnnotation':

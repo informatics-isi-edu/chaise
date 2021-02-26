@@ -643,6 +643,14 @@
                 margin-left: 10px;
             }
 
+            .no-annotation-message {
+                background: #F1F1F1;
+                border-bottom: 1px solid #f2f2f2;
+                padding: 8px 5px;
+                min-height: 39px;
+                text-align: center;
+            }
+
             /* Annotations item  */
             .annotationItem{
                 position: relative;

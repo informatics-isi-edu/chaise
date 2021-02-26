@@ -360,7 +360,7 @@
                 }
 
                 // read the annotation reference
-                return viewerAppUtils.readAllAnnotations();
+                return viewerAppUtils.readAllAnnotations(true);
             }).then(function () {
 
                 // view <table displayname>: tuple displayname
@@ -373,9 +373,9 @@
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
-                if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
-                    $rootScope.disableAnnotationSidebar = true;
-                }
+                // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
+                //     $rootScope.disableAnnotationSidebar = true;
+                // }
 
                 if ($rootScope.annotationTuples.length > 0) {
                     $rootScope.loadingAnnotations = true;

@@ -475,7 +475,7 @@
         /**
          * Send request to image annotation table and populates the values in the $rootScope
          */
-        function readAllAnnotations (initializeForm) {
+        function readAllAnnotations (isDuringInitialization) {
             console.log("fetching annotations for zIndex=" + context.defaultZIndex);
             var defer = $q.defer();
 
@@ -560,7 +560,9 @@
                         if(tuple.data && tuple.data[annotConfig.overlay_column_name]){
                             $rootScope.annotationURLs.push(tuple.data[annotConfig.overlay_column_name]);
 
-                            $rootScope.hideAnnotationSidebar = false;
+                            if (isDuringInitialization) {
+                                $rootScope.hideAnnotationSidebar = false;
+                            }
                         }
                     });
 
