@@ -17,9 +17,10 @@ angular.module('<NAMESPACE>.configure-<APP_NAME>', ['chaise.config'])
 
 // this constant is used to control the configuration of the angular app
 .constant('settings', {
-    appName: '<APP_NAME>',              // used for `cid` (e.g. recordset)
-    disableHeadTitle: true|false,       // set to true to disable chaise's heuristics for the headTitle
-    disableOnclickBehavior: true|false, // set to true to disable onclick behavior overrides
+    appName: '<APP_NAME>',                      // used for `cid` (e.g. recordset)
+    overrideHeadTitle: true|false,              // enables chaise's heuristics for the headTitle
+    overrideDownloadClickBehavior: true|false,  // enables onclick behavior for asset with the asset-permission class
+    overrideExternalLinkBehavior: true|false    // enables onclick behavior for external links
 })
 
 .run(['$rootScope', function ($rootScope) {

@@ -4,7 +4,9 @@
     angular.module('chaise.configure-help', ['chaise.config'])
 
     .constant('settings', {
-        appName: "help"
+        appName: "help",
+        overrideDownloadClickBehavior: true,    // links in navbar might need this
+        overrideExternalLinkBehavior: true      // links in navbar might need this
     })
 
     .run(['$rootScope', function ($rootScope) {

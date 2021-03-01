@@ -5,7 +5,10 @@
     angular.module('chaise.configure-recordset', ['chaise.config'])
 
     .constant('settings', {
-        appName: "recordset"
+        appName: "recordset",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
     })
 
     .run(['$rootScope', function ($rootScope) {

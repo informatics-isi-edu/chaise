@@ -5,7 +5,9 @@
     angular.module('chaise.configure-mdHelp', ['chaise.config'])
 
     .constant('settings', {
-        appName: "mdHelp"
+        appName: "mdHelp",
+        overrideDownloadClickBehavior: true,    // links in navbar might need this
+        overrideExternalLinkBehavior: true      // links in navbar might need this
     })
 
     .run(['$rootScope', function ($rootScope) {

@@ -3122,14 +3122,12 @@
             addCanonicalTag();                              // controlled by chaise-config value to turn on/off
             setWindowName();                                // will only update if not already set
 
-            if (!settings.disableHeadTitle) addTitle();     // controlled by settings in config.js
+            if (settings.overrideHeadTitle) addTitle();     // controlled by settings in config.js
 
-            if (!settings.disableOnclickBehavior) {
-                overrideDownloadClickBehavior();            // controlled by settings in config.js
-                overrideExternalLinkBehavior();             // controlled by settings in config.js
-            }
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();    // controlled by settings in config.js
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();      // controlled by settings in config.js
 
-            return addCustomCSS();                          // controlled by chaise-config value to attach or not
+            return addCustomCSS();                          // controlled by chaise-config value to attach
         }
 
         return {

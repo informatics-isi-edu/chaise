@@ -4,7 +4,10 @@
     angular.module('chaise.configure-viewer', ['chaise.config'])
 
     .constant('settings', {
-        appName: "viewer"
+        appName: "viewer",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
     })
 
     .run(['$rootScope', function ($rootScope) {

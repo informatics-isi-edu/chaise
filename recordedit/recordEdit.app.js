@@ -5,7 +5,10 @@
     angular.module('chaise.configure-recordedit', ['chaise.config'])
 
     .constant('settings', {
-        appName: "recordedit"
+        appName: "recordedit",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
     })
 
     .run(['$rootScope', function ($rootScope) {
