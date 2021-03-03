@@ -92,7 +92,7 @@
                                 throw error;
                             }).finally(function () {
                                 // let osd viewer know that the process is done
-                                iframe.postMessage({messageType: "updateDefaultZIndexDone", content: {}}, origin);
+                                iframe.postMessage({ messageType: "updateDefaultZIndexDone", content: { 'zIndex': data.zIndex}}, origin);
                             })
                         });
                         break;
