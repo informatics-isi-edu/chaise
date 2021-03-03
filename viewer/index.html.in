@@ -191,7 +191,7 @@
                                             </div>
                                         </div>
                                         <div class='chaise-input-group-append'>
-                                            <button id="search-submit" class="chaise-search-btn chaise-btn chaise-btn-primary" ng-click="anno.searchInputChanged()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
+                                            <button id="search-submit" class="chaise-search-btn chaise-btn chaise-btn-primary" ng-click="anno.search()" role="button" tooltip-placement="bottom" uib-tooltip="Search any keyword to filter anatomy">
                                                 &nbsp;<span class="glyphicon glyphicon-search"></span>&nbsp;<!-- Added 2 non-breaking spaces to prevent btn's margins from collapsing and to center the icon-->
                                             </button>
                                         </div>
@@ -199,9 +199,12 @@
                                     <button ng-show="canCreate" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                                 </div>
                                 <span class='resultCount'>
-                                    <span>Displaying {{ anno.matchCount }} <span ng-if="!loadingAnnotations"> of {{ anno.totalCount }} </span>Annotations</span>
+                                    <span>Displaying {{ anno.matchCount }} <span ng-if="!loadingAnnotations"> of {{ anno.totalCount }} </span>{{anno.searchKeyword ? "matching annotations": "annotations"}}</span>
                                 </span>
                                 <div class='groups'>
+                                    <div ng-if="!loadingAnnotations && anno.matchCount === 0" class="no-annotation-message">
+                                        No annotation found
+                                    </div>
                                     <div id="{{item.svgID + item.groupID}}" class="annotationItem" ng-click="anno.highlightGroup(item, $event)" ng-repeat="item in anno.annotationModels track by $index" ng-show="item.isShow && item.svgID && item.groupID" ng-class="{'visible-annotation': item.isShow, 'current': item.isSelected}">
                                         <div class='itemContent'>
                                             <div class='itemRow'>
