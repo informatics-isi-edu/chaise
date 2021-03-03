@@ -3,7 +3,11 @@
 
     angular.module('chaise.configure-help', ['chaise.config'])
 
-    .constant('appName', 'help')
+    .constant('settings', {
+        appName: "help",
+        overrideDownloadClickBehavior: true,    // links in navbar might need this
+        overrideExternalLinkBehavior: true      // links in navbar might need this
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM

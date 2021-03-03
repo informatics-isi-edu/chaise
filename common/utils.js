@@ -3113,16 +3113,21 @@
 
         /**
          * Will return a promise that is resolved when the setup is done
+         *
+         * NOTE: should only be called by config.js (or equivalent configuration app)
          */
-        function setupHead() {
-            addPolyfills();
-            addCanonicalTag();
-            addTitle();
-            setWindowName();
-            overrideDownloadClickBehavior();
-            overrideExternalLinkBehavior();
-            addBodyClasses();
-            return addCustomCSS();
+        function setupHead(settings) {
+            addPolyfills();                                 // needs to be set for navbar functionality (and other chaise functionality)
+            addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
+            addCanonicalTag();                              // controlled by chaise-config value to turn on/off
+            setWindowName();                                // will only update if not already set
+
+            if (settings.overrideHeadTitle) addTitle();     // controlled by settings in config.js
+
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();    // controlled by settings in config.js
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();      // controlled by settings in config.js
+
+            return addCustomCSS();                          // controlled by chaise-config value to attach
         }
 
         return {

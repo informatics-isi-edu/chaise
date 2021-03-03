@@ -25,7 +25,7 @@
         'ui.bootstrap'
     ])
 
-    .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
+    .run(['settings', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(settings, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
 
         // TODO navbar changes (these should move to ConfigUtils)
         // because we might call that one first. these should be in the setter...
@@ -55,7 +55,7 @@
         // initialize dcctx object
         $window.dcctx = {
             contextHeaderParams: {
-                cid: appName,
+                cid: settings.appName,
                 pid: MathUtils.uuid(),
                 wid: $window.name
             },
@@ -77,14 +77,14 @@
                     // we already setup the defaults and the configuration based on chaise-config.js
                     if (response && response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
-                    return headInjector.setupHead();
+                    return headInjector.setupHead(settings);
                 }).then(function () {
                     $rootScope.$emit("configuration-done");
                 })
                 // no need to add a catch block here, errors has been includedso handleException has been configured to be the default handler
             } else {
                 // there's no catalog to fetch (may be an index page)
-                headInjector.setupHead().then(function () {
+                headInjector.setupHead(settings).then(function () {
                     $rootScope.$emit("configuration-done");
                 });
             }

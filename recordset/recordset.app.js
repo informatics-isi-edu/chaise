@@ -4,7 +4,12 @@
 /* Configuration of the Recordset App */
     angular.module('chaise.configure-recordset', ['chaise.config'])
 
-    .constant('appName', 'recordset')
+    .constant('settings', {
+        appName: "recordset",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM

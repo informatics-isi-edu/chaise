@@ -3,7 +3,12 @@
 
     angular.module('chaise.configure-viewer', ['chaise.config'])
 
-    .constant('appName', 'viewer')
+    .constant('settings', {
+        appName: "viewer",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM

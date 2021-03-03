@@ -23,7 +23,11 @@ angular.module('configure-search', [
     'ngCookies'
 ])
 
-.constant('appName', 'search')
+.constant('settings', {
+    appName: "search",
+    overrideDownloadClickBehavior: true,    // links in navbar might need this
+    overrideExternalLinkBehavior: true      // links in navbar might need this
+})
 
 .run(['$rootScope', function ($rootScope) {
     // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
