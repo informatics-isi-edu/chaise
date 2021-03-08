@@ -18,6 +18,7 @@ angular.module('<NAMESPACE>.configure-<APP_NAME>', ['chaise.config'])
 // this constant is used to control the configuration of the angular app
 .constant('settings', {
     appName: '<APP_NAME>',                      // used for `cid` (e.g. recordset)
+    appTitle: '<APP_TITLE>',                    // used for tab title in browser. appended with `chaiseConfig.headTitle` || `Chaise`
     overrideHeadTitle: true|false,              // enables chaise's heuristics for the headTitle
     overrideDownloadClickBehavior: true|false,  // enables onclick behavior for asset with the asset-permission class
     overrideExternalLinkBehavior: true|false    // enables onclick behavior for external links

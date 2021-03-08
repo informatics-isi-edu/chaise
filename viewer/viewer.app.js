@@ -5,6 +5,7 @@
 
     .constant('settings', {
         appName: "viewer",
+        appTitle: "Image Viewer",
         overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,
         overrideExternalLinkBehavior: true

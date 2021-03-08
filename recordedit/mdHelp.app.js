@@ -6,6 +6,8 @@
 
     .constant('settings', {
         appName: "mdHelp",
+        appTitle: "Markdown Help",
+        overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,    // links in navbar might need this
         overrideExternalLinkBehavior: true      // links in navbar might need this
     })

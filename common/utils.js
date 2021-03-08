@@ -2952,6 +2952,8 @@
 
             if (typeof title !== "string" || title.length === 0) {
                 title = chaiseConfig.headTitle;
+            } else {
+                title += " | " + chaiseConfig.headTitle;
             }
 
             var titleTag = document.head.getElementsByTagName('title')[0];
@@ -3122,7 +3124,7 @@
             addCanonicalTag();                              // controlled by chaise-config value to turn on/off
             setWindowName();                                // will only update if not already set
 
-            if (settings.overrideHeadTitle) addTitle();     // controlled by settings in config.js
+            if (settings.overrideHeadTitle) addTitle(settings.appTitle);     // controlled by settings in config.js
 
             if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();    // controlled by settings in config.js
             if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();      // controlled by settings in config.js
