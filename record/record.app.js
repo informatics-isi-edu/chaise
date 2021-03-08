@@ -9,7 +9,6 @@
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
         $rootScope.$on("configuration-done", function () {
-
             angular.element(document).ready(function(){
                 angular.bootstrap(document.getElementById("record"), ["chaise.record"]);
             });
@@ -70,7 +69,16 @@
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
-        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
+        // if we have nodata set, use canonical tag as the uri
+        var locationToUse = $window.location;
+        if ($window.location.href.indexOf("nodata") >= 0) {
+            var url = document.createElement('a');
+            url.href = document.querySelectorAll('[rel="canonical"]')[0].href;
+            locationToUse = url;
+            if ($window.location.href.indexOf("redirect") >= 0) $window.location.replace(url);
+        }
+
+        var res = UriUtils.chaiseURItoErmrestURI(locationToUse, true);
         var ermrestUri = res.ermrestUri,
             pcid = res.pcid,
             ppid = res.ppid,
@@ -126,8 +134,14 @@
                 ];
                 $rootScope.reloadCauses = [];
 
-                return recordAppUtils.readMainEntity(false, logObj);
+                // if ($window.location.href.indexOf("nodata") == -1) {
+                    return recordAppUtils.readMainEntity(false, logObj);
+                // } else {
+                //     $rootScope.displayReady = true;
+                //     return $rootScope.loading = false;
+                // }
             }).then(function (page) {
+                if (page) {
                 var tuple = page.tuples[0];
                 // send string to prepend to "headTitle"
                 // <table-name>: <row-name>
@@ -144,7 +158,7 @@
 
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
-                $window.history.replaceState({}, '', url);
+                if ($window.location.href.indexOf("nodata") == -1) $window.history.replaceState({}, '', url);
 
                 // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,
@@ -276,6 +290,7 @@
                 $timeout(function () {
                     recordAppUtils.updateRecordPage(false);
                 });
+                }
 
             }).catch(recordAppUtils.genericErrorCatch);
 

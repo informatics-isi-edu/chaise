@@ -2090,7 +2090,7 @@
             // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
             compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
             cookiesProvider.defaults.path = '/';
-            logProvider.debugEnabled(getConfigJSON().debug === true);
+            logProvider.debugEnabled(true);
             // Configure all tooltips to be attached to the body by default. To attach a
             // tooltip on the element instead, set the `tooltip-append-to-body` attribute
             // to `false` on the element.
@@ -2981,7 +2981,7 @@
 
         function addCanonicalTag() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            if (chaiseConfig['includeCanonicalTag'] == true) {
+            if (chaiseConfig['includeCanonicalTag'] == true && ($window.location.href.indexOf("nodata") == -1)) {
                 var canonicalTag = document.createElement("link");
                 canonicalTag.setAttribute("rel", "canonical");
 
