@@ -51,6 +51,7 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
+        var openLinksInTab = inIframe && settings.openIframeLinksInTab;
 
         // initialize dcctx object
         $window.dcctx = {
@@ -59,7 +60,10 @@
                 pid: MathUtils.uuid(),
                 wid: $window.name
             },
-            hideNavbar: hideNavbar
+            settings: {
+                hideNavbar: hideNavbar,
+                openLinksInTab: openLinksInTab
+            }
         };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();

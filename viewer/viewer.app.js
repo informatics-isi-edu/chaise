@@ -7,7 +7,8 @@
         appName: "viewer",
         overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,
-        overrideExternalLinkBehavior: true
+        overrideExternalLinkBehavior: true,
+        openIframeLinksInTab: true
     })
 
     .run(['$rootScope', function ($rootScope) {
