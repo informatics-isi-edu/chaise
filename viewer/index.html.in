@@ -33,7 +33,6 @@
                     <div class="top-right-panel">
                         <div class="title-container" ng-if="pageTitle">
                             <h1 id="page-title" ng-bind-html="pageTitle"></h1>
-                            <a href="https://example.com">TEST LINK</a>
                         </div>
                         <div class="btn-group btn-group-sm pull-left menu-btn-container" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" role="group">
                             <button ng-click="osd.openAnnotations();" class="btn chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" uib-tooltip="List the Image annotations" ng-disabled="disableAnnotationSidebar"  id="edit-btn">
