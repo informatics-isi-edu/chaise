@@ -230,10 +230,13 @@
             var loadImageMetadata = true, imageURIQueryParams = {};
             var  osdViewerParams = {
                 mainImage: {zIndex: context.defaultZIndex, info: [], acls: {canUpdate: false}},
-                zPlaneList: [],
                 channels: [],
                 annotationSetURLs: [],
-                zPlaneTotalCount: 1,
+                zPlane: {
+                    count: 1,
+                    minZIndex: null,
+                    maxZIndex: null
+                },
                 isProcessed: true
             };
 
@@ -886,12 +889,18 @@
 
                 if (zIndexCol != null) {
                     // TODO log object
-                    return pImageReference.getAggregates([zIndexCol.aggregate.countDistinctAgg]);
+                    return pImageReference.getAggregates([
+                        zIndexCol.aggregate.countDistinctAgg,
+                        zIndexCol.aggregate.minAgg,
+                        zIndexCol.aggregate.maxAgg
+                    ]);
                 }
                 return null;
             }).then(function (res) {
-                if (res != null && Array.isArray(res) && res.length == 1) {
-                    $rootScope.osdViewerParameters.zPlaneTotalCount = res[0];
+                if (res != null && Array.isArray(res) && res.length == 3) {
+                    $rootScope.osdViewerParameters.zPlane.count = res[0];
+                    $rootScope.osdViewerParameters.zPlane.minZIndex = res[1];
+                    $rootScope.osdViewerParameters.zPlane.maxZIndex = res[2];
                 }
 
                 defer.resolve();
