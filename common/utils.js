@@ -3075,12 +3075,9 @@
         }
 
         /**
-         * if in iframe, make sure links open in new tab
+         * make sure links open in new tab
          */
-        function openIframeLinksInTab () {
-            // only do it for iframe
-            if ($window.self === $window.parent) return;
-
+        function openLinksInTab () {
             addClickListener('a[href]', function (e, element) {
                 element.target = "_blank";
             });
@@ -3133,17 +3130,17 @@
          *
          * NOTE: should only be called by config.js (or equivalent configuration app)
          */
-        function setupHead(settings) {
+        function setupHead() {
             addPolyfills();                                 // needs to be set for navbar functionality (and other chaise functionality)
             addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
             addCanonicalTag();                              // controlled by chaise-config value to turn on/off
             setWindowName();                                // will only update if not already set
 
-            if (settings.overrideHeadTitle) addTitle();     // controlled by settings in config.js
-
-            if (settings.openIframeLinksInTab) openIframeLinksInTab();
-            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();    // controlled by settings in config.js
-            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();      // controlled by settings in config.js
+            var settings = ConfigUtils.getSettings();
+            if (settings.overrideHeadTitle) addTitle();
+            if (settings.openLinksInTab) openLinksInTab();
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
 
 
             return addCustomCSS();                          // controlled by chaise-config value to attach

@@ -62,7 +62,12 @@
             },
             settings: {
                 hideNavbar: hideNavbar,
-                openLinksInTab: openLinksInTab
+                // the settings constant is not accessible from chaise apps,
+                // therefore we're capturing them here so they can be used in chaise
+                openLinksInTab: openLinksInTab,
+                overrideHeadTitle: settings.overrideHeadTitle,
+                overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
+                overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior
             }
         };
         // set chaise configuration based on what is in `chaise-config.js` first
@@ -81,14 +86,14 @@
                     // we already setup the defaults and the configuration based on chaise-config.js
                     if (response && response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
-                    return headInjector.setupHead(settings);
+                    return headInjector.setupHead();
                 }).then(function () {
                     $rootScope.$emit("configuration-done");
                 })
                 // no need to add a catch block here, errors has been includedso handleException has been configured to be the default handler
             } else {
                 // there's no catalog to fetch (may be an index page)
-                headInjector.setupHead(settings).then(function () {
+                headInjector.setupHead().then(function () {
                     $rootScope.$emit("configuration-done");
                 });
             }
