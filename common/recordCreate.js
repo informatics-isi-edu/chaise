@@ -984,7 +984,7 @@
                     }
                 }
                 // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                submissionRow[column.name] = (rowVal === undefined) ? null : rowVal;
+                submissionRow[column.name] = (rowVal === undefined || rowVal === "") ? null : rowVal;
             });
 
             return submissionRow;

@@ -5,6 +5,8 @@
 
     .constant('settings', {
         appName: "help",
+        appTitle: "Wiki Pages",
+        overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,    // links in navbar might need this
         overrideExternalLinkBehavior: true      // links in navbar might need this
     })
@@ -78,7 +80,7 @@
         page = helpPages[pageName];
 
         // change the title
-        headInjector.addTitle(page.title);
+        headInjector.updateHeadTitle(page.title);
 
         // fetch the help page
         ConfigUtils.getHTTPService().get(UriUtils.chaiseDeploymentPath() + "help/" + page.file).then(function (response) {

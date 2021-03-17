@@ -6,6 +6,7 @@
 
     .constant('settings', {
         appName: "recordset",
+        appTitle: "Record Set",
         overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,
         overrideExternalLinkBehavior: true

@@ -6,6 +6,7 @@
 
     .constant('settings', {
         appName: "recordedit",
+        appTitle: "Record Edit",
         overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,
         overrideExternalLinkBehavior: true

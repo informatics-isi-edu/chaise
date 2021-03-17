@@ -25,6 +25,8 @@ angular.module('configure-search', [
 
 .constant('settings', {
     appName: "search",
+    appTitle: "Search",
+    overrideHeadTitle: true,
     overrideDownloadClickBehavior: true,    // links in navbar might need this
     overrideExternalLinkBehavior: true      // links in navbar might need this
 })

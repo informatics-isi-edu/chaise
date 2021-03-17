@@ -64,10 +64,11 @@
                 hideNavbar: hideNavbar,
                 // the settings constant is not accessible from chaise apps,
                 // therefore we're capturing them here so they can be used in chaise
-                openLinksInTab: openLinksInTab,
+                appTitle: settings.appTitle,
                 overrideHeadTitle: settings.overrideHeadTitle,
                 overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
-                overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior
+                overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
+                openLinksInTab: openLinksInTab
             }
         };
         // set chaise configuration based on what is in `chaise-config.js` first

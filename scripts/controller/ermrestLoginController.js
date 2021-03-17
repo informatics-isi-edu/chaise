@@ -6,6 +6,8 @@ var ermLoginController = angular.module('ermLoginController', ['chaise.config'])
 
 ermLoginController.constant('settings', {
     appName: "oldlogin",
+    appTitle: "Login",
+    overrideHeadTitle: true,
     overrideDownloadClickBehavior: true,    // links in navbar might need this
     overrideExternalLinkBehavior: true      // links in navbar might need this
 });
