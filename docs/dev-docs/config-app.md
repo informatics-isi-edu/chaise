@@ -21,7 +21,8 @@ angular.module('<NAMESPACE>.configure-<APP_NAME>', ['chaise.config'])
     appTitle: '<APP_TITLE>',                    // used for tab title in browser. appended with `chaiseConfig.headTitle` || `Chaise`
     overrideHeadTitle: true|false,              // enables chaise's heuristics for the headTitle
     overrideDownloadClickBehavior: true|false,  // enables onclick behavior for asset with the asset-permission class
-    overrideExternalLinkBehavior: true|false    // enables onclick behavior for external links
+    overrideExternalLinkBehavior: true|false,   // enables onclick behavior for external links
+    openIframeLinksInTab: true|false            // if the app is used in an iframe window, makes sure all the links are added in new tab
 })
 
 .run(['$rootScope', function ($rootScope) {

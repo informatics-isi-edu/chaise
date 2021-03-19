@@ -8,7 +8,8 @@
         appTitle: "Image Viewer",
         overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,
-        overrideExternalLinkBehavior: true
+        overrideExternalLinkBehavior: true,
+        openIframeLinksInTab: true
     })
 
     .run(['$rootScope', function ($rootScope) {
