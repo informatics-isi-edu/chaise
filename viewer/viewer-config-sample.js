@@ -74,7 +74,14 @@ var viewerConfigs = {
             // what is the display method (`iiif`, `dzi`, etc)
             "display_method_column_name": "Display_Method",
 
-            // how to generate the url
+            /**
+             * how to generate the url
+             * in the image_url_pattern you have access to two variables:
+             *  - iiif_version: the IIIF version number defined (default is 2)
+             *  - url: the value of `image_url_column_name` (if it's relative, chaise will prepend current hostname to it)
+             * In the current casse, the hatrac url is stored in database, and this attribute would allow us 
+             * to convert a hatrac url into a proper image url that can be used to fetch the image.
+             */
             "iiif_version": "2", // if not passed, `2` will be used
             "image_url_pattern": {
                 "iiif": "/iiif/{{{iiif_version}}}/{{#encode url}}{{/encode}}/info.json"
@@ -124,6 +131,7 @@ var viewerConfigs = {
             "table_name": "Image_Annotation",
 
             // fk to image table in annotation table
+            // TODO: need a better way to specify better foreignkey path
             "reference_image_visible_column_name": "okfHjL8_zZzvahdjNJjz-Q",
             "reference_image_column_name": "Image",
 
@@ -142,6 +150,7 @@ var viewerConfigs = {
              */
             "annotated_term_displayname": "Anatomy",
             "annotated_term_column_name": "Anatomy",
+            // TODO: need a better way to specify better foreignkey path
             "annotated_term_visible_column_name": "Y7oiVf4tLQPtUWQRrtF-KQ",
             "annotated_term_foreign_key_constraint": ["Gene_Expression", "Image_Annotation_Anatomy_fkey"],
 
