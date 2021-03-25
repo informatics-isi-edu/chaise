@@ -111,7 +111,7 @@ The navbar app can be customized by defining different properties in the `chaise
 The `navbarMenu` property is the most complex of the above properties. This parameter is used to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with links and/or dropdown menus. Consult the [chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js) file for more details about format.
  - Each option has an optional newTab property that can be defined at any level. If undefined at root, newTab is treated as true. Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.
  - Each option accepts an 'acls' object that has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. 
- - The url property of each menu object allows for templating of the catalog id parameter using mustache. 
+ - The url property of each menu object allows for templating of the catalog id parameter. 
    - More info can be found in the [templating document](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/mustache-templating.md)
  - The header property of each menu object will create an unclickable bold header with class chaise-dropdown-header when set to `true`. 
 
