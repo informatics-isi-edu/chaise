@@ -96,6 +96,19 @@
                             })
                         });
                         break;
+                    case "updateChannelConfig":
+                        $scope.$apply(function () {
+                            viewerAppUtils.updateChannelConfig(data).then(function (res) {
+                                // we don't need to do anything on success.
+                                // the alerts are disaplyed by the updateChannelConfig function
+                            }).catch(function (error) {
+                                throw error;
+                            }).finally(function () {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: data}, origin);
+                            })
+                        });
+                        break;
                     case "showAlert":
                         $scope.$apply(function(){
                             AlertsService.addAlert(data.message, data.type);

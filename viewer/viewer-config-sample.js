@@ -67,7 +67,7 @@ var viewerConfigs = {
 
             // the actual location of image file (info.json, ImageProperties.xml, etc)
             "image_url_column_name": "File_URL",
-            
+
             // the channel number column
             "channel_number_column_name": "Channel_Number",
 
@@ -99,7 +99,7 @@ var viewerConfigs = {
 
             // the channelName column
             "channel_name_column_name": "Name",
-            
+
             // the channelNumber column
             "channel_number_column_name": "Channel_Number",
 
@@ -108,6 +108,11 @@ var viewerConfigs = {
 
             // a boolean column that signals whether the image is greyscale or rgb
             "is_rgb_column_name": "Is_RGB",
+
+            // a jsonb column that holds the settings for the channel
+            "channel_config_column_name": "Config",
+
+            "channel_config_software_version": "1.0",
 
             /**
              * @DEPRECATED This is here for just backward compatibilty and should not be used.

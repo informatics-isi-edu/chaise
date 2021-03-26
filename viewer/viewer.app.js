@@ -347,6 +347,11 @@
                             watermark = val[imageConfig.watermark_foreign_key_data_column_name];
                         }
                     }
+
+                    // properly set the mainImage acls
+                    $rootScope.osdViewerParameters.acls.mainImage = {
+                        canUpdate: $rootScope.reference.canUpdate
+                    };
                 }
 
                 qParamName = osdConstant.WATERMARK_QPARAM;
@@ -395,11 +400,6 @@
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");
                 }
-
-                // add acls to the osdViewerParameters
-                $rootScope.osdViewerParameters.mainImage.acls = {
-                    canUpdate: DataUtils.isObjectAndNotNull($rootScope.tuple) && $rootScope.reference.canUpdate
-                };
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
                 iframe.location.replace(osdViewerURI);

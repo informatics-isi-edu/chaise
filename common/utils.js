@@ -2603,6 +2603,7 @@
             // - server:
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
             VIEWER_CHANNEL_DEFAULT_LOAD: "z-default" + clientPathActionSeparator + "load",
+            VIEWER_UPDATE_CHANNEL_CONFIG: ":entity/channel-set,;update",
 
             // - client:
             VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",

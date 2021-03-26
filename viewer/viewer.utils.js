@@ -14,13 +14,22 @@
             PIXEL_PER_METER_QPARAM: "meterScaleInPixels",
             WATERMARK_QPARAM: "waterMark",
             IS_RGB_QPARAM: "isRGB",
+            CHANNEL_CONFIG_QPARAM: "channelConfig",
             CHANNEL_QPARAMS: [
                 "aliasName", "channelName", "pseudoColor", "isRGB"
             ],
             OTHER_QPARAMS: [
                 "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
-                "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness"
-            ]
+                "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness",
+                "showColorHistogram"
+            ],
+            CHANNEL_CONFIG: {
+                SOFTWARE_NAME: "channel-parameters",
+                SOFTWARE_VERSION: "1.0",
+                NAME_ATTR: "name",
+                VERSION_ATTR: "version",
+                CONFIG_ATTR: "config"
+            }
         },
         annotation: {
             SEARCH_LOG_TIMEOUT: 2000,
@@ -129,9 +138,14 @@
             imageConfig = viewerConfig.getImageConfig(),
             pImageConfig = viewerConfig.getProcesssedImageConfig(),
             channelConfig = viewerConfig.getChannelConfig();
-
+    
         var osdConstant = viewerConstant.osdViewer,
             URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
+            
+        var channelConfigSoftwareVersion = channelConfig.channel_config_software_version;
+        if (!DataUtils.isNoneEmptyString(channelConfigSoftwareVersion)) {
+            channelConfigSoftwareVersion = osdConstant.CHANNEL_CONFIG.SOFTWARE_VERSION;
+        }
 
         var encode = UriUtils.fixedEncodeURIComponent;
 
@@ -154,6 +168,14 @@
                 return i < qParamVal.length ? _sanitizeVal(qParamVal[i]) : null;
             }
             return null;
+        }
+
+        function _isAppropriateChannelConfig (obj) {
+            var ch = osdConstant.CHANNEL_CONFIG;
+            return DataUtils.isObjectAndNotNull(obj) && // is a not-null object
+                   ch.CONFIG_ATTR in obj && // has config attr
+                   obj[ch.NAME_ATTR] === ch.SOFTWARE_NAME && // name attr is correct
+                   obj[ch.VERSION_ATTR] === channelConfigSoftwareVersion; // version attr is correct
         }
 
         /**
@@ -229,13 +251,21 @@
         function initializeOSDParams (pageQueryParams, imageURI) {
             var loadImageMetadata = true, imageURIQueryParams = {};
             var  osdViewerParams = {
-                mainImage: {zIndex: context.defaultZIndex, info: [], acls: {canUpdate: false}},
+                mainImage: {zIndex: context.defaultZIndex, info: []},
                 channels: [],
                 annotationSetURLs: [],
                 zPlane: {
                     count: 1,
                     minZIndex: null,
                     maxZIndex: null
+                },
+                acls: {
+                    mainImage: {
+                        canUpdate: false
+                    },
+                    channels: {
+                        canUpdate: false
+                    }
                 },
                 isProcessed: true
             };
@@ -344,15 +374,37 @@
 
                         var pseudoColor = t.data[channelConfig.pseudo_color_column_name],
                             channelName = t.data[channelConfig.channel_name_column_name],
-                            channelNumber = t.data[channelConfig.channel_number_column_name];
+                            channelNumber = t.data[channelConfig.channel_number_column_name],
+                            channelConfigs = t.data[channelConfig.channel_config_column_name],
+                            hasConfig = false;
 
                         // create the channel info
                         var res = {};
+
                         res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
+
                         res[osdConstant.CHANNEL_NAME_QPARAM] = DataUtils.isNoneEmptyString(channelName) ? channelName : channelList.length;
+
                         res[osdConstant.PSEUDO_COLOR_QPARAM] = DataUtils.isNoneEmptyString(pseudoColor) ? pseudoColor : null;
+
                         var isRGB = t.data[channelConfig.is_rgb_column_name];
                         res[osdConstant.IS_RGB_QPARAM] = (typeof isRGB === "boolean") ? isRGB : null;
+
+                        // config
+                        channelConfigs = DataUtils.isObjectAndNotNull(channelConfigs) ? channelConfigs : [];
+                        if (Array.isArray(channelConfigs)) {
+                            channelConfigs = channelConfigs.filter(_isAppropriateChannelConfig);
+                            if (channelConfigs.length > 0) {
+                                channelConfigs = channelConfigs[0];
+                                hasConfig = true;
+                            }
+                        } else if (_isAppropriateChannelConfig(channelConfigs)) {
+                            hasConfig = true;
+                        }
+                        if (hasConfig) {
+                            res[osdConstant.CHANNEL_CONFIG_QPARAM] = channelConfigs[osdConstant.CHANNEL_CONFIG.CONFIG_ATTR];
+                        }
+
                         channelList.push(res);
 
                         // if any of the urls are null, then none of the values are valid
@@ -854,6 +906,10 @@
             _readImageChannelTable().then(function (res) {
                 $rootScope.osdViewerParameters.channels = res.channelList;
 
+                $rootScope.osdViewerParameters.acls.channels = {
+                    canUpdate: res.canUpdate
+                };
+
                 // backward compatibility
                 channelURLs = res.channelURLs;
 
@@ -955,6 +1011,77 @@
             return defer.promise;
         }
 
+        /**
+         * [{channelNumber: , settings: }]]
+         * TODO hacky!
+         */
+        function updateChannelConfig(data) {
+            var url, payload = [], defer = $q.defer();
+
+            url = context.serviceURL + "/catalog/" + context.catalogID + "/attributegroup/";
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.schema_name) + ":";
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name) + ",";
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_number_column_name) + ";";
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_config_column_name);
+            
+            // TODO it's changing the object completely right now!
+            var ch = osdConstant.CHANNEL_CONFIG;
+            data.forEach(function (d) {
+                var saved = {};
+                saved[channelConfig.reference_image_column_name] = context.imageID;
+                saved[channelConfig.channel_number_column_name] = d.channelNumber;
+                var config = {};
+                config[ch.NAME_ATTR] = ch.SOFTWARE_NAME;
+                config[ch.VERSION_ATTR] = channelConfigSoftwareVersion;
+                config[ch.CONFIG_ATTR] = d.channelConfig;
+                saved[channelConfig.channel_config_column_name] = config;
+                payload.push(saved);
+            });
+
+            var headers = {};
+            // TODO proper log object
+            var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
+            var stack = logService.getStackObject(
+                logService.getStackNode(
+                    logService.logStackTypes.CHANNEL,
+                    null,
+                    { 
+                        "s_t": channelConfig.schema_name + ":" + channelConfig.table_name
+                    }
+                )
+            );
+            headers[ERMrest.contextHeaderName] = {
+                catalog: context.catalogID,
+                schema_table: channelConfig.schema_name + ":" + channelConfig.table_name,
+                action: logService.getActionString(logService.logActions.VIEWER_UPDATE_CHANNEL_CONFIG, stackPath),
+                stack: stack
+            };
+
+            ConfigUtils.getHTTPService().put(url, payload, {headers: headers}).then(function (response) {
+                AlertsService.addAlert("Channel settings have been updated.", "success");
+                defer.resolve();
+            }).catch(function (error) {
+                Session.validateSession().then(function (session) {
+                    var exception = module.responseToError(error);
+                    if (!session && exception instanceof ERMrest.ConflictError) {
+                        // login in a modal should show (Session timed out)
+                        throw new ERMrest.UnauthorizedError();
+                    }
+
+                    if (exception instanceof Errors.DifferentUserConflictError) {
+                        ErrorService.handleException(exception, true);
+                    } else {
+                        AlertsService.addAlert(exception.message, 'error' );
+                    }
+
+                    defer.resolve();
+                });
+            });
+
+            return defer.promise;
+        }
+
 
         /**
          * since we don't know the size of our requests, this will make sure the
@@ -992,7 +1119,8 @@
             loadImageMetadata: loadImageMetadata,
             fetchZPlaneList: fetchZPlaneList,
             fetchZPlaneListByZIndex: fetchZPlaneListByZIndex,
-            updateDefaultZIndex: updateDefaultZIndex
+            updateDefaultZIndex: updateDefaultZIndex,
+            updateChannelConfig: updateChannelConfig
         };
 
     }]);

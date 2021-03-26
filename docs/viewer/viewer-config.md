@@ -18,7 +18,7 @@ The following is the assumed model of a fully-configured viewer app:
   in each z-plane. For example if an image has two stored z-indices and each one has
   two channels, there will be 4 records of `Processed_Image` table.
 - `Image_Channel` table stores the channel information (whether it's greyscale,
-  the pseudo color, channel name)
+  the pseudo color, channel name, and default [channel configuration](#channel-configuration))
 - `Image_Annotation` table stores the annotations. It MUST have an asset column that
   will be used for storing the annotation files.
 - `Annotated_Term` is the term that each annotation will be associated with.
@@ -66,3 +66,34 @@ query parameters other than "img1" and "img2", will ues `<config1>`.
 ### Parameters
 
 The parameters are explained in the [`viewer-config-sample.js`](https://github.com/informatics-isi-edu/chaise/tree/master/viewer/viewer-config-sample.js) file.
+
+## Channel Configuration
+
+As it was mentioned in the model section, one of the specified columns in the
+`Image_Channel` table is `Config`. This will allow preserving the values that
+will manipulate the displayed colors in the channel. This column is defined as
+`jsonb` type which contains array of configurations based on software and its
+version. The following is the expected structure:
+
+```json
+{
+  "name": "<software-name>",
+  "version": "<software-version>",
+  "config": {
+    
+  }
+}
+
+```
+
+Currently, in viewer app, we're using `"channel-parameters"` as the software name and `"1.0"`
+as the version number. And the config attributes are as follows:
+<!-- TODO explain each attribute -->
+- `contrast`:
+- `brightness`:
+- `gamma`:
+- `saturation`:
+- `hue`:
+- `display_greyscale`:
+
+So an example of a stored channel config looks like the following:
