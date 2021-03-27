@@ -99,14 +99,16 @@
                     case "updateChannelConfig":
                         $scope.$apply(function () {
                             viewerAppUtils.updateChannelConfig(data).then(function (res) {
-                                // we don't need to do anything on success.
                                 // the alerts are disaplyed by the updateChannelConfig function
-                            }).catch(function (error) {
-                                throw error;
-                            }).finally(function () {
                                 // let osd viewer know that the process is done
-                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: data}, origin);
-                            })
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: res}}, origin);
+                            }).catch(function (error) {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: false}}, origin);
+                                
+                                // show the error
+                                throw error;
+                            });
                         });
                         break;
                     case "showAlert":

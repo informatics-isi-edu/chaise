@@ -333,12 +333,13 @@
          * returns {
          *   channelURLs: [{url, channelNumber}], // used for backward compatibility
          *   channelList: [{channelNumber, channelName, isRGB, pseudoColor}]
+         *   acls: {canUpdate}
          * }
          *
          */
         function _readImageChannelTable() {
             console.log("reading channel table");
-            var defer = $q.defer(), channelList = [], channelURLs = [];
+            var defer = $q.defer(), channelList = [], channelURLs = [], canUpdate = false;
 
             // TODO should be done in ermrestjs
             var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
@@ -352,6 +353,8 @@
                 if (!ref) {
                     return false;
                 }
+                
+                canUpdate = ref.canUpdate;
 
                 var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
                 var stack = logService.getStackObject(
@@ -429,7 +432,8 @@
                 }
                 defer.resolve({
                     channelURLs: channelURLs, // backward compatibility
-                    channelList: channelList
+                    channelList: channelList,
+                    acls: {canUpdate: canUpdate}
                 });
             }).catch(function (err) {
                 defer.reject(err);
@@ -906,9 +910,7 @@
             _readImageChannelTable().then(function (res) {
                 $rootScope.osdViewerParameters.channels = res.channelList;
 
-                $rootScope.osdViewerParameters.acls.channels = {
-                    canUpdate: res.canUpdate
-                };
+                $rootScope.osdViewerParameters.acls.channels = res.acls;
 
                 // backward compatibility
                 channelURLs = res.channelURLs;
@@ -1060,10 +1062,10 @@
 
             ConfigUtils.getHTTPService().put(url, payload, {headers: headers}).then(function (response) {
                 AlertsService.addAlert("Channel settings have been updated.", "success");
-                defer.resolve();
+                defer.resolve(true);
             }).catch(function (error) {
                 Session.validateSession().then(function (session) {
-                    var exception = module.responseToError(error);
+                    var exception = ERMrest.responseToError(error);
                     if (!session && exception instanceof ERMrest.ConflictError) {
                         // login in a modal should show (Session timed out)
                         throw new ERMrest.UnauthorizedError();
@@ -1075,7 +1077,7 @@
                         AlertsService.addAlert(exception.message, 'error' );
                     }
 
-                    defer.resolve();
+                    defer.resolve(false);
                 });
             });
 
