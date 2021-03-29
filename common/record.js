@@ -89,6 +89,7 @@
                     isTableDisplay: '=', // is the table in table display mode or other custom mode ('markdown' display)
                     showToggleDisplayBtn: "=",
                     // strings
+                    appLink: '=',
                     baseTableName: '=',
                     displayname: '='
                 },
