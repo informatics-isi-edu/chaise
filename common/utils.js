@@ -466,12 +466,12 @@
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
 
-            var contextObj = ConfigUtils.getContextJSON();
+            var settingsObj = ConfigUtils.getSettings();
             var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             pcontext.push("pcid=" + contextHeaderParams.cid);
             pcontext.push("ppid=" + contextHeaderParams.pid);
             // only add the value to the applink function if it's true
-            if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
+            if (settingsObj.hideNavbar) pcontext.push("hideNavbar=" + settingsObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -1121,9 +1121,9 @@
             }
 
             // add hideNavbar if present/defined
-            var dcctx = ConfigUtils.getContextJSON();
-            if (dcctx.hideNavbar) {
-                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
+            var settings = ConfigUtils.getSettings();
+            if (settings.hideNavbar) {
+                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + settings.hideNavbar;
             }
 
             return url;
@@ -1935,6 +1935,10 @@
             return $window.dcctx;
         };
 
+        function getSettings() {
+            return getContextJSON().settings;
+        }
+
         function getConfigJSON() {
             return getContextJSON().chaiseConfig;
         };
@@ -2140,7 +2144,8 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
-            systemColumnsMode: systemColumnsMode
+            systemColumnsMode: systemColumnsMode,
+            getSettings: getSettings
         }
     }])
 
@@ -3073,6 +3078,15 @@
         }
 
         /**
+         * make sure links open in new tab
+         */
+        function openLinksInTab () {
+            addClickListener('a[href]', function (e, element) {
+                element.target = "_blank";
+            });
+        }
+
+        /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
          * @param {function} handler  the handler callback function.
@@ -3119,16 +3133,18 @@
          *
          * NOTE: should only be called by config.js (or equivalent configuration app)
          */
-        function setupHead(settings) {
+        function setupHead() {
             addPolyfills();                                 // needs to be set for navbar functionality (and other chaise functionality)
             addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
             addCanonicalTag();                              // controlled by chaise-config value to turn on/off
             setWindowName();                                // will only update if not already set
 
-            if (settings.overrideHeadTitle) addTitle(settings.appTitle);     // controlled by settings in config.js
+            var settings = ConfigUtils.getSettings();
+            if (settings.openLinksInTab) openLinksInTab();
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
+            if (settings.overrideHeadTitle) addTitle(settings.appTitle);
 
-            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();    // controlled by settings in config.js
-            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();      // controlled by settings in config.js
 
             return addCustomCSS();                          // controlled by chaise-config value to attach
         }

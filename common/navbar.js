@@ -215,14 +215,21 @@
         'chaise.utils'
     ])
     .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+
+        var chaiseConfig = ConfigUtils.getConfigJSON(),
+            settings = ConfigUtils.getSettings();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         // used to set ACL inheritance as well for each node
         var root = chaiseConfig.navbarMenu || {};
         var catalogId = UriUtils.getCatalogId();
+
+
+        // if in iframe and we want to force links to open in new tab,
+        var forceNewTab = settings.openLinksInTab === true;
+
         // Set default newTab property at root node
-        if (!root.hasOwnProperty('newTab')) {
+        if (!root.hasOwnProperty('newTab') || forceNewTab) {
             root.newTab = true;
         }
 
@@ -257,6 +264,9 @@
                     // get newTab from the parent
                     if (child.newTab === undefined) child.newTab = parentNewTab;
 
+                    // if we have to open in newtab
+                    if (forceNewTab) child.newTab = true;
+
                     // get acls settings from the parent
                     if (child.acls === undefined) {
                         child.acls = parentAcls;
@@ -286,8 +296,8 @@
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
-                var dcctx = ConfigUtils.getContextJSON();
-                scope.hideNavbar = dcctx.hideNavbar;
+                var settings = ConfigUtils.getSettings();
+                scope.hideNavbar = settings.hideNavbar;
                 // Subscribe to on change event for session
                 // navbar doesn't need to have functionality until the session returns, just like app.js blocks
                 var subFunctionId = Session.subscribeOnChange(function() {
