@@ -47,7 +47,7 @@
                         break;
                     case "fetchZPlaneList":
                         $scope.$apply(function () {
-                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after).then(function (res) {
+                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then(function (res) {
                                 iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
                             }).catch(function (err) {
                                 throw err;
@@ -57,7 +57,7 @@
                     // TODO change this to a better name
                     case "fetchZPlaneListByZIndex":
                         $scope.$apply(function () {
-                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex).then(function (res) {
+                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source).then(function (res) {
                                 iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
                             }).catch(function (err) {
                                 throw err;
@@ -105,7 +105,7 @@
                             }).catch(function (error) {
                                 // let osd viewer know that the process is done
                                 iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: false}}, origin);
-                                
+
                                 // show the error
                                 throw error;
                             });

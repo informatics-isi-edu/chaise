@@ -45,12 +45,15 @@ var viewerConfigs = {
             "legacy_osd_url_column_name": "uri",
         },
         /**
-         * the table that stores each individual image for each channel in each z-plane
+         * the table that stores each individual image for each channel in each z
          */
         "processed_image": {
             // procesed image table
             "schema_name": "Gene_Expression",
             "table_name": "Processed_Image",
+            
+            // the channel number column
+            "channel_number_column_name": "Channel_Number",
 
             // how to sort the processed_image records
             "column_order": [{
@@ -65,24 +68,33 @@ var viewerConfigs = {
             "z_index_column_name": "Z_Index",
             "reference_image_column_name": "Reference_Image",
 
-            // the actual location of image file (info.json, ImageProperties.xml, etc)
-            "image_url_column_name": "File_URL",
-
-            // the channel number column
-            "channel_number_column_name": "Channel_Number",
-
-            // what is the display method (`iiif`, `dzi`, etc)
-            "display_method_column_name": "Display_Method",
-
             /**
-             * how to generate the url
-             * in the image_url_pattern you have access to two variables:
-             *  - iiif_version: the IIIF version number defined (default is 2)
-             *  - url: the value of `image_url_column_name` (if it's relative, chaise will prepend current hostname to it)
-             * In the current casse, the hatrac url is stored in database, and this attribute would allow us 
-             * to convert a hatrac url into a proper image url that can be used to fetch the image.
+             * The following attributes will help chaise to generate a url 
+             * that OSD can understand to be able to locate the images.
+             *
+             * - `image_url_column_name`: where the pyremidical image is stored.
+             * - The display method (`iiif`, `dzi`, etc) should correspond to the keys defined in `image_url_pattern`s.
+             * - `iiif_version`: The version of iiif server that should be used (default is 2)
+             * - `image_url_pattern`: the url_pattern to transform the value of `image_url_column_name` into something
+             *    that OSD understands. in the `image_url_pattern` you have access to two variables:
+             *    - `iiif_version`: the IIIF version number defined (default is 2)
+             *    - `url`: the value of `image_url_column_name` (if it's relative, chaise will prepend current hostname to it)
+             *
+             * Notes:
+             * - If `image_url_pattern` is not defined for a specific display method,
+             *   the value of `image_url_column_name` column will be used without any transformation.
+             * - In the current use case, 
+             *   - iiif: the hatrac location of pyremidical images are stored 
+             *     in `image_url_column_name`, and the pattern attribute would allow us 
+             *     to convert a hatrac url into a url that OSD can use to fetch the images.
+             *   - dzi: the location of `ImageProperties.xml` is stored in
+             *    `image_url_column_name` column and transformation is not needed.
+             *   - other types (jpeg): The location of image is stored in 
+             *    `image_url_column_name` column and transformation is not needed.
              */
-            "iiif_version": "2", // if not passed, `2` will be used
+            "image_url_column_name": "File_URL",
+            "display_method_column_name": "Display_Method",
+            "iiif_version": "2",
             "image_url_pattern": {
                 "iiif": "/iiif/{{{iiif_version}}}/{{#encode url}}{{/encode}}/info.json"
             }

@@ -71,29 +71,107 @@ The parameters are explained in the [`viewer-config-sample.js`](https://github.c
 
 As it was mentioned in the model section, one of the specified columns in the
 `Image_Channel` table is `Config`. This will allow preserving the values that
-will manipulate the displayed colors in the channel. This column is defined as
-`jsonb` type which contains array of configurations based on software and its
-version. The following is the expected structure:
+will manipulate the displayed colors for each channel. This column is defined as
+`jsonb` type with the following expected structure:
 
 ```json
 {
   "name": "<software-name>",
   "version": "<software-version>",
   "config": {
-    
+
   }
 }
 
 ```
+> If Config column is not defined, or the value is not in the expected format, OSD viewer will use the default values.
 
 Currently, in viewer app, we're using `"channel-parameters"` as the software name and `"1.0"`
 as the version number. And the config attributes are as follows:
-<!-- TODO explain each attribute -->
-- `contrast`:
-- `brightness`:
-- `gamma`:
-- `saturation`:
-- `hue`:
-- `display_greyscale`:
+
+<table>
+    <tbody>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Acceptable values</th>
+            <th>Default value</th>
+        </tr>
+        <tr>
+            <td><strong>black_level_uint8</strong></td>
+            <td>
+                Used in combination with <em>white_level_uint8</em> to linearly map
+                intensity of the pixels in the displayed image. This value defines
+                the lower bound of the linear mapping.</br>
+                (Must be smaller than <em>white_level_uint8</em>)
+            </td>
+            <td>Integers in [0, 255] range</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td><strong>white_level_uint8</strong></td>
+            <td>
+                Used in combination with <em>black_level_uint8</em> to linearly map
+                intensity of the pixels in the displayed image. This value defines
+                the upper bound of the linear mapping. </br>
+                (Must be bigger than <em>black_level_uint8</em>)
+            </td>
+            <td>Integers in [0, 255] range</td>
+            <td>255</td>
+        </tr>
+        <tr>
+            <td><strong>gamma</strong></td>
+            <td>
+                Gamma correction. The defined value will be used as
+                exponent to modify the intensity of the pixels in the displayed image.
+            </td>
+            <td>Floating point number in [0, 3] range</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td><strong>saturation_percent</strong></td>
+            <td>
+                (Only applicable for greyscale images) </br>
+                Saturation of the pixels in the displayed image.
+            </td>
+            <td>Integers in [0, 100] range</td>
+            <td>100</td>
+        </tr>
+        <tr>
+            <td><strong>hue_degree</strong></td>
+            <td>
+                (Only applicable for greyscale images) </br>
+                Degree of the hue for the pixels in the displayed image.
+            </td>
+            <td>Integers in [0, 100] range</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td><strong>display_greyscale</strong></td>
+            <td>
+                (Only applicable for greyscale images) </br>
+                Set this to `true` to ignore the given `hue_degree` and show the
+                greyscale image without any hue adjustment.
+            </td>
+            <td>Boolean</td>
+            <td>false</td>
+        </tr>
+    </tbody>
+</table>
 
 So an example of a stored channel config looks like the following:
+
+```json
+{
+  "name": "channel-parameters",
+  "version": "1.0",
+  "config": {
+      "black_level_uint8": 0,
+      "white_level_uint8": 255,
+      "gamma": 1,
+      "saturation_percent": 100,
+      "hue_degree": 0,
+      "display_greyscale": false
+  }
+}
+```

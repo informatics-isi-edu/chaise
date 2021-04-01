@@ -138,10 +138,18 @@
             imageConfig = viewerConfig.getImageConfig(),
             pImageConfig = viewerConfig.getProcesssedImageConfig(),
             channelConfig = viewerConfig.getChannelConfig();
-    
+
         var osdConstant = viewerConstant.osdViewer,
             URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
-            
+
+        // used for log purposes
+        // initialized by _createProcessedImageReference and _readImageChannelTable
+        var zPlaneSetLogStack, zPlaneSetLogStackPath, channelSetLogStack, channelSetLogStackPath;
+
+        // used for generating the request to the processed image table.
+        // initialized by _createProcessedImageReference
+        var processedImageReference;
+
         var channelConfigSoftwareVersion = channelConfig.channel_config_software_version;
         if (!DataUtils.isNoneEmptyString(channelConfigSoftwareVersion)) {
             channelConfigSoftwareVersion = osdConstant.CHANNEL_CONFIG.SOFTWARE_VERSION;
@@ -353,20 +361,20 @@
                 if (!ref) {
                     return false;
                 }
-                
+
                 canUpdate = ref.canUpdate;
 
-                var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
-                var stack = logService.getStackObject(
+                channelSetLogStackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
+                channelSetLogStack = logService.getStackObject(
                     logService.getStackNode(
                         logService.logStackTypes.CHANNEL,
                         ref.table,
-                        { "z_index": context.defaultZIndex}
+                        {}
                     )
                 );
                 var logObj = {
-                    action: logService.getActionString(logService.logActions.VIEWER_CHANNEL_DEFAULT_LOAD, stackPath),
-                    stack: stack
+                    action: logService.getActionString(logService.logActions.LOAD, channelSetLogStackPath),
+                    stack: channelSetLogStack
                 };
 
                 // the callback that will be used for populating the result values
@@ -462,16 +470,10 @@
                     return false;
                 }
 
-                var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
-                var stack = logService.getStackObject(
-                    logService.getStackNode(
-                        logService.logStackTypes.CHANNEL,
-                        ref.table,
-                        { "z_index": context.defaultZIndex}
-                    )
-                );
+
+                var stack = logService.addExtraInfoToStack(null, {"z_index": context.defaultZIndex});
                 var logObj = {
-                    action: logService.getActionString(logService.logActions.LOAD, stackPath),
+                    action: logService.getActionString(logService.logActions.VIEWER_LOAD_DEFAULT_Z),
                     stack: stack
                 };
 
@@ -615,7 +617,7 @@
 
                 var logObj = {
                     action: AnnotationsService.getAnnotationLogAction(logService.logActions.LOAD),
-                    stack: AnnotationsService.getAnnotationLogStack()
+                    stack: AnnotationsService.getAnnotationLogStack(null, {"z_index": context.defaultZIndex})
                 };
 
                 var cb = function (page) {
@@ -649,6 +651,9 @@
             return defer.promise;
         }
 
+        /**
+         * populate the variables that are used in different places
+         */
         function _createProcessedImageReference() {
             var defer = $q.defer();
             var path = encode(pImageConfig.schema_name) + ":";
@@ -661,7 +666,19 @@
                 if (!res) {
                     return false;
                 }
-                defer.resolve(res.contextualize.compact);
+
+                processedImageReference = res.contextualize.compact;
+
+                zPlaneSetLogStackPath = logService.getStackPath("", logService.logStackPaths.Z_PLANE_SET);
+                zPlaneSetLogStack = logService.getStackObject(
+                    logService.getStackNode(
+                        logService.logStackTypes.Z_PLANE,
+                        processedImageReference.table,
+                        {}
+                    )
+                );
+
+                defer.resolve();
             }).catch(function (err) {
                 defer.reject(err);
             });
@@ -670,7 +687,7 @@
         }
 
         function _createProcessedImageAttributeGroupReference(beforeValue, afterValue) {
-            var pImageRef = $rootScope.processedImageReference;
+            var pImageRef = processedImageReference;
 
             var context = "compact",
                 table = pImageRef.table,
@@ -761,14 +778,35 @@
             return res;
         }
 
-        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue) {
+        /**
+         * The request used to reload the list based on new page information
+         */
+        function fetchZPlaneList(requestID, pageSize, beforeValue, afterValue, reloadCauses) {
             console.log("fetching zplane page", requestID, pageSize, beforeValue, afterValue);
             var defer = $q.defer();
 
             var ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
 
-            // TODO log object
-            var logObj = {};
+            // TODO we don't have queueing mechanism in osd viewer, so we can just set the time here
+            var stack = logService.addCausesToStack(zPlaneSetLogStack, reloadCauses, ERMrest.getElapsedTime());
+
+            var extraInfo = {
+                "page_size": pageSize
+            };
+
+            // if page-size changes or next page, it will be after
+            // otherwise it will be before
+            if (afterValue != null) {
+                extraInfo.z_index = afterValue;
+            } else {
+                extraInfo.z_index = beforeValue;
+            }
+
+            stack = logService.addExtraInfoToStack(stack, extraInfo);
+            var logObj = {
+                action: logService.getActionString(logService.logActions.RELOAD, zPlaneSetLogStackPath),
+                stack: stack
+            };
             ref.read(pageSize, logObj).then(function (page) {
                 var res = _processAttributeGroupPage(page);
                 if (res == null || res.length == 0) {
@@ -851,7 +889,7 @@
             return res;
         }
 
-        function fetchZPlaneListByZIndex(requestID, pageSize, zIndex) {
+        function fetchZPlaneListByZIndex(requestID, pageSize, zIndex, source) {
             console.log(requestID, pageSize, zIndex);
             var defer = $q.defer();
 
@@ -869,12 +907,33 @@
                 zIndex
             );
 
-            // TODO log object
             var beforeImages, beforePage, afterImages, afterPage;
-            beforeRef.read(pageSize, {}, true).then(function (page1) {
+            var stack = logService.addExtraInfoToStack(zPlaneSetLogStack, {
+                "page_size": pageSize,
+                "z_index": zIndex
+            });
+
+
+            var logObj = {
+                action: logService.getActionString(
+                    source + logService.logActions.VIEWER_LOAD_BEFORE,
+                    zPlaneSetLogStackPath
+                ),
+                stack: stack
+            };
+
+            beforeRef.read(pageSize, logObj, true).then(function (page1) {
                 beforePage = page1;
                 beforeImages = _processAttributeGroupPage(page1);
-                return afterRef.read(pageSize, {}, true);
+
+                logObj = {
+                    action: logService.getActionString(
+                        source + logService.logActions.VIEWER_LOAD_AFTER,
+                        zPlaneSetLogStackPath
+                    ),
+                    stack: stack
+                };
+                return afterRef.read(pageSize, logObj, true);
             }).then(function (page2) {
                 var res = []; // what will be sent to osd viewer
 
@@ -904,7 +963,7 @@
          */
         function loadImageMetadata() {
             var channelURLs = [];
-            var defer = $q.defer(), pImageReference;
+            var defer = $q.defer();
 
             // first read the channel info
             _readImageChannelTable().then(function (res) {
@@ -916,15 +975,10 @@
                 channelURLs = res.channelURLs;
 
                 return _createProcessedImageReference();
-            }).then(function (res) {
-                // needed this for creating the attributegroup reference
-                $rootScope.processedImageReference = res;
-
-                // needed for doing the aggregate
-                pImageReference = res;
+            }).then(function () {
 
                 // read the main image (processed data)
-                return _readProcessedImageTable(pImageReference);
+                return _readProcessedImageTable(processedImageReference);
             }).then (function (mainImageInfo) {
                 if (mainImageInfo.length == 0) {
                     // TODO backward compatibility
@@ -941,17 +995,20 @@
                 };
 
                 // then read the aggregate number of Zs
-                var zIndexCol = pImageReference.columns.find(function (col) {
+                var zIndexCol = processedImageReference.columns.find(function (col) {
                     return col.name === pImageConfig.z_index_column_name;
                 });
 
                 if (zIndexCol != null) {
-                    // TODO log object
-                    return pImageReference.getAggregates([
+                    var logObj = {
+                        action: logService.getActionString(logService.logActions.COUNT, zPlaneSetLogStackPath),
+                        stack: zPlaneSetLogStack
+                    };
+                    return processedImageReference.getAggregates([
                         zIndexCol.aggregate.countDistinctAgg,
                         zIndexCol.aggregate.minAgg,
                         zIndexCol.aggregate.maxAgg
-                    ]);
+                    ], logObj);
                 }
                 return null;
             }).then(function (res) {
@@ -971,7 +1028,10 @@
             return defer.promise
         }
 
-
+        /**
+         * Update the value of default_z with the given zIndex
+         * @param {Integer} zIndex -  the new default_z value
+         */
         function updateDefaultZIndex(zIndex) {
             var defer = $q.defer();
 
@@ -984,9 +1044,17 @@
                 var tuples = [
                     {data: newData, _oldData: oldData}
                 ];
-
-                // TODO log object
-                $rootScope.reference.contextualize.entryEdit.update(tuples, {}).then(function () {
+                var stack = logService.addExtraInfoToStack(null, {
+                    "updated_vals": {
+                        "cols": [imageConfig.default_z_index_column_name],
+                        "vals": [[zIndex]]
+                    }
+                });
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.UPDATE),
+                    stack: stack
+                };
+                $rootScope.reference.contextualize.entryEdit.update(tuples, logObj).then(function () {
                     AlertsService.addAlert("Default Z index value has been updated.", "success");
                     defer.resolve();
                 }).catch(function (exception) {
@@ -1026,7 +1094,7 @@
             url += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name) + ",";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_number_column_name) + ";";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_config_column_name);
-            
+
             // TODO it's changing the object completely right now!
             var ch = osdConstant.CHANNEL_CONFIG;
             data.forEach(function (d) {
@@ -1042,21 +1110,19 @@
             });
 
             var headers = {};
-            // TODO proper log object
-            var stackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
-            var stack = logService.getStackObject(
-                logService.getStackNode(
-                    logService.logStackTypes.CHANNEL,
-                    null,
-                    { 
-                        "s_t": channelConfig.schema_name + ":" + channelConfig.table_name
-                    }
-                )
-            );
+            var stack = logService.addExtraInfoToStack(channelSetLogStack, {
+                "num_updated": data.length,
+                "updated_keys": {
+                    "cols": [channelConfig.channel_number_column_name],
+                    "vals": data.map(function (d) {
+                        return [d.channelNumber];
+                    })
+                }
+            });
             headers[ERMrest.contextHeaderName] = {
                 catalog: context.catalogID,
                 schema_table: channelConfig.schema_name + ":" + channelConfig.table_name,
-                action: logService.getActionString(logService.logActions.VIEWER_UPDATE_CHANNEL_CONFIG, stackPath),
+                action: logService.getActionString(logService.logActions.UPDATE, channelSetLogStackPath),
                 stack: stack
             };
 
