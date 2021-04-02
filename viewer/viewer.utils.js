@@ -21,7 +21,7 @@
             OTHER_QPARAMS: [
                 "waterMark", "meterScaleInPixels", "scale", "x", "y", "z",
                 "ignoreReferencePoint", "ignoreDimension", "enableSVGStrokeWidth", "zoomLineThickness",
-                "showColorHistogram"
+                "showHistogram"
             ],
             CHANNEL_CONFIG: {
                 SOFTWARE_NAME: "channel-parameters",
@@ -143,8 +143,10 @@
             URLQParamAttr = viewerConstant.osdViewer.IMAGE_URL_QPARAM;
 
         // used for log purposes
-        // initialized by _createProcessedImageReference and _readImageChannelTable
-        var zPlaneSetLogStack, zPlaneSetLogStackPath, channelSetLogStack, channelSetLogStackPath;
+        // initialized by _createProcessedImageReference
+        var zPlaneLogStack, zPlaneSetLogStackPath, zPlaneEntityLogStackPath;
+        // initialized by _readImageChannelTable
+        var channelSetLogStack, channelSetLogStackPath;
 
         // used for generating the request to the processed image table.
         // initialized by _createProcessedImageReference
@@ -452,6 +454,7 @@
 
         /**
          * Send request to processed image table and returns a promise that is resolved
+         * used for default z
          * returns [{url, channelNumber}]
          */
         function _readProcessedImageTable(pImageReference) {
@@ -471,9 +474,9 @@
                 }
 
 
-                var stack = logService.addExtraInfoToStack(null, {"z_index": context.defaultZIndex});
+                var stack = logService.addExtraInfoToStack(zPlaneLogStack, {"z_index": context.defaultZIndex, "default_z": true});
                 var logObj = {
-                    action: logService.getActionString(logService.logActions.VIEWER_LOAD_DEFAULT_Z),
+                    action: logService.getActionString(logService.logActions.LOAD, zPlaneEntityLogStackPath),
                     stack: stack
                 };
 
@@ -617,7 +620,7 @@
 
                 var logObj = {
                     action: AnnotationsService.getAnnotationLogAction(logService.logActions.LOAD),
-                    stack: AnnotationsService.getAnnotationLogStack(null, {"z_index": context.defaultZIndex})
+                    stack: AnnotationsService.getAnnotationLogStack(null, {"z_index": context.defaultZIndex, "default_z": isDuringInitialization})
                 };
 
                 var cb = function (page) {
@@ -670,7 +673,8 @@
                 processedImageReference = res.contextualize.compact;
 
                 zPlaneSetLogStackPath = logService.getStackPath("", logService.logStackPaths.Z_PLANE_SET);
-                zPlaneSetLogStack = logService.getStackObject(
+                zPlaneEntityLogStackPath = logService.getStackPath("", logService.logStackPaths.Z_PLANE_ENTITY);
+                zPlaneLogStack = logService.getStackObject(
                     logService.getStackNode(
                         logService.logStackTypes.Z_PLANE,
                         processedImageReference.table,
@@ -788,7 +792,7 @@
             var ref = _createProcessedImageAttributeGroupReference(beforeValue, afterValue);
 
             // TODO we don't have queueing mechanism in osd viewer, so we can just set the time here
-            var stack = logService.addCausesToStack(zPlaneSetLogStack, reloadCauses, ERMrest.getElapsedTime());
+            var stack = logService.addCausesToStack(zPlaneLogStack, reloadCauses, ERMrest.getElapsedTime());
 
             var extraInfo = {
                 "page_size": pageSize
@@ -908,7 +912,7 @@
             );
 
             var beforeImages, beforePage, afterImages, afterPage;
-            var stack = logService.addExtraInfoToStack(zPlaneSetLogStack, {
+            var stack = logService.addExtraInfoToStack(zPlaneLogStack, {
                 "page_size": pageSize,
                 "z_index": zIndex
             });
@@ -1002,7 +1006,7 @@
                 if (zIndexCol != null) {
                     var logObj = {
                         action: logService.getActionString(logService.logActions.COUNT, zPlaneSetLogStackPath),
-                        stack: zPlaneSetLogStack
+                        stack: zPlaneLogStack
                     };
                     return processedImageReference.getAggregates([
                         zIndexCol.aggregate.countDistinctAgg,

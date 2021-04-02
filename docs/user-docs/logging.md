@@ -395,7 +395,7 @@ If you're interested in doing this for each specific table, you can choose to do
 ## Change Log
 
 
-### 04/01/21
+### 04/02/21
 
 ###### PR Links
   - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2069)
@@ -405,8 +405,11 @@ If you're interested in doing this for each specific table, you can choose to do
   - Renamed `:entity/channel-set,z-default;load` to `:entity/channel-set,;load` since it has nothing to do with `default-z` anymore.
     It was used as a backup for getting the URL information of the default-z image. But now it's the request to get all the available
     channel information.
-  - Renamed `:entity/channel-set,;load` to `:entity,default-z;load`. The previous request included the channel information alongside
-    the processed image information. But the new one is only used for getting the default-z processed image information.
+  - Renamed `:entity/channel-set,;load` to `:entity/z-plane-entity,;load`. The previous
+    request included the channel information alongside the processed image information.
+    But the new request is only fetching the processed image information. Since
+    this is currently only used for default z-index, a `default_z` attribute is also
+    logged in the stack. Later this request can be used for other z-indexes as well.
 
 ###### Added
   - Added `z_index` attribute to the `:entity/annotation-set,;load` request.

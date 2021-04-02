@@ -2608,7 +2608,6 @@
 
             // - server:
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
-            VIEWER_LOAD_DEFAULT_Z: "default-z" + clientPathActionSeparator + "load",
             VIEWER_LOAD_BEFORE: clientPathActionSeparator + "load-before",
             VIEWER_LOAD_AFTER: clientPathActionSeparator + "load-after",
 
@@ -2693,6 +2692,7 @@
             ANNOTATION_ENTITY: "annotation-entity",
             ANNOTATION_SET: "annotation-set",
             CHANNEL_SET: "channel-set",
+            Z_PLANE_ENTITY: "z-plane-entity",
             Z_PLANE_SET: "z-plane-set"
         });
 

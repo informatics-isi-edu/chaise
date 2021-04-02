@@ -76,8 +76,8 @@ will manipulate the displayed colors for each channel. This column is defined as
 
 ```json
 {
-  "name": "<software-name>",
-  "version": "<software-version>",
+  "name": "<format-name>",
+  "version": "<format-version>",
   "config": {
 
   }
@@ -86,7 +86,7 @@ will manipulate the displayed colors for each channel. This column is defined as
 ```
 > If Config column is not defined, or the value is not in the expected format, OSD viewer will use the default values.
 
-Currently, in viewer app, we're using `"channel-parameters"` as the software name and `"1.0"`
+Currently, in viewer app, we're using `"channel-parameters"` as the format name and `"1.0"`
 as the version number. And the config attributes are as follows:
 
 <table>
@@ -103,7 +103,7 @@ as the version number. And the config attributes are as follows:
                 Used in combination with <em>white_level_uint8</em> to linearly map
                 intensity of the pixels in the displayed image. This value defines
                 the lower bound of the linear mapping.</br>
-                (Must be smaller than <em>white_level_uint8</em>)
+                (Must be smaller than <code>white_level_uint8</code>)
             </td>
             <td>Integers in [0, 255] range</td>
             <td>0</td>
@@ -114,7 +114,7 @@ as the version number. And the config attributes are as follows:
                 Used in combination with <em>black_level_uint8</em> to linearly map
                 intensity of the pixels in the displayed image. This value defines
                 the upper bound of the linear mapping. </br>
-                (Must be bigger than <em>black_level_uint8</em>)
+                (Must be bigger than <code>black_level_uint8</code>)
             </td>
             <td>Integers in [0, 255] range</td>
             <td>255</td>
@@ -125,32 +125,45 @@ as the version number. And the config attributes are as follows:
                 Gamma correction. The defined value will be used as
                 exponent to modify the intensity of the pixels in the displayed image.
             </td>
-            <td>Floating point number in [0, 3] range</td>
-            <td>1</td>
+            <td>Numbers in [0, 3] range</td>
+            <td>
+                Default is set based on the channel names:
+                <ul>
+                    <li>
+                        <strong>0.55</strong> for channels that we know the color mapping of them: </br>
+                        <code>Alexa Fluor 633</code>, <code>Alexa Fluor 647</code>,
+                        <code>Rhodamine</code>, <code>RFP</code>, <code>Alexa Fluor 555</code>, <code>Alexa Fluor 594</code>, <code>tdTomato</code>, <code>mcherry</code>,
+                        <code>FITC</code>, <code>Alexa 488</code>, <code>Alexa Fluor 488</code>, <code>EGFP</code>, <code>DAPI</code>, <code>Hoechst</code>
+                    </li>
+                    <li>
+                        <strong>0.875</strong> for any other channels
+                    </li>
+                </ul>
+             </td>
         </tr>
         <tr>
             <td><strong>saturation_percent</strong></td>
             <td>
-                (Only applicable for greyscale images) </br>
+                (Only applicable to greyscale images) </br>
                 Saturation of the pixels in the displayed image.
             </td>
-            <td>Integers in [0, 100] range</td>
+            <td>Numbers in [0, 100] range</td>
             <td>100</td>
         </tr>
         <tr>
             <td><strong>hue_degree</strong></td>
             <td>
-                (Only applicable for greyscale images) </br>
+                (Only applicable to greyscale images) </br>
                 Degree of the hue for the pixels in the displayed image.
             </td>
-            <td>Integers in [0, 100] range</td>
+            <td>Integers in [0, 360] range</td>
             <td>0</td>
         </tr>
         <tr>
             <td><strong>display_greyscale</strong></td>
             <td>
-                (Only applicable for greyscale images) </br>
-                Set this to `true` to ignore the given `hue_degree` and show the
+                (Only applicable to greyscale images) </br>
+                Set this to <code>true</code> to ignore the given <code>hue_degree</code> and show the
                 greyscale image without any hue adjustment.
             </td>
             <td>Boolean</td>
