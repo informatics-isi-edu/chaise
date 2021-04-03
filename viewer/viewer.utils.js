@@ -24,8 +24,8 @@
                 "showHistogram"
             ],
             CHANNEL_CONFIG: {
-                SOFTWARE_NAME: "channel-parameters",
-                SOFTWARE_VERSION: "1.0",
+                FORMAT_NAME: "channel-parameters",
+                FORMAT_VERSION: "1.0",
                 NAME_ATTR: "name",
                 VERSION_ATTR: "version",
                 CONFIG_ATTR: "config"
@@ -152,9 +152,9 @@
         // initialized by _createProcessedImageReference
         var processedImageReference;
 
-        var channelConfigSoftwareVersion = channelConfig.channel_config_software_version;
-        if (!DataUtils.isNoneEmptyString(channelConfigSoftwareVersion)) {
-            channelConfigSoftwareVersion = osdConstant.CHANNEL_CONFIG.SOFTWARE_VERSION;
+        var channelConfigFormatVersion = channelConfig.channel_config_format_version;
+        if (!DataUtils.isNoneEmptyString(channelConfigFormatVersion)) {
+            channelConfigFormatVersion = osdConstant.CHANNEL_CONFIG.FORMAT_VERSION;
         }
 
         var encode = UriUtils.fixedEncodeURIComponent;
@@ -184,8 +184,8 @@
             var ch = osdConstant.CHANNEL_CONFIG;
             return DataUtils.isObjectAndNotNull(obj) && // is a not-null object
                    ch.CONFIG_ATTR in obj && // has config attr
-                   obj[ch.NAME_ATTR] === ch.SOFTWARE_NAME && // name attr is correct
-                   obj[ch.VERSION_ATTR] === channelConfigSoftwareVersion; // version attr is correct
+                   obj[ch.NAME_ATTR] === ch.FORMAT_NAME && // name attr is correct
+                   obj[ch.VERSION_ATTR] === channelConfigFormatVersion; // version attr is correct
         }
 
         /**
@@ -1086,8 +1086,10 @@
         }
 
         /**
-         * [{channelNumber: , settings: }]]
-         * TODO hacky!
+         * The expected input format: [{channelNumber: , settings: }]]
+         * TODO this function is not using ermrestjs and directly sending a request
+         * to ermrest. we should be able to improve this later.
+         *
          */
         function updateChannelConfig(data) {
             var url, payload = [], defer = $q.defer();
@@ -1099,15 +1101,14 @@
             url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_number_column_name) + ";";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_config_column_name);
 
-            // TODO it's changing the object completely right now!
             var ch = osdConstant.CHANNEL_CONFIG;
             data.forEach(function (d) {
                 var saved = {};
                 saved[channelConfig.reference_image_column_name] = context.imageID;
                 saved[channelConfig.channel_number_column_name] = d.channelNumber;
                 var config = {};
-                config[ch.NAME_ATTR] = ch.SOFTWARE_NAME;
-                config[ch.VERSION_ATTR] = channelConfigSoftwareVersion;
+                config[ch.NAME_ATTR] = ch.FORMAT_NAME;
+                config[ch.VERSION_ATTR] = channelConfigFormatVersion;
                 config[ch.CONFIG_ATTR] = d.channelConfig;
                 saved[channelConfig.channel_config_column_name] = config;
                 payload.push(saved);

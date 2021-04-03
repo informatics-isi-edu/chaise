@@ -51,7 +51,7 @@ var viewerConfigs = {
             // procesed image table
             "schema_name": "Gene_Expression",
             "table_name": "Processed_Image",
-            
+
             // the channel number column
             "channel_number_column_name": "Channel_Number",
 
@@ -69,7 +69,7 @@ var viewerConfigs = {
             "reference_image_column_name": "Reference_Image",
 
             /**
-             * The following attributes will help chaise to generate a url 
+             * The following attributes will help chaise to generate a url
              * that OSD can understand to be able to locate the images.
              *
              * - `image_url_column_name`: where the pyremidical image is stored.
@@ -83,13 +83,13 @@ var viewerConfigs = {
              * Notes:
              * - If `image_url_pattern` is not defined for a specific display method,
              *   the value of `image_url_column_name` column will be used without any transformation.
-             * - In the current use case, 
-             *   - iiif: the hatrac location of pyremidical images are stored 
-             *     in `image_url_column_name`, and the pattern attribute would allow us 
+             * - In the current use case,
+             *   - iiif: the hatrac location of pyremidical images are stored
+             *     in `image_url_column_name`, and the pattern attribute would allow us
              *     to convert a hatrac url into a url that OSD can use to fetch the images.
              *   - dzi: the location of `ImageProperties.xml` is stored in
              *    `image_url_column_name` column and transformation is not needed.
-             *   - other types (jpeg): The location of image is stored in 
+             *   - other types (jpeg): The location of image is stored in
              *    `image_url_column_name` column and transformation is not needed.
              */
             "image_url_column_name": "File_URL",
@@ -130,8 +130,8 @@ var viewerConfigs = {
 
             // a jsonb column that holds the settings for the channel
             "channel_config_column_name": "Config",
-
-            "channel_config_software_version": "1.0",
+            // the format version that should be used (default is "1.0")
+            "channel_config_format_version": "1.0",
 
             /**
              * @DEPRECATED This is here for just backward compatibilty and should not be used.
