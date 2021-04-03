@@ -2497,6 +2497,7 @@
             stackPathClientPathSeparator = ",",
             clientPathActionSeparator = ";",
             separator = "/";
+
         var logActions = Object.freeze({
             // general
 
@@ -2607,7 +2608,8 @@
 
             // - server:
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
-            VIEWER_CHANNEL_DEFAULT_LOAD: "z-default" + clientPathActionSeparator + "load",
+            VIEWER_LOAD_BEFORE: clientPathActionSeparator + "load-before",
+            VIEWER_LOAD_AFTER: clientPathActionSeparator + "load-after",
 
             // - client:
             VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",
@@ -2665,7 +2667,8 @@
 
             // used in viewer app:
             ANNOTATION: "annotation",
-            CHANNEL: "channel"
+            CHANNEL: "channel",
+            Z_PLANE: "z-plane"
         });
 
         var logStackPaths = Object.freeze({
@@ -2688,7 +2691,9 @@
             // used in viewer app:
             ANNOTATION_ENTITY: "annotation-entity",
             ANNOTATION_SET: "annotation-set",
-            CHANNEL_SET: "channel-set"
+            CHANNEL_SET: "channel-set",
+            Z_PLANE_ENTITY: "z-plane-entity",
+            Z_PLANE_SET: "z-plane-set"
         });
 
         var appModes = Object.freeze({

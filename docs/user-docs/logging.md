@@ -160,7 +160,7 @@ Depending on the request, we might log extra attributes that we are gong to list
     - `old_thickness`, `new_thickness`: Available only on "line thickness adjustment" client log in viewer app. It will capture the old and new value after user interacted with the UI to change the line thickness.
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
-    
+
     - `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
 
     - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
@@ -394,6 +394,31 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ## Change Log
 
+
+### 04/02/21
+
+###### PR Links
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2069)
+  - [OSD viewer](https://github.com/informatics-isi-edu/openseadragon-viewer/pull/78)
+
+###### Changed
+  - Renamed `:entity/channel-set,z-default;load` to `:entity/channel-set,;load` since it has nothing to do with `default-z` anymore.
+    It was used as a backup for getting the URL information of the default-z image. But now it's the request to get all the available
+    channel information.
+  - Renamed `:entity/channel-set,;load` to `:entity/z-plane-entity,;load`. The previous
+    request included the channel information alongside the processed image information.
+    But the new request is only fetching the processed image information. Since
+    this is currently only used for default z-index, a `default_z` attribute is also
+    logged in the stack. Later this request can be used for other z-indexes as well.
+
+###### Added
+  - Added `z_index` attribute to the `:entity/annotation-set,;load` request.
+  - Added `:entity,;update` , `:entity/channel-set,;update`,
+    `:entity/z-plane-set,;count`, `:entity/z-plane-set,;reload`,
+    `:entity/z-plane-set,[search-box|slider|default-z];load-before`, and
+    `:entity/z-plane-set,[search-box|slider|default-z];load-after`
+    requests.
+
 ### 08/26/20
 
 ###### Commit/PR Links
@@ -405,12 +430,12 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ###### Changed
   - Changed the annotation request in viewer app to be aligned with the rest of the apps (Action changed from `:entity,annotation;read` to `:entity/annotation-set,;load` and stack structure modified.)
-  
+
 ###### Added
   - Added proper log support to viewer app. This includes properly logging the requests that viewer app was already making and adding client logs. Please refer to the PR and documentation for more information.
-  
+
   - Added client log action for "go to RID" feature.
-  
+
   - Added `paction=view` to first request in record app, to indicates user clicked on "view" button in tabular displays.
 
 ### 02/12/20
