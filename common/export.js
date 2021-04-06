@@ -159,6 +159,7 @@
 
                 scope.$watch('reference', function (newValue, oldValue) {
                     if (newValue && scope.exportOptions.supportedFormats.length === 1) {
+                        scope.exportOptions.supportedFormats[0].link = scope.reference.csvDownloadLink;
                         _updateExportFormats(scope);
                     }
                 });

@@ -3,8 +3,8 @@
 
     angular.module('chaise.ellipsis', ['chaise.utils'])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
@@ -103,6 +103,7 @@
                     scope.linkText = "more";
                     scope.maxHeightStyle = { };
 
+                    scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
                     scope.noSelect = modalBox.noSelect;
                     scope.singleSelect = modalBox.singleSelectMode;
                     scope.multiSelect = modalBox.multiSelectMode;

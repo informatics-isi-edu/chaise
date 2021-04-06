@@ -150,11 +150,11 @@
                                     <!-- for different elements inside the accordion -->
                                     <div class="row" style="margin-right: 0px; margin-left: 0px;">
                                         <div ng-if="rtm.tableModel.reference.commentDisplay == 'inline' && rtm.tableModel.reference.comment" class="inline-tooltip">{{rtm.tableModel.reference.comment}}</div>
-                                        <div class="col-xs-12 accordion-content" ng-if="rtm.open" ng-switch="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)">
-                                            <div ng-switch-when="true">
+                                        <div class="col-xs-12 accordion-content" ng-if="rtm.open">
+                                            <div ng-show="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)" class="rt-markdown">
                                                 <span class="markdown-container" ng-bind-html="rtm.tableMarkdownContent | trustedHTML"></span>
                                             </div>
-                                            <div ng-switch-default>
+                                            <div ng-hide="!rtm.isTableDisplay && ctrl.allowRelatedTableMarkdown($index)" class="rt-rectab">
                                                 <table-header vm="rtm.tableModel"></table-header>
                                                 <record-table class="related-table" id="rt-{{::ctrl.makeSafeIdAttr(rtm.displayname.value)}}" vm="rtm.tableModel"></record-table>
                                             </div>

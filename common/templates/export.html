@@ -6,7 +6,7 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
         <li ng-repeat="template in exportOptions.supportedFormats">
-            <a class="export-{{::makeSafeIdAttr(template.displayname)}}" ng-click="submit(template)">{{template.displayname}}</a>
+            <a class="export-{{::makeSafeIdAttr(template.displayname)}}" ng-click="submit(template)" ng-attr-csvlink="{{template.link}}">{{template.displayname}}</a>
         </li>
     </ul>
 </div>

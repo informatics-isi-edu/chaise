@@ -21,7 +21,7 @@
                 </record-action-bar>
                 <div ng-hide="showError($index) || showLoader($index)" ng-class="{'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}">
                     <div ng-if="col.column.commentDisplay == 'inline' && col.column.comment" class="inline-tooltip">{{col.column.comment}}</div>
-                    <span ng-show="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" id="entity-{{$index}}-markdown">
+                    <span ng-show="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" id="entity-{{$index}}-markdown" class="entity-markdown">
                         <span ng-if="col.tableMarkdownContent == null">
                             <span class="markdown-container"><em><strong>None</strong></em></span>
                         </span>
@@ -29,7 +29,7 @@
                             <span class="markdown-container" ng-bind-html="col.tableMarkdownContent | trustedHTML"></span>
                         </span>
                     </span>
-                    <span ng-hide="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" id="entity-{{$index}}-recTab">
+                    <span ng-hide="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" id="entity-{{$index}}-recTab" class="entity-rectab">
                         <table-header vm="col.tableModel"></table-header>
                         <record-table class="related-table" id="rt-{{::makeSafeIdAttr(col.column.displayname.value)}}" vm="col.tableModel"></record-table>
                     </span>
