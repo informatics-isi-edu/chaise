@@ -11,6 +11,7 @@ var chaiseConfig = {
     disableExternalLinkModal: true,
     logClientActions: false,
     hideTableOfContents: true,
+    showWriterEmptyRelatedOnLoad: true,
     resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in ci
 };
 

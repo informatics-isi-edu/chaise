@@ -3,6 +3,9 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var testParams = {
     table_name: "editable-id-table",
+    tocHeaders: ['Summary', 'accommodation_image (4)', 'booking (2)', 'more-files (1)',
+        'more-media (1)', 'new_media (2)', 'new_media_2 (2)', 'new_media_3 (2)',
+        'new_media_4 (2)', 'new_media_5 (2)', 'new_media_6 (2)'],
     table_displayname: "Editable Id Table",
     table_inner_html_display: "<strong>Editable Id Table</strong>",
     entity_title: "1",
@@ -38,9 +41,11 @@ describe('View existing record,', function() {
 
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=11", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=11, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.maxRelatedTablesOpen).toBe(11);
+                expect(chaiseConfig.disableDefaultExport).toBeTruthy();
+                expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeFalsy();
             });
         });
 
@@ -51,6 +56,10 @@ describe('View existing record,', function() {
         it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
             var options = chaisePage.recordsetPage.getExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
+        });
+
+        it('should hide empty related tables on load',function(){
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
         });
 
     });
