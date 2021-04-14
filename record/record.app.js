@@ -72,7 +72,7 @@
 
         UriUtils.setOrigin();
 
-        // NOTE: default to false until we know a user is logged in and they can modify the main record and mosify at least 1 of the related tables
+        // NOTE: default to false until we know a user is logged in and they can modify the main record and modify at least 1 of the related tables
         $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
