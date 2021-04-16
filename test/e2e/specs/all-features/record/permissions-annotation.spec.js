@@ -16,7 +16,7 @@ describe('When viewing Record app', function() {
         browser.ignoreSynchronization = true;
     });
 
-    describe('as a read-only user', function() {
+    describe('for a read-only table', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
@@ -57,7 +57,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a create-only user', function() {
+    describe('for a create-only table', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
@@ -142,7 +142,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a user who can update (and create)', function() {
+    describe('for a table that allows edit and create (but no delete)', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
@@ -199,7 +199,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a delete-only user', function() {
+    describe('for a delete-only table', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();

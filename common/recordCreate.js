@@ -507,7 +507,7 @@
             if (column.isAsset) {
                 type = 'file'
             } else if (isDisabled) {
-                type = 'disabled';
+                type = "disabled";
             } else if (column.isForeignKey) {
                 type = 'popup-select';
             } else {
@@ -819,6 +819,10 @@
             // chaise should not use these values and we should just populate the values
             model.submissionRows[tupleIndex] = {};
 
+            if (!isCopy) {
+                model.canUpdateRows[tupleIndex] = {};
+            }
+
             var values = tuple.values;
 
             // attach the foreign key data of the tuple
@@ -832,7 +836,14 @@
                 var i = reference.columns.findIndex(function (col) {return col.name === column.name});
 
                 // If input is disabled, and it's copy, we don't want to copy the value
-                if (colModel.inputType == "disabled" && isCopy) return;
+                var isDisabled = colModel.inputType == "disabled";
+                if (isDisabled && isCopy) return;
+
+                if (!isCopy) {
+                    // whether certain columns are disabled or not
+                    model.canUpdateRows[tupleIndex][column.name] = tuple.canUpdate && tuple.canUpdateValues[i];
+                    isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[i]);
+                }
 
                 // stringify the returned array value
                 if (column.type.isArray) {
@@ -847,10 +858,10 @@
                 switch (column.type.name) {
                     case "timestamp":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatDatetime(values[i], options);
+                        value = isDisabled ? values[i] : InputUtils.formatDatetime(values[i], options);
                         break;
                     case "timestamptz":
-                        if (colModel.inputType == "disabled") {
+                        if (isDisabled) {
                             options.outputType = "string";
                             options.outputMomentFormat = dataFormats.datetime.return;
                         }
@@ -860,13 +871,13 @@
                     case "int4":
                     case "int8":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatInt(values[i]);
+                        value = isDisabled ? values[i] : InputUtils.formatInt(values[i]);
                         break;
                     case "float4":
                     case "float8":
                     case "numeric":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
+                        value = isDisabled ? values[i] : InputUtils.formatFloat(values[i]);
                         break;
                     case "boolean":
                         value = InputUtils.formatBoolean(column, values[i]);
@@ -920,8 +931,8 @@
          * @param {ERMrest.Tuple=} originalTuple - the original tuple that comes from the first read
          * @param {Boolean} editOrCopy - true if it's edit or copy, otherwise it's false.
          */
-        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy) {
-            reference.columns.forEach(function (column) {
+        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy, canUpdateRows) {
+            reference.columns.forEach(function (column, columnIndex) {
                 // If the column is a foreign key column, it needs to get the originating columns name for data submission
                 if (column.isForeignKey) {
 
@@ -948,7 +959,8 @@
                 }
                 // not foreign key, column.name is sufficient for the keys
                 var rowVal = modelRow[column.name];
-                if (rowVal && !column.isDisabled) {
+                var canUpdateCol = typeof canUpdateRows != "object" || canUpdateRows[column.name];
+                if (rowVal && !column.isDisabled && canUpdateCol) {
                     if (column.type.isArray) {
                         rowVal = JSON.parse(rowVal);
                     } else {

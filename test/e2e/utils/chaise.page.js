@@ -419,10 +419,6 @@ var recordEditPage = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
-    this.getDeleteRecordButton = function () {
-        return element(by.id("delete-button"));
-    };
-
     this.getSubmitRecordButton = function () {
         return element(by.id("submit-record-button"));
     };
@@ -1447,6 +1443,8 @@ function chaisePage() {
 
         return defer.promise;
     };
+
+    this.get
 
     this.waitForAggregates = function (timeout) {
         var locator = element.all(by.css('.aggregate-col-loader'));

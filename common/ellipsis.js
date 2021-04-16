@@ -131,7 +131,7 @@
                     );
 
                     // edit button
-                    if (scope.config.editable && tupleReference.canUpdate) {
+                    if (scope.config.editable && scope.tuple.canUpdate) {
                         scope.edit = function () {
                             var id = MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
 
@@ -161,6 +161,7 @@
                     // delete/unlink button
                     if (scope.config.deletable) {
                         if (associationRef) {
+                            // TODO we don't have the tuple so we can only check the table
                             if (associationRef.canDelete) {
                                 // define unlink function
                                 scope.unlink = function() {
@@ -168,7 +169,7 @@
                                 };
                             }
                         }
-                        else if (tupleReference.canDelete) {
+                        else if (scope.tuple.canDelete) {
                             // define delete function
                             scope.delete = function() {
                                 deleteReference(scope, tupleReference, isRelated);

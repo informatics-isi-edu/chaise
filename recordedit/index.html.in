@@ -87,13 +87,13 @@
                                                                 <span ng-if="::column.displayname.isHTML" ng-bind-html="::column.displayname.value"></span>
                                                                 <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                             </span>
-                                                            <span ng-if="(!form.recordEditModel.columnModels[columnIndex].isDisabled || form.recordEditModel.columnModels[columnIndex].showSelectAll) && form.recordEditModel.rows.length > 1" class="pull-right">
+                                                            <span ng-if="form.canShowSelectAllBtn(columnIndex)" class="pull-right">
                                                                 <button id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
                                                                     <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-chevron-up' : 'glyphicon-pencil'"></span>
                                                                 </button>
                                                             </span>
                                                         </td>
-                                                        <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.inputTypeOrDisabled(columnIndex);">
+                                                        <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.inputTypeOrDisabled(columnIndex, rowIndex);">
 
                                                             <!-- date input-->
                                                             <div ng-switch-when="date">
@@ -215,7 +215,7 @@
                                                             <!-- File input -->
                                                             <div ng-switch-when="file">
                                                                 <upload id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" reference="::reference"  column="::column" placeholder="::form.getDisabledInputValue(column, form.recordEditModel.rows[rowIndex][column.name])"
-                                                                values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]" is-required="::form.isRequired(columnIndex)" is-disabled="form.isDisabled(columnIndex)"></upload>
+                                                                values="form.recordEditModel.rows[rowIndex]" value="form.recordEditModel.rows[rowIndex][column.name]" is-required="::form.isRequired(columnIndex)" is-disabled="form.isDisabled(columnIndex, rowIndex)"></upload>
                                                             </div>
 
                                                             <!--JSON input -->
@@ -247,7 +247,7 @@
                                                             <!-- shorttext/default text input -->
                                                             <div ng-switch-default class="chaise-input-control has-feedback">
                                                                 <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}"
-                                                                       type="text" ng-required="::form.isRequired(columnIndex);" is-required="::form.isRequired(columnIndex)" is-disabled="form.isDisabled(columnIndex)" empty-to-null>
+                                                                       type="text" ng-required="::form.isRequired(columnIndex);" empty-to-null>
                                                                 <chaise-clear-input btn-class="text-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
 
@@ -305,9 +305,9 @@
                                     <h1 id="page-title">
                                         <span>{{ form.resultsetModel.rowValues.length }}/{{ form.resultsetModel.pageLimit }}</span>
                                         <chaise-title link="form.resultsetRecordsetLink" reference="reference"></chaise-title>
-                                        <span> Records </span>
-                                        <span ng-if="::!form.editMode">Created</span><span ng-if="::form.editMode">Updated</span>
-                                        <span> Successfully</span>
+                                        <span> records </span>
+                                        <span ng-if="::!form.editMode">created</span><span ng-if="::form.editMode">updated</span>
+                                        <span> successfully</span>
                                     </h1>
                                 </div>
                             </div>
@@ -319,12 +319,17 @@
                         <div class="main-container">
                             <div class="main-body container-fluid">
                                 <div id="resultset-tables">
-                                    <h3 class="replace-margin">{{ form.resultsetModel.rowValues.length }} Successful <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
+                                    <h3 class="replace-margin">{{ form.resultsetModel.rowValues.length }} successful <span ng-if="::!form.editMode">creations</span><span ng-if="::form.editMode">updates</span></h3>
                                     <record-table vm="form.resultsetModel"></record-table>
 
                                     <div ng-if="form.omittedResultsetModel">
-                                        <h3 class="replace-margin">{{ form.omittedResultsetModel.rowValues.length }} Failed <span ng-if="::!form.editMode">Creations</span><span ng-if="::form.editMode">Updates</span></h3>
+                                        <h3 class="replace-margin">{{ form.omittedResultsetModel.rowValues.length }} failed <span ng-if="::!form.editMode">creations</span><span ng-if="::form.editMode">updates</span></h3>
                                         <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
+                                    </div>
+
+                                    <div ng-if="form.disabledResultsetModel">
+                                        <h3 class="replace-margin">{{ form.disabledResultsetModel.rowValues.length }} disabled records (due to lack of permission)</h3>
+                                        <record-table vm="form.disabledResultsetModel" default-row-linking="true"></record-table>
                                     </div>
                                 </div>
                             </div>

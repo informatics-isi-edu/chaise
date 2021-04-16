@@ -1687,6 +1687,21 @@
                         }
                     }
                     return label + records;
+                };
+
+                scope.canCreate = function () {
+                    return scope.vm.config.editable && scope.vm.reference && scope.vm.reference.canCreate;
+                };
+
+                scope.canUpdate = function () {
+                    var res = scope.vm.config.editable && scope.vm.page && scope.vm.reference && scope.vm.reference.canUpdate;
+                    // make sure at least one row can be updated
+                    if (res) {
+                        return scope.vm.page.tuples.some(function (t) {
+                            return t.canUpdate;
+                        });
+                    }
+                    return false;
                 }
 
             }
