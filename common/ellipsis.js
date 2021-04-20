@@ -161,8 +161,7 @@
                     // delete/unlink button
                     if (scope.config.deletable) {
                         if (associationRef) {
-                            // TODO we don't have the tuple so we can only check the table
-                            if (associationRef.canDelete) {
+                            if (scope.tuple.canUnlink) {
                                 // define unlink function
                                 scope.unlink = function() {
                                     deleteReference(scope, associationRef, isRelated, true);

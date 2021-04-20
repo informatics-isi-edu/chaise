@@ -456,7 +456,12 @@
             logParams.action = getTableLogAction(vm, act);
 
             (function (current, requestCauses, reloadStartTime) {
-                vm.reference.read(vm.pageLimit, logParams).then(function (page) {
+                // if it's in related entity section, we should fetch the
+                // unlink trs (acl) of association tables
+                var getUnlinkTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 &&
+                                   vm.reference.derivedAssociationReference;
+
+                vm.reference.read(vm.pageLimit, logParams, false, false, getUnlinkTRS).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
