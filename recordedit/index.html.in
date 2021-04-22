@@ -93,7 +93,8 @@
                                                                 </button>
                                                             </span>
                                                         </td>
-                                                        <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.inputTypeOrDisabled(columnIndex, rowIndex);">
+                                                        <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.inputTypeOrDisabled(rowIndex, columnIndex);">
+                                                            <div class="column-permission-overlay" ng-if="!form.isDisabled(columnIndex, rowIndex) && form.recordEditModel.columnPermissionError[column.name]" ng-click="form.showColumnPermissionErrorClick(rowIndex, column.name)"></div>
 
                                                             <!-- date input-->
                                                             <div ng-switch-when="date">
@@ -175,7 +176,7 @@
 
                                                             <!-- int8 input -->
                                                             <div ng-switch-when="integer8" class="chaise-input-control has-feedback">
-                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" chaise-min="{{::form.int8min}}" chaise-max="{{::form.int8max}}" integer>
+                                                                <input id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" ng-required="::form.isRequired(columnIndex);" chaise-min="{{::form.int8min}}" chaise-max="{{::form.int8max}}" integer column-level-acl>
                                                                 <chaise-clear-input btn-class="int8-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                             </div>
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.row[rowIndex][column.name].$dirty || form.formContainer.$submitted" class="text-danger" role="alert" ng-if="::column.type.name == 'int8'">
@@ -262,7 +263,10 @@
                                                                 <div ng-message="json">Please enter a valid JSON value.</div>
                                                                 <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
                                                                 <div ng-message="customError">{{form.customErrorMessage[rowIndex][column.name]}}</div>
+                                                                <div ng-message="columnPermissionError">{{form.columnPermissionMessage[rowIndex][column.name]}}</div>
                                                             </div>
+
+                                                            <div ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="text-danger"></div>
 
                                                             <!-- Validation error messages to show when the form is submitted -->
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">

@@ -304,6 +304,10 @@
                                 recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
                             }
 
+                            recordEditModel.columnModels.forEach(function (cm) {
+                                recordCreate.populateColumnPermissionError(recordEditModel, cm);
+                            })
+
                             $rootScope.displayReady = true;
                             $log.info('Model: ', recordEditModel);
                             // Keep a copy of the initial rows data so that we can see if user has made any changes later

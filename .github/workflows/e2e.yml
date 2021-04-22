@@ -9,6 +9,8 @@ on:
     branches:
       - 'master'
 
+concurrency: chaise_env
+
 jobs:
   install-and-test:
     runs-on: ubuntu-20.04

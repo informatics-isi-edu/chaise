@@ -143,6 +143,20 @@
                                 border-right: 1px solid $border-color;
                             }
 
+                            &.entity-value {
+                                position: relative;
+
+                                .column-permission-overlay {
+                                    position: absolute;
+                                    left: 0;
+                                    top: 0;
+                                    height: 100%;
+                                    width: 100%;
+                                    z-index: 6; // higher than the chaise-clear
+                                }
+
+                            }
+
                             .modal-popup .chaise-input-control {
                                 height: unset;
                             }

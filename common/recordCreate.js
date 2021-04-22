@@ -811,6 +811,39 @@
             }
         }
 
+        function populateColumnPermissionError(model, columnModel) {
+            if (!model.columnPermissionError) {
+                model.columnPermissionError = {};
+            }
+
+            // TODO could be improved
+            if (columnModel.isDisabled) {
+                model.columnPermissionError[columnModel.column.name] = null;
+                return;
+            }
+
+            var cols = [];
+            model.canUpdateRows.forEach(function (cur, index) {
+                // the whole row can be updated but the column cannot
+                if ($rootScope.tuples[index].canUpdate && !cur[columnModel.column.name]) {
+                    cols.push(index);
+                }
+            });
+            if (cols.length === 0) {
+                model.columnPermissionError[columnModel.column.name] = null;
+                return;
+            }
+            var message = "This column cannot be edited. To edit it, remove record";
+            message += (cols.length > 1) ? "s" : "";
+            message += " number ";
+            message += cols.reduce(function (res, curr, index, arr) {
+                return res + (index == 0 ? "" : ", ") + (index == arr.length-1 && arr.length > 1 ? "and " : "")  + "`" + (curr+1) + "`";
+            }, "");
+            message += " from the form."
+
+            model.columnPermissionError[columnModel.column.name] =  message;
+        }
+
         function populateEditModelValues(model, reference, tuple, tupleIndex, isCopy) {
             // initialize row objects {column-name: value,...}
             model.rows[tupleIndex] = {};
@@ -1010,7 +1043,8 @@
             getColumnModelLogAction: getColumnModelLogAction,
             populateCreateModelValues: populateCreateModelValues,
             populateEditModelValues: populateEditModelValues,
-            populateSubmissionRow: populateSubmissionRow
+            populateSubmissionRow: populateSubmissionRow,
+            populateColumnPermissionError: populateColumnPermissionError
         }
     }])
 })();

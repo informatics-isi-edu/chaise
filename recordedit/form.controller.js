@@ -529,6 +529,11 @@
             if (vm.editMode) {
                 vm.recordEditModel.canUpdateRows.splice(index, 1);
                 $rootScope.tuples.splice(index, 1);
+                // when some rows has changed, we should make sure the errors are updated
+                vm.recordEditModel.columnModels.forEach(function (cm) {
+                    recordCreate.populateColumnPermissionError(vm.recordEditModel, cm);
+                });
+                vm.showColumnPermissionError = [];
             }
             $timeout(function() {
                 onResize();
@@ -657,8 +662,10 @@
 
             // it must be multi-row, column must not be disabled,
             // and at least one row can be edited (if in edit mode)
+            // and no column-level acl
             if (vm.recordEditModel.rows.length < 2) return false;
             if (model.isDisabled) return false;
+            if (vm.recordEditModel.columnPermissionError[model.column.name]) return false;
 
             return !vm.editMode || vm.recordEditModel.canUpdateRows.some(function (item) {
                 return item[model.column.name];
@@ -894,7 +901,7 @@
         //   1. the input should not be file (the upload directive handls showing proper disabled input for those)
         //   2. If the select all dialog is open
         //   3. If the column must be disabled based on acl or annotation
-        vm.inputTypeOrDisabled = function inputTypeOrDisabled(columnIndex, rowIndex) {
+        vm.inputTypeOrDisabled = function inputTypeOrDisabled(rowIndex, columnIndex) {
             try {
                 var model = vm.recordEditModel.columnModels[columnIndex];
                 if (model.inputType === "file") {
@@ -907,6 +914,17 @@
             } catch (err) {
                 console.log("couldn't figure out the type: ", err);
             }
+        }
+
+
+        vm.showColumnPermissionErrorClick = function (rowIndex, columnName) {
+            if (!vm.showColumnPermissionError) {
+                vm.showColumnPermissionError = [];
+            }
+            if (!(rowIndex in vm.showColumnPermissionError)) {
+                vm.showColumnPermissionError[rowIndex] = {};
+            }
+            vm.showColumnPermissionError[rowIndex][columnName] = true;
         }
 
         // if any of the columns is showing spinner, that means it's waiting for some
