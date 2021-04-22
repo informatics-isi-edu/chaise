@@ -20,6 +20,7 @@ jobs:
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: true
       PYTHONWARNINGS: ignore:Unverified HTTPS request
+    timeout-minutes: 90
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -115,6 +116,7 @@ jobs:
         run: |
           sudo service apache2 restart
       - name: Setup and connect to saucelabs
+        timeout-minutes: 2
         run: |
           curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
           tar -xzf saucelabs.tar.gz

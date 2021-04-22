@@ -660,16 +660,25 @@
                 return true;
             }
 
+            // in this case we want to show the button and instead disable it
+            if (vm.editMode && vm.recordEditModel.columnPermissionError && vm.recordEditModel.columnPermissionError[model.column.name]) {
+                return true;
+            }
+
             // it must be multi-row, column must not be disabled,
             // and at least one row can be edited (if in edit mode)
-            // and no column-level acl
             if (vm.recordEditModel.rows.length < 2) return false;
             if (model.isDisabled) return false;
-            if (vm.recordEditModel.columnPermissionError[model.column.name]) return false;
 
             return !vm.editMode || vm.recordEditModel.canUpdateRows.some(function (item) {
                 return item[model.column.name];
             });
+        };
+
+        // if because of column-level acl some rows cannot be edited, select-all should be disabled.
+        vm.disableSelectAllBtn = function (columnIndex) {
+            var model = vm.recordEditModel.columnModels[columnIndex];
+            return vm.editMode && vm.recordEditModel.columnPermissionError[model.column.name];
         }
 
         /**

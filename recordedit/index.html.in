@@ -73,9 +73,12 @@
                                                         <td class="entity-key">Record Number</td>
                                                         <td class="form-header entity-value" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                                             <div class="pull-left" ng-bind="rowIndex + 1"></div>
-                                                            <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
-                                                                <span class="glyphicon glyphicon-remove"></span>
-                                                            </button>
+                                                            <div class="pull-right">
+                                                                <i ng-show="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This recod cannot be modified."></i>
+                                                                <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
+                                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                                </button>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -88,7 +91,7 @@
                                                                 <span ng-if="::!column.displayname.isHTML" ng-bind="::column.displayname.value"></span>
                                                             </span>
                                                             <span ng-if="form.canShowSelectAllBtn(columnIndex)" class="pull-right">
-                                                                <button id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
+                                                                <button ng-disabled="form.disableSelectAllBtn(columnIndex)" id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
                                                                     <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-chevron-up' : 'glyphicon-pencil'"></span>
                                                                 </button>
                                                             </span>
@@ -263,10 +266,9 @@
                                                                 <div ng-message="json">Please enter a valid JSON value.</div>
                                                                 <div ng-message="fileExtension">Please select a file with the following type: {{form.fileExtensionTypes(column)}}</div>
                                                                 <div ng-message="customError">{{form.customErrorMessage[rowIndex][column.name]}}</div>
-                                                                <div ng-message="columnPermissionError">{{form.columnPermissionMessage[rowIndex][column.name]}}</div>
                                                             </div>
 
-                                                            <div ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="text-danger"></div>
+                                                            <div ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="alert alert-warning column-permission-warning"></div>
 
                                                             <!-- Validation error messages to show when the form is submitted -->
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
