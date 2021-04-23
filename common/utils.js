@@ -11,7 +11,7 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -37,6 +37,7 @@
           "disableExternalLinkModal": false,
           "logClientActions": true,
           "hideGoToRID": false,
+          "showWriterEmptyRelatedOnLoad": null,
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]

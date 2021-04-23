@@ -374,9 +374,9 @@ Since the asset download and also the default CSV export requests are simple red
 
 The following url patterns are what's unique about each of these requests and you can use for your analysis:
 
-- Asset download: `?limit=none&accept=csv&uinit=1&cid=`
+- Asset download: `uinit=1&cid=`
 
-- CSV default export: `uinit=1&cid=`
+- CSV default export: `?limit=none&accept=csv&uinit=1&cid=`
 
 #### Finding the displayed recordset request
 
