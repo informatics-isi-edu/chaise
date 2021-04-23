@@ -991,7 +991,7 @@
                 }
                 // not foreign key, column.name is sufficient for the keys
                 var rowVal = modelRow[column.name];
-                var canUpdateCol = typeof canUpdateRows != "object" || canUpdateRows[column.name];
+                var canUpdateCol = !DataUtils.isObjectAndNotNull(canUpdateRows) || canUpdateRows[column.name] == true;
                 if (rowVal && !column.isDisabled && canUpdateCol) {
                     if (column.type.isArray) {
                         rowVal = JSON.parse(rowVal);

@@ -20,7 +20,7 @@ jobs:
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: true
       PYTHONWARNINGS: ignore:Unverified HTTPS request
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -112,6 +112,8 @@ jobs:
           sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
           sudo -H -u webauthn webauthn2-manage addattr admin
           sudo -H -u webauthn webauthn2-manage assign test1 admin
+          sudo -H -u webauthn webauthn2-manage adduser test2
+          sudo -H -u webauthn webauthn2-manage passwd test2 dummypassword
       - name: Restart apache
         run: |
           sudo service apache2 restart

@@ -325,3 +325,20 @@ exports.deleteHatracNamespaces = function (authCookie, namespaces) {
 
     return Q.all(promises);
 }
+
+exports.importACLs = function (params) {
+    var defer = Q.defer();
+    ermrestUtils.importACLS({
+        url: process.env.ERMREST_URL,
+        authCookie: process.env.AUTH_COOKIE,
+        setup: params
+    }).then(function () {
+        console.log("successfully updated the ACLs");
+        defer.resolve();
+    }).catch(function (err) {
+        console.log("error while trying to change ACLs");
+        console.dir(err);
+        defer.reject(err);
+    });
+    return defer.promise;
+}

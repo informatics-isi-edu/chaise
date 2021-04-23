@@ -575,12 +575,12 @@ var recordPage = function() {
 
     this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName, isInline);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".edit-action-button"));
     };
 
     this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -1268,6 +1268,7 @@ function chaisePage() {
         return this.waitForElement(element(by.css(".recordset-table")));
     }
     this.recordPageReady = function() {
+        this.waitForElement(this.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.id('tblRecord')));
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
@@ -1438,6 +1439,7 @@ function chaisePage() {
             browser.ignoreSynchronization = false;
             defer.resolve();
         }).catch(function (err) {
+            console.dir(err);
             defer.reject(err);
         });
 
