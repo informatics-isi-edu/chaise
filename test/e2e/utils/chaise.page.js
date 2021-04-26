@@ -37,6 +37,20 @@ var recordEditPage = function() {
         return element.all(by.css("td.entity-key > span.column-displayname > span"));
     };
 
+    this.getColumnPermissionOverlay = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));
+    }
+
+    this.getColumnPermissionError = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-warn"));
+    };
+
+    this.getDisabledRowIcon = function (rowIndex) {
+        return element.all(by.css('.form-header')).get(rowIndex).all(by.css('.disabled-row-icon'));
+    }
+
     this.getColumnCaptionsWithHtml = function() {
         return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
@@ -438,6 +452,18 @@ var recordEditPage = function() {
 
     this.getClearButton = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().parent().find('.glyphicon-remove')[0]", el);
+    };
+
+    this.getDisabledResultSet = function () {
+        return element(by.id("resultset-disabled-table"));
+    };
+
+    this.getDisabledResultSetHeader = function () {
+        return element(by.id("resultset-disabled-table")).element(by.tagName("h3"));
+    };
+
+    this.getDisabledResultSetRows = function () {
+        return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
     };
 };
 

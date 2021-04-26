@@ -74,7 +74,7 @@
                                                         <td class="form-header entity-value" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                                             <div class="pull-left" ng-bind="rowIndex + 1"></div>
                                                             <div class="pull-right">
-                                                                <i ng-show="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This recod cannot be modified."></i>
+                                                                <i ng-if="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This recod cannot be modified."></i>
                                                                 <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
                                                                     <span class="glyphicon glyphicon-remove"></span>
                                                                 </button>
@@ -97,7 +97,7 @@
                                                             </span>
                                                         </td>
                                                         <td class="entity-value" ng-form="form.formContainer.row[rowIndex][column.name]" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index" ng-switch="form.inputTypeOrDisabled(rowIndex, columnIndex);">
-                                                            <div class="column-permission-overlay" ng-if="!form.isDisabled(columnIndex, rowIndex) && form.recordEditModel.columnPermissionError[column.name]" ng-click="form.showColumnPermissionErrorClick(rowIndex, column.name)"></div>
+                                                            <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-col-perm-overlay" class="column-permission-overlay" ng-if="!form.isDisabled(columnIndex, rowIndex) && form.recordEditModel.columnPermissionError[column.name]" ng-click="form.showColumnPermissionErrorClick(rowIndex, column.name)"></div>
 
                                                             <!-- date input-->
                                                             <div ng-switch-when="date">
@@ -268,7 +268,7 @@
                                                                 <div ng-message="customError">{{form.customErrorMessage[rowIndex][column.name]}}</div>
                                                             </div>
 
-                                                            <div ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="alert alert-warning column-permission-warning"></div>
+                                                            <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-col-perm-warn" ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="alert alert-warning column-permission-warning"></div>
 
                                                             <!-- Validation error messages to show when the form is submitted -->
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
@@ -333,7 +333,7 @@
                                         <record-table vm="form.omittedResultsetModel" default-row-linking="true"></record-table>
                                     </div>
 
-                                    <div ng-if="form.disabledResultsetModel">
+                                    <div ng-if="form.disabledResultsetModel" id="resultset-disabled-table">
                                         <h3 class="replace-margin">{{ form.disabledResultsetModel.rowValues.length }} disabled records (due to lack of permission)</h3>
                                         <record-table vm="form.disabledResultsetModel" default-row-linking="true"></record-table>
                                     </div>

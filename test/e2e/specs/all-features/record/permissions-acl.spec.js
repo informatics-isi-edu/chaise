@@ -26,18 +26,20 @@ var EC = protractor.ExpectedConditions;
  *  2: non-edit, non-delete
  */
 var testParams = {
-    row_ids: {
-        editable_deletable:    1,
-        non_edit_non_delete:   2,
-        non_edit_deletable:    3,
-        editable_non_delete:   4,
-        all_vis_col_non_edit:  5,
-        some_vis_col_non_edit: 6,
-    },
-    related: {
-        main_id: 1,
-        inbound_displayname: "related_1",
-        assoc_displayname: "related_2",
+    dynamic_acl: {
+        row_ids: {
+            editable_deletable:    1,
+            non_edit_non_delete:   2,
+            non_edit_deletable:    3,
+            editable_non_delete:   4,
+            all_vis_col_non_edit:  5,
+            some_vis_col_non_edit: 6,
+        },
+        related: {
+            main_id: 1,
+            inbound_displayname: "related_1",
+            assoc_displayname: "related_2",
+        }
     }
 };
 
@@ -280,14 +282,14 @@ describe('When viewing Record app for a table with dynamic acls, ', function() {
     });
 
     describe("when the row can be edited and deleted, ", function () {
-        testRecordEditDelete(testParams.row_ids.editable_deletable, true, true);
+        testRecordEditDelete(testParams.dynamic_acl.row_ids.editable_deletable, true, true);
     });
 
     describe("when the row cannot be edited or deleted, ", function () {
         // in this case none of the buttons show up (no edit, no delete, no create)
         beforeAll(function () {
             browser.ignoreSynchronization = true;
-            browser.get(getRecordURL(testParams.row_ids.non_edit_non_delete));
+            browser.get(getRecordURL(testParams.dynamic_acl.row_ids.non_edit_non_delete));
             chaisePage.recordPageReady();
         });
 
@@ -303,53 +305,53 @@ describe('When viewing Record app for a table with dynamic acls, ', function() {
     });
 
     describe("when the row cannot be edited but can be deleted, ", function () {
-        testRecordEditDelete(testParams.row_ids.non_edit_deletable, false, true);
+        testRecordEditDelete(testParams.dynamic_acl.row_ids.non_edit_deletable, false, true);
     });
 
     describe("when the row can be edited but not deleted, ", function () {
-        testRecordEditDelete(testParams.row_ids.editable_non_delete, true, false);
+        testRecordEditDelete(testParams.dynamic_acl.row_ids.editable_non_delete, true, false);
     });
 
     describe("when all the columns in a row are not editable, ", function () {
-        testRecordEditDelete(testParams.row_ids.all_vis_col_non_edit, false, true);
+        testRecordEditDelete(testParams.dynamic_acl.row_ids.all_vis_col_non_edit, false, true);
     });
 
     describe("when some of the columns in a row are not editable, ", function () {
-        testRecordEditDelete(testParams.row_ids.some_vis_col_non_edit, true, true);
+        testRecordEditDelete(testParams.dynamic_acl.row_ids.some_vis_col_non_edit, true, true);
     });
 
     describe("when the related tables have dynamic acls, ", function () {
         beforeAll(function () {
             browser.ignoreSynchronization = true;
-            browser.get(getRecordURL(testParams.related.main_id));
+            browser.get(getRecordURL(testParams.dynamic_acl.related.main_id));
             chaisePage.recordPageReady();
         });
 
         describe("for a related table, ", function () {
             it ("rows should be displayed properly", function () {
-                expect(recordPage.getRelatedTableRows(testParams.related.inbound_displayname).count()).toBe(4);
+                expect(recordPage.getRelatedTableRows(testParams.dynamic_acl.related.inbound_displayname).count()).toBe(4);
             });
 
             it ("Edit button should display based on related table acls,", function () {
-                testRelatedEdit(testParams.related.inbound_displayname, [true, false, false, true]);
+                testRelatedEdit(testParams.dynamic_acl.related.inbound_displayname, [true, false, false, true]);
             });
 
             it ("Delete button should display based on related table acls", function () {
-                testRelatedDelete(testParams.related.inbound_displayname, [true, false, true, false]);
+                testRelatedDelete(testParams.dynamic_acl.related.inbound_displayname, [true, false, true, false]);
             });
         });
 
         describe("for an association table, ", function () {
             it ("rows should be displayed properly", function () {
-                expect(recordPage.getRelatedTableRows(testParams.related.assoc_displayname).count()).toBe(2);
+                expect(recordPage.getRelatedTableRows(testParams.dynamic_acl.related.assoc_displayname).count()).toBe(2);
             });
 
             it ("Edit button should display based on related table acls,", function () {
-                testRelatedEdit(testParams.related.assoc_displayname, [true, false]);
+                testRelatedEdit(testParams.dynamic_acl.related.assoc_displayname, [true, false]);
             });
 
             it ("Unlink button should display based on association table acls", function () {
-                testRelatedDelete(testParams.related.assoc_displayname, [false, true]);
+                testRelatedDelete(testParams.dynamic_acl.related.assoc_displayname, [false, true]);
             });
         });
     });
