@@ -4,7 +4,7 @@ var config = pConfig.getConfig({
     configFileName: 'multi-permissions/dev.json',
     chaiseConfigFilePath: 'test/e2e/specs/all-features/chaise-config.js',
     specs: [
-        "*/permissions-annotation.spec.js"
+        "*/permissions-annotation.spec.js",
         "*/permissions-acl.spec.js"
     ],
     setBaseUrl: function(browser, data) {

@@ -96,13 +96,6 @@ describe('When viewing Record app', function() {
             expect(button.getAttribute("disabled")).toBeTruthy();
         });
 
-        // As create only user, 'Hide Empty Related Tables' should appear because the user can create entities for one or more related tables
-        it('should display the related tables toggle as "Hide empty sections"', function() {
-            var button = recordPage.getShowAllRelatedEntitiesButton();
-            expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getText()).toBe("Hide empty sections");
-        });
-
         describe('the related tables', function() {
             it('should show the "Explore" link', function() {
                 var link = recordPage.getMoreResultsLink('in_create_table');
@@ -181,13 +174,6 @@ describe('When viewing Record app', function() {
             var button = recordPage.getDeleteRecordButton();
             expect(button.isPresent()).toBeTruthy();
             expect(button.getAttribute("disabled")).toBeTruthy();
-        });
-
-        it('should display the related tables toggle as "Hide empty sections"', function() {
-            var button = recordPage.getShowAllRelatedEntitiesButton();
-            expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getText()).toBe("Hide empty sections");
-            // Actual toggling behavior (like does it show the right table format and whether the toggle text flips correctly is tested in Record presentation spec)
         });
 
         it('should show an "Edit mode" toggle link if a related table has a row_markdown_pattern', function() {
