@@ -199,16 +199,17 @@ describe("when viewing Recordedit app for a table with dynamic acls", function (
         beforeAll(function () {
             browser.ignoreSynchronization = true;
             browser.get(getRecordEditURL("id=1;id=4"));
-            var alert = browser.switchTo().alert();
-            if (alert) {
+            // just in case the other test failed and didn't submit
+            browser.switchTo().alert().then(function (alert) {
                 alert.accept();
-            }
-            chaisePage.recordeditPageReady();
-            browser.wait(function() {
+            }).catch(function () {}).finally(function () {
+                chaisePage.recordeditPageReady();
+                browser.wait(function() {
                 return recordEditPage.getAllColumnNames().count().then(function(ct) {
                     return (ct == 3);
                 });
             }, browser.params.defaultTimeout);
+            });
         });
 
         it ("The field should be disabled.", function (done) {
