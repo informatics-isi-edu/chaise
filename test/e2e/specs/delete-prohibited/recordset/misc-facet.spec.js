@@ -465,7 +465,6 @@ describe("Other facet features, ", function() {
 
             clearAll.click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
-
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -473,17 +472,12 @@ describe("Other facet features, ", function() {
         it ("null should be provided as an option and user should be able to select it.", function (done) {
             var params = testParams.null_filter.panel;
             chaisePage.recordsetPage.getFacetById(params.facetIdx).click().then(function () {
-                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
-
                 // wait for facet checkboxes to load
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getFacetOptions(params.facetIdx).count().then(function(ct) {
                         return ct == params.totalNumOptions;
                     });
                 }, browser.params.defaultTimeout);
-
-                // wait for list to be fully visible
-                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(params.facetIdx)), browser.params.defaultTimeout);
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(params.facetIdx, params.option));
             }).then(function () {
