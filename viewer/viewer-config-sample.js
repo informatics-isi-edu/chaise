@@ -78,7 +78,8 @@ var viewerConfigs = {
              * - `image_url_pattern`: the url_pattern to transform the value of `image_url_column_name` into something
              *    that OSD understands. in the `image_url_pattern` you have access to two variables:
              *    - `iiif_version`: the IIIF version number defined (default is 2)
-             *    - `url`: the value of `image_url_column_name` (if it's relative, chaise will prepend current hostname to it)
+             *    - `_url`: the raw value of `image_url_column_name`.
+             *    - `url`: the formatted value of `image_url_column_name`: if it's relative, chaise will prepend current hostname to it
              *
              * Notes:
              * - If `image_url_pattern` is not defined for a specific display method,

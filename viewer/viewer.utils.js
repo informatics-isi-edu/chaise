@@ -528,14 +528,22 @@
 
             var displayMethod = data[pImageConfig.display_method_column_name];
             if (displayMethod in pImageConfig.image_url_pattern) {
-                imageURL = UriUtils.getAbsoluteURL(imageURL);
+                var absImageURL = UriUtils.getAbsoluteURL(imageURL);
 
                 var iiifVersion = viewerConstant.DEFAULT_IIIF_VERSION;
                 if (DataUtils.isNoneEmptyString(pImageConfig.iiif_version)) {
                     iiifVersion = pImageConfig.iiif_version;
                 }
 
-                imageURL = ERMrest.renderHandlebarsTemplate(pImageConfig.image_url_pattern[displayMethod], {"url": imageURL, "iiif_version": iiifVersion});
+                imageURL = ERMrest.renderHandlebarsTemplate(
+                    pImageConfig.image_url_pattern[displayMethod],
+                    {
+                        "_url": imageURL,
+                        "url": absImageURL,
+                        "_iiif_version": iiifVersion,
+                        "iiif_version": iiifVersion
+                    }
+                );
             }
 
             return imageURL;
