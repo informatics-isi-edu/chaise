@@ -351,7 +351,7 @@
 
                     // properly set the mainImage acls
                     $rootScope.osdViewerParameters.acls.mainImage = {
-                        canUpdate: $rootScope.reference.canUpdate
+                        canUpdateDefaultZIndex: imageTuple.canUpdate && imageTuple.checkPermissions("column_update", imageConfig.default_z_index_column_name)
                     };
                 }
 

@@ -271,10 +271,7 @@
                 },
                 acls: {
                     mainImage: {
-                        canUpdate: false
-                    },
-                    channels: {
-                        canUpdate: false
+                        canUpdateDefaultZIndex: false
                     }
                 },
                 isProcessed: true
@@ -342,14 +339,13 @@
          * Send request to image channel table and returns a promise that is resolved
          * returns {
          *   channelURLs: [{url, channelNumber}], // used for backward compatibility
-         *   channelList: [{channelNumber, channelName, isRGB, pseudoColor}]
-         *   acls: {canUpdate}
+         *   channelList: [{channelNumber, channelName, isRGB, pseudoColor, acls: {canUpdateConfig}}],
          * }
          *
          */
         function _readImageChannelTable() {
             console.log("reading channel table");
-            var defer = $q.defer(), channelList = [], channelURLs = [], canUpdate = false;
+            var defer = $q.defer(), channelList = [], channelURLs = [];
 
             // TODO should be done in ermrestjs
             var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
@@ -363,8 +359,6 @@
                 if (!ref) {
                     return false;
                 }
-
-                canUpdate = ref.canUpdate;
 
                 channelSetLogStackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
                 channelSetLogStack = logService.getStackObject(
@@ -393,6 +387,10 @@
 
                         // create the channel info
                         var res = {};
+
+                        res.acls = {
+                            canUpdateConfig: t.canUpdate && t.checkPermissions("column_update", channelConfig.channel_config_column_name)
+                        };
 
                         res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
 
@@ -442,8 +440,7 @@
                 }
                 defer.resolve({
                     channelURLs: channelURLs, // backward compatibility
-                    channelList: channelList,
-                    acls: {canUpdate: canUpdate}
+                    channelList: channelList
                 });
             }).catch(function (err) {
                 defer.reject(err);
@@ -973,8 +970,6 @@
             _readImageChannelTable().then(function (res) {
                 $rootScope.osdViewerParameters.channels = res.channelList;
 
-                $rootScope.osdViewerParameters.acls.channels = res.acls;
-
                 // backward compatibility
                 channelURLs = res.channelURLs;
 
@@ -1040,14 +1035,13 @@
             var defer = $q.defer();
 
             Session.validateSessionBeforeMutation(function () {
-                // TODO hacky
-                var oldData = $rootScope.tuple.data;
-                var newData = JSON.parse(JSON.stringify(oldData));
-                newData[imageConfig.default_z_index_column_name] = zIndex;
 
-                var tuples = [
-                    {data: newData, _oldData: oldData}
-                ];
+                var ref = $rootScope.reference.contextualize.entryEdit;
+
+                // NOTE using a private API
+                var page = ERMrest._createPage(ref, null, [$rootScope.tuple.data],false, false);
+                page.tuples[0].data[imageConfig.default_z_index_column_name] = zIndex;
+
                 var stack = logService.addExtraInfoToStack(null, {
                     "updated_vals": {
                         "cols": [imageConfig.default_z_index_column_name],
@@ -1058,7 +1052,7 @@
                     action: logService.getActionString(logService.logActions.UPDATE),
                     stack: stack
                 };
-                $rootScope.reference.contextualize.entryEdit.update(tuples, logObj).then(function () {
+                ref.update(page.tuples, logObj).then(function () {
                     AlertsService.addAlert("Default Z index value has been updated.", "success");
                     defer.resolve();
                 }).catch(function (exception) {

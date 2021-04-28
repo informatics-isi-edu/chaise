@@ -268,7 +268,7 @@
                                                                 <div ng-message="customError">{{form.customErrorMessage[rowIndex][column.name]}}</div>
                                                             </div>
 
-                                                            <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-col-perm-warn" ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="alert alert-warning column-permission-warning"></div>
+                                                            <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-col-perm-warn" ng-bind="form.recordEditModel.columnPermissionError[column.name]" ng-show="form.showColumnPermissionError[rowIndex][column.name]" class="column-permission-warning"></div>
 
                                                             <!-- Validation error messages to show when the form is submitted -->
                                                             <div ng-messages="form.formContainer.row[rowIndex][column.name].$error" ng-show="form.formContainer.$submitted" class="text-danger" role="alert">
