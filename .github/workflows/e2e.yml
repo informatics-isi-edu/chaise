@@ -98,7 +98,6 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
-          git checkout dynamic-acls
           sudo make install
       - name: Install chaise
         run: |
