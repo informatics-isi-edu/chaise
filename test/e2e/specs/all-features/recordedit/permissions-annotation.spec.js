@@ -1,4 +1,4 @@
-// The goal of this spec is to test whether RecordEdit app correctly displays the right UI controls given different user permission levels
+// The goal of this spec is to test whether RecordEdit app correctly displays the right UI controls based on annotation
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditPage = chaisePage.recordEditPage;
 var testParams = {
@@ -112,15 +112,15 @@ describe('When viewing RecordEdit app', function() {
                 });
             });
         });
+    });
 
-        // navigate away from the recordedit page so it doesn't interfere with other tests
-        afterAll(function (done) {
-            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:main_update_table");
-            browser.switchTo().alert().then(function (alert) {
-                alert.accept();
-            }).catch(function () {}).finally(function () {
-                done();
-            });
+    // navigate away from the recordedit page so it doesn't interfere with other tests
+    afterAll(function (done) {
+        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:main_update_table");
+        browser.switchTo().alert().then(function (alert) {
+            alert.accept();
+        }).catch(function () {}).finally(function () {
+            done();
         });
     });
 });

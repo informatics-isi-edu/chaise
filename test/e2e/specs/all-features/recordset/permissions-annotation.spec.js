@@ -1,4 +1,4 @@
-// The goal of this spec is to test whether Recordset app correctly displays the right UI controls given different user permission levels
+// The goal of this spec is to test whether Recordset app correctly displays the right UI controls based on annotation
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordsetPage = chaisePage.recordsetPage;
 var testParams = {

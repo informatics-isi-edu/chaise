@@ -5,7 +5,7 @@ var config = pConfig.getConfig({
     chaiseConfigFilePath: 'test/e2e/specs/all-features/chaise-config.js',
     specs: [
         "*/permissions-annotation.spec.js",
-        "*/permissions-acl.spec.js"
+        "acls/*.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
