@@ -20,12 +20,13 @@ To run E2E tests on your machine, make sure that you've installed the following 
 - **JAVA**
 - **JDK**
 
-Before running the test cases you also need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
+Before running the test cases you also need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, `RESTRICTED_AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
 
 ```sh
 export CHAISE_BASE_URL=YOUR_CHAISE_BASE_URL
 export ERMREST_URL=YOUR_ERMREST_URL
-export AUTH_COOKIE=YOUR_ERMREST_COOKIE
+export AUTH_COOKIE=YOUR_WEBAUTHN_COOKIE
+export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 ```
 
@@ -35,6 +36,7 @@ These variables are used in `ErmrestDataUtils` to communicate with `ERMrest`. A 
 export CHAISE_BASE_URL=https://dev.isrd.isi.edu/~<your-user-directory>chaise # No trailing `/`
 export ERMREST_URL=https://dev.isrd.isi.edu/ermrest # No trailing `/`
 export AUTH_COOKIE="webauthn=PutYourCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
+export RESTRICTED_AUTH_COOKIE="webauthn=PutAnotherCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
 export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise # No trailing `/`
 export SHARDING=false
 ```
@@ -350,10 +352,10 @@ When the code is pushed to ISI repo, the "Chaise end-to-end tests" Github workfl
 ### Environment Variables
 
 **./.github/workflows/main.yml**: [.e2e.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.github/workflows/e2e.yml)
-specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure e2e.yml file. 
+specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure e2e.yml file.
 
-- Since CI e2e test require connecting to saucelabs, `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY`, 
-  and `SAUCE_TUNNEL_IDENTIFIER` are defined . `SAUCE_TUNNEL_IDENTIFIER` is used 
+- Since CI e2e test require connecting to saucelabs, `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY`,
+  and `SAUCE_TUNNEL_IDENTIFIER` are defined . `SAUCE_TUNNEL_IDENTIFIER` is used
   internally in the `e2e.yml` to create a saucelab tunnel with that identifier. And then
   during the setup the same identifier is used to ensure connecting to the correct tunnel.
 - `SHARDING: true` ensures running test cases in parallel.

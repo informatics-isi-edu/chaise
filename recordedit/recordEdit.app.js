@@ -250,13 +250,28 @@
                             action: logService.getActionString(logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
-                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
+                        $rootScope.reference.read(numberRowsToRead, logObj, false, false, true).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
                                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
                                 throw new Errors.noRecordError({}, page.reference.displayname.value, recordSetLink);
+                            }
+
+                            // make sure at least one row is editable
+                            if (context.mode == context.modes.EDIT) {
+                                var forbiddenTuples = page.tuples.filter(function (t) {
+                                    return !t.canUpdate;
+                                });
+                                // all the rows are disabled
+                                if (forbiddenTuples.length === page.tuples.length) {
+                                    var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
+                                    // NOTE there might be different reasons for this (column vs row)
+                                    // should we list all of them?
+                                    forbiddenError.subMessage = forbiddenTuples[0].canUpdateReason;
+                                    throw forbiddenError;
+                                }
                             }
 
                             var column, value, headTitle;
@@ -288,6 +303,10 @@
 
                                 recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
                             }
+
+                            recordEditModel.columnModels.forEach(function (cm) {
+                                recordCreate.populateColumnPermissionError(recordEditModel, cm);
+                            })
 
                             $rootScope.displayReady = true;
                             $log.info('Model: ', recordEditModel);

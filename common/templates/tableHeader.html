@@ -21,14 +21,14 @@
     </div>
     <div class="col-xs-12 col-sm-6">
         <div class="pull-right">
-            <button ng-if="vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.reference.canCreate && vm.config.editable"
+            <button ng-if="vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && canCreate()"
                 class="chaise-table-header-create-link chaise-btn"
                 ng-class="vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary'"
                 ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip="Create new {{vm.displayname ? vm.displayname.value : vm.reference.displayname.value}}">
                 <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
                 <span>{{vm.config.displayMode === recordsetDisplayModes.fullscreen ? "Create" : "Create new"}}</span>
             </button>
-            <button ng-if="vm.config.displayMode === recordsetDisplayModes.fullscreen && vm.page && vm.reference.canUpdate && vm.config.editable"
+            <button ng-if="vm.config.displayMode === recordsetDisplayModes.fullscreen && canUpdate()"
                 class="chaise-table-header-edit-link chaise-btn chaise-btn-primary"
                 ng-click="editRecord()" ng-disabled="{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}" tooltip-placement="bottom-right"
                 uib-tooltip="{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Edit this page of records.' ) }}">

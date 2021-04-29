@@ -72,7 +72,7 @@ E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-face
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
 E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/protractor.conf.js
-E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
+E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.conf.js
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
 # errors test

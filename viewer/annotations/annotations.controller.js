@@ -952,6 +952,7 @@
             if (typeof index == 'number') {
                 // TODO is this unnecessary?
                 annotationEditForm.rows = [{}];
+                annotationEditForm.canUpdateRows = [{}];
                 annotationEditForm.submissionRows = [{}];
                 annotationEditForm.foreignKeyData = [{}];
                 annotationEditForm.oldRows = [{}];

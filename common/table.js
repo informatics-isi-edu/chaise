@@ -456,7 +456,12 @@
             logParams.action = getTableLogAction(vm, act);
 
             (function (current, requestCauses, reloadStartTime) {
-                vm.reference.read(vm.pageLimit, logParams).then(function (page) {
+                // if it's in related entity section, we should fetch the
+                // unlink trs (acl) of association tables
+                var getUnlinkTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 &&
+                                   vm.reference.derivedAssociationReference;
+
+                vm.reference.read(vm.pageLimit, logParams, false, false, getUnlinkTRS).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
@@ -1687,6 +1692,21 @@
                         }
                     }
                     return label + records;
+                };
+
+                scope.canCreate = function () {
+                    return scope.vm.config.editable && scope.vm.reference && scope.vm.reference.canCreate;
+                };
+
+                scope.canUpdate = function () {
+                    var res = scope.vm.config.editable && scope.vm.page && scope.vm.reference && scope.vm.reference.canUpdate;
+                    // make sure at least one row can be updated
+                    if (res) {
+                        return scope.vm.page.tuples.some(function (t) {
+                            return t.canUpdate;
+                        });
+                    }
+                    return false;
                 }
 
             }

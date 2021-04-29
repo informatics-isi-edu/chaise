@@ -2688,6 +2688,7 @@
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",
             RESULT_FAILED_SET: "result-failed-set",
+            RESULT_DISABLED_SET: "result-disabled-set",
 
             // used in viewer app:
             ANNOTATION_ENTITY: "annotation-entity",
