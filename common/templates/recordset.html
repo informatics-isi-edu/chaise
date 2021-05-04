@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="top-right-panel">
-                <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
+                <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen && !vm.config.hideTitle">
                     <div class="recordset-title-buttons title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
@@ -26,6 +26,27 @@
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>
+                        <!-- save query -->
+                        <div class="chaise-btn-group" uib-dropdown>
+                            <button ng-if="showSavedQueryUI" id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" uib-dropdown-toggle tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
+                                <span class="chaise-btn-icon glyphicon glyphicon-star-empty"></span>
+                                <span>Saved Queries</span>
+                                <span class="caret "></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
+                                <li>
+                                    <a ng-click="::saveQuery()">Save Query</a>
+                                    <a ng-click="::showSavedQueries()">Show Saved Queries</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- <button class="dropdown-toggle chaise-btn chaise-btn-primary" uib-dropdown-toggle ng-click="logDropdownOpened()" ng-disabled="disabled" tooltip-placement="{{ hideNavbar ? 'left' : 'top-right'}}" uib-tooltip= "Click to choose an export format.">
+                            <span class="glyphicon chaise-btn-icon" ng-class="{'glyphicon-export': !isLoading, 'glyphicon-refresh glyphicon-refresh-animate': isLoading}"></span>
+                            <span>Export </span>
+                            <span class="caret "></span>
+                        </button> -->
+
                     </div>
                         <!-- TODO UX-M should change to class -->
                     <h1 id="page-title">

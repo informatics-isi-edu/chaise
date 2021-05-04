@@ -107,8 +107,8 @@
      *     that is also passed along with the emitted event
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'ConfigUtils', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, ConfigUtils, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordCreate, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -1220,6 +1220,7 @@
             scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             scope.transformCustomFilter = DataUtils.addSpaceAfterLogicalOperators;
+            scope.showSavedQueryUI = scope.$root.savedQuery.showUI;
 
             scope.getRecordsetLink = UriUtils.getRecordsetLink;
 
@@ -1268,6 +1269,126 @@
                 document.execCommand("copy");
 
                 document.body.removeChild(dummy[0]);
+            }
+
+            scope.saveQuery = function () {
+                // read model mapping
+                var mapping = scope.$root.savedQuery.mapping,
+                    chaiseConfig = ConfigUtils.getConfigJSON();
+
+                ERMrest.resolve(chaiseConfig.ermrestLocation + '/catalog/' + mapping.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    var columnModels = [];
+
+                    savedQueryReference = savedQueryReference.contextualize.entryCreate;
+
+                    var rowData = {
+                        rows: [{}],
+                        submissionRows: [{}],
+                        foreignKeyData: [{}],
+                        oldRows: [{}]
+                    };
+
+                    // set columns list
+                    savedQueryReference.columns.forEach(function (col) {
+                        columnModels.push(recordCreate.columnToColumnModel(col));
+                    });
+
+                    // grab facet blob from parent reference
+                    var facetIdx = scope.vm.reference.uri.indexOf("::facets::") + "::facets::".length;
+                    rowData.rows[0]["facets"] = JSON.stringify(ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx)));
+                    rowData.rows[0]["table_name"] = scope.vm.reference.table.name;
+                    rowData.rows[0]["user_id"] = scope.$root.session.client.id;
+
+                    //open modal
+                    modalUtils.showModal({
+                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
+                        windowClass:"create-saved-query",
+                        controller: "SavedQueryModalDialogController",
+                        controllerAs: "ctrl",
+                        size: "md",
+                        keyboard: true,
+                        resolve: {
+                            params: {
+                                reference: savedQueryReference,
+                                columnModels: columnModels,
+                                rowData: rowData
+                            }
+                        }
+                    }, function success() {
+                        // notify user of success before closing
+                        console.log("success callback")
+                        AlertsService.addAlert("Query saved.", "success");
+                    }, null, false, false);
+                });
+            }
+
+            scope.showSavedQueries = function () {
+                // read model mapping
+                var mapping = scope.$root.savedQuery.mapping,
+                    chaiseConfig = ConfigUtils.getConfigJSON();
+
+                var facetTxt = "*::facets::";
+                var facetBlob = {
+                    and: [{
+                        choices: [scope.vm.reference.table.name],
+                        source: mapping.tableCol
+                    }]
+                }
+
+                ERMrest.resolve(chaiseConfig.ermrestLocation + '/catalog/' + mapping.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob), ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    savedQueryReference = savedQueryReference.contextualize.compact.hideFacets();
+
+                    var params = {};
+
+                    params.parentReference = scope.vm.reference;
+                    params.saveQueryRecordset = true;
+                    params.displayMode = recordsetDisplayModes.savedQuery;
+
+                    params.reference = savedQueryReference;
+                    // params.reference.session = rsSession;
+                    params.selectedRows = [];
+                    params.showFaceting = false;
+                    params.facetPanelOpen = false;
+                    params.allowCreate = false;
+                    params.allowView = true;
+                    params.viewNewTab = true;
+                    params.allowDelete = true;
+                    params.savedQuery = true;
+
+                    // hide title
+                    params.hideRecordsetTitle = true;
+
+                    // TODO: fix logging stuff
+                    var stackElement = logService.getStackNode(
+                        logService.logStackTypes.RELATED,
+                        params.reference.table,
+                        {source: savedQueryReference.compressedDataSource, entity: true}
+                    );
+
+                    var logStack = logService.getStackObject(stackElement),
+                        logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
+
+                    params.logStack = logStack;
+                    params.logStackPath = logStackPath;
+
+                    modalUtils.showModal({
+                        animation: false,
+                        controller: "SearchPopupController",
+                        windowClass: "search-popup",
+                        controllerAs: "ctrl",
+                        resolve: {
+                            params: params
+                        },
+                        size: "lg",
+                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+                    }, function (res) {
+                        // set saved query facet blob
+                        var newRefUri = scope.vm.reference.unfilteredReference.uri + "/" + facetTxt + ERMrest.encodeFacet(JSON.parse(res.data.facets));
+                        ERMrest.resolve(newRefUri, ConfigUtils.getContextHeaderParams()).then(function (mainRef) {
+                            $window.location.replace(mainRef.contextualize.compact.appLink);
+                        });
+                    }, null, false, false);
+                });
             }
 
             scope.toggleFacetPanel = function () {

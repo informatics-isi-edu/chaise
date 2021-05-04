@@ -11,7 +11,8 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+        "showSavedQueryUI", "savedQueryMapping", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -38,6 +39,8 @@
           "logClientActions": true,
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
+          "showSavedQueryUI": false,
+          "savedQueryMapping": null,
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -162,7 +165,8 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
-        facetPopup: "popup/facet"
+        facetPopup: "popup/facet",
+        savedQuery: "popup/savedquery"
     })
 
     .constant("defaultDisplayname", {
@@ -2684,6 +2688,7 @@
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",

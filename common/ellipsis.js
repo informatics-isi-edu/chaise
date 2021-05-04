@@ -180,6 +180,7 @@
                 // Initialize the action column btn links
                 init();
 
+                // NOTE: will also apply saved query
                 scope.onSelect = function($event) {
                     var args = {"tuple": scope.tuple};
 

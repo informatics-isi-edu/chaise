@@ -1,0 +1,36 @@
+<div class="modal-header">
+    <div class="title-container">
+        <div class="title-buttons">
+            <button tooltip-placement="bottom" uib-tooltip="Save the set query" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()">
+                <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
+                <span>Save</span>
+            </button>
+            <button class="chaise-btn chaise-btn-secondary modal-close" type="button" ng-click="ctrl.cancel()">
+                <strong class="chaise-btn-icon">X</strong>
+                <span>Close</span>
+            </button>
+        </div>
+        <h2 class="modal-title">Save Query</h2>
+    </div>
+</div>
+<div class="modal-body">
+    <alerts alerts="ctrl.alerts"></alerts>
+    <table class="table">
+        <tr ng-repeat="(columnIndex, columnModel) in ctrl.columnModels" style="margin-bottom: 5px;">
+            <td class="savedQueryRowHeader" style="width: 20%;">
+                <span ng-if="columnModel.isRequired" class="text-danger ng-scope">*</span>
+                <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': columnModel.column.comment}" ng-attr-uib-tooltip="{{::(columnModel.column.comment) ? columnModel.column.comment : undefined}}" tooltip-placement="right">
+                    <span ng-if="::columnModel.column.displayname.isHTML" ng-bind-html="::columnModel.column.displayname.value"></span>
+                    <span ng-if="::!columnModel.column.displayname.isHTML" ng-bind="::columnModel.column.displayname.value"></span>
+                </span>
+            </td>
+            <td class="savedQueryRowValue">
+                <input-switch column="columnModel.column" column-model="columnModel"
+                        parent-reference="ctrl.savedQueryForm.reference" parent-model="ctrl.savedQueryForm"
+                        model="ctrl.savedQueryForm.rows[0][columnModel.column.name]" column-index="columnIndex"
+                        mode="edit" form-container="ctrl.form" input-container="ctrl.form.row[0][columnModel.column.name]"
+                        is-required="columnModel.isRequired"></input-switch>
+            </td>
+        </tr>
+    </table>
+</div>

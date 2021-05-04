@@ -34,6 +34,7 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
@@ -86,9 +87,14 @@
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
             var showFaceting = chaiseConfig.showFaceting === true ? true : false;
+            $rootScope.savedQuery = {
+                showUI: (chaiseConfig.showSavedQueryUI === true ? true : false),
+                mapping: chaiseConfig.savedQueryMapping
+            }
 
             recordsetModel.config = {
                 viewable: true,
+                allowCreate: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: modalBox.noSelect,

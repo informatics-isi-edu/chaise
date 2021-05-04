@@ -7,8 +7,11 @@
         <label />
     </div>
     <div class="chaise-btn-group" ng-switch-default>
+        <button ng-if="config.savedQuery" type="button" class="apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Apply Saved Query">
+            <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
+        </button>
         <!-- NOTE: so users can control how to open the view link -->
-        <a ng-if="viewLink" type="button" class="view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom" uib-tooltip="View Details">
+        <a ng-if="viewLink" type="button" class="view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{viewLink}}" ng-attr-target="{{config.viewNewTab ? '_blank' : ''}}" tooltip-placement="bottom" uib-tooltip="View Details">
             <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
         </a>
         <button ng-if="edit" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">

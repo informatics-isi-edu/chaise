@@ -326,8 +326,8 @@
             readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
-            displayname:   params.displayname ? params.displayname : null,
-            comment:       (typeof params.comment === "string") ? params.comment: null,
+            displayname:        params.displayname ? params.displayname : null,
+            comment:            (typeof params.comment === "string") ? params.comment: null,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
@@ -339,13 +339,18 @@
             matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {
-                viewable: false, deletable: false,
+                viewable:           (typeof params.allowView === "boolean") ? params.allowView : false,
+                viewNewTab:         (typeof params.allowView === "boolean") ? params.viewNewTab : false,
+                deletable:          (typeof params.allowDelete === "boolean") ? params.allowDelete : false,
+                allowCreate:        (typeof params.allowCreate === "boolean") ? params.allowCreate : true,
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
+                savedQuery:         (typeof params.savedQuery === "boolean") ? params.savedQuery : false,
                 selectMode:         params.selectMode,
                 showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
+                hideTitle:          params.hideRecordsetTitle || false,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
             },
             getDisabledTuples:          params.getDisabledTuples,
@@ -614,6 +619,32 @@
         function ok() {
             $uibModalInstance.close();
         }
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, params, $scope, $uibModalInstance) {
+        var vm = this;
+        vm.alerts = AlertsService.alerts;
+        vm.columnModels = params.columnModels;
+        vm.savedQueryForm = params.rowData;
+
+        vm.form = {
+            rows: [{}]
+        }
+
+        vm.submit = function () {
+            // submit data for create using recordCreate
+            params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
+                // show success after close
+                $uibModalInstance.close(query.successful);
+            }, function error(error) {
+                // show error without close
+                AlertsService.addAlert(error.message, 'error');
+            });
+        }
+
         vm.cancel = function () {
             $uibModalInstance.dismiss("cancel");
         }
