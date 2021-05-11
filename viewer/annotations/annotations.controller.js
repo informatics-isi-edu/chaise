@@ -749,7 +749,7 @@
 
                 ERMrest.resolve(existingRefURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
                     // TODO properly pass logObj
-                    return ref.setSamePaging(page).read(pageSize, logObj, false, true);
+                    return ref.contextualize.compactSelect.setSamePaging(page).read(pageSize, logObj, false, true);
                 }).then(function (newPage) {
                     newPage.tuples.forEach(function (newTuple) {
                         // currently selected value should not be disabled
