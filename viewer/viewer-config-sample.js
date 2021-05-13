@@ -149,12 +149,25 @@ var viewerConfigs = {
             "table_name": "Image_Annotation",
 
             // fk to image table in annotation table
-            // TODO: need a better way to specify better foreignkey path
+            /**
+             * TODO: need a better way to specify better foreignkey path
+             * to find the visible column name, navigate to record page and find the
+             * foreignkey pseudo-column to the image table.
+             * in the HTML source code, find the tr containing the column.
+             * the visible column name is used in id attribute with the following format:
+             * id="row-<visible-column-name>"
+             */
             "reference_image_visible_column_name": "okfHjL8_zZzvahdjNJjz-Q",
             "reference_image_column_name": "Image",
 
             // the asset column that has the annotation
             "overlay_column_name": "File_URL",
+            /**
+             * This attribute is only needed if you're planning on passing
+             * annotation urls as query parameters. In this case, this path
+             * is used to distinguish between annotation and image urls in the
+             * `url` query parameter.
+             */
             "overlay_hatrac_path": "resources/gene_expression/annotations",
 
             // the columns that are used internally and should be removed from the entry form
@@ -168,7 +181,14 @@ var viewerConfigs = {
              */
             "annotated_term_displayname": "Anatomy",
             "annotated_term_column_name": "Anatomy",
-            // TODO: need a better way to specify better foreignkey path
+            /**
+             * TODO: need a better way to specify better foreignkey path
+             * to find the visible column name, navigate to record page and find the
+             * foreignkey pseudo-column to the annotated term table.
+             * in the HTML source code, find the tr containing the column.
+             * the visible column name is used in id attribute with the following format:
+             * id="row-<visible-column-name>"
+             */
             "annotated_term_visible_column_name": "Y7oiVf4tLQPtUWQRrtF-KQ",
             "annotated_term_foreign_key_constraint": ["Gene_Expression", "Image_Annotation_Anatomy_fkey"],
 
