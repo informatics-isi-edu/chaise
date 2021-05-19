@@ -43,7 +43,7 @@ export SHARDING=false
 
 You can get your cookie by querying the database, or using the following simple steps:
 
-1. Open up [https://dev.isrd.isi.edu/chaise/search/](https://dev.isrd.isi.edu/chaise/search/) website.
+1. Open up any chaise page in the deployment that you want to run test cases on.
 2. Login. The account that you are using must have delete and create access. We use this cookie to create and delete catalogs.
 3. Open the Developer tools in your browser.
 4. Go to the console section and write `$.cookie("webauthn")`.
