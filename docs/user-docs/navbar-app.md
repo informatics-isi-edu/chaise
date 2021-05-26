@@ -3,15 +3,18 @@
 This documentation focuses on navbar and how it can be used in external HTML pages.
 
 ## Table of Contents
-- [How to add navbar app](#how-to-add-navbar-app)
-  * [1. Install Chaise](#1-install-chaise)
-  * [2. Include Chaise dependencies](#2-include-chaise-dependencies)
-    + [2.1. Prefetch Chaise dependencies](#21-prefetch-chaise-dependencies-optional)
-    + [2.2. Prefetch custom styles](#22-prefetch-custom-styles-optional)
-  * [3. Use navbar](#3-use-navbar)
-  * [4. Configuring navbar](#4-configuring-navbar)
-- [Sample HTML page](#sample-html-page)
-- [Notes](#notes)
+- [Use navbar app in external HTML pages](#use-navbar-app-in-external-html-pages)
+  - [Table of Contents](#table-of-contents)
+  - [How to add navbar app](#how-to-add-navbar-app)
+    - [1. Install Chaise](#1-install-chaise)
+    - [2. Include Chaise dependencies](#2-include-chaise-dependencies)
+      - [2.1. Prefetch Chaise dependencies (optional)](#21-prefetch-chaise-dependencies-optional)
+      - [2.2. Prefetch custom styles (optional)](#22-prefetch-custom-styles-optional)
+    - [3. Use navbar](#3-use-navbar)
+  - [Sample HTML page](#sample-html-page)
+  - [4. Configuring Navbar](#4-configuring-navbar)
+  - [5. How to customize navbar UI](#5-how-to-customize-navbar-ui)
+  - [Notes](#notes)
 
 ## How to add navbar app
 
@@ -114,6 +117,46 @@ The `navbarMenu` property is the most complex of the above properties. This para
  - The url property of each menu object allows for templating of the catalog id parameter. 
    - More info can be found in the [templating document](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/mustache-templating.md)
  - The header property of each menu object will create an unclickable bold header with class chaise-dropdown-header when set to `true`. 
+
+## 5. How to customize navbar UI
+
+With the current HTML structure, it is possible to apply different styles to customize the appearance. Overriding these selectors can help -
+
+```
+/* change the navbar background color */
+.navbar-inverse {
+    background-color: YOUR_VALUE;
+}
+```
+
+```
+/* change the brand text color */
+.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a {
+    color: YOUR_VALUE;
+}
+```
+
+```
+/* change the color of options */
+   .navbar-inverse .navbar-nav>li>a {color: YOUR_VALUE; font-size: YOUR_VALUE;}
+   .navbar-inverse .navbar-nav>li>a:hover {color: YOUR_VALUE;}
+   .navbar-inverse .navbar-nav>li>a:visited {color: YOUR_VALUE;
+}
+```
+
+```
+/* change the minimum height of navbar */
+.navbar {
+	  min-height: YOUR_VALUE;
+}
+```
+
+```
+/* we get a vertical navbar when the width is lesser than the content, you can change the max-height of that navbar after which we will see a scrollbar to ensure it doesn’t take over the entire page (default if not customized is 340px) */
+.navbar-collapse {
+	  max-height: YOUR_VALUE;
+}
+```
 
 ## Notes
 
