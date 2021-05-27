@@ -163,8 +163,19 @@ body > .container {
     color: #fff;
 }
 
-.child-opened {
-    background-color: $table-header-background-color;
+
+// Horizontal navbar
+@media (min-width: 768px) {
+    .child-opened {
+        background-color: $table-header-background-color;
+    }
+}
+
+// Vertical navbar
+@media (max-width: 768px) {
+    .child-opened > ul {
+        padding-left: 3%;
+    }
 }
 
 /*Adding the scroll bar to the menu */
