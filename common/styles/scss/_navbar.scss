@@ -163,8 +163,19 @@ body > .container {
     color: #fff;
 }
 
-.child-opened {
-    background-color: $table-header-background-color;
+
+// Horizontal navbar
+@media (min-width: 768px) {
+    .child-opened {
+        background-color: $table-header-background-color;
+    }
+}
+
+// Vertical navbar
+@media (max-width: 768px) {
+    .child-opened > ul {
+        padding-left: 3%;
+    }
 }
 
 /*Adding the scroll bar to the menu */
@@ -172,4 +183,9 @@ body > .container {
     min-height: 30px;
     overflow-x: hidden;
     overflow-y: auto;
+}
+
+/* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
+.navbar-collapse {
+    max-height: 340px;
 }
