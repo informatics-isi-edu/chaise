@@ -27,6 +27,7 @@
             var openDropdowns = document.querySelectorAll(".dropdown.open ul");
             [].forEach.call(openDropdowns, function(el) {
                 checkHeight(el, window.innerHeight);
+                checkWidth(el, window.innerWidth);
             });
         }
     }
@@ -43,6 +44,16 @@
         if ((dropdownHeight + fromTop) > winHeight) {
             var newHeight = winHeight - fromTop - footerBuffer;
             ele.style.height = newHeight + "px";
+        }
+    }
+
+    // Function to open the menu on the left if not enough space on right
+    function checkWidth(ele, winWidth) {
+        if (ele.getBoundingClientRect().right > winWidth) {
+            ele.classList.add("dropdown-menu-right");
+        }
+        else {
+            ele.classList.remove("dropdown-menu-right");
         }
     }
 
@@ -83,7 +94,7 @@
           menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
       }
 
-      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
+      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
 
       var open = !menuTarget.classList.contains("show");
 
@@ -105,6 +116,20 @@
           [].forEach.call(openSubmenus, function(el) {
               checkHeight(el, window.innerHeight);
           });
+      }
+
+      //If not enough space to expand on right
+      var widthOfSubMenu = menuTarget.offsetWidth;
+      var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
+      if (submenuEndOnRight > window.innerWidth) {
+          // open on whichever side there is more space and less cutoff of content
+          var rightCutoff = submenuEndOnRight - window.innerWidth;
+          var submenuEndOnLeft = posValues - widthOfSubMenu;
+          var leftCutoff = 0 - submenuEndOnLeft; 
+
+          if (rightCutoff > leftCutoff) {
+            menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
+          }
       }
 
       return open;

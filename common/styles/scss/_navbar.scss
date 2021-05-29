@@ -90,7 +90,7 @@ body > .container {
 }
 
 .dropdown-submenu>a:after {
-    display: block;
+    display: flex;
     content: " ";
     float: right;
     width: 0;
@@ -99,9 +99,11 @@ body > .container {
     border-style: solid;
     border-width: 6px 0 6px 6px; /* was 5px 0 5px 5px */
     border-left-color: #428bca; /* was #ccc */
-    margin-top: 5px;
+    // to center
+    margin: auto;
     margin-right: -15px;
     padding-right: 10px;
+    margin-left: 10px;
 }
 
 .dropdown-submenu:hover>a:after {
@@ -163,6 +165,23 @@ body > .container {
     color: #fff;
 }
 
+.dropdown-menu > li >a {
+    white-space: normal;
+    max-width: 350px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+}
+
+// Vertical navbar
+@media (max-width: 768px) {
+    .child-opened > ul {
+        padding-left: 3%;
+    }
+    .dropdown-menu > li > a {
+        max-width: none;
+    }
+}
 
 // Horizontal navbar
 @media (min-width: 768px) {
@@ -171,21 +190,17 @@ body > .container {
     }
 }
 
-// Vertical navbar
-@media (max-width: 768px) {
-    .child-opened > ul {
-        padding-left: 3%;
-    }
-}
-
 /*Adding the scroll bar to the menu */
 .navbar-nav ul.dropdown-menu {
     min-height: 30px;
     overflow-x: hidden;
     overflow-y: auto;
+    width: max-content;
 }
 
 /* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
 .navbar-collapse {
     max-height: 340px;
 }
+
+
