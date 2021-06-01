@@ -167,7 +167,8 @@ body > .container {
 
 .dropdown-menu > li >a {
     white-space: normal;
-    max-width: 350px;
+    // text wraps post 33% of viewport width
+    max-width: 33vw;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
