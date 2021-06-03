@@ -165,13 +165,13 @@ body > .container {
     color: #fff;
 }
 
-.dropdown-menu > li >a {
+.dropdown-menu > li > a {
     white-space: normal;
-    // text wraps post 33% of viewport width
-    max-width: 33vw;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
+    margin-bottom: 2px;
+    padding: 3px 15px;
 }
 
 // Vertical navbar
@@ -179,9 +179,12 @@ body > .container {
     .child-opened > ul {
         padding-left: 3%;
     }
-    .dropdown-menu > li > a {
-        max-width: none;
+    // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
+    .dropdown-menu, .navbar-nav ul.dropdown-menu, .dropdown-menu > li > a {
+        max-width: none !important;
+        width: auto !important;
     }
+
 }
 
 // Horizontal navbar
@@ -197,6 +200,7 @@ body > .container {
     overflow-x: hidden;
     overflow-y: auto;
     width: max-content;
+    max-width: 450px;
 }
 
 /* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
@@ -204,4 +208,15 @@ body > .container {
     max-height: 340px;
 }
 
+// Dummy selector to keep the same amount of space as submenu arrow
+.dropdown-menu > .dropdown-submenu + li > a::after {
+    content: " ";
+    height: 12px;
+    width: 12px;
+    margin-left: 10px;
+}
 
+.dropdown-menu {
+    // To keep it more compact
+    min-width: 100px;
+}
