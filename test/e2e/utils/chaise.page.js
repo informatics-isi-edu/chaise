@@ -37,6 +37,10 @@ var recordEditPage = function() {
         return element.all(by.css("td.entity-key > span.column-displayname > span"));
     };
 
+    this.getAllColumnPermissionOverlays = function () {
+      return element.all(by.css(".column-permission-overlay"));
+    }
+
     this.getColumnPermissionOverlay = function (rowIndex, displayName) {
         displayName = makeSafeIdAttr(displayName);
         return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));

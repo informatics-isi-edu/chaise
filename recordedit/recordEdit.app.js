@@ -304,9 +304,11 @@
                                 recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
                             }
 
-                            recordEditModel.columnModels.forEach(function (cm) {
+                            if (context.mode == context.modes.EDIT) {
+                              recordEditModel.columnModels.forEach(function (cm) {
                                 recordCreate.populateColumnPermissionError(recordEditModel, cm);
-                            })
+                              });
+                            }
 
                             $rootScope.displayReady = true;
                             $log.info('Model: ', recordEditModel);

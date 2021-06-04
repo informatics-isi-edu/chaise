@@ -37,8 +37,7 @@ describe('View existing record,', function() {
             keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
-
+            chaisePage.recordPageReady();
         });
 
         it("should load chaise-config.js and have maxRelatedTablesOpen=11, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
@@ -258,6 +257,14 @@ describe('View existing record,', function() {
                     expect(text).toBe("Automatically generated");
                 });
             });
+
+            // because of a bug in column permission error,
+            // chaise was showing the column permission overlay and users couldn't
+            // edit the values. This test case is to make sure that logic is correct
+            it ("should not show any permission errors", function () {
+              var colPermissionErrors = chaisePage.recordEditPage.getAllColumnPermissionOverlays();
+              expect(colPermissionErrors.isPresent()).toBeFalsy();
+            })
 
             it("should alert the user if trying to submit data without changing the id.", function() {
                 chaisePage.recordEditPage.submitForm();
