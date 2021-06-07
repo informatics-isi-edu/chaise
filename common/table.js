@@ -1353,10 +1353,6 @@
                     params.allowView = true;
                     params.viewNewTab = true;
                     params.allowDelete = true;
-                    params.savedQuery = true;
-
-                    // hide title
-                    params.hideRecordsetTitle = true;
 
                     // TODO: fix logging stuff
                     var stackElement = logService.getStackNode(

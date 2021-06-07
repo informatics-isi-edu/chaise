@@ -7,7 +7,7 @@
         <label />
     </div>
     <div class="chaise-btn-group" ng-switch-default>
-        <button ng-if="config.savedQuery" type="button" class="apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Apply Saved Query">
+        <button ng-if="config.displayMode == 'popup/savedquery'" type="button" class="apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Apply Saved Query">
             <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
         </button>
         <!-- NOTE: so users can control how to open the view link -->
