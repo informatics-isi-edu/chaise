@@ -27,7 +27,7 @@ The below table explains the usage of the default parameters:
 | navbarBrandImage | A URL | N/A | "navbarBrandImage":\<value\> | N/A | The URL for an image to be displayed in the navigation bar. |
 | logoutURL | A URL | / | "logoutURL":\<value\> | N/A | The URL to the logout page, root if not defined. |
 | maxRecordsetRowHeight | A boolean/number | 160 | "maxRecordsetRowHeight":\<value\> | N/A | Set this property to false if you don't want content to be clipped in tables else set it to a number which represent the maximum row height when not expanded. |
-| dataBrowser | A URL | /chaise/recordset | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. Also used when an error is thrown and we don't know where to redirect the user. |
+| dataBrowser | A URL | / | "dataBrowser":\<value\> | N/A | The URL to continue after a logout. Also used when an error is thrown and we don't know where to redirect the user. |
 | defaultAnnotationColor | red, orange, gold, green, blue, purple | red | "defaultAnnotationColor":\<value\> | N/A | In `/chaise/viewer`, annotations' borders and colors will default to this value. |
 | confirmDelete | A boolean | true | "confirmDelete":\<value\> | N/A | If `false`, the user will **not** be prompted by a modal when deleting an item |
 | hideSearchTextFacet | A boolean | false | "hideSearchTextFacet":\<value\> | N/A | Whether the search box for attributes names and values should be hidden |
