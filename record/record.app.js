@@ -144,6 +144,9 @@
                     DataUtils.getDisplaynameInnerText(tuple.displayname)
                 );
 
+                // populate the google dataset metadata
+                recordAppUtils.attachGoogleDatasetJsonLd(tuple);
+
                 // update the window location with tuple to remove query params (namely ppid and pcid)
                 // and also change the url to always be based on RID
                 var url = tuple.reference.contextualize.detailed.appLink;

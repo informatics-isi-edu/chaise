@@ -628,6 +628,21 @@
             recordTableUtils.FlowControlObject.call(this, maxRequests);
         }
 
+        function attachGoogleDatasetJsonLd (tuple) {
+            
+            // use ermrestjs and attach to dom
+            var metadata = $rootScope.reference.googleDatasetMetadata;
+            if (DataUtils.isObjectAndNotNull(metadata)) {
+                metadata = metadata.compute(tuple, $rootScope.templateVariables);
+            }
+            metadata = Object.assign({}, metadata, { "@context": "http://schema.org", "@type": "Dataset" });
+            console.log(metadata);
+            var script = document.createElement('script');
+            script.setAttribute('type', 'application/ld+json');
+            script.textContent = JSON.stringify(metadata, null, 4);
+            document.head.appendChild(script);
+        }
+
         return {
             updateRecordPage: updateRecordPage,
             genericErrorCatch: genericErrorCatch,
@@ -635,7 +650,8 @@
             getTableModel: getTableModel,
             FlowControlObject: FlowControlObject,
             pauseUpdateRecordPage: pauseUpdateRecordPage,
-            resumeUpdateRecordPage: resumeUpdateRecordPage
+            resumeUpdateRecordPage: resumeUpdateRecordPage,
+            attachGoogleDatasetJsonLd: attachGoogleDatasetJsonLd
         };
     }]);
 
