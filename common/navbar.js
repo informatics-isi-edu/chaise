@@ -146,6 +146,12 @@
             menuTarget.style.width = visibleContent + "px";
           }
       }
+      else {
+          // if vertical scrollbar then offset a bit more to make scrollbar visible
+        if (parent.scrollHeight > parent.clientHeight) {
+            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
+          }
+      }
 
       return open;
     }
