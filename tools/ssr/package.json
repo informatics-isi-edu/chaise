@@ -1,0 +1,9 @@
+{
+  "name": "puppeteer mock chaise",
+  "devDependencies": {},
+  "dependencies": {
+    "express": "^4.17.1",
+    "phantom": "^6.3.0",
+    "puppeteer": "^8.0.0"
+  }
+}
