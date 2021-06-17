@@ -634,14 +634,15 @@
             var metadata = $rootScope.reference.googleDatasetMetadata;
             if (DataUtils.isObjectAndNotNull(metadata)) {
                 metadata = metadata.compute(tuple, $rootScope.templateVariables);
+                if (DataUtils.isObjectAndNotNull(metadata)) {
+                    metadata.url = window.location.href;
+                    var script = document.createElement('script');
+                    script.setAttribute('type', 'application/ld+json');
+                    script.textContent = JSON.stringify(metadata, null, 4);
+                    document.head.appendChild(script);
+                }
             }
             
-            console.log(metadata);
-            metadata.url = window.location.href;
-            var script = document.createElement('script');
-            script.setAttribute('type', 'application/ld+json');
-            script.textContent = JSON.stringify(metadata, null, 4);
-            document.head.appendChild(script);
         }
 
         return {
