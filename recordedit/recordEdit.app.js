@@ -192,6 +192,10 @@
 
                 $log.info("Reference: ", $rootScope.reference);
 
+                // TODO: update the window location to remove query params (namely ppid and pcid)
+                //       - No need to do in edit since we don't rely on the url for permalink/share (no feature in edit app)
+                //       nice to do for consistency though
+
                 // log attribues
                 $rootScope.logStackPath = logService.logStackPaths.SET;
                 $rootScope.logStack = [

@@ -636,7 +636,7 @@
                         if (isColumnOfType("timestamp")) {
                             // convert and set the values if they are defined.
                             scope.rangeOptions.absMin = timestampToDateTime(min);
-                            scope.rangeOptions.absMax = timestampToDateTime(max);
+                            scope.rangeOptions.absMax = timestampToDateTime(max, true);
                         } else {
                             scope.rangeOptions.absMin = min;
                             scope.rangeOptions.absMax = max;
@@ -675,12 +675,14 @@
                     /**
                      * Given a string representing timestamp will turn it into an object with `date` and `time` attributes
                      * @param  {string} ts timestamp
+                     * @param  {boolean} roundUp should the seconds be rounded up to avoid truncation (should only be the case for max values)
                      * @return {object} an object with `date` and `time` attributes
                      * NOTE might return `null`
                      */
-                    function timestampToDateTime(ts) {
+                    function timestampToDateTime(ts, roundUp) {
                         if (!ts) return null;
                         var m = moment(ts);
+                        if (roundUp && m.millisecond()) m.add(1, 'second').startOf('second');
                         return {
                             date: m.format(dataFormats.date),
                             time: m.format(dataFormats.time24)
