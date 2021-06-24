@@ -157,6 +157,8 @@
 // chaise table
 .outer-table {
     overflow-x: auto;
+    height: max-content;
+    max-height: 60vh;
 }
 
 .chaise-table-header {
