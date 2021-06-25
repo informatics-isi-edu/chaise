@@ -19,7 +19,7 @@ body > .container {
 // default modal z-index is 1050 (for the first modal)
 // as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
 // we tried to be safe about it before by increasing it by only 1
-.modal-login-instruction #mainnav, .error-open #mainnav {
+.modal-login #mainnav, .error-open #mainnav {
     z-index: 1501;
 }
 
