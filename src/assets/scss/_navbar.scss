@@ -1,0 +1,224 @@
+// required here because the output of this file (navbar.css) is used for login.index.html as well still
+@import "variables";
+
+body > .container {
+	min-height: 100%;
+	position: relative;
+}
+
+.content {
+	min-height: 100%;
+	position: relative;
+	padding-top: 70px;
+}
+
+#mainnav {
+    z-index: 1037;
+}
+
+// default modal z-index is 1050 (for the first modal)
+// as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
+// we tried to be safe about it before by increasing it by only 1
+.modal-login-instruction #mainnav, .error-open #mainnav {
+    z-index: 1501;
+}
+
+.navbar-inverse {
+    background-color: #000;
+    border-color: #000;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+   color: #C1C1C1;
+}
+
+.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a{
+   color: #59C4FF;
+}
+
+#live-btn {
+    margin-right: 0px; // offset marging-right: -15px from navbar-right
+    color: #59C4FF;
+    padding: 15px;
+}
+
+.navbar-inverse .navbar-nav.navbar-right > li > a:hover{
+   color: #FFF;
+}
+
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+	border-color: #4D4D4D;
+}
+
+.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:hover, .navbar-inverse .navbar-nav > .active > a:focus {
+	background-color: #4D4D4D;
+}
+
+.navbar-inverse .navbar-text {
+	color: #FFF;
+}
+
+.navbar-inverse .navbar-toggle {
+    border-color: #fff;
+		color: #fff;
+}
+
+.navbar .navbar-nav .disable-link {
+    pointer-events: none;
+    cursor: default;
+    color: $disabled-color;
+}
+
+// positioning of searh box in navbar
+.rid-search {
+    margin-right: 0px; // offset marging-right: -15px from navbar-right
+
+    .chaise-search-box {
+        padding: 13px 15px;
+    }
+
+    .chaise-input-control-sm {
+        width: 100px;
+        border-color: $black-color;
+        border-radius: 4px 0px 0px 4px;
+    }
+
+    .chaise-search-btn .glyphicon-refresh {
+        color: white;
+    }
+}
+
+#rid-search-input {
+    background-color: $table-striped-background-color;
+}
+
+#mainnav {
+    border-radius: 0;
+}
+
+.navbar {
+    margin-bottom: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
+.navbar-collapse {
+    max-height: 340px;
+}
+
+/* 
+modify the behavior of dropdown menu for navbar 
+we have to wrap all the rules in navbar specific tag, otherwise all the 
+dropdowns in bootstrap will be affected.
+ideally most of the other rules in this file should be wrapped in this tag,
+but since custom-css rules are written based on that, I didn't change them.
+TODO we should be able to simplify the rules and also investigate whether
+     we want to move other rules to be in this wraper.
+*/
+header {
+    .dropdown-menu>li>a.chaise-dropdown-header,
+    .chaise-dropdown-header {
+        font-size: $font-size;
+        color: $black-color;
+        font-weight: 600;
+    }
+
+    .dropdown-submenu {
+        position: relative;
+    }
+
+    .dropdown-submenu>.dropdown-menu {
+        position: fixed;
+        margin-top: -6px;
+        margin-left: -1px;
+        -webkit-border-radius: 0 6px 6px 6px;
+        -moz-border-radius: 0 6px 6px;
+        border-radius: 0 6px 6px 6px;
+    }
+
+    .dropdown-submenu>a:after {
+        display: flex;
+        content: " ";
+        float: right;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-style: solid;
+        border-width: 6px 0 6px 6px; /* was 5px 0 5px 5px */
+        border-left-color: #428bca; /* was #ccc */
+        // to center
+        margin: auto;
+        margin-right: -15px;
+        padding-right: 10px;
+        margin-left: 10px;
+    }
+
+    .dropdown-submenu:hover>a:after {
+        border-left-color: #777; /* was #fff */
+    }
+
+    .dropdown-submenu.pull-left {
+        float: none;
+    }
+
+    .dropdown-submenu.pull-left>.dropdown-menu {
+        left: -100%;
+        margin-left: 10px;
+        -webkit-border-radius: 6px 0 6px 6px;
+        -moz-border-radius: 6px 0 6px 6px;
+        border-radius: 6px 0 6px 6px;
+    }
+
+    // Dummy selector to keep the same amount of space as submenu arrow
+    .dropdown-menu > .dropdown-submenu + li > a::after {
+        content: " ";
+        height: 12px;
+        width: 12px;
+        margin-left: 10px;
+    }
+
+    /*Adding the scroll bar to the menu */
+    .navbar-nav ul.dropdown-menu {
+        min-height: 30px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: max-content;
+        max-width: 450px;
+    }
+
+    .dropdown-menu {
+        // To keep it more compact
+        min-width: 100px;
+    }
+
+    .dropdown-menu > li > a {
+        white-space: normal;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+        padding: 3px 15px 3px 15px;
+        line-height: 1.4;
+    }
+
+    // Vertical navbar
+    @media (max-width: 768px) {
+        .child-opened > ul {
+            padding-left: 3%;
+        }
+        // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
+        .dropdown-menu, .navbar-nav ul.dropdown-menu, .dropdown-menu > li > a {
+            max-width: none !important;
+            width: auto !important;
+        }
+
+    }
+
+    // Horizontal navbar
+    @media (min-width: 768px) {
+        .child-opened {
+            background-color: $table-header-background-color;
+        }
+    }
+}

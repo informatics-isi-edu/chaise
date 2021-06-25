@@ -1,0 +1,308 @@
+#recordedit .app-container {
+    .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
+        padding: 5px 3px;
+    }
+
+    .main-container {
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .main-body {
+        padding: 0;
+    }
+
+    .form-controls {
+        display: flex;
+        align-items: flex-end;
+        padding-top: 10px;
+        padding-bottom: 10px;
+
+        .add-forms {
+            width: auto;
+            margin-left: auto;
+
+            .add-rows-input {
+                width: 50px;
+                padding-left: 5px;
+            }
+        }
+    }
+
+    .input-container {
+        margin-top: 0px;
+    }
+
+
+    @mixin shift-above-edit-forms() {
+        height: 15px;
+        position: fixed;
+        z-index: 5;
+        margin-top: -15px;
+    }
+
+    .scroll-spacer {
+        background-color: $white-color;
+        width: $chaise-caption-column-width; // entity-key is position absolute
+
+        @include shift-above-edit-forms();
+    }
+
+    #form-edit-scroll {
+        overflow-x: auto;
+        overflow-y: hidden;
+        margin-left: $chaise-caption-column-width; // entity-key is position absolute
+
+        @include shift-above-edit-forms();
+
+        > div {
+            height: inherit;
+            overflow-x: scroll;
+        }
+    }
+
+    #form-section {
+        width: 100%;
+        position: relative;
+        // padding-right: 15px; // so table is padded properly on load
+        padding-top: 15px;
+
+        #form-edit {
+            position: static;
+            overflow-x: auto;
+            overflow-y: auto;
+            // padding-right: 15px;
+            margin-left: $chaise-caption-column-width; // entity-key is position absolute
+            margin-bottom: 40px; // margin at bottom of page so edit form isn't touching the bottom of viewport
+
+            > table {
+                overflow: hidden;
+                margin-bottom: 0;
+                max-width: none;
+
+                > tbody {
+                    &:first-child > tr.shift-form:first-child > td {
+                        color: $disabled-color;
+                        font-weight: normal;
+                        font-size: 1rem;
+                    }
+
+                    // style for bottom of table (entity-values)
+                    &:last-child {
+                        border-bottom: 1px solid $border-color;
+
+                        > tr > td {
+                            &:first-child {
+                                border-bottom: 1px solid $border-color;
+                            }
+
+                            &.entity-key.select-all-opened {
+                                border-bottom: 0;
+                            }
+                        }
+                    }
+
+                    > tr > td {
+                        border-top: 1px solid $border-color;
+
+                        &:last-child {
+                            border-bottom: 1px solid $border-color;
+                        }
+                    }
+
+                    > tr {
+                        > td {
+                            &.form-header {
+                                height: 47px;
+
+                                .remove-form-btn {
+                                    padding: 1px 7px 0px 7px;
+                                }
+
+                                .disabled-row-icon {
+                                    margin: 6px 10px 0 0;
+                                    font-size: 1.3em;
+                                }
+                            }
+
+                            &.entity-key,
+                            &.match-entity-key {
+                                position: absolute !important;
+                                left: 0;
+                                top: auto;
+                                width: $chaise-caption-column-width;
+                                border-left: 1px solid $border-color;
+                                border-right: 1px solid $border-color;
+                                // margin-left: 10px;
+                                background: white;
+                            }
+
+                            &.match-entity-key.select-all-opened {
+                                border-top: none;
+                            }
+
+                            &.entity-value,
+                            &.match-entity-value {
+                                word-wrap: break-word;
+                                min-width: 250px;
+                                border-right: 1px solid $border-color;
+                            }
+
+                            &.entity-value {
+                                position: relative;
+
+                                .column-permission-overlay {
+                                    position: absolute;
+                                    left: 0;
+                                    top: 0;
+                                    height: 100%;
+                                    width: 100%;
+                                    z-index: 6; // higher than the chaise-clear
+                                }
+
+                                .column-permission-warning {
+                                    margin: 0;
+                                    padding: 5px;
+                                    color: rgb(180,95,6);
+                                }
+
+                            }
+
+                            .modal-popup .chaise-input-control {
+                                height: unset;
+                            }
+                        }
+                    }
+                } // end "> tbody"
+            } // end "> table"
+
+            .table > tbody + tbody {
+                border-top: 0;
+            }
+        } // end #form-edit
+    } // // end #form-section
+
+    .modal-popup {
+      width: 100%;
+      margin-bottom: 0px;
+    }
+
+    .record-number {
+      font-size: 14px;
+      margin-left: 10px;
+      color: $disabled-color;
+    }
+
+    tbody.highlight{
+      background-color: #f7f0cf !important;
+    }
+
+    .chaise-input-control[readonly] {
+        background-color: $white-color;
+        opacity: 1;
+    }
+
+    .md-editor {
+        border-radius: $btn-border-radius;
+
+        .md-header {
+            border-top-left-radius: $btn-border-radius;
+            border-top-right-radius: $btn-border-radius;
+        }
+
+        .content-box {
+            border-bottom-left-radius: $btn-border-radius;
+            border-bottom-right-radius: $btn-border-radius;
+            border-bottom: 0;
+        }
+    }
+
+    textarea {
+        resize: vertical;
+        height: auto;
+    }
+
+    .input-timestamptz {
+        min-width: 112px;
+    }
+
+    .adjust-boolean-dropdown {
+        border-top: 0;
+    }
+
+    .select-all-text {
+        padding: 4px;
+        border: 1px solid transparent;
+    }
+
+    @-moz-document url-prefix() {
+        #form-edit > table > tbody > tr > td:first-child {
+            margin-top: -1px;
+        }
+    }
+
+    #resultset-tables {
+        padding-bottom: 20px;
+    }
+
+    /****************** Upload modal css *****************/
+
+
+    .progress-percent {
+      font-weight: bold;
+      margin-top: -25px;
+      margin-left: 50%;
+    }
+
+    .inner-progress-percent {
+      margin-top: -18px;
+      font-size: 12px;
+    }
+
+    table.upload-table {
+
+    }
+
+    table.upload-table > tbody {
+      border: none;
+    }
+
+    table.upload-table > tbody > tr > td:first-child {
+      padding-left: 20px;
+
+    }
+
+    table.upload-table > tbody > tr > td:last-child {
+      width: 40%;
+    }
+
+    table.upload-table > tbody > tr > td:nth-child(2) {
+      padding-left: 0px;
+      padding-right: 0px;
+    }
+
+
+    table.upload-table > tbody > tr:last-child > td {
+      border-bottom: 1px solid $disabled-background-color;
+      background-color: white;
+    }
+
+
+    table.upload-table > tbody > tr:first-child > td {
+      padding-left:0px;
+      padding-top: 15px;
+      border-bottom: 2px solid gainsboro;
+      font-weight: 600;
+    }
+
+
+    table.upload-table .progress {
+      height: 20px;
+    }
+
+
+    .upload-progress-bar {
+      width: 0%;
+      background-color: #8cacc7 !important;
+    }
+}
