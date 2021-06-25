@@ -1,6 +1,6 @@
 # Interface Style Guide
 
-## NOTE: Some of the contents of this guide may be out of date or deprecated. Check https://dev.isrd.isi.edu/chaise/docs/style-guide/style-guide.html for the more recent version of this document.
+### NOTE: Some of the contents of this guide may be out of date or deprecated. Check https://dev.isrd.isi.edu/chaise/docs/style-guide/style-guide.html for the more recent version of this document.
 
 This guide defines the styles, icons, fonts and general UI control that should be used for any user interface we code. This creates a consistent look and feel - and saves time.
 
