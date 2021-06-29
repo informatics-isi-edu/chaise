@@ -201,6 +201,8 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(LOGIN_JS_SOURCE_MIN) \
 	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
+SOURCE=src
+
  DIST=dist
 
  # Shared utilities
@@ -590,7 +592,7 @@ $(MODULES): package.json
 # Rule to create the package.
 # - we have to make sure the npm dependencies required for build are installed.
 # - we have to clean all the dist files because we need to generate new ones.
-$(DIST): print_variables npm_install_prod_modules $(SASS) $(MIN) $(HTML) gitversion
+$(DIST): print_variables npm_install_prod_modules run_webpack $(SASS) $(MIN) $(HTML) gitversion
 
 # build version will change everytime make all or install is called
 $(BUILD_VERSION):
@@ -624,19 +626,25 @@ all: $(DIST)
 .PHONY: install dont_install_in_root
 install: $(DIST) dont_install_in_root
 	$(info - deploying the package)
-	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # Rule for installing during testing (build chaise and deploy with the chaise-config)
 .PHONY: install-w-config dont_install_in_root
 install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
 	$(info - deploying the package with the existing default config files)
-	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # Rule to create version.txt
 .PHONY: gitversion
 gitversion:
 	$(info - creating version.txt)
 	@sh ./git_version_info.sh
+
+run_webpack: $(SOURCE)
+	$(info - creating webpack bundles)
+	@./node_modules/.bin/webpack --config ./webpack/main.config.js
 
 # we want to make sure npm install is done for production
 # if we don't run this, npm install without any flags will be called from
