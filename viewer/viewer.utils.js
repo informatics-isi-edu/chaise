@@ -432,7 +432,8 @@
                 ref = ref.contextualize.compact.sort(channelConfig.column_order);
 
                 // send request to server
-                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, true, cb);
+                // since we want to check the ACL for updating the channel config we have to ask for TRS
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, true, true, cb);
             }).then(function () {
                 // if any of the urls are null, we shouldn't use any of the urls
                 if (hasNull) {
@@ -501,7 +502,7 @@
                 ref = ref.contextualize.compact.sort(pImageConfig.column_order);
 
                 // send request to server
-                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, cb);
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, false, cb);
             }).then(function () {
                 if (hasNull) {
                     mainImageInfo = [];
@@ -645,7 +646,8 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, cb);
+                // since we want to check the ACL for allowing edit/delete of annotations we have to has for TRS
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, true, cb);
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {
@@ -1162,9 +1164,9 @@
          * since we don't know the size of our requests, this will make sure the
          * requests are done in batches until all the values are processed.
          */
-        function _readPageByPage (ref, pageSize, logObj, useEntity, cb) {
+        function _readPageByPage (ref, pageSize, logObj, useEntity, getTRS, cb) {
             var defer = $q.defer();
-            ref.read(pageSize, logObj, useEntity, true).then(function (page){
+            ref.read(pageSize, logObj, useEntity, true, getTRS).then(function (page){
                 if (page && page.length > 0) {
                     var cb_res = cb(page);
                     if (cb_res === false) {
@@ -1175,7 +1177,7 @@
                 }
 
                 if (page.hasNext) {
-                    return _readPageByPage(page.next, pageSize, logObj, useEntity, cb);
+                    return _readPageByPage(page.next, pageSize, logObj, useEntity, getTRS, cb);
                 }
                 return true;
             }).then(function (res) {

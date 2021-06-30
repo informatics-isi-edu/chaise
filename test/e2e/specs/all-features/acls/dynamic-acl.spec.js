@@ -367,11 +367,11 @@ describe("regarding dynamic ACL support, ", function () {
 
         describe("when all the columns in a row are not editable, ", function () {
             testRecordEditDelete(testParams.dynamic_acl.row_ids.all_vis_col_non_edit, false, true);
-        });
+        }).pend("tcrs support has been removed because of performance issues");
 
         describe("when some of the columns in a row are not editable, ", function () {
             testRecordEditDelete(testParams.dynamic_acl.row_ids.some_vis_col_non_edit, true, true);
-        });
+        }).pend("tcrs support has been removed because of performance issues");
 
         describe("when the related tables have dynamic acls, ", function () {
             beforeAll(function () {
@@ -415,7 +415,9 @@ describe("regarding dynamic ACL support, ", function () {
         describe("when the whole row cannot be edited", function () {
             beforeAll(function () {
                 browser.ignoreSynchronization = true;
-                browser.get(getRecordEditURL("id=1;id=2;id=5"));
+                // NOTE when we add tcrs support we should also ask for id=5
+                //      removed it since we're not asking for tcrs anymore
+                browser.get(getRecordEditURL("id=1;id=2"));
                 chaisePage.recordeditPageReady();
                 browser.wait(function() {
                     return recordEditPage.getAllColumnNames().count().then(function(ct) {
@@ -427,7 +429,9 @@ describe("regarding dynamic ACL support, ", function () {
             it("the `ban` icon should be displayed on the header.", function () {
                 expect(recordEditPage.getDisabledRowIcon(0).isPresent()).toBe(false, "first row missmatch");
                 expect(recordEditPage.getDisabledRowIcon(1).isPresent()).toBe(true, "second row missmatch");
-                expect(recordEditPage.getDisabledRowIcon(2).isPresent()).toBe(true, "third row missmatch");
+                // NOTE when we add tcrs support we should also ask for id=5
+                //      removed it since we're not asking for tcrs anymore
+                // expect(recordEditPage.getDisabledRowIcon(2).isPresent()).toBe(true, "third row missmatch");
             });
 
             it ("all the columns in the row should be disabled.", function () {
@@ -440,9 +444,11 @@ describe("regarding dynamic ACL support, ", function () {
                 expect(recordEditPage.getInputById(1, "name").getAttribute('disabled')).toBeTruthy("row=1 name missmatch");
                 expect(recordEditPage.getInputById(1, "fk_col").getAttribute('disabled')).toBeTruthy("row=1 fk_col missmatch");
 
-                expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
-                expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
-                expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
+                // NOTE when we add tcrs support we should also ask for id=5
+                //      removed it since we're not asking for tcrs anymore
+                // expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
+                // expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
+                // expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
 
             });
 
@@ -454,13 +460,13 @@ describe("regarding dynamic ACL support, ", function () {
                     // Make sure the table shows up with the expected # of rows
                     browser.wait(function() {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return (ct == 3);
+                            return (ct == 2);
                         });
                     }, browser.params.defaultTimeout);
 
-                    expect(recordEditPage.getResultsetTitleElement().getText()).toBe("1/3 dynamic_acl_main_table records updated successfully", "Resultset title is incorrect.");
+                    expect(recordEditPage.getResultsetTitleElement().getText()).toBe("1/2 dynamic_acl_main_table records updated successfully", "Resultset title is incorrect.");
 
-                    expect(recordEditPage.getDisabledResultSetHeader().getText()).toBe("2 disabled records (due to lack of permission)", "disabled header is incorrect.");
+                    expect(recordEditPage.getDisabledResultSetHeader().getText()).toBe("1 disabled records (due to lack of permission)", "disabled header is incorrect.");
 
                     done();
                 }).catch(function (err) {
@@ -469,7 +475,7 @@ describe("regarding dynamic ACL support, ", function () {
             });
         });
 
-        describe("when some of the columns in the row cannot be edited", function () {
+        xdescribe("when some of the columns in the row cannot be edited", function () {
             beforeAll(function () {
                 browser.ignoreSynchronization = true;
                 browser.get(getRecordEditURL("id=1;id=6"));
@@ -531,7 +537,7 @@ describe("regarding dynamic ACL support, ", function () {
                     done.fail(err);
                 })
             });
-        });
+        }).pend("tcrs support has been removed because of performance issues");
 
         // navigate away from the recordedit page so it doesn't interfere with other tests
         afterAll(function (done) {
@@ -547,7 +553,8 @@ describe("regarding dynamic ACL support, ", function () {
     /******************** recordset tests ************************/
     describe('When viewing Recordset app for a table with dynamic acls, ', function() {
         describe("when some of the displayed rows are not editable/deletable, ", function () {
-            testRecordSetEditDelete("", 6, true, [true, false, false, true, false, true], [true, false, true, false, true, true]);
+            // NOTE recordset doesn't ask for tcrs and therefore cannot accurately guess the acl for id=5
+            testRecordSetEditDelete("", 6, true, [true, false, false, true, true, true], [true, false, true, false, true, true]);
         });
 
         describe("when none of the displayed rows are editable, ", function () {
