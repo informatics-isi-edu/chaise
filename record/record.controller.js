@@ -632,8 +632,8 @@
             });
         }
 
-        var top =  mainContainerEl[0].getBoundingClientRect().top;
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+            var top =  mainContainerEl[0].getBoundingClientRect().top;
             var headers = [].slice.call(mainContainerEl.querySelectorAll("thead"));
             headers.some(function(header) {
                 var tableRect = header.parentNode.getBoundingClientRect();
