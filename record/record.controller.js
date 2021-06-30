@@ -632,7 +632,22 @@
             });
         }
 
+        var top =  mainContainerEl[0].getBoundingClientRect().top;
         mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+            var headers = [].slice.call(mainContainerEl.querySelectorAll("thead"));
+            headers.some(function(header) {
+                var tableRect = header.parentNode.getBoundingClientRect();
+                if (tableRect.top != 0 && tableRect.top <= $window.innerHeight && tableRect.bottom > mainContainerEl[0].getBoundingClientRect().top) {
+                    if (tableRect.top > top) {
+                        header.style.top = 0;
+                    }
+                    else {
+                        header.style.top = parseInt(parseInt(header.style.top) + (top - header.getBoundingClientRect().top))+  "px";
+                    }
+                    return true;   
+                } 
+            });
+            
             if (mainContainerEl.scrollTop() > 300) {
               $scope.showTopBtn = true;
             } else {

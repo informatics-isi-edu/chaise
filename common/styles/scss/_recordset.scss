@@ -157,8 +157,6 @@
 // chaise table
 .outer-table {
     overflow-x: auto;
-    height: max-content;
-    max-height: 60vh;
 }
 
 .chaise-table-header {
@@ -187,7 +185,8 @@
 }
 
 .chaise-table.table {
-    border-top: 1px solid $table-border-color;
+    border-collapse: initial;
+    border-left: 1px solid $table-border-color;
     border-bottom: 1px solid $table-border-color;
     margin: 0;
 
@@ -231,6 +230,9 @@
     }
 
     .table-heading {
+        position: relative;
+        top: 0px;
+        z-index: 1;
         background-color: $table-header-background-color;
         color: $black-color;
 
@@ -267,6 +269,7 @@
 
     >thead>tr>th {
         border-bottom: 1px solid $table-border-color;
+        border-top: 1px solid $table-border-color !important;
     }
 
     >thead>tr>th,
@@ -540,4 +543,8 @@ faceting {
 // selected rows
 .selected-rows {
     min-height: 45px;
+}
+
+#overflow-container-facet .chaise-checkbox {
+    z-index: 0;
 }
