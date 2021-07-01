@@ -46,7 +46,6 @@
         'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ui.select',
         'angular-markdown-editor',
         'chaise.footer',
         'chaise.recordcreate'
