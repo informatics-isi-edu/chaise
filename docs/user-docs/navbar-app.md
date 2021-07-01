@@ -160,11 +160,38 @@ With the current HTML structure, it is possible to apply different styles to cus
 
 ## Notes
 
+1. Some CSS classes in Chaise might conflict with the ones used in your HTML page. Also the CSS rules that you have on your static page might affect navbar. So if you're seeing some wierd UIs, it could be because of these clashing rules. When navbar app is completely loaded, the following is the rough structure of the elements that it will create. If you have some CSS rules to select these elements, they will also apply to navbar and can cause issues:
+    ```html
+    <navbar class="ng-scope ng-isolate-scope">
+      <header lass="row">
+        <nav id="mainnav" class="navbar navbar-inverse">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="md-chevron-down"></span>
+              MENU
+            </button>
+            <a class="navbar-brand">
+              <!-- the navbar brand and logo -->
+            </a>
+          </div>
+
+          <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
+            <ul id="navbar-menu" class="nav navbar-nav">
+              <!-- menu options -->
+            </ul>
+            <!-- other parts of navbar (login, profile, search by rid, etc) -->
+          </div>
+        </nav>
+      </header>
+    </navbar>
+    ```
+
+
+
 1. The bootstrap and jQuery versions of the HTML page might be different from the ones used in Chaise. This might produce some inconsistent behavior on the HTML page.
 
 2. Regardless of prefetching or allowing Navbar app to include the dependencies for you, it will fetch ERMrestJS. This might cause some issues if your page is already including ERMrestJS. It's better if you let Navbar app include it for you.
-
-3. Some CSS classes in Chaise might conflict with the ones used in your HTML page.
 
 4. Since navbar is going to take some time to load, if you want to make sure you're showing navbar and the rest of the page together, you can use the following class names:
     - `wait-for-navbar`: This class should be used on an element that is wrapping the entire content of your page (including navbar). Chaise will set a `visibility:hidden` on this element and will only set it to `visibility:visible` when the navbar is loaded.
