@@ -6,6 +6,7 @@
 
 var pImport =  require('../../../utils/protractor.import.js');
 var chaisePage = require('../../../utils/chaise.page.js');
+const { browser } = require('protractor');
 var recordPage = chaisePage.recordPage;
 var recordEditPage = chaisePage.recordEditPage;
 var recordsetPage = chaisePage.recordsetPage;
@@ -415,9 +416,7 @@ describe("regarding dynamic ACL support, ", function () {
         describe("when the whole row cannot be edited", function () {
             beforeAll(function () {
                 browser.ignoreSynchronization = true;
-                // NOTE when we add tcrs support we should also ask for id=5
-                //      removed it since we're not asking for tcrs anymore
-                browser.get(getRecordEditURL("id=1;id=2"));
+                browser.get(getRecordEditURL("id=1;id=2;id=5"));
                 chaisePage.recordeditPageReady();
                 browser.wait(function() {
                     return recordEditPage.getAllColumnNames().count().then(function(ct) {
@@ -429,9 +428,7 @@ describe("regarding dynamic ACL support, ", function () {
             it("the `ban` icon should be displayed on the header.", function () {
                 expect(recordEditPage.getDisabledRowIcon(0).isPresent()).toBe(false, "first row missmatch");
                 expect(recordEditPage.getDisabledRowIcon(1).isPresent()).toBe(true, "second row missmatch");
-                // NOTE when we add tcrs support we should also ask for id=5
-                //      removed it since we're not asking for tcrs anymore
-                // expect(recordEditPage.getDisabledRowIcon(2).isPresent()).toBe(true, "third row missmatch");
+                expect(recordEditPage.getDisabledRowIcon(2).isPresent()).toBe(true, "third row missmatch");
             });
 
             it ("all the columns in the row should be disabled.", function () {
@@ -444,12 +441,9 @@ describe("regarding dynamic ACL support, ", function () {
                 expect(recordEditPage.getInputById(1, "name").getAttribute('disabled')).toBeTruthy("row=1 name missmatch");
                 expect(recordEditPage.getInputById(1, "fk_col").getAttribute('disabled')).toBeTruthy("row=1 fk_col missmatch");
 
-                // NOTE when we add tcrs support we should also ask for id=5
-                //      removed it since we're not asking for tcrs anymore
-                // expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
-                // expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
-                // expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
-
+                expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
+                expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
+                expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
             });
 
             it ("submitting the form should not submit the value and show the rows a `disabled`", function (done) {
@@ -460,13 +454,13 @@ describe("regarding dynamic ACL support, ", function () {
                     // Make sure the table shows up with the expected # of rows
                     browser.wait(function() {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                            return (ct == 2);
+                            return (ct == 3);
                         });
                     }, browser.params.defaultTimeout);
 
-                    expect(recordEditPage.getResultsetTitleElement().getText()).toBe("1/2 dynamic_acl_main_table records updated successfully", "Resultset title is incorrect.");
+                    expect(recordEditPage.getResultsetTitleElement().getText()).toBe("1/3 dynamic_acl_main_table records updated successfully", "Resultset title is incorrect.");
 
-                    expect(recordEditPage.getDisabledResultSetHeader().getText()).toBe("1 disabled records (due to lack of permission)", "disabled header is incorrect.");
+                    expect(recordEditPage.getDisabledResultSetHeader().getText()).toBe("2 disabled records (due to lack of permission)", "disabled header is incorrect.");
 
                     done();
                 }).catch(function (err) {
@@ -475,7 +469,7 @@ describe("regarding dynamic ACL support, ", function () {
             });
         });
 
-        xdescribe("when some of the columns in the row cannot be edited", function () {
+        describe("when some of the columns in the row cannot be edited", function () {
             beforeAll(function () {
                 browser.ignoreSynchronization = true;
                 browser.get(getRecordEditURL("id=1;id=6"));
@@ -495,6 +489,7 @@ describe("regarding dynamic ACL support, ", function () {
             it ("The field should be disabled.", function (done) {
                 recordEditPage.getInputForAColumn("name", 1).then(function (input) {
                     expect(input.getAttribute("disabled")).toBeTruthy("disabled missmatch");
+                    browser.pause();
                     expect(input.getAttribute("value")).toEqual("six","value missmatch");
                     done();
                 }).catch(function (err) {
@@ -537,7 +532,7 @@ describe("regarding dynamic ACL support, ", function () {
                     done.fail(err);
                 })
             });
-        }).pend("tcrs support has been removed because of performance issues");
+        })
 
         // navigate away from the recordedit page so it doesn't interfere with other tests
         afterAll(function (done) {

@@ -250,9 +250,9 @@
                             stack: logService.getStackObject()
                         };
 
-                        // in edit mode, we have to check the TRS (row-level acls)
-                        var getTRS = context.mode === context.modes.EDIT;
-                        $rootScope.reference.read(numberRowsToRead, logObj, false, false, getTRS).then(function getPage(page) {
+                        // in edit mode, we have to check the TCRS (row-level acls)
+                        var getTCRS = context.mode === context.modes.EDIT;
+                        $rootScope.reference.read(numberRowsToRead, logObj, false, false, false, getTCRS).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {

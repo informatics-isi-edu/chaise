@@ -232,8 +232,8 @@
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
 
-                // since we want to check the ACL for updating the default_Z we have to ask for TRS
-                return imageReference.contextualize.detailed.read(1, logObj, false, true, true);
+                // since we want to check the ACL for updating the default_Z we have to ask for TCRS
+                return imageReference.contextualize.detailed.read(1, logObj, false, true, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {
