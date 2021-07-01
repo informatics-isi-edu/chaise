@@ -122,21 +122,21 @@ The `navbarMenu` property is the most complex of the above properties. This para
 
 With the current HTML structure, it is possible to apply different styles to customize the appearance. Overriding these selectors can help -
 
-```
+```css
 /* change the navbar background color */
 .navbar-inverse {
     background-color: YOUR_VALUE;
 }
 ```
 
-```
+```css
 /* change the brand text color */
 .navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a {
     color: YOUR_VALUE;
 }
 ```
 
-```
+```css
 /* change the color of options */
    .navbar-inverse .navbar-nav>li>a {color: YOUR_VALUE; font-size: YOUR_VALUE;}
    .navbar-inverse .navbar-nav>li>a:hover {color: YOUR_VALUE;}
@@ -144,14 +144,14 @@ With the current HTML structure, it is possible to apply different styles to cus
 }
 ```
 
-```
+```css
 /* change the minimum height of navbar */
 .navbar {
 	  min-height: YOUR_VALUE;
 }
 ```
 
-```
+```css
 /* we get a vertical navbar when the width is lesser than the content, you can change the max-height of that navbar after which we will see a scrollbar to ensure it doesn’t take over the entire page (default if not customized is 340px) */
 .navbar-collapse {
 	  max-height: YOUR_VALUE;
@@ -160,7 +160,7 @@ With the current HTML structure, it is possible to apply different styles to cus
 
 ## Notes
 
-1. Some CSS classes in Chaise might conflict with the ones used in your HTML page. Also the CSS rules that you have on your static page might affect navbar. So if you're seeing some wierd UIs, it could be because of these clashing rules. When navbar app is completely loaded, the following is the rough structure of the elements that it will create. If you have some CSS rules to select these elements, they will also apply to navbar and can cause issues:
+1. Some CSS rules in Chaise might conflict with the ones used in your HTML page. Also the CSS rules that you have on your static page might affect navbar. So if you're seeing some wierd UIs, it could be because of these clashing rules. When navbar app is completely loaded, the following is the rough structure of the elements that it will create. If you have some CSS rules that apply to these elements, they will also apply to navbar and can cause issues:
     ```html
     <navbar class="ng-scope ng-isolate-scope">
       <header lass="row">
@@ -180,7 +180,9 @@ With the current HTML structure, it is possible to apply different styles to cus
             <ul id="navbar-menu" class="nav navbar-nav">
               <!-- menu options -->
             </ul>
+
             <!-- other parts of navbar (login, profile, search by rid, etc) -->
+
           </div>
         </nav>
       </header>
