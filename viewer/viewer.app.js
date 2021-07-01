@@ -48,7 +48,6 @@
         'ngSanitize',
         'ngMessages',
         'ui.mask',
-        'ui.select',
         'ui.bootstrap',
         'angular-markdown-editor'
     ])
