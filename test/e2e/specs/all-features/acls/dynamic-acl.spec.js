@@ -489,7 +489,6 @@ describe("regarding dynamic ACL support, ", function () {
             it ("The field should be disabled.", function (done) {
                 recordEditPage.getInputForAColumn("name", 1).then(function (input) {
                     expect(input.getAttribute("disabled")).toBeTruthy("disabled missmatch");
-                    browser.pause();
                     expect(input.getAttribute("value")).toEqual("six","value missmatch");
                     done();
                 }).catch(function (err) {
