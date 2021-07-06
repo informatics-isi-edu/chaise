@@ -6,6 +6,7 @@
 
 var pImport =  require('../../../utils/protractor.import.js');
 var chaisePage = require('../../../utils/chaise.page.js');
+const { browser } = require('protractor');
 var recordPage = chaisePage.recordPage;
 var recordEditPage = chaisePage.recordEditPage;
 var recordsetPage = chaisePage.recordsetPage;
@@ -367,11 +368,11 @@ describe("regarding dynamic ACL support, ", function () {
 
         describe("when all the columns in a row are not editable, ", function () {
             testRecordEditDelete(testParams.dynamic_acl.row_ids.all_vis_col_non_edit, false, true);
-        });
+        }).pend("tcrs support has been removed because of performance issues");
 
         describe("when some of the columns in a row are not editable, ", function () {
             testRecordEditDelete(testParams.dynamic_acl.row_ids.some_vis_col_non_edit, true, true);
-        });
+        }).pend("tcrs support has been removed because of performance issues");
 
         describe("when the related tables have dynamic acls, ", function () {
             beforeAll(function () {
@@ -443,7 +444,6 @@ describe("regarding dynamic ACL support, ", function () {
                 expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
                 expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
                 expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
-
             });
 
             it ("submitting the form should not submit the value and show the rows a `disabled`", function (done) {
@@ -531,7 +531,7 @@ describe("regarding dynamic ACL support, ", function () {
                     done.fail(err);
                 })
             });
-        });
+        })
 
         // navigate away from the recordedit page so it doesn't interfere with other tests
         afterAll(function (done) {
@@ -547,7 +547,8 @@ describe("regarding dynamic ACL support, ", function () {
     /******************** recordset tests ************************/
     describe('When viewing Recordset app for a table with dynamic acls, ', function() {
         describe("when some of the displayed rows are not editable/deletable, ", function () {
-            testRecordSetEditDelete("", 6, true, [true, false, false, true, false, true], [true, false, true, false, true, true]);
+            // NOTE recordset doesn't ask for tcrs and therefore cannot accurately guess the acl for id=5
+            testRecordSetEditDelete("", 6, true, [true, false, false, true, true, true], [true, false, true, false, true, true]);
         });
 
         describe("when none of the displayed rows are editable, ", function () {
