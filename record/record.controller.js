@@ -632,12 +632,18 @@
             });
         }
 
-        mainContainerEl.on('scroll', $scope.$apply.bind($scope, function () {
+        /**
+         * based on scroll position:
+         *  - TODO summarize what you're doing
+         *  - toggle the back-to-top button
+         */
+        mainContainerEl[0].onscroll = function () {
+            // TODO comment what this is doing
             var top =  mainContainerEl[0].getBoundingClientRect().top;
             var headers = [].slice.call(mainContainerEl.querySelectorAll("thead"));
             headers.some(function(header) {
                 var tableRect = header.parentNode.getBoundingClientRect();
-                if (tableRect.top != 0 && tableRect.top <= $window.innerHeight && tableRect.bottom > mainContainerEl[0].getBoundingClientRect().top) {
+                if (tableRect.top != 0 && tableRect.top <= $window.innerHeight && tableRect.bottom > top) {
                     if (tableRect.top > top) {
                         header.style.top = 0;
                     }
@@ -648,11 +654,16 @@
                 } 
             });
             
+            // determine whether we need the back-to-top button
+            var showTopBtn = false;
             if (mainContainerEl.scrollTop() > 300) {
-              $scope.showTopBtn = true;
-            } else {
-              $scope.showTopBtn = false;
+                showTopBtn = true;
             }
-        }));
+            // only run the digest cycle when we have to
+            if (showTopBtn != $scope.showTopBtn) {
+                $scope.showTopBtn = showTopBtn;
+                $scope.$apply();
+            }
+        };
     }]);
 })();
