@@ -632,38 +632,119 @@
             });
         }
 
+
+        var checkStickyHeader;
+        var lastUpdatedHeader;
+        var scrollListener = function() {
+                if (lastUpdatedHeader) {
+                    lastUpdatedHeader.style.top = 0;
+                }
+             
+                clearTimeout(checkStickyHeader);
+                checkStickyHeader = setTimeout(function() {
+                console.log("checkStickyHeader");
+                var header;
+                var tableRect;
+                // TODO comment what this is doing
+                var top =  mainContainerEl[0].getBoundingClientRect().top;
+                //console.time("count");
+
+                var headers = mainContainerEl[0].getElementsByTagName("thead");
+                //console.timeLog("count");
+                for (var i = 0; i < headers.length; i++) {
+                    header = headers[i];
+                    tableRect = header.parentNode.getBoundingClientRect();
+                    if (tableRect.bottom > top && tableRect.top <= window.innerHeight) {
+                        if (tableRect.top > top) {
+                            header.style.top = 0;
+                        }
+                        else {
+                            lastUpdatedHeader = header;
+                            header.style.top = parseInt(parseInt(header.style.top) + (top - header.getBoundingClientRect().top))+  "px";
+                        }
+                        break;
+                    } 
+                }
+            }, 60);
+        }
         /**
          * based on scroll position:
          *  - TODO summarize what you're doing
          *  - toggle the back-to-top button
          */
-        mainContainerEl[0].onscroll = function () {
-            // TODO comment what this is doing
-            var top =  mainContainerEl[0].getBoundingClientRect().top;
-            var headers = [].slice.call(mainContainerEl.querySelectorAll("thead"));
-            headers.some(function(header) {
-                var tableRect = header.parentNode.getBoundingClientRect();
-                if (tableRect.top != 0 && tableRect.top <= $window.innerHeight && tableRect.bottom > top) {
-                    if (tableRect.top > top) {
-                        header.style.top = 0;
-                    }
-                    else {
-                        header.style.top = parseInt(parseInt(header.style.top) + (top - header.getBoundingClientRect().top))+  "px";
-                    }
-                    return true;   
-                } 
-            });
+        mainContainerEl[0].onscroll = scrollListener;
+        // function () {
+        //     var header;
+        //     var tableRect;
+        //     // TODO comment what this is doing
+        //     var top =  mainContainerEl[0].getBoundingClientRect().top;
+        //     console.time("count");
+
+        //     // var header = document.getElementById("fixed-table-header");
+        //     // console.timeLog("count");
+        //     // var tableRect = header.parentNode.getBoundingClientRect();
+        //     // if (tableRect.top > top) {
+        //     //     header.style.top = 0;
+        //     // }
+        //     // else {
+        //     //     header.style.top = parseInt(parseInt(header.style.top) + (top - header.getBoundingClientRect().top))+  "px";
+        //     // }
+
+        //     //var headers = mainContainerEl[0].querySelectorAll("thead");
+            
+        //     var headers = mainContainerEl[0].getElementsByTagName("thead");
+        //     console.timeLog("count");
+        //     for (var i = 0; i < headers.length; i++) {
+        //         header = headers[i];
+        //         tableRect = header.parentNode.getBoundingClientRect();
+        //         if (tableRect.bottom > top && tableRect.top <= window.innerHeight) {
+        //             if (tableRect.top > top) {
+        //                 header.style.top = 0;
+        //             }
+        //             else {
+        //                 console.timeLog("count");
+        //                 header.style.top = parseInt(parseInt(header.style.top) + (top - header.getBoundingClientRect().top))+  "px";
+        //                 console.timeLog("count");
+        //             }
+        //             break;
+        //         } 
+        //     }
+
+        //     // var headers = mainContainerEl[0].getElementsByTagName("thead");
+        //     // console.timeLog("count");
+        //     // for (var i = 0; i < headers.length; i++) {
+        //     //     header = headers[i];
+        //     //     tableRect = header.parentNode.getBoundingClientRect();
+
+        //     //     if (tableRect.bottom > top && tableRect.top <= window.innerHeight) {
+        //     //         if (tableRect.top > top) {
+        //     //             header.style.position="relative";
+        //     //             header.style.top = 0;
+        //     //         }
+        //     //         else {
+        //     //             if(header.style.top == "" || header.style.top == 0 || header.style.top == "0px") {
+        //     //                 header.style.top = top +  "px";
+        //     //             }
+        //     //             header.style.position="fixed"
+        //     //         }
+        //     //         break;
+        //     //     } 
+                
+        //     // }
+
+        //     console.timeEnd("count");
+        //     console.log("\n");
             
             // determine whether we need the back-to-top button
-            var showTopBtn = false;
-            if (mainContainerEl.scrollTop() > 300) {
-                showTopBtn = true;
-            }
-            // only run the digest cycle when we have to
-            if (showTopBtn != $scope.showTopBtn) {
-                $scope.showTopBtn = showTopBtn;
-                $scope.$apply();
-            }
-        };
+            // var showTopBtn = false;
+            // if (mainContainerEl.scrollTop() > 300) {
+            //     showTopBtn = true;
+            // }
+            // // only run the digest cycle when we have to
+            // if (showTopBtn != $scope.showTopBtn) {
+            //     $scope.showTopBtn = showTopBtn;
+            //     $scope.$apply();
+            // }
+        //};
     }]);
 })();
