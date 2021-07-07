@@ -511,6 +511,7 @@ html {
             position: relative;
             overflow-x: hidden;
             overflow-y: auto;
+            scroll-behavior: smooth;
 
             // we're going to adjust this dynamically for dynamic-padding
             &:not(.dynamic-padding) {
