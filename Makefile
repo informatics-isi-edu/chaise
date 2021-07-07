@@ -260,10 +260,7 @@ SHARED_JS_VENDOR_ASSET=$(JS)/vendor/angular-plotly.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/vendor/css-element-queries.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(JS)/vendor/select.js \
-	$(COMMON)/vendor/mask.min.js \
-	$(COMMON)/vendor/spectrum/spectrum.min.js
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
 
 SHARED_JS_VENDOR_ASSET_MIN=chaise.vendor.min.js
 $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
@@ -271,7 +268,6 @@ $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
 
 SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 	$(CSS)/vendor/fontawesome.min.css \
-	$(COMMON)/vendor/spectrum/spectrum.min.css \
 	$(COMMON)/styles/app.css
 
 SASS=$(COMMON)/styles/app.css
@@ -370,11 +366,14 @@ $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN): $(RECORDEDIT_JS_SOURCE)
 RECORDEDIT_JS_VENDOR_ASSET=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/spectrum/spectrum.min.js
 
 RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(COMMON)/vendor/spectrum/spectrum.min.css
 
 .make-recordedit-includes: $(BUILD_VERSION)
 	@> .make-recordedit-includes
@@ -437,13 +436,14 @@ VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
 	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/spectrum/spectrum.min.js
 
-VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
-	$(CSS)/vendor/select2.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(COMMON)/vendor/spectrum/spectrum.min.css
 
 .make-viewer-includes: $(BUILD_VERSION)
 	@> .make-viewer-includes
@@ -483,7 +483,8 @@ LOGIN_JS_VENDOR_ASSET=$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/ng-grid.js \
-	$(JS)/vendor/bootstrap-tour.min.js
+	$(JS)/vendor/bootstrap-tour.min.js \
+	$(JS)/vendor/select.js
 
 LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/vendor/ng-grid.css \

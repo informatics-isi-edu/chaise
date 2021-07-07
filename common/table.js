@@ -456,12 +456,18 @@
             logParams.action = getTableLogAction(vm, act);
 
             (function (current, requestCauses, reloadStartTime) {
+                // the places that we want to show edit or delete button, we should also ask for trs
+                // NOTE technically this should be based on passed config options but we're passing editable
+                //      to mean both edit and create, so it's not really useful here
+                var getTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 ||
+                             vm.config.displayMode === recordsetDisplayModes.fullscreen;
+
                 // if it's in related entity section, we should fetch the
                 // unlink trs (acl) of association tables
                 var getUnlinkTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 &&
                                    vm.reference.derivedAssociationReference;
 
-                vm.reference.read(vm.pageLimit, logParams, false, false, getUnlinkTRS).then(function (page) {
+                vm.reference.read(vm.pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
