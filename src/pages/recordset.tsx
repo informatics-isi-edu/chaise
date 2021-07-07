@@ -1,5 +1,7 @@
 import React  from 'react'
 import ReactDOM from 'react-dom'
+import { Provider } from 'react-redux';
+import { store } from 'Store/store';
 
 const RecordSetApp: React.FC<{}> = (): JSX.Element => {
   return (
@@ -8,6 +10,8 @@ const RecordSetApp: React.FC<{}> = (): JSX.Element => {
 }
 
 ReactDOM.render(
-  <RecordSetApp/>,
+  <Provider store={store}>
+    <RecordSetApp />
+  </Provider>,
   document.getElementById("chaise-app-root")
 );

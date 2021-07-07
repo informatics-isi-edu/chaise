@@ -16,15 +16,16 @@ module.exports =  function (appName, filename) {
           extensions: ['.ts', '.tsx', '.js', '.json'],
           modules: [
               path.resolve(__dirname, '..', 'src'),
-              'node_modules'
+              path.resolve(__dirname, '..', 'node_modules')
           ],
           alias: {
-              Legacy: path.resolve(__dirname, '..'),
+              Assets: path.resolve(__dirname, '..', 'src', 'assets'),
               Components: path.resolve(__dirname, '..', 'src', 'components'),
+              Legacy: path.resolve(__dirname, '..'),
               Services: path.resolve(__dirname, '..', 'src', 'services'),
-              Vendor: path.resolve(__dirname, '..', 'src', 'vendor'),
+              Store: path.resolve(__dirname, '..', 'src', 'store'),
               Utils: path.resolve(__dirname, '..', 'src', 'utils'),
-              Store: path.resolve(__dirname, '..', 'src', 'store')
+              Vendor: path.resolve(__dirname, '..', 'src', 'vendor')
           }
       },
       module: {
