@@ -629,6 +629,22 @@
         }
 
         function attachGoogleDatasetJsonLd (tuple) {
+            // check the googleDatasetConfigs global variable
+            // that is defined in google-dataset-config.js file
+            var catalogID = tuple.reference.location.catalogID, //getting the catalog-id without version
+                schemaName = tuple.reference.table.schema.name,
+                tableName = tuple.reference.table.name;
+            if (typeof googleDatasetConfigs !== 'undefined' &&
+                DataUtils.isObjectAndNotNull(googleDatasetConfigs) &&
+                DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID]) &&
+                DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID][schemaName]) &&
+                DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID][schemaName][tableName])
+                ) {
+                var currConfig = googleDatasetConfigs[catalogID][schemaName][tableName];
+                // TODO check for the values and if match return
+                // if the config is not in a valid format, act as if it's not even defined
+                return;
+            }
             
             // use ermrestjs and attach to dom
             var metadata = $rootScope.reference.googleDatasetMetadata;
