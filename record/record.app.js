@@ -69,16 +69,7 @@
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
 
-        // if we have nodata set, use canonical tag as the uri
-        var locationToUse = $window.location;
-        if ($window.location.href.indexOf("nodata") >= 0) {
-            var url = document.createElement('a');
-            url.href = document.querySelectorAll('[rel="canonical"]')[0].href;
-            locationToUse = url;
-            if ($window.location.href.indexOf("redirect") >= 0) $window.location.replace(url);
-        }
-
-        var res = UriUtils.chaiseURItoErmrestURI(locationToUse, true);
+        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
         var ermrestUri = res.ermrestUri,
             pcid = res.pcid,
             ppid = res.ppid,
@@ -138,14 +129,8 @@
                 ];
                 $rootScope.reloadCauses = [];
 
-                // if ($window.location.href.indexOf("nodata") == -1) {
-                    return recordAppUtils.readMainEntity(false, logObj);
-                // } else {
-                //     $rootScope.displayReady = true;
-                //     return $rootScope.loading = false;
-                // }
+                return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
-                if (page) {
                 var tuple = page.tuples[0];
                 // send string to prepend to "headTitle"
                 // <table-name>: <row-name>
@@ -294,7 +279,6 @@
                 $timeout(function () {
                     recordAppUtils.updateRecordPage(false);
                 });
-                }
 
             }).catch(recordAppUtils.genericErrorCatch);
 

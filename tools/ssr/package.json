@@ -1,5 +1,5 @@
 {
-  "name": "puppeteer mock chaise",
+  "name": "puppeteer-mock-chaise",
   "devDependencies": {},
   "dependencies": {
     "express": "^4.17.1",
