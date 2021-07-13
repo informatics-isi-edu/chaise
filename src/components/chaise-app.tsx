@@ -7,13 +7,20 @@
 
 
 import React from 'react'
+import Spinner from 'Components/spinner';
+import ERMrestService from 'Services/ermrest';
 
 const ChaiseApp: React.FC<{}> = (): JSX.Element => {
 
-  return (
-    <React.StrictMode>
+  ERMrestService.setup().then(() => {
 
-    </React.StrictMode>
+  });
+
+
+  return (<Spinner/>)
+
+  return (
+    <div></div>
   )
 }
 

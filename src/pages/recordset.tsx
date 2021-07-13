@@ -1,3 +1,7 @@
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'Vendor/fontawesome/fontawesome.css'
+import 'Assets/scss/app.scss'
+
 import React  from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux';
@@ -11,7 +15,9 @@ const RecordSetApp: React.FC<{}> = (): JSX.Element => {
 
 ReactDOM.render(
   <Provider store={store}>
-    <RecordSetApp />
+    <React.StrictMode>
+      <RecordSetApp />
+    </React.StrictMode>
   </Provider>,
   document.getElementById("chaise-app-root")
 );

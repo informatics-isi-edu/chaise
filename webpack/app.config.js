@@ -1,4 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
 
 module.exports =  function (appName, filename) {
@@ -10,10 +12,10 @@ module.exports =  function (appName, filename) {
       entry: path.join(__dirname, '..', 'src', 'pages', filename + '.tsx'),
       output: {
           path: path.resolve(__dirname, '..', 'dist', 'react', filename),
-          filename: appName + '.bundle.js'
+          filename: '[name].bundle.js'
       },
       resolve: {
-          extensions: ['.ts', '.tsx', '.js', '.json'],
+          extensions: ['.ts', '.tsx', '.js'],
           modules: [
               path.resolve(__dirname, '..', 'src'),
               path.resolve(__dirname, '..', 'node_modules')
@@ -30,38 +32,35 @@ module.exports =  function (appName, filename) {
       },
       module: {
           rules: [
-              // {
-                  // Include ts, tsx, js, and jsx files.
-                  // test: /\.(ts|js)x?$/,
-              //     test: /\.(js|jsx)$/,
-              //     exclude: /node_modules/,
-              //     use: ['babel-loader']
-              // },
               {
                   test: /\.(ts|js)x?$/,
                   exclude: /node_modules/,
-                  use: ['ts-loader'],
+                  use: ['babel-loader'],
+              },
+              {
+                test: /\.(css|scss)$/,
+                use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+              },
+              {
+                test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
+                type: 'asset/resource',
+              },
+              {
+                test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
+                type: 'asset/inline',
               }
-              // {
-              //     test: /\.(css|scss)$/,
-              //     use: ['style-loader', 'css-loader', 'sass-loader'],
-              // }
           ]
       },
       plugins: [
+        new MiniCssExtractPlugin(),
         new HtmlWebpackPlugin({
           template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
         }),
       ],
-      // optimization: {
-      //     minimize: true,
-      //     minimizer: [
-      //         new TerserPlugin({
-      //             // Use multi-process parallel running to improve the build speed
-      //             // Default number of concurrent runs: os.cpus().length - 1
-      //             parallel: true
-      //         })
-      //     ]
-      // }
+      optimization: {
+        splitChunks: {
+          chunks: 'all',
+        }
+      }
   }
 }
