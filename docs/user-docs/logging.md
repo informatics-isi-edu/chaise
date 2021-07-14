@@ -28,33 +28,47 @@ By providing `Deriva-Client-Context` header in ermrset requests we can log extra
 
 ```javascript
 {
-  "scheme":"https",
-  "host":"dev.isrd.isi.edu",
+  "elapsed": 0.037084000000000006,
+  "req": "Le-1bpTwSfSxddRT8Y0T5g",
+  "scheme": "https",
+  "host": "dev.isrd.isi.edu",
   "status": "200 OK",
-  "method":"GET",
-  "path": "/ermrest/catalog/1/entity/T:=isa:experiment/dataset=1-3VFJ/$T/M:=(experiment_type)=(vocab:experiment_type:id)@sort(name,RID)?limit=11",
-  "dcctx":{
-      "catalog":"1",
-      "schema_table":"vocab:experiment_type",
-      "stack":[
-        {
-            "type":"set",
-            "s_t":"isa:experiment",
-            "filters": {"and":[{"src":[{"o":["isa", "experiment_dataset_fkey"]}, "RID"], "ch":["1-3VFJ"]}]}
-        },
-        {
-            "type":"facet",
-            "s_t":"vocab:experiment_type",
-            "source": [{"o":["isa", "experiment_experiment_type_fkey"]}, "id"],
-            "entity":true
-        }
+  "method": "GET",
+  "path": "/ermrest/catalog/1/entity/T:=isa:dataset/(id)=(isa:dataset_organism:dataset_id)/M:=(organism)=(vocab:species:id)@sort(name,RID)?limit=11",
+  "type": "application/json",
+  "client": "128.9.180.218",
+  "referrer": "https://dev.isrd.isi.edu/chaise/recordset/",
+  "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+  "track": "916d434.5aa5c5cf6b595",
+  "dcctx": {
+    "catalog": "1",
+    "schema_table": "vocab:species",
+    "stack": [
+      {
+        "type": "set",
+        "s_t": "isa:dataset"
+      }, 
+      {
+        "type": "facet",
+        "s_t": "vocab:species",
+        "source": [
+          {
+            "i": ["isa", "dataset_organism_dataset_id_fkey"]
+          }, 
+          {
+            "o": ["isa", "dataset_organism_organism_fkey"]
+          }, 
+          "id"
+        ],
+        "entity": true
+      }
     ],
-    "action":":set/facet,;load",
-    "cid":"recordset",
-    "pid":"1lp2236a1p1g2age1l1a2pxo",
-    "wid":"1tw6218n1xbr2mvq251y2rsd",
-    "elapsed_ms":646
- }
+    "action": ":set/facet,choice;load",
+    "cid": "recordset",
+    "pid": "1sy623td1kht2cyu2bv01w3e",
+    "wid": "1kcg21wn27ah1hr52djl269e",
+    "elapsed_ms": 4578
+  }
 }
 ```
 
@@ -160,7 +174,7 @@ Depending on the request, we might log extra attributes that we are gong to list
     - `old_thickness`, `new_thickness`: Available only on "line thickness adjustment" client log in viewer app. It will capture the old and new value after user interacted with the UI to change the line thickness.
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
-    
+
     - `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
 
     - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
@@ -374,9 +388,9 @@ Since the asset download and also the default CSV export requests are simple red
 
 The following url patterns are what's unique about each of these requests and you can use for your analysis:
 
-- Asset download: `?limit=none&accept=csv&uinit=1&cid=`
+- Asset download: `uinit=1&cid=`
 
-- CSV default export: `uinit=1&cid=`
+- CSV default export: `?limit=none&accept=csv&uinit=1&cid=`
 
 #### Finding the displayed recordset request
 
@@ -394,6 +408,31 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ## Change Log
 
+
+### 04/02/21
+
+###### PR Links
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2069)
+  - [OSD viewer](https://github.com/informatics-isi-edu/openseadragon-viewer/pull/78)
+
+###### Changed
+  - Renamed `:entity/channel-set,z-default;load` to `:entity/channel-set,;load` since it has nothing to do with `default-z` anymore.
+    It was used as a backup for getting the URL information of the default-z image. But now it's the request to get all the available
+    channel information.
+  - Renamed `:entity/channel-set,;load` to `:entity/z-plane-entity,;load`. The previous
+    request included the channel information alongside the processed image information.
+    But the new request is only fetching the processed image information. Since
+    this is currently only used for default z-index, a `default_z` attribute is also
+    logged in the stack. Later this request can be used for other z-indexes as well.
+
+###### Added
+  - Added `z_index` attribute to the `:entity/annotation-set,;load` request.
+  - Added `:entity,;update` , `:entity/channel-set,;update`,
+    `:entity/z-plane-set,;count`, `:entity/z-plane-set,;reload`,
+    `:entity/z-plane-set,[search-box|slider|default-z];load-before`, and
+    `:entity/z-plane-set,[search-box|slider|default-z];load-after`
+    requests.
+
 ### 08/26/20
 
 ###### Commit/PR Links
@@ -405,12 +444,12 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ###### Changed
   - Changed the annotation request in viewer app to be aligned with the rest of the apps (Action changed from `:entity,annotation;read` to `:entity/annotation-set,;load` and stack structure modified.)
-  
+
 ###### Added
   - Added proper log support to viewer app. This includes properly logging the requests that viewer app was already making and adding client logs. Please refer to the PR and documentation for more information.
-  
+
   - Added client log action for "go to RID" feature.
-  
+
   - Added `paction=view` to first request in record app, to indicates user clicked on "view" button in tabular displays.
 
 ### 02/12/20

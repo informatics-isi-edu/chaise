@@ -47,7 +47,7 @@
                         break;
                     case "fetchZPlaneList":
                         $scope.$apply(function () {
-                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after).then(function (res) {
+                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then(function (res) {
                                 iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
                             }).catch(function (err) {
                                 throw err;
@@ -57,7 +57,7 @@
                     // TODO change this to a better name
                     case "fetchZPlaneListByZIndex":
                         $scope.$apply(function () {
-                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex).then(function (res) {
+                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source).then(function (res) {
                                 iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
                             }).catch(function (err) {
                                 throw err;
@@ -81,6 +81,34 @@
                         $scope.$apply(function(){
                             vm.waitingForScreenshot = false;
                             AlertsService.addAlert(errorMessages.viewerScreenshotFailed, "warning");
+                        });
+                        break;
+                    case "updateDefaultZIndex":
+                        $scope.$apply(function () {
+                            viewerAppUtils.updateDefaultZIndex(data.zIndex).then(function (res) {
+                                // we don't need to do anything on success.
+                                // the alerts are disaplyed by the updateDefaultZIndex function
+                            }).catch(function (error) {
+                                throw error;
+                            }).finally(function () {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateDefaultZIndexDone", content: { 'zIndex': data.zIndex}}, origin);
+                            })
+                        });
+                        break;
+                    case "updateChannelConfig":
+                        $scope.$apply(function () {
+                            viewerAppUtils.updateChannelConfig(data).then(function (res) {
+                                // the alerts are disaplyed by the updateChannelConfig function
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: res}}, origin);
+                            }).catch(function (error) {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: false}}, origin);
+
+                                // show the error
+                                throw error;
+                            });
                         });
                         break;
                     case "showAlert":

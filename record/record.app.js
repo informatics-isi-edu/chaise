@@ -4,7 +4,13 @@
 /* Configuration of the Record App */
     angular.module('chaise.configure-record', ['chaise.config'])
 
-    .constant('appName', 'record')
+    .constant('settings', {
+        appName: "record",
+        appTitle: "Record",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -65,6 +71,7 @@
 
         UriUtils.setOrigin();
 
+        // NOTE: default to false until we know a user is logged in and they can modify the main record and modify at least 1 of the related tables
         $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
@@ -251,6 +258,7 @@
                 $rootScope.lastRendered = null;
                 related.forEach(function (ref, index) {
                     ref = ref.contextualize.compactBrief;
+                    // user can modify the current record page and can modify at least 1 of the related tables
                     if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && ref.canCreate) {
                         $rootScope.showEmptyRelatedTables = true;
                     }
@@ -274,6 +282,12 @@
                         baseTableName: $rootScope.reference.displayname
                     });
                 });
+
+                // chaiseConfig.showWriterEmptyRelatedOnLoad takes precedence over heuristics above for $rootScope.showEmptyRelatedTables when true or false
+                // showWriterEmptyRelatedOnLoad only applies to users with write permissions for current table
+                if ($rootScope.reference.canCreate && typeof chaiseConfig.showWriterEmptyRelatedOnLoad === "boolean") {
+                    $rootScope.showEmptyRelatedTables = chaiseConfig.showWriterEmptyRelatedOnLoad;
+                }
 
                 $rootScope.loading = related.length > 0;
                 $timeout(function () {

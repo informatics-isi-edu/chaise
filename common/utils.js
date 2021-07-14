@@ -11,7 +11,7 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -20,7 +20,7 @@
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
-          "dataBrowser": "/chaise/recordset",
+          "dataBrowser": "/",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
           "deleteRecord": false,
@@ -37,6 +37,7 @@
           "disableExternalLinkModal": false,
           "logClientActions": true,
           "hideGoToRID": false,
+          "showWriterEmptyRelatedOnLoad": null,
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -466,12 +467,12 @@
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
 
-            var contextObj = ConfigUtils.getContextJSON();
+            var settingsObj = ConfigUtils.getSettings();
             var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             pcontext.push("pcid=" + contextHeaderParams.cid);
             pcontext.push("ppid=" + contextHeaderParams.pid);
             // only add the value to the applink function if it's true
-            if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
+            if (settingsObj.hideNavbar) pcontext.push("hideNavbar=" + settingsObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -1121,9 +1122,9 @@
             }
 
             // add hideNavbar if present/defined
-            var dcctx = ConfigUtils.getContextJSON();
-            if (dcctx.hideNavbar) {
-                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
+            var settings = ConfigUtils.getSettings();
+            if (settings.hideNavbar) {
+                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + settings.hideNavbar;
             }
 
             return url;
@@ -1935,6 +1936,10 @@
             return $window.dcctx;
         };
 
+        function getSettings() {
+            return getContextJSON().settings;
+        }
+
         function getConfigJSON() {
             return getContextJSON().chaiseConfig;
         };
@@ -2140,7 +2145,8 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
-            systemColumnsMode: systemColumnsMode
+            systemColumnsMode: systemColumnsMode,
+            getSettings: getSettings
         }
     }])
 
@@ -2492,6 +2498,7 @@
             stackPathClientPathSeparator = ",",
             clientPathActionSeparator = ";",
             separator = "/";
+
         var logActions = Object.freeze({
             // general
 
@@ -2602,7 +2609,8 @@
 
             // - server:
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
-            VIEWER_CHANNEL_DEFAULT_LOAD: "z-default" + clientPathActionSeparator + "load",
+            VIEWER_LOAD_BEFORE: clientPathActionSeparator + "load-before",
+            VIEWER_LOAD_AFTER: clientPathActionSeparator + "load-after",
 
             // - client:
             VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",
@@ -2660,7 +2668,8 @@
 
             // used in viewer app:
             ANNOTATION: "annotation",
-            CHANNEL: "channel"
+            CHANNEL: "channel",
+            Z_PLANE: "z-plane"
         });
 
         var logStackPaths = Object.freeze({
@@ -2679,11 +2688,14 @@
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",
             RESULT_FAILED_SET: "result-failed-set",
+            RESULT_DISABLED_SET: "result-disabled-set",
 
             // used in viewer app:
             ANNOTATION_ENTITY: "annotation-entity",
             ANNOTATION_SET: "annotation-set",
-            CHANNEL_SET: "channel-set"
+            CHANNEL_SET: "channel-set",
+            Z_PLANE_ENTITY: "z-plane-entity",
+            Z_PLANE_SET: "z-plane-set"
         });
 
         var appModes = Object.freeze({
@@ -2952,6 +2964,8 @@
 
             if (typeof title !== "string" || title.length === 0) {
                 title = chaiseConfig.headTitle;
+            } else {
+                title += " | " + chaiseConfig.headTitle;
             }
 
             var titleTag = document.head.getElementsByTagName('title')[0];
@@ -3070,6 +3084,15 @@
         }
 
         /**
+         * make sure links open in new tab
+         */
+        function openLinksInTab () {
+            addClickListener('a[href]', function (e, element) {
+                element.target = "_blank";
+            });
+        }
+
+        /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
          * @param {function} handler  the handler callback function.
@@ -3113,16 +3136,23 @@
 
         /**
          * Will return a promise that is resolved when the setup is done
+         *
+         * NOTE: should only be called by config.js (or equivalent configuration app)
          */
         function setupHead() {
-            addPolyfills();
-            addCanonicalTag();
-            addTitle();
-            setWindowName();
-            overrideDownloadClickBehavior();
-            overrideExternalLinkBehavior();
-            addBodyClasses();
-            return addCustomCSS();
+            addPolyfills();                                 // needs to be set for navbar functionality (and other chaise functionality)
+            addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
+            addCanonicalTag();                              // controlled by chaise-config value to turn on/off
+            setWindowName();                                // will only update if not already set
+
+            var settings = ConfigUtils.getSettings();
+            if (settings.openLinksInTab) openLinksInTab();
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
+            if (settings.overrideHeadTitle) addTitle(settings.appTitle);
+
+
+            return addCustomCSS();                          // controlled by chaise-config value to attach
         }
 
         return {

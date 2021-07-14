@@ -19,7 +19,7 @@ body > .container {
 // default modal z-index is 1050 (for the first modal)
 // as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
 // we tried to be safe about it before by increasing it by only 1
-.error-open #mainnav {
+.modal-login #mainnav, .error-open #mainnav {
     z-index: 1501;
 }
 
@@ -69,57 +69,6 @@ body > .container {
     color: $disabled-color;
 }
 
-.dropdown-menu>li>a.chaise-dropdown-header,
-.chaise-dropdown-header {
-    font-size: $font-size;
-    color: $black-color;
-    font-weight: 600;
-}
-
-.dropdown-submenu {
-    position: relative;
-}
-
-.dropdown-submenu>.dropdown-menu {
-    position: fixed;
-    margin-top: -6px;
-    margin-left: -1px;
-    -webkit-border-radius: 0 6px 6px 6px;
-    -moz-border-radius: 0 6px 6px;
-    border-radius: 0 6px 6px 6px;
-}
-
-.dropdown-submenu>a:after {
-    display: block;
-    content: " ";
-    float: right;
-    width: 0;
-    height: 0;
-    border-color: transparent;
-    border-style: solid;
-    border-width: 6px 0 6px 6px; /* was 5px 0 5px 5px */
-    border-left-color: #428bca; /* was #ccc */
-    margin-top: 5px;
-    margin-right: -15px;
-    padding-right: 10px;
-}
-
-.dropdown-submenu:hover>a:after {
-    border-left-color: #777; /* was #fff */
-}
-
-.dropdown-submenu.pull-left {
-    float: none;
-}
-
-.dropdown-submenu.pull-left>.dropdown-menu {
-    left: -100%;
-    margin-left: 10px;
-    -webkit-border-radius: 6px 0 6px 6px;
-    -moz-border-radius: 6px 0 6px 6px;
-    border-radius: 6px 0 6px 6px;
-}
-
 // positioning of searh box in navbar
 .rid-search {
     margin-right: 0px; // offset marging-right: -15px from navbar-right
@@ -153,23 +102,123 @@ body > .container {
     padding-right: 20px;
 }
 
-#header {
-    width: 100%;
-    background: #4D4D4D;
-    position: relative;
+/* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
+.navbar-collapse {
+    max-height: 340px;
 }
 
-#brand {
-    color: #fff;
-}
+/* 
+modify the behavior of dropdown menu for navbar 
+we have to wrap all the rules in navbar specific tag, otherwise all the 
+dropdowns in bootstrap will be affected.
+ideally most of the other rules in this file should be wrapped in this tag,
+but since custom-css rules are written based on that, I didn't change them.
+TODO we should be able to simplify the rules and also investigate whether
+     we want to move other rules to be in this wraper.
+*/
+header {
+    .dropdown-menu>li>a.chaise-dropdown-header,
+    .chaise-dropdown-header {
+        font-size: $font-size;
+        color: $black-color;
+        font-weight: 600;
+    }
 
-.child-opened {
-    background-color: $table-header-background-color;
-}
+    .dropdown-submenu {
+        position: relative;
+    }
 
-/*Adding the scroll bar to the menu */
-.navbar-nav ul.dropdown-menu {
-    min-height: 30px;
-    overflow-x: hidden;
-    overflow-y: auto;
+    .dropdown-submenu>.dropdown-menu {
+        position: fixed;
+        margin-top: -6px;
+        margin-left: -1px;
+        -webkit-border-radius: 0 6px 6px 6px;
+        -moz-border-radius: 0 6px 6px;
+        border-radius: 0 6px 6px 6px;
+    }
+
+    .dropdown-submenu>a:after {
+        display: flex;
+        content: " ";
+        float: right;
+        width: 0;
+        height: 0;
+        border-color: transparent;
+        border-style: solid;
+        border-width: 6px 0 6px 6px; /* was 5px 0 5px 5px */
+        border-left-color: #428bca; /* was #ccc */
+        // to center
+        margin: auto;
+        margin-right: -15px;
+        padding-right: 10px;
+        margin-left: 10px;
+    }
+
+    .dropdown-submenu:hover>a:after {
+        border-left-color: #777; /* was #fff */
+    }
+
+    .dropdown-submenu.pull-left {
+        float: none;
+    }
+
+    .dropdown-submenu.pull-left>.dropdown-menu {
+        left: -100%;
+        margin-left: 10px;
+        -webkit-border-radius: 6px 0 6px 6px;
+        -moz-border-radius: 6px 0 6px 6px;
+        border-radius: 6px 0 6px 6px;
+    }
+
+    // Dummy selector to keep the same amount of space as submenu arrow
+    .dropdown-menu > .dropdown-submenu + li > a::after {
+        content: " ";
+        height: 12px;
+        width: 12px;
+        margin-left: 10px;
+    }
+
+    /*Adding the scroll bar to the menu */
+    .navbar-nav ul.dropdown-menu {
+        min-height: 30px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        width: max-content;
+        max-width: 450px;
+    }
+
+    .dropdown-menu {
+        // To keep it more compact
+        min-width: 100px;
+    }
+
+    .dropdown-menu > li > a {
+        white-space: normal;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+        padding: 3px 15px 3px 15px;
+        line-height: 1.4;
+    }
+
+    // Vertical navbar
+    @media (max-width: 768px) {
+        .child-opened > ul {
+            padding-left: 3%;
+        }
+        // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
+        .dropdown-menu, .navbar-nav ul.dropdown-menu, .dropdown-menu > li > a {
+            max-width: none !important;
+            width: auto !important;
+        }
+
+    }
+
+    // Horizontal navbar
+    @media (min-width: 768px) {
+        .child-opened {
+            background-color: $table-header-background-color;
+        }
+    }
 }

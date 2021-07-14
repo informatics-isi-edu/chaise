@@ -1,4 +1,4 @@
-// The goal of this spec is to test whether Record app correctly displays the right UI controls given different user permission levels
+// The goal of this spec is to test whether Record app correctly displays the right UI controls based on annotation
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordPage = chaisePage.recordPage;
 var testParams = {
@@ -16,7 +16,7 @@ describe('When viewing Record app', function() {
         browser.ignoreSynchronization = true;
     });
 
-    describe('as a read-only user', function() {
+    describe('for a read-only table', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
@@ -57,7 +57,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a create-only user', function() {
+    describe('for a create-only table', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
@@ -94,13 +94,6 @@ describe('When viewing Record app', function() {
             var button = recordPage.getDeleteRecordButton();
             expect(button.isPresent()).toBeTruthy();
             expect(button.getAttribute("disabled")).toBeTruthy();
-        });
-
-        // As create only user, 'Hide Empty Related Tables' should appear because the user can create entities for one or more related tables
-        it('should display the related tables toggle as "Hide empty sections"', function() {
-            var button = recordPage.getShowAllRelatedEntitiesButton();
-            expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getText()).toBe("Hide empty sections");
         });
 
         describe('the related tables', function() {
@@ -142,7 +135,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a user who can update (and create)', function() {
+    describe('for a table that allows edit and create (but no delete)', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
@@ -183,13 +176,6 @@ describe('When viewing Record app', function() {
             expect(button.getAttribute("disabled")).toBeTruthy();
         });
 
-        it('should display the related tables toggle as "Hide empty sections"', function() {
-            var button = recordPage.getShowAllRelatedEntitiesButton();
-            expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getText()).toBe("Hide empty sections");
-            // Actual toggling behavior (like does it show the right table format and whether the toggle text flips correctly is tested in Record presentation spec)
-        });
-
         it('should show an "Edit mode" toggle link if a related table has a row_markdown_pattern', function() {
             // The link is only "Edit" if user can edit; otherwise it should say "Table Display"
             var link = recordPage.getToggleDisplayLink('in_update_table');
@@ -199,7 +185,7 @@ describe('When viewing Record app', function() {
         });
     });
 
-    describe('as a delete-only user', function() {
+    describe('for a delete-only table', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();

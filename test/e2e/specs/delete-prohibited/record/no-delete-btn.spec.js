@@ -6,7 +6,10 @@ var testParams = {
         name: "id",
         value: "4004",
         operator: "="
-    }
+    },
+    tocHeaders: ['Summary', 'booking (0)', 'accommodation_collections (0)','table_w_aggregates (0)',
+        'accommodation_image_assoc (0)', 'table_w_invalid_row_markdown_pattern (0)',
+        'accommodation_image (0)', 'media (0)']
 }
 
 describe('View existing record,', function() {
@@ -25,10 +28,11 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4", function() {
+        it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4, showWriterEmptyRelatedOnLoad=true", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
                 expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
+                expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeTruthy();
             });
         });
 
@@ -46,7 +50,13 @@ describe('View existing record,', function() {
             expect(showTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain("chaise-sidebar-open", "Wrong icon for show toc button");
             expect(recPan.getAttribute("class")).toContain('close-panel', 'Side Panel is visible when it should NOT be');
 
+            // open toc for next test
+            showTocBtn.click();
             done();
+        });
+
+        it('Related tables should all show by default because of showWriterEmptyRelatedOnLoad=true', function () {
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
         });
 
         if (process.env.CI) {

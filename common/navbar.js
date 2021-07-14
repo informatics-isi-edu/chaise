@@ -27,6 +27,7 @@
             var openDropdowns = document.querySelectorAll(".dropdown.open ul");
             [].forEach.call(openDropdowns, function(el) {
                 checkHeight(el, window.innerHeight);
+                checkWidth(el, window.innerWidth);
             });
         }
     }
@@ -43,6 +44,28 @@
         if ((dropdownHeight + fromTop) > winHeight) {
             var newHeight = winHeight - fromTop - footerBuffer;
             ele.style.height = newHeight + "px";
+        }
+    }
+
+    // Function to open the menu on the left if not enough space on right
+    function checkWidth(ele, winWidth) {
+        //revert to defaults
+        ele.classList.remove("dropdown-menu-right");
+        ele.style.width = "max-content";
+
+        // If dropdown is spilling over
+        if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
+            ele.style.width = "max-content";
+        }
+        else {
+            var visibleContent =  winWidth - ele.getBoundingClientRect().left;
+            //hard-coded limit of width for opening on the left hand side
+            if (Math.round(visibleContent) < 200) {
+                ele.classList.add("dropdown-menu-right");
+            }
+            else {
+                ele.style.width = visibleContent + "px";
+            }
         }
     }
 
@@ -72,6 +95,7 @@
       }
 
       var menuTarget = getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+      menuTarget.style.width = "max-content";
       var immediateParent = target.offsetParent; // parent, <li>
       var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
       var posValues = getOffsetValue(immediateParent);
@@ -83,7 +107,7 @@
           menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
       }
 
-      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
+      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
 
       var open = !menuTarget.classList.contains("show");
 
@@ -105,6 +129,28 @@
           [].forEach.call(openSubmenus, function(el) {
               checkHeight(el, window.innerHeight);
           });
+      }
+
+      //If not enough space to expand on right
+      var widthOfSubMenu = menuTarget.offsetWidth;
+      var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
+      
+      if (submenuEndOnRight > window.innerWidth) {
+          var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
+          var visibleContent = window.innerWidth - submenuEndOnLeft;
+
+          if (visibleContent < 200) {
+            menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
+          }
+          else {
+            menuTarget.style.width = visibleContent + "px";
+          }
+      }
+      else {
+          // if vertical scrollbar then offset a bit more to make scrollbar visible
+        if (parent.scrollHeight > parent.clientHeight) {
+            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
+          }
       }
 
       return open;
@@ -215,14 +261,21 @@
         'chaise.utils'
     ])
     .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
-        var chaiseConfig = ConfigUtils.getConfigJSON();
+
+        var chaiseConfig = ConfigUtils.getConfigJSON(),
+            settings = ConfigUtils.getSettings();
 
         // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
         // used to set ACL inheritance as well for each node
         var root = chaiseConfig.navbarMenu || {};
         var catalogId = UriUtils.getCatalogId();
+
+
+        // if in iframe and we want to force links to open in new tab,
+        var forceNewTab = settings.openLinksInTab === true;
+
         // Set default newTab property at root node
-        if (!root.hasOwnProperty('newTab')) {
+        if (!root.hasOwnProperty('newTab') || forceNewTab) {
             root.newTab = true;
         }
 
@@ -257,6 +310,9 @@
                     // get newTab from the parent
                     if (child.newTab === undefined) child.newTab = parentNewTab;
 
+                    // if we have to open in newtab
+                    if (forceNewTab) child.newTab = true;
+
                     // get acls settings from the parent
                     if (child.acls === undefined) {
                         child.acls = parentAcls;
@@ -286,8 +342,8 @@
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
-                var dcctx = ConfigUtils.getContextJSON();
-                scope.hideNavbar = dcctx.hideNavbar;
+                var settings = ConfigUtils.getSettings();
+                scope.hideNavbar = settings.hideNavbar;
                 // Subscribe to on change event for session
                 // navbar doesn't need to have functionality until the session returns, just like app.js blocks
                 var subFunctionId = Session.subscribeOnChange(function() {

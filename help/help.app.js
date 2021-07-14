@@ -3,7 +3,13 @@
 
     angular.module('chaise.configure-help', ['chaise.config'])
 
-    .constant('appName', 'help')
+    .constant('settings', {
+        appName: "help",
+        appTitle: "Wiki Pages",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,    // links in navbar might need this
+        overrideExternalLinkBehavior: true      // links in navbar might need this
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -74,7 +80,7 @@
         page = helpPages[pageName];
 
         // change the title
-        headInjector.addTitle(page.title);
+        headInjector.updateHeadTitle(page.title);
 
         // fetch the help page
         ConfigUtils.getHTTPService().get(UriUtils.chaiseDeploymentPath() + "help/" + page.file).then(function (response) {

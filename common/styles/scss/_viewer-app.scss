@@ -575,6 +575,7 @@
                     opacity: 0.7;
                     -webkit-transition: .2s;
                     transition: opacity .2s;
+                    cursor: pointer;
                 }
                 .strokeSlider:hover {
                     opacity: 1;
@@ -850,7 +851,7 @@
 
     }
     .menu-btn-container{
-        display: flex;
+        // display: flex;
         /* background: #000; */
         /* border: 1px solid #737171; */
         /* border-radius: 3px; */

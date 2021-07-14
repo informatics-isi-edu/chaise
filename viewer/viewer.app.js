@@ -3,7 +3,14 @@
 
     angular.module('chaise.configure-viewer', ['chaise.config'])
 
-    .constant('appName', 'viewer')
+    .constant('settings', {
+        appName: "viewer",
+        appTitle: "Image Viewer",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true,
+        openIframeLinksInTab: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -41,7 +48,6 @@
         'ngSanitize',
         'ngMessages',
         'ui.mask',
-        'ui.select',
         'ui.bootstrap',
         'angular-markdown-editor'
     ])
@@ -225,7 +231,9 @@
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-                return imageReference.contextualize.detailed.read(1, logObj, false, true);
+
+                // since we want to check the ACL for updating the default_Z we have to ask for TCRS
+                return imageReference.contextualize.detailed.read(1, logObj, false, true, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {
@@ -239,6 +247,9 @@
 
                 if (imagePage.length == 1) {
                     imageTuple = imagePage.tuples[0];
+
+                    $rootScope.tuple = imageTuple;
+
                     image.entity = imageTuple.data;
                     context.imageID = image.entity.RID;
                     imageURI = image.entity[imageConfig.legacy_osd_url_column_name];
@@ -338,6 +349,11 @@
                             watermark = val[imageConfig.watermark_foreign_key_data_column_name];
                         }
                     }
+
+                    // properly set the mainImage acls
+                    $rootScope.osdViewerParameters.acls.mainImage = {
+                        canUpdateDefaultZIndex: imageTuple.canUpdate && imageTuple.checkPermissions("column_update", imageConfig.default_z_index_column_name)
+                    };
                 }
 
                 qParamName = osdConstant.WATERMARK_QPARAM;

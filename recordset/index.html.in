@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" id="recordset">
     <head>
-        <title>Record Set App</title>
+        <title>Record Set</title>
         <meta charset="UTF-8">
         <script src="/gtm-id.js"></script>
         %INCLUDES%

@@ -10,7 +10,7 @@
             if (column.isAsset) {
                 return 'file';
             } else if (isDisabled) {
-                return 'disabled';
+                return "disabled";
             } else if (column.isForeignKey) {
                 return 'popup-select';
             } else {

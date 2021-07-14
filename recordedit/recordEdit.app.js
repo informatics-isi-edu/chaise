@@ -4,7 +4,13 @@
 /* Configuration of the Recordedit App */
     angular.module('chaise.configure-recordedit', ['chaise.config'])
 
-    .constant('appName', 'recordedit')
+    .constant('settings', {
+        appName: "recordedit",
+        appTitle: "Record Edit",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -40,7 +46,6 @@
         'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ui.select',
         'angular-markdown-editor',
         'chaise.footer',
         'chaise.recordcreate'
@@ -244,13 +249,31 @@
                             action: logService.getActionString(logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
-                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
+
+                        // in edit mode, we have to check the TCRS (row-level acls)
+                        var getTCRS = context.mode === context.modes.EDIT;
+                        $rootScope.reference.read(numberRowsToRead, logObj, false, false, false, getTCRS).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
                                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
                                 throw new Errors.noRecordError({}, page.reference.displayname.value, recordSetLink);
+                            }
+
+                            // make sure at least one row is editable
+                            if (context.mode == context.modes.EDIT) {
+                                var forbiddenTuples = page.tuples.filter(function (t) {
+                                    return !t.canUpdate;
+                                });
+                                // all the rows are disabled
+                                if (forbiddenTuples.length === page.tuples.length) {
+                                    var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
+                                    // NOTE there might be different reasons for this (column vs row)
+                                    // should we list all of them?
+                                    forbiddenError.subMessage = forbiddenTuples[0].canUpdateReason;
+                                    throw forbiddenError;
+                                }
                             }
 
                             var column, value, headTitle;
@@ -281,6 +304,12 @@
                                 $rootScope.tuples.push(shallowTuple);
 
                                 recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
+                            }
+
+                            if (context.mode == context.modes.EDIT) {
+                              recordEditModel.columnModels.forEach(function (cm) {
+                                recordCreate.populateColumnPermissionError(recordEditModel, cm);
+                              });
                             }
 
                             $rootScope.displayReady = true;

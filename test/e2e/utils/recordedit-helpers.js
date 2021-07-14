@@ -1751,7 +1751,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
         describe('result page, ', function () {
             it("should have the correct title.", function() {
-                var title = tableParams.results.length + "/" + tableParams.results.length + " " + tableParams.table_displayname + " Records " + (isEditMode ? "Updated" : "Created") + " Successfully";
+                var title = tableParams.results.length + "/" + tableParams.results.length + " " + tableParams.table_displayname + " records " + (isEditMode ? "updated" : "created") + " successfully";
                 expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
             });
 

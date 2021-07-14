@@ -237,7 +237,7 @@ describe('Edit multiple existing record,', function() {
 
                     describe("result page", function () {
                         it("should have the correct title.", function() {
-                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length +  " " + tableParams.table_name + " Records Updated Successfully", "Resultset title is incorrect.");
+                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length +  " " + tableParams.table_name + " records updated successfully", "Resultset title is incorrect.");
                         });
 
                         it('should point to the correct link with caption.', function () {

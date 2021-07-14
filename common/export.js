@@ -5,7 +5,7 @@
 
     .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
-        var context = ConfigUtils.getContextJSON();
+        var settings = ConfigUtils.getSettings();
         /**
          * Cancel the current export request
          */
@@ -128,7 +128,7 @@
                 scope.isLoading = false;
                 scope.exporter = null;
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-                scope.hideNavbar = context.hideNavbar;
+                scope.hideNavbar = settings.hideNavbar;
 
                 if (!DataUtils.isNoneEmptyString(scope.csvOptionName)) {
                     scope.csvOptionName = "Search results (CSV)";

@@ -749,7 +749,7 @@
 
                 ERMrest.resolve(existingRefURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
                     // TODO properly pass logObj
-                    return ref.setSamePaging(page).read(pageSize, logObj, false, true);
+                    return ref.contextualize.compactSelect.setSamePaging(page).read(pageSize, logObj, false, true);
                 }).then(function (newPage) {
                     newPage.tuples.forEach(function (newTuple) {
                         // currently selected value should not be disabled
@@ -902,6 +902,34 @@
         }
 
         /**
+         * this callback will be fired when users try to navigate away from the page
+         * NOTE custom message is not supported by modern browsers anymore, but
+         *      for consistency I've added it.
+         */
+        function _leaveAlertEvent(e) {
+            // make sure annotation panel is open
+            if (vm.editingAnatomy != null) {
+                e.returnValue = "Any unsaved change will be discarded. Do you want to continue?";
+            }
+        }
+
+        /**
+         * register the _leaveAlertEvent
+         * Done when users open the edit/create form
+         */
+        function _registerLeaveAlertListener() {
+            window.addEventListener("beforeunload", _leaveAlertEvent);
+        }
+
+        /**
+         * destroy the _leaveAlertEvent
+         * Done when we close the edit/create form
+         */
+        function _destroyLeaveAlertListener() {
+            window.removeEventListener("beforeunload", _leaveAlertEvent);
+        }
+
+        /**
          * click the setting icon to open the setting panel for the specific annotation,
          * or when in the controller we want to switch to/from form
          * @param {object} item : the anatomy's annotations object
@@ -924,6 +952,7 @@
             if (typeof index == 'number') {
                 // TODO is this unnecessary?
                 annotationEditForm.rows = [{}];
+                annotationEditForm.canUpdateRows = [{}];
                 annotationEditForm.submissionRows = [{}];
                 annotationEditForm.foreignKeyData = [{}];
                 annotationEditForm.oldRows = [{}];
@@ -976,7 +1005,15 @@
             if (item != null) {
                 // switch to drawing mode by default
                 vm.drawAnnotation(vm.editingAnatomy, null, true);
+
+
+                // make sure users are warned that data might be lost
+                _registerLeaveAlertListener();
             } else {
+
+                // we don't need the warning event listener anymore
+                _destroyLeaveAlertListener();
+
                 $rootScope.logAppMode = null;
             }
 
