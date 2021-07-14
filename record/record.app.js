@@ -147,7 +147,7 @@
 
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
-                if ($window.location.href.indexOf("nodata") == -1) $window.history.replaceState({}, '', url);
+                $window.history.replaceState({}, '', url);
 
                 // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,

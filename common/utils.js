@@ -2981,7 +2981,7 @@
 
         function addCanonicalTag() {
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            if (chaiseConfig['includeCanonicalTag'] == true && ($window.location.href.indexOf("nodata") == -1)) {
+            if (chaiseConfig['includeCanonicalTag'] == true) {
                 var canonicalTag = document.createElement("link");
                 canonicalTag.setAttribute("rel", "canonical");
 
