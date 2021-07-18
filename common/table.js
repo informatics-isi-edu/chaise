@@ -1477,6 +1477,13 @@
                     UiUtils.attachFooterResizeSensor(0);
                 }
 
+                if (scope.vm.config.displayMode === recordsetDisplayModes.facetPopup) {
+                    var overflowContainerFacet = document.getElementById('overflow-container-facet');
+                    if (overflowContainerFacet) {
+                        overflowContainerFacet.onscroll =  fixHeader;
+                    }
+                }
+
                 // capture and log the right click event on the permalink button
                 var permalink = document.getElementById('permalink');
                 if (permalink) {
@@ -1487,7 +1494,18 @@
                         }, scope.vm.reference.defaultLogInfo);
                     });
                 }
-            };
+
+                var overflowContainer = document.getElementById('overflow-container');
+                if (overflowContainer) {
+                    overflowContainer.onscroll =  fixHeader;
+                }
+
+            };  
+
+            var fixHeader = function(e) {
+                var header = document.getElementById('fixed-table-header');
+                header.style.top = e.target.scrollTop + "px";
+            }
 
             var attachDOMElementsToScope = function (scope) {
                 // set the parentContainer element
