@@ -267,6 +267,7 @@
                         padding: 10px 0px 10px 0px;
 
                         .accordion-content {
+                            position: static;
                             padding-left: 40px;
                             padding-right: 8px;
                         }
@@ -419,10 +420,12 @@
           .chaise-table.table {
               border-top: 1px solid #BBBBBB;
               border-bottom: 1px solid #BBBBBB;
+              border-left: 1px solid $table-border-color;
+              border-collapse: initial;
 
               tr {
                     border-left: 1px solid #BBBBBB;
-                    border-bottom: none;
+                    border-bottom: 1px solid #BBBBBB;
                  }
 
               >thead>tr>th,
@@ -438,7 +441,7 @@
               th
               {
                     background-color: unset !important;
-                    border-top: none;
+                    border-top: 1px solid #BBBBBB;
                     border-bottom: 1px solid #BBBBBB;
               }
           }
