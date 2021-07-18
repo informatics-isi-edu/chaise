@@ -144,9 +144,6 @@
                     DataUtils.getDisplaynameInnerText(tuple.displayname)
                 );
 
-                // populate the google dataset metadata
-                recordAppUtils.attachGoogleDatasetJsonLd(tuple);
-
                 // update the window location with tuple to remove query params (namely ppid and pcid)
                 // and also change the url to always be based on RID
                 var url = tuple.reference.contextualize.detailed.appLink;
@@ -155,6 +152,9 @@
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState({}, '', url);
+
+                // populate the google dataset metadata
+                recordAppUtils.attachGoogleDatasetJsonLd(tuple);
 
                 // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,

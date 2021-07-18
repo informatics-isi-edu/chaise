@@ -680,7 +680,6 @@
             if (DataUtils.isObjectAndNotNull(metadata)) {
                 metadata = metadata.compute(tuple, $rootScope.templateVariables);
                 if (DataUtils.isObjectAndNotNull(metadata)) {
-                    metadata.url = window.location.href;
                     var script = document.createElement('script');
                     script.setAttribute('type', 'application/ld+json');
                     script.textContent = JSON.stringify(metadata, null, 4);
