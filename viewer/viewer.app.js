@@ -48,7 +48,6 @@
         'ngSanitize',
         'ngMessages',
         'ui.mask',
-        'ui.select',
         'ui.bootstrap',
         'angular-markdown-editor'
     ])
@@ -232,7 +231,9 @@
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-                return imageReference.contextualize.detailed.read(1, logObj, false, true);
+
+                // since we want to check the ACL for updating the default_Z we have to ask for TCRS
+                return imageReference.contextualize.detailed.read(1, logObj, false, true, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {

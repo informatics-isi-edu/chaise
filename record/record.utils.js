@@ -146,7 +146,8 @@
                 logObj.stack = logService.addCausesToStack(logObj.stack, causes, $rootScope.reloadStartTime);
             }
 
-            $rootScope.reference.read(1, logObj).then(function (page) {
+            // making sure we're asking for TRS for the main entity
+            $rootScope.reference.read(1, logObj, false, false, true).then(function (page) {
                 $log.info("Page: ", page);
 
                 var recordSetLink;
