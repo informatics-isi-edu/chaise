@@ -642,36 +642,35 @@
                 DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID][schemaName][tableName])
                 ) {
                 var currConfig = googleDatasetConfigs[catalogID][schemaName][tableName];
-                if(currConfig) {
+                if (currConfig) {
                     var columns = currConfig.columns;
                     var allValuesArray = currConfig.values;
-                    var valueInTuple;
-                    
-                    if (Array.isArray(columns) && Array.isArray(allValuesArray) && 
-                    (columns.length == allValuesArray.length || (columns.length == 1 && allValuesArray.length > 0))) {
-                        var isValuePresentInTuple = false;
-                        // 2D Array of values
-                        // { "columns": ["RID", "PID"], "values": [["RID_v1", "RID_v2"], ["PID_v1", "PID_v2"]]}
-                        if(Array.isArray(allValuesArray[0])) {
-                            columns.some(function(col, index) {
-                                valueInTuple = tuple.data[col];
-                                if (valueInTuple && allValuesArray[index].includes(valueInTuple)) {
-                                    isValuePresentInTuple = true;
-                                    return true;
-                                }
-                            });
+
+                    if (!Array.isArray(columns) || !Array.isArray(allValuesArray)) {
+                        console.warn("Invalid google metadata config!");
+                        return;
+                    }
+
+                    var matchFound = allValuesArray.some(function (v) {
+                        // make sure the value is an array
+                        var val = Array.isArray(v) ? v : [v];
+
+                        // make sure we have value for all the columns
+                        if (val.length != columns.length) {
+                            console.warn("Invalid google metadata config!");
+                            return false;
                         }
-                        // allowed case of 1D array of values
-                        // { "columns": ["RID"], "values": ["RID_v1", "RID_v2"]}
-                        else {
-                            valueInTuple = tuple.data[columns[0]];
-                            if (valueInTuple && allValuesArray.includes(valueInTuple)) {
-                                isValuePresentInTuple = true;
-                            }
-                        }
-                        if (!isValuePresentInTuple) {
-                            return;
-                        }
+
+                        // all the values match
+                        return columns.every(function (col, index) {
+                            return tuple.data[col] == val[index];
+                        });
+
+                    });
+
+                    // didn't find a match: don't add json-ld
+                    if (!matchFound) {
+                        return;
                     }
                 }
             }
@@ -683,7 +682,7 @@
                 if (DataUtils.isObjectAndNotNull(metadata)) {
                     var script = document.createElement('script');
                     script.setAttribute('type', 'application/ld+json');
-                    script.textContent = JSON.stringify(metadata, null, 4);
+                    script.textContent = JSON.stringify(metadata);
                     document.head.appendChild(script);
                 }
             }
