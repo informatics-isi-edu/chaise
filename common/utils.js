@@ -464,7 +464,8 @@
                 appPath = ContextUtils.getValueFromContext(appContextMapping, context);
             }
 
-            var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
+            // slice to remove trailing '/' instead of modifying appPath
+            var url = chaiseDeploymentPath().slice(0, -1) + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
 
             var settingsObj = ConfigUtils.getSettings();
