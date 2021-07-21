@@ -939,6 +939,7 @@
 
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
+                // appLink is relative but the display for
                 var url = tuple.reference.contextualize.detailed.appLink;
                 // remove query parameters
                 var lastIndex = url.lastIndexOf("?") > 0 ? url.lastIndexOf("?") : url.length

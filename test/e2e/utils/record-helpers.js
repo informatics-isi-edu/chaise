@@ -514,6 +514,7 @@ exports.testSharePopup = function (citationParams) {
         it("should have a versioned link and permalink present.", function () {
             chaisePage.recordPage.getShareLinkSubHeaders().then(function (subheaders) {
                 // verify versioned link
+                browser.pause();
                 if (citationParams.verifyVersionedLink) {
                     expect(subheaders[0].getText()).toContain("Versioned Link", "versioned link header is incorrect");
                     expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(citationParams.permalink, "versioned link url does not contain the permalink");

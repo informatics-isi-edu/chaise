@@ -65,7 +65,7 @@ describe("For error handling strategies on submission,", function() {
             }).then(function(alert) {
                 expect(alert.getText()).toContain(testParams.conflict_message, "alert message is incorrect");
 
-                var duplicate_uri = uri.replace('recordedit', 'record') + '/' + testParams.conflict_column + '=' + testParams.conflict_key;
+                var duplicate_uri = 'record/#' + browser.params.catalogId + "/submission-disabled:" + testParams.conflict_table_name + '/' + testParams.conflict_column + '=' + testParams.conflict_key;
                 expect(chaisePage.recordEditPage.getAlertErrorLinkHref()).toContain(duplicate_uri, "link to duplicate record is incorrect");
             });
         });
