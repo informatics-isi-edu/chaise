@@ -6,13 +6,22 @@
  *   matches one of the given values in here.
  * for more info refer to docs/user-docs/google-dataset.md
  */
-var googleDatasetConfigs = {
-  "<catalog_number>": {
-    "<schema_name>": {
-      "table_name>": {
-        "columns": ["<array of column names>"],
-        "values": ["<array of values>"]
+ var googleDatasetConfig = {
+  "configRules": [
+      {
+          "host": ["www.abc.org", "www.xyz.org"],
+          "config": {
+              "allowlist": {
+                  "<catalog_number>": {
+                      "<schema_name>": {
+                          "table_name>": {
+                              "columns": ["<array of column names>"],
+                              "values": ["<array of values>"]
+                          }
+                      }
+                  }
+              }
+          }
       }
-    }
-  }
+  ]
 };

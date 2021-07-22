@@ -37,37 +37,48 @@
 2. For more fine grain control of cases where JSON-LD should be added, a config file called [`google-dataset-config.js`](https://github.com/informatics-isi-edu/chaise/blob/master/google-dataset-config-sample.js) is used to specify the cases that should contain the JSON-LD. It can be plugged in similar to chaise-config.js. JSON-LD will only be appended when the row in question is in the config (if it exists for the table) and the annotation is setup correctly as well.  This is an optional step and if no config file exists then the JSON-LD will still be appended if the annotation is setup correctly. Example below:
 
 ```javascript
-var googleDatasetConfigs = {
-    "2": {
-        "Protocol": {
-            "Protocol": {
-                "columns": [
-                    "RID"
-                ],
-                "values": [
-                    "N-H98J","N-H98R","N-H990","N-H99G","N-H996","N-H99J","N-H99P","N-H9A8"
-                ]
-            }
-        },
-        "Common": {
-            "Collection": {
-                "columns": [
-                    "RID"
-                ],
-                "values": [
-                    "Q-3K5E","R-ZD4C","16-26EY","16-QKNG","16-WHS4","16-WMM4","17-DSBR"
-                ]
-            },
-            "Gene": {
-                "columns": [
-                    "RID"
-                ],
-                "values": [
-                    "Q-3TNA","Q-5CPA"
-                ]
+var googleDatasetConfig = {
+    "configRules": [
+        {
+            "host": [
+                "www.gudmap.org"
+            ],
+            "config": {
+                "allowlist": {
+                    "2": {
+                        "Protocol": {
+                            "Protocol": {
+                                "columns": [
+                                    "RID"
+                                ],
+                                "values": [
+                                    "N-H98J","N-H98R"
+                                ]
+                            }
+                        },
+                        "Common": {
+                            "Collection": {
+                                "columns": [
+                                    "RID"
+                                ],
+                                "values": [
+                                    "Q-3K5E","R-ZD4C","16-26EY","16-QKNG","16-WHS4","16-WMM4","17-DSBR"
+                                ]
+                            },
+                            "Gene": {
+                                "columns": [
+                                    "RID"
+                                ],
+                                "values": [
+                                    "Q-4M5E","Q-5G0C","Q-3QBE","Q-46MG","Q-47YR"
+                                ]
+                            }
+                        },
+                    }
+                }
             }
         }
-    }
+    ]
 }
 ```
 

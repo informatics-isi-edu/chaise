@@ -630,47 +630,49 @@
         }
 
         function attachGoogleDatasetJsonLd (tuple) {
-            // check the googleDatasetConfigs global variable
+            // check the googleDatasetConfig global variable
             // that is defined in google-dataset-config.js file
             var catalogID = tuple.reference.location.catalogId, //getting the catalog-id without version
                 schemaName = tuple.reference.table.schema.name,
                 tableName = tuple.reference.table.name;
-            if (typeof googleDatasetConfigs !== 'undefined' &&
-                DataUtils.isObjectAndNotNull(googleDatasetConfigs) &&
-                DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID]) &&
-                DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID][schemaName]) &&
-                DataUtils.isObjectAndNotNull(googleDatasetConfigs[catalogID][schemaName][tableName])
+            if (typeof googleDatasetConfig !== 'undefined') {
+                var allowlist = getAllowListForCurrentHost(googleDatasetConfig);
+                if (DataUtils.isObjectAndNotNull(allowlist) &&
+                    DataUtils.isObjectAndNotNull(allowlist[catalogID]) &&
+                    DataUtils.isObjectAndNotNull(allowlist[catalogID][schemaName]) &&
+                    DataUtils.isObjectAndNotNull(allowlist[catalogID][schemaName][tableName])
                 ) {
-                var currConfig = googleDatasetConfigs[catalogID][schemaName][tableName];
-                if (currConfig) {
-                    var columns = currConfig.columns;
-                    var allValuesArray = currConfig.values;
+                    var currConfig = allowlist[catalogID][schemaName][tableName];
+                    if (currConfig) {
+                        var columns = currConfig.columns;
+                        var allValuesArray = currConfig.values;
 
-                    if (!Array.isArray(columns) || !Array.isArray(allValuesArray)) {
-                        console.warn("Invalid google metadata config!");
-                        return;
-                    }
-
-                    var matchFound = allValuesArray.some(function (v) {
-                        // make sure the value is an array
-                        var val = Array.isArray(v) ? v : [v];
-
-                        // make sure we have value for all the columns
-                        if (val.length != columns.length) {
+                        if (!Array.isArray(columns) || !Array.isArray(allValuesArray)) {
                             console.warn("Invalid google metadata config!");
-                            return false;
+                            return;
                         }
 
-                        // all the values match
-                        return columns.every(function (col, index) {
-                            return tuple.data[col] == val[index];
+                        var matchFound = allValuesArray.some(function (v) {
+                            // make sure the value is an array
+                            var val = Array.isArray(v) ? v : [v];
+
+                            // make sure we have value for all the columns
+                            if (val.length != columns.length) {
+                                console.warn("Invalid google metadata config!");
+                                return false;
+                            }
+
+                            // all the values match
+                            return columns.every(function (col, index) {
+                                return tuple.data[col] == val[index];
+                            });
+
                         });
 
-                    });
-
-                    // didn't find a match: don't add json-ld
-                    if (!matchFound) {
-                        return;
+                        // didn't find a match: don't add json-ld
+                        if (!matchFound) {
+                            return;
+                        }
                     }
                 }
             }
@@ -685,6 +687,34 @@
                     script.textContent = JSON.stringify(metadata);
                     document.head.appendChild(script);
                 }
+            }
+        }
+
+        function getAllowListForCurrentHost(config) {
+            var result;
+            if (Array.isArray(config.configRules)) {
+                // loop through each config rule and look for a set that matches the current host
+                config.configRules.forEach(function (ruleset) {
+                    // we have 1 host
+                    if (typeof ruleset.host == "string") {
+                        var arr = [];
+                        arr.push(ruleset.host);
+                        ruleset.host = arr;
+                    }
+                    if (Array.isArray(ruleset.host)) {
+                        for (var i=0; i<ruleset.host.length; i++) {
+                            // if there is a config rule for the current host, overwrite the properties defined
+                            // $window.location.host refers to the hostname and port (www.something.com:0000)
+                            // $window.location.hostname refers to just the hostname (www.something.com)
+                            if (ruleset.host[i] === window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
+                                result = ruleset.config;
+                            }
+                        }
+                    }
+                });
+            }
+            if(result && result.allowlist) {
+                return result.allowlist;
             }
         }
 
