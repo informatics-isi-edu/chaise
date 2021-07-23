@@ -105,8 +105,6 @@ jobs:
           cd chaise
           sudo npm install
           sudo make install
-          sudo npm list
-          node -v
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1
