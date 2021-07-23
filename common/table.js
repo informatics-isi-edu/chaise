@@ -1296,7 +1296,9 @@
                     // grab facet blob from parent reference
                     var facetIdx = scope.vm.reference.uri.indexOf("::facets::") + "::facets::".length;
                     rowData.rows[0]["facets"] = JSON.stringify(ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx)));
-                    rowData.rows[0]["table_name"] = scope.vm.reference.table.name;
+                    rowData.rows[0][mapping.tableCol] = scope.vm.reference.table.name;
+                    rowData.rows[0][mapping.schemaCol] = scope.vm.reference.table.schema.name;
+                    rowData.rows[0][mapping.catalogCol] = scope.vm.reference.table.schema.catalog.id;
                     rowData.rows[0]["user_id"] = scope.$root.session.client.id;
 
                     //open modal
