@@ -939,14 +939,14 @@
 
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
-                // appLink is relative but the display for
+                // appLink is relative but the display for permalink should be complete
                 var url = tuple.reference.contextualize.detailed.appLink;
                 // remove query parameters
                 var lastIndex = url.lastIndexOf("?") > 0 ? url.lastIndexOf("?") : url.length
                 url = url.substring(0, lastIndex);
 
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
-                return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
+                return $window.location.origin + url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
             // if it's a number (isNaN tries to parse to integer before checking) and is the same as current catalog
