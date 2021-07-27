@@ -12,6 +12,7 @@ ssr-test.js is a script to get 1 of each page from the following schema:table fo
     - RNASeq:Study
 after running that script, include `<script src="/~jchudy/chaise-ssr.js"></script>` at the bottom of the <body> tag before the <no-script> tag
 */
+var cid = "record-static-ssr"
 
 // share shows on page load until toggled
 $(".chaise-share-citation")[0].style.display = "none";
@@ -65,7 +66,7 @@ $(".chaise-table-next-btn").on("click", function ($event) {
 
     var reload = confirm("Click ok and we will reload the page to restore functionality to try again.");
 
-    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?scrollTo=" + displayNameEl.text();
+    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&scrollTo=" + displayNameEl.text();
 });
 
 /* ==== ON CLICK FUNCTIONS ==== */
@@ -217,7 +218,7 @@ $(".more-results-link").on("click", function ($event) {
     }
 
     var url = document.createElement('a');
-    url.href = target.attributes.getNamedItem("appLink").value;
+    url.href = target.attributes.getNamedItem("appLink").value + "?pcid=" + cid;
 
     window.location.replace(url);
 });
@@ -356,7 +357,7 @@ $(".related-table-accordion .toggle-display-link").on("click", function ($event)
 
 // redirect to chaise with prompt login query param
 $("#login-link").on("click", function ($event) {
-    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?promptlogin";
+    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
 });
 
 // export is hidden on page load
@@ -385,7 +386,7 @@ $(".export-This-record-CSV-").on("click", function ($event) {
 
 // redirect to dynamic chaise page and prompt for login
 $(".export-BDBag").on("click", function ($event) {
-    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?promptlogin";
+    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
 });
 
 $("th.clickable").on("click", function ($event) {
