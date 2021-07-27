@@ -937,6 +937,13 @@
             var resolverId = chaiseConfig.resolverImplicitCatalog;
             var currCatalog = reference.location.catalogId;
 
+            // TODO: remove this, only temporary to force links in share/cite to be direct to www
+            var stringToReplace = null;
+            if ($window.location.origin.indexOf("staging") > -1) stringToReplace = "staging";
+            if ($window.location.origin.indexOf("dev") > -1) stringToReplace = "dev";
+
+            var wwwLink = $window.location.origin.replace(stringToReplace, "www");
+
             // null or no RID
             if (resolverId === null || !tuple.data || !tuple.data.RID) {
                 // appLink is relative but the display for permalink should be complete
@@ -946,17 +953,17 @@
                 url = url.substring(0, lastIndex);
 
                 // location.catalog will be in the form of `<id>` or `<id>@<version>`
-                return $window.location.origin + url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
+                return wwwLink + url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
             // if it's a number (isNaN tries to parse to integer before checking) and is the same as current catalog
             if (!isNaN(resolverId) && resolverId == currCatalog) {
-                return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
+                return wwwLink + "/id/" + tuple.data.RID + (version ? version : "");
             }
 
             // if resolverId is false or undefined OR any other values that are not allowed use the default
             // default is to show the fully qualified resolveable link for permalink
-            return $window.location.origin + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
+            return wwwLink + "/id/" + currCatalog + "/" + tuple.data.RID + (version ? version : "");
         }
 
         // if '?' is used instead of '#' (?catalog/schema:table), return in the proper form (#catalog/schema:table)

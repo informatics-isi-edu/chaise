@@ -3,7 +3,7 @@
 This is a colection of jQuery functions to make available alongside the pregenerated static html pages for record app
 This is intended to work with the pages defined in generate-scripts/ssr-test.js
 
-ssr-test.js is a script to get 1 of each page from the following schema:table for rebuildingakidney
+ssr-test.js is a script to get 1 of each page from the following schema:table for gudmap
    schema:tables include:
     - Gene_Expression:Specimen
     - Common:Gene
@@ -46,12 +46,23 @@ $("#rt-Single-Cell-Visualization .c_8HFVaLlTUqBDa0dfgwS2oQ .not-sorted-icon").re
 $("#rt-Attachments .c_File_Name").removeClass("clickable");
 $("#rt-Attachments .c_File_Name .not-sorted-icon").remove();
 
-$(".chaise-table-previous-btn").each(function (idx, el) {
-    el.style.display = "none";
+var prevBtns = $(".chaise-table-previous-btn");
+$(".chaise-table-next-btn").each(function (idx, el) {
+    if (el.disabled) {
+        prevBtns[idx].style.display = "none";
+        el.style.display = "none";
+    }
 });
 
-$(".chaise-table-next-btn").each(function (idx, el) {
-    el.style.display = "none";
+$(".chaise-table-next-btn").on("click", function ($event) {
+    var target = $event.target,
+        displayNameEl = null;
+
+    tableContainer = target.closest(".related-table-accordion");
+    if (tableContainer) {
+        displayNameEl = $(tableContainer).find(".rt-displayname");
+    }
+    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?scrollTo=" + displayNameEl.text();
 });
 
 /* ==== ON CLICK FUNCTIONS ==== */
@@ -192,7 +203,7 @@ $("#navbar-menu > li > a, ul > li.dropdown-submenu > a").on("click", function ($
 $(".chaise-search-btn").on("click", function () {
     var searchVal = $("#rid-search-input")[0].value.trim();
 
-    window.location.href = "https://dev.rebuildingakidney.org/id/" + searchVal;
+    window.location.href = "https://www.gudmap.org/id/" + searchVal;
 });
 
 // click event for "Explore" button

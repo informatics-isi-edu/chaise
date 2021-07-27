@@ -498,6 +498,13 @@
 
             var citation = $rootScope.citation;
 
+            // TODO: remove this, only temporary to force links in share/cite to be direct to www
+            var stringToReplace = null;
+            if (citation.url.indexOf("staging") > -1) stringToReplace = "staging";
+            if (citation.url.indexOf("dev") > -1) stringToReplace = "dev";
+
+            citation.url = citation.url.replace(stringToReplace, "www");
+
             vm.citation = citation;
             vm.citationReady = true;
 
