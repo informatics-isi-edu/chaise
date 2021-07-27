@@ -62,7 +62,10 @@ $(".chaise-table-next-btn").on("click", function ($event) {
     if (tableContainer) {
         displayNameEl = $(tableContainer).find(".rt-displayname");
     }
-    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?scrollTo=" + displayNameEl.text();
+
+    var reload = confirm("Click ok and we will reload the page to restore functionality to try again.");
+
+    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?scrollTo=" + displayNameEl.text();
 });
 
 /* ==== ON CLICK FUNCTIONS ==== */
