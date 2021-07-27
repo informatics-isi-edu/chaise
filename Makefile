@@ -279,6 +279,8 @@ $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
+GOOGLE_DATASET_CONFIG=google-dataset-config.js
+
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
 	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
@@ -314,7 +316,7 @@ RECORD_CSS_SOURCE=
 	$(info - creating .make-record-includes)
 	@> .make-record-includes
 	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
-	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
+	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(GOOGLE_DATASET_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-record-includes)
 
 record/index.html: record/index.html.in .make-record-includes
