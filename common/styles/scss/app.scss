@@ -723,3 +723,20 @@ html {
         line-height: 1.2;
     }
 }
+
+.topScrollWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 15px;
+    position: fixed;
+    margin-top: -15px;
+    width: -moz-available;
+    width: -webkit-fill-available;
+    margin-right: 15px;
+    margin-left: 20px;
+}
+
+.topScroll {
+    height: inherit;
+    overflow-x: scroll;
+}
