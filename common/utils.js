@@ -3010,7 +3010,7 @@
 
                 // the hash returned from this function handles the case when '#' is switched with '?'
                 var hash = UriUtils.getHash($window.location);
-                var canonicalURL = $window.location.origin + $window.location.pathname + UriUtils.stripSortAndQueryParams(hash);
+                var canonicalURL = $window.location.pathname + UriUtils.stripSortAndQueryParams(hash);
                 canonicalTag.setAttribute("href", canonicalURL);
                 document.getElementsByTagName("head")[0].appendChild(canonicalTag);
             }
