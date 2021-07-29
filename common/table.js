@@ -1218,6 +1218,17 @@
                 }
                 _attachExtraAttributes(scope.vm);
             });
+
+            var tableDataInitializedWatcher = scope.$watch(function () {
+                return scope.vm.initialized;
+              }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                UiUtils.addTopHorizontalScroll();
+                // unbind the watcher
+                tableDataInitializedWatcher();
+              });
         }
 
         /**
@@ -1295,7 +1306,6 @@
                 );
 
                 scope.vm.config.facetPanelOpen = !scope.vm.config.facetPanelOpen;
-
             }
 
             scope.search = function(term, action) {
@@ -1496,39 +1506,6 @@
                 }
             };
 
-            var addTopHorizontalScroll = function() {
-                var topScrollElements = Array.from(document.getElementsByClassName("top-scroll-wrapper"));
-                topScrollElements.forEach(function(topScrollElement, index) {
-                    var recordsetTable = topScrollElement.parentElement.getElementsByClassName("recordset-table");
-                    if (recordsetTable && recordsetTable.length == 1) {
-                        recordsetTable = Array.from(recordsetTable)[0];
-
-                        topScrollElement.addEventListener('scroll', function() {
-                            recordsetTable.scrollLeft = topScrollElement.scrollLeft;
-                        });
-
-                        recordsetTable.addEventListener('scroll', function() {
-                            topScrollElement.scrollLeft = recordsetTable.scrollLeft;
-                        });
-
-                        addSensorsForHorizontalScroll(recordsetTable, topScrollElement,index);
-                    }
-                });
-            };
-                
-
-            var addSensorsForHorizontalScroll = function(recordsetTable, topScrollElement, indexOfTopScrollElement) {
-                var sensor1 = new ResizeSensor(recordsetTable, function () {
-                    var topScrollElement = Array.from(document.getElementsByClassName("top-scroll"))[indexOfTopScrollElement];
-                    if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
-                        topScrollElement.style.width = 0;
-                    }
-                    else {
-                        topScrollElement.style.width = (recordsetTable.scrollWidth) + "px";
-                    }
-                });
-            };
-
             var attachDOMElementsToScope = function (scope) {
                 // set the parentContainer element
                 if (scope.vm.parentContainerSelector) {
@@ -1581,8 +1558,6 @@
 
                     // make sure the padding of main-container is correctly set
                     UiUtils.attachMainContainerPaddingSensor(scope.parentContainer);
-
-                        addTopHorizontalScroll();
 
                     // unbind the watcher
                     recordsetDataInitializedWatcher();

@@ -724,7 +724,7 @@ html {
     }
 }
 
-.top-scroll-wrapper, .top-scroll-record-wrapper {
+.top-scroll-wrapper {
     overflow-x: auto;
     overflow-y: hidden;
     height: 15px;
@@ -735,8 +735,7 @@ html {
     top: 0;
 }
 
-.top-scroll, .top-scroll-record {
-    width: 2000px;
+.top-scroll {
     height: inherit;
     overflow-x: scroll;
 }

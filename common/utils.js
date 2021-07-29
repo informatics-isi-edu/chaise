@@ -1858,6 +1858,51 @@
             }
         }
 
+        /**
+         * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
+         * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+         */
+        function addTopHorizontalScroll() {
+            var topScrollElements = Array.from(document.getElementsByClassName("top-scroll-wrapper"));
+            topScrollElements.forEach(function(topScrollElement, index) {
+                // Get the table related with the scrollbar
+                var recordsetTable = topScrollElement.parentElement.getElementsByClassName("recordset-table");
+                if (recordsetTable && recordsetTable.length == 1) {
+                    recordsetTable = Array.from(recordsetTable)[0];
+
+                    // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+                    topScrollElement.addEventListener('scroll', function() {
+                        recordsetTable.scrollLeft = topScrollElement.scrollLeft;
+                    });
+
+                    recordsetTable.addEventListener('scroll', function() {
+                        topScrollElement.scrollLeft = recordsetTable.scrollLeft;
+                    });
+
+                    addSensorsForHorizontalScroll(recordsetTable, index);
+                }
+            });
+        }
+
+        /**
+         * Here we make sure that the length of the scroll is identical to the scroll at the bottom of the table
+         * @param {*} table The table that we will add the resize sensor to
+         * @param {*} indexOfTopScrollElement the table/scrollbar index that we are interested in
+         */
+        function addSensorsForHorizontalScroll(table, indexOfTopScrollElement) {
+            var sensor = new ResizeSensor(table, function () {
+                var topScrollElement = Array.from(document.getElementsByClassName("top-scroll"))[indexOfTopScrollElement];
+                // there is no need of a scrollbar, content is not overflowing
+                if  (table.scrollWidth == table.clientWidth) {
+                    topScrollElement.style.width = 0;
+                }
+                else {
+                    topScrollElement.style.width = table.scrollWidth + "px";
+                }
+            });
+        }
+
+
         return {
             humanizeTimestamp: humanizeTimestamp,
             versionDate: versionDate,
@@ -1870,7 +1915,8 @@
             attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor,
+            addTopHorizontalScroll: addTopHorizontalScroll
         }
     }])
 
