@@ -724,19 +724,19 @@ html {
     }
 }
 
-.topScrollWrapper {
+.top-scroll-wrapper, .top-scroll-record-wrapper {
     overflow-x: auto;
     overflow-y: hidden;
     height: 15px;
-    position: fixed;
-    margin-top: -15px;
+    position: sticky;
     width: -moz-available;
     width: -webkit-fill-available;
-    margin-right: 15px;
-    margin-left: 20px;
+    z-index: 2;
+    top: 0;
 }
 
-.topScroll {
+.top-scroll, .top-scroll-record {
+    width: 2000px;
     height: inherit;
     overflow-x: scroll;
 }
