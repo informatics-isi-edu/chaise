@@ -1220,41 +1220,13 @@
             });
 
             /**
-             * make sure reference and columns are defined, and therefore the directive can show the structure
+             * When the directive DOM is loaded, all the elements that 
+             * we need for top-horizontal logic are loaded as well and therefore
+             * we don't need to wait for any condition.
+             * NOTE if we add a condition to hide an element, we should add a 
+             * watcher for this one as well.
              */
-            var canManipulateDOMElements = function (scope) {
-                return scope.vm && scope.vm.reference && Array.isArray(scope.vm.reference.columns);
-            };
-
-            /**
-             * All DOM manipulations related to table should be here
-             */
-            var manipulateTableDOMEelements = function () {
-                
-                // add the top horizontal scrollbar
-                UiUtils.addTopHorizontalScroll();
-            }
-
-            // directive might take a while to load
-            var tableDataInitializedWatcher = scope.$watch(function () {
-                return canManipulateDOMElements(scope);
-              }, function (newValue, oldValue) {
-                if(angular.equals(newValue, oldValue) || !newValue){
-                    return;
-                }
-                manipulateTableDOMEelements();
-
-                // unbind the watcher
-                tableDataInitializedWatcher();
-            });
-
-            // we might be able to do this as soon as directive loads
-            if (canManipulateDOMElements(scope)) {
-                manipulateTableDOMEelements();
-
-                // unbind the watcher
-                tableDataInitializedWatcher();
-            }
+            UiUtils.addTopHorizontalScroll(elem[0]);
         }
 
         /**

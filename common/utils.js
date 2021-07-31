@@ -1861,47 +1861,39 @@
         /**
          * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
          * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+         * @param {DOMElement} parent - the parent element
          */
-        function addTopHorizontalScroll() {
-            var topScrollElements = Array.from(document.getElementsByClassName("top-scroll-wrapper"));
-            topScrollElements.forEach(function(topScrollElement, index) {
-                // Get the table related with the scrollbar
-                var recordsetTable = topScrollElement.parentElement.getElementsByClassName("recordset-table");
-                if (recordsetTable && recordsetTable.length == 1) {
-                    recordsetTable = Array.from(recordsetTable)[0];
+        function addTopHorizontalScroll(parent) {
+            if (!parent) return;
+            
+            var topScrollElementWrapper = parent.querySelector(".top-scroll-wrapper"),
+                topScrollElement = parent.querySelector(".top-scroll"),
+                recordsetTable = parent.querySelector(".recordset-table");
 
-                    // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
-                    topScrollElement.addEventListener('scroll', function() {
-                        recordsetTable.scrollLeft = topScrollElement.scrollLeft;
-                    });
+            if (!topScrollElementWrapper || !topScrollElement || !recordsetTable) {
+                return;
+            }
 
-                    recordsetTable.addEventListener('scroll', function() {
-                        topScrollElement.scrollLeft = recordsetTable.scrollLeft;
-                    });
-
-                    addSensorsForHorizontalScroll(recordsetTable, index);
-                }
+            // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+            topScrollElementWrapper.addEventListener('scroll', function() {
+                recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
             });
-        }
 
-        /**
-         * Here we make sure that the length of the scroll is identical to the scroll at the bottom of the table
-         * @param {*} table The table that we will add the resize sensor to
-         * @param {*} indexOfTopScrollElement the table/scrollbar index that we are interested in
-         */
-        function addSensorsForHorizontalScroll(table, indexOfTopScrollElement) {
-            var sensor = new ResizeSensor(table, function () {
-                var topScrollElement = Array.from(document.getElementsByClassName("top-scroll"))[indexOfTopScrollElement];
+            recordsetTable.addEventListener('scroll', function() {
+                topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+            });
+
+            // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+            new ResizeSensor(recordsetTable, function () {
                 // there is no need of a scrollbar, content is not overflowing
-                if  (table.scrollWidth == table.clientWidth) {
+                if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
                     topScrollElement.style.width = 0;
                 }
                 else {
-                    topScrollElement.style.width = table.scrollWidth + "px";
+                    topScrollElement.style.width = recordsetTable.scrollWidth + "px";
                 }
             });
         }
-
 
         return {
             humanizeTimestamp: humanizeTimestamp,
