@@ -1219,16 +1219,42 @@
                 _attachExtraAttributes(scope.vm);
             });
 
+            /**
+             * make sure reference and columns are defined, and therefore the directive can show the structure
+             */
+            var canManipulateDOMElements = function (scope) {
+                return scope.vm && scope.vm.reference && Array.isArray(scope.vm.reference.columns);
+            };
+
+            /**
+             * All DOM manipulations related to table should be here
+             */
+            var manipulateTableDOMEelements = function () {
+                
+                // add the top horizontal scrollbar
+                UiUtils.addTopHorizontalScroll();
+            }
+
+            // directive might take a while to load
             var tableDataInitializedWatcher = scope.$watch(function () {
-                return scope.vm.initialized;
+                return canManipulateDOMElements(scope);
               }, function (newValue, oldValue) {
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
-                UiUtils.addTopHorizontalScroll();
+                manipulateTableDOMEelements();
+
                 // unbind the watcher
                 tableDataInitializedWatcher();
-              });
+            });
+
+            // we might be able to do this as soon as directive loads
+            if (canManipulateDOMElements(scope)) {
+                manipulateTableDOMEelements();
+
+                // unbind the watcher
+                tableDataInitializedWatcher();
+            }
         }
 
         /**
