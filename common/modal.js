@@ -622,7 +622,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'ERMrest', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, ERMrest, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = AlertsService.alerts;
         vm.columnModels = params.columnModels;
@@ -633,7 +633,9 @@
         }
 
         vm.submit = function () {
-            // submit data for create using recordCreate
+            // set id based on hash of `user_id` and `facets` columns
+            // TODO: replace with hash library function
+            vm.savedQueryForm.rows[0].id = ERMrest._LZString.compressToEncodedURIComponent(vm.savedQueryForm.rows[0].user_id+vm.savedQueryForm.rows[0].facets)
             params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
                 // show success after close
                 $uibModalInstance.close(query.successful);
