@@ -119,6 +119,8 @@
 
             context.catalogID = res.catalogId;
 
+            // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+            recordsetModel.config.isSavedQueryTable = ermrestUri.indexOf($rootScope.savedQuery.mapping.ermrestTablePath) > -1
 
             FunctionUtils.registerErmrestCallbacks();
 

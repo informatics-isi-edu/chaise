@@ -349,6 +349,7 @@
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
+                isSavedQueryTable:  params.displayMode == recordsetDisplayModes.savedQuery,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
             },
             getDisabledTuples:          params.getDisabledTuples,
@@ -622,7 +623,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'ERMrest', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, ERMrest, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'ERMrest', 'MathUtils', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, ERMrest, MathUtils, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = AlertsService.alerts;
         vm.columnModels = params.columnModels;
@@ -633,9 +634,12 @@
         }
 
         vm.submit = function () {
-            // set id based on hash of `user_id` and `facets` columns
-            // TODO: replace with hash library function
-            vm.savedQueryForm.rows[0].id = ERMrest._LZString.compressToEncodedURIComponent(vm.savedQueryForm.rows[0].user_id+vm.savedQueryForm.rows[0].facets)
+            var row = vm.savedQueryForm.rows[0]
+
+            // set id based on hash of `user_id`, `facets`, and `table_name` columns
+            row.query_id = MathUtils.hashcodeUuid(row.user_id + row.facets + row.table_name)
+            row.name = "test";
+            row.description = "test desc";
             params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
                 // show success after close
                 $uibModalInstance.close(query.successful);

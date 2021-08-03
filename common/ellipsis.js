@@ -114,7 +114,7 @@
                         associationRef;
 
                     // view link
-                    if (scope.config.viewable) {
+                    if (scope.config.viewable && !scope.config.isSavedQueryTable) {
                         var viewLink = tupleReference.contextualize.detailed.appLink;
                         var qCharacter = viewLink.indexOf("?") !== -1 ? "&" : "?";
                         scope.viewLink = viewLink + qCharacter + "paction=view";

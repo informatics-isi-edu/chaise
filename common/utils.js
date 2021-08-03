@@ -1906,6 +1906,28 @@
             return Math.floor(Math.random() * (max - min)) + min;
         }
 
+        // function for creating a unique hash code based on input string
+        // function found here: https://stackoverflow.com/a/7616484
+        function hashcodeUuid(str) {
+            var hash = 0, char;
+            // fail by returning 0 instead of an error
+            if (str.length === 0) return hash;
+            for (var i = 0; i < str.length; i++) {
+                char  = str.charCodeAt(i);
+                // The left shift operator (<<) shifts the first operand the specified number of bits to the left.
+                // Excess bits shifted off to the left are discarded. Zero bits are shifted in from the right.
+                hash  = ((hash << 5) - hash) + char;
+                // The bitwise OR assignment operator (|=) uses the binary representation of both operands,
+                // does a bitwise OR operation on them and assigns the result to the variable.
+                hash |= 0; // Convert to 32bit integer
+            }
+
+            // identifiers should be positive
+            if (Math.sign(hash) == -1) hash = Math.abs(hash);
+
+            return hash;
+        }
+
         /**
          * Generates a unique uuid
          * @returns {String} a string of length 24
@@ -1920,6 +1942,7 @@
 
         return {
             getRandomInt: getRandomInt,
+            hashcodeUuid: hashcodeUuid,
             uuid: uuid
         }
     }])

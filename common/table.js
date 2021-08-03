@@ -1276,7 +1276,7 @@
                 var mapping = scope.$root.savedQuery.mapping,
                     chaiseConfig = ConfigUtils.getConfigJSON();
 
-                ERMrest.resolve(chaiseConfig.ermrestLocation + '/catalog/' + mapping.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                ERMrest.resolve($window.location.origin + mapping.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
                     var columnModels = [];
 
                     savedQueryReference = savedQueryReference.contextualize.entryCreate;
@@ -1295,11 +1295,11 @@
 
                     // grab facet blob from parent reference
                     var facetIdx = scope.vm.reference.uri.indexOf("::facets::") + "::facets::".length;
-                    rowData.rows[0]["facets"] = JSON.stringify(ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx)));
-                    rowData.rows[0][mapping.tableCol] = scope.vm.reference.table.name;
-                    // rowData.rows[0][mapping.schemaCol] = scope.vm.reference.table.schema.name;
+                    rowData.rows[0].facets = JSON.stringify(ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx)));
+                    rowData.rows[0].table_name = scope.vm.reference.table.name;
+                    rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     // rowData.rows[0][mapping.catalogCol] = scope.vm.reference.table.schema.catalog.id;
-                    rowData.rows[0]["user_id"] = scope.$root.session.client.id;
+                    rowData.rows[0].user_id = scope.$root.session.client.id;
 
                     //open modal
                     modalUtils.showModal({
@@ -1333,11 +1333,11 @@
                 var facetBlob = {
                     and: [{
                         choices: [scope.vm.reference.table.name],
-                        source: mapping.tableCol
+                        source: "table_name" // name of column storing table name in saved_query table
                     }]
                 }
 
-                ERMrest.resolve(chaiseConfig.ermrestLocation + '/catalog/' + mapping.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob), ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                ERMrest.resolve($window.location.origin + mapping.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob), ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
                     savedQueryReference = savedQueryReference.contextualize.compact.hideFacets();
 
                     var params = {};
