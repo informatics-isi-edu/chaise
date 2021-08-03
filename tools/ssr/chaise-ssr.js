@@ -47,6 +47,11 @@ $("#rt-Single-Cell-Visualization .c_8HFVaLlTUqBDa0dfgwS2oQ .not-sorted-icon").re
 $("#rt-Attachments .c_File_Name").removeClass("clickable");
 $("#rt-Attachments .c_File_Name .not-sorted-icon").remove();
 
+function getAlertText (uiAction) {
+    return "The "\" + uiAction + "\" button is not supported on this snapshot. Click OK to go to the fully-functional live page, then try again."
+}
+
+/* ==== prev/next button functionality ==== */
 var prevBtns = $(".chaise-table-previous-btn");
 $(".chaise-table-next-btn").each(function (idx, el) {
     if (el.disabled) {
@@ -55,6 +60,7 @@ $(".chaise-table-next-btn").each(function (idx, el) {
     }
 });
 
+// if next is visible, attach an onclick function to show an alert that the user will be navigated to the live page to try again
 $(".chaise-table-next-btn").on("click", function ($event) {
     var target = $event.target,
         displayNameEl = null;
@@ -64,7 +70,7 @@ $(".chaise-table-next-btn").on("click", function ($event) {
         displayNameEl = $(tableContainer).find(".rt-displayname");
     }
 
-    var reload = confirm("Click ok and we will reload the page to restore functionality to try again.");
+    var reload = confirm(getAlertText("Next"));
 
     if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&scrollTo=" + displayNameEl.text();
 });
@@ -357,7 +363,9 @@ $(".related-table-accordion .toggle-display-link").on("click", function ($event)
 
 // redirect to chaise with prompt login query param
 $("#login-link").on("click", function ($event) {
-    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
+    var reload = confirm(getAlertText("Login"));
+
+    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
 });
 
 // export is hidden on page load
@@ -386,7 +394,9 @@ $(".export-This-record-CSV-").on("click", function ($event) {
 
 // redirect to dynamic chaise page and prompt for login
 $(".export-BDBag").on("click", function ($event) {
-    window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
+    var reload = confirm(getAlertText("Export BDBag"));
+
+    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
 });
 
 $("th.clickable").on("click", function ($event) {
