@@ -1874,13 +1874,24 @@
                 return;
             }
 
+            // these 2 flags help us prevent cascading scroll changes back and forth across the 2 elements
+            var isSyncingTopScroll = false;
+            var isSyncingTableScroll = false;
             // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
             topScrollElementWrapper.addEventListener('scroll', function() {
-                recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
+                if (!isSyncingTopScroll) {
+                    isSyncingTableScroll = true;
+                    recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
+                }
+                isSyncingTopScroll = false;
             });
 
             recordsetTable.addEventListener('scroll', function() {
-                topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+                if (!isSyncingTableScroll) {
+                    isSyncingTopScroll = true;
+                    topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+                }
+                isSyncingTableScroll = false;
             });
 
             // make sure that the length of the scroll is identical to the scroll at the bottom of the table
