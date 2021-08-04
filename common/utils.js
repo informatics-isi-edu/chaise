@@ -1904,6 +1904,9 @@
                     topScrollElement.style.width = recordsetTable.scrollWidth + "px";
                 }
             });
+
+            // make top scroll visible after adding the handlers to ensure its visible only when working
+            topScrollElementWrapper.style.display = "block";
         }
 
         return {
