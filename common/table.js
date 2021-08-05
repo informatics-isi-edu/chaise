@@ -1689,7 +1689,7 @@
                     }
 
                     var label = "";
-                    if (vm.totalRowsCnt && !vm.tableError) {
+                    if ((!vm.reference.display || !vm.reference.display.hideRowCount) && vm.totalRowsCnt && !vm.tableError) {
                         label += "of ";
                         if (vm.totalRowsCnt > vm.rowValues.length) {
                             label += vm.totalRowsCnt.toLocaleString() + " ";
