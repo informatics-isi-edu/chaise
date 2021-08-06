@@ -129,17 +129,15 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      
-      - name: Run default config test spec
-        id: test-default-config
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
         continue-on-error: true
         run: |
           cd chaise
-          make testdefaultconfig
-      
+          make testdeleteprohibited
      
-      - name: Check on default config test spec
-        if: always() && steps.test-default-config.outcome != 'success'
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
       
       - name: Diagnosis after failure
