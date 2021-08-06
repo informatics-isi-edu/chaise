@@ -1409,6 +1409,7 @@
                 update(scope.vm, true, true, true, false, logService.reloadCauses.ENTITY_DELETE);
             });
 
+            // if reference.column list changed, update columnModels
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
@@ -1418,13 +1419,58 @@
                 _attachExtraAttributes(scope.vm);
             });
 
-            scope.$on('facetsLoaded', function () {
-                scope.facetsLoaded = true;
+            /**
+             * Order of events:
+             * - vm.readyToInitialize shoubl be set to true when we're ready to initialize
+             * - `recordsetReadyToInitializeWatcher` will call `generateFacetColumns` which will
+             *   set vm.facetColumnsReady = true
+             *   (if facet list is empty, `facetDirectivesLoaded=true` will be called manually)
+             * - based on ng-if in recordset directive, faceting will load and populate the facets
+             *   and will emit `facetDirectivesLoaded` event, which will set facetDirectivesLoaded=true
+             *   (when we're not showing any facets, )
+             * - when `facetDirectivesLoaded` is true, recordset structure is ready. so 
+             *   `recordsetStructureReadyWatcher` watcher will call `initializeRecordsetData`
+             * 
+             * @param {*} scope 
+             * @returns 
+             */
+            var recordsetReadyToInitializeStructure = function (scope) {
+                return scope.vm.readyToInitialize;
+            }
+
+            scope.$on('facetDirectivesLoaded', function () {
+                $log.debug("all directives loaded");
+                scope.facetDirectivesLoaded = true;
             });
 
-            var recordsetReadyToInitialize = function (scope) {
-                return scope.vm.readyToInitialize && (scope.facetsLoaded || (scope.vm.reference && scope.vm.reference.facetColumns && scope.vm.reference.facetColumns.length === 0));
+            var recordsetStructureReady = function (scope) {
+                return scope.facetDirectivesLoaded;
             };
+
+            var initializeRecordsetStructure = function (scope) {
+                if (scope.ignoreFaceting) {
+                    scope.vm.facetDirectivesLoaded = true;
+                    return;
+                }
+
+                // NOTE this will affect the reference uri so it must be 
+                //      done before initializing recordset
+                scope.vm.reference.generateFacetColumns().then(function (fcols) {
+                    $log.debug("facet columns generated: " + fcols.length);
+                    scope.vm.facetColumnsReady = true;
+                    if (fcols.length === 0) {
+                        $log.debug("facet columns empty, directives loaded");
+                        scope.facetDirectivesLoaded = true;
+                    }
+                }).catch(function (exception) {
+                    $log.warn(exception);
+                    scope.vm.hasLoaded = true;
+                    if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                        exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    }
+                    throw exception;
+                });
+            }
 
             /**
              * initialize the recordset. This includes:
@@ -1432,11 +1478,8 @@
              *  - scrolling to the first open facet.
              *  - initialize flow-control
              */
-            var initializeRecordset = function (scope) {
+            var initializeRecordsetData = function (scope) {
                 $timeout(function() {
-                    // NOTE
-                    // This order is very important, the ref.facetColumns is going to change the
-                    // location, so we should call read after that.
                     if (!scope.ignoreFaceting && scope.vm.reference.facetColumns.length > 0) {
                         var firstOpen = -1;
                         // create the facetsToPreProcess and also open facets
@@ -1512,24 +1555,56 @@
                 scope.resizePartners = scope.parentContainer.querySelectorAll(".top-left-panel");
             };
 
-            // initialize the recordset when it's ready to be initialized
+            // initialize the recordset structure when it's ready
+            var recordsetReadyToInitializeStructureWatcher = scope.$watch(function () {
+                return recordsetReadyToInitializeStructure(scope);
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                initializeRecordsetStructure(scope);
+
+                // unbind the wwatcher
+                recordsetReadyToInitializeStructureWatcher();
+            });
+
+            // we might be able to initialize the recordset structure on load
+            if (recordsetReadyToInitializeStructure(scope)) {
+                initializeRecordsetStructure(scope);
+
+                // unbind the wwatcher
+                recordsetReadyToInitializeStructureWatcher();
+            }
+
+            // after recordset structure is ready, do DOM manipulation and start loading data
             attachDOMElementsToScope(scope);
-            var recordsetDOMInitializedWatcher = scope.$watch(function () {
-                return recordsetReadyToInitialize(scope);
+            var recordsetStructureReadyWatcher = scope.$watch(function () {
+                return recordsetStructureReady(scope);
             }, function (newValue, oldValue) {
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
 
+                $log.debug("going to initialize recordset man");
+
                 // DOM manipulations
                 manipulateRecordsetDOMElements();
 
                 // call the flow-control to fetch the data
-                initializeRecordset(scope);
+                initializeRecordsetData(scope);
 
                 // unbind the wwatcher
-                recordsetDOMInitializedWatcher();
+                recordsetStructureReadyWatcher();
             });
+
+            // we might be able to do DOM manipulation and loading of data on load of directive
+            if (recordsetStructureReady(scope)) {
+                manipulateRecordsetDOMElements();
+                initializeRecordsetData(scope);
+
+                // unbind the watcher
+                recordsetStructureReadyWatcher();
+            }
 
             // the recordset data is initialized, so we can do extra manipulations if we need to
             var recordsetDataInitializedWatcher = scope.$watch(function () {
@@ -1552,12 +1627,6 @@
                     recordsetDataInitializedWatcher();
                 }
             });
-
-            // we might be able to initialize the recordset when it's loading
-            if (recordsetReadyToInitialize(scope)) {
-                manipulateRecordsetDOMElements();
-                initializeRecordset(scope);
-            }
         }
 
         return {
@@ -1846,7 +1915,7 @@
             link: function (scope, elem, attrs) {
                 // currently faceting is not defined in this mode.
                 // TODO We should eventually add faceting here, and remove these initializations
-                scope.facetsLoaded = true;
+                scope.facetDirectivesLoaded = true;
                 scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
                 scope.tooltip = messageMap.tooltip;
                 scope.recordsetDisplayModes = recordsetDisplayModes;

@@ -99,7 +99,8 @@
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
-                            $scope.$emit("facetsLoaded");
+                            $log.debug("emmitting facet direcives loaded");
+                            $scope.$emit("facetDirectivesLoaded");
                         }
                     };
 
