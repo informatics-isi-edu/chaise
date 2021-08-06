@@ -81,7 +81,7 @@ E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
-DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
+DefaultConfigParallel=test/e2e/specs/default-config/recordedit/add-x-forms.conf.js
 # Setup for manual tests
 Manualrecordset=test/manual/specs/recordset.conf.js
 

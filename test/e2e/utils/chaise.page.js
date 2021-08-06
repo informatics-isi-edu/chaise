@@ -469,6 +469,10 @@ var recordEditPage = function() {
     this.getDisabledResultSetRows = function () {
         return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
     };
+
+    this.getCreateNewButton = function() {
+        return element(by.className('chaise-table-header-create-link'));
+    }
 };
 
 var recordPage = function() {
