@@ -1899,14 +1899,20 @@
                 // there is no need of a scrollbar, content is not overflowing
                 if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
                     topScrollElement.style.width = 0;
+                    topScrollElementWrapper.style.height = 0;
                 }
                 else {
+                    topScrollElementWrapper.style.height = "15px";
                     topScrollElement.style.width = recordsetTable.scrollWidth + "px";
                 }
             });
 
             // make top scroll visible after adding the handlers to ensure its visible only when working
             topScrollElementWrapper.style.display = "block";
+            // show only if content is overflowing
+            if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                topScrollElementWrapper.style.height = "15px";
+            }
         }
 
         return {

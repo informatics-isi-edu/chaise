@@ -727,7 +727,7 @@ html {
 .top-scroll-wrapper {
     overflow-x: auto;
     overflow-y: hidden;
-    height: 15px;
+    height: 0;
     position: sticky;
     width: -moz-available;
     width: -webkit-fill-available;
