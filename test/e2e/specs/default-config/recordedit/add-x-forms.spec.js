@@ -213,6 +213,7 @@ describe('Record Add', function() {
                     return chaisePage.recordEditPage.getSelectAllPopupBtn(colName).click();
                 }).then(function () {
                     // wait for modal rows to load
+                    browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getCreateNewButton()), browser.params.defaultTimeout);
                     browser.wait(function() {
                         return chaisePage.recordsetPage.getModalRows().count().then(function(ct) {
                             return (ct == 5);
