@@ -475,6 +475,10 @@ faceting {
         width: 1px;
     }
 
+    .favorite-icon {
+        display: none !important;
+    }
+
     .js-plotly-plot {
         height: 150px;
         margin-left: -5px;
@@ -529,8 +533,32 @@ faceting {
         margin-bottom: 7px;
         margin-left: 5px;
     }
-    li:hover {
-        background-color: rgb(241, 241, 241);
+
+    li {
+        .favorite-icon {
+            top: 2px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 18px;
+
+            &.glyphicon-star {
+                color: goldenrod;
+            }
+
+            // glyphicon-star-empty
+            &.hover-show {
+                display: none;
+            }
+
+        }
+
+        &:hover {
+            background-color: rgb(241, 241, 241);
+
+            .hover-show {
+                display: inline-block;
+            }
+        }
     }
 }
 

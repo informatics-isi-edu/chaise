@@ -1272,11 +1272,9 @@
             }
 
             scope.saveQuery = function () {
-                // read model mapping
-                var mapping = scope.$root.savedQuery.mapping,
-                    chaiseConfig = ConfigUtils.getConfigJSON();
+                var chaiseConfig = ConfigUtils.getConfigJSON();
 
-                ERMrest.resolve($window.location.origin + mapping.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
                     var columnModels = [];
 
                     savedQueryReference = savedQueryReference.contextualize.entryCreate;
@@ -1295,10 +1293,10 @@
 
                     // grab facet blob from parent reference
                     var facetIdx = scope.vm.reference.uri.indexOf("::facets::") + "::facets::".length;
-                    rowData.rows[0].facets = JSON.stringify(ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx)));
+                    rowData.rows[0].encoded_facets = scope.vm.reference.uri.substring(facetIdx);
+                    rowData.rows[0].facets = ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx));
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
-                    // rowData.rows[0][mapping.catalogCol] = scope.vm.reference.table.schema.catalog.id;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
 
                     //open modal
@@ -1325,9 +1323,7 @@
             }
 
             scope.showSavedQueries = function () {
-                // read model mapping
-                var mapping = scope.$root.savedQuery.mapping,
-                    chaiseConfig = ConfigUtils.getConfigJSON();
+                var chaiseConfig = ConfigUtils.getConfigJSON();
 
                 var facetTxt = "*::facets::";
                 var facetBlob = {
@@ -1337,8 +1333,8 @@
                     }]
                 }
 
-                ERMrest.resolve($window.location.origin + mapping.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob), ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
-                    savedQueryReference = savedQueryReference.contextualize.compact.hideFacets();
+                ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    savedQueryReference = savedQueryReference.contextualize.compactSelect.hideFacets();
 
                     var params = {};
 
@@ -1380,11 +1376,8 @@
                         size: "lg",
                         templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
                     }, function (res) {
-                        // set saved query facet blob
-                        var newRefUri = scope.vm.reference.unfilteredReference.uri + "/" + facetTxt + ERMrest.encodeFacet(JSON.parse(res.data.facets));
-                        ERMrest.resolve(newRefUri, ConfigUtils.getContextHeaderParams()).then(function (mainRef) {
-                            $window.location.replace(mainRef.contextualize.compact.appLink);
-                        });
+                        // ellipsis creates a link attached to the button instead of returning here to redirect
+                        // TODO: return from modal and update page instead of reloading
                     }, null, false, false);
                 });
             }
@@ -1893,6 +1886,16 @@
                 scope.onSelect = function (row, $event) {
                     row.selected = !row.selected;
                     scope.onRowClick(row, $event);
+                }
+
+                scope.toggleFavorite = function (row) {
+                    // row.tuple can get all information about the row and create a request to favorite the term
+                    console.log("favorite: ", row.displayname.value);
+                    row.isFavorite = !row.isFavorite;
+
+                    console.log(row);
+                    var favoriteTablePath = "/ermrest/catalog/registry/entity/CFDE:favorite_" + row.tuple.reference.table.name;
+                    console.log(favoriteTablePath);
                 }
 
                 scope.$watch('initialized', function (newVal, oldVal) {

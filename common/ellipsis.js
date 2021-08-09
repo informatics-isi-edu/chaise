@@ -3,8 +3,8 @@
 
     angular.module('chaise.ellipsis', ['chaise.utils'])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
@@ -113,6 +113,18 @@
                         isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
                         associationRef;
 
+                    // apply saved query link
+                    if (scope.config.isSavedQueryTable) {
+                        // var rowData = scope.tuple.data;
+                        // // NOTE: assume catalog 1 for now, this will be removed in favor of a markdown pattern
+                        // var ermrestPath = chaiseConfig.ermrestLocation + "/catalog/1/entity/" + rowData.schema_name + ":" + rowData.table_name + "/*::facets::" + ERMrest.encodeFacet(rowData.facets);
+                        // ERMrest.resolve(ermrestPath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryRef) {
+                        //     var savedQueryLink = savedQueryRef.contextualize.compact.appLink;
+                        //     var qCharacter = savedQueryLink.indexOf("?") !== -1 ? "&" : "?";
+                        //     scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + rowData.RID;
+                        // });
+                    }
+
                     // view link
                     if (scope.config.viewable && !scope.config.isSavedQueryTable) {
                         var viewLink = tupleReference.contextualize.detailed.appLink;
@@ -180,7 +192,6 @@
                 // Initialize the action column btn links
                 init();
 
-                // NOTE: will also apply saved query
                 scope.onSelect = function($event) {
                     var args = {"tuple": scope.tuple};
 

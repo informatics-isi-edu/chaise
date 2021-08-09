@@ -87,10 +87,6 @@
             var modifyEnabled = chaiseConfig.editRecord === false ? false : true;
             var deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
             var showFaceting = chaiseConfig.showFaceting === true ? true : false;
-            $rootScope.savedQuery = {
-                showUI: (chaiseConfig.showSavedQueryUI === true ? true : false),
-                mapping: chaiseConfig.savedQueryMapping
-            }
 
             recordsetModel.config = {
                 viewable: true,
@@ -119,8 +115,25 @@
 
             context.catalogID = res.catalogId;
 
-            // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
-            recordsetModel.config.isSavedQueryTable = ermrestUri.indexOf($rootScope.savedQuery.mapping.ermrestTablePath) > -1
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            // TODO: this will be moved to per table
+            $rootScope.savedQuery = {
+                showUI: (chaiseConfig.showSavedQueryUI === true ? true : false)
+            }
+
+            // NOTE: if this is not set, saved query UI should probably be turned off
+            if (chaiseConfig.savedQueryConfig && chaiseConfig.savedQueryConfig.storageTable) {
+                var mapping = $rootScope.savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                $rootScope.savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                $rootScope.savedQuery.showUI = false;
+            }
+
+            recordsetModel.config.isSavedQueryTable = ermrestUri.indexOf($rootScope.savedQuery.ermrestTablePath) > -1
 
             FunctionUtils.registerErmrestCallbacks();
 

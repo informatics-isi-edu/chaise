@@ -623,7 +623,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'ERMrest', 'MathUtils', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, ERMrest, MathUtils, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = AlertsService.alerts;
         vm.columnModels = params.columnModels;
@@ -636,14 +636,14 @@
         vm.submit = function () {
             var row = vm.savedQueryForm.rows[0]
 
-            // set id based on hash of `user_id`, `facets`, and `table_name` columns
-            row.query_id = MathUtils.hashcodeUuid(row.user_id + row.facets + row.table_name)
-            row.name = "test";
-            row.description = "test desc";
+            // set id based on hash of `facets` columns
+            row.query_id = SparkMD5.hash(JSON.stringify(row.facets));
+            row.last_execution_time = "now";
             params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
                 // show success after close
                 $uibModalInstance.close(query.successful);
             }, function error(error) {
+                // TODO: error handling when "facet blob" exists already and violates the uniqueness constraint
                 // show error without close
                 AlertsService.addAlert(error.message, 'error');
             });

@@ -18,7 +18,7 @@
             </div>
             <div class="top-right-panel">
                 <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
-                    <div class="recordset-title-buttons title-buttons" ng-hide="vm.config.isSavedQueryTable">
+                    <div class="recordset-title-buttons title-buttons">
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
@@ -27,7 +27,7 @@
                             <span>Permalink</span>
                         </a>
                         <!-- save query -->
-                        <div ng-if="showSavedQueryUI" class="chaise-btn-group" uib-dropdown>
+                        <div ng-if="showSavedQueryUI && !vm.config.isSavedQueryTable" class="chaise-btn-group" uib-dropdown>
                             <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" uib-dropdown-toggle tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
                                 <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
                                 <span>Saved Queries</span>
