@@ -1866,8 +1866,8 @@
         function addTopHorizontalScroll(parent) {
             if (!parent) return;
             
-            var topScrollElementWrapper = parent.querySelector(".top-scroll-wrapper"),
-                topScrollElement = parent.querySelector(".top-scroll"),
+            var topScrollElementWrapper = parent.querySelector(".chaise-table-top-scroll-wrapper"),
+                topScrollElement = parent.querySelector(".chaise-table-top-scroll"),
                 recordsetTable = parent.querySelector(".recordset-table");
 
             if (!topScrollElementWrapper || !topScrollElement || !recordsetTable) {
