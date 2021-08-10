@@ -1218,6 +1218,15 @@
                 }
                 _attachExtraAttributes(scope.vm);
             });
+
+            /**
+             * When the directive DOM is loaded, all the elements that 
+             * we need for top-horizontal logic are loaded as well and therefore
+             * we don't need to wait for any condition.
+             * NOTE if we add a condition to hide an element, we should add a 
+             * watcher for this one as well.
+             */
+            UiUtils.addTopHorizontalScroll(elem[0]);
         }
 
         /**
