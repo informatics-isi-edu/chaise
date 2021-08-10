@@ -1271,6 +1271,8 @@
                 document.body.removeChild(dummy[0]);
             }
 
+            // string constant used for both saved query functions
+            var facetTxt = "*::facets::";
             scope.saveQuery = function () {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
 
@@ -1292,14 +1294,16 @@
                     });
 
                     // grab facet blob from parent reference
-                    var facetIdx = scope.vm.reference.uri.indexOf("::facets::") + "::facets::".length;
-                    rowData.rows[0].encoded_facets = scope.vm.reference.uri.substring(facetIdx);
-                    rowData.rows[0].facets = ERMrest.decodeFacet(scope.vm.reference.uri.substring(facetIdx));
+                    // to get the beginning of where to substring from, look for the `*::facets::` string
+                    // then add length since indexOf is the index of the first character in matched string
+                    var facetString = scope.vm.reference.uri.substring(scope.vm.reference.uri.indexOf(facetTxt) + facetTxt.length);
+
+                    rowData.rows[0].encoded_facets = facetString;
+                    rowData.rows[0].facets = ERMrest.decodeFacet(facetString);
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
 
-                    //open modal
                     modalUtils.showModal({
                         templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
                         windowClass:"create-saved-query",
@@ -1316,7 +1320,6 @@
                         }
                     }, function success() {
                         // notify user of success before closing
-                        console.log("success callback")
                         AlertsService.addAlert("Query saved.", "success");
                     }, null, false, false);
                 });
@@ -1325,7 +1328,6 @@
             scope.showSavedQueries = function () {
                 var chaiseConfig = ConfigUtils.getConfigJSON();
 
-                var facetTxt = "*::facets::";
                 var facetBlob = {
                     and: [{
                         choices: [scope.vm.reference.table.name],
@@ -1334,27 +1336,25 @@
                 }
 
                 ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    // we don't want to allow faceting in the popup
                     savedQueryReference = savedQueryReference.contextualize.compactSelect.hideFacets();
 
                     var params = {};
 
                     params.parentReference = scope.vm.reference;
                     params.saveQueryRecordset = true;
+                    // used popup/savedquery so that we can configure which button to show and change the modal title
                     params.displayMode = recordsetDisplayModes.savedQuery;
-
                     params.reference = savedQueryReference;
-                    // params.reference.session = rsSession;
                     params.selectedRows = [];
                     params.showFaceting = false;
+                    // faceting not allowed, make sure panel is collapsed too just in case
                     params.facetPanelOpen = false;
-                    params.allowCreate = false;
-                    params.allowView = true;
-                    params.viewNewTab = true;
                     params.allowDelete = true;
 
                     // TODO: fix logging stuff
                     var stackElement = logService.getStackNode(
-                        logService.logStackTypes.RELATED,
+                        logService.logStackTypes.SET,
                         params.reference.table,
                         {source: savedQueryReference.compressedDataSource, entity: true}
                     );

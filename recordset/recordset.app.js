@@ -90,7 +90,6 @@
 
             recordsetModel.config = {
                 viewable: true,
-                allowCreate: true,
                 editable: modifyEnabled,
                 deletable: modifyEnabled && deleteEnabled,
                 selectMode: modalBox.noSelect,
@@ -132,8 +131,6 @@
                 // if storage table is not defined, the config is ill-defined and the feature will be turned off
                 $rootScope.savedQuery.showUI = false;
             }
-
-            recordsetModel.config.isSavedQueryTable = ermrestUri.indexOf($rootScope.savedQuery.ermrestTablePath) > -1
 
             FunctionUtils.registerErmrestCallbacks();
 

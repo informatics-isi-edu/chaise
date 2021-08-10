@@ -111,25 +111,30 @@
 
                     var tupleReference = scope.tuple.reference,
                         isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
+                        isSavedQueryPopup = scope.config.displayMode === recordsetDisplayModes.savedQuery,
                         associationRef;
 
-                    var showApplyHideView = (scope.config.isSavedQueryTable && scope.config.displayMode !== recordsetDisplayModes.fullscreen)
                     // apply saved query link
                     // show the apply saved query button for (compact/select savedQuery popup)
-                    if (showApplyHideView) {
-                        var rowData = scope.tuple.data;
-                        // NOTE: assume catalog 1 for now, this will be removed in favor of a markdown pattern
-                        var ermrestPath = chaiseConfig.ermrestLocation + "/catalog/1/entity/" + rowData.schema_name + ":" + rowData.table_name + "/*::facets::" + rowData.encoded_facets;
+                    if (isSavedQueryPopup) {
+                        // NOTE: assume relative to reference the user is viewing
+                        // encoded_facets column might not be a part of the rowValues so get from tuple.data (prevents formatting being applied as well)
+                        var ermrestPath = scope.tableModel.parentReference.unfilteredReference.uri + "/*::facets::" + scope.tuple.data.encoded_facets;
+                        // if (ermrestPath === scope.tableModel.parentReference.uri) {
+                        //     // add alert notifying the user they are viewing this saved query already
+                        // }
                         ERMrest.resolve(ermrestPath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryRef) {
                             var savedQueryLink = savedQueryRef.contextualize.compact.appLink;
                             var qCharacter = savedQueryLink.indexOf("?") !== -1 ? "&" : "?";
-                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + rowData.RID;
+                            // TODO: change from HTML link to refresh page to:
+                            //    "updateFacets on main entity and add to browser history stack"
+                            // after update, put last_execution_time as "now"
+                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
                         });
                     }
 
                     // view link
-                    // if we are showing the apply saved query button, hide view button (compact/select savedQuery popup)
-                    if (scope.config.viewable && !showApplyHideView) {
+                    if (scope.config.viewable) {
                         var viewLink = tupleReference.contextualize.detailed.appLink;
                         var qCharacter = viewLink.indexOf("?") !== -1 ? "&" : "?";
                         scope.viewLink = viewLink + qCharacter + "paction=view";
