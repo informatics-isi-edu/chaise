@@ -21,7 +21,7 @@
     </div>
     <div class="col-xs-12 col-sm-6">
         <div class="pull-right">
-            <button ng-if="vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.reference.canCreate && vm.config.allowCreate && vm.config.editable && !vm.config.isSavedQueryTable"
+            <button ng-if="vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.reference.canCreate && vm.config.allowCreate && vm.config.editable"
                 class="chaise-table-header-create-link chaise-btn"
                 ng-class="vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary'"
                 ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip="Create new {{vm.displayname ? vm.displayname.value : vm.reference.displayname.value}}">
