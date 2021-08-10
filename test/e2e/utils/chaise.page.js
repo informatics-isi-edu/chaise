@@ -1132,6 +1132,10 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
+    this.getModalTotalCount = function () {
+        return element(by.css(".modal-body")).element(by.css('.chaise-table-header-total-count'));
+    };
+
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };

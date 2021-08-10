@@ -65,6 +65,19 @@ var testParams = {
             }
         }
     },
+    hide_row_count: {
+        hidden: {
+            facetIdx: 11,
+            displayingText: "Displaying\nall 13\nrecords",
+            numModalOptions: 13
+            
+        },
+        shown: {
+            facetIdx: 10,
+            displayingText: "Displaying\nall 12\nof 12 records",
+            numModalOptions: 12
+        }
+    },
     customFilter: {
         ermrestFilter: "id=1;id=2;int_col::geq::20",
         ermrestFilterDisplayed: "id=1; id=2; int_col::geq::20",
@@ -531,6 +544,69 @@ describe("Other facet features, ", function() {
     /***********************************************************  local test cases ***********************************************************/
     if (process.env.CI) return;
     // NOTE the following test cases will only run locally.
+
+    describe("regarding hide_row_count support in entity facet popups", function () {
+        beforeAll(function (done) {
+            var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            chaisePage.waitForElement(clearAll);
+            chaisePage.clickButton(clearAll).then(function () {
+                done()
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("should hide the total count when hide_row_count=true", function (done) {
+            // facet is already open so we don't have to click to open
+            var facetParams = testParams.hide_row_count.hidden;
+            var showMore = chaisePage.recordsetPage.getShowMore(facetParams.facetIdx);
+            browser.wait(EC.elementToBeClickable(showMore));
+            chaisePage.clickButton(showMore).then(function () {
+                chaisePage.recordsetPage.waitForInverseModalSpinner();
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                        return values.length == facetParams.numModalOptions;
+                    });
+                }, browser.params.defaultTimeout);
+
+                expect(chaisePage.recordsetPage.getModalTotalCount().getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
+
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
+            }).then(function (){
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("otherwise should show the total count", function (done) {
+            var facetParams = testParams.hide_row_count.shown;
+            var facet = chaisePage.recordsetPage.getFacetById(facetParams.facetIdx);
+
+            // open the facet first and then open the modal
+            chaisePage.clickButton(facet).then(function () {
+                var showMore = chaisePage.recordsetPage.getShowMore(facetParams.facetIdx);
+                browser.wait(EC.elementToBeClickable(showMore));
+                return chaisePage.clickButton(showMore)
+            }).then(function () {
+                chaisePage.recordsetPage.waitForInverseModalSpinner();
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                        return values.length == facetParams.numModalOptions;
+                    });
+                }, browser.params.defaultTimeout);
+
+                expect(chaisePage.recordsetPage.getModalTotalCount().getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
+
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
+            }).then(function (){
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+        
+    });
 
     describe("navigating to recordset with filters that faceting doesn't support.", function () {
         var customFilterParams = testParams.customFilter;
