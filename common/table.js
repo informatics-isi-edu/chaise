@@ -841,8 +841,12 @@
             // get the aggregate values only if main page is loaded
             updateColumnAggregates(vm, _updatePage);
 
-            // update the count
-            _updateMainCount(vm, _updatePage);
+            // do not fetch table count if hideRowCount is set in the annotation for the table
+            // this is because the query takes too long sometimes
+            if(!vm.reference.display || !vm.reference.display.hideRowCount){
+                // update the count
+                _updateMainCount(vm, _updatePage);
+            }
 
             // update the facets
             if (vm.facetModels) {

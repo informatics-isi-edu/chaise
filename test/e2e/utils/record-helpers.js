@@ -1023,6 +1023,10 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 return chaisePage.recordsetPage.getModalRows().count();
             }).then(function(ct){
                 expect(ct).toBe(params.totalCount, "association count missmatch.");
+
+                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
+                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+
                 done();
             }).catch(function(error) {
                 console.log(error);

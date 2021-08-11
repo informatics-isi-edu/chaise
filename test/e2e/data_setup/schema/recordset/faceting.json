@@ -328,6 +328,11 @@
                     "row_name": {
                         "row_markdown_pattern": "{{term}}"
                     }
+                },
+                "tag:misd.isi.edu,2015:display" : {
+                    "hide_row_count": {
+                        "*": true
+                    }
                 }
             }
         },

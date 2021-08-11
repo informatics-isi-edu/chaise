@@ -470,9 +470,9 @@ var recordEditPage = function() {
         return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
     };
 
-    this.getCreateNewButton = function() {
-        return element(by.className('chaise-table-header-create-link'));
-    }
+    this.getRecordSetTable = function() {
+        return element(by.className('recordset-table'));
+    };
 };
 
 var recordPage = function() {
@@ -1130,6 +1130,10 @@ var recordsetPage = function() {
 
     this.getModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
+    };
+
+    this.getModalTotalCount = function () {
+        return element(by.css(".modal-body")).element(by.css('.chaise-table-header-total-count'));
     };
 
     this.getRecordsetTableModalOptions = function () {
