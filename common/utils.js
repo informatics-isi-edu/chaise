@@ -1858,6 +1858,63 @@
             }
         }
 
+        /**
+         * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
+         * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+         * @param {DOMElement} parent - the parent element
+         */
+        function addTopHorizontalScroll(parent) {
+            if (!parent) return;
+            
+            var topScrollElementWrapper = parent.querySelector(".chaise-table-top-scroll-wrapper"),
+                topScrollElement = parent.querySelector(".chaise-table-top-scroll"),
+                recordsetTable = parent.querySelector(".recordset-table");
+
+            if (!topScrollElementWrapper || !topScrollElement || !recordsetTable) {
+                return;
+            }
+
+            // these 2 flags help us prevent cascading scroll changes back and forth across the 2 elements
+            var isSyncingTopScroll = false;
+            var isSyncingTableScroll = false;
+            // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+            topScrollElementWrapper.addEventListener('scroll', function() {
+                if (!isSyncingTopScroll) {
+                    isSyncingTableScroll = true;
+                    recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
+                }
+                isSyncingTopScroll = false;
+            });
+
+            recordsetTable.addEventListener('scroll', function() {
+                if (!isSyncingTableScroll) {
+                    isSyncingTopScroll = true;
+                    topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+                }
+                isSyncingTableScroll = false;
+            });
+
+            // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+            new ResizeSensor(recordsetTable, function () {
+                // there is no need of a scrollbar, content is not overflowing
+                if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                    topScrollElement.style.width = 0;
+                    topScrollElementWrapper.style.height = 0;
+                }
+                else {
+                    topScrollElementWrapper.style.height = "15px";
+                    topScrollElement.style.width = recordsetTable.scrollWidth + "px";
+                }
+            });
+
+            // make top scroll visible after adding the handlers to ensure its visible only when working
+            topScrollElementWrapper.style.display = "block";
+            // show only if content is overflowing
+            if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                topScrollElementWrapper.style.height = "15px";
+            }
+        }
+
         return {
             humanizeTimestamp: humanizeTimestamp,
             versionDate: versionDate,
@@ -1870,7 +1927,8 @@
             attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor,
+            addTopHorizontalScroll: addTopHorizontalScroll
         }
     }])
 

@@ -268,6 +268,10 @@ describe('View recordset,', function() {
                 chaisePage.waitForAggregates();
             });
 
+            it ("should not show the total count if hide_row_count is true.", function () {
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nall "+ activeListData.length + "\nrecords", "hide_row_count not honored");
+            });
+
             it ("should show correct table rows.", function (done) {
                 chaisePage.recordsetPage.getRows().then(function (rows) {
                     expect(rows.length).toBe(activeListData.length, "row length missmatch.");

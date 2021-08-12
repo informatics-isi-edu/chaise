@@ -722,4 +722,22 @@ html {
     input[type=number]::-moz-placeholder {
         line-height: 1.2;
     }
+
+    .chaise-table-top-scroll-wrapper {
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 0;
+        position: sticky;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        z-index: 2;
+        top: 0;
+        display: none;
+    }
+    
+    .chaise-table-top-scroll {
+        height: inherit;
+        overflow-x: scroll;
+    }
 }
+
