@@ -407,7 +407,7 @@
                         },
                         "all_outbound_entity_o1_o1": {
                             "source": [
-                                {"outbound": ["active_list_schema", "main_fk1"]},
+                                {"sourcekey": "outbound_entity_o1"},
                                 {"outbound": ["active_list_schema", "outbound1_fk1"]},
                                 "outbound1_outbound1_id"
                             ],
@@ -431,7 +431,7 @@
                         },
                         "all_outbound_scalar_o1_o1": {
                             "source": [
-                                {"outbound": ["active_list_schema", "main_fk1"]},
+                                {"sourcekey": "outbound_entity_o1"},
                                 {"outbound": ["active_list_schema", "outbound1_fk1"]},
                                 "int_col"
                             ],
@@ -527,8 +527,7 @@
                         },
                         "all_outbound_entity_o1_o1_o1": {
                             "source": [
-                                {"outbound": ["active_list_schema", "main_fk1"]},
-                                {"outbound": ["active_list_schema", "outbound1_fk1"]},
+                                {"sourcekey": "all_outbound_entity_o1_o1"},
                                 {"outbound": ["active_list_schema", "outbound1_outbound1_fk1"]},
                                 "outbound1_outbound1_outbound1_id"
                             ],
