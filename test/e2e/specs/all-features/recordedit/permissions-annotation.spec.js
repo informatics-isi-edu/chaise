@@ -1,4 +1,4 @@
-// The goal of this spec is to test whether RecordEdit app correctly displays the right UI controls given different user permission levels
+// The goal of this spec is to test whether RecordEdit app correctly displays the right UI controls based on annotation
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditPage = chaisePage.recordEditPage;
 var testParams = {
@@ -16,7 +16,7 @@ describe('When viewing RecordEdit app', function() {
         browser.ignoreSynchronization = true;
     });
 
-    it('as a create-only user, the app should not load the form and displays error modal instead', function() {
+    it('for a create-only table, the app should not load the form and displays error modal instead', function() {
         url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
         modalBody = element(by.css('.modal-body'));
 
@@ -26,7 +26,7 @@ describe('When viewing RecordEdit app', function() {
         });
     });
 
-    it('as a read-only user, the app should not load the form and displays error modal instead', function() {
+    it('for a read-only table, the app should not load the form and displays error modal instead', function() {
         url = baseUrl + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
         modalBody = element(by.css('.modal-body'));
 
@@ -36,7 +36,7 @@ describe('When viewing RecordEdit app', function() {
         });
     });
 
-    it('as a delete-only user, the app should not load the form and displays error modal instead', function() {
+    it('for a delete-only table, the app should not load the form and displays error modal instead', function() {
         url = baseUrl + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
         modalBody = element(by.css('.modal-body'));
 
@@ -46,18 +46,12 @@ describe('When viewing RecordEdit app', function() {
         });
     });
 
-    describe('as a user who can update (and create)', function() {
+    describe('for a table that allows create and edit, ', function() {
         beforeAll(function() {
             browser.get(baseUrl + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.waitForElement(element(by.id('page-title'))).then(function() {
                 expect(element(by.id('page-title')).isDisplayed()).toBe(true);
             });
-        });
-
-        it('should not display the delete button', function() {
-            var button = recordEditPage.getDeleteRecordButton();
-            expect(button.isPresent()).toBe(false);
-            // The inverse of this case is tested in RecordEdit presentation spec.
         });
 
         describe('the FK search popup modal should have the select button in the action column and', function() {
@@ -118,40 +112,15 @@ describe('When viewing RecordEdit app', function() {
                 });
             });
         });
-
     });
 
-    describe('user should be shown login modal', function() {
-        beforeAll(function(done) {
-            chaisePage.performLogin(process.env.AUTH_COOKIE + "expires=Thu, 01 Jan 1970 00:00:01 GMT;", true).then(function() {
-                browser.ignoreSynchronization = true;
-                done();
-            }, function(err) {
-                browser.ignoreSynchronization = true;
-                console.log(err);
-                done.fail();
-            });
-        });
-
-        it("as anonymous user", function() {
-            url = baseUrl + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value;
-            modalBody = element(by.css('.modal-body'));
-
-            browser.get(url);
-            chaisePage.waitForElement(modalBody).then(function() {
-                expect(modalBody.isDisplayed()).toBe(true, "modal body is not displayed");
-                expect(element(by.css('.modal-title')).isPresent()).toBe(true, "modal title is not present");
-                expect(element(by.css('.modal-title')).getText()).toBe('You need to be logged in to continue.', "modal title text is incorrect");
-            });
-        });
-
-        afterAll(function(done) {
-            chaisePage.performLogin(process.env.AUTH_COOKIE, false).then(function() {
-                done();
-            }, function(err) {
-                console.log(err);
-                done.fail();
-            });
+    // navigate away from the recordedit page so it doesn't interfere with other tests
+    afterAll(function (done) {
+        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:main_update_table");
+        browser.switchTo().alert().then(function (alert) {
+            alert.accept();
+        }).catch(function () {}).finally(function () {
+            done();
         });
     });
 });

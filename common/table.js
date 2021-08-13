@@ -456,7 +456,18 @@
             logParams.action = getTableLogAction(vm, act);
 
             (function (current, requestCauses, reloadStartTime) {
-                vm.reference.read(vm.pageLimit, logParams).then(function (page) {
+                // the places that we want to show edit or delete button, we should also ask for trs
+                // NOTE technically this should be based on passed config options but we're passing editable
+                //      to mean both edit and create, so it's not really useful here
+                var getTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 ||
+                             vm.config.displayMode === recordsetDisplayModes.fullscreen;
+
+                // if it's in related entity section, we should fetch the
+                // unlink trs (acl) of association tables
+                var getUnlinkTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 &&
+                                   vm.reference.derivedAssociationReference;
+
+                vm.reference.read(vm.pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
@@ -830,8 +841,12 @@
             // get the aggregate values only if main page is loaded
             updateColumnAggregates(vm, _updatePage);
 
-            // update the count
-            _updateMainCount(vm, _updatePage);
+            // do not fetch table count if hideRowCount is set in the annotation for the table
+            // this is because the query takes too long sometimes
+            if(!vm.reference.display || !vm.reference.display.hideRowCount){
+                // update the count
+                _updateMainCount(vm, _updatePage);
+            }
 
             // update the facets
             if (vm.facetModels) {
@@ -1207,6 +1222,15 @@
                 }
                 _attachExtraAttributes(scope.vm);
             });
+
+            /**
+             * When the directive DOM is loaded, all the elements that 
+             * we need for top-horizontal logic are loaded as well and therefore
+             * we don't need to wait for any condition.
+             * NOTE if we add a condition to hide an element, we should add a 
+             * watcher for this one as well.
+             */
+            UiUtils.addTopHorizontalScroll(elem[0]);
         }
 
         /**
@@ -1826,6 +1850,21 @@
                         }
                     }
                     return label + records;
+                };
+
+                scope.canCreate = function () {
+                    return scope.vm.config.editable && scope.vm.reference && scope.vm.reference.canCreate;
+                };
+
+                scope.canUpdate = function () {
+                    var res = scope.vm.config.editable && scope.vm.page && scope.vm.reference && scope.vm.reference.canUpdate;
+                    // make sure at least one row can be updated
+                    if (res) {
+                        return scope.vm.page.tuples.some(function (t) {
+                            return t.canUpdate;
+                        });
+                    }
+                    return false;
                 }
 
             }

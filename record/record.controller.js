@@ -54,7 +54,7 @@
         };
 
         vm.canEdit = function() {
-            var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+            var canEdit = ($rootScope.tuple && $rootScope.tuple.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
 
@@ -79,7 +79,7 @@
         };
 
         vm.canDelete = function() {
-            return ($rootScope.reference && $rootScope.reference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
+            return ($rootScope.tuple && $rootScope.tuple.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
         };
 
         vm.deleteRecord = function() {

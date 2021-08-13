@@ -3,15 +3,18 @@
 This documentation focuses on navbar and how it can be used in external HTML pages.
 
 ## Table of Contents
-- [How to add navbar app](#how-to-add-navbar-app)
-  * [1. Install Chaise](#1-install-chaise)
-  * [2. Include Chaise dependencies](#2-include-chaise-dependencies)
-    + [2.1. Prefetch Chaise dependencies](#21-prefetch-chaise-dependencies-optional)
-    + [2.2. Prefetch custom styles](#22-prefetch-custom-styles-optional)
-  * [3. Use navbar](#3-use-navbar)
-  * [4. Configuring navbar](#4-configuring-navbar)
-- [Sample HTML page](#sample-html-page)
-- [Notes](#notes)
+- [Use navbar app in external HTML pages](#use-navbar-app-in-external-html-pages)
+  - [Table of Contents](#table-of-contents)
+  - [How to add navbar app](#how-to-add-navbar-app)
+    - [1. Install Chaise](#1-install-chaise)
+    - [2. Include Chaise dependencies](#2-include-chaise-dependencies)
+      - [2.1. Prefetch Chaise dependencies (optional)](#21-prefetch-chaise-dependencies-optional)
+      - [2.2. Prefetch custom styles (optional)](#22-prefetch-custom-styles-optional)
+    - [3. Use navbar](#3-use-navbar)
+  - [Sample HTML page](#sample-html-page)
+  - [4. Configuring Navbar](#4-configuring-navbar)
+  - [5. How to customize navbar UI](#5-how-to-customize-navbar-ui)
+  - [Notes](#notes)
 
 ## How to add navbar app
 
@@ -115,13 +118,82 @@ The `navbarMenu` property is the most complex of the above properties. This para
    - More info can be found in the [templating document](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/mustache-templating.md)
  - The header property of each menu object will create an unclickable bold header with class chaise-dropdown-header when set to `true`. 
 
+## 5. How to customize navbar UI
+
+With the current HTML structure, it is possible to apply different styles to customize the appearance. Overriding these selectors can help -
+
+```css
+/* change the navbar background color */
+.navbar-inverse {
+    background-color: YOUR_VALUE;
+}
+```
+
+```css
+/* change the brand text color */
+.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a {
+    color: YOUR_VALUE;
+}
+```
+
+```css
+/* change the color of options */
+   .navbar-inverse .navbar-nav>li>a {color: YOUR_VALUE; font-size: YOUR_VALUE;}
+   .navbar-inverse .navbar-nav>li>a:hover {color: YOUR_VALUE;}
+   .navbar-inverse .navbar-nav>li>a:visited {color: YOUR_VALUE;
+}
+```
+
+```css
+/* change the minimum height of navbar */
+.navbar {
+	  min-height: YOUR_VALUE;
+}
+```
+
+```css
+/* we get a vertical navbar when the width is lesser than the content, you can change the max-height of that navbar after which we will see a scrollbar to ensure it doesn’t take over the entire page (default if not customized is 340px) */
+.navbar-collapse {
+	  max-height: YOUR_VALUE;
+}
+```
+
 ## Notes
+
+1. Some CSS rules in Chaise might conflict with the ones used in your HTML page. Also the CSS rules that you have on your static page might affect navbar. So if you're seeing some wierd UIs, it could be because of these clashing rules. When navbar app is completely loaded, the following is the rough structure of the elements that it will create. If you have some CSS rules that apply to these elements, they will also apply to navbar and can cause issues:
+    ```html
+    <navbar class="ng-scope ng-isolate-scope">
+      <header lass="row">
+        <nav id="mainnav" class="navbar navbar-inverse">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="md-chevron-down"></span>
+              MENU
+            </button>
+            <a class="navbar-brand">
+              <!-- the navbar brand and logo -->
+            </a>
+          </div>
+
+          <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
+            <ul id="navbar-menu" class="nav navbar-nav">
+              <!-- menu options -->
+            </ul>
+
+            <!-- other parts of navbar (login, profile, search by rid, etc) -->
+
+          </div>
+        </nav>
+      </header>
+    </navbar>
+    ```
+
+
 
 1. The bootstrap and jQuery versions of the HTML page might be different from the ones used in Chaise. This might produce some inconsistent behavior on the HTML page.
 
 2. Regardless of prefetching or allowing Navbar app to include the dependencies for you, it will fetch ERMrestJS. This might cause some issues if your page is already including ERMrestJS. It's better if you let Navbar app include it for you.
-
-3. Some CSS classes in Chaise might conflict with the ones used in your HTML page.
 
 4. Since navbar is going to take some time to load, if you want to make sure you're showing navbar and the rest of the page together, you can use the following class names:
     - `wait-for-navbar`: This class should be used on an element that is wrapping the entire content of your page (including navbar). Chaise will set a `visibility:hidden` on this element and will only set it to `visibility:visible` when the navbar is loaded.

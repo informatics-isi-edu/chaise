@@ -271,10 +271,7 @@
                 },
                 acls: {
                     mainImage: {
-                        canUpdate: false
-                    },
-                    channels: {
-                        canUpdate: false
+                        canUpdateDefaultZIndex: false
                     }
                 },
                 isProcessed: true
@@ -342,14 +339,13 @@
          * Send request to image channel table and returns a promise that is resolved
          * returns {
          *   channelURLs: [{url, channelNumber}], // used for backward compatibility
-         *   channelList: [{channelNumber, channelName, isRGB, pseudoColor}]
-         *   acls: {canUpdate}
+         *   channelList: [{channelNumber, channelName, isRGB, pseudoColor, acls: {canUpdateConfig}}],
          * }
          *
          */
         function _readImageChannelTable() {
             console.log("reading channel table");
-            var defer = $q.defer(), channelList = [], channelURLs = [], canUpdate = false;
+            var defer = $q.defer(), channelList = [], channelURLs = [];
 
             // TODO should be done in ermrestjs
             var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
@@ -363,8 +359,6 @@
                 if (!ref) {
                     return false;
                 }
-
-                canUpdate = ref.canUpdate;
 
                 channelSetLogStackPath = logService.getStackPath("", logService.logStackPaths.CHANNEL_SET);
                 channelSetLogStack = logService.getStackObject(
@@ -393,6 +387,10 @@
 
                         // create the channel info
                         var res = {};
+
+                        res.acls = {
+                            canUpdateConfig: t.canUpdate && t.checkPermissions("column_update", channelConfig.channel_config_column_name)
+                        };
 
                         res[osdConstant.CHANNEL_NUMBER_QPARAM] = channelNumber; // not-null
 
@@ -434,7 +432,9 @@
                 ref = ref.contextualize.compact.sort(channelConfig.column_order);
 
                 // send request to server
-                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, true, cb);
+                // since we want to check the ACL for updating the channel config we have to ask for TCRS
+                // NOTE we cannot ask for entity since we want the TCRS info
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, true, cb);
             }).then(function () {
                 // if any of the urls are null, we shouldn't use any of the urls
                 if (hasNull) {
@@ -442,8 +442,7 @@
                 }
                 defer.resolve({
                     channelURLs: channelURLs, // backward compatibility
-                    channelList: channelList,
-                    acls: {canUpdate: canUpdate}
+                    channelList: channelList
                 });
             }).catch(function (err) {
                 defer.reject(err);
@@ -504,7 +503,7 @@
                 ref = ref.contextualize.compact.sort(pImageConfig.column_order);
 
                 // send request to server
-                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, cb);
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, false, cb);
             }).then(function () {
                 if (hasNull) {
                     mainImageInfo = [];
@@ -528,14 +527,22 @@
 
             var displayMethod = data[pImageConfig.display_method_column_name];
             if (displayMethod in pImageConfig.image_url_pattern) {
-                imageURL = UriUtils.getAbsoluteURL(imageURL);
+                var absImageURL = UriUtils.getAbsoluteURL(imageURL);
 
                 var iiifVersion = viewerConstant.DEFAULT_IIIF_VERSION;
                 if (DataUtils.isNoneEmptyString(pImageConfig.iiif_version)) {
                     iiifVersion = pImageConfig.iiif_version;
                 }
 
-                imageURL = ERMrest.renderHandlebarsTemplate(pImageConfig.image_url_pattern[displayMethod], {"url": imageURL, "iiif_version": iiifVersion});
+                imageURL = ERMrest.renderHandlebarsTemplate(
+                    pImageConfig.image_url_pattern[displayMethod],
+                    {
+                        "_url": imageURL,
+                        "url": absImageURL,
+                        "_iiif_version": iiifVersion,
+                        "iiif_version": iiifVersion
+                    }
+                );
             }
 
             return imageURL;
@@ -640,7 +647,8 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, cb);
+                // since we want to check the ACL for allowing edit/delete of annotations we have to has for TCRS
+                return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, true, cb);
             }).then(function (res) {
                 defer.resolve(res);
             }).catch(function (err) {
@@ -973,8 +981,6 @@
             _readImageChannelTable().then(function (res) {
                 $rootScope.osdViewerParameters.channels = res.channelList;
 
-                $rootScope.osdViewerParameters.acls.channels = res.acls;
-
                 // backward compatibility
                 channelURLs = res.channelURLs;
 
@@ -1040,14 +1046,13 @@
             var defer = $q.defer();
 
             Session.validateSessionBeforeMutation(function () {
-                // TODO hacky
-                var oldData = $rootScope.tuple.data;
-                var newData = JSON.parse(JSON.stringify(oldData));
-                newData[imageConfig.default_z_index_column_name] = zIndex;
 
-                var tuples = [
-                    {data: newData, _oldData: oldData}
-                ];
+                var ref = $rootScope.reference.contextualize.entryEdit;
+
+                // NOTE using a private API
+                var page = ERMrest._createPage(ref, null, [$rootScope.tuple.data],false, false);
+                page.tuples[0].data[imageConfig.default_z_index_column_name] = zIndex;
+
                 var stack = logService.addExtraInfoToStack(null, {
                     "updated_vals": {
                         "cols": [imageConfig.default_z_index_column_name],
@@ -1058,7 +1063,7 @@
                     action: logService.getActionString(logService.logActions.UPDATE),
                     stack: stack
                 };
-                $rootScope.reference.contextualize.entryEdit.update(tuples, logObj).then(function () {
+                ref.update(page.tuples, logObj).then(function () {
                     AlertsService.addAlert("Default Z index value has been updated.", "success");
                     defer.resolve();
                 }).catch(function (exception) {
@@ -1160,9 +1165,9 @@
          * since we don't know the size of our requests, this will make sure the
          * requests are done in batches until all the values are processed.
          */
-        function _readPageByPage (ref, pageSize, logObj, useEntity, cb) {
+        function _readPageByPage (ref, pageSize, logObj, useEntity, getTCRS, cb) {
             var defer = $q.defer();
-            ref.read(pageSize, logObj, useEntity, true).then(function (page){
+            ref.read(pageSize, logObj, useEntity, true, false, getTCRS).then(function (page){
                 if (page && page.length > 0) {
                     var cb_res = cb(page);
                     if (cb_res === false) {
@@ -1173,7 +1178,7 @@
                 }
 
                 if (page.hasNext) {
-                    return _readPageByPage(page.next, pageSize, logObj, useEntity, cb);
+                    return _readPageByPage(page.next, pageSize, logObj, useEntity, getTCRS, cb);
                 }
                 return true;
             }).then(function (res) {

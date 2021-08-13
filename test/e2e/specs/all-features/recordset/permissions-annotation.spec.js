@@ -1,4 +1,4 @@
-// The goal of this spec is to test whether Recordset app correctly displays the right UI controls given different user permission levels
+// The goal of this spec is to test whether Recordset app correctly displays the right UI controls based on annotation
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordsetPage = chaisePage.recordsetPage;
 var testParams = {
@@ -19,7 +19,7 @@ describe('When viewing Recordset app', function() {
         browser.ignoreSynchronization = true;
     });
 
-    describe('as a read-only user', function() {
+    describe('for a read-only table', function() {
         beforeAll(function() {
             browser.get(url + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
@@ -72,7 +72,7 @@ describe('When viewing Recordset app', function() {
         });
     });
 
-    describe('a user who can only create', function() {
+    describe('for a create-only table', function() {
         beforeAll(function() {
             browser.get(url + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
@@ -118,7 +118,7 @@ describe('When viewing Recordset app', function() {
         });
     });
 
-    describe('as a user who can update (and create)', function() {
+    describe('for a table that allows edit and create (but no delete)', function() {
         beforeAll(function() {
             browser.get(url + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
@@ -163,7 +163,7 @@ describe('When viewing Recordset app', function() {
         });
     });
 
-    describe('as a delete-only user', function() {
+    describe('for a delete-only table', function() {
         beforeAll(function() {
             browser.get(url + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();

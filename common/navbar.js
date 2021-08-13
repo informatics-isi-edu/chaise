@@ -27,6 +27,7 @@
             var openDropdowns = document.querySelectorAll(".dropdown.open ul");
             [].forEach.call(openDropdowns, function(el) {
                 checkHeight(el, window.innerHeight);
+                checkWidth(el, window.innerWidth);
             });
         }
     }
@@ -43,6 +44,28 @@
         if ((dropdownHeight + fromTop) > winHeight) {
             var newHeight = winHeight - fromTop - footerBuffer;
             ele.style.height = newHeight + "px";
+        }
+    }
+
+    // Function to open the menu on the left if not enough space on right
+    function checkWidth(ele, winWidth) {
+        //revert to defaults
+        ele.classList.remove("dropdown-menu-right");
+        ele.style.width = "max-content";
+
+        // If dropdown is spilling over
+        if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
+            ele.style.width = "max-content";
+        }
+        else {
+            var visibleContent =  winWidth - ele.getBoundingClientRect().left;
+            //hard-coded limit of width for opening on the left hand side
+            if (Math.round(visibleContent) < 200) {
+                ele.classList.add("dropdown-menu-right");
+            }
+            else {
+                ele.style.width = visibleContent + "px";
+            }
         }
     }
 
@@ -72,6 +95,7 @@
       }
 
       var menuTarget = getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+      menuTarget.style.width = "max-content";
       var immediateParent = target.offsetParent; // parent, <li>
       var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
       var posValues = getOffsetValue(immediateParent);
@@ -83,7 +107,7 @@
           menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
       }
 
-      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 5 + 'px';
+      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
 
       var open = !menuTarget.classList.contains("show");
 
@@ -105,6 +129,28 @@
           [].forEach.call(openSubmenus, function(el) {
               checkHeight(el, window.innerHeight);
           });
+      }
+
+      //If not enough space to expand on right
+      var widthOfSubMenu = menuTarget.offsetWidth;
+      var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
+      
+      if (submenuEndOnRight > window.innerWidth) {
+          var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
+          var visibleContent = window.innerWidth - submenuEndOnLeft;
+
+          if (visibleContent < 200) {
+            menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
+          }
+          else {
+            menuTarget.style.width = visibleContent + "px";
+          }
+      }
+      else {
+          // if vertical scrollbar then offset a bit more to make scrollbar visible
+        if (parent.scrollHeight > parent.clientHeight) {
+            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
+          }
       }
 
       return open;

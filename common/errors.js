@@ -569,17 +569,27 @@
                 // change defaults
                 pageName = "Recordset";
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
+            } 
+            else if (ERMrest && exception instanceof ERMrest.InvalidServerResponse) {
+                if (!skipLogging) {
+                    logError(exception, ConfigUtils.getContextHeaderParams());
+                }
+                message = errorMessages.systemAdminMessage;
+                subMessage = exception.message;
+            }
+            else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
-            } else if (exception instanceof Errors.CustomError ) {
+            } 
+            else if (exception instanceof Errors.CustomError ) {
                 if (!skipLogging) {
-                    logError(exception);
+                    logError(exception, ConfigUtils.getContextHeaderParams());
                 }
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (!assetPermissionError) {
+            }
+            else if (!assetPermissionError) {
                 if (!skipLogging) {
-                    logError(exception);
+                    logError(exception, ConfigUtils.getContextHeaderParams());
                 }
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
@@ -628,10 +638,16 @@
  * Log the error in ermrest
  * @param  {object} error the error object
  */
-var logError = function (error) {
+var logError = function (error, contextHeaderParams) {
     if (!ERMrest) return;
     var ermrestUri = (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest');
-    ERMrest.logError(error, ermrestUri).then(function () {
+
+    if (!contextHeaderParams || typeof contextHeaderParams !== "object" && 
+        typeof window.dcctx === "object" && typeof window.dcctx.contextHeaderParams === "object") {
+        contextHeaderParams = window.dcctx.contextHeaderParams;
+    }
+
+    ERMrest.logError(error, ermrestUri, contextHeaderParams).then(function () {
         console.log("logged the error");
     }).catch(function (err) {
         console.log("couldn't log the error.");

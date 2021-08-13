@@ -37,6 +37,24 @@ var recordEditPage = function() {
         return element.all(by.css("td.entity-key > span.column-displayname > span"));
     };
 
+    this.getAllColumnPermissionOverlays = function () {
+      return element.all(by.css(".column-permission-overlay"));
+    }
+
+    this.getColumnPermissionOverlay = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));
+    }
+
+    this.getColumnPermissionError = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-warn"));
+    };
+
+    this.getDisabledRowIcon = function (rowIndex) {
+        return element.all(by.css('.form-header')).get(rowIndex).all(by.css('.disabled-row-icon'));
+    }
+
     this.getColumnCaptionsWithHtml = function() {
         return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
@@ -419,10 +437,6 @@ var recordEditPage = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
-    this.getDeleteRecordButton = function () {
-        return element(by.id("delete-button"));
-    };
-
     this.getSubmitRecordButton = function () {
         return element(by.id("submit-record-button"));
     };
@@ -442,6 +456,22 @@ var recordEditPage = function() {
 
     this.getClearButton = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().parent().find('.glyphicon-remove')[0]", el);
+    };
+
+    this.getDisabledResultSet = function () {
+        return element(by.id("resultset-disabled-table"));
+    };
+
+    this.getDisabledResultSetHeader = function () {
+        return element(by.id("resultset-disabled-table")).element(by.tagName("h3"));
+    };
+
+    this.getDisabledResultSetRows = function () {
+        return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
+    };
+
+    this.getRecordSetTable = function() {
+        return element(by.className('recordset-table'));
     };
 };
 
@@ -579,12 +609,12 @@ var recordPage = function() {
 
     this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName, isInline);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".edit-action-button"));
     };
 
     this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -1102,6 +1132,10 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
+    this.getModalTotalCount = function () {
+        return element(by.css(".modal-body")).element(by.css('.chaise-table-header-total-count'));
+    };
+
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
@@ -1272,6 +1306,7 @@ function chaisePage() {
         return this.waitForElement(element(by.css(".recordset-table")));
     }
     this.recordPageReady = function() {
+        this.waitForElement(this.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.id('tblRecord')));
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
@@ -1442,11 +1477,14 @@ function chaisePage() {
             browser.ignoreSynchronization = false;
             defer.resolve();
         }).catch(function (err) {
+            console.dir(err);
             defer.reject(err);
         });
 
         return defer.promise;
     };
+
+    this.get
 
     this.waitForAggregates = function (timeout) {
         var locator = element.all(by.css('.aggregate-col-loader'));
