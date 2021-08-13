@@ -2141,6 +2141,30 @@
             return mode;
         }
 
+        function initializeSavingQueries() {
+            var chaiseConfig = getConfigJSON();
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            // TODO: this will be moved to per table
+
+            var savedQuery = {
+                showUI: (chaiseConfig.showSavedQueryUI === true ? true : false)
+            }
+
+            // NOTE: if this is not set, saved query UI should probably be turned off
+            if (chaiseConfig.savedQueryConfig && chaiseConfig.savedQueryConfig.storageTable) {
+                var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                savedQuery.showUI = false;
+            }
+
+            return savedQuery;
+        }
+
         return {
             configureAngular: configureAngular,
             decorateTemplateRequest: decorateTemplateRequest,
@@ -2149,6 +2173,7 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
+            initializeSavingQueries: initializeSavingQueries,
             systemColumnsMode: systemColumnsMode,
             getSettings: getSettings
         }

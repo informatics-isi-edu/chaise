@@ -1271,15 +1271,35 @@
                 document.body.removeChild(dummy[0]);
             }
 
-            // string constant used for both saved query functions
-            var facetTxt = "*::facets::";
-            scope.saveQuery = function () {
-                var chaiseConfig = ConfigUtils.getConfigJSON();
-
+            if (scope.showSavedQueryUI) {
                 ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    scope.vm.savedQueryReference = savedQueryReference;
+                }).catch(function (error) {
+                    // an error here could mean a misconfiguration of the saved query ermrest table path
+                    $log.warn(error);
+
+                    throw error;
+                });
+
+                var _disableSavedQueryButton;
+                scope.disableSavedQueryButton = function () {
+                    if (_disableSavedQueryButton === undefined && scope.vm.savedQueryReference) {
+                        // if insert is false, disable the button
+                        // should this be checking for insert !== true
+                        _disableSavedQueryButton = !scope.vm.savedQueryReference.table.rights.insert;
+                    }
+
+                    return _disableSavedQueryButton;
+                }
+
+                // string constant used for both saved query functions
+                var facetTxt = "*::facets::";
+                scope.saveQuery = function () {
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
+
                     var columnModels = [];
 
-                    savedQueryReference = savedQueryReference.contextualize.entryCreate;
+                    var savedQueryReference = scope.vm.savedQueryReference.contextualize.entryCreate;
 
                     var rowData = {
                         rows: [{}],
@@ -1295,11 +1315,13 @@
 
                     // grab facet blob from parent reference
                     // to get the beginning of where to substring from, look for the `*::facets::` string
+                    var facetTextIdx = scope.vm.reference.uri.indexOf(facetTxt);
                     // then add length since indexOf is the index of the first character in matched string
-                    var facetString = scope.vm.reference.uri.substring(scope.vm.reference.uri.indexOf(facetTxt) + facetTxt.length);
+                    // if no facetText, use empty string
+                    var facetString = facetTextIdx != -1 ? scope.vm.reference.uri.substring(facetTextIdx + facetTxt.length) : null;
 
-                    rowData.rows[0].encoded_facets = facetString;
-                    rowData.rows[0].facets = ERMrest.decodeFacet(facetString);
+                    rowData.rows[0].encoded_facets = facetString || "";
+                    rowData.rows[0].facets = facetString ? ERMrest.decodeFacet(facetString) : {};
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
@@ -1314,6 +1336,7 @@
                         resolve: {
                             params: {
                                 reference: savedQueryReference,
+                                parentReference: scope.vm.reference,
                                 columnModels: columnModels,
                                 rowData: rowData
                             }
@@ -1322,64 +1345,68 @@
                         // notify user of success before closing
                         AlertsService.addAlert("Query saved.", "success");
                     }, null, false, false);
-                });
-            }
-
-            scope.showSavedQueries = function () {
-                var chaiseConfig = ConfigUtils.getConfigJSON();
-
-                var facetBlob = {
-                    and: [{
-                        choices: [scope.vm.reference.table.name],
-                        source: "table_name" // name of column storing table name in saved_query table
-                    }]
                 }
 
-                ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
-                    // we don't want to allow faceting in the popup
-                    savedQueryReference = savedQueryReference.contextualize.compactSelect.hideFacets();
+                scope.showSavedQueries = function () {
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
 
-                    var params = {};
+                    var facetBlob = {
+                        and: [{
+                            choices: [scope.vm.reference.table.name],
+                            source: "table_name" // name of column storing table name in saved_query table
+                        }]
+                    }
 
-                    params.parentReference = scope.vm.reference;
-                    params.saveQueryRecordset = true;
-                    // used popup/savedquery so that we can configure which button to show and change the modal title
-                    params.displayMode = recordsetDisplayModes.savedQuery;
-                    params.reference = savedQueryReference;
-                    params.selectedRows = [];
-                    params.showFaceting = false;
-                    // faceting not allowed, make sure panel is collapsed too just in case
-                    params.facetPanelOpen = false;
-                    params.allowDelete = true;
+                    ERMrest.resolve(scope.vm.savedQueryReference.uri + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                        // we don't want to allow faceting in the popup
+                        savedQueryReference = savedQueryReference.contextualize.compactSelect.hideFacets();
 
-                    // TODO: fix logging stuff
-                    var stackElement = logService.getStackNode(
-                        logService.logStackTypes.SET,
-                        params.reference.table,
-                        {source: savedQueryReference.compressedDataSource, entity: true}
-                    );
+                        var params = {};
 
-                    var logStack = logService.getStackObject(stackElement),
+                        params.parentReference = scope.vm.reference;
+                        params.saveQueryRecordset = true;
+                        // used popup/savedquery so that we can configure which button to show and change the modal title
+                        params.displayMode = recordsetDisplayModes.savedQuery;
+                        params.reference = savedQueryReference;
+                        params.selectedRows = [];
+                        params.showFaceting = false;
+                        // faceting not allowed, make sure panel is collapsed too just in case
+                        params.facetPanelOpen = false;
+                        params.allowDelete = true;
+
+                        // TODO: fix logging stuff
+                        var stackElement = logService.getStackNode(
+                            logService.logStackTypes.SET,
+                            params.reference.table,
+                            {source: savedQueryReference.compressedDataSource, entity: true}
+                        );
+
+                        var logStack = logService.getStackObject(stackElement),
                         logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
 
-                    params.logStack = logStack;
-                    params.logStackPath = logStackPath;
+                        params.logStack = logStack;
+                        params.logStackPath = logStackPath;
 
-                    modalUtils.showModal({
-                        animation: false,
-                        controller: "SearchPopupController",
-                        windowClass: "search-popup",
-                        controllerAs: "ctrl",
-                        resolve: {
-                            params: params
-                        },
-                        size: "lg",
-                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-                    }, function (res) {
-                        // ellipsis creates a link attached to the button instead of returning here to redirect
-                        // TODO: return from modal and update page instead of reloading
-                    }, null, false, false);
-                });
+                        modalUtils.showModal({
+                            animation: false,
+                            controller: "SearchPopupController",
+                            windowClass: "search-popup",
+                            controllerAs: "ctrl",
+                            resolve: {
+                                params: params
+                            },
+                            size: "lg",
+                            templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+                        }, function (res) {
+                            // ellipsis creates a link attached to the button instead of returning here to redirect
+                            // TODO: return from modal and update page instead of reloading
+                        }, null, false, false);
+                    }).catch(function (error) {
+                        $log.warn(error);
+
+                        throw error;
+                    });
+                }
             }
 
             scope.toggleFacetPanel = function () {

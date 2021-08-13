@@ -340,10 +340,11 @@
             search:             reference.location.searchTerm,
             config:             {
                 viewable:           false,
-                deletable:          (typeof params.allowDelete === "boolean") ? params.allowDelete : false,
+                deletable:          (typeof params.allowDelete === "boolean") ? params.allowDelete : false, // saved query mode we want to allow delete (per row)
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
-                showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showFaceting:       showFaceting,
+                facetPanelOpen: params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
@@ -624,6 +625,7 @@
         var vm = this;
         vm.alerts = AlertsService.alerts;
         vm.columnModels = params.columnModels;
+        vm.parentReference = params.parentReference;
         vm.savedQueryForm = params.rowData;
 
         vm.form = {

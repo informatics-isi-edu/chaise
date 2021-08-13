@@ -117,6 +117,9 @@
             throw error;
         }
 
+        // TODO: this will be moved to per table
+        $rootScope.savedQuery = ConfigUtils.initializeSavingQueries();
+
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
         var ermrestUri = res.ermrestUri,
             pcid = res.pcid,

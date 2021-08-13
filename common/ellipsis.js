@@ -119,10 +119,9 @@
                     if (isSavedQueryPopup) {
                         // NOTE: assume relative to reference the user is viewing
                         // encoded_facets column might not be a part of the rowValues so get from tuple.data (prevents formatting being applied as well)
-                        var ermrestPath = scope.tableModel.parentReference.unfilteredReference.uri + "/*::facets::" + scope.tuple.data.encoded_facets;
-                        // if (ermrestPath === scope.tableModel.parentReference.uri) {
-                        //     // add alert notifying the user they are viewing this saved query already
-                        // }
+                        // some queries might be saved withoug any facets selected meaning this shouldn't break
+                        var facetString = scope.tuple.data.encoded_facets ? "/*::facets::" + scope.tuple.data.encoded_facets : "";
+                        var ermrestPath = scope.tableModel.parentReference.unfilteredReference.uri + facetString;
                         ERMrest.resolve(ermrestPath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryRef) {
                             var savedQueryLink = savedQueryRef.contextualize.compact.appLink;
                             var qCharacter = savedQueryLink.indexOf("?") !== -1 ? "&" : "?";
@@ -130,6 +129,10 @@
                             //    "updateFacets on main entity and add to browser history stack"
                             // after update, put last_execution_time as "now"
                             scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
+                        }).catch(function (error) {
+                            $log.warn(error);
+
+                            throw error;
                         });
                     }
 
