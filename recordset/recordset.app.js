@@ -34,6 +34,7 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
@@ -113,6 +114,8 @@
 
             context.catalogID = res.catalogId;
 
+            // TODO: this will be moved to per table
+            $rootScope.savedQuery = ConfigUtils.initializeSavingQueries();
 
             FunctionUtils.registerErmrestCallbacks();
 

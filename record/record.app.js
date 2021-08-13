@@ -86,6 +86,9 @@
 
         context.catalogID = res.catalogId;
 
+        // TODO: this will be moved to per table
+        $rootScope.savedQuery = ConfigUtils.initializeSavingQueries();
+
         FunctionUtils.registerErmrestCallbacks();
 
         // Subscribe to on change event for session

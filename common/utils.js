@@ -11,7 +11,8 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+        "showSavedQueryUI", "savedQueryConfig", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -38,6 +39,8 @@
           "logClientActions": true,
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
+          "showSavedQueryUI": false,
+          "savedQueryConfig": null,
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -162,7 +165,8 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
-        facetPopup: "popup/facet"
+        facetPopup: "popup/facet",
+        savedQuery: "popup/savedquery"
     })
 
     .constant("defaultDisplayname", {
@@ -2195,6 +2199,30 @@
             return mode;
         }
 
+        function initializeSavingQueries() {
+            var chaiseConfig = getConfigJSON();
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            // TODO: this will be moved to per table
+
+            var savedQuery = {
+                showUI: (chaiseConfig.showSavedQueryUI === true ? true : false)
+            }
+
+            // NOTE: if this is not set, saved query UI should probably be turned off
+            if (chaiseConfig.savedQueryConfig && chaiseConfig.savedQueryConfig.storageTable) {
+                var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                savedQuery.showUI = false;
+            }
+
+            return savedQuery;
+        }
+
         return {
             configureAngular: configureAngular,
             decorateTemplateRequest: decorateTemplateRequest,
@@ -2203,6 +2231,7 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
+            initializeSavingQueries: initializeSavingQueries,
             systemColumnsMode: systemColumnsMode,
             getSettings: getSettings
         }
@@ -2742,6 +2771,7 @@
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",

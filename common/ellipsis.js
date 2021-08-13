@@ -3,8 +3,8 @@
 
     angular.module('chaise.ellipsis', ['chaise.utils'])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
@@ -111,7 +111,30 @@
 
                     var tupleReference = scope.tuple.reference,
                         isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
+                        isSavedQueryPopup = scope.config.displayMode === recordsetDisplayModes.savedQuery,
                         associationRef;
+
+                    // apply saved query link
+                    // show the apply saved query button for (compact/select savedQuery popup)
+                    if (isSavedQueryPopup) {
+                        // NOTE: assume relative to reference the user is viewing
+                        // encoded_facets column might not be a part of the rowValues so get from tuple.data (prevents formatting being applied as well)
+                        // some queries might be saved withoug any facets selected meaning this shouldn't break
+                        var facetString = scope.tuple.data.encoded_facets ? "/*::facets::" + scope.tuple.data.encoded_facets : "";
+                        var ermrestPath = scope.tableModel.parentReference.unfilteredReference.uri + facetString;
+                        ERMrest.resolve(ermrestPath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryRef) {
+                            var savedQueryLink = savedQueryRef.contextualize.compact.appLink;
+                            var qCharacter = savedQueryLink.indexOf("?") !== -1 ? "&" : "?";
+                            // TODO: change from HTML link to refresh page to:
+                            //    "updateFacets on main entity and add to browser history stack"
+                            // after update, put last_execution_time as "now"
+                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
+                        }).catch(function (error) {
+                            $log.warn(error);
+
+                            throw error;
+                        });
+                    }
 
                     // view link
                     if (scope.config.viewable) {
