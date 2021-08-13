@@ -325,7 +325,7 @@
         text-align: center;
         font-size: 1.2rem;
         // since we're increasing the size of icons, we should decrease the padding
-        padding: 5px 5px 0 5px;
+        padding: 5px 0 0 0;
 
         .chaise-btn {
             padding: 0;
@@ -475,10 +475,6 @@ faceting {
         width: 1px;
     }
 
-    .favorite-icon {
-        display: none !important;
-    }
-
     .js-plotly-plot {
         height: 150px;
         margin-left: -5px;
@@ -534,31 +530,8 @@ faceting {
         margin-left: 5px;
     }
 
-    li {
-        .favorite-icon {
-            top: 2px;
-            margin-right: 10px;
-            cursor: pointer;
-            font-size: 18px;
-
-            &.glyphicon-star {
-                color: goldenrod;
-            }
-
-            // glyphicon-star-empty
-            &.hover-show {
-                display: none;
-            }
-
-        }
-
-        &:hover {
-            background-color: rgb(241, 241, 241);
-
-            .hover-show {
-                display: inline-block;
-            }
-        }
+    li:hover {
+        background-color: rgb(241, 241, 241);
     }
 }
 

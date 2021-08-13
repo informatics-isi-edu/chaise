@@ -1915,16 +1915,6 @@
                     scope.onRowClick(row, $event);
                 }
 
-                scope.toggleFavorite = function (row) {
-                    // row.tuple can get all information about the row and create a request to favorite the term
-                    console.log("favorite: ", row.displayname.value);
-                    row.isFavorite = !row.isFavorite;
-
-                    console.log(row);
-                    var favoriteTablePath = "/ermrest/catalog/registry/entity/CFDE:favorite_" + row.tuple.reference.table.name;
-                    console.log(favoriteTablePath);
-                }
-
                 scope.$watch('initialized', function (newVal, oldVal) {
                     if (newVal) {
                         $timeout(function () {
