@@ -1205,6 +1205,7 @@
                                 selected: false,
                                 uniqueId: value,
                                 displayname: tuple.displayname,
+                                // isFavorite: tuple.isFavorite,
                                 tuple:  tuple,
                                 // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,

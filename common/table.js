@@ -1224,10 +1224,10 @@
             });
 
             /**
-             * When the directive DOM is loaded, all the elements that 
+             * When the directive DOM is loaded, all the elements that
              * we need for top-horizontal logic are loaded as well and therefore
              * we don't need to wait for any condition.
-             * NOTE if we add a condition to hide an element, we should add a 
+             * NOTE if we add a condition to hide an element, we should add a
              * watcher for this one as well.
              */
             UiUtils.addTopHorizontalScroll(elem[0]);
@@ -1935,7 +1935,7 @@
         }
     }])
 
-    .directive('recordList', ['defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$timeout', function(defaultDisplayname, messageMap, recordTableUtils, UriUtils, $timeout) {
+    .directive('recordList', ['ConfigUtils', 'defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$log', '$timeout', '$window', function(ConfigUtils, defaultDisplayname, messageMap, recordTableUtils, UriUtils, $log, $timeout, $window) {
 
         return {
             restrict: 'E',
@@ -1954,14 +1954,63 @@
                     scope.onRowClick(row, $event);
                 }
 
+                var favoriteTables = ["anatomy", "assay_type", "dcc"];
+                scope.canFavorite = function (row) {
+                    if (!row.tuple) return false;
+                    var tableName = row.tuple.reference.table.name;
+                    return favoriteTables.indexOf(tableName) > -1;
+                }
+
                 scope.toggleFavorite = function (row) {
                     // row.tuple can get all information about the row and create a request to favorite the term
-                    console.log("favorite: ", row.displayname.value);
-                    row.isFavorite = !row.isFavorite;
+                    var favoriteTablePath = "/ermrest/catalog/registry/entity/CFDE:favorite_" + UriUtils.fixedEncodeURIComponent(row.tuple.reference.table.name);
 
-                    console.log(row);
-                    var favoriteTablePath = "/ermrest/catalog/registry/entity/CFDE:favorite_" + row.tuple.reference.table.name;
-                    console.log(favoriteTablePath);
+                    // if not a favorite, add it
+                    if (!row.isFavorite) {
+                        ERMrest.resolve($window.location.origin + favoriteTablePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
+                            var rows = [{}],
+                                favoriteRow = rows[0];
+
+                            favoriteRow[row.tuple.reference.table.name] = row.tuple.data.id
+                            favoriteRow.user_id = scope.$root.session.client.id;
+
+                            return favoriteReference.contextualize.entryCreate.create(rows);
+                        }).then(function success() {
+                            // toggle favorite
+                            row.isFavorite = true;
+                            console.log("favorite created!")
+                        }, function error(error) {
+                            if (error.code === 409) {
+                                // duplicate error, row is there already so mark as favorite
+                                // TODO: remove this code!
+                                row.isFavorite = true;
+                            }
+                            // TODO: what to do for error handling
+                            console.log("favorite create failed")
+                            console.log(error);
+                        }).catch(function (error) {
+                            // an error here could mean a misconfiguration of the saved query ermrest table path
+                            $log.warn(error);
+
+                            throw error;
+                        });
+                    } else {
+                        // if favorited, delete it
+                        var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(row.tuple.reference.table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
+                        console.log(deleteFavoritePath)
+                        ERMrest.resolve(deleteFavoritePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
+                        // delete the favorite
+                            return favoriteReference.delete();
+                        }).then(function success() {
+                            // toggle favorite
+                            row.isFavorite = false;
+                            console.log("favorite deleted!")
+                        }, function error(error) {
+                            // TODO: what to do for error handling
+                            console.log("favorite delete failed")
+                            console.log(error);
+                        });
+                    }
                 }
 
                 scope.$watch('initialized', function (newVal, oldVal) {

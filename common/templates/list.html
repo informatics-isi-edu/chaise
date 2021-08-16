@@ -6,7 +6,7 @@
         <label ng-if="row.displayname.value && !row.displayname.isHTML" ng-bind="row.displayname.value"  tooltip-enable="tooltipEnabled" uib-tooltip="{{row.tooltip.value}}" tooltip-placement="bottom-left" chaise-enable-tooltip-width></label>
         <label ng-if="row.displayname.value == ''" uib-tooltip-html="tooltip.empty" tooltip-placement="bottom-left" ng-bind-html="defaultDisplayname.empty"></label>
         <label ng-if="row.displayname.value == null" class="chaise-icon-for-tooltip" uib-tooltip-html="tooltip.null" tooltip-placement="bottom-left" ng-bind-html="defaultDisplayname.null" style="padding-right: 2px;"></label>
-        <span ng-if="row.isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="toggleFavorite(row)"></span>
-        <span ng-if="!row.isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="toggleFavorite(row)"></span>
+        <span ng-if="canFavorite(row) && row.isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="toggleFavorite(row)"></span>
+        <span ng-if="canFavorite(row) && !row.isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="toggleFavorite(row)"></span>
     </li>
 </ul>
