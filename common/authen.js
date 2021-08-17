@@ -183,7 +183,9 @@
         var logInHelper = function(logInTypeCb, win, cb, type, rejectCb, logAction){
             var referrerId = (new Date().getTime());
 
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + "login?referrerid=" + referrerId);
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            var loginApp = chaiseConfig.newLoginGroupId ? "login2" : "login";
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + loginApp + "/?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -530,6 +532,29 @@
                     // if the logout fails for some reason, send the user to the logout url as defined above
                     $window.location = logoutURL;
                 });
+            },
+
+            logoutWithoutRedirect: function(action) {
+                var defer = $q.defer();;
+
+                var config = {
+                    skipHTTP401Handling: true,
+                    headers: {}
+                };
+
+                config.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(action, "", "")
+                };
+
+                ConfigUtils.getHTTPService().delete(serviceURL + "/authn/session/", config).then(function(response) {
+                    StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
+
+                    defer.resolve();
+                }, function(error) {
+                    defer.reject(error);
+                });
+
+                return defer.promise;
             }
         }
     }])

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" id="login2">
+    <head>
+        <title>Login</title>
+        <meta charset="UTF-8"></meta>
+        <script src="/gtm-id.js"></script>
+        %INCLUDES%
+    </head>
+    <body class="chaise-body">
+        <div class="configure-container" ng-app="chaise.configure-login2">
+            <loading-spinner></loading-spinner>
+        </div>
+        <div class="app-container container-fluid row" ng-controller="Login2Controller as ctrl">
+            <div class="login2-container main-container">
+                <h2>Sign up for personalized dashboard features</h2>
+                <p>To have access to the personalized dashboard features, you need to apply for membership using <a href="{{ctrl.joinLink}}" target="_blank">this link</a>. After joining, click the "Proceed" button below.</p>
+
+                <button class="chaise-btn chaise-btn-primary" ng-click="::ctrl.reLogin()" uib-tooltip="Click to proceed to the application after joining the group.">Proceed</button>
+            </div>
+            <footer></footer>
+        </div>
+    </body>
+</html>

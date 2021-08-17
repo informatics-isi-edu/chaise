@@ -11,7 +11,8 @@
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+        "newLoginGroupId", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -32,6 +33,7 @@
           "showExportButton": false,
           "navbarMenu": {},
           "navbarBrand": "",
+          "newLoginGroupId": null,
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
@@ -1865,7 +1867,7 @@
          */
         function addTopHorizontalScroll(parent) {
             if (!parent) return;
-            
+
             var topScrollElementWrapper = parent.querySelector(".chaise-table-top-scroll-wrapper"),
                 topScrollElement = parent.querySelector(".chaise-table-top-scroll"),
                 recordsetTable = parent.querySelector(".recordset-table");
@@ -2704,6 +2706,10 @@
             SWITCH_USER_ACCOUNTS_LOGIN: "switch-accounts" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
+
+            // - login2:
+            VERIFY_GLOBUS_GROUP_LOGIN: "verify-globus-group" + clientPathActionSeparator + "login",
+            VERIFY_GLOBUS_GROUP_LOGOUT: "verify-globus-group" + clientPathActionSeparator + "logout",
 
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
