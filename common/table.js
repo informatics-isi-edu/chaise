@@ -1965,6 +1965,7 @@
                     // row.tuple can get all information about the row and create a request to favorite the term
                     var favoriteTablePath = "/ermrest/catalog/registry/entity/CFDE:favorite_" + UriUtils.fixedEncodeURIComponent(row.tuple.reference.table.name);
 
+                    // TODO: show spinning wheel and disable star
                     // if not a favorite, add it
                     if (!row.isFavorite) {
                         ERMrest.resolve($window.location.origin + favoriteTablePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
@@ -1974,6 +1975,7 @@
                             favoriteRow[row.tuple.reference.table.name] = row.tuple.data.id
                             favoriteRow.user_id = scope.$root.session.client.id;
 
+                            // TODO: use put maybe? so it doesn't complain about duplicate
                             return favoriteReference.contextualize.entryCreate.create(rows);
                         }).then(function success() {
                             // toggle favorite
@@ -1982,6 +1984,7 @@
                         }, function error(error) {
                             if (error.code === 409) {
                                 // duplicate error, row is there already so mark as favorite
+                                // NOTE: could be model change though
                                 // TODO: remove this code!
                                 row.isFavorite = true;
                             }
@@ -1989,7 +1992,7 @@
                             console.log("favorite create failed")
                             console.log(error);
                         }).catch(function (error) {
-                            // an error here could mean a misconfiguration of the saved query ermrest table path
+                            // an error here could mean a misconfiguration of the favorite_* ermrest table path
                             $log.warn(error);
 
                             throw error;
@@ -1997,7 +2000,6 @@
                     } else {
                         // if favorited, delete it
                         var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(row.tuple.reference.table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
-                        console.log(deleteFavoritePath)
                         ERMrest.resolve(deleteFavoritePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
                         // delete the favorite
                             return favoriteReference.delete();
@@ -2006,9 +2008,15 @@
                             row.isFavorite = false;
                             console.log("favorite deleted!")
                         }, function error(error) {
+                            // NOTE: 404 could mean it was already deleted, so update UI to show that
                             // TODO: what to do for error handling
                             console.log("favorite delete failed")
                             console.log(error);
+                        }).catch(function (error) {
+                            // an error here could mean a misconfiguration of the favorite_* ermrest table path
+                            $log.warn(error);
+
+                            throw error;
                         });
                     }
                 }
