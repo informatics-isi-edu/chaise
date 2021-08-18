@@ -1052,9 +1052,7 @@
                 }
 
                 // add markdown_name
-                // TODO if this is unformatted then the details
-                //      should turn this into HTML
-                filter.markdown_name = fc.displayname.unformatted;
+                filter.markdown_name = DataUtils.getDisplaynameInnerText(fc.displayname);
 
                 // encode source_domain
                 filter.source_domain = {
@@ -1564,25 +1562,24 @@
                         $log.debug("facet columns empty, directives loaded");
                         scope.facetDirectivesLoaded = true;
                     }
-                    if (res.issues.length > 0) {
-                        $log.info("issues are", res.issues);
 
-                        // TODO ok should change the url location
-                        // TODO issues should be formatted
-                        // TODO scrollbar should be fixed for the error popup
-                        var exception = new Errors.CustomError(
-                            "Invalid Facet Filters",
-                            [
-                                "Some (or all) externally supplied filter criteria cannot be implemented with the current catalog content. ",
-                                "This may be due to lack of permissions or changes made to the content since the criteria were initially saved."
-                            ].join(""),
-                            null, // redirect url
-                            "You may also continue with the subset of filter criteria which are supported at this time.", // ok action message
-                            true,
-                            res.issues.join("\n")
-                        );
-
-                        ErrorService.handleException(exception, true);
+                    /**
+                     * When there are issues in the given facet,
+                     * - recordset should just load the data based on the remaining
+                     *  facets that had no issue
+                     * - we should show an error and let users know that there were some
+                     *   issues.
+                     * - we should keep the browser location like original to allow users to 
+                     *   refresh and try again. Also the issue might be happening because they
+                     *   are not logged in. So we should keep the location like original so after
+                     *   logging in they can get back to the page.
+                     * - Dismissing the error should change the browser location.
+                     */
+                    if (res.issues) {
+                        var cb = function () {
+                            $rootScope.$emit('reference-modified');
+                        };
+                        ErrorService.handleException(res.issues, false, false, cb, cb);
                     }
                 }).catch(function (exception) {
                     $log.warn(exception);

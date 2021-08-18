@@ -224,6 +224,8 @@
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (ERMrest && exception instanceof ERMrest.FacetFiltersNotImplemented) {
+            vm.clickActionMessage = messageMap.clickActionMessage.facetFiltersNotImplemented;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
