@@ -436,8 +436,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$timeout', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $timeout, $window) {
 
         // NOTE: overriding `window.onerror` in the ErrorService scope
         $window.onerror = function () {
@@ -531,6 +531,9 @@
             }, moveErrorModal);
 
             function moveErrorModal() {
+                var errorBody = $document[0].querySelector(".modal-error .modal-body");
+
+                // make sure error popup is below the navbar
                 var mainnav = $document[0].getElementById('navheader');
                 if (mainnav !== null) {
                     var errorModal = $document[0].getElementsByClassName('modal-error')[0];
@@ -538,6 +541,27 @@
                             errorModal.style.top = mainnav.offsetHeight + "px";
                     }
                 }
+
+                /**
+                 * make sure the error popup is scrollable
+                 * 
+                 * The previous block is changing the position of error modal, which will 
+                 * affect the following. Since the effect might not be applied right away,
+                 * I had to add this timeout. This will ensure that the errorBodyY that we
+                 * are fetching is correct.
+                 */
+                $timeout(function(){ 
+                    try {
+                        var footerHeight = document.querySelector(".modal-footer").offsetHeight;
+                        var errorBodyY = errorBody.getBoundingClientRect().y;
+                        errorBody.style.overflowY = "auto";
+                        errorBody.style.maxHeight = "calc(100vh - 2.5vh - " + (errorBodyY + footerHeight) + "px)";
+                    } catch (exp) {
+                        // fail silently
+                        // instead of adding multiple checks, just catching error
+                    }
+                }, 200);
+                
             }
         }
 
