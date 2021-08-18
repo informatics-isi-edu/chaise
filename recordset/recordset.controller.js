@@ -13,6 +13,9 @@
         $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         function updateLocation() {
+            // if we're showing an error popup, don't change the location
+            if ($rootScope.error) return;
+
             $window.scrollTo(0, 0);
             $window.history.replaceState({}, '', UriUtils.getRecordsetLink(recordsetModel.reference));
         }

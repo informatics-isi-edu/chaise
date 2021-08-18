@@ -375,7 +375,7 @@
          * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
          * @return {object}                     Error Object
          */
-        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss){
+        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss, subMessage){
             /**
              * @type {string}
              * @desc Text to display in the Error Modal Header
@@ -387,6 +387,13 @@
              * @desc Error message that shows in the Error modal body
              */
             this.message = message;
+
+
+            /**
+             * @type {string}
+             * @desc Error message details that will not be displayed in body
+             */
+            this.subMessage = subMessage;
 
             /**
              * @type {object}

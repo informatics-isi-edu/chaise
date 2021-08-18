@@ -26,6 +26,9 @@
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>
+                        <button class="chaise-btn chaise-btn-primary" ng-click="::testStableFacets()">
+                            Test
+                        </button>
                     </div>
                         <!-- TODO UX-M should change to class -->
                     <h1 id="page-title">
@@ -76,7 +79,7 @@
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-if="!vm.reference.location.customFacets.displayname.isHTML" ng-bind="vm.reference.location.customFacets.displayname.value" uib-tooltip="{{vm.reference.location.customFacets.displayname.value}}" tooltip-placement="bottom-left" tooltip-class="custom-filter-tooltip"></span>
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-if="vm.reference.location.customFacets.displayname.isHTML" ng-bind-html="vm.reference.location.customFacets.displayname.value" uib-tooltip-html="'{{vm.reference.location.customFacets.displayname.value}}'" tooltip-placement="bottom-left" tooltip-class="custom-filter-tooltip"></span>
                     </div>
-                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.facetColumnsReady && vm.hasFilter($index)">
                         <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied">
                             <i class="glyphicon glyphicon-remove"></i>
                         </button>

@@ -107,8 +107,8 @@
      *     that is also passed along with the emitted event
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'Errors', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, DataUtils, defaultDisplayname, Errors, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -1015,6 +1015,88 @@
         }
 
         /**
+         * {
+         *  "and": [
+         *    {
+         *      "sourcekey": "key",
+         *      "choices": [v1, v2, ..],
+         *      "source_domain": {
+         *        "schema": 
+         *        "table":
+         *        "column":
+         *      }
+         *    }
+         *  ]
+         * }
+         */
+        function _getStableFacets(scope) {
+            if (!scope.vm.hasFilter()) {
+                return {};
+            }
+            var filters = [];
+            for (var i = 0; i < scope.vm.facetModels.length; i++) {
+                var fm = scope.vm.facetModels[i],
+                    fc = scope.vm.reference.facetColumns[i];
+
+                if (fm.appliedFilters.length == 0) {
+                    continue;
+                }
+
+                var filter = fc.toJSON();
+
+                // we should use sourcekey if we have it
+                // NOTE accessing private variable
+                if (fc._facetObject.sourcekey) {
+                    delete filter.source;
+                    filter.sourcekey = fc._facetObject.sourcekey;
+                }
+
+                // add markdown_name
+                // TODO if this is unformatted then the details
+                //      should turn this into HTML
+                filter.markdown_name = fc.displayname.unformatted;
+
+                // encode source_domain
+                filter.source_domain = {
+                    schema: fc.column.table.schema.name,
+                    table: fc.column.table.name,
+                    column: fc.column.name,
+                };
+
+                // in entity choice mode we have to map to stable key
+                if (fc.isEntityMode && fc.preferredMode === "choices") {
+                    var stableKeyCols = fc.column.table.stableKey, stableKeyColName;
+                    stableKeyColName = stableKeyCols[0].name;
+                    if (stableKeyColName != fc.column.name) {
+                        // we're assuming that it's just simple key
+                        // we have to change the column and choices values
+                        filter.source_domain.column = stableKeyColName;
+                        filter.choices = [];
+                        
+
+                        for (var j = 0; j < fm.appliedFilters.length; j++) {
+                            var af = fm.appliedFilters[j];
+                            // ignore the not-null choice (it's already encoded and we don't need to map it)
+                            if (af.isNotNull) {
+                                continue;
+                            }
+                            // add the null choice manually
+                            if (af.uniqueId == null) {
+                                filter.choices.push(null);
+                            } else {
+                                filter.choices.push(af.tuple.data[stableKeyColName]);
+                            }
+                        }
+                    }
+                }
+
+                filters.push(filter);
+            }
+
+            return {"and": filters};
+        }
+
+        /**
          * Registers the callbacks for recordTable directive and it's children.
          * @param  {object} scope the scope object
          */
@@ -1257,6 +1339,13 @@
             scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
 
+            // TODO SHOULD BE REMOVED
+            scope.testStableFacets = function () {
+                var res = _getStableFacets(scope);
+                console.log(res);
+                console.log(ERMrest.encodeFacet(res));
+            };
+
             scope.versionDisplay = function () {
                 return UiUtils.humanizeTimestamp(scope.vm.reference.location.versionAsMillis);
             }
@@ -1468,12 +1557,32 @@
 
                 // NOTE this will affect the reference uri so it must be 
                 //      done before initializing recordset
-                scope.vm.reference.generateFacetColumns().then(function (fcols) {
-                    $log.debug("facet columns generated: " + fcols.length);
+                scope.vm.reference.generateFacetColumns().then(function (res) {
+                    $log.debug("facet columns generated: " + res.facets.length);
                     scope.vm.facetColumnsReady = true;
-                    if (fcols.length === 0) {
+                    if (res.facets.length === 0) {
                         $log.debug("facet columns empty, directives loaded");
                         scope.facetDirectivesLoaded = true;
+                    }
+                    if (res.issues.length > 0) {
+                        $log.info("issues are", res.issues);
+
+                        // TODO ok should change the url location
+                        // TODO issues should be formatted
+                        // TODO scrollbar should be fixed for the error popup
+                        var exception = new Errors.CustomError(
+                            "Invalid Facet Filters",
+                            [
+                                "Some (or all) externally supplied filter criteria cannot be implemented with the current catalog content. ",
+                                "This may be due to lack of permissions or changes made to the content since the criteria were initially saved."
+                            ].join(""),
+                            null, // redirect url
+                            "You may also continue with the subset of filter criteria which are supported at this time.", // ok action message
+                            true,
+                            res.issues.join("\n")
+                        );
+
+                        ErrorService.handleException(exception, true);
                     }
                 }).catch(function (exception) {
                     $log.warn(exception);
