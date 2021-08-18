@@ -1337,13 +1337,6 @@
             scope.vm.facetsToPreProcess = [];
             scope.vm.flowControlObject = new FlowControlObject();
 
-            // TODO SHOULD BE REMOVED
-            scope.testStableFacets = function () {
-                var res = _getStableFacets(scope);
-                console.log(res);
-                console.log(ERMrest.encodeFacet(res));
-            };
-
             scope.versionDisplay = function () {
                 return UiUtils.humanizeTimestamp(scope.vm.reference.location.versionAsMillis);
             }
