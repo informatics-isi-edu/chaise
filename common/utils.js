@@ -12,7 +12,7 @@
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "newLoginGroupId", "configRules"
+        "termsAndConditionsConfig", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -33,7 +33,7 @@
           "showExportButton": false,
           "navbarMenu": {},
           "navbarBrand": "",
-          "newLoginGroupId": null,
+          "termsAndConditionsConfig": null,
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,

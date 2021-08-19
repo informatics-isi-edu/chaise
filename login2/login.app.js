@@ -11,7 +11,6 @@
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
         $rootScope.$on("configuration-done", function () {
-            console.log("config event captured");
             angular.element(document).ready(function(){
                 angular.bootstrap(document.getElementById("login2"),["chaise.login2app"]);
             });
@@ -41,31 +40,22 @@
     }])
 
     .controller("Login2Controller", ['ConfigUtils', 'ERMrest', 'logService', '$rootScope', 'Session', function (ConfigUtils, ERMrest, logService, $rootScope, Session) {
-        console.log("login controller");
         var vm = this;
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
-        vm.joinLink = "https://app.globus.org/groups/" + chaiseConfig.newLoginGroupId + "/join";
+        vm.joinLink = chaiseConfig.termsAndConditionsConfig.joinUrl;
+        vm.groupName = chaiseConfig.termsAndConditionsConfig.groupName;
 
         vm.reLogin = function () {
-            // log the user out
-            Session.logoutWithoutRedirect(logService.logActions.VERIFY_GLOBUS_GROUP_LOGOUT).then(function () {
-                // log the user in without prompting
-                // can we do this?
-                //  - doesn't seem likely
-                //
-                // NOTE: Click "proceed" logs out, starts login process in new window, closes current window without triggering the referrer reload
-                // NOTE: maybe reuse reffererid to refresh main page after
-                Session.loginInAPopUp(logService.logActions.VERIFY_GLOBUS_GROUP_LOGIN);
-            }).catch(function (exception) {
-                // show alert if logout fails?
-                console.log(exception);
-            });
+            // log the user back in (assuming the user joined the required globus group)
+            Session.refreshLogin(logService.logActions.VERIFY_GLOBUS_GROUP_LOGIN);
         }
     }])
 
-    .run(['AlertsService', 'ConfigUtils', 'messageMap', '$rootScope', 'Session', 'ERMrest', 'UiUtils', 'UriUtils', '$window',
-    function (AlertsService, ConfigUtils, messageMap, $rootScope, Session, ERMrest, UiUtils, UriUtils, $window) {
+    .run(['AlertsService', 'ConfigUtils', 'ERMrest', 'logService', 'messageMap', '$rootScope', 'Session', 'UiUtils', 'UriUtils', '$window',
+    function (AlertsService, ConfigUtils, ERMrest, logService, messageMap, $rootScope, Session, UiUtils, UriUtils, $window) {
+        $rootScope.showInstructions = false;
+
         var session,
             errorData = {};
 
@@ -75,11 +65,10 @@
         var subId = Session.subscribeOnChange(function () {
             Session.unsubscribeOnChange(subId);
             var session = Session.getSessionValue();
-            console.log(session);
 
             // if the user does have the defined group, continue with auto close and reload of the application
             var hasGroup = session && session.attributes.filter(function(attr) {
-                return attr.id === "https://auth.globus.org/" + chaiseConfig.newLoginGroupId;
+                return attr.id === chaiseConfig.termsAndConditionsConfig.groupId;
             }).length > 0
 
             if (hasGroup) {
@@ -97,7 +86,14 @@
                     $window.close();
                     return;
                 }
+            } else {
+                // if this login process is used for verifying group membership, that group is REQUIRED to have an active login
+                // log the user out if they don't have the group
+                Session.logoutWithoutRedirect(logService.logActions.VERIFY_GLOBUS_GROUP_LOGOUT);
             }
+
+            // show the instructions if the user doesn't have the required group
+            $rootScope.showInstructions = !hasGroup;
         });
 
         UriUtils.setLocationChangeHandling();

@@ -184,7 +184,7 @@
             var referrerId = (new Date().getTime());
 
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            var loginApp = chaiseConfig.newLoginGroupId ? "login2" : "login";
+            var loginApp = chaiseConfig.termsAndConditionsConfig ? "login2" : "login";
             var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + loginApp + "/?referrerid=" + referrerId);
             var config = {
                 headers: {
@@ -534,27 +534,61 @@
                 });
             },
 
-            logoutWithoutRedirect: function(action) {
-                var defer = $q.defer();;
-
-                var config = {
+            logoutWithoutRedirect: function (action) {
+                var logoutConfig = {
                     skipHTTP401Handling: true,
                     headers: {}
                 };
 
-                config.headers[ERMrest.contextHeaderName] = {
+                logoutConfig.headers[ERMrest.contextHeaderName] = {
                     action: logService.getActionString(action, "", "")
                 };
 
-                ConfigUtils.getHTTPService().delete(serviceURL + "/authn/session/", config).then(function(response) {
+                // logout without redirecting the user
+                ConfigUtils.getHTTPService().delete(serviceURL + "/authn/session/", logoutConfig).then(function(response) {
                     StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
 
-                    defer.resolve();
-                }, function(error) {
-                    defer.reject(error);
+                }).catch(function (error) {
+                    // this is a 404 error when session doesn't exist and the user tries to logout
+                    // don't throw the error since this means the user is lready logged out
+                    console.log(error);
+                });
+            },
+
+            refreshLogin: function(action) {
+                $rootScope.showSpinner = true;
+
+                // get referrerid from browser url
+                var referrerId = UriUtils.queryStringToJSON($window.location.search).referrerid,
+                    preauthReferrer = $window.location.origin + UriUtils.chaiseDeploymentPath() + "login2/?referrerid=" + referrerId,
+                    redirectUrl = serviceURL + '/authn/preauth/?referrer=' + UriUtils.fixedEncodeURIComponent(preauthReferrer);
+
+                var loginConfig = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Accept': 'application/json'
+                    },
+                    skipHTTP401Handling: true
+                };
+
+                loginConfig.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(action, "", "")
+                }
+
+                ConfigUtils.getHTTPService().get(redirectUrl, loginConfig).then(function(response){
+                    var data = response.data;
+
+                    // redirect_url is supposed to be the same as preauthReferrer
+                    if (data.redirect_url === undefined) {
+                        data.redirect_url = preauthReferrer;
+                    }
+
+                    $rootScope.showSpinner = false;
+                    $window.location = data.redirect_url;
+                }).catch(function (error) {
+                    $rootScope.showSpinner = false;
                 });
 
-                return defer.promise;
             }
         }
     }])
