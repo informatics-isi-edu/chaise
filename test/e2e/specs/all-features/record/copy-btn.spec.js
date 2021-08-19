@@ -63,7 +63,7 @@ describe('View existing record,', function() {
 
     });
 
-    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal
+    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal, and disabled export button
     describe("For table " + testParams.html_table_name + ",", function() {
 
         var currentBrowserUrl;
@@ -84,6 +84,11 @@ describe('View existing record,', function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.resolverImplicitCatalog).toBeFalsy();
             });
+        });
+
+        // we're not using default tempaltes and csv option is disabled
+        it ("export button should be disabled", function () {
+            expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
         });
 
         it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
@@ -150,7 +155,7 @@ describe('View existing record,', function() {
         });
     });
 
-    // below are the tests for the copy button
+    // below are the tests for the copy button, and no csv option
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record;
@@ -170,6 +175,19 @@ describe('View existing record,', function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.editRecord).toBe(true);
             });
+        });
+
+        it ("should not have the default csv export option and only the defined template should be available", function (done) {
+            var options = chaisePage.recordsetPage.getExportOptions();
+            expect(options.count()).toBe(1, "count missmatch");
+
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
+                expect(csvOption.getText()).toBe("Defined template");
+                done();
+            }).catch(function(err) {
+                done.fail(err);
+            })
         });
 
         describe("for the copy record button,", function() {
