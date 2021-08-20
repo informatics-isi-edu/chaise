@@ -1092,6 +1092,11 @@
                     }
                 }
 
+                // make sure the items are sorted so it's not based on user selection
+                if (Array.isArray(filter.choices)) {
+                    filter.choices.sort();
+                }
+
                 filters.push(filter);
             }
 
