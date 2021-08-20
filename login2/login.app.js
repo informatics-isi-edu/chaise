@@ -43,8 +43,10 @@
         var vm = this;
         var chaiseConfig = ConfigUtils.getConfigJSON();
 
-        vm.joinLink = chaiseConfig.termsAndConditionsConfig.joinUrl;
-        vm.groupName = chaiseConfig.termsAndConditionsConfig.groupName;
+        if (ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig)) {
+            vm.joinLink = chaiseConfig.termsAndConditionsConfig.joinUrl;
+            vm.groupName = chaiseConfig.termsAndConditionsConfig.groupName;
+        }
 
         vm.reLogin = function () {
             // log the user back in (assuming the user joined the required globus group)
@@ -66,12 +68,19 @@
             Session.unsubscribeOnChange(subId);
             var session = Session.getSessionValue();
 
-            // if the user does have the defined group, continue with auto close and reload of the application
-            var hasGroup = session && session.attributes.filter(function(attr) {
-                return attr.id === chaiseConfig.termsAndConditionsConfig.groupId;
-            }).length > 0
+            var validConfig = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig),
+                hasGroup = false;
 
-            if (hasGroup) {
+            // only check if the user has the group if the config is valid
+            if (validConfig) {
+                // if the user does have the defined group, continue with auto close and reload of the application
+                hasGroup = session && session.attributes.filter(function(attr) {
+                    return attr.id === chaiseConfig.termsAndConditionsConfig.groupId;
+                }).length > 0
+            }
+
+            // if the config is invalid, don't require group membership to continue automatically
+            if (!validConfig || hasGroup) {
                 var queryString = UriUtils.queryStringToJSON($window.location.search);
                 if (queryString.referrerid && (typeof queryString.action == 'undefined') && $window.opener) {
 
@@ -87,13 +96,12 @@
                     return;
                 }
             } else {
+                // show the instructions if the user doesn't have the required group
+                $rootScope.showInstructions = !hasGroup;
                 // if this login process is used for verifying group membership, that group is REQUIRED to have an active login
                 // log the user out if they don't have the group
                 Session.logoutWithoutRedirect(logService.logActions.VERIFY_GLOBUS_GROUP_LOGOUT);
             }
-
-            // show the instructions if the user doesn't have the required group
-            $rootScope.showInstructions = !hasGroup;
         });
 
         UriUtils.setLocationChangeHandling();

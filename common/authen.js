@@ -184,7 +184,7 @@
             var referrerId = (new Date().getTime());
 
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            var loginApp = chaiseConfig.termsAndConditionsConfig ? "login2" : "login";
+            var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
             var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + loginApp + "/?referrerid=" + referrerId);
             var config = {
                 headers: {

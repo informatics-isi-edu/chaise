@@ -2197,6 +2197,29 @@
             return mode;
         }
 
+        /**
+         * Returns true if the object passed is valid for the terms and conditions feature
+         * @params {Object} obj - the termaAndConditions object from chaise-config
+         * @return {boolean} boolean - value to use the terms and conditions config requiring a specific globus group for access
+         *
+         * termsAndConditionsConfig: {
+         *     "groupId": "https://auth.globus.org/123a4bcd-ef5a-67bc-8912-d34e5fa67b89",
+         *     "joinUrl": "https://app.globus.org/groups/123a4bcd-ef5a-67bc-8912-d34e5fa67b89/join",
+         *     "groupName": "Globus group name"
+         * },
+         */
+        function validateTermsAndConditionsConfig(obj) {
+            if (!obj || typeof obj !== "object") return false;
+            var tacConfig = getConfigJSON().termsAndConditionsConfig;
+
+            function isStringAndNotEmpty(str) {
+                return typeof str === "string" && str.length > 0;
+            };
+
+            // all 3 properties must be defined for this to function, if not the old login app will be used
+            return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));
+        }
+
         return {
             configureAngular: configureAngular,
             decorateTemplateRequest: decorateTemplateRequest,
@@ -2206,7 +2229,8 @@
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
             systemColumnsMode: systemColumnsMode,
-            getSettings: getSettings
+            getSettings: getSettings,
+            validateTermsAndConditionsConfig: validateTermsAndConditionsConfig
         }
     }])
 
