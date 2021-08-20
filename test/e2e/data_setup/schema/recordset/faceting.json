@@ -218,7 +218,7 @@
                             {"sourcekey": "outbound_to_f1", "markdown_name": "**F1**", "hide_not_null_choice": true},
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet", "hide_null_choice": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
-                            {"source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false, "ux_mode": "choices", "hide_null_choice": true},
+                            {"sourcekey": "path_to_f4_scalar_w_id", "ux_mode": "choices", "hide_null_choice": true},
                             {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment", "hide_null_choice": true},
                             {"source": "text_col_2", "ux_mode": "check_presence", "markdown_name": "Check Presence Text"},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "id"], "markdown_name": "F3 Entity"},
@@ -241,6 +241,9 @@
                         },
                         "outbound_to_f1": {
                             "source": [{"outbound": ["faceting", "main_fk1"]}, "id"]
+                        },
+                        "path_to_f4_scalar_w_id": {
+                            "source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false
                         }
                     }
                 }

@@ -1054,6 +1054,9 @@
                     filter.sourcekey = fc._facetObject.sourcekey;
                 }
 
+                // add entity mode
+                filter.entity = fc.isEntityMode;
+
                 // add markdown_name
                 filter.markdown_name = DataUtils.getDisplaynameInnerText(fc.displayname);
 
