@@ -114,9 +114,6 @@
 
             context.catalogID = res.catalogId;
 
-            // TODO: this will be moved to per table
-            $rootScope.savedQuery = ConfigUtils.initializeSavingQueries();
-
             FunctionUtils.registerErmrestCallbacks();
 
             // Subscribe to on change event for session
@@ -127,6 +124,7 @@
 
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                    $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                     // send string to prepend to "headTitle"
                     // <table-name>
                     headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));

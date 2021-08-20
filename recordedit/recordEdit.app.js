@@ -116,9 +116,6 @@
             throw error;
         }
 
-        // TODO: this will be moved to per table
-        $rootScope.savedQuery = ConfigUtils.initializeSavingQueries();
-
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
         var ermrestUri = res.ermrestUri,
             pcid = res.pcid,
@@ -164,8 +161,7 @@
 
             // On resolution
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
-
-
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)

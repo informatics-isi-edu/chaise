@@ -86,9 +86,6 @@
 
         context.catalogID = res.catalogId;
 
-        // TODO: this will be moved to per table
-        $rootScope.savedQuery = ConfigUtils.initializeSavingQueries();
-
         FunctionUtils.registerErmrestCallbacks();
 
         // Subscribe to on change event for session
@@ -98,6 +95,7 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 

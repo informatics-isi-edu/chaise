@@ -2200,22 +2200,35 @@
             return mode;
         }
 
-        function initializeSavingQueries() {
+        // NOTE: should use DataUtils.isNoneEmptyString but including causes a circular dependency
+        // DataUtils relies on errors for one functions, `verify()`. `verify` should be moved to
+        // errors to remove this circular dependency and allow utility functions with no dependencies
+        // to be used everywhere
+        function isStringAndNotEmpty(str) {
+            return typeof str === "string" && str.length > 0;
+        };
+
+        function initializeSavingQueries(reference) {
             var chaiseConfig = getConfigJSON();
             // initalize to null as if there is no saved query table
             // savedQuery object should be defined with showUI true || false for UI purposes
-            // TODO: this will be moved to per table
-
             var savedQuery = {
-                showUI: (chaiseConfig.showSavedQueryUI === true ? true : false)
+                showUI: reference.display.showSavedQuery
             }
 
             // NOTE: if this is not set, saved query UI should probably be turned off
-            if (chaiseConfig.savedQueryConfig && chaiseConfig.savedQueryConfig.storageTable) {
+            if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
                 var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
 
+                var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
+
                 // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
-                savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+                if (validMapping) {
+                    savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+                } else {
+                    // if mapping is invalid, the config is ill-defined and the feature will be turned off
+                    savedQuery.showUI = false;
+                }
             } else {
                 // if storage table is not defined, the config is ill-defined and the feature will be turned off
                 savedQuery.showUI = false;
@@ -2238,10 +2251,6 @@
         function validateTermsAndConditionsConfig(obj) {
             if (!obj || typeof obj !== "object") return false;
             var tacConfig = getConfigJSON().termsAndConditionsConfig;
-
-            function isStringAndNotEmpty(str) {
-                return typeof str === "string" && str.length > 0;
-            };
 
             // all 3 properties must be defined for this to function, if not the old login app will be used
             return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));

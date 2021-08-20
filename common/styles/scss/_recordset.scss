@@ -536,6 +536,10 @@ faceting {
     .chaise-checkbox {
         margin-bottom: 7px;
         margin-left: 5px;
+
+        // puts the checkbox+label to the left and the favorite icon to the right
+        display: flex;
+        justify-content: space-between;
     }
 
     li:hover {

@@ -1025,11 +1025,11 @@
             }
 
             scope.toggleFavorite = function (tuple, isFavorite) {
+                // tuple can get all information about the row and create a request to favorite the term
                 var defer = $q.defer();
 
-                var favoriteTableName = tuple.reference.table.name;
-                // row.tuple can get all information about the row and create a request to favorite the term
-                var favoriteTablePath = "/ermrest/catalog/registry/entity/CFDE:favorite_" + UriUtils.fixedEncodeURIComponent(favoriteTableName);
+                var favoriteTable = tuple.reference.table;
+                var favoriteTablePath = favoriteTable.favoritesPath;
 
                 // TODO: show spinning wheel and disable star
                 // if not a favorite, add it
@@ -1038,7 +1038,11 @@
                         var rows = [{}],
                             favoriteRow = rows[0];
 
-                        favoriteRow[favoriteTableName] = tuple.data.id
+                        // assumption that the column to store the id information is the name of the table
+                        // assumption that the data to store in above mentioned column is the value of the id column
+                        // assupmtion that the column to store the user information is the user_id column
+                        // TODO: add all three to config language
+                        favoriteRow[favoriteTable.name] = tuple.data.id
                         favoriteRow.user_id = scope.$root.session.client.id;
 
                         // TODO: use put maybe? so it doesn't complain about duplicate. ask karl
@@ -1069,8 +1073,12 @@
                         defer.reject(false);
                     });
                 } else {
+                    // assumption that the column to delete the id information is the name of the table
+                    // assumption that the data to associate for delete in above mentioned column is the value of the id column
+                    // assupmtion that the column to delete the user information is the user_id column
+                    // TODO: add all three to config language
+                    var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(favoriteTable.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
                     // if favorited, delete it
-                    var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(favoriteTableName) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
                     ERMrest.resolve(deleteFavoritePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
                         // delete the favorite
                         return favoriteReference.delete();
@@ -1329,7 +1337,6 @@
             scope.$root.showSpinner = false; // this property is set from common modules for controlling the spinner at a global level that is out of the scope of the app
             scope.vm.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
             scope.transformCustomFilter = DataUtils.addSpaceAfterLogicalOperators;
-            scope.showSavedQueryUI = scope.$root.savedQuery.showUI;
 
             scope.getRecordsetLink = UriUtils.getRecordsetLink;
 
@@ -1380,7 +1387,13 @@
                 document.body.removeChild(dummy[0]);
             }
 
-            if (scope.showSavedQueryUI) {
+            // this function is called after recordset triggers that the reference is readyToInitialize
+            // scope.$root.savedQuery is set once we have a reference
+            function registerSavedQueryFunctions () {
+                scope.showSavedQueryUI = scope.$root.savedQuery.showUI;
+                // if the UI should not be shown return before doing anything
+                if (!scope.showSavedQueryUI) return;
+
                 ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
                     scope.vm.savedQueryReference = savedQueryReference;
                 }).catch(function (error) {
@@ -1757,6 +1770,8 @@
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
+                // set saved query Functions
+                registerSavedQueryFunctions();
 
                 // DOM manipulations
                 manipulateRecordsetDOMElements();
@@ -2058,7 +2073,9 @@
                             var listElem = elem[0].getElementsByClassName("chaise-list-container")[0];
 
                             // set the height to the clientHeight or the rendered height so when the content changes the page doesn't thrash
-                            listElem.style.height = listElem.scrollHeight + "px";
+                            // TODO: we should figure out why this is calculating incorrectly now
+                            // plus 1 to fix a truncation of the list issue
+                            listElem.style.height = listElem.scrollHeight + 1 + "px";
                             listElem.style.overflow = "hidden";
                         }, 0);
                     } else if (newVal == false) {
