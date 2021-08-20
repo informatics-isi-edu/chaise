@@ -151,7 +151,7 @@
                     // so we can construct the redirectPath correctly.
                     // NOTE we might want to eventually remove this and have
                     // the redirectPath logic in the catch all.
-                    var facetColumns = recordsetModel.reference.facetColumns;
+                    // var facetColumns = recordsetModel.reference.facetColumns;
 
                     $log.info("Reference:", recordsetModel.reference);
 

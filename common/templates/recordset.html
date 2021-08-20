@@ -1,6 +1,6 @@
 <div class="recordset-container app-content-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
     <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
-    <div class="top-panel-container" ng-show="vm.reference">
+    <div class="top-panel-container" ng-if="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
             <div class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
@@ -91,7 +91,7 @@
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-if="!vm.reference.location.customFacets.displayname.isHTML" ng-bind="vm.reference.location.customFacets.displayname.value" uib-tooltip="{{vm.reference.location.customFacets.displayname.value}}" tooltip-placement="bottom-left" tooltip-class="custom-filter-tooltip"></span>
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-if="vm.reference.location.customFacets.displayname.isHTML" ng-bind-html="vm.reference.location.customFacets.displayname.value" uib-tooltip-html="'{{vm.reference.location.customFacets.displayname.value}}'" tooltip-placement="bottom-left" tooltip-class="custom-filter-tooltip"></span>
                     </div>
-                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.facetColumnsReady && vm.hasFilter($index)">
                         <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied">
                             <i class="glyphicon glyphicon-remove"></i>
                         </button>
@@ -130,7 +130,7 @@
         </div>
     </div>
     <div class="bottom-panel-container">
-        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-partners="resizePartners" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
+        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-partners="resizePartners" ng-if="vm.facetColumnsReady" ng-show="vm.config.showFaceting" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
             <faceting vm="vm"></faceting>
         </div>
         <div class="main-container dynamic-padding">

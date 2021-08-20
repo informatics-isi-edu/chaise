@@ -375,7 +375,7 @@
          * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
          * @return {object}                     Error Object
          */
-        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss){
+        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss, subMessage){
             /**
              * @type {string}
              * @desc Text to display in the Error Modal Header
@@ -387,6 +387,13 @@
              * @desc Error message that shows in the Error modal body
              */
             this.message = message;
+
+
+            /**
+             * @type {string}
+             * @desc Error message details that will not be displayed in body
+             */
+            this.subMessage = subMessage;
 
             /**
              * @type {object}
@@ -429,8 +436,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$timeout', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $timeout, $window) {
 
         // NOTE: overriding `window.onerror` in the ErrorService scope
         $window.onerror = function () {
@@ -438,17 +445,19 @@
         };
 
         /**
-         * exception    - the error that was thrown
-         * pageName     - the name of the page we will redirect to
-         * redirectLink - link that is used for redirect
-         * subMessage   - message displayed after the exception message
-         * stackTrace   - stack trace provided with error output
-         * isDismissible- if the error modal can be close
-         * showLogin    - if the login link should be shown
-         * message      - (optional) primary message displayed in modal (if defined, overwrites exception.message)
-         * errorStatus  - (optional) error "name" (if defined, overwrites exception.status)
+         * exception        - the error that was thrown
+         * pageName         - the name of the page we will redirect to
+         * redirectLink     - link that is used for redirect
+         * subMessage       - message displayed after the exception message
+         * stackTrace       - stack trace provided with error output
+         * isDismissible    - if the error modal can be close
+         * showLogin        - if the login link should be shown
+         * message          - (optional) primary message displayed in modal (if defined, overwrites exception.message)
+         * errorStatus      - (optional) error "name" (if defined, overwrites exception.status)
+         * okBtnCallback    - (optional) the function that will be called when users click on "OK" button
+         * closeBtnCallback - (optional) the function that will be called when users click on "Close" button
          */
-        function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus) {
+        function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus, okBtnCallback, closeBtnCallback) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
                 session = Session.getSessionValue(),
@@ -504,7 +513,9 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                if (okBtnCallback) {
+                    okBtnCallback();
+                }else if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);
                 } else {
                     if(actionBtnIdentifier == "reload"){
@@ -513,9 +524,16 @@
                         $window.location = redirectLink;
                     }
                 }
-            }, false, moveErrorModal);
+            }, function () {
+                if (closeBtnCallback) {
+                    closeBtnCallback();
+                }
+            }, moveErrorModal);
 
             function moveErrorModal() {
+                var errorBody = $document[0].querySelector(".modal-error .modal-body");
+
+                // make sure error popup is below the navbar
                 var mainnav = $document[0].getElementById('navheader');
                 if (mainnav !== null) {
                     var errorModal = $document[0].getElementsByClassName('modal-error')[0];
@@ -523,13 +541,34 @@
                             errorModal.style.top = mainnav.offsetHeight + "px";
                     }
                 }
+
+                /**
+                 * make sure the error popup is scrollable
+                 * 
+                 * The previous block is changing the position of error modal, which will 
+                 * affect the following. Since the effect might not be applied right away,
+                 * I had to add this timeout. This will ensure that the errorBodyY that we
+                 * are fetching is correct.
+                 */
+                $timeout(function(){ 
+                    try {
+                        var footerHeight = document.querySelector(".modal-footer").offsetHeight;
+                        var errorBodyY = errorBody.getBoundingClientRect().y;
+                        errorBody.style.overflowY = "auto";
+                        errorBody.style.maxHeight = "calc(100vh - 2.5vh - " + (errorBodyY + footerHeight) + "px)";
+                    } catch (exp) {
+                        // fail silently
+                        // instead of adding multiple checks, just catching error
+                    }
+                }, 200);
+                
             }
         }
 
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception, isDismissible, skipLogging) {
+        function handleException(exception, isDismissible, skipLogging, okBtnCallback, closeBtnCallback) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             $log.info(exception);
 
@@ -609,7 +648,7 @@
                 }
             }
 
-            errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
+            errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus, okBtnCallback, closeBtnCallback);
 
             // if not a dismissible error then exception should be suppressed
             if (!isDismissible && !exception.showContinueBtn && !exception.clickOkToDismiss) exceptionFlag = true;
