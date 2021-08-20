@@ -40,7 +40,6 @@
           "logClientActions": true,
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
-          "showSavedQueryUI": false,
           "savedQueryConfig": null,
           "shareCiteAcls": {
               "show": ["*"],

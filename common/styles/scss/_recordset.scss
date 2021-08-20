@@ -329,7 +329,7 @@
         text-align: center;
         font-size: 1.2rem;
         // since we're increasing the size of icons, we should decrease the padding
-        padding: 5px 5px 0 5px;
+        padding: 5px 0 0 0;
 
         .chaise-btn {
             padding: 0;
@@ -477,10 +477,6 @@ faceting {
     hr {
         color: $border-color;
         width: 1px;
-    }
-
-    .favorite-icon {
-        display: none !important;
     }
 
     .js-plotly-plot {

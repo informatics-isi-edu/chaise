@@ -161,7 +161,7 @@
     </div>
 
     <!-- Validation error messages to show when the form field is touched -->
-    <!-- <div ng-messages="vm.inputContainer.$error" ng-show="vm.inputContainer.$error || vm.formContainer.$submitted" class="text-danger" role="alert">
+    <div ng-messages="vm.inputContainer.$error" ng-show="vm.inputContainer.$error || vm.formContainer.$submitted" class="text-danger" role="alert">
         <div ng-message="date">Please enter a date value in {{vm.dataFormats.placeholder.date}} format.</div>
         <div ng-message="time">Please enter a time value in 12-hr {{vm.dataFormats.placeholder.time}} format.</div>
         <div ng-message="timestampDate">Please enter a date value in {{vm.dataFormats.placeholder.date}} format.</div>
@@ -171,7 +171,7 @@
         <div ng-message="json">Please enter a valid JSON value.</div>
         <div ng-message="fileExtension">Please select a file with the following type: {{vm.fileExtensionTypes(column)}}</div>
         <div ng-message="customError">{{vm.customErrorMessage}}</div>
-    </div> -->
+    </div>
 
     <!-- Validation error messages to show when the form is submitted -->
     <div ng-messages="vm.inputContainer.$error" ng-show="vm.formContainer.$submitted" class="text-danger" role="alert">
