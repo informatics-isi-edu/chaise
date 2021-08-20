@@ -1015,6 +1015,9 @@
         }
 
         /**
+         * NOTE added for saved query feature
+         * Transform facets to a more stable version that can be saved.
+         * The overal returned format is like the following:
          * {
          *  "and": [
          *    {
@@ -1066,7 +1069,8 @@
                     var stableKeyCols = fc.column.table.stableKey, stableKeyColName;
                     stableKeyColName = stableKeyCols[0].name;
                     if (stableKeyColName != fc.column.name) {
-                        // we're assuming that it's just simple key
+                        // TODO we're assuming that it's just simple key,
+                        //     if this assumption has changed, we should change this implementation too
                         // we have to change the column and choices values
                         filter.source_domain.column = stableKeyColName;
                         filter.choices = [];
@@ -1549,10 +1553,11 @@
                 // NOTE this will affect the reference uri so it must be 
                 //      done before initializing recordset
                 scope.vm.reference.generateFacetColumns().then(function (res) {
-                    $log.debug("facet columns generated: " + res.facets.length);
                     scope.vm.facetColumnsReady = true;
-                    if (res.facets.length === 0) {
-                        $log.debug("facet columns empty, directives loaded");
+
+                    // if facetColumns were empty, we have to manually set the 
+                    // facetDirectivesLoaded to true
+                    if (res.facetColumns.length === 0) {
                         scope.facetDirectivesLoaded = true;
                     }
 
@@ -1573,6 +1578,8 @@
                             $rootScope.$emit('reference-modified');
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
+                    } else {
+                        // TODO this is where we should update the exection time if there was a query_id q parameter.
                     }
                 }).catch(function (exception) {
                     $log.warn(exception);
