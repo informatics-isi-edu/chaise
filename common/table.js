@@ -563,23 +563,6 @@
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
 
-                    // if defined, we need to update the execution status of the saved query
-                    if ($rootScope.savedQuery.rid) {
-                        var rows = [{}],
-                            updateRow = rows[0];
-
-                        updateRow.RID = $rootScope.savedQuery.rid
-                        updateRow.last_execution_time = "now";
-
-                        // attributegroup/CFDE:saved_query/RID;last_execution_status
-                        ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
-                            console.log("new last executed time: ", response);
-                        }).catch(function (error) {
-                            console.log(error);
-                            $log.warn("saved query last executed time could not be updated");
-                        });
-                    }
-
                     // make sure we're getting the data for aggregate columns
                     vm.aggregateModels.forEach(function (agg, i) {
                         if (vm.page.tuples.length > 0) {
@@ -1031,6 +1014,7 @@
             }, 0);
         }
 
+       /**
         * Registers the callbacks for favorites functionality used in faceting and ellipsis
         * @param  {object} scope the scope object
         */
@@ -1543,15 +1527,14 @@
                         columnModels.push(recordCreate.columnToColumnModel(col));
                     });
 
-                    // grab facet blob from parent reference
-                    // to get the beginning of where to substring from, look for the `*::facets::` string
+                    // if facet idx exists, there should be stableFacet object
                     var facetTextIdx = scope.vm.reference.uri.indexOf(facetTxt);
-                    // then add length since indexOf is the index of the first character in matched string
-                    // if no facetText, use empty string
-                    var facetString = facetTextIdx != -1 ? scope.vm.reference.uri.substring(facetTextIdx + facetTxt.length) : null;
+                    // if no facetIdx, assume no facets
+                    var facetObj = facetTextIdx != -1 ? _getStableFacets(scope) : null;
 
-                    rowData.rows[0].encoded_facets = facetString || "";
-                    rowData.rows[0].facets = facetString ? ERMrest.decodeFacet(facetString) : {};
+                    // encodeFacet({}) produces an encoded string!!
+                    rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : "";
+                    rowData.rows[0].facets = facetObj || {};
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
@@ -1584,6 +1567,9 @@
                         and: [{
                             choices: [scope.vm.reference.table.name],
                             source: "table_name" // name of column storing table name in saved_query table
+                        }, {
+                            choices: [scope.$root.session.client.id],
+                            source: "user_id"
                         }]
                     }
 
@@ -1840,7 +1826,21 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        // TODO this is where we should update the exection time if there was a query_id q parameter.
+                        if ($rootScope.savedQuery.rid) {
+                            var rows = [{}],
+                                updateRow = rows[0];
+
+                            updateRow.RID = $rootScope.savedQuery.rid
+                            updateRow.last_execution_time = "now";
+
+                            // attributegroup/CFDE:saved_query/RID;last_execution_status
+                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
+                                console.log("new last executed time: ", response);
+                            }).catch(function (error) {
+                                console.log(error);
+                                $log.warn("saved query last executed time could not be updated");
+                            });
+                        }
                     }
                 }).catch(function (exception) {
                     $log.warn(exception);

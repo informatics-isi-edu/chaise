@@ -92,7 +92,27 @@
                         //For child window
                         $window.opener.postMessage($window.location.search, $window.opener.location.href);
                     }
-                    $window.close();
+
+                    // POST /ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip
+                    // Content-Type: application/json
+                    //
+                    // [
+                    //     {"id": "...", "display_name": "...", "full_name": "..."}
+                    // ]
+                    var userProfilePath = "/ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip"
+                    var rows = [{
+                        "id": session.client.id,
+                        "display_name": session.client.display_name,
+                        "full_name": session.client.full_name
+                    }]
+
+                    ConfigUtils.getHTTPService().post($window.location.origin + userProfilePath, rows).then(function (response) {
+                        $window.close();
+                    }).catch(function (error) {
+                        console.log(error);
+                        console.log("error creating user");
+                        // $window.close();
+                    });
                     return;
                 }
             } else {

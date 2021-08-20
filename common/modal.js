@@ -634,9 +634,7 @@
         vm.parentReference = params.parentReference;
         vm.savedQueryForm = params.rowData;
 
-        vm.form = {
-            rows: [{}]
-        }
+        vm.form = params.rowData;
 
         vm.submit = function () {
             var row = vm.savedQueryForm.rows[0]
