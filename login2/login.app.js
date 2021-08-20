@@ -109,9 +109,12 @@
                     ConfigUtils.getHTTPService().post($window.location.origin + userProfilePath, rows).then(function (response) {
                         $window.close();
                     }).catch(function (error) {
+                        // NOTE: this should almost never happen
+                        // I think this shouldn't "close the window" automatically
+                        // if a user reports this hanging around, we need to identify what error caused it
+                        // should be easy since the error will be logged with context pointing to login2 i believe
                         console.log(error);
                         console.log("error creating user");
-                        // $window.close();
                     });
                     return;
                 }
