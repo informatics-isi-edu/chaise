@@ -205,6 +205,10 @@
             > td.disabled-cell {
                 background-color: #f7f0cf !important;
             }
+
+            .hover-show {
+                visibility: visible;
+            }
         }
 
         /* odd disabled cells need to be darker */
@@ -534,30 +538,11 @@ faceting {
         margin-left: 5px;
     }
 
-    li {
-        .favorite-icon {
-            top: 2px;
-            margin-right: 10px;
-            cursor: pointer;
-            font-size: 18px;
+    li:hover {
+        background-color: rgb(241, 241, 241);
 
-            &.glyphicon-star {
-                color: goldenrod;
-            }
-
-            // glyphicon-star-empty
-            &.hover-show {
-                display: none;
-            }
-
-        }
-
-        &:hover {
-            background-color: rgb(241, 241, 241);
-
-            .hover-show {
-                display: inline-block;
-            }
+        .hover-show {
+            visibility: visible;
         }
     }
 }

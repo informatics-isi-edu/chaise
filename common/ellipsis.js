@@ -109,6 +109,18 @@
                     scope.defaultDisplayname = defaultDisplayname;
                     scope.config = scope.tableModel.config;
 
+                    recordTableUtils.registerFavoritesCallbacks(scope);
+
+                    scope.callToggleFavorite = function () {
+                        scope.toggleFavorite(scope.tuple, scope.isFavorite).then(function (isFavorite) {
+                            scope.isFavorite = isFavorite;
+                        }, function (isFavorite) {
+                            scope.isFavorite = isFavorite;
+                        }).catch(function (error) {
+                            $log.warn(error);
+                        });
+                    }
+
                     var tupleReference = scope.tuple.reference,
                         isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
                         isSavedQueryPopup = scope.config.displayMode === recordsetDisplayModes.savedQuery,

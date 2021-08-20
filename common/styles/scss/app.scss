@@ -632,6 +632,24 @@ html {
         overflow: hidden;
     }
 
+    // favorite icon used for favorites in faceting->choice-picker->list and ellipsis action column
+    .favorite-icon {
+        top: 2px;
+        margin-right: 10px;
+        cursor: pointer;
+        font-size: 18px;
+
+        &.glyphicon-star {
+            color: goldenrod;
+        }
+
+        // glyphicon-star-empty
+        &.hover-show {
+            visibility: hidden;
+        }
+
+    }
+
     // changes the color of alert glyphicon (used for timeout error)
     .glyphicon-alert {
         color: $warning-color !important;
@@ -734,10 +752,9 @@ html {
         top: 0;
         display: none;
     }
-    
+
     .chaise-table-top-scroll {
         height: inherit;
         overflow-x: scroll;
     }
 }
-
