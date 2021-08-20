@@ -13,7 +13,7 @@
         <div class="app-container container-fluid row" ng-controller="Login2Controller as ctrl">
             <div ng-if="showInstructions" class="login2-container main-container">
                 <h2>Sign up for personalized dashboard features</h2>
-                <p>To access the personalized dashboard features, membership in the "{{ctrl.groupName}}" group is required. Click the "<b>Sign Up</b>" button to join the group. Using the "<b>Sign Up</b>" button will open a Globus Groups enrollment page in a separate tab or window. After completing enrollment on that page, come back and click the "<b>Proceed</b>" button to begin using the new features of this site.</p>
+                <p>To access the personalized dashboard features, membership in the "{{ctrl.groupName}}" group is required. Click the <b>Sign Up</b> button to join the group. Using the <b>Sign Up</b> button will open a Globus group enrollment page in a separate tab or window. After completing enrollment on that page, come back and click the <b>Proceed</b> button to begin using the new features of this site.</p>
                 <div class="btn-container">
                     <a class="chaise-btn chaise-btn-primary" ng-href="{{::ctrl.joinLink}}" target="_blank" uib-tooltip="Click to sign up for {{ctrl.groupName}}." tooltip-placement="bottom-left">Sign Up</a>
                     <button class="chaise-btn chaise-btn-secondary" ng-click="::ctrl.reLogin()" uib-tooltip="Click to proceed to the application after joining the group." tooltip-placement="bottom-left">Proceed</button>
