@@ -17,6 +17,7 @@
 @import "recordedit-app";
 @import "viewer-app";
 @import "switch-user-accounts";
+@import "login-app";
 @import "help-app";
 
 
@@ -734,10 +735,9 @@ html {
         top: 0;
         display: none;
     }
-    
+
     .chaise-table-top-scroll {
         height: inherit;
         overflow-x: scroll;
     }
 }
-

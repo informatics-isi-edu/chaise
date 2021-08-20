@@ -182,6 +182,7 @@ test: test-ALL_TESTS
 
 # HTML files that need to be created
 HTML=login/index.html \
+	 login2/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
@@ -199,6 +200,7 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
 	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
 	$(DIST)/$(LOGIN_JS_SOURCE_MIN) \
+	$(DIST)/$(LOGIN2_JS_SOURCE_MIN) \
 	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
  DIST=dist
@@ -503,6 +505,28 @@ LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 login/index.html: login/index.html.in .make-login-includes
 	$(info - creating login/index.html)
 	@$(call build_html, .make-login-includes, login/index.html)
+
+# ------------------------------- Login2 app --------------------------------#
+LOGIN2_JS_SOURCE=login2/login.app.js
+
+LOGIN2_JS_SOURCE_MIN=login2.min.js
+$(DIST)/$(LOGIN2_JS_SOURCE_MIN): $(LOGIN2_JS_SOURCE)
+	$(call bundle_js_files,$(LOGIN2_JS_SOURCE_MIN),$(LOGIN2_JS_SOURCE))
+
+LOGIN2_JS_VENDOR_ASSET=
+
+LOGIN2_CSS_SOURCE=
+
+.make-login2-includes: $(BUILD_VERSION)
+	@> .make-login2-includes
+	$(info - creating .make-login2-includes)
+	@$(call add_css_link,.make-login2-includes,$(LOGIN2_CSS_SOURCE))
+	@$(call add_js_script,.make-login2-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN2_JS_VENDOR_ASSET) $(DIST)/$(LOGIN2_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-login2-includes)
+
+login2/index.html: login2/index.html.in .make-login2-includes
+	$(info - creating login2/index.html)
+	@$(call build_html, .make-login2-includes, login2/index.html)
 
 # -------------------------- switch user help app -------------------------- #
 SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
