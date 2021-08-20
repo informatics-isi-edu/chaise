@@ -39,6 +39,7 @@
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
+        'ngMessages',
         'ngSanitize',
         'ngAnimate',
         'duScroll',

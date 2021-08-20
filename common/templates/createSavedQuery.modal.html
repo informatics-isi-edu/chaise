@@ -18,7 +18,7 @@
 </div>
 <div class="modal-body">
     <alerts alerts="ctrl.alerts"></alerts>
-    <table class="table">
+    <table class="table" ng-form="ctrl.form">
         <tr ng-repeat="(columnIndex, columnModel) in ctrl.columnModels" style="margin-bottom: 5px;">
             <td class="savedQueryRowHeader" style="width: 20%;">
                 <span ng-if="columnModel.isRequired" class="text-danger ng-scope">*</span>
@@ -28,9 +28,8 @@
                 </span>
             </td>
             <td class="savedQueryRowValue">
-                <input-switch column="columnModel.column" column-model="columnModel"
-                        parent-reference="ctrl.savedQueryForm.reference" parent-model="ctrl.savedQueryForm"
-                        model="ctrl.savedQueryForm.rows[0][columnModel.column.name]" column-index="columnIndex"
+                <input-switch column="columnModel.column" column-model="columnModel" parent-reference="ctrl.savedQueryForm.reference"
+                        parent-model="ctrl.savedQueryForm" model="ctrl.savedQueryForm.row[0][columnModel.column.name]" column-index="columnIndex"
                         mode="edit" form-container="ctrl.form" input-container="ctrl.form.row[0][columnModel.column.name]"
                         is-required="columnModel.isRequired"></input-switch>
             </td>

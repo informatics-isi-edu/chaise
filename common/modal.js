@@ -621,7 +621,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'params', '$scope', '$uibModalInstance', function MarkdownPreviewController(AlertsService, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = AlertsService.alerts;
         vm.columnModels = params.columnModels;
