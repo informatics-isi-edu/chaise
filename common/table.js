@@ -563,6 +563,23 @@
                     // globally sets when the app state is ready to interact with
                     $rootScope.displayReady = true;
 
+                    // if defined, we need to update the execution status of the saved query
+                    if ($rootScope.savedQuery.rid) {
+                        var rows = [{}],
+                            updateRow = rows[0];
+
+                        updateRow.RID = $rootScope.savedQuery.rid
+                        updateRow.last_execution_time = "now";
+
+                        // attributegroup/CFDE:saved_query/RID;last_execution_status
+                        ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
+                            console.log("new last executed time: ", response);
+                        }).catch(function (error) {
+                            console.log(error);
+                            $log.warn("saved query last executed time could not be updated");
+                        });
+                    }
+
                     // make sure we're getting the data for aggregate columns
                     vm.aggregateModels.forEach(function (agg, i) {
                         if (vm.page.tuples.length > 0) {

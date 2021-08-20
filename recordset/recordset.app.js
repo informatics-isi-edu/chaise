@@ -125,7 +125,7 @@
 
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
-                    $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
+                    $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
                     // send string to prepend to "headTitle"
                     // <table-name>
                     headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));
