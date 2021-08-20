@@ -1019,11 +1019,9 @@
          * @param  {object} scope the scope object
          */
         function registerFavoritesCallbacks(scope, elem, attrs) {
-            var favoriteTables = ["anatomy", "assay_type", "dcc"];
-            scope.canFavorite = function (tuple) {
-                if (!tuple || !scope.$root.session) return false;
-                var tableName = tuple.reference.table.name;
-                return favoriteTables.indexOf(tableName) > -1;
+            scope.canFavorite = function (table) {
+                if (!table || !scope.$root.session) return false;
+                return table.favoritesPath;
             }
 
             scope.toggleFavorite = function (tuple, isFavorite) {
