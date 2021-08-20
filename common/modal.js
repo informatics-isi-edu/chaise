@@ -224,6 +224,8 @@
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (ERMrest && exception instanceof ERMrest.UnsupportedFilters) {
+            vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
@@ -250,12 +252,16 @@
         };
 
         vm.ok = function () {
+            $rootScope.error = false;
+
             // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
             // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
 
         vm.cancel = function cancel() {
+            $rootScope.error = false;
+
             $uibModalInstance.dismiss('cancel');
         };
 

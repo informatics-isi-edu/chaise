@@ -108,7 +108,8 @@
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
             "pageRedirect": "Click <b>OK</b> to go to the ",
-            "reloadMessage": "Click <b>Reload</b> to start over."
+            "reloadMessage": "Click <b>Reload</b> to start over.",
+            "unsupportedFilters": "Click <b>OK</b> to continue with the subset of filter criteria which are supported at this time."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
