@@ -980,8 +980,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout',
-            function (AlertsService, facetingUtils, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout) {
+            ["AlertsService", 'ConfigUtils', 'facetingUtils', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout', '$window',
+            function (AlertsService, ConfigUtils, facetingUtils, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout, $window) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -1206,7 +1206,6 @@
                                 selected: false,
                                 uniqueId: value,
                                 displayname: tuple.displayname,
-                                // isFavorite: tuple.isFavorite,
                                 tuple:  tuple,
                                 // if we have a not_null filter, other filters must be disabled.
                                 disabled: scope.facetColumn.hasNotNullFilter,
@@ -1218,8 +1217,55 @@
                         scope.facetModel.reloadCauses = [];
                         scope.facetModel.reloadStartTime = -1;
 
-                        defer.resolve(true);
+                        var table = scope.reference.table;
+                        // if the stable key is greater than length 1, the favorites won't be supported for now
+                        // TODO: support this for composite stable keys
+                        if (table.favoritesPath && scope.facetColumn.isEntityMode && table.stableKey.length == 1) {
+                            // array of column names that represent the stable key of leaf with favorites
+                            // favorites_* will use stable key to store this information
+                            // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
+                            var key = table.stableKey[0];
+                            var displayedFacetIds = "(";
+                            scope.checkboxRows.forEach(function (row, idx) {
+                                // filter out null and not null rows
+                                if (row.tuple) {
+                                    // use the stable key here
+                                    displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data[key.name]);
+                                    if (idx !== scope.checkboxRows.length-1) displayedFacetIds += ";";
+                                }
+                            });
+                            displayedFacetIds += ")"
+                            // resolve favorites reference for this table with given user_id
+                            var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
 
+                            ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+
+                                // read favorites on reference
+                                // use 10 since that's the max our facets will show at once
+                                return favoritesReference.contextualize.compact.read(10);
+                            }).then(function (favoritesPage) {
+                                favoritesPage.tuples.forEach(function (tuple) {
+                                    // should only be 1
+                                    var matchedRow = scope.checkboxRows.filter(function (cbRow) {
+                                        if (cbRow.tuple) {
+                                            // tuple has data as table.name and user_id
+                                            // cbRow.tuple is the whole row of data with ermrest columns
+                                            return tuple.data[table.name] == cbRow.tuple.data[key.name]
+                                        }
+                                        return false;
+                                    });
+
+                                    matchedRow[0].isFavorite = true;
+                                });
+
+                                defer.resolve(true);
+                            }).catch(function (error) {
+                                console.log(error);
+                                defer.resolve(true)
+                            });
+                        } else {
+                            defer.resolve(true);
+                        }
                     }).catch(function (err) {
                         defer.reject(err);
                     });

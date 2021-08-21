@@ -477,6 +477,8 @@
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(vm, page, requestCauses, reloadStartTime) : {page: page};
                 }).then(function (result) {
+                    return vm.getFavorites ? vm.getFavorites(vm, result.page) : {page: result.page};
+                }).then(function (result) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
@@ -1019,9 +1021,13 @@
         * @param  {object} scope the scope object
         */
        function registerFavoritesCallbacks(scope, elem, attrs) {
-           scope.canFavorite = function (table) {
-               if (!table || !scope.$root.session) return false;
-               return table.favoritesPath;
+           scope.canFavorite = function (tuple, value) {
+               // NOTE: When a value comes back from the modal, we are dropping the tuple object
+               // and creating a new one with basic filter information that no longer has the tuple
+               // or other relevent information like table
+               // Maybe list directive should have the table (or reference) available
+               if (!(tuple && tuple.reference && tuple.reference.table) || !scope.$root.session) return false;
+               return tuple.reference.table.favoritesPath;
            }
 
            scope.toggleFavorite = function (tuple, isFavorite) {
@@ -2297,7 +2303,7 @@
      *   value to the vm.selectedRows
      * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
      */
-    .directive('recordsetSelectFaceting', ['messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', function(messageMap, recordsetDisplayModes, recordTableUtils, UriUtils) {
+    .directive('recordsetSelectFaceting', ['ConfigUtils', 'ERMrest', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$q', '$window', function(ConfigUtils, ERMrest, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $q, $window) {
 
         return {
             restrict: 'E',
@@ -2318,6 +2324,53 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
+
+                // fetch the favorites
+                scope.vm.getFavorites = function (vm, page) {
+                    var defer = $q.defer();
+
+                    var table = scope.vm.reference.table;
+                    // if the stable key is greater than length 1, the favorites won't be supported for now
+                    // TODO: support this for composite stable keys
+                    if (table.favoritesPath && table.stableKey.length == 1) {
+                        // array of column names that represent the stable key of leaf with favorites
+                        // favorites_* will use stable key to store this information
+                        // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
+                        var key = table.stableKey[0];
+                        var displayedFacetIds = "(";
+                        page.tuples.forEach(function (tuple, idx) {
+                            // use the stable key here
+                            displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data[key.name]);
+                            if (idx !== page.tuples.length-1) displayedFacetIds += ";";
+                        });
+                        displayedFacetIds += ")"
+                        // resolve favorites reference for this table with given user_id
+                        var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+
+                        ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                            // read favorites on reference
+                            // use 10 since that's the max our facets will show at once
+                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit);
+                        }).then(function (favoritesPage) {
+                            favoritesPage.tuples.forEach(function (favTuple) {
+                                // should only be 1
+                                var matchedTuple = page.tuples.filter(function (tuple) {
+                                    // favTuple has data as table.name and user_id
+                                    // tuple comes from leaf table, so find value based on key info
+                                    return favTuple.data[table.name] == tuple.data[key.name]
+                                });
+
+                                matchedTuple[0].isFavorite = true;
+                            });
+
+                            defer.resolve({page: page});
+                        }).catch(function (error) {
+                            defer.resolve({page: page});
+                        });
+                    }
+
+                    return defer.promise;
+                }
             }
         };
     }])

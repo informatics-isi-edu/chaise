@@ -5,8 +5,8 @@
     <div ng-switch-when="multi-select" class="chaise-checkbox">
         <input type="checkbox" ng-checked="selected || selectDisabled" ng-click="onSelect($event)" ng-disabled="selectDisabled">
         <label />
-        <span ng-if="canFavorite(tuple.reference.table) && isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="callToggleFavorite()"></span>
-        <span ng-if="canFavorite(tuple.reference.table) && !isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="callToggleFavorite()"></span>
+        <span ng-if="canFavorite(tuple) && tuple.isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="callToggleFavorite()"></span>
+        <span ng-if="canFavorite(tuple) && !tuple.isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="callToggleFavorite()"></span>
     </div>
     <div class="chaise-btn-group" ng-switch-default>
         <a ng-if="applySavedQuery" class="apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{applySavedQuery}}" tooltip-placement="bottom" uib-tooltip="Apply Saved Query">
