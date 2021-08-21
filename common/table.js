@@ -1024,7 +1024,7 @@
          *      "sourcekey": "key",
          *      "choices": [v1, v2, ..],
          *      "source_domain": {
-         *        "schema": 
+         *        "schema":
          *        "table":
          *        "column":
          *      }
@@ -1077,7 +1077,7 @@
                         // we have to change the column and choices values
                         filter.source_domain.column = stableKeyColName;
                         filter.choices = [];
-                        
+
 
                         for (var j = 0; j < fm.appliedFilters.length; j++) {
                             var af = fm.appliedFilters[j];
@@ -1316,10 +1316,10 @@
             });
 
             /**
-             * When the directive DOM is loaded, all the elements that 
+             * When the directive DOM is loaded, all the elements that
              * we need for top-horizontal logic are loaded as well and therefore
              * we don't need to wait for any condition.
-             * NOTE if we add a condition to hide an element, we should add a 
+             * NOTE if we add a condition to hide an element, we should add a
              * watcher for this one as well.
              */
             UiUtils.addTopHorizontalScroll(elem[0]);
@@ -1533,11 +1533,11 @@
              * - based on ng-if in recordset directive, faceting will load and populate the facets
              *   and will emit `facetDirectivesLoaded` event, which will set facetDirectivesLoaded=true
              *   (when we're not showing any facets, )
-             * - when `facetDirectivesLoaded` is true, recordset structure is ready. so 
+             * - when `facetDirectivesLoaded` is true, recordset structure is ready. so
              *   `recordsetStructureReadyWatcher` watcher will call `initializeRecordsetData`
-             * 
-             * @param {*} scope 
-             * @returns 
+             *
+             * @param {*} scope
+             * @returns
              */
             var recordsetReadyToInitializeStructure = function (scope) {
                 return scope.vm.readyToInitialize;
@@ -1558,12 +1558,12 @@
                     return;
                 }
 
-                // NOTE this will affect the reference uri so it must be 
+                // NOTE this will affect the reference uri so it must be
                 //      done before initializing recordset
                 scope.vm.reference.generateFacetColumns().then(function (res) {
                     scope.vm.facetColumnsReady = true;
 
-                    // if facetColumns were empty, we have to manually set the 
+                    // if facetColumns were empty, we have to manually set the
                     // facetDirectivesLoaded to true
                     if (res.facetColumns.length === 0) {
                         scope.facetDirectivesLoaded = true;
@@ -1575,7 +1575,7 @@
                      *  facets that had no issue
                      * - we should show an error and let users know that there were some
                      *   issues.
-                     * - we should keep the browser location like original to allow users to 
+                     * - we should keep the browser location like original to allow users to
                      *   refresh and try again. Also the issue might be happening because they
                      *   are not logged in. So we should keep the location like original so after
                      *   logging in they can get back to the page.
@@ -2048,6 +2048,55 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
+
+                // fetch the favorites
+                scope.vm.getFavorites = function (vm, page) {
+                    var defer = $q.defer();
+
+                    var table = scope.vm.reference.table;
+                    // if the stable key is greater than length 1, the favorites won't be supported for now
+                    // TODO: support this for composite stable keys
+                    if (scope.$root.session && table.favoritesPath && table.stableKey.length == 1) {
+                        // array of column names that represent the stable key of leaf with favorites
+                        // favorites_* will use stable key to store this information
+                        // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
+                        var key = table.stableKey[0];
+                        var displayedFacetIds = "(";
+                        page.tuples.forEach(function (tuple, idx) {
+                            // use the stable key here
+                            displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data[key.name]);
+                            if (idx !== page.tuples.length-1) displayedFacetIds += ";";
+                        });
+                        displayedFacetIds += ")"
+                        // resolve favorites reference for this table with given user_id
+                        var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+
+                        ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                            // read favorites on reference
+                            // use 10 since that's the max our facets will show at once
+                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit);
+                        }).then(function (favoritesPage) {
+                            favoritesPage.tuples.forEach(function (favTuple) {
+                                // should only be 1
+                                var matchedTuple = page.tuples.filter(function (tuple) {
+                                    // favTuple has data as table.name and user_id
+                                    // tuple comes from leaf table, so find value based on key info
+                                    return favTuple.data[table.name] == tuple.data[key.name]
+                                });
+
+                                matchedTuple[0].isFavorite = true;
+                            });
+
+                            defer.resolve({page: page});
+                        }).catch(function (error) {
+                            defer.resolve({page: page});
+                        });
+                    } else {
+                        defer.resolve({page: page});
+                    }
+
+                    return defer.promise;
+                }
             }
         };
     }])
