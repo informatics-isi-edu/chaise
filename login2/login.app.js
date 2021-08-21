@@ -92,7 +92,39 @@
                         //For child window
                         $window.opener.postMessage($window.location.search, $window.opener.location.href);
                     }
-                    $window.close();
+
+                    // POST /ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip
+                    // Content-Type: application/json
+                    //
+                    // [
+                    //     {"id": "...", "display_name": "...", "full_name": "..."}
+                    // ]
+                    var userProfilePath = "/ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip"
+                    var rows = [{
+                        "id": session.client.id,
+                        "display_name": session.client.display_name,
+                        "full_name": session.client.full_name
+                    }]
+
+                    if (validConfig) {
+                        // we only want to force adding to this group if the termsAndConditionsConfig is defined
+                        // TODO: this should be it's own configuration property
+                        //    - should it be part of termsAndConditionsConfig
+                        //    - or it's own property since this could be for a separate feature request
+                        //       - (having user profiles but not require a specific globus group for login)
+                        ConfigUtils.getHTTPService().post($window.location.origin + userProfilePath, rows).then(function (response) {
+                            $window.close();
+                        }).catch(function (error) {
+                            // NOTE: this should almost never happen
+                            // I think this shouldn't "close the window" automatically
+                            // if a user reports this hanging around, we need to identify what error caused it
+                            // should be easy since the error will be logged with context pointing to login2 i believe
+                            console.log(error);
+                            console.log("error creating user");
+                        });
+                    } else {
+                        $window.close();
+                    }
                     return;
                 }
             } else {

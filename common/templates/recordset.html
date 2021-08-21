@@ -18,7 +18,7 @@
             </div>
             <div class="top-right-panel">
                 <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
-                    <div class="recordset-title-buttons title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
+                    <div class="recordset-title-buttons title-buttons">
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
@@ -26,6 +26,21 @@
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>
+                        <!-- save query -->
+                        <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown>
+                            <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" uib-dropdown-toggle tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
+                                <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
+                                <span>Saved queries</span>
+                                <span class="caret "></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
+                                <li>
+                                    <a ng-click="::saveQuery()">Save query</a>
+                                    <a ng-click="::showSavedQueries()">Show saved queries</a>
+                                </li>
+                            </ul>
+                        </div>
+
                     </div>
                         <!-- TODO UX-M should change to class -->
                     <h1 id="page-title">

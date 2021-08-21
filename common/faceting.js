@@ -980,8 +980,8 @@
         }])
 
         .directive('choicePicker',
-            ["AlertsService", 'facetingUtils', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout',
-            function (AlertsService, facetingUtils, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout) {
+            ["AlertsService", 'ConfigUtils', 'facetingUtils', 'logService', 'messageMap', 'modalUtils', 'recordsetDisplayModes', 'tableConstants', 'UriUtils', "$log", '$q', '$timeout', '$window',
+            function (AlertsService, ConfigUtils, facetingUtils, logService, messageMap, modalUtils, recordsetDisplayModes, tableConstants, UriUtils, $log, $q, $timeout, $window) {
 
             /**
              * Given tuple and the columnName that should be used, return
@@ -1257,11 +1257,14 @@
 
                                     matchedRow[0].isFavorite = true;
                                 });
-                            }).catch(function () {
+
+                                defer.resolve(true);
+                            }).catch(function (error) {
+                                console.log(error);
                                 defer.resolve(true)
-                            })
+                            });
                         } else {
-                            defer.resolve(true)
+                            defer.resolve(true);
                         }
                     }).catch(function (err) {
                         defer.reject(err);
