@@ -1220,7 +1220,7 @@
                         var table = scope.reference.table;
                         // if the stable key is greater than length 1, the favorites won't be supported for now
                         // TODO: support this for composite stable keys
-                        if (table.favoritesPath && scope.facetColumn.isEntityMode && table.stableKey.length == 1) {
+                        if (scope.$root.session && table.favoritesPath && scope.facetColumn.isEntityMode && table.stableKey.length == 1) {
                             // array of column names that represent the stable key of leaf with favorites
                             // favorites_* will use stable key to store this information
                             // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
