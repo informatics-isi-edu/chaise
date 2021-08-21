@@ -95,6 +95,7 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 

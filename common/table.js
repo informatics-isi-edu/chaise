@@ -107,8 +107,8 @@
      *     that is also passed along with the emitted event
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'Errors', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, Errors, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'ConfigUtils', 'DataUtils', 'defaultDisplayname', 'Errors', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, ConfigUtils, DataUtils, defaultDisplayname, Errors, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordCreate, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -476,6 +476,8 @@
                     $log.debug("counter", current, ": read main successful.");
 
                     return vm.getDisabledTuples ? vm.getDisabledTuples(vm, page, requestCauses, reloadStartTime) : {page: page};
+                }).then(function (result) {
+                    return vm.getFavorites ? vm.getFavorites(vm, result.page) : {page: result.page};
                 }).then(function (result) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
@@ -1014,6 +1016,103 @@
             }, 0);
         }
 
+       /**
+        * Registers the callbacks for favorites functionality used in faceting and ellipsis
+        * @param  {object} scope the scope object
+        */
+       function registerFavoritesCallbacks(scope, elem, attrs) {
+           scope.canFavorite = function (tuple, value) {
+               // NOTE: When a value comes back from the modal, we are dropping the tuple object
+               // and creating a new one with basic filter information that no longer has the tuple
+               // or other relevent information like table
+               // Maybe list directive should have the table (or reference) available
+               if (!(tuple && tuple.reference && tuple.reference.table) || !scope.$root.session) return false;
+               return tuple.reference.table.favoritesPath;
+           }
+
+           scope.toggleFavorite = function (tuple, isFavorite) {
+               // tuple can get all information about the row and create a request to favorite the term
+               var defer = $q.defer();
+
+               var favoriteTable = tuple.reference.table;
+               var favoriteTablePath = favoriteTable.favoritesPath;
+
+               // TODO: show spinning wheel and disable star
+               // if not a favorite, add it
+               if (!isFavorite) {
+                   ERMrest.resolve($window.location.origin + favoriteTablePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
+                       var rows = [{}],
+                           favoriteRow = rows[0];
+
+                       // assumption that the column to store the id information is the name of the table
+                       // assumption that the data to store in above mentioned column is the value of the id column
+                       // assupmtion that the column to store the user information is the user_id column
+                       // TODO: add all three to config language
+                       favoriteRow[favoriteTable.name] = tuple.data.id
+                       favoriteRow.user_id = scope.$root.session.client.id;
+
+                       // TODO: use put maybe? so it doesn't complain about duplicate. ask karl
+                       return favoriteReference.contextualize.entryCreate.create(rows);
+                   }).then(function success() {
+                       // toggle favorite
+                       console.log("favorite created!")
+                       // return true (favorite)
+                       defer.resolve(true);
+                   }, function error(error) {
+                       if (error.code === 409) {
+                           // duplicate error, row is there already so mark as favorite
+                           // NOTE: could be model change though
+                           // TODO: remove this code with request change that karl suggested
+                           // return true (favorite)
+                           defer.resolve(true);
+                       }
+                       // TODO: what to do for error handling
+                       console.log("favorite create failed")
+                       console.log(error);
+                       // return false (not favorite)
+                       defer.reject(false);
+                   }).catch(function (error) {
+                       // an error here could mean a misconfiguration of the favorite_* ermrest table path
+                       $log.warn(error);
+
+                       // return false (not favorite)
+                       defer.reject(false);
+                   });
+               } else {
+                   // assumption that the column to delete the id information is the name of the table
+                   // assumption that the data to associate for delete in above mentioned column is the value of the id column
+                   // assupmtion that the column to delete the user information is the user_id column
+                   // TODO: add all three to config language
+                   var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(favoriteTable.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
+                   // if favorited, delete it
+                   ERMrest.resolve(deleteFavoritePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
+                       // delete the favorite
+                       return favoriteReference.delete();
+                   }).then(function success() {
+                       // toggle favorite
+                       console.log("favorite deleted!")
+                       // return false (not favorite)
+                       defer.resolve(false);
+                   }, function error(error) {
+                       // NOTE: 404 could mean it was already deleted, so update UI to show that
+                       // TODO: what to do for error handling
+                       console.log("favorite delete failed")
+                       console.log(error);
+                       // return true (favorite)
+                       defer.reject(true);
+                   }).catch(function (error) {
+                       // an error here could mean a misconfiguration of the favorite_* ermrest table path
+                       $log.warn(error);
+
+                       // return true (favorite)
+                       defer.reject(true);
+                   });
+               }
+
+               return defer.promise;
+           }
+       }
+
         /**
          * NOTE added for saved query feature
          * Transform facets to a more stable version that can be saved.
@@ -1024,7 +1123,7 @@
          *      "sourcekey": "key",
          *      "choices": [v1, v2, ..],
          *      "source_domain": {
-         *        "schema": 
+         *        "schema":
          *        "table":
          *        "column":
          *      }
@@ -1077,7 +1176,7 @@
                         // we have to change the column and choices values
                         filter.source_domain.column = stableKeyColName;
                         filter.choices = [];
-                        
+
 
                         for (var j = 0; j < fm.appliedFilters.length; j++) {
                             var af = fm.appliedFilters[j];
@@ -1316,10 +1415,10 @@
             });
 
             /**
-             * When the directive DOM is loaded, all the elements that 
+             * When the directive DOM is loaded, all the elements that
              * we need for top-horizontal logic are loaded as well and therefore
              * we don't need to wait for any condition.
-             * NOTE if we add a condition to hide an element, we should add a 
+             * NOTE if we add a condition to hide an element, we should add a
              * watcher for this one as well.
              */
             UiUtils.addTopHorizontalScroll(elem[0]);
@@ -1384,6 +1483,152 @@
                 document.execCommand("copy");
 
                 document.body.removeChild(dummy[0]);
+            }
+
+            // this function is called after recordset triggers that the reference is readyToInitialize
+            // scope.$root.savedQuery is set once we have a reference
+            function registerSavedQueryFunctions () {
+                scope.showSavedQueryUI = scope.$root.savedQuery.showUI;
+                // if the UI should not be shown return before doing anything
+                if (!scope.showSavedQueryUI) return;
+
+                ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    scope.vm.savedQueryReference = savedQueryReference;
+                }).catch(function (error) {
+                    // an error here could mean a misconfiguration of the saved query ermrest table path
+                    $log.warn(error);
+
+                    throw error;
+                });
+
+                var _disableSavedQueryButton;
+                scope.disableSavedQueryButton = function () {
+                    if (_disableSavedQueryButton === undefined && scope.vm.savedQueryReference) {
+                        // if insert is false, disable the button
+                        // should this be checking for insert !== true
+                        _disableSavedQueryButton = !scope.vm.savedQueryReference.table.rights.insert;
+                    }
+
+                    return _disableSavedQueryButton;
+                }
+
+                // string constant used for both saved query functions
+                var facetTxt = "*::facets::";
+                scope.saveQuery = function () {
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
+
+                    var columnModels = [];
+
+                    var savedQueryReference = scope.vm.savedQueryReference.contextualize.entryCreate;
+
+                    var rowData = {
+                        rows: [{}],
+                        submissionRows: [{}],
+                        foreignKeyData: [{}],
+                        oldRows: [{}]
+                    };
+
+                    // set columns list
+                    savedQueryReference.columns.forEach(function (col) {
+                        columnModels.push(recordCreate.columnToColumnModel(col));
+                    });
+
+                    // if facet idx exists, there should be stableFacet object
+                    var facetTextIdx = scope.vm.reference.uri.indexOf(facetTxt);
+                    // if no facetIdx, assume no facets
+                    var facetObj = facetTextIdx != -1 ? _getStableFacets(scope) : null;
+
+                    // encodeFacet({}) produces an encoded string!!
+                    rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : "";
+                    rowData.rows[0].facets = facetObj || {};
+                    rowData.rows[0].table_name = scope.vm.reference.table.name;
+                    rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
+                    rowData.rows[0].user_id = scope.$root.session.client.id;
+
+                    modalUtils.showModal({
+                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
+                        windowClass:"create-saved-query",
+                        controller: "SavedQueryModalDialogController",
+                        controllerAs: "ctrl",
+                        size: "md",
+                        keyboard: true,
+                        resolve: {
+                            params: {
+                                reference: savedQueryReference,
+                                parentReference: scope.vm.reference,
+                                columnModels: columnModels,
+                                rowData: rowData
+                            }
+                        }
+                    }, function success() {
+                        // notify user of success before closing
+                        AlertsService.addAlert("Query saved.", "success");
+                    }, null, false, false);
+                }
+
+                scope.showSavedQueries = function () {
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
+
+                    var facetBlob = {
+                        and: [{
+                            choices: [scope.vm.reference.table.name],
+                            source: "table_name" // name of column storing table name in saved_query table
+                        }, {
+                            choices: [scope.$root.session.client.id],
+                            source: "user_id"
+                        }]
+                    }
+
+                    ERMrest.resolve(scope.vm.savedQueryReference.uri + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                        // we don't want to allow faceting in the popup
+                        savedQueryReference = savedQueryReference.contextualize.compactSelect.hideFacets();
+
+                        var params = {};
+
+                        params.parentReference = scope.vm.reference;
+                        params.saveQueryRecordset = true;
+                        // used popup/savedquery so that we can configure which button to show and change the modal title
+                        params.displayMode = recordsetDisplayModes.savedQuery;
+                        params.reference = savedQueryReference;
+                        params.selectedRows = [];
+                        params.showFaceting = false;
+                        // faceting not allowed, make sure panel is collapsed too just in case
+                        params.facetPanelOpen = false;
+                        params.allowDelete = true;
+
+                        // TODO: fix logging stuff
+                        var stackElement = logService.getStackNode(
+                            logService.logStackTypes.SET,
+                            params.reference.table,
+                            {source: savedQueryReference.compressedDataSource, entity: true}
+                        );
+
+                        var logStack = logService.getStackObject(stackElement),
+                        logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
+
+                        params.logStack = logStack;
+                        params.logStackPath = logStackPath;
+
+                        modalUtils.showModal({
+                            animation: false,
+                            controller: "SearchPopupController",
+                            windowClass: "search-popup",
+                            controllerAs: "ctrl",
+                            resolve: {
+                                params: params
+                            },
+                            size: "lg",
+                            templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+                        }, function (res) {
+                            // ellipsis creates a link attached to the button instead of returning here to redirect
+                            // TODO: return from modal and update page instead of reloading
+                        }, null, false, false);
+                    }).catch(function (error) {
+                        $log.warn(error);
+
+                        throw error;
+                    });
+                }
             }
 
             scope.toggleFacetPanel = function () {
@@ -1533,11 +1778,11 @@
              * - based on ng-if in recordset directive, faceting will load and populate the facets
              *   and will emit `facetDirectivesLoaded` event, which will set facetDirectivesLoaded=true
              *   (when we're not showing any facets, )
-             * - when `facetDirectivesLoaded` is true, recordset structure is ready. so 
+             * - when `facetDirectivesLoaded` is true, recordset structure is ready. so
              *   `recordsetStructureReadyWatcher` watcher will call `initializeRecordsetData`
-             * 
-             * @param {*} scope 
-             * @returns 
+             *
+             * @param {*} scope
+             * @returns
              */
             var recordsetReadyToInitializeStructure = function (scope) {
                 return scope.vm.readyToInitialize;
@@ -1558,12 +1803,12 @@
                     return;
                 }
 
-                // NOTE this will affect the reference uri so it must be 
+                // NOTE this will affect the reference uri so it must be
                 //      done before initializing recordset
                 scope.vm.reference.generateFacetColumns().then(function (res) {
                     scope.vm.facetColumnsReady = true;
 
-                    // if facetColumns were empty, we have to manually set the 
+                    // if facetColumns were empty, we have to manually set the
                     // facetDirectivesLoaded to true
                     if (res.facetColumns.length === 0) {
                         scope.facetDirectivesLoaded = true;
@@ -1575,7 +1820,7 @@
                      *  facets that had no issue
                      * - we should show an error and let users know that there were some
                      *   issues.
-                     * - we should keep the browser location like original to allow users to 
+                     * - we should keep the browser location like original to allow users to
                      *   refresh and try again. Also the issue might be happening because they
                      *   are not logged in. So we should keep the location like original so after
                      *   logging in they can get back to the page.
@@ -1587,7 +1832,21 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        // TODO this is where we should update the exection time if there was a query_id q parameter.
+                        if ($rootScope.savedQuery.rid) {
+                            var rows = [{}],
+                                updateRow = rows[0];
+
+                            updateRow.RID = $rootScope.savedQuery.rid
+                            updateRow.last_execution_time = "now";
+
+                            // attributegroup/CFDE:saved_query/RID;last_execution_status
+                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
+                                console.log("new last executed time: ", response);
+                            }).catch(function (error) {
+                                console.log(error);
+                                $log.warn("saved query last executed time could not be updated");
+                            });
+                        }
                     }
                 }).catch(function (exception) {
                     $log.warn(exception);
@@ -1711,6 +1970,8 @@
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
+                // set saved query Functions
+                registerSavedQueryFunctions();
 
                 $log.debug("going to initialize recordset man");
 
@@ -1761,6 +2022,7 @@
             update: update,
             updateColumnAggregates: updateColumnAggregates,
             updateMainEntity: updateMainEntity,
+            registerFavoritesCallbacks: registerFavoritesCallbacks,
             registerTableCallbacks: registerTableCallbacks,
             registerRecordsetCallbacks: registerRecordsetCallbacks,
             FlowControlObject: FlowControlObject,
@@ -1979,7 +2241,7 @@
         }
     }])
 
-    .directive('recordList', ['defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$timeout', function(defaultDisplayname, messageMap, recordTableUtils, UriUtils, $timeout) {
+    .directive('recordList', ['ConfigUtils', 'defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$log', '$timeout', '$window', function(ConfigUtils, defaultDisplayname, messageMap, recordTableUtils, UriUtils, $log, $timeout, $window) {
 
         return {
             restrict: 'E',
@@ -1998,13 +2260,27 @@
                     scope.onRowClick(row, $event);
                 }
 
+                recordTableUtils.registerFavoritesCallbacks(scope, elem, attr);
+
+                scope.callToggleFavorite = function (row) {
+                    scope.toggleFavorite(row.tuple, row.isFavorite).then(function (isFavorite) {
+                        row.isFavorite = isFavorite;
+                    }, function (isFavorite) {
+                        row.isFavorite = isFavorite;
+                    }).catch(function (error) {
+                        $log.warn(error);
+                    });
+                }
+
                 scope.$watch('initialized', function (newVal, oldVal) {
                     if (newVal) {
                         $timeout(function () {
                             var listElem = elem[0].getElementsByClassName("chaise-list-container")[0];
 
                             // set the height to the clientHeight or the rendered height so when the content changes the page doesn't thrash
-                            listElem.style.height = listElem.scrollHeight + "px";
+                            // TODO: we should figure out why this is calculating incorrectly now
+                            // plus 1 to fix a truncation of the list issue
+                            listElem.style.height = listElem.scrollHeight + 1 + "px";
                             listElem.style.overflow = "hidden";
                         }, 0);
                     } else if (newVal == false) {
@@ -2027,7 +2303,7 @@
      *   value to the vm.selectedRows
      * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
      */
-    .directive('recordsetSelectFaceting', ['messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', function(messageMap, recordsetDisplayModes, recordTableUtils, UriUtils) {
+    .directive('recordsetSelectFaceting', ['ConfigUtils', 'ERMrest', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$q', '$window', function(ConfigUtils, ERMrest, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $q, $window) {
 
         return {
             restrict: 'E',
@@ -2048,6 +2324,53 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
+
+                // fetch the favorites
+                scope.vm.getFavorites = function (vm, page) {
+                    var defer = $q.defer();
+
+                    var table = scope.vm.reference.table;
+                    // if the stable key is greater than length 1, the favorites won't be supported for now
+                    // TODO: support this for composite stable keys
+                    if (table.favoritesPath && table.stableKey.length == 1) {
+                        // array of column names that represent the stable key of leaf with favorites
+                        // favorites_* will use stable key to store this information
+                        // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
+                        var key = table.stableKey[0];
+                        var displayedFacetIds = "(";
+                        page.tuples.forEach(function (tuple, idx) {
+                            // use the stable key here
+                            displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data[key.name]);
+                            if (idx !== page.tuples.length-1) displayedFacetIds += ";";
+                        });
+                        displayedFacetIds += ")"
+                        // resolve favorites reference for this table with given user_id
+                        var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+
+                        ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                            // read favorites on reference
+                            // use 10 since that's the max our facets will show at once
+                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit);
+                        }).then(function (favoritesPage) {
+                            favoritesPage.tuples.forEach(function (favTuple) {
+                                // should only be 1
+                                var matchedTuple = page.tuples.filter(function (tuple) {
+                                    // favTuple has data as table.name and user_id
+                                    // tuple comes from leaf table, so find value based on key info
+                                    return favTuple.data[table.name] == tuple.data[key.name]
+                                });
+
+                                matchedTuple[0].isFavorite = true;
+                            });
+
+                            defer.resolve({page: page});
+                        }).catch(function (error) {
+                            defer.resolve({page: page});
+                        });
+                    }
+
+                    return defer.promise;
+                }
             }
         };
     }])

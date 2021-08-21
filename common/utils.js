@@ -12,7 +12,7 @@
         "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "termsAndConditionsConfig", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -40,6 +40,7 @@
           "logClientActions": true,
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
+          "savedQueryConfig": null,
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -165,7 +166,8 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
-        facetPopup: "popup/facet"
+        facetPopup: "popup/facet",
+        savedQuery: "popup/savedquery"
     })
 
     .constant("defaultDisplayname", {
@@ -2198,6 +2200,47 @@
             return mode;
         }
 
+        // NOTE: should use DataUtils.isNoneEmptyString but including causes a circular dependency
+        // DataUtils relies on errors for one functions, `verify()`. `verify` should be moved to
+        // errors to remove this circular dependency and allow utility functions with no dependencies
+        // to be used everywhere
+        function isStringAndNotEmpty(str) {
+            return typeof str === "string" && str.length > 0;
+        };
+
+        function initializeSavingQueries(reference, queryParams) {
+            var chaiseConfig = getConfigJSON();
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            var savedQuery = {
+                showUI: reference.display.showSavedQuery
+            }
+
+            // NOTE: if this is not set, saved query UI should probably be turned off
+            if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
+                var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+
+                var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                if (validMapping) {
+                    savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+                    savedQuery.ermrestAGPath = "/ermrest/catalog/" + mapping.catalog + "/attributegroup/" + mapping.schema + ":" + mapping.table
+
+                    // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
+                    if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
+                } else {
+                    // if mapping is invalid, the config is ill-defined and the feature will be turned off
+                    savedQuery.showUI = false;
+                }
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                savedQuery.showUI = false;
+            }
+
+            return savedQuery;
+        }
+
         /**
          * Returns true if the object passed is valid for the terms and conditions feature
          * @params {Object} obj - the termaAndConditions object from chaise-config
@@ -2213,10 +2256,6 @@
             if (!obj || typeof obj !== "object") return false;
             var tacConfig = getConfigJSON().termsAndConditionsConfig;
 
-            function isStringAndNotEmpty(str) {
-                return typeof str === "string" && str.length > 0;
-            };
-
             // all 3 properties must be defined for this to function, if not the old login app will be used
             return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));
         }
@@ -2229,6 +2268,7 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
+            initializeSavingQueries: initializeSavingQueries,
             systemColumnsMode: systemColumnsMode,
             getSettings: getSettings,
             validateTermsAndConditionsConfig: validateTermsAndConditionsConfig
@@ -2773,6 +2813,7 @@
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",

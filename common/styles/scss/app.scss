@@ -575,8 +575,8 @@ html {
         position: relative;
 
         label {
-            display: inline-block;
-            margin-left: 25px;
+            padding-left: 25px;
+            padding-right: 5px;
             font-weight: 400;
             position: relative;
             vertical-align: middle;
@@ -631,6 +631,24 @@ html {
         text-overflow: ellipsis;
         white-space: nowrap;
         overflow: hidden;
+    }
+
+    // favorite icon used for favorites in faceting->choice-picker->list and ellipsis action column
+    .favorite-icon {
+        top: 2px;
+        margin-right: 8px;
+        cursor: pointer;
+        font-size: 18px;
+
+        &.glyphicon-star {
+            color: goldenrod;
+        }
+
+        // glyphicon-star-empty
+        &.hover-show {
+            visibility: hidden;
+        }
+
     }
 
     // changes the color of alert glyphicon (used for timeout error)
