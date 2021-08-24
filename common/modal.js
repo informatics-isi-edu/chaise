@@ -637,6 +637,12 @@
         vm.form = params.rowData;
 
         vm.submit = function () {
+            if (vm.form.$invalid) {
+                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
+                vm.form.$setSubmitted();
+                return;
+            }
+
             var row = vm.savedQueryForm.rows[0]
 
             // set id based on hash of `facets` columns
