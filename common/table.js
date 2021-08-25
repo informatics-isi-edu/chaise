@@ -1113,8 +1113,7 @@
            }
        }
 
-        /**
-         * NOTE added for saved query feature
+        /** 
          * Transform facets to a more stable version that can be saved.
          * The overal returned format is like the following:
          * {
@@ -1130,12 +1129,21 @@
          *    }
          *  ]
          * }
+         * NOTE: will return null if there aren't any facets
          */
         function _getStableFacets(scope) {
-            if (!scope.vm.hasFilter()) {
-                return {};
-            }
             var filters = [];
+            if (scope.vm.search) {
+                // TODO this is a bit hacky
+                filters.push({"sourcekey": "search-box", "search": [scope.vm.search]});
+            }
+            if (!scope.vm.hasFilter()) {
+                if (filters.length > 0) {
+                    return {"and": filters};
+                } else {
+                    return null;
+                }
+            }
             for (var i = 0; i < scope.vm.facetModels.length; i++) {
                 var fm = scope.vm.facetModels[i],
                     fc = scope.vm.reference.facetColumns[i];
@@ -1533,12 +1541,10 @@
                         columnModels.push(recordCreate.columnToColumnModel(col));
                     });
 
-                    // if facet idx exists, there should be stableFacet object
-                    var facetTextIdx = scope.vm.reference.uri.indexOf(facetTxt);
-                    // if no facetIdx, assume no facets
-                    var facetObj = facetTextIdx != -1 ? _getStableFacets(scope) : null;
+                    
+                    // get the stable facet
+                    var facetObj = _getStableFacets(scope);
 
-                    // encodeFacet({}) produces an encoded string!!
                     rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : "";
                     rowData.rows[0].facets = facetObj || {};
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
