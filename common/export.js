@@ -21,6 +21,8 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
+            scope.exportOptions.supportedFormats = [];
+
             // add the default csv option
             if (scope.reference.csvDownloadLink) {
                 scope.exportOptions.supportedFormats.push({
@@ -161,8 +163,10 @@
                     _doExport(scope, template);
                 };
 
-                var watcher = scope.$watch('reference', function (newValue, oldValue) {
-                    if (newValue && scope.exportOptions.supportedFormats.length === 0) {
+                // NOTE the assumption is that the directive is disabled on load and will be enabled when we 
+                //      can populate the templates
+                var watcher = scope.$watch('disabled', function (newValue, oldValue) {
+                    if (!newValue && scope.exportOptions.supportedFormats.length === 0) {
                         _updateExportFormats(scope);
                         
                         // unbind the watcher
