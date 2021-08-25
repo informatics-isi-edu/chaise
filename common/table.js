@@ -1545,8 +1545,8 @@
                     // get the stable facet
                     var facetObj = _getStableFacets(scope);
 
-                    rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : "";
-                    rowData.rows[0].facets = facetObj || {};
+                    rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : null;
+                    rowData.rows[0].facets = facetObj;
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
