@@ -146,8 +146,8 @@
                             scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
                         }).catch(function (error) {
                             $log.warn(error);
-
-                            throw error;
+                            // fail silently and degrade the UX (hide the apply button)
+                            scope.applySavedQuery = null;
                         });
                     }
 
