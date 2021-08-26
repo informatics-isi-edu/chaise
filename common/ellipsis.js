@@ -111,16 +111,25 @@
 
                     recordTableUtils.registerFavoritesCallbacks(scope);
 
+                    scope.isFavoriteLoading = false;
                     scope.callToggleFavorite = function () {
+                        if (scope.isFavoriteLoading) return;
+                        scope.isFavoriteLoading = true;
                         scope.toggleFavorite(scope.tuple, scope.tuple.isFavorite).then(function (isFavorite) {
                             // attached value is to the tuple
                             // TODO: this should be changed but it was the only value shared between ellipsis
                             //    and when I read in the data for setting favorites
                             scope.tuple.isFavorite = isFavorite;
+
+                            scope.isFavoriteLoading = false;
                         }, function (isFavorite) {
                             scope.tuple.isFavorite = isFavorite;
+
+                            scope.isFavoriteLoading = false;
                         }).catch(function (error) {
                             $log.warn(error);
+
+                            scope.isFavoriteLoading = false;
                         });
                     }
 

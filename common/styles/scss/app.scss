@@ -649,6 +649,17 @@ html {
             visibility: hidden;
         }
 
+        &.favorite-spinner-container {
+            font-size: 1em;
+            > .glyphicon-refresh {
+                cursor: not-allowed;
+                font-size: 14px;
+                padding-right: 0px;
+                margin-right: 2px;
+                margin-left: 2px;
+            }
+        }
+
     }
 
     // changes the color of alert glyphicon (used for timeout error)

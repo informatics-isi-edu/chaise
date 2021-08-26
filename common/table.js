@@ -1051,28 +1051,17 @@
                        favoriteRow[favoriteTable.name] = tuple.data.id
                        favoriteRow.user_id = scope.$root.session.client.id;
 
-                       // TODO: use put maybe? so it doesn't complain about duplicate. ask karl
-                       return favoriteReference.contextualize.entryCreate.create(rows);
+                       // TODO pass proper log object
+                       // passing skipOnConflict so it won't return 409 when it encounters a duplicate
+                       return favoriteReference.contextualize.entryCreate.create(rows, null, true);
                    }).then(function success() {
                        // toggle favorite
                        console.log("favorite created!")
                        // return true (favorite)
                        defer.resolve(true);
-                   }, function error(error) {
-                       if (error.code === 409) {
-                           // duplicate error, row is there already so mark as favorite
-                           // NOTE: could be model change though
-                           // TODO: remove this code with request change that karl suggested
-                           // return true (favorite)
-                           defer.resolve(true);
-                       }
-                       // TODO: what to do for error handling
-                       console.log("favorite create failed")
-                       console.log(error);
-                       // return false (not favorite)
-                       defer.reject(false);
                    }).catch(function (error) {
                        // an error here could mean a misconfiguration of the favorite_* ermrest table path
+                       // or some error while trying to create
                        $log.warn(error);
 
                        // return false (not favorite)
@@ -1094,12 +1083,18 @@
                        // return false (not favorite)
                        defer.resolve(false);
                    }, function error(error) {
-                       // NOTE: 404 could mean it was already deleted, so update UI to show that
-                       // TODO: what to do for error handling
-                       console.log("favorite delete failed")
-                       console.log(error);
-                       // return true (favorite)
-                       defer.reject(true);
+                        // TODO hacky
+                        // NOTE: 404 could mean it was already deleted, so update UI to show that
+                        if (error.code === 404) {
+                            // return false (not favorite)
+                            defer.resolve(false);
+                        } else {
+                            // TODO: what to do for error handling
+                            console.log("favorite delete failed")
+                            console.log(error);
+                            // return true (favorite)
+                            defer.reject(true);
+                        }
                    }).catch(function (error) {
                        // an error here could mean a misconfiguration of the favorite_* ermrest table path
                        $log.warn(error);
@@ -2269,12 +2264,21 @@
                 recordTableUtils.registerFavoritesCallbacks(scope, elem, attr);
 
                 scope.callToggleFavorite = function (row) {
+                    if (row.isFavoriteLoading) return;
+                    row.isFavoriteLoading = true;
+
                     scope.toggleFavorite(row.tuple, row.isFavorite).then(function (isFavorite) {
                         row.isFavorite = isFavorite;
+
+                        row.isFavoriteLoading = false;
                     }, function (isFavorite) {
                         row.isFavorite = isFavorite;
+
+                        row.isFavoriteLoading = false;
                     }).catch(function (error) {
                         $log.warn(error);
+
+                        row.isFavoriteLoading = false;
                     });
                 }
 
