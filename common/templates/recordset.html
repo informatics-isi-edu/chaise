@@ -30,13 +30,13 @@
                         <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown>
                             <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" uib-dropdown-toggle tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
                                 <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
-                                <span>Saved queries</span>
+                                <span>Saved searches</span>
                                 <span class="caret "></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
                                 <li>
-                                    <a ng-click="::saveQuery()">Save query</a>
-                                    <a ng-click="::showSavedQueries()">Show saved queries</a>
+                                    <a ng-click="::saveQuery()">Save current search criteria</a>
+                                    <a ng-click="::showSavedQueries()">Show saved search criteria</a>
                                 </li>
                             </ul>
                         </div>
