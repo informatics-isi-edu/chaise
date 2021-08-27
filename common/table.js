@@ -474,10 +474,11 @@
                     }
 
                     $log.debug("counter", current, ": read main successful.");
+                    
 
-                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, page, requestCauses, reloadStartTime) : {page: page};
+                    return vm.getFavorites ? vm.getFavorites(vm, page) : {page: page};
                 }).then(function (result) {
-                    return vm.getFavorites ? vm.getFavorites(vm, result.page) : {page: result.page};
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, result.page, requestCauses, reloadStartTime) : {page: result.page};
                 }).then(function (result) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
