@@ -365,7 +365,7 @@
                         if (!notTerminal){
                             err.subMessage = err.message;
                             err.message = "The result set cannot be retrieved. Try the following to reduce the query time:\n" + messageMap.queryTimeoutList;
-                            console.log(err);
+                            $log.warn(err);
                             ErrorService.handleException(err, true);
                         }
                     } else {
@@ -749,6 +749,7 @@
          * @param  {boolean} updateCount  if it's true we will update the displayed total count.
          * @param  {boolean} updateFacets if it's true we will udpate the opened facets.
          * @param  {boolean} sameCounter if it's true, the flow-control counter won't be updated.
+         * @param  {string?} cause why we're calling this function (optional)
          *
          * NOTE: sameCounter=true is used just to signal that we want to get results of the current
          * page status. For example when a facet opens or when users add a search term to a single facet.
@@ -1046,7 +1047,7 @@
                        return favoriteReference.contextualize.entryCreate.create(rows, null, true);
                    }).then(function success() {
                        // toggle favorite
-                       console.log("favorite created!")
+                       $log.debug("favorite created");
                        // return true (favorite)
                        defer.resolve(true);
                    }).catch(function (error) {
@@ -1069,7 +1070,7 @@
                        return favoriteReference.delete();
                    }).then(function success() {
                        // toggle favorite
-                       console.log("favorite deleted!")
+                       $log.debug("favorite deleted");
                        // return false (not favorite)
                        defer.resolve(false);
                    }, function error(error) {
@@ -1080,8 +1081,8 @@
                             defer.resolve(false);
                         } else {
                             // TODO: what to do for error handling
-                            console.log("favorite delete failed")
-                            console.log(error);
+                            $log.warn("favorite delete failed")
+                            $log.warn(error);
                             // return true (favorite)
                             defer.reject(true);
                         }
@@ -1832,10 +1833,10 @@
 
                             // attributegroup/CFDE:saved_query/RID;last_execution_status
                             ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
-                                console.log("new last executed time: ", response);
+                                $log.debug("new last executed time: ", response);
                             }).catch(function (error) {
-                                console.log(error);
                                 $log.warn("saved query last executed time could not be updated");
+                                $log.warn(error);
                             });
                         }
                     }
@@ -2199,10 +2200,16 @@
                  * The recordset has a onSelectedRowsChanged which will be passed to this onSelectedRowsChangedBind.
                  */
                 onSelectedRowsChangedBind: '=?',
-                onSelectedRowsChanged: '&?'      // set row click function
+                onSelectedRowsChanged: '&?',      // set row click function
+                onFavoritesChanged: '&?'
             },
             link: function (scope, elem, attrs) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attrs);
+
+                // bind the scope so it can be called
+                if (scope.onFavoritesChanged) {
+                    scope.onFavoritesChanged = scope.onFavoritesChanged();
+                }
 
                 scope.isSelected = function (tuple) {
                     if (scope.vm.matchNotNull) {
@@ -2240,6 +2247,7 @@
             scope: {
                 initialized: '=?',
                 onRowClick: '=',
+                onFavoritesChanged: "=?",
                 rows: '=', // each row: {uniqueId, displayname, count, selected}
                 enableFavorites: "=?",
                 table: "=?"
@@ -2261,16 +2269,15 @@
 
                     scope.toggleFavorite(row.tuple.data, scope.table, row.isFavorite).then(function (isFavorite) {
                         row.isFavorite = isFavorite;
-
-                        row.isFavoriteLoading = false;
                     }, function (isFavorite) {
                         row.isFavorite = isFavorite;
-
-                        row.isFavoriteLoading = false;
                     }).catch(function (error) {
                         $log.warn(error);
-
+                    }).finally(function () {
                         row.isFavoriteLoading = false;
+                        if (scope.onFavoritesChanged) {
+                            scope.onFavoritesChanged();
+                        }
                     });
                 }
 
@@ -2314,6 +2321,7 @@
                 mode: "=?",
                 vm: '=',
                 onSelectedRowsChanged: '&?',       // set row click function
+                onFavoritesChanged: '&?',
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
             },
@@ -2326,6 +2334,11 @@
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
+
+                // bind the scope so it can be called
+                if (scope.onFavoritesChanged) {
+                    scope.onFavoritesChanged = scope.onFavoritesChanged();
+                }
 
                 // fetch the favorites
                 scope.vm.getFavorites = function (vm, page) {

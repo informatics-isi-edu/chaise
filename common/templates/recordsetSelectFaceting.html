@@ -38,7 +38,7 @@
             <div class="main-body">
                 <!-- record table -->
                 <div class="recordset-table-container" ng-show="vm.initialized">
-                    <record-table-select-faceting vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged"></record-table-select-faceting>
+                    <record-table-select-faceting vm="vm" on-selected-rows-changed-bind="onSelectedRowsChanged" on-favorites-changed="onFavoritesChanged"></record-table-select-faceting>
                 </div>
             </div>
             <footer ng-show="vm.initialized && vm.config.displayMode === recordsetDisplayModes.fullscreen"></footer>

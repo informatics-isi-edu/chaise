@@ -3,7 +3,7 @@
         <chaise-search-input ng-show="showSearch"
             input-class="facet-search-input" search-columns="searchColumns"
             search-term="searchTerm" search-callback="search" disabled="facetColumn.hasNotNullFilter"></chaise-search-input>
-        <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen' enable-favorites="enableFavorites" table="reference.table"></record-list>
+        <record-list rows='checkboxRows' on-row-click='onRowClick' initialized='facetModel.initialized && facetModel.isOpen && facetPanelOpen' enable-favorites="facetModel.enableFavorites" on-favorites-changed="onFavoritesChanged" table="reference.table"></record-list>
         <button id="show-more" ng-click="openSearchPopup()" ng-disabled="facetColumn.hasNotNullFilter" class="chaise-btn chaise-btn-sm chaise-btn-tertiary pull-right show-more-btn">
             <span class="chaise-btn-icon far fa-window-restore"></span>
             <span ng-bind="hasMore || showFindMore ? 'Show More' : 'Show Details'"></span>

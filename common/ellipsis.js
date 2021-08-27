@@ -90,6 +90,7 @@
                 rowValues: '=', // tuple's values
                 rowIndex: '=', // tuple's row index in rowValues array
                 onRowClickBind: '=?',
+                onFavoritesChanged: '=?',
                 selected: '=',
                 selectDisabled: "=?",
                 tableModel: "="
@@ -120,16 +121,15 @@
                             // TODO: this should be changed but it was the only value shared between ellipsis
                             //    and when I read in the data for setting favorites
                             scope.tuple.isFavorite = isFavorite;
-
-                            scope.isFavoriteLoading = false;
                         }, function (isFavorite) {
                             scope.tuple.isFavorite = isFavorite;
-
-                            scope.isFavoriteLoading = false;
                         }).catch(function (error) {
                             $log.warn(error);
-
+                        }).finally(function () {
                             scope.isFavoriteLoading = false;
+                            if (scope.onFavoritesChanged) {
+                                scope.onFavoritesChanged();
+                            }
                         });
                     }
 

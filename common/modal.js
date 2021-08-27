@@ -311,6 +311,7 @@
 
         vm.params = params;
         vm.onSelectedRowsChanged = onSelectedRowsChanged;
+        vm.onFavoritesChanged = params.onFavoritesChanged;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;

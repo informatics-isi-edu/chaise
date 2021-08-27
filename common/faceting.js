@@ -68,9 +68,10 @@
                         ctrl.childCtrls[index] = childCtrl;
                         ctrl.facetingCount++;
 
+                        var table = facetColumn.column.table;
                         var facetLogStackNode = logService.getStackNode(
                             logService.logStackTypes.FACET,
-                            facetColumn.column.table,
+                            table,
                             { source: facetColumn.compressedDataSource, entity: facetColumn.isEntityMode}
                         );
 
@@ -95,7 +96,10 @@
                             // but only did logStackNode so I can call the recordTableUtils.getTableLogStack with it.
                             logStackNode: facetLogStackNode,
                             // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
-                            parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET
+                            parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
+                            // if the stable key is greater than length 1, the favorites won't be supported for now
+                            // TODO: support this for composite stable keys
+                            enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1
                         };
 
                         if (ctrl.facetingCount === $scope.vm.reference.facetColumns.length) {
@@ -155,6 +159,56 @@
                      */
                     ctrl.getFacetLogStack = function (index, extraInfo) {
                         return recordTableUtils.getTableLogStack($scope.vm, $scope.vm.facetModels[index].logStackNode, extraInfo);
+                    };
+
+                    /**
+                     * Should be called when a favorite in a facet has changed.
+                     * This will ensure we're propagating this to other facets with the same end table
+                     * @param {integer} index - the facet index
+                     * @param {boolean} isModal - if this originated from facet popup, then we have to update current facet too
+                     */
+                    ctrl.favoritesChanged = function (index, isModal) {
+                        var currFacetModal = $scope.vm.facetModels[index],
+                            currTable = $scope.vm.reference.facetColumns[index].column.table;
+                        var cause = isModal ? "facet-popup-favorite" : "facet-favorite";
+
+                        var indices = [];
+
+                        var addToUpdateList = function (fm, fIndex) {
+                            indices.push(fIndex)
+
+                            fm.processed = false;
+                            fm.isLoading = true;
+
+                            if (!Number.isInteger(fm.reloadStartTime) || fm.reloadStartTime === -1) {
+                                fm.reloadStartTime = ERMrest.getElapsedTime();
+                                if (cause && fm.reloadCauses.indexOf(cause) === -1) {
+                                    fm.reloadCauses.push(cause);
+                                }
+                            }
+                        }
+
+                        //if it was because of closing modal, we have to update the current facet too
+                        if (isModal) {
+                            addToUpdateList(currFacetModal, index);
+
+                            // to make sure the current facet is getting updated
+                            $scope.vm.lastActiveFacet = -1;
+                        }
+
+                        // find any other facets that should be updated
+                        $scope.vm.facetModels.forEach(function (fm, i) {
+                            if (i == index) return;
+                            var facetTable = $scope.vm.reference.facetColumns[i].column.table;
+                            if (fm.isOpen && fm.enableFavorites && currTable === facetTable) {
+                                addToUpdateList(fm, i);
+                            }
+                        });
+
+                        // if we don't need to update anything else, just return
+                        if (indices.length == 0) return;
+                        $log.debug("faceting: favorites changes, so updating facets with index=" + indices.join(", "));
+                        recordTableUtils.update($scope.vm, false, false, false, true, cause);
                     };
                 }],
                 require: 'faceting',
@@ -1155,9 +1209,6 @@
                     }
                 }
 
-                // since reference will be populated here and before this we're not showing the list,
-                // we have to populate this here (and not directly in link function)
-                scope.enableFavorites = scope.$root.session && scope.facetColumn.isEntityMode && scope.reference.table.favoritesPath && scope.reference.table.stableKey.length == 1;
 
                 // read new data if needed
                 (function (uri) {
@@ -1175,6 +1226,7 @@
                     // update the filter log info to stack
                     logService.updateStackFilterInfo(facetLog.stack, scope.reference.filterLogInfo);
 
+                    var checkboxRows;
                     scope.reference.read(tableConstants.PAGE_SIZE, facetLog, true).then(function (page) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
@@ -1182,13 +1234,16 @@
                             return defer.promise;
                         }
 
-                        scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
+                        scope.facetModel.reloadCauses = [];
+                        scope.facetModel.reloadStartTime = -1;
 
                         scope.hasMore = page.hasNext;
 
+                        checkboxRows = appliedFiltersToCheckBoxRows(scope);
+
                         page.tuples.forEach(function (tuple) {
                             // if we're showing enough rows
-                            if (scope.checkboxRows.length == maxCheckboxLen) {
+                            if (checkboxRows.length == maxCheckboxLen) {
                                 return;
                             }
 
@@ -1211,7 +1266,7 @@
                                     isHTML: false
                                 };
                             }
-                            scope.checkboxRows.push({
+                            checkboxRows.push({
                                 selected: false,
                                 uniqueId: value,
                                 displayname: tuple.displayname,
@@ -1223,13 +1278,7 @@
                             });
                         });
 
-                        scope.facetModel.reloadCauses = [];
-                        scope.facetModel.reloadStartTime = -1;
-
-                        var table = scope.reference.table;
-                        // if the stable key is greater than length 1, the favorites won't be supported for now
-                        // TODO: support this for composite stable keys
-                        return updateFavorites(scope);
+                        return updateFavorites(scope, checkboxRows);
                     }).then(function (result) {
                         // if this is not the result of latest facet change
                         if (scope.reference.uri !== uri) {
@@ -1237,6 +1286,14 @@
                             return defer.promise;
                         }
 
+                        /**
+                         * This is done here to avoid showing result while we're waiting for favorites
+                         * If we populate the scope.checkboxRows as soon as we got the facet result,
+                         * then there will be a few seconds where we're not showing proper favorites.
+                         * Also if this request is to refresh the favorites values, it would make the
+                         * favorites to hide and then show. instead of just update in place
+                         */
+                        scope.checkboxRows = checkboxRows;
                         defer.resolve(result);
                     }).catch(function (err) {
                         defer.reject(err);
@@ -1246,11 +1303,21 @@
                 return defer.promise;
             }
 
-            function updateFavorites(scope) {
+            /**
+             * will send a request to favorites table and 
+             * updates the given checkboxRows to have proper isFavorite flag
+             * 
+             * NOTE If checkboxRows not passed it will use the scope.checkboxRows
+             */
+            function updateFavorites(scope, checkboxRows) {
                 var defer = $q.defer(), table = scope.reference.table;
 
-                if (!scope.enableFavorites) {
+                if (!scope.facetModel.enableFavorites) {
                     return defer.resolve(true), defer.promise;
+                }
+
+                if (!checkboxRows) {
+                    checkboxRows = scope.checkboxRows;
                 }
 
                 // if the stable key is greater than length 1, the favorites won't be supported for now
@@ -1260,14 +1327,14 @@
                 // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
                 var key = table.stableKey[0];
                 var displayedFacetIds = "(", rowCount = 0;
-                scope.checkboxRows.forEach(function (row, idx) {
+                checkboxRows.forEach(function (row, idx) {
                     // filter out null and not null rows
                     if (row.tuple) {
                         rowCount++;
 
                         // use the stable key here
                         displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data[key.name]);
-                        if (idx !== scope.checkboxRows.length-1) displayedFacetIds += ";";
+                        if (idx !== checkboxRows.length-1) displayedFacetIds += ";";
                     }
                 });
                 displayedFacetIds += ")"
@@ -1289,7 +1356,7 @@
                         // find the favorite in the list of visible rows
                         favoritesPage.tuples.forEach(function (tuple) {
                             // should only be 1
-                            var matchedRow = scope.checkboxRows.filter(function (cbRow) {
+                            var matchedRow = checkboxRows.filter(function (cbRow) {
                                 if (cbRow.tuple) {
                                     // tuple has data as table.name and user_id
                                     // cbRow.tuple is the whole row of data with ermrest columns
@@ -1303,7 +1370,8 @@
 
                         defer.resolve(true);
                     }).catch(function (error) {
-                        console.log(error);
+                        $log.warn("could not fetch favorites")
+                        $log.warn(error);
                         defer.resolve(true)
                     });
                 })(scope.reference.uri);
@@ -1505,7 +1573,13 @@
                         params.displayMode = recordsetDisplayModes.facetPopup;
                         params.editable = false;
 
-                        params.enableFavorites = scope.enableFavorites;
+                        params.enableFavorites = scope.facetModel.enableFavorites;
+
+                        // if favorites have been changed in popup, we have to refresh the facet
+                        var popupFavoritesChanged = false;
+                        params.onFavoritesChanged = function () {
+                            popupFavoritesChanged = true;
+                        };
 
                         params.selectedRows = [];
 
@@ -1552,7 +1626,17 @@
                             },
                             size: modalUtils.getSearchPopupSize(params),
                             templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-                        }, modalDataChanged(scope, true), null, false);
+                        }, modalDataChanged(scope, true), function () {
+                            // make sure favorite state is consistent
+                            if (popupFavoritesChanged) {
+                                scope.onFavoritesChanged(true);
+                            }
+                        }, false);
+                    };
+
+                    // when favorite has been clicked, or popup closed without submit
+                    scope.onFavoritesChanged = function (isModal) {
+                        scope.parentCtrl.favoritesChanged(scope.index, isModal);
                     };
 
                     // for clicking on each row (will be registerd as a callback for list directive)
