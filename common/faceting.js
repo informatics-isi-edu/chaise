@@ -1139,7 +1139,11 @@
                     scope.checkboxRows = appliedFiltersToCheckBoxRows(scope);
                     // there might be more, we're not sure
                     scope.hasMore = false;
-                    defer.resolve(true);
+                    updateFavorites(scope).then(function (res) {
+                        defer.resolve(res);
+                    }).catch(function (err) {
+                        defer.reject(err);
+                    });
                     return defer.promise;
                 }
 
@@ -1150,6 +1154,11 @@
                         scope.reference = scope.reference.contextualize.compactSelect;
                     }
                 }
+
+                // since reference will be populated here and before this we're not showing the list,
+                // we have to populate this here (and not directly in link function)
+                scope.enableFavorites = scope.$root.session && scope.facetColumn.isEntityMode && scope.reference.table.favoritesPath && scope.reference.table.stableKey.length == 1;
+
                 // read new data if needed
                 (function (uri) {
                     var facetLog = getDefaultLogInfo(scope);
@@ -1220,54 +1229,82 @@
                         var table = scope.reference.table;
                         // if the stable key is greater than length 1, the favorites won't be supported for now
                         // TODO: support this for composite stable keys
-                        if (scope.$root.session && table.favoritesPath && scope.facetColumn.isEntityMode && table.stableKey.length == 1) {
-                            // array of column names that represent the stable key of leaf with favorites
-                            // favorites_* will use stable key to store this information
-                            // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
-                            var key = table.stableKey[0];
-                            var displayedFacetIds = "(";
-                            scope.checkboxRows.forEach(function (row, idx) {
-                                // filter out null and not null rows
-                                if (row.tuple) {
-                                    // use the stable key here
-                                    displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data[key.name]);
-                                    if (idx !== scope.checkboxRows.length-1) displayedFacetIds += ";";
-                                }
-                            });
-                            displayedFacetIds += ")"
-                            // resolve favorites reference for this table with given user_id
-                            var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
-
-                            ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
-
-                                // read favorites on reference
-                                // use 10 since that's the max our facets will show at once
-                                return favoritesReference.contextualize.compact.read(10);
-                            }).then(function (favoritesPage) {
-                                favoritesPage.tuples.forEach(function (tuple) {
-                                    // should only be 1
-                                    var matchedRow = scope.checkboxRows.filter(function (cbRow) {
-                                        if (cbRow.tuple) {
-                                            // tuple has data as table.name and user_id
-                                            // cbRow.tuple is the whole row of data with ermrest columns
-                                            return tuple.data[table.name] == cbRow.tuple.data[key.name]
-                                        }
-                                        return false;
-                                    });
-
-                                    matchedRow[0].isFavorite = true;
-                                });
-
-                                defer.resolve(true);
-                            }).catch(function (error) {
-                                console.log(error);
-                                defer.resolve(true)
-                            });
-                        } else {
-                            defer.resolve(true);
+                        return updateFavorites(scope);
+                    }).then(function (result) {
+                        // if this is not the result of latest facet change
+                        if (scope.reference.uri !== uri) {
+                            defer.resolve(false);
+                            return defer.promise;
                         }
+
+                        defer.resolve(result);
                     }).catch(function (err) {
                         defer.reject(err);
+                    });
+                })(scope.reference.uri);
+
+                return defer.promise;
+            }
+
+            function updateFavorites(scope) {
+                var defer = $q.defer(), table = scope.reference.table;
+
+                if (!scope.enableFavorites) {
+                    return defer.resolve(true), defer.promise;
+                }
+
+                // if the stable key is greater than length 1, the favorites won't be supported for now
+                // TODO: support this for composite stable keys
+                // array of column names that represent the stable key of leaf with favorites
+                // favorites_* will use stable key to store this information
+                // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
+                var key = table.stableKey[0];
+                var displayedFacetIds = "(", rowCount = 0;
+                scope.checkboxRows.forEach(function (row, idx) {
+                    // filter out null and not null rows
+                    if (row.tuple) {
+                        rowCount++;
+
+                        // use the stable key here
+                        displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(row.tuple.data[key.name]);
+                        if (idx !== scope.checkboxRows.length-1) displayedFacetIds += ";";
+                    }
+                });
+                displayedFacetIds += ")"
+                // resolve favorites reference for this table with given user_id
+                var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+
+                (function (uri) {
+                    ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                        // read favorites on reference
+                        // TODO proper log object
+                        return favoritesReference.contextualize.compact.read(rowCount, null, true, true);
+                    }).then(function (favoritesPage) {
+                        // if this is not the result of latest facet change
+                        if (scope.reference.uri !== uri) {
+                            defer.resolve(false);
+                            return defer.promise;
+                        }
+
+                        // find the favorite in the list of visible rows
+                        favoritesPage.tuples.forEach(function (tuple) {
+                            // should only be 1
+                            var matchedRow = scope.checkboxRows.filter(function (cbRow) {
+                                if (cbRow.tuple) {
+                                    // tuple has data as table.name and user_id
+                                    // cbRow.tuple is the whole row of data with ermrest columns
+                                    return tuple.data[table.name] == cbRow.tuple.data[key.name]
+                                }
+                                return false;
+                            });
+
+                            matchedRow[0].isFavorite = true;
+                        });
+
+                        defer.resolve(true);
+                    }).catch(function (error) {
+                        console.log(error);
+                        defer.resolve(true)
                     });
                 })(scope.reference.uri);
 
@@ -1467,6 +1504,8 @@
 
                         params.displayMode = recordsetDisplayModes.facetPopup;
                         params.editable = false;
+
+                        params.enableFavorites = scope.enableFavorites;
 
                         params.selectedRows = [];
 

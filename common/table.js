@@ -1022,20 +1022,9 @@
         * @param  {object} scope the scope object
         */
        function registerFavoritesCallbacks(scope, elem, attrs) {
-           scope.canFavorite = function (tuple, value) {
-               // NOTE: When a value comes back from the modal, we are dropping the tuple object
-               // and creating a new one with basic filter information that no longer has the tuple
-               // or other relevent information like table
-               // Maybe list directive should have the table (or reference) available
-               if (!(tuple && tuple.reference && tuple.reference.table) || !scope.$root.session) return false;
-               return tuple.reference.table.favoritesPath;
-           }
-
-           scope.toggleFavorite = function (tuple, isFavorite) {
-               // tuple can get all information about the row and create a request to favorite the term
+           scope.toggleFavorite = function (tupleData, favoriteTable,isFavorite) {
                var defer = $q.defer();
 
-               var favoriteTable = tuple.reference.table;
                var favoriteTablePath = favoriteTable.favoritesPath;
 
                // TODO: show spinning wheel and disable star
@@ -1049,7 +1038,7 @@
                        // assumption that the data to store in above mentioned column is the value of the id column
                        // assupmtion that the column to store the user information is the user_id column
                        // TODO: add all three to config language
-                       favoriteRow[favoriteTable.name] = tuple.data.id
+                       favoriteRow[favoriteTable.name] = tupleData.id
                        favoriteRow.user_id = scope.$root.session.client.id;
 
                        // TODO pass proper log object
@@ -1073,7 +1062,7 @@
                    // assumption that the data to associate for delete in above mentioned column is the value of the id column
                    // assupmtion that the column to delete the user information is the user_id column
                    // TODO: add all three to config language
-                   var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(favoriteTable.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
+                   var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(favoriteTable.name) + "=" + UriUtils.fixedEncodeURIComponent(tupleData.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
                    // if favorited, delete it
                    ERMrest.resolve(deleteFavoritePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
                        // delete the favorite
@@ -2251,7 +2240,9 @@
             scope: {
                 initialized: '=?',
                 onRowClick: '=',
-                rows: '=' // each row: {uniqueId, displayname, count, selected}
+                rows: '=', // each row: {uniqueId, displayname, count, selected}
+                enableFavorites: "=?",
+                table: "=?"
             },
             link: function (scope, elem, attr) {
                 scope.defaultDisplayname = defaultDisplayname;
@@ -2268,7 +2259,7 @@
                     if (row.isFavoriteLoading) return;
                     row.isFavoriteLoading = true;
 
-                    scope.toggleFavorite(row.tuple, row.isFavorite).then(function (isFavorite) {
+                    scope.toggleFavorite(row.tuple.data, scope.table, row.isFavorite).then(function (isFavorite) {
                         row.isFavorite = isFavorite;
 
                         row.isFavoriteLoading = false;
@@ -2361,7 +2352,8 @@
                         ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
                             // read favorites on reference
                             // use 10 since that's the max our facets will show at once
-                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit);
+                            // TODO proper log object
+                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit, null, true, true);
                         }).then(function (favoritesPage) {
                             favoritesPage.tuples.forEach(function (favTuple) {
                                 // should only be 1

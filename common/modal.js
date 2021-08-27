@@ -355,6 +355,7 @@
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
+                enableFavorites:     params.enableFavorites ? params.enableFavorites : false
             },
             getDisabledTuples:          params.getDisabledTuples,
 
