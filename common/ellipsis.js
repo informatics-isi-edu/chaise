@@ -156,8 +156,12 @@
                         }).catch(function (error) {
                             $log.warn(error);
                             // fail silently and degrade the UX (hide the apply button)
-                            scope.applySavedQuery = null;
+                            // show the disabled apply button
+                            scope.applySavedQuery = false;
                         });
+                    } else {
+                        // hide the apply button completely
+                        scope.applySavedQuery = null;
                     }
 
                     // view link

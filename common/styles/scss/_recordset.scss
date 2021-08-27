@@ -343,6 +343,11 @@
                 top: -2px;
             }
         }
+
+        .apply-saved-query-button.disabled {
+            cursor: not-allowed;
+            color: $disabled-color;
+        }
     }
 
 

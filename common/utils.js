@@ -141,7 +141,8 @@
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
-        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
+        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again.",
+        "duplicateSavedQueryMessage": "This search has already been saved. Please edit it under <b>Show Saved Search Criteria</b> if you wish to change its name or description."
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot

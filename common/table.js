@@ -1563,7 +1563,7 @@
                         }
                     }, function success() {
                         // notify user of success before closing
-                        AlertsService.addAlert("Query saved.", "success");
+                        AlertsService.addAlert("Search criteria saved.", "success");
                     }, null, false, false);
                 }
 

@@ -627,7 +627,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = AlertsService.alerts;
         vm.columnModels = params.columnModels;
@@ -652,9 +652,16 @@
                 // show success after close
                 $uibModalInstance.close(query.successful);
             }, function error(error) {
-                // TODO: error handling when "facet blob" exists already and violates the uniqueness constraint
                 // show error without close
-                AlertsService.addAlert(error.message, 'error');
+
+                // error handling when "facet blob" exists already and violates the uniqueness constraint
+                // NOTE: this is hacky as it's assuming the only unique constraint on the table
+                //       is because of duplicate facet definition
+                if (ERMrest && error instanceof ERMrest.DuplicateConflictError) {
+                    AlertsService.addAlert(messageMap.duplicateSavedQueryMessage, 'error');
+                } else {
+                    AlertsService.addAlert(error.message, 'error');
+                }
             });
         }
 
