@@ -198,8 +198,13 @@
 
             var imageReference;
             // resolve the main (image) reference
-            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (ref) {
-                imageReference = ref;
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (reference) {
+                // TODO added this to get rid of terminal error, but this doesn't make sense to me
+                //      we shouldn't polute rootScope in other apps for no reason.
+                //      and also this should be based on contextualized reference
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
+
+                imageReference = reference;
 
                 // TODO check for filter
                 // context.filter = imageReference.location.filter;
