@@ -221,6 +221,8 @@
                             item = vm.annotationModels.find(function(item){
                                 return item.svgID == svgID && item.groupID == groupID;
                             })
+                            // if user clicks on a drawing during annotation
+                            if (!item) return;
                             vm.scrollIntoView(item.svgID + item.groupID);
                             vm.changeSelectingAnnotation(item);
 
