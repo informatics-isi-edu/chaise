@@ -637,8 +637,13 @@
                 tableName = tuple.reference.table.name;
             if (typeof googleDatasetConfig !== 'undefined') {
                 var allowlist = getAllowListForCurrentHost(googleDatasetConfig);
-                if (DataUtils.isObjectAndNotNull(allowlist) &&
-                    DataUtils.isObjectAndNotNull(allowlist[catalogID]) &&
+
+                // if config is defined, but there's no allowlist for this host
+                if (!DataUtils.isObjectAndNotNull(allowlist)) {
+                    return;
+                }
+
+                if (DataUtils.isObjectAndNotNull(allowlist[catalogID]) &&
                     DataUtils.isObjectAndNotNull(allowlist[catalogID][schemaName]) &&
                     DataUtils.isObjectAndNotNull(allowlist[catalogID][schemaName][tableName])
                 ) {
