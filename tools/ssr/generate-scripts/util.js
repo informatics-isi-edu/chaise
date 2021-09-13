@@ -1,10 +1,11 @@
 const fs = require('fs').promises;
 
-module.exports.snapshot = async (page, url, rid, setName, counter) => {
+module.exports.snapshot = async (page, url, path, rid, setName, counter, loadingPause, modalPause) => {
     await page.goto(url);
 
     // wait 25 seconds for page to finish loading
-    await page.waitForTimeout(25000);
+    loadingPause = loadingPause || 25000
+    await page.waitForTimeout(loadingPause);
     let error = await page.evaluate((rid, setName) => {
         let innerError = null;
         let errModal = document.querySelector('.modal-error');
@@ -31,20 +32,22 @@ module.exports.snapshot = async (page, url, rid, setName, counter) => {
         await page.click("#show-all-related-tables");
         await page.click("#share");
         // wait 15 seconds for modal to show
+        modalPause = modalPause || 15000
         await page.waitForTimeout(15000);
 
         // append style and script tags
-        await page.evaluate(() => {
+        await page.evaluate((hrefPath) => {
             let headEle = document.querySelector('head');
             headEle.innerHTML += '<style type="text/css">.modal-error{display:none!important;}</style>';
             headEle.innerHTML += '<style type="text/css">.modal-backdrop{display:none!important;}</style>';
 
             let bodyEle = document.querySelector('.chaise-body');
-            bodyEle.innerHTML += '<script src="../../chaise-ssr.js"></script>';
-        });
+            bodyEle.innerHTML += '<script src="../chaise-ssr.js"></script>';
+            bodyEle.innerHTML += '<div style="display:none;" data-page-href="' + hrefPath + '"></div>'
+        }, path);
     }
 
     var html = await page.content();
-    console.log(counter + " write " + setName + "/" + rid + ".html");
-    await fs.writeFile(setName + "/" + rid + ".html", html);
+    console.log(counter + " write " + setName + "/RID=" + rid);
+    await fs.writeFile(setName + "/RID=" + rid, html);
 }

@@ -8,12 +8,12 @@ const parse = require('csv-parse');
     let rids = []
     let file = await fs.readFile("./RID-grouping.csv")
     await parse(file, {columns: false, trim: true}, (err, rows) => {
-        // row 6 is Common:Collection SSR
-        let collectionSsrIdx = 5;
+        // row 18 is Gene_Expression:Specimen SSR
+        let specimenSsrIdx = 17;
         // column 5 is the set of RIDs
         let ridIdx = 4;
-        console.log(rows[collectionSsrIdx]);
-        rids = rows[collectionSsrIdx][ridIdx].replace('["', '').replace('"]', '').split('", "');
+        console.log(rows[specimenSsrIdx]);
+        rids = rows[specimenSsrIdx][ridIdx].replace('["', '').replace('"]', '').split('", "');
     });
     const browser = await puppeteer.launch(["--start-maximized"]);
     const page = await browser.newPage();
@@ -23,13 +23,13 @@ const parse = require('csv-parse');
         height: 850
     });
 
-    /* ==== COLLECTION TABLE ==== */
-    console.log("begin with " + rids.length + " collection rids");
+    /* ==== SPECIMEN TABLE ==== */
+    console.log("begin with " + rids.length + " specimen rids");
     console.log(rids);
     for (let i=0; i<rids.length; i++) {
         let rid = rids[i];
-        let path = '/chaise/record/#2/Common:Collection/RID=' + rid
-        await util.snapshot(page, 'https://staging.gudmap.org' + path, path, rid, "Common:Collection", i);
+        let path = '/chaise/record/#2/Gene_Expression:Specimen/RID=' + rid
+        await util.snapshot(page, 'https://staging.gudmap.org' + path, path, rid, "Gene_Expression:Specimen", i);
     }
 
     await browser.close();

@@ -48,7 +48,7 @@ $("#rt-Attachments .c_File_Name").removeClass("clickable");
 $("#rt-Attachments .c_File_Name .not-sorted-icon").remove();
 
 function getAlertText (uiAction) {
-    return "The "\" + uiAction + "\" button is not supported on this snapshot. Click OK to go to the fully-functional live page, then try again."
+    return "The \"" + uiAction + "\" button is not supported on this snapshot. Click OK to go to the fully-functional live page, then try again."
 }
 
 /* ==== prev/next button functionality ==== */
@@ -72,7 +72,7 @@ $(".chaise-table-next-btn").on("click", function ($event) {
 
     var reload = confirm(getAlertText("Next"));
 
-    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&scrollTo=" + displayNameEl.text();
+    if (reload) window.location.href = document.querySelectorAll('[data-page-href]')[0].dataset.pageHref + "?pcid=" + cid + "&scrollTo=" + displayNameEl.text();
 });
 
 /* ==== ON CLICK FUNCTIONS ==== */
@@ -365,7 +365,7 @@ $(".related-table-accordion .toggle-display-link").on("click", function ($event)
 $("#login-link").on("click", function ($event) {
     var reload = confirm(getAlertText("Login"));
 
-    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
+    if (reload) window.location.href = document.querySelectorAll('[data-page-href]')[0].dataset.pageHref + "?pcid=" + cid + "&promptlogin";
 });
 
 // export is hidden on page load
@@ -393,10 +393,16 @@ $(".export-This-record-CSV-").on("click", function ($event) {
 });
 
 // redirect to dynamic chaise page and prompt for login
+$(".export-BDBAG-All-").on("click", function ($event) {
+    var reload = confirm(getAlertText("Export BDBAG (All)"));
+
+    if (reload) window.location.href = document.querySelectorAll('[data-page-href]')[0].dataset.pageHref + "?pcid=" + cid + "&promptlogin";
+});
+
 $(".export-BDBag").on("click", function ($event) {
     var reload = confirm(getAlertText("Export BDBag"));
 
-    if (reload) window.location.href = document.querySelectorAll('[rel="canonical"]')[0].href + "?pcid=" + cid + "&promptlogin";
+    if (reload) window.location.href = document.querySelectorAll('[data-page-href]')[0].dataset.pageHref + "?pcid=" + cid + "&promptlogin";
 });
 
 $("th.clickable").on("click", function ($event) {
