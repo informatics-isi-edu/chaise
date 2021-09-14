@@ -105,7 +105,7 @@
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                 // 'promptlogin' query parameter comes from static generated chaise record pages
-                if (!session && $window.location.href.indexOf("promptlogin") >= 0) {
+                if (!session && UriUtils.getQueryParam($window.location.href, "promptlogin")) {
                     Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
                 }
 

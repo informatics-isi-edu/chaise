@@ -1032,11 +1032,15 @@
                 var queries = url.slice(idx+1).split("&");
                 for (var i = 0; i < queries.length; i++) {
                     var q_parts = queries[i].split("=");
-                    if (q_parts.length != 2) continue;
+                    // allow for length 1 query params
+                    if (q_parts.length > 2) continue;
+                    // if value is not defined, use true since key would still be defined
+                    q_parts[1] = q_parts[1] || true
 
                     var q_key, q_val;
                     if (dontDecodeQueryParams) {
-                        q_key = q_parts[0], q_val = q_parts[1];
+                        q_key = q_parts[0];
+                        q_val = q_parts[1];
                     } else {
                         q_key = decodeURIComponent(q_parts[0]), q_val = decodeURIComponent(q_parts[1]);
                     }
