@@ -1039,8 +1039,7 @@
 
                     var q_key, q_val;
                     if (dontDecodeQueryParams) {
-                        q_key = q_parts[0];
-                        q_val = q_parts[1];
+                        q_key = q_parts[0], q_val = q_parts[1];
                     } else {
                         q_key = decodeURIComponent(q_parts[0]), q_val = decodeURIComponent(q_parts[1]);
                     }
