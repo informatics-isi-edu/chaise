@@ -104,6 +104,11 @@
                 session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
+                // 'promptlogin' query parameter comes from static generated chaise record pages
+                if (!session && $window.location.href.indexOf("promptlogin") >= 0) {
+                    Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
+                }
+
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
                 $rootScope.reference.session = session;
