@@ -784,7 +784,13 @@
 
                 res.push({
                     zIndex: data[zIndexColName],
-                    info: imgInfo
+                    /**
+                     * since we're using array(*), the images are not sorted
+                     * so we have to make sure they are sorted based on channelNumber
+                     */
+                     info: imgInfo.sort(function (a, b) {
+                        return a.channelNumber  - b.channelNumber;
+                    })
                 });
             }
             return res;
