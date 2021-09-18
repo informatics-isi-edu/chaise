@@ -1,6 +1,6 @@
 <div class="recordset-container app-content-container" ng-class="vm.config.showFaceting ? 'with-faceting':'without-faceting'" >
     <loading-spinner id="main-spinner" ng-show="(!vm.initialized || $root.showSpinner || !vm.hasLoaded) && !$root.error"></loading-spinner>
-    <div class="top-panel-container" ng-if="vm.reference">
+    <div class="top-panel-container" ng-show="vm.reference">
         <alerts alerts="$root.alerts"></alerts>
         <div class="top-flex-panel">
             <div class="top-left-panel also-resizeable" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen}">
