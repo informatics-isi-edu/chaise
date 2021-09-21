@@ -8,8 +8,9 @@ const parse = require('csv-parse');
     let rids = []
     let file = await fs.readFile("./RID-grouping.csv")
     await parse(file, {columns: false, trim: true}, (err, rows) => {
-        // row 11 is RNASeq:Study SSR
-        let studySsrIdx = 10;
+        // NOTE: files were generated using row 11 (RNASeq:Study Dataset)
+        // row 12 is RNASeq:Study SSR
+        let studySsrIdx = 11;
         // column 5 is the set of RIDs
         let ridIdx = 4;
         console.log(rows[studySsrIdx]);
