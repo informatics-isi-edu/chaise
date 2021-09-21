@@ -1824,7 +1824,7 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        if ($rootScope.savedQuery.rid) {
+                        if ($rootScope.savedQuery && $rootScope.savedQuery.rid) {
                             var rows = [{}],
                                 updateRow = rows[0];
 
