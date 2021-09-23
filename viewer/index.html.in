@@ -38,8 +38,8 @@
                             <button ng-click="osd.openAnnotations();" class="chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" ng-attr-uib-tooltip="{{(hideAnnotationSidebar ? 'Show ' : 'Hide ') + (anno.editingAnatomy == null ? 'the list of annotations' : 'the annotation entry form')}}" ng-disabled="disableAnnotationSidebar"  id="edit-btn">
                               <span class="chaise-icon" ng-class="{'chaise-sidebar-close': !hideAnnotationSidebar, 'chaise-sidebar-open': hideAnnotationSidebar}"></span> {{hideAnnotationSidebar ? "Show" : "Hide" }} {{anno.editingAnatomy == null ? "Annotations" : "Annotation form"}}
                             </button>
-                            <button ng-click="osd.filterChannels();" class="chaise-btn chaise-btn-primary" ng-class="{'pick':osd.filterChannelsAreHidden}" type="button" role="button" ng-attr-uib-tooltip="{{osd.filterChannelsAreHidden ? 'Hide' : 'Show' }} the list of channels" id="filter-btn">
-                                <span class="glyphicon glyphicon-tasks"></span> {{osd.filterChannelsAreHidden ? "Hide" : "Show" }} Channels
+                            <button ng-click="osd.toggleChannelList();" class="chaise-btn chaise-btn-primary" type="button" role="button" ng-attr-uib-tooltip="{{osd.showChannelList ? 'Hide' : 'Show' }} the list of channels" id="filter-btn">
+                                <span class="glyphicon glyphicon-tasks"></span> {{osd.showChannelList ? "Hide" : "Show" }} Channel list
                             </button>
                             <button ng-click="osd.zoomInView();" class="chaise-btn chaise-btn-primary" type="button" role="button" uib-tooltip="Zoom in" id="zoomin-btn">
                                 <span class="glyphicon glyphicon-zoom-in"></span> Zoom In
