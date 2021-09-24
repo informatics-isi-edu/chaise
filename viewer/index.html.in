@@ -30,9 +30,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="top-right-panel">
-                        <div class="title-container">
-                            <h1 ng-if="pageTitle" id="page-title" ng-bind-html="pageTitle"></h1>
+                    <div class="top-right-panel" ng-class="{'no-title': !pageTitle}">
+                        <div class="title-container" ng-if="pageTitle">
+                            <h1 id="page-title" ng-bind-html="pageTitle"></h1>
                         </div>
                         <div class="pull-left menu-btn-container" ng-class="{'open-panel': !hideAnnotationSidebar, 'close-panel': hideAnnotationSidebar}" role="group">
                             <button ng-click="osd.openAnnotations();" class="chaise-btn chaise-btn-primary" type="button" ng-class="{'pick':!hideAnnotationSidebar}" role="button" ng-attr-uib-tooltip="{{(hideAnnotationSidebar ? 'Show ' : 'Hide ') + (anno.editingAnatomy == null ? 'the list of annotations' : 'the annotation entry form')}}" ng-disabled="disableAnnotationSidebar"  id="edit-btn">

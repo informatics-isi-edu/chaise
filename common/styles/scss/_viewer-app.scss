@@ -24,6 +24,11 @@
         padding-left: 20px !important;
     }
 
+    // add more space when the title is hidden
+    .top-right-panel.no-title {
+        padding-top: 10px;
+    }
+
     .main-body, .side-panel-container {
         height: 100%;
     }
