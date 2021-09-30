@@ -94,6 +94,8 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
+            session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                 $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 context.filter = reference.location.filter;
@@ -101,7 +103,6 @@
 
                 DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                 // 'promptlogin' query parameter comes from static generated chaise record pages
