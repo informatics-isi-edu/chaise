@@ -9,7 +9,7 @@
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
         "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
-        "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+        "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
         "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "configRules"
@@ -30,7 +30,6 @@
           "allowErrorDismissal": false,
           "showFaceting": false,
           "hideTableOfContents": false,
-          "showExportButton": false,
           "navbarMenu": {},
           "navbarBrand": "",
           "termsAndConditionsConfig": null,
