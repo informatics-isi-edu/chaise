@@ -1,0 +1,20 @@
+<li ng-repeat="option in menu" ng-class="{'dropdown-submenu': option.children, 'dropdown-header-container': option.type == 'header'}">
+    <div ng-switch="option.type">
+        <div ng-switch-when="header">
+            <span class="dropdown-header chaise-dropdown-header" ng-bind-html="renderName(option)"></span>
+        </div>
+        <div ng-switch-when="menu">
+            <a class="dropdown-toggle" ng-click="::toggleSubMenu($event, item)" ng-bind-html="renderName(option)"></a>
+            <ul sub-menu menu="option.children" class="dropdown-menu"></ul>
+        </div>
+        <div ng-switch-when="url">
+            <a ng-href="{{option.url}}" target="{{option.newTab ? '_blank' : '_self'}}" ng-click="::onLinkClick($event, option)" ng-bind-html="renderName(option)"></a>
+        </div>
+        <div ng-switch-when="my_profile">
+            <a id="profile-link" ng-click="openProfile()">My Profile</a>
+        </div>
+        <div ng-switch-when="logout">
+            <a id="logout-link" ng-click="logout()">Log Out</a>
+        </div>
+    </div>
+</li>

@@ -118,6 +118,7 @@ TODO we should be able to simplify the rules and also investigate whether
 */
 header {
     .dropdown-menu>li>a.chaise-dropdown-header,
+    .login-menu>li a.chaise-dropdown-header,
     .chaise-dropdown-header {
         padding: 3px 15px 3px 15px;
         cursor: default;
@@ -194,17 +195,27 @@ header {
         min-width: 100px;
     }
 
-    .dropdown-menu > li > a {
+    .dropdown-menu > li > a,
+    .login-menu>li a {
         white-space: normal;
         cursor: pointer;
         display: flex;
         justify-content: space-between;
+        color: #333;
         margin-bottom: 2px;
         padding: 3px 15px 3px 15px;
         line-height: 1.4;
+
+        &:focus,
+        &:hover {
+            color: #262626;
+            text-decoration: none;
+            background-color: #f5f5f5;
+        }
     }
 
-    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a {
+    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a,
+    .login-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container) a {
         padding-left: 22px;
     }
 

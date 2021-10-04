@@ -12,7 +12,7 @@
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -40,6 +40,7 @@
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
           "savedQueryConfig": null,
+          "loggedInMenu": {},
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -233,8 +234,8 @@
         };
     }])
 
-    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
-        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'logService', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, logService, messageMap, ParsedFilter, $injector, $rootScope, $window) {
 
         function getCatalogId() {
             var catalogId = "",
@@ -1187,6 +1188,127 @@
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
             getAbsoluteURL: getAbsoluteURL
+        }
+    }])
+
+    .factory('MenuUtils', ['ConfigUtils', 'logService', 'UriUtils', '$window', function (ConfigUtils, logService, UriUtils, $window) {
+        var _path;
+        function path(dcctx) {
+            if (!_path) {
+                var path = "/chaise/";
+                if (dcctx && typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                    var path = chaiseBuildVariables.chaiseBasePath;
+                    // append "/" if not present
+                    if (path[path.length-1] !== "/") path += "/";
+                }
+
+                _path = window.location.host + path;
+            }
+
+            return _path;
+        }
+
+        function isChaise(link, dcctx) {
+            if (!link) return false;
+
+            var appNames = ["record", "recordset", "recordedit", "login", "help"];
+
+            // parses the url into a location object
+            var eleUrl = document.createElement('a');
+            eleUrl.href = link;
+
+            for (var i=0; i<appNames.length; i++) {
+                var name = appNames[i];
+                // path/appName exists in our url
+                if (eleUrl.href.indexOf(path(dcctx) + name) !== -1) return true;
+            }
+
+            return false;
+        }
+
+        function addLogParams(url, contextHeaderParams) {
+            // if `?` already in the url, use &
+            var paramChar = url.lastIndexOf("?") !== -1 ? "&" : "?";
+
+            var pcid = "navbar";
+            // if not navbar app, append appname
+            if (contextHeaderParams.cid !== "navbar") {
+                pcid += "/" + contextHeaderParams.cid;
+            }
+            // ppid should be the pid for the current page
+            return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
+        }
+
+        function isOptionValid(option) {
+            function validateMenu(menuOption) {
+                menuOption.children.forEach(function (child) {
+                    if (child.children) {
+                        validateMenu(child)
+                    } else if (child.url) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                });
+            }
+
+            var isValid = true;
+            switch (option.type) {
+                case "menu":
+                    // must have children to be considered a valid menu
+                    isValid = (option.children) ? validateMenu(option) : false;
+                    console.log("Menu: ", isValid);
+                    break;
+                case "url":
+                    // accepts "urlPattern"
+                    break;
+                case "header":
+                    // ignores "children", "urlPattern"
+                    break;
+                case "logout":
+                    // ignore "children", "urlPattern"
+                    break;
+                case "my_profile":
+                    // ignore "children", "urlPattern"
+                    break;
+                default:
+                    // if "children" and "urlPattern" are both present, children will be used and produce a sub menu without a link
+                    // if children only, show submenu
+                    // if urlPattern only, show url/link
+                    break;
+            }
+
+            return isValid;
+        }
+
+        function onLinkClick() {
+            return function ($event, menuObject) {
+                $event.preventDefault();
+                $event.stopPropagation();
+
+                // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
+                if (!isChaise(menuObject.urlPattern, ConfigUtils.getContextJSON())) {
+                    // check if external or internal resource page
+                    var action = UriUtils.isSameOrigin(menuObject.urlPattern) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
+                    logService.logClientAction({
+                        action: logService.getActionString(action, "", ""),
+                        names: menuObject.names
+                    });
+                }
+
+                if (menuObject.newTab) {
+                    $window.open(menuObject.urlPattern, '_blank');
+                } else {
+                    $window.location = menuObject.urlPattern;
+                }
+            };
+        }
+
+        return {
+            addLogParams: addLogParams,
+            isChaise: isChaise,
+            isOptionValid: isOptionValid,
+            onLinkClick: onLinkClick
         }
     }])
 

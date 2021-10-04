@@ -1,21 +1,44 @@
 <ul class="nav navbar-nav navbar-right">
     <li>
         <a id="signup-link" ng-if="user === null && signUpURL" ng-href="{{signUpURL}}">Sign Up</a>
-        <a class="username" ng-if="user !== null && profileURL" ng-href="{{profileURL}}" ng-bind="user"></a>
     </li>
     <li>
         <a id="login-link" ng-if="user === null" ng-click="login()">Log In</a>
     </li>
-    <li uib-dropdown>
-        <a href="#" class="dropdown-toggle" uib-dropdown-toggle ng-if="user !== null && !profileURL" ng-click="::logDropdownOpen()">
-            <span class="username-display" ng-bind="user" uib-tooltip="{{userTooltip}}" tooltip-placement="bottom-right"></span>
+    <li class="dropdown" uib-dropdown>
+        <a href="#" class="dropdown-toggle" uib-dropdown-toggle ng-if="user !== null" ng-click="::logDropdownOpen()">
+            <span class="username-display" ng-bind="displayName" uib-tooltip="{{showUserTooltip() ? userTooltip : ''}}" tooltip-placement="bottom-right"></span>
             <span class="caret"></span>
         </a>
-        <ul class="dropdown-menu">
-            <li>
+        <!-- <ul ng-if="loggedInMenu.menuOptions" sub-menu menu="loggedInMenu.menuOptions" class="dropdown-menu login-menu"></ul> -->
+        <ul class="dropdown-menu login-menu">
+            <li ng-if="loggedInMenu.menuOptions" ng-repeat="option in loggedInMenu.menuOptions" ng-class="{'dropdown-submenu': option.children, 'dropdown-header-container': option.type == 'header'}">
+                <div ng-switch="option.type">
+                    <div ng-switch-when="header">
+                        <span class="dropdown-header chaise-dropdown-header" ng-bind-html="renderName(option)"></span>
+                    </div>
+                    <div ng-switch-when="menu">
+                        <a class="dropdown-toggle" uib-dropdown-toggle ><span ng-bind-html="renderName(option)"></span> <span class="caret"></span></a>
+                        <ul navbar-menu menu="option.children" class="dropdown-menu"></ul>
+                    </div>
+                    <div ng-switch-when="url">
+                        <a ng-href="{{option.url}}" target="{{option.newTab ? '_blank' : '_self'}}" ng-click="::onLinkClick($event, option)" ng-bind-html="renderName(option)"></a>
+                    </div>
+                    <div ng-switch-when="my_profile">
+                        <a id="profile-link" ng-click="openProfile()">My Profile</a>
+                    </div>
+                    <div ng-switch-when="logout">
+                        <a id="logout-link" ng-click="logout()">Log Out</a>
+                    </div>
+                    <!-- <div ng-switch-default>
+
+                    </div> -->
+                </div>
+            </li>
+            <li ng-if="!loggedInMenu.menuOptions">
                 <a id="profile-link" ng-click="openProfile()">My Profile</a>
             </li>
-            <li ng-if="user !== null">
+            <li ng-if="user !== null && !loggedInMenu.menuOptions">
                 <a id="logout-link" ng-click="logout()">Log Out</a>
             </li>
         </ul>

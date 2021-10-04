@@ -123,13 +123,14 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
+                session = Session.getSessionValue();
+                ERMrest.setClientSession(session);
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
                     $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
                     // send string to prepend to "headTitle"
                     // <table-name>
                     headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));
-                    session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                     var location = reference.location;

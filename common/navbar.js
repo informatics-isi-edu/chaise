@@ -134,7 +134,7 @@
       //If not enough space to expand on right
       var widthOfSubMenu = menuTarget.offsetWidth;
       var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
-      
+
       if (submenuEndOnRight > window.innerWidth) {
           var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
           var visibleContent = window.innerWidth - submenuEndOnLeft;
@@ -158,19 +158,6 @@
 
     function isCatalogDefined(val) {
         return val != undefined && val != null;
-    }
-
-    function addLogParams(url, contextHeaderParams) {
-        // if `?` already in the url, use &
-        var paramChar = url.lastIndexOf("?") !== -1 ? "&" : "?";
-
-        var pcid = "navbar";
-        // if not navbar app, append appname
-        if (contextHeaderParams.cid !== "navbar") {
-            pcid += "/" + contextHeaderParams.cid;
-        }
-        // ppid should be the pid for the current page
-        return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
     }
 
     // TODO we might want to refactor this
@@ -209,13 +196,13 @@
     // item - navbar menu object form children array
     // session - Session factory
     function canShow (item, session) {
-        return session.isGroupIncluded(item.acls.show);
+        return item.acls && session.isGroupIncluded(item.acls.show);
     }
 
     // item - navbar menu object form children array
     // session - Session factory
     function canEnable (item, session) {
-        return session.isGroupIncluded(item.acls.enable);
+        return item.acls && session.isGroupIncluded(item.acls.enable);
     }
 
     /**
@@ -260,7 +247,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+    .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'MenuUtils', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, MenuUtils, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
 
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             settings = ConfigUtils.getSettings();
@@ -299,8 +286,8 @@
                 obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
 
                 // only append pcid/ppid if link is to a chaise url
-                if (isChaise(obj.url, ConfigUtils.getContextJSON())) {
-                    obj.url = addLogParams(obj.url, ConfigUtils.getContextHeaderParams());
+                if (MenuUtils.isChaise(obj.url, ConfigUtils.getContextJSON())) {
+                    obj.url = MenuUtils.addLogParams(obj.url, ConfigUtils.getContextHeaderParams());
                 }
             }
             // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
@@ -406,7 +393,7 @@
                         $window.location = link;
                     }
 
-                    scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
+                    scope.onLinkClick = MenuUtils.onLinkClick();
 
                     scope.showRidSearch = function () {
                         return chaiseConfig.resolverImplicitCatalog !== null && chaiseConfig.hideGoToRID !== true
@@ -467,7 +454,7 @@
                         }
 
                         scope.toLive = function () {
-                            $window.location = addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), ConfigUtils.getContextHeaderParams());
+                            $window.location = MenuUtils.addLogParams($window.location.href.replace(catalogId, catalogId.split("@")[0]), ConfigUtils.getContextHeaderParams());
                         }
                     }
 
