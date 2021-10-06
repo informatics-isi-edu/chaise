@@ -145,7 +145,6 @@
 
 
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.reference.session = session;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,

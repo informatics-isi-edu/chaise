@@ -186,7 +186,6 @@
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
 
-                $rootScope.reference.session = session;
                 $rootScope.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);

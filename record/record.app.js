@@ -112,7 +112,6 @@
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
-                $rootScope.reference.session = session;
 
                 // send string to prepend to "headTitle"
                 // <table-name>: pending... until we get row information back
