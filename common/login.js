@@ -188,13 +188,13 @@
                         return MenuUtils.renderName(option);
                     }
 
-                    // scope.canShow = function (item) {
-                    //     return canShow(item, Session);
-                    // }
-                    //
-                    // scope.canEnable = function (item) {
-                    //     return canEnable(item, Session);
-                    // }
+                    scope.canShow = function (option) {
+                        return MenuUtils.canShow(option);
+                    }
+
+                    scope.canEnable = function (option) {
+                        return MenuUtils.canEnable(option);
+                    }
 
                     // functions of sub menu when menuOptions not defined
                     scope.openProfile = function openProfile() {
