@@ -232,13 +232,13 @@
                 "tag:isrd.isi.edu,2019:source-definitions": {
                     "columns": true,
                     "fkeys": true,
+                    "search-box": {
+                        "or": [
+                            {"source": "text_col", "markdown_name": "**text**"},
+                            {"source": "longtext_col", "markdown_name": "long column"}
+                        ]
+                    },
                     "sources": {
-                        "search-box": {
-                            "or": [
-                                {"source": "text_col", "markdown_name": "**text**"},
-                                {"source": "longtext_col", "markdown_name": "long column"}
-                            ]
-                        },
                         "outbound_to_f1": {
                             "source": [{"outbound": ["faceting", "main_fk1"]}, "id"]
                         },
@@ -291,12 +291,10 @@
                 "tag:isrd.isi.edu,2019:source-definitions": {
                     "fkeys": true,
                     "columns": true,
-                    "sources": {
-                        "search-box": {
-                            "or": [
-                                {"source": "term", "markdown_name": "term column"}
-                            ]
-                        }
+                    "search-box": {
+                        "or": [
+                            {"source": "term", "markdown_name": "term column"}
+                        ]
                     }
                 }
             }
