@@ -8,7 +8,7 @@
     ])
 
     // Login top level menu and functionality
-    .directive('login', ['ConfigUtils', 'logService', 'MenuUtils', 'modalUtils', 'Session', 'UriUtils', '$rootScope', '$sce', function (ConfigUtils, logService, MenuUtils, modalUtils, Session, UriUtils, $rootScope, $sce) {
+    .directive('login', ['ConfigUtils', 'logService', 'MenuUtils', 'modalUtils', 'Session', 'UriUtils', '$rootScope', function (ConfigUtils, logService, MenuUtils, modalUtils, Session, UriUtils, $rootScope) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var settings = ConfigUtils.getSettings();
         var dcctx = ConfigUtils.getContextJSON();
@@ -165,7 +165,7 @@
         };
     }])
 
-    .directive('subMenu', ['$compile', 'ConfigUtils', 'logService', 'MenuUtils', 'UriUtils', '$sce', '$window', function($compile, ConfigUtils, logService, MenuUtils, UriUtils, $sce, $window) {
+    .directive('subMenu', ['$compile', 'ConfigUtils', 'logService', 'MenuUtils', 'UriUtils', function($compile, ConfigUtils, logService, MenuUtils, UriUtils) {
         return {
             restrict: 'EA',
             scope: {
@@ -195,6 +195,15 @@
                     // scope.canEnable = function (item) {
                     //     return canEnable(item, Session);
                     // }
+
+                    // functions of sub menu when menuOptions not defined
+                    scope.openProfile = function openProfile() {
+                        MenuUtils.openProfileModal();
+                    };
+
+                    scope.logout = function logout() {
+                        MenuUtils.logout();
+                    };
 
                     scope.toggleSubMenu = function (event, menuObject) {
                         // toggle the menu

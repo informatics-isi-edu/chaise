@@ -1228,8 +1228,32 @@
             }
         }
 
+        // Function to open the menu on the left if not enough space on right
+        function _checkWidth(ele, winWidth) {
+            //revert to defaults
+            ele.classList.remove("dropdown-menu-right");
+            ele.style.width = "max-content";
+
+            // If dropdown is spilling over
+            if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
+                ele.style.width = "max-content";
+            }
+            else {
+                var visibleContent =  winWidth - ele.getBoundingClientRect().left;
+                //hard-coded limit of width for opening on the left hand side
+                if (Math.round(visibleContent) < 200) {
+                    ele.classList.add("dropdown-menu-right");
+                }
+                else {
+                    ele.style.width = visibleContent + "px";
+                }
+            }
+        }
+
+        /* ===== Public Functions attached to return object ===== */
+
         // ele - dropdown ul element
-        function _checkHeight(ele, winHeight) {
+        function checkHeight(ele, winHeight) {
             // no dropdown is open
             if (!ele) return;
 
@@ -1242,8 +1266,6 @@
                 ele.style.height = newHeight + "px";
             }
         }
-
-        /* ===== Public Functions attached to return object ===== */
 
         /**
          * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
@@ -1293,7 +1315,7 @@
                 // recalculate the height for each open submenu, <ul>
                 var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
                 [].forEach.call(openSubmenus, function(el) {
-                    _checkHeight(el, window.innerHeight);
+                    checkHeight(el, window.innerHeight);
                 });
             }
 
@@ -1353,6 +1375,11 @@
             return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
         }
 
+        function resetHeight(event) {
+            var menuTarget = _getNextSibling(event.target,".dropdown-menu");
+            if (menuTarget) menuTarget.style.height = "unset";
+        }
+
         function isOptionValid(option) {
             function validateMenu(menuOption) {
                 menuOption.children.forEach(function (child) {
@@ -1395,6 +1422,29 @@
             return isValid;
         }
 
+        // triggered when top level menu is opened/closed
+        function onToggle(open) {
+            var elems = document.querySelectorAll(".dropdown-menu.show");
+            [].forEach.call(elems, function(el) {
+                el.classList.remove("show");
+            });
+
+            // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
+            var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
+            [].forEach.call(highlightedParents, function(el) {
+                el.classList.remove("child-opened");
+            });
+
+            // calculate height for each open dropdown menu
+            if (open) {
+                var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                [].forEach.call(openDropdowns, function(el) {
+                    checkHeight(el, window.innerHeight);
+                    _checkWidth(el, window.innerWidth);
+                });
+            }
+        }
+
         /**
          * Just to make sure browsers are not ignoring the ng-click, we are first
          * preventing the default behavior of link, then logging the client action
@@ -1425,7 +1475,30 @@
         }
 
         function renderName(option) {
-            return $sce.trustAsHtml(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, {inline: true}));
+            // new syntax will always use nameMarkdownPattern
+            if (option.nameMarkdownPattern) {
+                return $sce.trustAsHtml(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, {inline: true}));
+            }
+
+            // support markdownName backwards compatibility for navbarMenu
+            if (option.markdownName) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(option.markdownName, {inline: true}));
+            }
+
+            // support name backwards compatibility for navbarMenu
+            return $sce.trustAsHtml(option.name);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canShow (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.show);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canEnable (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.enable);
         }
 
         // NOTE: hard coded action
@@ -1449,12 +1522,17 @@
 
         return {
             addLogParams: addLogParams,
+            canEnable: canEnable,
+            canShow: canShow,
+            checkHeight: checkHeight,
             isChaise: isChaise,
             isOptionValid: isOptionValid,
             logout: logout,
             onLinkClick: onLinkClick,
             openProfileModal: openProfileModal,
+            onToggle: onToggle,
             renderName: renderName,
+            resetHeight: resetHeight,
             toggleMenu: toggleMenu
         }
     }])

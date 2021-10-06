@@ -1,247 +1,4 @@
 (function() {
-    var _path;
-    function getNextSibling(elem, selector) {
-      var sibling = elem.nextElementSibling;
-      if (!selector) return sibling;
-      while (sibling) {
-        if (sibling.matches(selector)) return sibling;
-        sibling = sibling.nextElementSibling
-      }
-    };
-
-    // triggered when top level menu is opened/closed
-    function onToggle(open) {
-        var elems = document.querySelectorAll(".dropdown-menu.show");
-        [].forEach.call(elems, function(el) {
-            el.classList.remove("show");
-        });
-
-        // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
-        var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
-        [].forEach.call(highlightedParents, function(el) {
-            el.classList.remove("child-opened");
-        });
-
-        // calculate height for each open dropdown menu
-        if (open) {
-            var openDropdowns = document.querySelectorAll(".dropdown.open ul");
-            [].forEach.call(openDropdowns, function(el) {
-                checkHeight(el, window.innerHeight);
-                checkWidth(el, window.innerWidth);
-            });
-        }
-    }
-
-    // ele - dropdown ul element
-    function checkHeight(ele, winHeight) {
-        // no dropdown is open
-        if (!ele) return;
-
-        var dropdownHeight = ele.offsetHeight;
-        var fromTop = ele.offsetTop;
-        var footerBuffer = 50;
-
-        if ((dropdownHeight + fromTop) > winHeight) {
-            var newHeight = winHeight - fromTop - footerBuffer;
-            ele.style.height = newHeight + "px";
-        }
-    }
-
-    // Function to open the menu on the left if not enough space on right
-    function checkWidth(ele, winWidth) {
-        //revert to defaults
-        ele.classList.remove("dropdown-menu-right");
-        ele.style.width = "max-content";
-
-        // If dropdown is spilling over
-        if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
-            ele.style.width = "max-content";
-        }
-        else {
-            var visibleContent =  winWidth - ele.getBoundingClientRect().left;
-            //hard-coded limit of width for opening on the left hand side
-            if (Math.round(visibleContent) < 200) {
-                ele.classList.add("dropdown-menu-right");
-            }
-            else {
-                ele.style.width = visibleContent + "px";
-            }
-        }
-    }
-
-    /* Function to calculate the left of the toggleSubMenu*/
-    function getOffsetValue(element){
-       var offsetLeft = 0
-       while(element) {
-          offsetLeft += element.offsetLeft;
-          element = element.offsetParent;
-       }
-       return offsetLeft;
-    }
-
-    /**
-     * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
-     * it will close all the other dropdowns and also will return `true`.
-     * @return{boolean} if true, it means that we opened the menu
-     */
-    function toggleMenu($event) {
-      $event.stopPropagation();
-      $event.preventDefault();
-
-      var target = $event.target;
-      // added markdownName support allows for inline template to be defined like :span:TEXT:/span:{.class-name}
-      if ($event.target.localName != "a") {
-          target = $event.target.parentElement;
-      }
-
-      var menuTarget = getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
-      menuTarget.style.width = "max-content";
-      var immediateParent = target.offsetParent; // parent, <li>
-      var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
-      var posValues = getOffsetValue(immediateParent);
-
-      // calculate the position the submenu should open from the top fo the viewport
-      if (parent.scrollTop == 0){
-          menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
-      } else if (parent.scrollTop > 0) {
-          menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
-      }
-
-      menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
-
-      var open = !menuTarget.classList.contains("show");
-
-      // if we're opening this, close all the other dropdowns on navbar.
-      if (open) {
-        target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
-          el.parentElement.classList.remove("child-opened");
-          el.classList.remove("show");
-        });
-      }
-
-      menuTarget.classList.toggle("show"); // toggle the class
-      menuTarget.style.height = "unset"; // remove height in case it was set for a different position
-      immediateParent.classList.toggle("child-opened"); // used for setting highlight color
-
-      if (open) {
-          // recalculate the height for each open submenu, <ul>
-          var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
-          [].forEach.call(openSubmenus, function(el) {
-              checkHeight(el, window.innerHeight);
-          });
-      }
-
-      //If not enough space to expand on right
-      var widthOfSubMenu = menuTarget.offsetWidth;
-      var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
-
-      if (submenuEndOnRight > window.innerWidth) {
-          var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
-          var visibleContent = window.innerWidth - submenuEndOnLeft;
-
-          if (visibleContent < 200) {
-            menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
-          }
-          else {
-            menuTarget.style.width = visibleContent + "px";
-          }
-      }
-      else {
-          // if vertical scrollbar then offset a bit more to make scrollbar visible
-        if (parent.scrollHeight > parent.clientHeight) {
-            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
-          }
-      }
-
-      return open;
-    }
-
-    function isCatalogDefined(val) {
-        return val != undefined && val != null;
-    }
-
-    // TODO we might want to refactor this
-    function path(dcctx) {
-        if (!_path) {
-            var path = "/chaise/";
-            if (dcctx && typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
-                var path = chaiseBuildVariables.chaiseBasePath;
-                // append "/" if not present
-                if (path[path.length-1] !== "/") path += "/";
-            }
-
-            _path = window.location.host + path;
-        }
-
-        return _path;
-    }
-
-    // TODO we might want to refactor this
-    function isChaise(link, dcctx) {
-        var appNames = ["record", "recordset", "recordedit", "login", "help"];
-
-        // parses the url into a location object
-        var eleUrl = document.createElement('a');
-        eleUrl.href = link;
-
-        for (var i=0; i<appNames.length; i++) {
-            var name = appNames[i];
-            // path/appName exists in our url
-            if (eleUrl.href.indexOf(path(dcctx) + name) !== -1) return true;
-        }
-
-        return false;
-    }
-
-    // item - navbar menu object form children array
-    // session - Session factory
-    function canShow (item, session) {
-        return item.acls && session.isGroupIncluded(item.acls.show);
-    }
-
-    // item - navbar menu object form children array
-    // session - Session factory
-    function canEnable (item, session) {
-        return item.acls && session.isGroupIncluded(item.acls.enable);
-    }
-
-    /**
-     * Just to make sure browsers are not ignoring the ng-click, we are first
-     * preventing the default behavior of link, then logging the client action
-     * and then changing the location without waiting for the request,
-     * This will ensure that we're at least sending the log to server.
-     */
-    function onLinkClick(ConfigUtils, logService, UriUtils, $window) {
-        return function ($event, menuObject) {
-            $event.preventDefault();
-            $event.stopPropagation();
-
-            // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
-            if (!isChaise(menuObject.url, ConfigUtils.getContextJSON())) {
-                // check if external or internal resource page
-                var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
-                logService.logClientAction({
-                    action: logService.getActionString(action, "", ""),
-                    names: menuObject.names
-                });
-            }
-
-            if (menuObject.newTab) {
-                $window.open(menuObject.url, '_blank');
-            } else {
-                $window.location = menuObject.url;
-            }
-        };
-    }
-
-    function renderInlineMarkdown(item, sce) {
-        if (item.markdownName) {
-            return sce.trustAsHtml(ERMrest.renderMarkdown(item.markdownName, {inline: true}));
-        }
-
-        return sce.trustAsHtml(item.name);
-    }
-
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
@@ -257,6 +14,9 @@
         var root = chaiseConfig.navbarMenu || {};
         var catalogId = UriUtils.getCatalogId();
 
+        function isValueDefined(val) {
+            return val != undefined && val != null;
+        }
 
         // if in iframe and we want to force links to open in new tab,
         var forceNewTab = settings.openLinksInTab === true;
@@ -282,7 +42,7 @@
             var parentNames = obj.names;
             // template the url
             // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (obj.url && isCatalogDefined(catalogId)) {
+            if (obj.url && isValueDefined(catalogId)) {
                 obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
 
                 // only append pcid/ppid if link is to a chaise url
@@ -356,28 +116,27 @@
                             });
                         }
 
-                        onToggle(open);
+                        MenuUtils.onToggle(open);
                     }
 
                     // prefer to use markdownName over name
                     scope.renderName = function (item) {
-                        return renderInlineMarkdown(item, $sce);
+                        return MenuUtils.renderName(item);
                     }
 
                     // remove the height when the dropdown is toggled
                     // NOTE: $event can't be passed to function attached to on-toggle listener
                     // use this function on a click event
                     scope.resetHeight = function ($event) {
-                        var menuTarget = getNextSibling($event.target,".dropdown-menu");
-                        if (menuTarget) menuTarget.style.height = "unset";
+                        MenuUtils.resetHeight($event);
                     }
 
                     scope.canShow = function (item) {
-                        return canShow(item, Session);
+                        return MenuUtils.canShow(item);
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, Session);
+                        return MenuUtils.canEnable(item);
                     }
 
                     scope.logBranding = function ($event, link) {
@@ -412,7 +171,7 @@
                         var resolverId = chaiseConfig.resolverImplicitCatalog,
                             url = "/id/", catId, splitId;
 
-                        if (isCatalogDefined(catalogId)) {
+                        if (isValueDefined(catalogId)) {
                             splitId = UriUtils.splitVersionFromCatalog(catalogId);
 
                             // use `/id/catalog/ridSearchTerm` format if:
@@ -424,7 +183,7 @@
                         }
 
                         url += scope.ridSearchTerm;
-                        // implicitly does the isCatalogDefined(catalogId) check with how function returns true/false
+                        // implicitly does the isValueDefined(catalogId) check with how function returns true/false
                         if (scope.isVersioned()) url += "@" + splitId.version;
 
                         var logObj = ConfigUtils.getContextHeaderParams(), headers = {};
@@ -448,7 +207,7 @@
 
                     }
 
-                    if (isCatalogDefined(catalogId)) {
+                    if (isValueDefined(catalogId)) {
                         scope.isVersioned = function () {
                             return catalogId.split("@")[1] ? true : false;
                         }
@@ -467,7 +226,7 @@
                             var openDropdowns = document.querySelectorAll(".dropdown.open ul");
                             [].forEach.call(openDropdowns, function(el) {
                                 el.style.height = "unset";
-                                checkHeight(el, $window.innerHeight);
+                                MenuUtils.checkHeight(el, $window.innerHeight);
                             });
                         }, 0)
                     });
@@ -476,7 +235,7 @@
         };
     }])
 
-    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logService', 'Session', 'UriUtils', '$sce', '$window', function($compile, ConfigUtils, logService, Session, UriUtils, $sce, $window) {
+    .directive('navbarMenu', ['$compile', 'ConfigUtils', 'logService', 'MenuUtils', 'Session', 'UriUtils', '$sce', '$window', function($compile, ConfigUtils, logService, MenuUtils, Session, UriUtils, $sce, $window) {
         return {
             restrict: 'EA',
             scope: {
@@ -496,20 +255,20 @@
 
                     // prefer to use markdownName over name
                     scope.renderName = function (item) {
-                        return renderInlineMarkdown(item, $sce);
+                        return MenuUtils.renderName(item);
                     }
 
                     scope.canShow = function (item) {
-                        return canShow(item, Session);
+                        return MenuUtils.canShow(item);
                     }
 
                     scope.canEnable = function (item) {
-                        return canEnable(item, Session);
+                        return MenuUtils.canEnable(item);
                     }
 
                     scope.toggleSubMenu = function (event, menuObject) {
                         // toggle the menu
-                        if (toggleMenu(event)) {
+                        if (MenuUtils.toggleMenu(event)) {
                             // if we opened the menu, log it.
                             logService.logClientAction({
                                 action: logService.getActionString(logService.logActions.NAVBAR_MENU_OPEN, "", ""),
@@ -518,7 +277,7 @@
                         }
                     };
 
-                    scope.onLinkClick = onLinkClick(ConfigUtils, logService, UriUtils, $window);
+                    scope.onLinkClick = MenuUtils.onLinkClick();
 
                     compiled(scope, function(clone) {
                         el.append(clone);
