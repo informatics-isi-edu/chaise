@@ -4,7 +4,7 @@
             <span class="dropdown-header chaise-dropdown-header" ng-bind-html="renderName(option)"></span>
         </div>
         <div ng-switch-when="menu">
-            <a class="dropdown-toggle" ng-click="::toggleSubMenu($event, item)" ng-bind-html="renderName(option)"></a>
+            <a class="dropdown-toggle" ng-click="::toggleSubMenu($event, option)" ng-bind-html="renderName(option)"></a>
             <ul sub-menu menu="option.children" class="dropdown-menu"></ul>
         </div>
         <div ng-switch-when="url">

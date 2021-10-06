@@ -118,7 +118,7 @@ TODO we should be able to simplify the rules and also investigate whether
 */
 header {
     .dropdown-menu>li>a.chaise-dropdown-header,
-    .login-menu>li a.chaise-dropdown-header,
+    .dropdown-menu>li>div>div>a.chaise-dropdown-header,
     .chaise-dropdown-header {
         padding: 3px 15px 3px 15px;
         cursor: default;
@@ -131,7 +131,8 @@ header {
         position: relative;
     }
 
-    .dropdown-submenu>.dropdown-menu {
+    .dropdown-submenu>.dropdown-menu,
+    .dropdown-submenu>div>div>.dropdown-menu {
         position: fixed;
         margin-top: -6px;
         margin-left: -1px;
@@ -140,7 +141,8 @@ header {
         border-radius: 0 6px 6px 6px;
     }
 
-    .dropdown-submenu>a:after {
+    .dropdown-submenu>a:after,
+    .dropdown-submenu>div>div>a:after {
         display: flex;
         content: " ";
         float: right;
@@ -157,7 +159,8 @@ header {
         margin-left: 10px;
     }
 
-    .dropdown-submenu:hover>a:after {
+    .dropdown-submenu:hover>a:after,
+    .dropdown-submenu:hover>div>div>a:after {
         border-left-color: #777; /* was #fff */
     }
 
@@ -165,7 +168,8 @@ header {
         float: none;
     }
 
-    .dropdown-submenu.pull-left>.dropdown-menu {
+    .dropdown-submenu.pull-left>.dropdown-menu,
+    .dropdown-submenu.pull-left>div>div>.dropdown-menu {
         left: -100%;
         margin-left: 10px;
         -webkit-border-radius: 6px 0 6px 6px;
@@ -174,7 +178,8 @@ header {
     }
 
     // Dummy selector to keep the same amount of space as submenu arrow
-    .dropdown-menu > .dropdown-submenu + li > a::after {
+    .dropdown-menu > .dropdown-submenu + li > a::after,
+    .dropdown-menu > .dropdown-submenu + li > div > div > a::after {
         content: " ";
         height: 12px;
         width: 12px;
@@ -196,7 +201,7 @@ header {
     }
 
     .dropdown-menu > li > a,
-    .login-menu>li a {
+    .dropdown-menu > li > div > div > a {
         white-space: normal;
         cursor: pointer;
         display: flex;
@@ -215,7 +220,7 @@ header {
     }
 
     .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a,
-    .login-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container) a {
+    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>div>div>a {
         padding-left: 22px;
     }
 
@@ -225,7 +230,10 @@ header {
             padding-left: 3%;
         }
         // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
-        .dropdown-menu, .navbar-nav ul.dropdown-menu, .dropdown-menu > li > a {
+        .dropdown-menu,
+        .navbar-nav ul.dropdown-menu,
+        .dropdown-menu > li > a,
+        .dropdown-menu > li > div > div > a {
             max-width: none !important;
             width: auto !important;
         }
