@@ -224,6 +224,8 @@
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (ERMrest && exception instanceof ERMrest.UnsupportedFilters) {
+            vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
@@ -250,12 +252,16 @@
         };
 
         vm.ok = function () {
+            $rootScope.error = false;
+
             // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
             // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
 
         vm.cancel = function cancel() {
+            $rootScope.error = false;
+
             $uibModalInstance.dismiss('cancel');
         };
 
@@ -305,6 +311,7 @@
 
         vm.params = params;
         vm.onSelectedRowsChanged = onSelectedRowsChanged;
+        vm.onFavoritesChanged = params.onFavoritesChanged;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;
@@ -326,8 +333,8 @@
             readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
-            displayname:   params.displayname ? params.displayname : null,
-            comment:       (typeof params.comment === "string") ? params.comment: null,
+            displayname:        params.displayname ? params.displayname : null,
+            comment:            (typeof params.comment === "string") ? params.comment: null,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
@@ -339,14 +346,17 @@
             matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {
-                viewable: false, deletable: false,
+                viewable:           false,
+                deletable:          (typeof params.allowDelete === "boolean") ? params.allowDelete : false, // saved query mode we want to allow delete (per row)
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
-                showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showFaceting:       showFaceting,
+                facetPanelOpen:     params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
+                enableFavorites:     params.enableFavorites ? params.enableFavorites : false
             },
             getDisabledTuples:          params.getDisabledTuples,
 
@@ -614,6 +624,49 @@
         function ok() {
             $uibModalInstance.close();
         }
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, messageMap, params, $scope, $uibModalInstance) {
+        var vm = this;
+        vm.alerts = AlertsService.alerts;
+        vm.columnModels = params.columnModels;
+        vm.parentReference = params.parentReference;
+        vm.savedQueryForm = params.rowData;
+
+        vm.form = params.rowData;
+
+        vm.submit = function () {
+            if (vm.form.$invalid) {
+                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
+                vm.form.$setSubmitted();
+                return;
+            }
+
+            var row = vm.savedQueryForm.rows[0]
+
+            // set id based on hash of `facets` columns
+            row.query_id = SparkMD5.hash(JSON.stringify(row.facets));
+            row.last_execution_time = "now";
+            params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
+                // show success after close
+                $uibModalInstance.close(query.successful);
+            }, function error(error) {
+                // show error without close
+
+                // error handling when "facet blob" exists already and violates the uniqueness constraint
+                // NOTE: this is hacky as it's assuming the only unique constraint on the table
+                //       is because of duplicate facet definition
+                if (ERMrest && error instanceof ERMrest.DuplicateConflictError) {
+                    AlertsService.addAlert(messageMap.duplicateSavedQueryMessage, 'error');
+                } else {
+                    AlertsService.addAlert(error.message, 'error');
+                }
+            });
+        }
+
         vm.cancel = function () {
             $uibModalInstance.dismiss("cancel");
         }

@@ -3,8 +3,8 @@
 
     angular.module('chaise.ellipsis', ['chaise.utils'])
 
-    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
-        function(AlertsService, ConfigUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
+    .directive('ellipsis', ['AlertsService', 'ConfigUtils', 'defaultDisplayname', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordsetDisplayModes', 'recordTableUtils', 'Session', 'UiUtils', 'UriUtils', '$log', '$rootScope', '$sce', '$timeout', '$window',
+        function(AlertsService, ConfigUtils, defaultDisplayname, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordsetDisplayModes, recordTableUtils, Session, UiUtils, UriUtils, $log, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             context = ConfigUtils.getContextJSON();
 
@@ -90,6 +90,7 @@
                 rowValues: '=', // tuple's values
                 rowIndex: '=', // tuple's row index in rowValues array
                 onRowClickBind: '=?',
+                onFavoritesChanged: '=?',
                 selected: '=',
                 selectDisabled: "=?",
                 tableModel: "="
@@ -109,9 +110,59 @@
                     scope.defaultDisplayname = defaultDisplayname;
                     scope.config = scope.tableModel.config;
 
+                    recordTableUtils.registerFavoritesCallbacks(scope);
+
+                    scope.isFavoriteLoading = false;
+                    scope.callToggleFavorite = function () {
+                        if (scope.isFavoriteLoading) return;
+                        scope.isFavoriteLoading = true;
+                        scope.toggleFavorite(scope.tuple.data, scope.tuple.reference.table, scope.tuple.isFavorite).then(function (isFavorite) {
+                            // attached value is to the tuple
+                            // TODO: this should be changed but it was the only value shared between ellipsis
+                            //    and when I read in the data for setting favorites
+                            scope.tuple.isFavorite = isFavorite;
+                        }, function (isFavorite) {
+                            scope.tuple.isFavorite = isFavorite;
+                        }).catch(function (error) {
+                            $log.warn(error);
+                        }).finally(function () {
+                            scope.isFavoriteLoading = false;
+                            if (scope.onFavoritesChanged) {
+                                scope.onFavoritesChanged();
+                            }
+                        });
+                    }
+
                     var tupleReference = scope.tuple.reference,
                         isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
+                        isSavedQueryPopup = scope.config.displayMode === recordsetDisplayModes.savedQuery,
                         associationRef;
+
+                    // apply saved query link
+                    // show the apply saved query button for (compact/select savedQuery popup)
+                    if (isSavedQueryPopup) {
+                        // NOTE: assume relative to reference the user is viewing
+                        // encoded_facets column might not be a part of the rowValues so get from tuple.data (prevents formatting being applied as well)
+                        // some queries might be saved withoug any facets selected meaning this shouldn't break
+                        var facetString = scope.tuple.data.encoded_facets ? "/*::facets::" + scope.tuple.data.encoded_facets : "";
+                        var ermrestPath = scope.tableModel.parentReference.unfilteredReference.uri + facetString;
+                        ERMrest.resolve(ermrestPath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryRef) {
+                            var savedQueryLink = savedQueryRef.contextualize.compact.appLink;
+                            var qCharacter = savedQueryLink.indexOf("?") !== -1 ? "&" : "?";
+                            // TODO: change from HTML link to refresh page to:
+                            //    "updateFacets on main entity and add to browser history stack"
+                            // after update, put last_execution_time as "now"
+                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
+                        }).catch(function (error) {
+                            $log.warn(error);
+                            // fail silently and degrade the UX (hide the apply button)
+                            // show the disabled apply button
+                            scope.applySavedQuery = false;
+                        });
+                    } else {
+                        // hide the apply button completely
+                        scope.applySavedQuery = null;
+                    }
 
                     // view link
                     if (scope.config.viewable) {

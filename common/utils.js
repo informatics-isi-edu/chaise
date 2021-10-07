@@ -9,9 +9,10 @@
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
         "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
-        "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+        "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -29,15 +30,16 @@
           "allowErrorDismissal": false,
           "showFaceting": false,
           "hideTableOfContents": false,
-          "showExportButton": false,
           "navbarMenu": {},
           "navbarBrand": "",
+          "termsAndConditionsConfig": null,
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
           "logClientActions": true,
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
+          "savedQueryConfig": null,
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -106,7 +108,8 @@
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
             "pageRedirect": "Click <b>OK</b> to go to the ",
-            "reloadMessage": "Click <b>Reload</b> to start over."
+            "reloadMessage": "Click <b>Reload</b> to start over.",
+            "unsupportedFilters": "Click <b>OK</b> to continue with the subset of filter criteria which are supported at this time."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -137,7 +140,8 @@
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
-        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
+        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again.",
+        "duplicateSavedQueryMessage": "This search has already been saved. Please edit it under <b>Show Saved Search Criteria</b> if you wish to change its name or description."
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -162,7 +166,8 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
-        facetPopup: "popup/facet"
+        facetPopup: "popup/facet",
+        savedQuery: "popup/savedquery"
     })
 
     .constant("defaultDisplayname", {
@@ -1026,7 +1031,10 @@
                 var queries = url.slice(idx+1).split("&");
                 for (var i = 0; i < queries.length; i++) {
                     var q_parts = queries[i].split("=");
-                    if (q_parts.length != 2) continue;
+                    // allow for length 1 query params
+                    if (q_parts.length > 2) continue;
+                    // if value is not defined, use true since key would still be defined
+                    q_parts[1] = q_parts[1] || true
 
                     var q_key, q_val;
                     if (dontDecodeQueryParams) {
@@ -1858,6 +1866,63 @@
             }
         }
 
+        /**
+         * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
+         * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+         * @param {DOMElement} parent - the parent element
+         */
+        function addTopHorizontalScroll(parent) {
+            if (!parent) return;
+
+            var topScrollElementWrapper = parent.querySelector(".chaise-table-top-scroll-wrapper"),
+                topScrollElement = parent.querySelector(".chaise-table-top-scroll"),
+                recordsetTable = parent.querySelector(".recordset-table");
+
+            if (!topScrollElementWrapper || !topScrollElement || !recordsetTable) {
+                return;
+            }
+
+            // these 2 flags help us prevent cascading scroll changes back and forth across the 2 elements
+            var isSyncingTopScroll = false;
+            var isSyncingTableScroll = false;
+            // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+            topScrollElementWrapper.addEventListener('scroll', function() {
+                if (!isSyncingTopScroll) {
+                    isSyncingTableScroll = true;
+                    recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
+                }
+                isSyncingTopScroll = false;
+            });
+
+            recordsetTable.addEventListener('scroll', function() {
+                if (!isSyncingTableScroll) {
+                    isSyncingTopScroll = true;
+                    topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+                }
+                isSyncingTableScroll = false;
+            });
+
+            // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+            new ResizeSensor(recordsetTable, function () {
+                // there is no need of a scrollbar, content is not overflowing
+                if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                    topScrollElement.style.width = 0;
+                    topScrollElementWrapper.style.height = 0;
+                }
+                else {
+                    topScrollElementWrapper.style.height = "15px";
+                    topScrollElement.style.width = recordsetTable.scrollWidth + "px";
+                }
+            });
+
+            // make top scroll visible after adding the handlers to ensure its visible only when working
+            topScrollElementWrapper.style.display = "block";
+            // show only if content is overflowing
+            if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                topScrollElementWrapper.style.height = "15px";
+            }
+        }
+
         return {
             humanizeTimestamp: humanizeTimestamp,
             versionDate: versionDate,
@@ -1870,7 +1935,8 @@
             attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor,
+            addTopHorizontalScroll: addTopHorizontalScroll
         }
     }])
 
@@ -2137,6 +2203,66 @@
             return mode;
         }
 
+        // NOTE: should use DataUtils.isNoneEmptyString but including causes a circular dependency
+        // DataUtils relies on errors for one functions, `verify()`. `verify` should be moved to
+        // errors to remove this circular dependency and allow utility functions with no dependencies
+        // to be used everywhere
+        function isStringAndNotEmpty(str) {
+            return typeof str === "string" && str.length > 0;
+        };
+
+        function initializeSavingQueries(reference, queryParams) {
+            var chaiseConfig = getConfigJSON();
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            var savedQuery = {
+                showUI: reference.display.showSavedQuery
+            }
+
+            // NOTE: if this is not set, saved query UI should probably be turned off
+            if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
+                var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+
+                var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                if (validMapping) {
+                    savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+                    savedQuery.ermrestAGPath = "/ermrest/catalog/" + mapping.catalog + "/attributegroup/" + mapping.schema + ":" + mapping.table
+
+                    // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
+                    if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
+                } else {
+                    // if mapping is invalid, the config is ill-defined and the feature will be turned off
+                    savedQuery.showUI = false;
+                }
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                savedQuery.showUI = false;
+            }
+
+            return savedQuery;
+        }
+
+        /**
+         * Returns true if the object passed is valid for the terms and conditions feature
+         * @params {Object} obj - the termaAndConditions object from chaise-config
+         * @return {boolean} boolean - value to use the terms and conditions config requiring a specific globus group for access
+         *
+         * termsAndConditionsConfig: {
+         *     "groupId": "https://auth.globus.org/123a4bcd-ef5a-67bc-8912-d34e5fa67b89",
+         *     "joinUrl": "https://app.globus.org/groups/123a4bcd-ef5a-67bc-8912-d34e5fa67b89/join",
+         *     "groupName": "Globus group name"
+         * },
+         */
+        function validateTermsAndConditionsConfig(obj) {
+            if (!obj || typeof obj !== "object") return false;
+            var tacConfig = getConfigJSON().termsAndConditionsConfig;
+
+            // all 3 properties must be defined for this to function, if not the old login app will be used
+            return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));
+        }
+
         return {
             configureAngular: configureAngular,
             decorateTemplateRequest: decorateTemplateRequest,
@@ -2145,8 +2271,10 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
+            initializeSavingQueries: initializeSavingQueries,
             systemColumnsMode: systemColumnsMode,
-            getSettings: getSettings
+            getSettings: getSettings,
+            validateTermsAndConditionsConfig: validateTermsAndConditionsConfig
         }
     }])
 
@@ -2647,6 +2775,10 @@
             SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
 
+            // - login2:
+            VERIFY_GLOBUS_GROUP_LOGIN: "verify-globus-group" + clientPathActionSeparator + "login",
+            VERIFY_GLOBUS_GROUP_LOGOUT: "verify-globus-group" + clientPathActionSeparator + "logout",
+
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
             NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",
@@ -2684,6 +2816,7 @@
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",

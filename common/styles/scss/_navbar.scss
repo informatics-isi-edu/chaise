@@ -107,9 +107,9 @@ body > .container {
     max-height: 340px;
 }
 
-/* 
-modify the behavior of dropdown menu for navbar 
-we have to wrap all the rules in navbar specific tag, otherwise all the 
+/*
+modify the behavior of dropdown menu for navbar
+we have to wrap all the rules in navbar specific tag, otherwise all the
 dropdowns in bootstrap will be affected.
 ideally most of the other rules in this file should be wrapped in this tag,
 but since custom-css rules are written based on that, I didn't change them.
@@ -119,6 +119,8 @@ TODO we should be able to simplify the rules and also investigate whether
 header {
     .dropdown-menu>li>a.chaise-dropdown-header,
     .chaise-dropdown-header {
+        padding: 3px 15px 3px 15px;
+        cursor: default;
         font-size: $font-size;
         color: $black-color;
         font-weight: 600;
@@ -200,6 +202,10 @@ header {
         margin-bottom: 2px;
         padding: 3px 15px 3px 15px;
         line-height: 1.4;
+    }
+
+    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a {
+        padding-left: 22px;
     }
 
     // Vertical navbar

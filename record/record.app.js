@@ -95,6 +95,7 @@
             Session.unsubscribeOnChange(subId);
 
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
@@ -102,6 +103,11 @@
 
                 session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+
+                // 'promptlogin' query parameter comes from static generated chaise record pages
+                if (!session && UriUtils.getQueryParam($window.location.href, "promptlogin")) {
+                    Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
+                }
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
@@ -152,6 +158,9 @@
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState({}, '', url);
+
+                // populate the google dataset metadata
+                recordAppUtils.attachGoogleDatasetJsonLd(tuple);
 
                 // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,

@@ -34,10 +34,12 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
+        'ngMessages',
         'ngSanitize',
         'ngAnimate',
         'duScroll',
@@ -113,7 +115,6 @@
 
             context.catalogID = res.catalogId;
 
-
             FunctionUtils.registerErmrestCallbacks();
 
             // Subscribe to on change event for session
@@ -124,6 +125,7 @@
 
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                    $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
                     // send string to prepend to "headTitle"
                     // <table-name>
                     headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));
@@ -149,7 +151,7 @@
                     // so we can construct the redirectPath correctly.
                     // NOTE we might want to eventually remove this and have
                     // the redirectPath logic in the catch all.
-                    var facetColumns = recordsetModel.reference.facetColumns;
+                    // var facetColumns = recordsetModel.reference.facetColumns;
 
                     $log.info("Reference:", recordsetModel.reference);
 

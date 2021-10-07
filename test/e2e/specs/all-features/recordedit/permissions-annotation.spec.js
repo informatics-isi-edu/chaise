@@ -67,7 +67,7 @@ describe('When viewing RecordEdit app', function() {
             it('should show the create button in the modal for a FK-related table that allows creation', function() {
                 var input = recordEditPage.getForeignKeyInputs().first();
                 var modalTitle = recordEditPage.getModalTitle();
-                input.click().then(function () {
+                chaisePage.clickButton(input).then(function () {
                     return chaisePage.waitForElement(modalTitle);
                 }).then(function() {
                     chaisePage.waitForElementInverse(element.all(by.id("spinner")).get(0));

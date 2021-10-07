@@ -629,6 +629,100 @@
             recordTableUtils.FlowControlObject.call(this, maxRequests);
         }
 
+        function attachGoogleDatasetJsonLd (tuple) {
+            // check the googleDatasetConfig global variable
+            // that is defined in google-dataset-config.js file
+            var catalogID = tuple.reference.location.catalogId, //getting the catalog-id without version
+                schemaName = tuple.reference.table.schema.name,
+                tableName = tuple.reference.table.name;
+            if (typeof googleDatasetConfig !== 'undefined') {
+                var allowlist = getAllowListForCurrentHost(googleDatasetConfig);
+
+                // if config is defined, but there's no allowlist for this host
+                if (!DataUtils.isObjectAndNotNull(allowlist)) {
+                    return;
+                }
+
+                if (DataUtils.isObjectAndNotNull(allowlist[catalogID]) &&
+                    DataUtils.isObjectAndNotNull(allowlist[catalogID][schemaName]) &&
+                    DataUtils.isObjectAndNotNull(allowlist[catalogID][schemaName][tableName])
+                ) {
+                    var currConfig = allowlist[catalogID][schemaName][tableName];
+                    if (currConfig) {
+                        var columns = currConfig.columns;
+                        var allValuesArray = currConfig.values;
+
+                        if (!Array.isArray(columns) || !Array.isArray(allValuesArray)) {
+                            console.warn("Invalid google metadata config!");
+                            return;
+                        }
+
+                        var matchFound = allValuesArray.some(function (v) {
+                            // make sure the value is an array
+                            var val = Array.isArray(v) ? v : [v];
+
+                            // make sure we have value for all the columns
+                            if (val.length != columns.length) {
+                                console.warn("Invalid google metadata config!");
+                                return false;
+                            }
+
+                            // all the values match
+                            return columns.every(function (col, index) {
+                                return tuple.data[col] == val[index];
+                            });
+
+                        });
+
+                        // didn't find a match: don't add json-ld
+                        if (!matchFound) {
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // use ermrestjs and attach to dom if annotation exists
+            var metadata = $rootScope.reference.googleDatasetMetadata;
+            if (DataUtils.isObjectAndNotNull(metadata)) {
+                metadata = metadata.compute(tuple, $rootScope.templateVariables);
+                if (DataUtils.isObjectAndNotNull(metadata)) {
+                    var script = document.createElement('script');
+                    script.setAttribute('type', 'application/ld+json');
+                    script.textContent = JSON.stringify(metadata);
+                    document.head.appendChild(script);
+                }
+            }
+        }
+
+        function getAllowListForCurrentHost(config) {
+            var result;
+            if (Array.isArray(config.configRules)) {
+                // loop through each config rule and look for a set that matches the current host
+                config.configRules.forEach(function (ruleset) {
+                    // we have 1 host
+                    if (typeof ruleset.host == "string") {
+                        var arr = [];
+                        arr.push(ruleset.host);
+                        ruleset.host = arr;
+                    }
+                    if (Array.isArray(ruleset.host)) {
+                        for (var i=0; i<ruleset.host.length; i++) {
+                            // if there is a config rule for the current host, overwrite the properties defined
+                            // $window.location.host refers to the hostname and port (www.something.com:0000)
+                            // $window.location.hostname refers to just the hostname (www.something.com)
+                            if (ruleset.host[i] === window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
+                                result = ruleset.config;
+                            }
+                        }
+                    }
+                });
+            }
+            if(result && result.allowlist) {
+                return result.allowlist;
+            }
+        }
+
         return {
             updateRecordPage: updateRecordPage,
             genericErrorCatch: genericErrorCatch,
@@ -636,7 +730,8 @@
             getTableModel: getTableModel,
             FlowControlObject: FlowControlObject,
             pauseUpdateRecordPage: pauseUpdateRecordPage,
-            resumeUpdateRecordPage: resumeUpdateRecordPage
+            resumeUpdateRecordPage: resumeUpdateRecordPage,
+            attachGoogleDatasetJsonLd: attachGoogleDatasetJsonLd
         };
     }]);
 

@@ -16,9 +16,8 @@
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
         vm.alerts = AlertsService.alerts;
-        vm.disablefilterChannels = false;
-        vm.filterChannelsAreHidden = false;
-        vm.filterChannels = filterChannels;
+        vm.showChannelList = false;
+        vm.toggleChannelList = toggleChannelList;
 
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
@@ -69,7 +68,12 @@
                         break;
                     case "hideChannelList":
                         $scope.$apply(function(){
-                            vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+                            vm.showChannelList = false;
+                        });
+                        break;
+                    case "showChannelList":
+                        $scope.$apply(function(){
+                            vm.showChannelList = true;
                         });
                         break;
                     case "downloadViewDone":
@@ -197,15 +201,11 @@
             }, $rootScope.reference.defaultLogInfo);
         }
 
-        function filterChannels() {
-            var btnptr = $('#filter-btn');
-            btnptr.blur();
-            var sidebarptr=$('#sidebar');
+        function toggleChannelList() {
+            var action = vm.showChannelList ? logService.logActions.VIEWER_CHANNEL_HIDE : logService.logActions.VIEWER_CHANNEL_SHOW;
 
-            var action = vm.filterChannelsAreHidden ? logService.logActions.VIEWER_CHANNEL_HIDE : logService.logActions.VIEWER_CHANNEL_SHOW;
-
-            iframe.postMessage({messageType: 'filterChannels'}, origin);
-            vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+            iframe.postMessage({messageType: 'toggleChannelList'}, origin);
+            vm.showChannelList = !vm.showChannelList;
 
             // log the click
             // app mode will change by annotation controller, this one should be independent of that

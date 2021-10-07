@@ -139,6 +139,15 @@
         padding: 0 !important;
         /*existing rule is padding=2, which should be changed for the other changes*/
 
+        &:only-child {
+            > li {
+                // when there is only one list and one list item within it, hide the bullets
+                &:only-child {
+                    margin-left: 0;
+                    list-style: none;
+                }
+            }
+        }
         > li {
             margin-left: 1em;
             padding-left: 0;
@@ -148,10 +157,6 @@
             }
 
             list-style: inherit;
-            &:only-child {
-                margin-left: 0;
-                list-style: none;
-            }
         }
     }
 }
