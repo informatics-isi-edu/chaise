@@ -39,7 +39,7 @@
                         if (scope.loggedInMenu) {
                             var menuConfig = scope.loggedInMenu;
                             var newTab = menuConfig.newTab || true;
-                            var acls = menuConfig.acls || {};
+                            var acls = menuConfig.acls || { "show": ["*"], "enable": ["*"] };
 
                             if (menuConfig.displayNameMarkdownPattern) scope.displayName = ERMrest.renderHandlebarsTemplate(menuConfig.displayNameMarkdownPattern, null, {id: catalogId});
 
