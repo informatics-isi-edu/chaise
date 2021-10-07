@@ -103,17 +103,8 @@
                                             q.push(child);
                                         });
                                     }
+                                    option.isValid = MenuUtils.isOptionValid(option);
                                 }
-
-                                // check if configuration is valid and remove if not
-                                // menuConfig.menuOptions.forEach(function (option, idx) {
-                                //     if (!MenuUtils.isOptionValid(option)) {
-                                //         // delete menuConfig.menuOptions[idx]
-                                //         console.log("option not valid");
-                                //     }
-                                // });
-
-                                console.log(menuConfig);
                             }
                         }
 

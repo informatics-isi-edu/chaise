@@ -1,4 +1,4 @@
-<li ng-repeat="option in menu" ng-if="canShow(option)" ng-class="{'dropdown-submenu': option.children && canEnable(option), 'dropdown-header-container': option.type == 'header'}">
+<li ng-repeat="option in menu" ng-if="canShow(option) && option.isValid" ng-class="{'dropdown-submenu': option.children && canEnable(option), 'dropdown-header-container': option.type == 'header'}">
     <div ng-switch="option.type">
         <div ng-switch-when="header">
             <span class="dropdown-header chaise-dropdown-header" ng-bind-html="renderName(option)"></span>
@@ -12,10 +12,10 @@
             <a ng-href="{{option.url}}" ng-class="{'disable-link': !canEnable(option)}" target="{{option.newTab ? '_blank' : '_self'}}" ng-click="::onLinkClick($event, option)" ng-bind-html="renderName(option)"></a>
         </div>
         <div ng-switch-when="my_profile">
-            <a id="profile-link" ng-click="openProfile()">My Profile</a>
+            <a id="profile-link" ng-click="openProfile()" ng-bind-html="option.nameMarkdownPattern ? renderName(option) : 'My Profile'"></a>
         </div>
         <div ng-switch-when="logout">
-            <a id="logout-link" ng-click="logout()">Log Out</a>
+            <a id="logout-link" ng-click="logout()" ng-bind-html="option.nameMarkdownPattern ? renderName(option) : 'Log Out'"></a>
         </div>
     </div>
 </li>

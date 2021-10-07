@@ -1381,41 +1381,32 @@
         }
 
         function isOptionValid(option) {
-            function validateMenu(menuOption) {
-                menuOption.children.forEach(function (child) {
-                    if (child.children) {
-                        validateMenu(child)
-                    } else if (child.url) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                });
-            }
+            // if no nameMarkdownPattern, we can't show anything
+            if (!option.nameMarkdownPattern) return false;
 
             var isValid = true;
             switch (option.type) {
                 case "menu":
                     // must have children to be considered a valid menu
-                    isValid = (option.children) ? validateMenu(option) : false;
-                    console.log("Menu: ", isValid);
+                    isValid = option.children && option.children.length > 0;
                     break;
                 case "url":
                     // accepts "urlPattern"
+                    isValid = option.url ? true : false;
                     break;
                 case "header":
-                    // ignores "children", "urlPattern"
-                    break;
                 case "logout":
-                    // ignore "children", "urlPattern"
-                    break;
                 case "my_profile":
                     // ignore "children", "urlPattern"
                     break;
                 default:
-                    // if "children" and "urlPattern" are both present, children will be used and produce a sub menu without a link
-                    // if children only, show submenu
-                    // if urlPattern only, show url/link
+                    if (option.children && option.children.length > 0) {
+                        option.type = "menu"
+                    } else if (option.url) {
+                        option.type = "url";
+                    } else {
+                        isValid = false;
+                    }
                     break;
             }
 
