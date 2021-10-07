@@ -134,7 +134,7 @@
       //If not enough space to expand on right
       var widthOfSubMenu = menuTarget.offsetWidth;
       var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
-      
+
       if (submenuEndOnRight > window.innerWidth) {
           var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
           var visibleContent = window.innerWidth - submenuEndOnLeft;
@@ -260,7 +260,7 @@
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+    .directive('navbar', ['ConfigUtils', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, DataUtils, ERMrest, Errors, ErrorService, logService, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
 
         var chaiseConfig = ConfigUtils.getConfigJSON(),
             settings = ConfigUtils.getSettings();
@@ -359,6 +359,58 @@
                     scope.brandText = chaiseConfig.navbarBrandText;
                     scope.brandImage = chaiseConfig.navbarBrandImage;
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
+
+
+                    // banner support
+                    scope.topBanners = [];
+                    scope.bottomBanners = [];
+                    // make sure ermrestjs is loaded so we can use templating and markdown
+                    ERMrest.onload().then(function () {
+                        // navbarBanner can be an object or array
+                        var bannerConfig = Array.isArray(chaiseConfig.navbarBanner) ? chaiseConfig.navbarBanner : [chaiseConfig.navbarBanner];
+
+                        bannerConfig.forEach(function (conf) {
+                            if (!DataUtils.isObjectAndNotNull(conf)) return;
+                            if (!DataUtils.isNoneEmptyString(conf.markdown_pattern)) return;
+
+                            var html = ERMrest.renderHandlebarsTemplate(conf.markdown_pattern, null, {id: catalogId});
+                            html = ERMrest.renderMarkdown(html, false);
+
+                            if (!DataUtils.isNoneEmptyString(html)) {
+                                // invalid html, so we shounldn't add it.
+                                return;
+                            }
+
+                            // if acls.show is defined, process it
+                            if (DataUtils.isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
+                                if (!Session.isGroupIncluded(conf.acls.show)) {
+                                    // don't add the banner because of acls
+                                    return;
+                                }
+                            }
+
+                            var banner = {
+                                html: html,
+                                dismissable: (conf.dismissable === true),
+                                className: DataUtils.isNoneEmptyString(conf.className) ? conf.className : ""
+                            };
+
+                            // add the banner to top or bottom based on given position
+                            if ((conf.position !== "bottom")) {
+                                scope.topBanners.push(banner);
+                            } else {
+                                scope.bottomBanners.push(banner);
+                            }
+                        });
+                    });
+
+                    scope.hideBanner = function (index, isTop) {
+                        if (isTop) {
+                            scope.topBanners[index].hide = true;
+                        } else {
+                            scope.bottomBanners[index].hide = true;
+                        }
+                    };
 
                     scope.onToggle = function (open, menuObject) {
                         if (open) {
