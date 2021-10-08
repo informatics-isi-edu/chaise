@@ -90,7 +90,11 @@
             title: "Your session has expired. Please login to continue.",
         },
         "previousSession": {
-            message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
+            message: [
+                "Your login session has expired. You are now accessing data anonymously. ",
+                "<a ng-click='login()'>Log in</a> to continue your privileged access. ",
+                "<i class=\"chaise-icon chaise-info\" tooltip-placement=\"bottom-left\" uib-tooltip=\"Clicking on '×' button on the right will snooze this alert for one hour.\"></i>"
+            ].join("")
         },
         "noSession": {
             title: "You need to be logged in to continue."
