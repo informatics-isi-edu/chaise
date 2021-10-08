@@ -59,8 +59,6 @@
                                         "enable": ["*"]
                                     };
                                 }
-                                scope.overrideProfile = false;
-                                scope.overrideLogout = false;
 
                                 // iterate over menuOptions and check to see if profile and logout need to be replaced
                                 var q = [menuConfig];

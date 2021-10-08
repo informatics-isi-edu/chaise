@@ -10,8 +10,8 @@
             <span class="username-display" ng-bind="displayName" uib-tooltip="{{showUserTooltip() ? userTooltip : ''}}" tooltip-placement="bottom-right"></span>
             <span class="caret"></span>
         </a>
-        <ul ng-if="loggedInMenu.menuOptions" sub-menu menu="loggedInMenu.menuOptions" class="dropdown-menu login-menu"></ul>
-        <ul ng-if="!loggedInMenu.menuOptions" class="dropdown-menu login-menu">
+        <ul ng-if="loggedInMenu.menuOptions" sub-menu menu="loggedInMenu.menuOptions" class="dropdown-menu chaise-login-menu"></ul>
+        <ul ng-if="!loggedInMenu.menuOptions" class="dropdown-menu chaise-login-menu">
             <li><a id="profile-link" ng-click="openProfile()">My Profile</a></li>
             <li><a id="logout-link" ng-click="logout()">Log Out</a></li>
         </ul>

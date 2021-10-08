@@ -1468,7 +1468,7 @@
         function renderName(option) {
             // new syntax will always use nameMarkdownPattern
             if (option.nameMarkdownPattern) {
-                return $sce.trustAsHtml(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, {inline: true}));
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), {inline: true}));
             }
 
             // support markdownName backwards compatibility for navbarMenu

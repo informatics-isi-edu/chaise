@@ -8,7 +8,7 @@ describe('Navbar ', function() {
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));
-        loginMenu = element(by.css('.login-menu'));
+        loginMenu = element(by.css('.chaise-login-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
@@ -159,11 +159,11 @@ describe('Navbar ', function() {
         });
 
         it('should have a disabled link named "Disabled Link".', function () {
-            var dropdownOptions = element.all(by.css('.login-menu > li'));
+            var dropdownOptions = element.all(by.css('.chaise-login-menu > li'));
 
             expect(dropdownOptions.count()).toBe(4, "number of top level dropdown menu options is wrong");
 
-            var disabledEle = element(by.css('.login-menu > li a.disable-link'));
+            var disabledEle = element(by.css('.chaise-login-menu > li a.disable-link'));
             expect(disabledEle.getText()).toBe("Disabled Link", "text for disabled link is incorrect");
         });
     });
