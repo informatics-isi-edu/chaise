@@ -27,16 +27,17 @@ var chaiseConfig = {
     navbarBanner: [
         {
             markdown_pattern: "This is a development version of Chaise",
-            // // to make the banner dismissable:
-            // dismissable: true,
+            // // to make the banner dismissible:
+            // dismissible: true,
             // // to ensure showing the banner only to certain users:
             // acls: {
             //     show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
             // },
             // // to make sure banner is added below the banner (by default it will be added to top):
             // position: "bottom",
-            // // to define a custom className so you can refer to this specific banner:
-            // className: "some-custom-name"
+            // // (optional) a class name using `chaise-navbar-banner-container-<key>` will be added to the banner container
+            // // to allow CSS customizations
+            // key: "some-custom-name"
         }
     ],
     navbarMenu: {

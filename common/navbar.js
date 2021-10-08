@@ -391,8 +391,8 @@
 
                             var banner = {
                                 html: html,
-                                dismissable: (conf.dismissable === true),
-                                className: DataUtils.isNoneEmptyString(conf.className) ? conf.className : ""
+                                dismissible: (conf.dismissible === true),
+                                key: DataUtils.isNoneEmptyString(conf.key) ? conf.key : ""
                             };
 
                             // add the banner to top or bottom based on given position

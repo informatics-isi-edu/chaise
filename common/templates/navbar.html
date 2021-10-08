@@ -1,6 +1,6 @@
 <header ng-hide="hideNavbar" id="navheader" class="row">
-    <div class="chaise-navbar-banner" ng-repeat="banner in topBanners track by $index" ng-hide="banner.hide" ng-class="banner.className">
-        <button class="close" ng-click="hideBanner($index, true)" ng-if="banner.dismissable">
+    <div class="chaise-navbar-banner-container" ng-repeat="banner in topBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+        <button class="close" ng-click="hideBanner($index, true)" ng-if="banner.dismissible">
             <span aria-hidden="true">×</span>
         </button>
         <div class="markdown-container" ng-bind-html="banner.html | trustedHTML"></div>
@@ -45,8 +45,8 @@
             </span>
         </div><!--/.nav-collapse -->
     </nav>
-    <div class="chaise-navbar-banner" ng-repeat="banner in bottomBanners track by $index" ng-hide="banner.hide" ng-class="banner.className">
-        <button class="close" ng-click="hideBanner($index, false)" ng-if="banner.dismissable">
+    <div class="chaise-navbar-banner" ng-repeat="banner in bottomBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+        <button class="close" ng-click="hideBanner($index, false)" ng-if="banner.dismissible">
             <span aria-hidden="true">×</span>
         </button>
         <div class="markdown-container" ng-bind-html="banner.html | trustedHTML"></div>
