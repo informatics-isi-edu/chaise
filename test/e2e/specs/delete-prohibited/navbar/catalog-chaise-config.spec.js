@@ -37,6 +37,35 @@ describe('Navbar ', function() {
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo, "the expected logo is not shown");
     });
 
+    it('should show a link for the login information since chaiseConfig.loggedInMenu is an object', function() {
+        expect(element(by.css('login .login-display')).getText()).toBe("Outbound Profile Link", "user's displayed name is incorrect");
+    });
+
+    if (!process.env.CI){
+        it('should open a new tab when clicking the link for the login information', function(done) {
+            var allWindows;
+            var loginElement = element(by.css('login .login-display'));
+
+            loginElement.click().then(function () {
+                return browser.getAllWindowHandles();
+            }).then(function (tabs) {
+                allWindows = tabs;
+                expect(allWindows.length).toBe(2, "new tab wasn't opened");
+
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function () {
+                browser.close();
+
+                return browser.switchTo().window(allWindows[0]);
+            }).then(function () {
+                done();
+            }).catch(function (err) {
+                console.dir(err);
+                done.fail();
+            });
+        });
+    }
+
     it('should hide the navbar bar if the hideNavbar query parameter is set to true', function () {
         browser.get(url + "?hideNavbar=true");
         browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);

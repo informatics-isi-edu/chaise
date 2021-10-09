@@ -118,7 +118,7 @@ describe('Navbar ', function() {
     describe('for the login menu', function () {
         var allWindows;
 
-        it('should show the "Display Name" of the logged in user in the top right based on annotation', function () {
+        it('should show the "Display Name" of the logged in user in the top right based on chaise-config property', function () {
             var name = browser.params.client.display_name;
             expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
         });

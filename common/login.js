@@ -36,6 +36,7 @@
                     } else {
                         var user = $rootScope.session.client;
                         scope.displayName = dcctx.user = user.full_name || user.display_name || user.email || user.id;
+
                         if (scope.loggedInMenu) {
                             var menuConfig = scope.loggedInMenu;
                             var newTab = menuConfig.newTab || true;
@@ -43,23 +44,24 @@
 
                             if (menuConfig.displayNameMarkdownPattern) scope.displayName = ERMrest.renderHandlebarsTemplate(menuConfig.displayNameMarkdownPattern, null, {id: catalogId});
 
-                            if (menuConfig.menuOptions) {
-                                // if in iframe and we want to force links to open in new tab,
-                                var forceNewTab = settings.openLinksInTab === true;
+                            // if in iframe and we want to force links to open in new tab,
+                            var forceNewTab = settings.openLinksInTab === true;
 
-                                // Set default newTab property at root node
-                                if (!menuConfig.hasOwnProperty('newTab') || forceNewTab) {
-                                    menuConfig.newTab = true;
-                                }
+                            // Set default newTab property at root node
+                            if (!menuConfig.hasOwnProperty('newTab') || forceNewTab) {
+                                menuConfig.newTab = true;
+                            }
 
-                                // Set default ACLs property at root node
-                                if (!menuConfig.hasOwnProperty('acls')) {
-                                    menuConfig.acls = {
-                                        "show": ["*"],
-                                        "enable": ["*"]
-                                    };
-                                }
+                            // Set default ACLs property at root node
+                            if (!menuConfig.hasOwnProperty('acls')) {
+                                menuConfig.acls = {
+                                    "show": ["*"],
+                                    "enable": ["*"]
+                                };
+                            }
 
+                            scope.replaceDropdown = false;
+                            if (menuConfig.menuOptions && Array.isArray(menuConfig.menuOptions)) {
                                 // iterate over menuOptions and check to see if profile and logout need to be replaced
                                 var q = [menuConfig];
                                 while (q.length > 0) {
@@ -81,6 +83,7 @@
 
                                     // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
                                     // used to set ACLs for each child as well
+                                    // check for isArray still since this iterates over menuOptions too
                                     if (Array.isArray(option.menuOptions) || Array.isArray(option.children)) {
                                         var arr = option.menuOptions || option.children;
                                         arr.forEach(function (child) {
@@ -103,6 +106,47 @@
                                     }
                                     option.isValid = MenuUtils.isOptionValid(option);
                                 }
+                            } else if (menuConfig.menuOptions) {
+                                // menuOptions is defined but not an array
+                                var option = menuConfig.menuOptions;
+                                // valid if the "option" is an object that represents type my_profile, logout, header, url
+                                // check for menu type or children being set, if so ignore the option
+                                if (option.type === "menu" || option.children) {
+                                    option.isValid = false;
+                                } else {
+                                    // might be valid, set all default values on the option assuming it is then verify validity
+                                    if (option.urlPattern && isValueDefined(catalogId)) {
+                                        option.url = ERMrest.renderHandlebarsTemplate(option.urlPattern, null, {id: catalogId});
+
+                                        // only append pcid/ppid if link is to a chaise url
+                                        if (MenuUtils.isChaise(option.url, ConfigUtils.getContextJSON())) {
+                                            option.url = MenuUtils.addLogParams(option.url, ConfigUtils.getContextHeaderParams());
+                                        }
+                                    }
+
+                                    option.isValid = MenuUtils.isOptionValid(option);
+                                    // no point in setting this if invalid
+                                    if (option.isValid) {
+                                        // TODO: refactor to a function so it can be reused
+                                        // get newTab from the parent
+                                        if (option.newTab === undefined) option.newTab = menuConfig.newTab;
+                                        // if we have to open in newtab
+                                        if (forceNewTab) option.newTab = true;
+
+                                        // get acls settings from the parent
+                                        if (option.acls === undefined) {
+                                            option.acls = menuConfig.acls;
+                                        } else {
+                                            // acls could be defined with nothing in it, or with only show or only enable
+                                            if (option.acls.show === undefined) option.acls.show = menuConfig.acls.show;
+                                            if (option.acls.enable === undefined) option.acls.enable = menuConfig.acls.enable;
+                                        }
+                                    }
+                                }
+
+                                scope.oneOption = option;
+                                console.log(scope.oneOption)
+                                scope.replaceDropdown = option.isValid;
                             }
                         }
 
@@ -140,6 +184,13 @@
                         action: logService.logActions.NAVBAR_ACCOUNT_DROPDOWN
                     });
                 }
+
+                // functions for supporting menuOptions as an object
+                scope.renderName = function (option) {
+                    return MenuUtils.renderName(option);
+                }
+
+                scope.onLinkClick = MenuUtils.onLinkClick();
 
                 // functions of sub menu when menuOptions not defined
                 scope.openProfile = function openProfile() {

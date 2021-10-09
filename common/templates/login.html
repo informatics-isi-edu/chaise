@@ -5,7 +5,13 @@
     <li>
         <a id="login-link" ng-if="user === null" ng-click="login()">Log In</a>
     </li>
-    <li class="dropdown" uib-dropdown>
+    <li ng-if="replaceDropdown" class="login-display" ng-class="{'dropdown-header-container': oneOption.type == 'header'}" ng-switch="oneOption.type">
+        <span ng-switch-when="header" class="dropdown-header chaise-dropdown-header" ng-bind-html="renderName(oneOption)"></span>
+        <a ng-switch-when="url" ng-href="{{oneOption.url}}" target="{{oneOption.newTab ? '_blank' : '_self'}}" ng-click="::onLinkClick($event, oneOption)" ng-bind-html="renderName(oneOption)"></a>
+        <a ng-switch-when="my_profile" id="profile-link" ng-click="openProfile()" ng-bind-html="oneOption.nameMarkdownPattern ? renderName(oneOption) : 'My Profile'"></a>
+        <a ng-switch-when="logout" id="logout-link" ng-click="logout()" ng-bind-html="oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out'"></a>
+    </li>
+    <li ng-if="!replaceDropdown" class="dropdown" uib-dropdown>
         <a ng-if="user !== null" href="#" class="dropdown-toggle" uib-dropdown-toggle ng-click="::logDropdownOpen()">
             <span class="username-display" ng-bind="displayName" uib-tooltip="{{showUserTooltip() ? userTooltip : ''}}" tooltip-placement="bottom-right"></span>
             <span class="caret"></span>
