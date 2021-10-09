@@ -362,6 +362,33 @@ specifies environment variables in Github workflow so that tests can be run succ
 
 While running tests on **CI** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **main.yml** file.
 
+## Debugging
+
+You can use [the Node.js built-in inspector](https://nodejs.org/en/docs/inspector) to debug the test cases. To do so,
+
+1. Find the configuration that you want to debug. Since we're going to use Node.js, we have to directly target the configuration and cannot use the existing `make` targets. To make this easier, you can find the config locations in `Makefile`. In this example, we want to only debug faceting tests which is,
+    ```
+    test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+    ```
+
+2. Run protractor using `--inspect-break` to ensure debugging client waits for you to open it:
+    ```
+    node --inspect-break ./node_modules/.bin/protractor test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+    ```
+    - By default this will use the `9229` port. You can change this by doing `--inspect-break=0.0.0.0:1234`.
+
+3. The previous command will create a debugger that listens to a specific port, and then waits for you to open an [inspector client](https://nodejs.org/en/docs/guides/debugging-getting-started/#inspector-clients). For the purpose of this document, we're going to use Chrome DevTools. So open Chrome and navigate to the following location:
+    ```
+    chrome://inspect
+    ```
+
+4. In the Chrome's inspect page, under the "Remote Target", you should see your target. Click on "inspect" for that target.
+
+5. Chrome will open a new window that is focused on "Sources" tab. If this is the first time that you're debugging, you need to add Chaise folder to Chrome's workspace. To do so just click on "Add folder to workspace" and choose Chaise folder.
+
+6. Now you can go ahead and find the file that you want to debug in Chaise folder and add your break points to the test folder.
+
+7. Resume the execution after you've added your breakpoints and wait for protractor to reach that part of code.
 
 ## Writing test
 
