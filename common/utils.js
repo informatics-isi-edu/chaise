@@ -1400,6 +1400,8 @@
                     // ignore "children", "urlPattern"
                     break;
                 default:
+                    // if option has both children and url defined, prefer to use the children and ignore the url
+                    // if neither are defined, either the type is not supported or type was not defined
                     if (option.children && option.children.length > 0) {
                         option.type = "menu"
                     } else if (option.url) {

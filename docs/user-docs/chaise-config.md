@@ -31,7 +31,7 @@ If a property appears in the same configuration twice, the property defined late
    * [dataBrowser](#databrowser)
    * [signUpURL](#signupurl)
    * [profileURL](#profileURL)
-   * [termsAndConditionsConfig](termsandconditionsconfig)
+   * [termsAndConditionsConfig](#termsandconditionsconfig)
    * [loggedInMenu](#loggedinmenu)
  * [Display Configuration:](#display-configuration)
    * [customCSS](#customcss)
@@ -150,7 +150,7 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### navbarMenu
- Use this parameter to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with your links and/or dropdown menus. Each option accepts an 'acls' object that has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. The `url` property of each menu object allows for templating of the catalog id parameter using the pattern `{{$catalog.id}}`. The `header` property of each menu object will create an unclickable bold header with class `chaise-dropdown-header`. Consult the `chaise-config-sample.js` file for more details about format.
+ Use this parameter to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with your links and/or dropdown menus. Consult the `chaise-config-sample.js` file for more details about format.
    - Type: Object
    - General syntax:
      ```
@@ -172,10 +172,54 @@ If a property appears in the same configuration twice, the property defined late
        ],
      }
      ```
-   - Default value:	N/A
+   - `navbarMenu` attributes
+     - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. Define this property here in `navbarMenu` to have all children and children of children inherit the same link functionality. If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default. An empty array (`[]`) will hide the link or disable it for everyone
+     - `newTab`: Boolean _optional_ - set to `true` to open the link in a new tab. Define this property here in `navbarMenu` to have all children and children of children inherit the same link functionality. If undefined at root, `newTab` is treated as `true`.
+     - `children`: Array - used to specify dropdowns, you can nest as many dropdowns as you need.
+   - `menuOption` attributes
+     - `name`: String - label of the menu item
+     - `markdownName`: String - use this to override the `name` property and add markdown styling to the label of the menu item. Can be used to attach a class for CSS styles to be applied to, read more in the [markdown document](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md).
+     - `url`: String - this menu item's url. URLs can be absolute or relative to the document root. URLs support templating primarily for catalog substition.
+     - `children`: Array - used to specify dropdowns, you can nest as many dropdowns as you need.
+     - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. Follows the same rules for defaults defined above.
+     - `newTab`: Boolean _optional_ - set to `true` to open the link in a new tab. Each child menu item checks for a `newTab` property on itself, if nothing is set, the child inherits from it's parent.
+     - `header`: Boolean _optional_ - set to true to create an un-clickable bold menu option with class `chaise-dropdown-header`
+   - Default value: N/A
    - Sample syntax:
      ```
-     navbarMenu: "../images/logo.png"
+     navbarMenu: {
+         newTab: false,
+         children: [
+             {"name": "Search","children": [
+                 {"name": "Gene Expression Data", "children": [
+                     {"name": "Genes", "url": "/chaise/recordset/#2/Common:Gene"},
+                     {"name": "Sequencing Data (GUDMAP pre-2018)", "children": [
+                         {"name": "Series", "url": "/chaise/recordset/#2/Legacy_RNASeq:Series"},
+                         {"name": "Samples", "url": "/chaise/recordset/#2/Legacy_RNASeq:Sample"},
+                         {"name": "Protocols", "url": "/chaise/recordset/#2/Legacy_RNASeq:Protocol"}
+                     ]},
+                     {"name": "Specimens", "url": "/chaise/recordset/#2/Gene_Expression:Specimen"}
+                 ]},
+                 {"name": "Cell & Animal Models", "children": [
+                     {"name": "Parental Cell Lines", "url": "/chaise/recordset/#2/Cell_Line:Parental_Cell_Line"},
+                     {"name": "Mouse Strains", "url": "/chaise/recordset/#2/Cell_Line:Mouse_Strain"}
+                 ]}
+             ]},
+             {"name": "Create", "children": [
+                 {"name": "Protocol", "children": [
+                     {"name": "Protocol", "url": "/chaise/recordedit/#2/Protocol:Protocol"},
+                     {"name": "Subject", "url": "/chaise/recordedit/#2/Protocol:Subject"},
+                     {"name": "Keyword", "url": "/chaise/recordedit/#2/Vocabulary:Keyword"}
+                 ]}
+             ]},
+             {"name": "Help", "children": [
+                 {"name": "Using the Data Browser", "url": "https://github.com/informatics-isi-edu/gudmap-rbk/wiki/Using-the-GUDMAP-RBK-Data-Browser"},
+                 {"name": "Submitting Data", "url": "https://github.com/informatics-isi-edu/gudmap-rbk/wiki"},
+                 {"name": "Create Citable Datasets", "url": "https://github.com/informatics-isi-edu/gudmap-rbk/wiki/Create-citable-datasets"},
+                 {"name": "Cite Consortium Data", "url": "/about/usage.html"}
+             ]}
+         ]
+     }
      ```
 
 ### Login Configuration:
@@ -241,7 +285,7 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### loggedInMenu
- Use this parameter to customize the menu items displayed in the navbar under the login dropdown after a user has logged into the system by supplying an object with your links and/or dropdown menus. Each option accepts an ‘acls’ object that has two attribute arrays (‘show’ and ‘enable’) used to define lists of globus groups or users that can see and click that link. The url property of each menu object allows for templating of the catalog id parameter using the pattern {{$catalog.id}}. The header property of each menu object will create an unclickable bold header with class chaise-dropdown-header. Consult the chaise-config-sample.js file for more details about format.
+ Use this parameter to customize the menu items displayed in the navbar under the login dropdown after a user has logged into the system by supplying an object with your links and/or dropdown menus.
    - Type: Object
    - General syntax:
      ```
@@ -258,41 +302,39 @@ If a property appears in the same configuration twice, the property defined late
          },
          <menuOption>,
          ...
-       ],
+       ] || <menuOption>,
        acls: { show: [], enable:[] },
        newTab: <true|false>
      }
      ```
    - loggedInMenu attributes:
-     - `{`... `"menuOptions":` `[` _menuOption_ `]` || _menuOption_ ...`}`: Describe this property
-     - `{`... `"displayNameMarkdownPattern":` "" ...`}`:  The visual presentation of the login display SHOULD be computed by performing [Pattern Expansion](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/annotation.md#pattern-expansion) on pattern to obtain a markdown-formatted text value which MAY be rendered using a markdown-aware renderer.
-     - acls
-     - newTab
-   - menuOption attributes
-     - type
-     - nameMarkdownPattern
-     - urlPattern
-     - children
-     - acls
-     - newTab
-   - types
-     - menu
-     - url
-     - header
-     - my_profile
-     - logout
+     - `menuOptions`: Array || Object - If defined as an Array, the array replaces the dropdown menu with the listed `menuOption` objects. Each `menuOption` is required to have a `nameMarkdownPattern` defined and should have a `type` defined to properly display the option. If no type is defined, the type will try to be inferred by checking for `children` or `urlPattern`. If both are defined, `children` is preferred and the type is set to `menu`. If defined as an Object, the Object is assumed to be a `menuOption` and will be used to replace the display and dropdown functionality. The same types listed below are allowed except for the `menu` type.
+     - `displayNameMarkdownPattern`: String _optional_ - The visual presentation of the login display in the right hand corner of the navigation bar. Will be computed by performing [Pattern Expansion](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/annotation.md#pattern-expansion) on the pattern to obtain a markdown-formatted text value which will be rendered using a markdown renderer.
+     - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click the links in the dropdown menu. Define this property here in `loggedInMenu` to have all children and children of children inherit the same link functionality. If either array, `show` or `enable`, or both are missing, `["*"]` will be used as the default. An empty array (`[]`) will hide the link or disable it for everyone
+     - `newTab`: Boolean _optional_ - set to `true` to have links in the dropdown menu open in a new tab. Define this property here in `loggedInMenu` to have all children and children of children inherit the same link functionality. If undefined at root, `newTab` is treated as `true`.
+   - `menuOption` attributes
+     - `type`: String - set the type of the menu option to change how it is displayed. Types include: `menu`, `url`, `header`, `my_profile`, `logout`. More info for each type can be found below.
+     - `nameMarkdownPattern`: String _required_ - label of the menu item. Will be computed by performing [Pattern Expansion](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/annotation.md#pattern-expansion) on the pattern to obtain a markdown-formatted text value which will be rendered using a markdown renderer. Replaces the `name` and `markdownName` properties defined for `navbarMenu`.
+     - `urlPattern`: String - this menu item's url. URLs can be absolute or relative to the document root. URLs support templating primarily for catalog substition. Replaces the `url` property of `navbarMenu`.
+     - `children`: Array - used to specify dropdowns, you can nest as many dropdowns as you need.
+     - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. Follows the same rules for defaults defined above.
+     - `newTab`: Boolean _optional_ - set to `true` to open the link in a new tab. Each child menu item checks for a `newTab` property on itself, if nothing is set, the child inherits from it's parent.
+   - Values allowed for `type` attribute
+     - `menu`: display the menu item with a sub menu. Valid if children Array is defined and length is greater than 0.
+     - `url`: display the menu item as a url link. Valid if `urlPattern` evaluates into a non `null` value
+     - `header`: display the menu item as an unclickable header with bold text
+     - `my_profile`: display the existing "My Profile" menu item that opens the profile modal. If not defined in the list, "My Profile" menu item will not be shown
+     - `logout`: display the existing "Log Out" menu item that logs the user out. If not defined in the list, the "Log Out" menu item will not be shown
    - Default value:	{}
    - Sample syntax:
      ```
      loggedInMenu: {
        menuOptions: [
          { nameMarkdownPattern: "User Profile", type: "my_profile" },
-         {
-           nameMarkdownPattern: "CFDE User Profile", "type": "url", urlPattern: "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}"
-         },
+         { nameMarkdownPattern: "CFDE User Profile", type: "url", urlPattern: "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}" },
          { nameMarkdownPattern: "Logout", type: "logout" }
        ],
-       displayNameMarkdownPattern: "{{$session.displayName}}"
+       displayNameMarkdownPattern: "{{$session.display_name}}"
      }
      ```
 
@@ -553,7 +595,21 @@ system columns:
    - Default value: N/A
    - Sample syntax:
      ```
-     configRules:
+     configRules: [
+         {
+             host: ["www.rebuildingakidney.org", "staging.rebuildingakidney.org", "dev.rebuildingakidney.org"],
+             config: {
+                 headTitle: "RBK",
+                 navbarBrand: "/resources/"
+             }
+         }, {
+             host: ["www.gudmap.org", "staging.gudmap.org", "dev.gudmap.org"],
+             config: {
+                 headTitle: "GUDMAP",
+                 navbarBrand: "/"
+             }
+         }
+     ]
      ```
 
  #### savedQueryConfig
