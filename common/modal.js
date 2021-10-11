@@ -309,6 +309,7 @@
         function SearchPopupController(ConfigUtils, DataUtils, params, Session, logService, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
+        vm.rowsOnLoad = params.selectedRows.length > 0;
         vm.params = params;
         vm.onSelectedRowsChanged = onSelectedRowsChanged;
         vm.onFavoritesChanged = params.onFavoritesChanged;
@@ -383,12 +384,7 @@
             switch (params.selectMode) {
                 case modalBox.multiSelectMode:
                     if (params.onSelectedRowsChanged) {
-                        var res = params.onSelectedRowsChanged(getMultiSelectionResult());
-
-                        // if it returns false, then we should disable submit button
-                        // since we cannot apply the change (url limit issue)
-                        vm.disableSubmit = (res === false);
-                        return res;
+                        return params.onSelectedRowsChanged(getMultiSelectionResult());
                     }
                     break;
                 default:
