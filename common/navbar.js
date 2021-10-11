@@ -5,91 +5,13 @@
         'chaise.utils'
     ])
     .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'MenuUtils', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, MenuUtils, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
-
-        var chaiseConfig = ConfigUtils.getConfigJSON(),
-            settings = ConfigUtils.getSettings();
-
-        // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
-        // used to set ACL inheritance as well for each node
-        var root = chaiseConfig.navbarMenu || {};
-        var catalogId = UriUtils.getCatalogId();
-
-        function isValueDefined(val) {
-            return val != undefined && val != null;
-        }
-
-        // if in iframe and we want to force links to open in new tab,
-        var forceNewTab = settings.openLinksInTab === true;
-
-        // Set default newTab property at root node
-        if (!root.hasOwnProperty('newTab') || forceNewTab) {
-            root.newTab = true;
-        }
-
-        // Set default ACLs property at root node
-        if (!root.hasOwnProperty('acls')) {
-            root.acls = {
-                "show": ["*"],
-                "enable": ["*"]
-            };
-        }
-
-        var q = [root];
-        while (q.length > 0) {
-            var obj = q.shift();
-            var parentNewTab = obj.newTab;
-            var parentAcls = obj.acls;
-            var parentNames = obj.names;
-            // template the url
-            // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (obj.url && isValueDefined(catalogId)) {
-                obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
-
-                // only append pcid/ppid if link is to a chaise url
-                if (MenuUtils.isChaise(obj.url, ConfigUtils.getContextJSON())) {
-                    obj.url = MenuUtils.addLogParams(obj.url, ConfigUtils.getContextHeaderParams());
-                }
-            }
-            // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
-            // used to set ACLs for each child as well
-            if (Array.isArray(obj.children)) {
-                obj.children.forEach(function (child) {
-                    // get newTab from the parent
-                    if (child.newTab === undefined) child.newTab = parentNewTab;
-
-                    // if we have to open in newtab
-                    if (forceNewTab) child.newTab = true;
-
-                    // get acls settings from the parent
-                    if (child.acls === undefined) {
-                        child.acls = parentAcls;
-                    } else {
-                        // acls could be defined with nothing in it, or with only show or only enable
-                        if (child.acls.show === undefined) child.acls.show = parentAcls.show;
-                        if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
-                    }
-
-                    // create the names array that will be used for logging
-                    if (!Array.isArray(parentNames)) {
-                        if (!(name in obj)) {
-                            parentNames = [];
-                        } else {
-                            parentNames = obj.name;
-                        }
-                    }
-                    child.names = parentNames.concat(child.name);
-
-                    q.push(child);
-                });
-            }
-        }
-
+        var chaiseConfig = ConfigUtils.getConfigJSON();
+        var settings = ConfigUtils.getSettings();
         return {
             restrict: 'EA',
             scope: {},
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/navbar.html',
             link: function(scope) {
-                var settings = ConfigUtils.getSettings();
                 scope.hideNavbar = settings.hideNavbar;
                 // Subscribe to on change event for session
                 // navbar doesn't need to have functionality until the session returns, just like app.js blocks
@@ -100,11 +22,87 @@
                     // Unsubscribe onchange event to avoid this function getting called again
                     Session.unsubscribeOnChange(subFunctionId);
 
-                    var chaiseConfig = ConfigUtils.getConfigJSON();
-
+                    // set before processing the navbar menu
                     scope.brandURL = chaiseConfig.navbarBrand;
                     scope.brandText = chaiseConfig.navbarBrandText;
                     scope.brandImage = chaiseConfig.navbarBrandImage;
+
+                    // One-time transformation of chaiseConfig.navbarMenu to set the appropriate newTab setting at each node
+                    // used to set ACL inheritance as well for each node
+                    var root = chaiseConfig.navbarMenu || {};
+                    var catalogId = UriUtils.getCatalogId();
+
+                    function isValueDefined(val) {
+                        return val != undefined && val != null;
+                    }
+
+                    // if in iframe and we want to force links to open in new tab,
+                    var forceNewTab = settings.openLinksInTab === true;
+
+                    // Set default newTab property at root node
+                    if (!root.hasOwnProperty('newTab') || forceNewTab) {
+                        root.newTab = true;
+                    }
+
+                    // Set default ACLs property at root node
+                    if (!root.hasOwnProperty('acls')) {
+                        root.acls = {
+                            "show": ["*"],
+                            "enable": ["*"]
+                        };
+                    }
+
+                    var q = [root];
+                    while (q.length > 0) {
+                        var obj = q.shift();
+                        var parentNewTab = obj.newTab;
+                        var parentAcls = obj.acls;
+                        var parentNames = obj.names;
+                        // template the url
+                        // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
+                        if (obj.url && isValueDefined(catalogId)) {
+                            obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, {id: catalogId});
+
+                            // only append pcid/ppid if link is to a chaise url
+                            if (MenuUtils.isChaise(obj.url, ConfigUtils.getContextJSON())) {
+                                obj.url = MenuUtils.addLogParams(obj.url, ConfigUtils.getContextHeaderParams());
+                            }
+                        }
+                        // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
+                        // used to set ACLs for each child as well
+                        if (Array.isArray(obj.children)) {
+                            obj.children.forEach(function (child) {
+                                // get newTab from the parent
+                                if (child.newTab === undefined) child.newTab = parentNewTab;
+
+                                // if we have to open in newtab
+                                if (forceNewTab) child.newTab = true;
+
+                                // get acls settings from the parent
+                                if (child.acls === undefined) {
+                                    child.acls = parentAcls;
+                                } else {
+                                    // acls could be defined with nothing in it, or with only show or only enable
+                                    if (child.acls.show === undefined) child.acls.show = parentAcls.show;
+                                    if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
+                                }
+
+                                // create the names array that will be used for logging
+                                if (!Array.isArray(parentNames)) {
+                                    if (!(name in obj)) {
+                                        parentNames = [];
+                                    } else {
+                                        parentNames = obj.name;
+                                    }
+                                }
+                                child.names = parentNames.concat(child.name);
+
+                                q.push(child);
+                            });
+                        }
+                    }
+
+                    // relies on navbarMenu processing to finish, setting this updates the DOM
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
 
                     scope.onToggle = function (open, menuObject) {
