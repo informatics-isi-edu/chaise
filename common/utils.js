@@ -12,7 +12,7 @@
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -40,6 +40,7 @@
           "hideGoToRID": false,
           "showWriterEmptyRelatedOnLoad": null,
           "savedQueryConfig": null,
+          "loggedInMenu": {},
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -237,8 +238,8 @@
         };
     }])
 
-    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
-        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'logService', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, logService, messageMap, ParsedFilter, $injector, $rootScope, $window) {
 
         function getCatalogId() {
             var catalogId = "",
@@ -1191,6 +1192,345 @@
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
             getAbsoluteURL: getAbsoluteURL
+        }
+    }])
+
+    .factory('MenuUtils', ['ConfigUtils', 'logService', 'modalUtils', 'Session', 'UriUtils', '$sce', '$window', function (ConfigUtils, logService, modalUtils, Session, UriUtils, $sce, $window) {
+        /* ===== Private Functions and variables ===== */
+        var _path;
+        function _getPath(dcctx) {
+            if (!_path) {
+                var path = "/chaise/";
+                if (dcctx && typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                    var path = chaiseBuildVariables.chaiseBasePath;
+                    // append "/" if not present
+                    if (path[path.length-1] !== "/") path += "/";
+                }
+
+                _path = window.location.host + path;
+            }
+
+            return _path;
+        }
+
+        /* Function to calculate the left of the toggleSubMenu*/
+        function _getOffsetValue(element){
+           var offsetLeft = 0
+           while(element) {
+              offsetLeft += element.offsetLeft;
+              element = element.offsetParent;
+           }
+           return offsetLeft;
+        }
+
+        function _getNextSibling(elem, selector) {
+            var sibling = elem.nextElementSibling;
+            if (!selector) return sibling;
+            while (sibling) {
+                if (sibling.matches(selector)) return sibling;
+                sibling = sibling.nextElementSibling;
+            }
+        }
+
+        // Function to open the menu on the left if not enough space on right
+        function _checkWidth(ele, winWidth) {
+            //revert to defaults
+            ele.classList.remove("dropdown-menu-right");
+            ele.style.width = "max-content";
+
+            // If dropdown is spilling over
+            if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
+                ele.style.width = "max-content";
+            }
+            else {
+                var visibleContent =  winWidth - ele.getBoundingClientRect().left;
+                //hard-coded limit of width for opening on the left hand side
+                if (Math.round(visibleContent) < 200) {
+                    ele.classList.add("dropdown-menu-right");
+                }
+                else {
+                    ele.style.width = visibleContent + "px";
+                }
+            }
+        }
+
+        /* ===== Public Functions attached to return object ===== */
+
+        // ele - dropdown ul element
+        function checkHeight(ele, winHeight) {
+            // no dropdown is open
+            if (!ele) return;
+
+            var dropdownHeight = ele.offsetHeight;
+            var fromTop = ele.offsetTop;
+            var footerBuffer = 50;
+
+            if ((dropdownHeight + fromTop) > winHeight) {
+                var newHeight = winHeight - fromTop - footerBuffer;
+                ele.style.height = newHeight + "px";
+            }
+        }
+
+        /**
+         * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
+         * it will close all the other dropdowns and also will return `true`.
+         * @return{boolean} if true, it means that we opened the menu
+         */
+        function toggleMenu($event) {
+            $event.stopPropagation();
+            $event.preventDefault();
+
+            var target = $event.target;
+            // added markdownName support allows for inline template to be defined like :span:TEXT:/span:{.class-name}
+            if ($event.target.localName != "a") {
+                target = $event.target.parentElement;
+            }
+
+            var menuTarget = _getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+            menuTarget.style.width = "max-content";
+            var immediateParent = target.offsetParent; // parent, <li>
+            var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
+            var posValues = _getOffsetValue(immediateParent);
+
+            // calculate the position the submenu should open from the top fo the viewport
+            if (parent.scrollTop == 0){
+                menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
+            } else if (parent.scrollTop > 0) {
+                menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
+            }
+
+            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
+
+            var open = !menuTarget.classList.contains("show");
+
+            // if we're opening this, close all the other dropdowns on navbar.
+            if (open) {
+                target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+                    el.parentElement.classList.remove("child-opened");
+                    el.classList.remove("show");
+                });
+            }
+
+            menuTarget.classList.toggle("show"); // toggle the class
+            menuTarget.style.height = "unset"; // remove height in case it was set for a different position
+            immediateParent.classList.toggle("child-opened"); // used for setting highlight color
+
+            if (open) {
+                // recalculate the height for each open submenu, <ul>
+                var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
+                [].forEach.call(openSubmenus, function(el) {
+                    checkHeight(el, window.innerHeight);
+                });
+            }
+
+            //If not enough space to expand on right
+            var widthOfSubMenu = menuTarget.offsetWidth;
+            var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
+
+            if (submenuEndOnRight > window.innerWidth) {
+                var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
+                var visibleContent = window.innerWidth - submenuEndOnLeft;
+
+                if (visibleContent < 200) {
+                    menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
+                }
+                else {
+                    menuTarget.style.width = visibleContent + "px";
+                }
+            }
+            else {
+                // if vertical scrollbar then offset a bit more to make scrollbar visible
+                if (parent.scrollHeight > parent.clientHeight) {
+                    menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
+                }
+            }
+
+            return open;
+        }
+
+        function isChaise(link, dcctx) {
+            if (!link) return false;
+
+            var appNames = ["record", "recordset", "recordedit", "login", "help"];
+
+            // parses the url into a location object
+            var eleUrl = document.createElement('a');
+            eleUrl.href = link;
+
+            for (var i=0; i<appNames.length; i++) {
+                var name = appNames[i];
+                // path/appName exists in our url
+                if (eleUrl.href.indexOf(_getPath(dcctx) + name) !== -1) return true;
+            }
+
+            return false;
+        }
+
+        function addLogParams(url, contextHeaderParams) {
+            // if `?` already in the url, use &
+            var paramChar = url.lastIndexOf("?") !== -1 ? "&" : "?";
+
+            var pcid = "navbar";
+            // if not navbar app, append appname
+            if (contextHeaderParams.cid !== "navbar") {
+                pcid += "/" + contextHeaderParams.cid;
+            }
+            // ppid should be the pid for the current page
+            return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
+        }
+
+        function resetHeight(event) {
+            var menuTarget = _getNextSibling(event.target,".dropdown-menu");
+            if (menuTarget) menuTarget.style.height = "unset";
+        }
+
+        function isOptionValid(option) {
+            // if no nameMarkdownPattern, we can't show anything
+            if (!option.nameMarkdownPattern) return false;
+
+            var isValid = true;
+            switch (option.type) {
+                case "menu":
+                    // must have children to be considered a valid menu
+                    isValid = option.children && option.children.length > 0;
+                    break;
+                case "url":
+                    // accepts "urlPattern"
+                    isValid = option.url ? true : false;
+                    break;
+                case "header":
+                case "logout":
+                case "my_profile":
+                    // ignore "children", "urlPattern"
+                    break;
+                default:
+                    // if option has both children and url defined, prefer to use the children and ignore the url
+                    // if neither are defined, either the type is not supported or type was not defined
+                    if (option.children && option.children.length > 0) {
+                        option.type = "menu"
+                    } else if (option.url) {
+                        option.type = "url";
+                    } else {
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            return isValid;
+        }
+
+        // triggered when top level menu is opened/closed
+        function onToggle(open) {
+            var elems = document.querySelectorAll(".dropdown-menu.show");
+            [].forEach.call(elems, function(el) {
+                el.classList.remove("show");
+            });
+
+            // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
+            var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
+            [].forEach.call(highlightedParents, function(el) {
+                el.classList.remove("child-opened");
+            });
+
+            // calculate height for each open dropdown menu
+            if (open) {
+                var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                [].forEach.call(openDropdowns, function(el) {
+                    checkHeight(el, window.innerHeight);
+                    _checkWidth(el, window.innerWidth);
+                });
+            }
+        }
+
+        /**
+         * Just to make sure browsers are not ignoring the ng-click, we are first
+         * preventing the default behavior of link, then logging the client action
+         * and then changing the location without waiting for the request,
+         * This will ensure that we're at least sending the log to server.
+         */
+        function onLinkClick() {
+            return function ($event, menuObject) {
+                $event.preventDefault();
+                $event.stopPropagation();
+
+                // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
+                if (!isChaise(menuObject.url, ConfigUtils.getContextJSON())) {
+                    // check if external or internal resource page
+                    var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
+                    logService.logClientAction({
+                        action: logService.getActionString(action, "", ""),
+                        names: menuObject.names
+                    });
+                }
+
+                if (menuObject.newTab) {
+                    $window.open(menuObject.url, '_blank');
+                } else {
+                    $window.location = menuObject.url;
+                }
+            };
+        }
+
+        function renderName(option) {
+            // new syntax will always use nameMarkdownPattern
+            if (option.nameMarkdownPattern) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), {inline: true}));
+            }
+
+            // support markdownName backwards compatibility for navbarMenu
+            if (option.markdownName) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(option.markdownName, {inline: true}));
+            }
+
+            // support name backwards compatibility for navbarMenu
+            return $sce.trustAsHtml(option.name);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canShow (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.show);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canEnable (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.enable);
+        }
+
+        // NOTE: hard coded action
+        function openProfileModal() {
+            logService.logClientAction({
+                action: logService.logActions.NAVBAR_PROFILE_OPEN
+            });
+
+            modalUtils.showModal({
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
+                controller: "profileModalDialogController",
+                controllerAs: "ctrl",
+                windowClass: "profile-popup"
+            }, false, false, false);
+        }
+
+        // NOTE: hard coded action
+        function logout() {
+            Session.logout(logService.logActions.LOGOUT_NAVBAR);
+        }
+
+        return {
+            addLogParams: addLogParams,
+            canEnable: canEnable,
+            canShow: canShow,
+            checkHeight: checkHeight,
+            isChaise: isChaise,
+            isOptionValid: isOptionValid,
+            logout: logout,
+            onLinkClick: onLinkClick,
+            openProfileModal: openProfileModal,
+            onToggle: onToggle,
+            renderName: renderName,
+            resetHeight: resetHeight,
+            toggleMenu: toggleMenu
         }
     }])
 

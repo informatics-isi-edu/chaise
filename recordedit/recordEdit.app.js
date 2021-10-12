@@ -152,6 +152,7 @@
 
             // Get existing session value
             session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
 
             // If session is not defined or null (Anonymous user) prompt the user to login
             if (!session) {
@@ -185,7 +186,6 @@
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
 
-                $rootScope.reference.session = session;
                 $rootScope.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);

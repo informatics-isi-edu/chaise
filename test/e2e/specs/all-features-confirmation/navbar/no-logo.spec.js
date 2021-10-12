@@ -1,3 +1,5 @@
+var chaisePage = require('../../../utils/chaise.page.js');
+
 describe('Navbar ', function() {
     var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
@@ -6,6 +8,7 @@ describe('Navbar ', function() {
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));
+        loginMenu = element(by.css('.chaise-login-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
@@ -110,6 +113,59 @@ describe('Navbar ', function() {
                 });
             });
         }
+    });
+
+    describe('for the login menu', function () {
+        var allWindows;
+
+        it('should show the "Display Name" of the logged in user in the top right based on chaise-config property', function () {
+            var name = browser.params.client.display_name;
+            expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
+        });
+
+        it('should generate the correct # of list items', function(done) {
+            var nodesInDOM = loginMenu.all(by.tagName('li'));
+            // counted from chaise config doc rather than having code count
+            // 7 menu options defined in chaise-config
+            // accounts for 2 broken menu options that are set as invalid
+            var counter = 5;
+
+            nodesInDOM.count().then(function(count) {
+                expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
+
+                done();
+            }).catch(function (err) {
+                done.fail();
+                console.log(err);
+            });
+        });
+
+        it('should change the name of the "My Profile" and "Log Out" links', function(done) {
+            var loginDropdown = element(by.css('login .dropdown-toggle'));
+
+            browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
+            chaisePage.clickButton(loginDropdown).then(function() {
+                var profileLink = element(by.id('profile-link'));
+                expect(profileLink.getText()).toBe("User Profile", "my_profile link shows wrong name");
+
+                var logoutLink = element(by.id('logout-link'));
+                expect(logoutLink.getText()).toBe("Logout", "logout link shows wrong name");
+
+                done();
+            }).catch(function (err) {
+                done.fail();
+                console.log(err);
+            });
+        });
+
+        it('should have a disabled link named "Disabled Link".', function () {
+            var dropdownOptions = element.all(by.css('.chaise-login-menu > li'));
+
+            expect(dropdownOptions.count()).toBe(4, "number of top level dropdown menu options is wrong");
+
+            var disabledEle = element(by.css('.chaise-login-menu > li a.disable-link'));
+            expect(disabledEle.getText()).toBe("Disabled Link", "text for disabled link is incorrect");
+        });
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet

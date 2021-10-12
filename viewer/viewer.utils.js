@@ -587,8 +587,6 @@
                 $rootScope.canUpdate = ref.canUpdate || false;
                 $rootScope.canDelete = ref.canDelete || false;
 
-                ref.session = $rootScope.session;
-
                 // TODO create and edit should be refactored to reuse the same code
                 // create the edit and create forms
                 var invisibleColumns = [

@@ -334,7 +334,6 @@
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
-            params.reference.session = rsSession;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
