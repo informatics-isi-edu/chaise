@@ -384,7 +384,12 @@
             switch (params.selectMode) {
                 case modalBox.multiSelectMode:
                     if (params.onSelectedRowsChanged) {
-                        return params.onSelectedRowsChanged(getMultiSelectionResult());
+                        var res = params.onSelectedRowsChanged(getMultiSelectionResult());
+
+                        // if it returns false, then we should disable submit button
+                        // since we cannot apply the change (url limit issue)
+                        vm.disableSubmit = (res === false);
+                        return res;
                     }
                     break;
                 default:
