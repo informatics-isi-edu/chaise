@@ -14,7 +14,8 @@ var testParams = {
         modalOption: 2,
         totalNumOptions: 11,
         numRows: 10,
-        numRowsAfterModal: 11
+        numRowsAfterModal: 11,
+        removingOptionsNumRowsAfterModal: 25
     },
     facet_order: [
         {
@@ -71,7 +72,7 @@ var testParams = {
             facetIdx: 11,
             displayingText: "Displaying\nall 13\nrecords",
             numModalOptions: 13
-            
+
         },
         shown: {
             facetIdx: 10,
@@ -305,8 +306,36 @@ describe("Other facet features, ", function() {
                     });
                 }, browser.params.defaultTimeout, "Number of facet options is incorrect after returning from modal");
 
-                return chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters());
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("removing values in the modal should allow for submitting to remove the set of selected options for that facet.", function (done) {
+            chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(2, "number of checked rows missmatch.");
+
+                // clear selections in modal to remove selections in facet
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalClearSelection());
             }).then(function () {
+                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch after clearing selection.");
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return (ct == testParams.filter_secondary_key.removingOptionsNumRowsAfterModal);
+                    });
+                }, browser.params.defaultTimeout, "number of visible rows after selecting a second option missmatch.");
+
+                browser.wait(function() {
+                    return  chaisePage.recordsetPage.getCheckedFacetOptions(idx).count().then(function(ct) {
+                        return (ct == 0);
+                    });
+                }, browser.params.defaultTimeout, "Number of facet options is incorrect after returning from modal");
+
+                //no need to clear all filters, this test removed the last selected facet options
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -647,7 +676,7 @@ describe("Other facet features, ", function() {
 
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
-                
+
                 var newURL = uriPrefix + "/*::facets::" + currParams.facetBlobAfterOK;
                 expect(currentUrl).toContain(newURL, "The redirection from record page to recordset in case of multiple records failed");
                 done();
@@ -716,7 +745,7 @@ describe("Other facet features, ", function() {
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
-        
+
     });
 
     describe("navigating to recordset with filters that faceting doesn't support.", function () {

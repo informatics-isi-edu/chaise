@@ -1144,6 +1144,10 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
+    this.getModalClearSelection = function () {
+        return element(by.css(".modal-body")).element(by.css(".clear-all-btn"));
+    }
+
     this.getModalSubmit = function () {
         return element(by.id("multi-select-submit-btn"));
     }
