@@ -37,6 +37,12 @@ describe('Navbar ', function() {
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo, "the expected logo is not shown");
     });
 
+    it ('should show a banner on top of the navbar', function () {
+        var banner = chaisePage.navbar.getBanner();
+        expect(banner.isDisplayed()).toBeTruthy();
+        expect(banner.getText()).toEqual("This is a banner with link");
+    });
+
     it('should show a link for the login information since chaiseConfig.loggedInMenu is an object', function() {
         expect(element(by.css('login .login-display')).getText()).toBe("Outbound Profile Link", "user's displayed name is incorrect");
     });

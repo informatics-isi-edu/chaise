@@ -45,7 +45,7 @@
             </span>
         </div><!--/.nav-collapse -->
     </nav>
-    <div class="chaise-navbar-banner" ng-repeat="banner in bottomBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+    <div class="chaise-navbar-banner-container" ng-repeat="banner in bottomBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
         <button class="close" ng-click="hideBanner($index, false)" ng-if="banner.dismissible">
             <span aria-hidden="true">×</span>
         </button>

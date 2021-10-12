@@ -21,6 +21,7 @@ If a property appears in the same configuration twice, the property defined late
    * [defaultTables](#defaulttables)
  * [Navbar Configuration:](#navbar-configuration)
    * [headTitle](#headtitle)
+   * [navbarBanner](#navbarbanner)
    * [navbarBrand](#navbarbrand)
    * [navbarBrandText](#navbarbrandtext)
    * [navbarBrandImage](#navbarbrandimage)
@@ -121,6 +122,55 @@ If a property appears in the same configuration twice, the property defined late
      headTitle: "Chaise"
      ```
 
+ #### navbarBanner
+ Use this parameter to define banners that will be displayed on top or below the banner.
+   - Type: Object or array of objects.
+   - Default value:	N/A
+   - General syntax:
+      - One banner:
+        ```
+        navbarBanner: {
+          markdownPattern: <markdown-pattern>,
+          dismissible: <boolean>,
+          position: <position>,
+          key: <key-string>,
+          acls: [
+            show: <group-list>
+          ]
+        }
+        ```
+      - Multiple banners:
+        ```
+        navbarBanner: [
+          {
+            {
+              markdownPattern: <markdown-pattern>,
+              dismissible: <boolean>,
+              position: <position>,
+              key: <key-string>,
+              acls: [
+                show: <group-list>
+              ]
+            },
+            ...
+          }
+        ]
+        ```
+
+
+   - Attributes:
+     - `markdownPattern`: String - What should be displayed in the banner. If results in an empty string, the banner will be ignored.
+     - `dismissible`: Boolean (_optional_) - Whether users should be able to dismiss the banner.
+     - `position`: `"bottom"` or `"top"` (_optional_) - By default the banner will be displayed above the banner and using this attribute you can change that.
+     - `key`: String (_optional_) - Used in the `class` attribute that is attached to the banner using the `chaise-navbar-banner-container-<key>` format. For instance if the `key` is defined as `"feedback"`, you can use `.chaise-navbar-banner-container-feedback` to refer to this banner.
+     - `acls`: Object _optional_ - has one attribute array (`show`) used to define lists of globus groups or users that can see the banner.  If missing, `["*"]` will be used as the default. An empty array (`[]`) will hide the banner for everyone.
+   - Default value: {}
+   - Sample syntax:
+     ```
+     navbarBanner: {
+       markdownPattern: "Let us know how you use and what you think of this data repository. [Please fill out the survey](https://survey.com)!"
+     }
+     ```
  #### navbarBrand
  The URL for the branding logo in the top navigation bar.
    - Type: String - URL
