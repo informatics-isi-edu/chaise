@@ -309,6 +309,9 @@
         function SearchPopupController(ConfigUtils, DataUtils, params, Session, logService, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
+        // rowOnLoad is used to determine if the submit button should be disabled
+        // if there are selected rows from the facet options when the modal loads, don't disable the submit button when there are 0 rows selected
+        // the submit button can be disabled when there are no selected rows on load and there are none selected
         vm.rowsOnLoad = params.selectedRows.length > 0;
         vm.params = params;
         vm.onSelectedRowsChanged = onSelectedRowsChanged;
