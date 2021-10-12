@@ -1304,9 +1304,9 @@
             }
 
             /**
-             * will send a request to favorites table and 
+             * will send a request to favorites table and
              * updates the given checkboxRows to have proper isFavorite flag
-             * 
+             *
              * NOTE If checkboxRows not passed it will use the scope.checkboxRows
              */
             function updateFavorites(scope, checkboxRows) {
@@ -1539,7 +1539,6 @@
                         params.comment = scope.facetColumn.comment;
 
                         params.reference = scope.reference;
-                        params.reference.session = scope.$root.session;
                         params.selectMode = "multi-select";
                         params.faceting = false;
                         params.facetPanelOpen = false;
