@@ -12,6 +12,9 @@ var chaiseConfig = {
     logClientActions: false,
     hideTableOfContents: true,
     showWriterEmptyRelatedOnLoad: true,
+    loggedInMenu: {
+        menuOptions: { nameMarkdownPattern: "Outbound Profile Link", urlPattern: "/", newTab: true, type: "url" }
+    },
     resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in ci
 };
 

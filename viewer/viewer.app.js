@@ -196,6 +196,9 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
+            session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
+
             var imageReference;
             // resolve the main (image) reference
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (reference) {
@@ -211,7 +214,6 @@
                 // context.facets = imageReference.location.facets;
                 // DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                 // TODO is it needed?

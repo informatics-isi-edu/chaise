@@ -311,7 +311,6 @@
             params.displayMode = vm.editMode ? recordsetDisplayModes.foreignKeyPopupEdit : recordsetDisplayModes.foreignKeyPopupCreate;
 
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
-            params.reference.session = $rootScope.session;
 
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
