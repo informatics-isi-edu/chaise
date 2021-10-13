@@ -1294,11 +1294,7 @@
             var posValues = _getOffsetValue(immediateParent);
 
             // calculate the position the submenu should open from the top fo the viewport
-            if (parent.scrollTop == 0){
-                menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
-            } else if (parent.scrollTop > 0) {
-                menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
-            }
+            menuTarget.style.top = parseInt(immediateParent.getBoundingClientRect().y) + 5 + 'px';
 
             menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
 
