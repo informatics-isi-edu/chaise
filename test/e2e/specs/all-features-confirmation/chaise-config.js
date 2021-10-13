@@ -44,6 +44,30 @@ var chaiseConfig = {
     },
     // configuration for navbar spec with no logo or brand text
     headTitle: 'show me on the navbar!',
+    navbarBanner: [
+        {
+            markdownPattern: "banner 1",
+            dismissible: true,
+            key: "banner-1-custom-key"
+        },
+        {
+            markdownPattern: "banner 2",
+            key: "banner-2-custom-key"
+        },
+        {
+            markdownPattern: "banner 3 (hidden)",
+            acls: {
+                show: []
+            },
+            key: "banner-3-custom-key"
+        },
+        {
+            markdownPattern: "banner 4",
+            dismissible: true,
+            position: "bottom",
+            key: "banner-4-custom-key"
+        }
+    ],
     navbarMenu: {
        children: [
            {

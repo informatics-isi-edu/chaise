@@ -1,10 +1,12 @@
 (function() {
+
     'use strict';
     angular.module('chaise.navbar', [
         'chaise.login',
         'chaise.utils'
     ])
-    .directive('navbar', ['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'MenuUtils', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, ERMrest, Errors, ErrorService, logService, MenuUtils, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
+
+    .directive('navbar', ['ConfigUtils', 'DataUtils', 'ERMrest', 'Errors', 'ErrorService', 'logService', 'MenuUtils', 'Session', 'UriUtils', '$rootScope', '$sce', '$timeout', '$window', function(ConfigUtils, DataUtils, ERMrest, Errors, ErrorService, logService, MenuUtils, Session, UriUtils, $rootScope, $sce, $timeout, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var settings = ConfigUtils.getSettings();
         return {
@@ -104,6 +106,55 @@
 
                     // relies on navbarMenu processing to finish, setting this updates the DOM
                     scope.menu = chaiseConfig.navbarMenu ? chaiseConfig.navbarMenu.children : [];
+
+
+                    // banner support
+                    scope.topBanners = [];
+                    scope.bottomBanners = [];
+                    // navbarBanner can be an object or array
+                    var bannerConfig = Array.isArray(chaiseConfig.navbarBanner) ? chaiseConfig.navbarBanner : [chaiseConfig.navbarBanner];
+
+                    bannerConfig.forEach(function (conf) {
+                        if (!DataUtils.isObjectAndNotNull(conf)) return;
+                        if (!DataUtils.isNoneEmptyString(conf.markdownPattern)) return;
+
+                        var html = ERMrest.renderHandlebarsTemplate(conf.markdownPattern, null, {id: catalogId});
+                        html = ERMrest.renderMarkdown(html, false);
+
+                        if (!DataUtils.isNoneEmptyString(html)) {
+                            // invalid html, so we shounldn't add it.
+                            return;
+                        }
+
+                        // if acls.show is defined, process it
+                        if (DataUtils.isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
+                            if (!Session.isGroupIncluded(conf.acls.show)) {
+                                // don't add the banner because of acls
+                                return;
+                            }
+                        }
+
+                        var banner = {
+                            html: html,
+                            dismissible: (conf.dismissible === true),
+                            key: DataUtils.isNoneEmptyString(conf.key) ? conf.key : ""
+                        };
+
+                        // add the banner to top or bottom based on given position
+                        if ((conf.position !== "bottom")) {
+                            scope.topBanners.push(banner);
+                        } else {
+                            scope.bottomBanners.push(banner);
+                        }
+                    });
+
+                    scope.hideBanner = function (index, isTop) {
+                        if (isTop) {
+                            scope.topBanners[index].hide = true;
+                        } else {
+                            scope.bottomBanners[index].hide = true;
+                        }
+                    };
 
                     scope.onToggle = function (open, menuObject) {
                         if (open) {

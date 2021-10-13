@@ -7,7 +7,7 @@
         "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
         "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
-        "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+        "signUpURL", "profileURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
@@ -30,6 +30,7 @@
           "allowErrorDismissal": false,
           "showFaceting": false,
           "hideTableOfContents": false,
+          "navbarBanner": {},
           "navbarMenu": {},
           "navbarBrand": "",
           "termsAndConditionsConfig": null,
@@ -1293,11 +1294,7 @@
             var posValues = _getOffsetValue(immediateParent);
 
             // calculate the position the submenu should open from the top fo the viewport
-            if (parent.scrollTop == 0){
-                menuTarget.style.top = parseInt(immediateParent.offsetTop + parent.offsetTop) + 10 + 'px';
-            } else if (parent.scrollTop > 0) {
-                menuTarget.style.top = parseInt((immediateParent.offsetTop + parent.offsetTop) - parent.scrollTop) + 10 + 'px';
-            }
+            menuTarget.style.top = parseInt(immediateParent.getBoundingClientRect().y) + 5 + 'px';
 
             menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
 

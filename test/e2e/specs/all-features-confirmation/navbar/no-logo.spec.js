@@ -1,3 +1,4 @@
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {
@@ -41,6 +42,62 @@ describe('Navbar ', function() {
     it('should not display a brand image/logo', function() {
         expect(element(by.id('brand-image')).isPresent()).toBeFalsy();
     });
+
+    describe("for banner", function () {
+        var banner1, banner2, banner3, banner4,
+            banner1Dismiss, banner2Dismiss, banner4Dismiss;
+        beforeAll(function () {
+            banner1 = chaisePage.navbar.getBanner("banner-1-custom-key");
+            banner1Dismiss = chaisePage.navbar.getBannerDismissBtn("banner-1-custom-key");
+
+            banner2 = chaisePage.navbar.getBanner("banner-2-custom-key");
+            banner2Dismiss = chaisePage.navbar.getBannerDismissBtn("banner-2-custom-key");
+
+            banner3 = chaisePage.navbar.getBanner("banner-3-custom-key");
+
+            banner4 = chaisePage.navbar.getBanner("banner-4-custom-key");
+            banner4Dismiss = chaisePage.navbar.getBannerDismissBtn("banner-4-custom-key");
+        });
+
+        it ("should hide banner based on given acls", function () {
+            expect(banner3.isPresent()).toBeFalsy();
+        });
+
+        it ("should be able to show multiple banners", function () {
+            expect(banner1.isDisplayed()).toBeTruthy("banner 1 missing");
+            expect(banner1.getText()).toEqual("×\nbanner 1", "banner 1 content missmatch");
+
+            expect(banner2.isDisplayed()).toBeTruthy("banner 2 missing");
+            expect(banner2.getText()).toEqual("banner 2", "banner 2 content missmatch");
+
+            expect(banner4.isDisplayed()).toBeTruthy("banner 4 missing");
+            expect(banner4.getText()).toEqual("×\nbanner 4", "banner 4 content missmatch");
+        });
+
+        it ("should show dismiss button based on the given configuration", function () {
+            expect(banner1Dismiss.isDisplayed()).toBeTruthy("banner 1 dismiss mismatch");
+            expect(banner2Dismiss.isPresent()).toBeFalsy("banner 2 dismiss mismatch");
+            expect(banner4Dismiss.isDisplayed()).toBeTruthy("banner 4 dismiss mismatch");
+        });
+
+        it ("clicking on dismiss button should close the banner", function (done) {
+            chaisePage.clickButton(banner1Dismiss).then(function () {
+                chaisePage.waitForElementInverse(banner1);
+
+                expect(banner1.isDisplayed()).toBeFalsy("banner 1 didn't close");
+
+                return chaisePage.clickButton(banner4Dismiss);
+            }).then(function () {
+                chaisePage.waitForElementInverse(banner4);
+
+                expect(banner4.isDisplayed()).toBeFalsy("banner 4 didn't close");
+
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
+        });
+    })
 
     describe('for the menu', function () {
         var allWindows;
