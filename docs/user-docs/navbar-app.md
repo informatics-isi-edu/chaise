@@ -47,7 +47,7 @@ Navbar app has more dependencies that, if not included, are fetched dynamically.
 
 The position of where you're adding these include statements is very important. It HAS TO be BEFORE `navbar.app.js`.  Adding them after `navbar.app.js` defeats the purpose of prefetching and actually causes duplicated fetching.
 
-You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
+You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)
 
 If you're using [Jekyll](https://jekyllrb.com), the following are the steps on how you can achieve this:
 
@@ -98,25 +98,18 @@ After installing Chaise and including the dependencies, you can now use navbar b
 
 ## Sample HTML page
  If you want to look at a sample HTML page, you can take a look at [sample-navbar.html file in Chaise](https://github.com/informatics-isi-edu/chaise/blob/master/lib/navbar/sample-navbar.html).
- 
+
 ## 4. Configuring Navbar
 
-The navbar app can be customized by defining different properties in the `chaise-config`. The following list of properties is further described in [chaise-config.md](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/chaise-config.md):
- - navbarBrand
- - navbarBrandText
- - navbarBrandImage
- - navbarMenu
- - hideGoToRID
- - defaultCatalog 
- - signUpURL
- - profileURL
+The navbar app can be customized by defining different properties in the "chaise-config". Please refer to [chaise-config document](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/chaise-config.md#navbar-configuration) for complete list of properties that are supported.
+
 
 The `navbarMenu` property is the most complex of the above properties. This parameter is used to customize the menu items displayed in the navbar at the top of all Chaise apps by supplying an object with links and/or dropdown menus. Consult the [chaise-config-sample.js](https://github.com/informatics-isi-edu/chaise/blob/master/chaise-config-sample.js) file for more details about format.
  - Each option has an optional newTab property that can be defined at any level. If undefined at root, newTab is treated as true. Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.
- - Each option accepts an 'acls' object that has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. 
- - The url property of each menu object allows for templating of the catalog id parameter. 
+ - Each option accepts an 'acls' object that has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link.
+ - The url property of each menu object allows for templating of the catalog id parameter.
    - More info can be found in the [templating document](https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/mustache-templating.md)
- - The header property of each menu object will create an unclickable bold header with class chaise-dropdown-header when set to `true`. 
+ - The header property of each menu object will create an unclickable bold header with class chaise-dropdown-header when set to `true`.
 
 ## 5. How to customize navbar UI
 

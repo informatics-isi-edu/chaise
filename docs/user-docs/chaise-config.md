@@ -30,7 +30,6 @@ If a property appears in the same configuration twice, the property defined late
    * [logoutURL](#logouturl)
    * [dataBrowser](#databrowser)
    * [signUpURL](#signupurl)
-   * [profileURL](#profileURL)
    * [termsAndConditionsConfig](#termsandconditionsconfig)
    * [loggedInMenu](#loggedinmenu)
  * [Display Configuration:](#display-configuration)
@@ -297,15 +296,6 @@ If a property appears in the same configuration twice, the property defined late
    - Sample syntax:
      ```
      signUpURL: "<your-url>"
-     ```
-
- #### profileURL
- When a user is logged in, the navbar displays the user's username. Use this parameter to specify what the username in the navbar should link to (e.g. `https://app.globus.org/account` if your deployment uses Globus authentication). If profileURL is unspecified, the navbar will display the username as regular text.
-   - Type: String - URL
-   - Default value: N/A
-   - Sample syntax:
-     ```
-     profileURL: "<your-url>"
      ```
 
  #### termsAndConditionsConfig
