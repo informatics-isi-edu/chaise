@@ -108,6 +108,11 @@ body > .container {
     background-color: #f9e3a1;
     text-align: center;
 
+    // use the normal font instead of light and make it bigger
+    font-family: "Helvetica Neue", Helvetica , Arial, sans-serif;
+    letter-spacing: 1px;
+    font-weight: 500;
+
     .close {
         padding-right: 15px;
     }
