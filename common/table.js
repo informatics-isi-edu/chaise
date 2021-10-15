@@ -474,7 +474,7 @@
                     }
 
                     $log.debug("counter", current, ": read main successful.");
-                    
+
 
                     return vm.getFavorites ? vm.getFavorites(vm, page) : {page: page};
                 }).then(function (result) {
@@ -1099,7 +1099,7 @@
            }
        }
 
-        /** 
+        /**
          * Transform facets to a more stable version that can be saved.
          * The overal returned format is like the following:
          * {
@@ -1527,9 +1527,89 @@
                         columnModels.push(recordCreate.columnToColumnModel(col));
                     });
 
-                    
                     // get the stable facet
                     var facetObj = _getStableFacets(scope);
+
+                    var isDescriptionMarkdown = columnModels.filter(function (model) {
+                        return model.column.name == "description"
+                    })[0].inputType == "longtext"
+
+                    function facetOptionsToString (options, isRange) {
+                        var str = "";
+                        options.forEach(function (option, idx) {
+                            str += isRange ? (option.min + " to " + option.max) : (option === null ? " _No value_" : " " + option);
+                            if (idx+1 != options.length) str += ", "
+                        });
+                        return str;
+                    }
+
+                    // thresholds for when to use a modified simpler syntax for the name
+                    var facetChoicesThreshold = 5; // default to 5 choices
+                    var facetTextLengthThreshold = 60; // default to 50 characters;
+                    var nameLengthThreshold = 200; // default to 200 characters
+
+                    var nameDescriptionPrefix = scope.vm.reference.table.name + " with";
+                    var facetNames = "";
+
+                    var name = nameDescriptionPrefix;
+                    var description = nameDescriptionPrefix + ":\n";
+
+                    // iterate over the facetObj to create the default name and description values;
+                    facetObj.and.forEach(function (facet, facetIdx) {
+                        // ===== setting default name =====
+                        // create the facetNames string in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
+                        facetNames += " " + facet.markdown_name;
+                        if (facetIdx+1 != facetObj.and.length) facetNames += ",";
+
+                        var numChoices;
+                        if (facet.choices && facet.choices.length) {
+                            numChoices = facet.choices.length;
+                        } else if (facet.ranges && facet.ranges.length) {
+                            numChoices = facet.ranges.length;
+                        } else {
+                            // either not_null or search
+                            numChoices = 1;
+                        }
+
+                        var facetDetails = " " + facet.markdown_name + " (" + numChoices + " choice" + (numChoices > 1 ? 's' : '') + ")";
+                        // set to default value to use if the threshold are broken
+                        var facetInfo = facetDetails;
+
+                        // used for the description and name if not too long
+                        var facetOptionsString; // the concatenation of facet option names
+                        if (facet.not_null)  {
+                            // if not_null is selected, only 1 option is present
+                            facetOptionsString = " _All records with value_";
+                            facetInfo = facetOptionsString;
+                        } else if (facet.choices) {
+                            facetOptionsString = facetOptionsToString(facet.choices, false);
+                            // check if the number of selected options is under the threshold
+                            // check if the concatenated choice string is under the threshold
+                            if (facet.choices.length <= facetChoicesThreshold && facetOptionsString.length <= facetTextLengthThreshold) facetInfo = facetOptionsString;
+                        } else if (facet.ranges) {
+                            facetOptionsString = " " + facet.markdown_name + " (";
+                            facetOptionsString += facetOptionsToString(facet.ranges, true);
+                            facetOptionsString += ")";
+                            // check if the number of selected options is under the threshold
+                            // check if the concatenated range string is under the threshold
+                            if (facet.ranges.length <= facetChoicesThreshold && facetOptionsString.length <= facetTextLengthThreshold) facetInfo = facetOptionsString;
+                        } else if (facet.search) {
+                            // if search, only 1 option is present
+                            facetOptionsString = " " + facet.search;
+                            facetInfo = facetOptionsString;
+                        }
+                        name += facetInfo + ";"
+
+                        // ===== setting default description =====
+                        description += (isDescriptionMarkdown ? "  -" : "") + facetDetails + ":" + facetOptionsString + ";";
+                        if (facetIdx+1 != facetObj.and.length) description += "\n";
+                    });
+
+                    // if name is longer than the set string length threshold, show the compact version with facet names only
+                    if (name.length > nameLengthThreshold) name = nameDescriptionPrefix + " " + facetObj.and.length + " facets:" + facetNames;
+
+                    rowData.rows[0].name = name;
+                    rowData.rows[0].description = description;
 
                     rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : null;
                     rowData.rows[0].facets = facetObj;
