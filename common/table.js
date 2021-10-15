@@ -1534,10 +1534,19 @@
                         return model.column.name == "description"
                     })[0].inputType == "longtext"
 
-                    function facetOptionsToString (options, isRange) {
+                    function facetOptionsToString (options) {
                         var str = "";
                         options.forEach(function (option, idx) {
-                            str += isRange ? (option.min + " to " + option.max) : (option === null ? " _No value_" : " " + option);
+                            var name = option.displayname.value;
+                            if (name === null) {
+                                str += " _No value_";
+                            } else if (name === "<i>All records with value </i>") {
+                                str += " _All records with value_"
+                            } else if (name === '') {
+                                str += " _Empty_"
+                            } else {
+                                str += " " + name;
+                            }
                             if (idx+1 != options.length) str += ", "
                         });
                         return str;
@@ -1551,58 +1560,44 @@
                     var nameDescriptionPrefix = scope.vm.reference.table.name + " with";
                     var facetNames = "";
 
-                    var name = nameDescriptionPrefix;
+                    var name = nameDescriptionPrefix
                     var description = nameDescriptionPrefix + ":\n";
 
-                    // iterate over the facetObj to create the default name and description values;
-                    facetObj.and.forEach(function (facet, facetIdx) {
+                    var modelsWFilters = scope.vm.facetModels.filter(function (fm, idx) {
+                        fm.displayname = scope.vm.reference.facetColumns[idx].displayname.value;
+                        fm.preferredMode = scope.vm.reference.facetColumns[idx].preferredMode;
+                        return (fm.appliedFilters.length > 0);
+                    });
+
+                    if (scope.vm.search) {
+                        name += " " + scope.vm.search;
+                        description += (isDescriptionMarkdown ? "  -" : "") + " Search: " + scope.vm.search + ";";
+                        if (modelsWFilters.length > 0) description += "\n";
+                    }
+
+                    // iterate over the facetModels to create the default name and description values;
+                    modelsWFilters.forEach(function (fm, modelIdx) {
                         // ===== setting default name =====
                         // create the facetNames string in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
-                        facetNames += " " + facet.markdown_name;
-                        if (facetIdx+1 != facetObj.and.length) facetNames += ",";
+                        facetNames += " " + fm.displayname;
+                        if (modelIdx+1 != modelsWFilters.length) facetNames += ",";
 
-                        var numChoices;
-                        if (facet.choices && facet.choices.length) {
-                            numChoices = facet.choices.length;
-                        } else if (facet.ranges && facet.ranges.length) {
-                            numChoices = facet.ranges.length;
-                        } else {
-                            // either not_null or search
-                            numChoices = 1;
-                        }
-
-                        var facetDetails = " " + facet.markdown_name + " (" + numChoices + " choice" + (numChoices > 1 ? 's' : '') + ")";
+                        var numChoices = fm.appliedFilters.length;
+                        var facetDetails = " " + fm.displayname + " (" + numChoices + " choice" + (numChoices > 1 ? 's' : '') + ")";
                         // set to default value to use if the threshold are broken
                         var facetInfo = facetDetails;
 
                         // used for the description and name if not too long
-                        var facetOptionsString; // the concatenation of facet option names
-                        if (facet.not_null)  {
-                            // if not_null is selected, only 1 option is present
-                            facetOptionsString = " _All records with value_";
-                            facetInfo = facetOptionsString;
-                        } else if (facet.choices) {
-                            facetOptionsString = facetOptionsToString(facet.choices, false);
-                            // check if the number of selected options is under the threshold
-                            // check if the concatenated choice string is under the threshold
-                            if (facet.choices.length <= facetChoicesThreshold && facetOptionsString.length <= facetTextLengthThreshold) facetInfo = facetOptionsString;
-                        } else if (facet.ranges) {
-                            facetOptionsString = " " + facet.markdown_name + " (";
-                            facetOptionsString += facetOptionsToString(facet.ranges, true);
-                            facetOptionsString += ")";
-                            // check if the number of selected options is under the threshold
-                            // check if the concatenated range string is under the threshold
-                            if (facet.ranges.length <= facetChoicesThreshold && facetOptionsString.length <= facetTextLengthThreshold) facetInfo = facetOptionsString;
-                        } else if (facet.search) {
-                            // if search, only 1 option is present
-                            facetOptionsString = " " + facet.search;
-                            facetInfo = facetOptionsString;
-                        }
+                        var facetOptionsString = ""; // the concatenation of facet option names
+                        if (fm.preferredMode == "ranges") facetOptionsString += " " + fm.displayname + " (";
+                        facetOptionsString += facetOptionsToString(fm.appliedFilters);
+                        if (fm.preferredMode == "ranges") facetOptionsString += ")";
+                        if (fm.appliedFilters.length <= facetChoicesThreshold && facetOptionsString.length <= facetTextLengthThreshold) facetInfo = facetOptionsString;
                         name += facetInfo + ";"
 
                         // ===== setting default description =====
                         description += (isDescriptionMarkdown ? "  -" : "") + facetDetails + ":" + facetOptionsString + ";";
-                        if (facetIdx+1 != facetObj.and.length) description += "\n";
+                        if (modelIdx+1 != modelsWFilters.length) description += "\n";
                     });
 
                     // if name is longer than the set string length threshold, show the compact version with facet names only
