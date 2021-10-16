@@ -10,7 +10,6 @@ var chaiseConfig = {
     navbarBrandImage: null,
     logoutURL: '/image-annotation',
     // signUpURL: '', The URL at a which a user can create a new account
-    // profileURL: '', Globus deployments can use https://www.globus.org/app/account
     dataBrowser: '',
     shareCiteAcls: {
         show: ["*"],  // [] <- hide
@@ -24,6 +23,22 @@ var chaiseConfig = {
     deleteRecord: true,
     maxRecordsetRowHeight: 160,
     showFaceting: true,
+    navbarBanner: [
+        {
+            markdown_pattern: "This is a development version of Chaise",
+            // // to make the banner dismissible:
+            // dismissible: true,
+            // // to ensure showing the banner only to certain users:
+            // acls: {
+            //     show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
+            // },
+            // // to make sure banner is added below the banner (by default it will be added to top):
+            // position: "bottom",
+            // // (optional) a class name using `chaise-navbar-banner-container-<key>` will be added to the banner container
+            // // to allow CSS customizations
+            // key: "some-custom-name"
+        }
+    ],
     navbarMenu: {
         // The optional newTab property can be defined at any level. If undefined at root, newTab is treated as true
         // Each child menu item checks for a newTab property on itself, if nothing is set, the child inherits from it's parent.

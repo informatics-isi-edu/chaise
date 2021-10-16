@@ -23,8 +23,7 @@ exports.getConfig = function(options) {
               }
           }
       },
-      'os': 'MacOS El Capitan 10.11',
-      'platform': 'OS X 10.11',
+      'platform': 'macOS 10.15',
       'screenResolution': '1280x960'
     },
     specs: [

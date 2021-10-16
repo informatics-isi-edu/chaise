@@ -102,6 +102,24 @@ body > .container {
     padding-right: 20px;
 }
 
+.chaise-navbar-banner-container {
+    margin-bottom: 0;
+    padding: 10px 20px 10px 20px;
+    background-color: #f9e3a1;
+    text-align: center;
+
+    // use the normal font instead of light and make it bigger
+    font-family: "Helvetica Neue", Helvetica , Arial, sans-serif;
+    letter-spacing: 1px;
+    font-weight: 500;
+    font-size: 16px;
+
+    .close {
+        padding-right: 15px;
+    }
+}
+
+
 /* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
 .navbar-collapse {
     max-height: 340px;

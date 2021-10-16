@@ -1144,6 +1144,10 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
+    this.getModalClearSelection = function () {
+        return element(by.css(".modal-body")).element(by.css(".clear-all-btn"));
+    }
+
     this.getModalSubmit = function () {
         return element(by.id("multi-select-submit-btn"));
     }
@@ -1260,6 +1264,21 @@ var errorModal = function () {
     }
 };
 
+var navbar = function () {
+    this.getBanner = function (key) {
+        var selector = ".chaise-navbar-banner-container";
+        if (key) {
+            selector += ".chaise-navbar-banner-container-" + key;
+        }
+        return element(by.css(selector));
+    }
+
+    this.getBannerDismissBtn = function (key) {
+        var banner = this.getBanner(key);
+        return banner.element(by.css(".close"));
+    }
+}
+
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
 function makeSafeIdAttr(string) {
@@ -1273,6 +1292,8 @@ function chaisePage() {
     this.recordsetPage = new recordsetPage();
     this.errorModal = new errorModal();
     this.searchPopup = new SearchPopup();
+    this.navbar = new navbar();
+
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
@@ -1483,8 +1504,6 @@ function chaisePage() {
 
         return defer.promise;
     };
-
-    this.get
 
     this.waitForAggregates = function (timeout) {
         var locator = element.all(by.css('.aggregate-col-loader'));
