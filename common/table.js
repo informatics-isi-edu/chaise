@@ -1510,10 +1510,9 @@
                 var facetTxt = "*::facets::";
                 scope.saveQuery = function () {
                     var chaiseConfig = ConfigUtils.getConfigJSON();
-
                     var columnModels = [];
-
                     var savedQueryReference = scope.vm.savedQueryReference.contextualize.entryCreate;
+                    var savedQueryConfig = scope.$root.savedQuery;
 
                     var rowData = {
                         rows: [{}],
@@ -1547,17 +1546,41 @@
                             } else {
                                 str += " " + name;
                             }
-                            if (idx+1 != options.length) str += ", "
+                            if (idx+1 != options.length) str += ","
                         });
                         return str;
                     }
 
-                    // thresholds for when to use a modified simpler syntax for the name
-                    var facetChoicesThreshold = 5; // default to 5 choices
-                    var facetTextLengthThreshold = 60; // default to 50 characters;
-                    var nameLengthThreshold = 200; // default to 200 characters
+                    function facetDescription (facet, optionsString, notLastIdx) {
+                        var value = (isDescriptionMarkdown ? "  -" : "") + facet + ":" + optionsString + ";";
+                        if (notLastIdx) value += "\n";
 
-                    var nameDescriptionPrefix = scope.vm.reference.table.name + " with";
+                        return value;
+                    }
+
+                    /*
+                     * The following code is for creating the default name and description
+                     *
+                     * `name` begins with the reference displayname and "with". The rest of the name is created by
+                     * iterating over each facet and the selections made in the facets. The value appended to the
+                     * name for each facet will follow 1 of 3 formats:
+                     *   1. listing the options if under the numFacetChoices and facetTextLength thresholds
+                     *      <option1>, <option2>, <option3>, ...
+                     *   2. in the case of ranges, listing the facet displayname and the selections if under the numFacetChoices and facetTextLength thresholds
+                     *      <facet displayname> (<option1>, <option2>, <option3>, ...)
+                     *   3. listing the facet displayname and number of selections if over either of the numFacetChoices or facetTextLength thresholds
+                     *      <facet displayname> (6 choices)
+                     *
+                     * `description` begins with the reference displayname and "with" also. The rest of the
+                     * description is created by iterating over each facet and the selections made in the facets.
+                     * description format for each facet is generally:
+                     *     <facet displayname> (x choices): <option1>, <option2>, <option3>, ...
+                     *
+                     * The format for description slightly differs depending on whether the input type is text
+                     * or longtext. If longtext, each facet description is preceded by a hyphen (`-`) and is on a new line.
+                     * Otherwise, the description is all one line with no hyphens
+                     */
+                    var nameDescriptionPrefix = scope.vm.reference.displayname.value + " with";
                     var facetNames = "";
 
                     var name = nameDescriptionPrefix
@@ -1570,9 +1593,8 @@
                     });
 
                     if (scope.vm.search) {
-                        name += " " + scope.vm.search;
-                        description += (isDescriptionMarkdown ? "  -" : "") + " Search: " + scope.vm.search + ";";
-                        if (modelsWFilters.length > 0) description += "\n";
+                        name += " " + scope.vm.search + ";";
+                        description += facetDescription(" Search", scope.vm.search, modelsWFilters.length > 0)
                     }
 
                     // iterate over the facetModels to create the default name and description values;
@@ -1592,16 +1614,15 @@
                         if (fm.preferredMode == "ranges") facetOptionsString += " " + fm.displayname + " (";
                         facetOptionsString += facetOptionsToString(fm.appliedFilters);
                         if (fm.preferredMode == "ranges") facetOptionsString += ")";
-                        if (fm.appliedFilters.length <= facetChoicesThreshold && facetOptionsString.length <= facetTextLengthThreshold) facetInfo = facetOptionsString;
+                        if (fm.appliedFilters.length <= savedQueryConfig.thresholds.numFacetChoices && facetOptionsString.length <= savedQueryConfig.thresholds.facetTextLength) facetInfo = facetOptionsString;
                         name += facetInfo + ";"
 
                         // ===== setting default description =====
-                        description += (isDescriptionMarkdown ? "  -" : "") + facetDetails + ":" + facetOptionsString + ";";
-                        if (modelIdx+1 != modelsWFilters.length) description += "\n";
+                        description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
                     });
 
                     // if name is longer than the set string length threshold, show the compact version with facet names only
-                    if (name.length > nameLengthThreshold) name = nameDescriptionPrefix + " " + facetObj.and.length + " facets:" + facetNames;
+                    if (name.length > savedQueryConfig.thresholds.nameLength) name = nameDescriptionPrefix + " " + modelsWFilters.length + " facets:" + facetNames;
 
                     rowData.rows[0].name = name;
                     rowData.rows[0].description = description;
