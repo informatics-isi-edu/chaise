@@ -651,8 +651,6 @@
 
             var row = vm.savedQueryForm.rows[0]
 
-            // set id based on hash of `facets` columns
-            row.query_id = SparkMD5.hash(JSON.stringify(row.facets));
             row.last_execution_time = "now";
             params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
                 // show success after close

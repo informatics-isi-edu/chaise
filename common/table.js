@@ -474,7 +474,7 @@
                     }
 
                     $log.debug("counter", current, ": read main successful.");
-                    
+
 
                     return vm.getFavorites ? vm.getFavorites(vm, page) : {page: page};
                 }).then(function (result) {
@@ -1099,7 +1099,7 @@
            }
        }
 
-        /** 
+        /**
          * Transform facets to a more stable version that can be saved.
          * The overal returned format is like the following:
          * {
@@ -1514,6 +1514,10 @@
                     var columnModels = [];
 
                     var savedQueryReference = scope.vm.savedQueryReference.contextualize.entryCreate;
+                    // get the stable facet
+                    var facetObj = _getStableFacets(scope);
+                    // set id based on hash of `facets` columns
+                    var query_id = SparkMD5.hash(JSON.stringify(facetObj));
 
                     var rowData = {
                         rows: [{}],
@@ -1527,35 +1531,52 @@
                         columnModels.push(recordCreate.columnToColumnModel(col));
                     });
 
-                    
-                    // get the stable facet
-                    var facetObj = _getStableFacets(scope);
-
+                    // set id based on hash of `facets` columns
+                    rowData.rows[0].query_id = query_id;
                     rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : null;
                     rowData.rows[0].facets = facetObj;
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
 
-                    modalUtils.showModal({
-                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
-                        windowClass:"create-saved-query",
-                        controller: "SavedQueryModalDialogController",
-                        controllerAs: "ctrl",
-                        size: "md",
-                        keyboard: true,
-                        resolve: {
-                            params: {
-                                reference: savedQueryReference,
-                                parentReference: scope.vm.reference,
-                                columnModels: columnModels,
-                                rowData: rowData
-                            }
+                    var row = rowData.rows[0];
+                    // check to see if the saved query exists for the given user, table, schema, and selected facets
+                    var queryUri = savedQueryReference.uri + "/user_id=" + UriUtils.fixedEncodeURIComponent(row.user_id) + "&schema_name=" + UriUtils.fixedEncodeURIComponent(row.schema_name) + "&table_name=" + UriUtils.fixedEncodeURIComponent(row.table_name) + "&query_id=" + row.query_id;
+
+                    var headers = {};
+                    headers[ERMrest.contextHeaderName] = ConfigUtils.getContextHeaderParams();
+                    ERMrest.resolve(queryUri, {headers: headers}).then(function (response) {
+                        console.log("reference: ", response);
+
+                        return response.read(1);
+                    }).then(function (page) {
+                        // if a row is returned, a query with this set of facets exists already
+                        if (page.tuples.length > 0) {
+                            console.log("query exists already");
+                        } else {
+                            modalUtils.showModal({
+                                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
+                                windowClass:"create-saved-query",
+                                controller: "SavedQueryModalDialogController",
+                                controllerAs: "ctrl",
+                                size: "md",
+                                keyboard: true,
+                                resolve: {
+                                    params: {
+                                        reference: savedQueryReference,
+                                        parentReference: scope.vm.reference,
+                                        columnModels: columnModels,
+                                        rowData: rowData
+                                    }
+                                }
+                            }, function success() {
+                                // notify user of success before closing
+                                AlertsService.addAlert("Search criteria saved.", "success");
+                            }, null, false, false);
                         }
-                    }, function success() {
-                        // notify user of success before closing
-                        AlertsService.addAlert("Search criteria saved.", "success");
-                    }, null, false, false);
+                    }).catch(function (err) {
+                        $log.debug(err);
+                    });
                 }
 
                 scope.showSavedQueries = function () {
