@@ -1570,6 +1570,9 @@
                      *      <facet displayname> (<option1>, <option2>, <option3>, ...)
                      *   3. listing the facet displayname and number of selections if over either of the numFacetChoices or facetTextLength thresholds
                      *      <facet displayname> (6 choices)
+                     * If the name after appending all facet names together is over the nameLength threshold,
+                     * a further shortened syntax is used for the whole name:
+                     *     <reference displayname> with x facets: <facet1 displayname>, <facet2 displayname>, <facet3 displayname>, ...
                      *
                      * `description` begins with the reference displayname and "with" also. The rest of the
                      * description is created by iterating over each facet and the selections made in the facets.

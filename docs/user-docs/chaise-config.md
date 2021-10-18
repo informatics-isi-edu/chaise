@@ -661,13 +661,19 @@ system columns:
          catalog: <catalog id>
          schema: <schema name>
          table: <table name>
-       }
+       },
+       facetChoicesThreshold: <int>,
+       facetTextLengthThreshold: <int>,
+       nameLengthThreshold: <int>
      }
      ```
    - `storageTable` attributes
      - `catalog`: String - catalog id
      - `schema`: String - schema name
      - `table`: String - table name
+   - `facetChoicesThreshold`: for the default value of the name property of saved queries. Set this value to define when to show a shortened facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the shortened syntax.
+   - `facetTextLengthThreshold`: for the default value of the name property of saved queries. Set this value to define when to show a shortened facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the shortened syntax.
+   - `nameLengthThreshold`: for the default value of the name property of saved queries. Set this value to define when to show a further shortened facet syntax based on the total string length of all facets text when appended together. By default this value is 200. Set this to 0 to always show the further shortened syntax.
    - Default value: null
    - Sample syntax:
      ```
@@ -699,4 +705,3 @@ system columns:
      ```
      assetDownloadPolicyURL: "<your url>"
      ```
-
