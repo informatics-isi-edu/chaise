@@ -8,7 +8,7 @@
         var ALERT_TYPES = ['success', 'error', 'warning'];
         var urlLimitAlert;
 
-        function Alert(message, type, cb) {
+        function Alert(message, type, cb, replaceCloseBoolean) {
             DataUtils.verify(message, 'Message required to create an alert.');
             if (type === undefined || ALERT_TYPES.indexOf(type) === -1) {
                 type = 'error';
@@ -16,11 +16,12 @@
             this.message = message;
             this.type = type;
             this.callback = cb;
+            this.replaceClose = replaceCloseBoolean;
         }
 
-        function addAlert(message, type, closeCallback) {
+        function addAlert(message, type, closeCallback, replaceClose) {
             DataUtils.verify(message, 'Message required to create an alert.');
-            var alert = new Alert(message, type, closeCallback);
+            var alert = new Alert(message, type, closeCallback, replaceClose);
             alerts.push(alert);
             return alert;
         }
@@ -32,9 +33,9 @@
             return alerts.splice(index, 1);
         }
 
-        function createAlert(message, type, closeCallback) {
+        function createAlert(message, type, closeCallback, replaceClose) {
             DataUtils.verify(message, 'Message required to create an alert.');
-            var alert = new Alert(message, type, closeCallback);
+            var alert = new Alert(message, type, closeCallback, replaceClose);
             return alert;
         }
 
@@ -88,6 +89,7 @@
             },
             link: function (scope, elem, attr) {
                 scope.closeAlert = function(alert) {
+                    if (alert.replaceClose) return alert.callback(alert);
                     AlertsService.deleteAlert(alert);
                 }
 

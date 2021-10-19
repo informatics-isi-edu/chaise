@@ -633,9 +633,15 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, messageMap, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = [];
+        var deleteAlert = function(alert) {
+            var index = vm.alerts.indexOf(alert);
+            DataUtils.verify((index > -1), 'Alert not found.');
+            return vm.alerts.splice(index, 1);
+        }
+
         vm.columnModels = params.columnModels;
         vm.parentReference = params.parentReference;
         vm.savedQueryForm = params.rowData;
@@ -644,7 +650,7 @@
 
         vm.submit = function () {
             if (vm.form.$invalid) {
-                vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error'));
+                vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error', deleteAlert, true));
                 vm.form.$setSubmitted();
                 return;
             }
@@ -657,7 +663,7 @@
                 $uibModalInstance.close(query.successful);
             }, function error(error) {
                 // show error without close
-                vm.alerts.push(AlertsService.createAlert(error.message, 'error'));
+                vm.alerts.push(AlertsService.createAlert(error.message, 'error', deleteAlert, true));
             });
         }
 
