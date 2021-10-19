@@ -1552,7 +1552,18 @@
                     }).then(function (page) {
                         // if a row is returned, a query with this set of facets exists already
                         if (page.tuples.length > 0) {
-                            console.log("query exists already");
+                            modalUtils.showModal({
+                                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/duplicateSavedQuery.modal.html",
+                                windowClass:"duplicate-saved-query",
+                                controller: "DuplicateSavedQueryModalDialogController",
+                                controllerAs: "ctrl",
+                                keyboard: true,
+                                resolve: {
+                                    params: {
+                                        tuple: page.tuples[0]
+                                    }
+                                }
+                            }, null, null, false, false);
                         } else {
                             modalUtils.showModal({
                                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",

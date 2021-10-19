@@ -674,4 +674,17 @@
         }
     }])
 
+    .controller('DuplicateSavedQueryModalDialogController', ['messageMap', 'params', '$uibModalInstance', '$window', function SavedQueryModalDialogController(messageMap, params, $uibModalInstance, $window) {
+        var vm = this;
+        vm.tuple = params.tuple;
+
+        vm.toEdit = function () {
+            $window.location = params.tuple.reference.contextualize.entryEdit.appLink;
+        }
+
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
 })();

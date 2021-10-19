@@ -1,0 +1,11 @@
+<div class="modal-header">
+    <h2 class="modal-title">Duplicate Saved Query</h2>
+</div>
+<div class="modal-body">
+    <p>A saved query with the same set of selected facet options already exists with the name "{{ctrl.tuple.data.name}}".</p>
+    <p>Click <b>"Edit"</b> to change the name and description or <b>"Cancel"</b> to change the current facet criteria.</p>
+</div>
+<div class="modal-footer">
+    <button class="chaise-btn chaise-btn-secondary" type="button" ng-click="ctrl.toEdit()">Edit</button>
+    <button class="chaise-btn chaise-btn-secondary" type="button" ng-click="ctrl.cancel()">Cancel</button>
+</div>
