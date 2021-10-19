@@ -16,7 +16,7 @@
             this.message = message;
             this.type = type;
             this.callback = cb;
-            this.replaceClose = replaceCloseBoolean;
+            this.replaceClose = replaceCloseBoolean || false;
         }
 
         function addAlert(message, type, closeCallback, replaceClose) {
