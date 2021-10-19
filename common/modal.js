@@ -635,7 +635,7 @@
 
     .controller('SavedQueryModalDialogController', ['AlertsService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
-        vm.alerts = AlertsService.alerts;
+        vm.alerts = [];
         vm.columnModels = params.columnModels;
         vm.parentReference = params.parentReference;
         vm.savedQueryForm = params.rowData;
@@ -644,7 +644,7 @@
 
         vm.submit = function () {
             if (vm.form.$invalid) {
-                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
+                vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error'));
                 vm.form.$setSubmitted();
                 return;
             }
@@ -657,15 +657,7 @@
                 $uibModalInstance.close(query.successful);
             }, function error(error) {
                 // show error without close
-
-                // error handling when "facet blob" exists already and violates the uniqueness constraint
-                // NOTE: this is hacky as it's assuming the only unique constraint on the table
-                //       is because of duplicate facet definition
-                if (ERMrest && error instanceof ERMrest.DuplicateConflictError) {
-                    AlertsService.addAlert(messageMap.duplicateSavedQueryMessage, 'error');
-                } else {
-                    AlertsService.addAlert(error.message, 'error');
-                }
+                vm.alerts.push(AlertsService.createAlert(error.message, 'error'));
             });
         }
 

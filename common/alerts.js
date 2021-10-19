@@ -32,6 +32,12 @@
             return alerts.splice(index, 1);
         }
 
+        function createAlert(message, type, closeCallback) {
+            DataUtils.verify(message, 'Message required to create an alert.');
+            var alert = new Alert(message, type, closeCallback);
+            return alert;
+        }
+
         /**
          * Will create a specific type of alert for url limitation
          * @param {string} message
@@ -64,6 +70,7 @@
         return {
             alerts: alerts,
             addAlert: addAlert,
+            createAlert: createAlert,
             deleteAlert: deleteAlert,
             deleteAllAlerts: deleteAllAlerts,
             addURLLimitAlert: addURLLimitAlert,
