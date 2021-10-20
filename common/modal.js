@@ -676,8 +676,8 @@
         var vm = this;
         vm.tuple = params.tuple;
 
-        vm.toEdit = function () {
-            $window.location = params.tuple.reference.contextualize.entryEdit.appLink;
+        vm.editAppLink = function () {
+            return params.tuple.reference.contextualize.entryEdit.appLink;
         }
 
         vm.cancel = function () {
