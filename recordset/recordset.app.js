@@ -112,6 +112,7 @@
             var ermrestUri = res.ermrestUri,
                 pcid = res.pcid,
                 ppid = res.ppid,
+                paction = res.paction,
                 isQueryParameter = res.isQueryParameter;
 
             context.catalogID = res.catalogId;
@@ -183,6 +184,8 @@
                     recordsetModel.logObject = {};
                     if (pcid) recordsetModel.logObject.pcid = pcid;
                     if (ppid) recordsetModel.logObject.ppid = ppid;
+                    if (paction) recordsetModel.logObject.paction = paction; // currently only captures the "applyQuery" action from the show saved query popup
+                    if (res.queryParams.savedQueryRid) recordsetModel.logObject.saveQueryRid = res.queryParams.savedQueryRid;
                     if (isQueryParameter) recordsetModel.logObject.cqp = 1;
 
                     recordsetModel.readyToInitialize = true;

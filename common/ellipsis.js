@@ -152,7 +152,7 @@
                             // TODO: change from HTML link to refresh page to:
                             //    "updateFacets on main entity and add to browser history stack"
                             // after update, put last_execution_time as "now"
-                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
+                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID + "&paction=applyQuery";
                         }).catch(function (error) {
                             $log.warn(error);
                             // fail silently and degrade the UX (hide the apply button)
