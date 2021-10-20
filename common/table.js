@@ -1614,7 +1614,9 @@
                         if (fm.preferredMode == "ranges") facetOptionsString += " " + fm.displayname + " (";
                         facetOptionsString += facetOptionsToString(fm.appliedFilters);
                         if (fm.preferredMode == "ranges") facetOptionsString += ")";
-                        if (fm.appliedFilters.length <= savedQueryConfig.thresholds.numFacetChoices && facetOptionsString.length <= savedQueryConfig.thresholds.facetTextLength) facetInfo = facetOptionsString;
+
+                        // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
+                        if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
                         name += facetInfo + ";"
 
                         // ===== setting default description =====
@@ -1622,7 +1624,7 @@
                     });
 
                     // if name is longer than the set string length threshold, show the compact version with facet names only
-                    if (name.length > savedQueryConfig.thresholds.nameLength) name = nameDescriptionPrefix + " " + modelsWFilters.length + " facets:" + facetNames;
+                    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) name = nameDescriptionPrefix + " " + modelsWFilters.length + " facets:" + facetNames;
 
                     rowData.rows[0].name = name;
                     rowData.rows[0].description = description;
