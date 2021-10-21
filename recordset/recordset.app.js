@@ -43,7 +43,8 @@
         'ngSanitize',
         'ngAnimate',
         'duScroll',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'angular-markdown-editor'
     ])
 
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {

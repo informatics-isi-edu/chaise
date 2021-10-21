@@ -633,9 +633,15 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, messageMap, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
-        vm.alerts = AlertsService.alerts;
+        vm.alerts = [];
+        var deleteAlert = function(alert) {
+            var index = vm.alerts.indexOf(alert);
+            DataUtils.verify((index > -1), 'Alert not found.');
+            return vm.alerts.splice(index, 1);
+        }
+
         vm.columnModels = params.columnModels;
         vm.parentReference = params.parentReference;
         vm.savedQueryForm = params.rowData;
@@ -644,31 +650,34 @@
 
         vm.submit = function () {
             if (vm.form.$invalid) {
-                AlertsService.addAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error');
+                vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error', deleteAlert, true));
                 vm.form.$setSubmitted();
                 return;
             }
 
             var row = vm.savedQueryForm.rows[0]
 
-            // set id based on hash of `facets` columns
-            row.query_id = SparkMD5.hash(JSON.stringify(row.facets));
             row.last_execution_time = "now";
             params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
                 // show success after close
                 $uibModalInstance.close(query.successful);
             }, function error(error) {
                 // show error without close
-
-                // error handling when "facet blob" exists already and violates the uniqueness constraint
-                // NOTE: this is hacky as it's assuming the only unique constraint on the table
-                //       is because of duplicate facet definition
-                if (ERMrest && error instanceof ERMrest.DuplicateConflictError) {
-                    AlertsService.addAlert(messageMap.duplicateSavedQueryMessage, 'error');
-                } else {
-                    AlertsService.addAlert(error.message, 'error');
-                }
+                vm.alerts.push(AlertsService.createAlert(error.message, 'error', deleteAlert, true));
             });
+        }
+
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('DuplicateSavedQueryModalDialogController', ['messageMap', 'params', '$uibModalInstance', '$window', function SavedQueryModalDialogController(messageMap, params, $uibModalInstance, $window) {
+        var vm = this;
+        vm.tuple = params.tuple;
+
+        vm.editAppLink = function () {
+            return params.tuple.reference.contextualize.entryEdit.appLink;
         }
 
         vm.cancel = function () {

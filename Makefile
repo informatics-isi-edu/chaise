@@ -336,9 +336,15 @@ RECORDSET_JS_SOURCE_MIN=recordset.min.js
 $(DIST)/$(RECORDSET_JS_SOURCE_MIN): $(RECORDSET_JS_SOURCE)
 	$(call bundle_js_files,$(RECORDSET_JS_SOURCE_MIN),$(RECORDSET_JS_SOURCE))
 
-RECORDSET_JS_VENDOR_ASSET=
+# TODO why four different files for markdown? if inputswitch will be used everywhere, this should move to shared
+RECORDSET_JS_VENDOR_ASSET=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
 
-RECORDSET_CSS_SOURCE=
+RECORDSET_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
 
 .make-recordset-includes: $(BUILD_VERSION)
 	@> .make-recordset-includes

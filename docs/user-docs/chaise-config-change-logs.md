@@ -2,6 +2,14 @@ The file contains changes made to chaise-config parameters.
 - Refer to [chaise-config.d](chaise-config.md) for currently supported parameters
 - Refer to [chaise-config-deprecated.md](chaise-config-deprecated.md) for deprecated parameters
 
+#### 10/20/2021 ####
+
+###### PR Link
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2134)
+
+###### Changed
+  - `savedQueryConfig` added new object named `defaultName` to define properties related to setting the default name of the saved query feature.
+
 #### 10/13/2021 ####
 
 ###### PR Link
@@ -28,7 +36,7 @@ The file contains changes made to chaise-config parameters.
   - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2114)
 
 ###### Added
-  - `savedQueryConfig` was introduced to define propreties related to saved query feature.
+  - `savedQueryConfig` was introduced to define properties related to saved query feature.
 
 <!--  TODO we might want to add the rest of changes as well -->
 
