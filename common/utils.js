@@ -2559,15 +2559,16 @@
                 showUI: reference.display.showSavedQuery
             }
 
-            // NOTE: if this is not set, saved query UI should probably be turned off
+            // NOTE: if this is not set, saved query UI should be turned off
             if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
                 var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
-                // set the 3 threshold properties: facetChoicesThreshold, facetTextLengthThreshold, nameLengthThreshold
-                // thresholds for when to use a modified simpler syntax for the default name value
-                savedQuery.thresholds = {
-                    numFacetChoices: !isNaN(chaiseConfig.savedQueryConfig.facetChoicesThreshold) ? chaiseConfig.savedQueryConfig.facetChoicesThreshold : 5,
-                    facetTextLength: !isNaN(chaiseConfig.savedQueryConfig.facetTextLengthThreshold) ? chaiseConfig.savedQueryConfig.facetTextLengthThreshold : 60,
-                    nameLength: !isNaN(chaiseConfig.savedQueryConfig.nameLengthThreshold) ? chaiseConfig.savedQueryConfig.nameLengthThreshold : 200
+                // limits for when to use a modified simpler syntax for the default name value
+                // set the 3 threshold properties: facetChoiceLimit, facetTextLimit, totalTextLimit
+                var limits = chaiseConfig.savedQueryConfig.defaultName || {};
+                savedQuery.defaultNameLimits = {
+                    facetChoiceLimit: !isNaN(limits.facetChoiceLimit) ? limits.facetChoiceLimit : 5,
+                    facetTextLimit: !isNaN(limits.facetTextLimit) ? limits.facetTextLimit : 60,
+                    totalTextLimit: !isNaN(limits.totalTextLimit) ? limits.totalTextLimit : 200
                 }
 
                 var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);

@@ -652,7 +652,7 @@ system columns:
      ```
 
  #### savedQueryConfig
- Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 3 properties, `catalog`, `schema`, and `table`. This config property defaults to null when undefined. If the property is not an object with an object containing all of the above 3 properties, this will be set to `null`.
+ Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 3 properties, `catalog`, `schema`, and `table`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
    - Type: Object
    - General syntax:
      ```
@@ -662,18 +662,21 @@ system columns:
          schema: <schema name>
          table: <table name>
        },
-       facetChoicesThreshold: <int>,
-       facetTextLengthThreshold: <int>,
-       nameLengthThreshold: <int>
+       defaultName: {
+           facetChoiceLimit: <int>,
+           facetTextLimit: <int>,
+           totalTextLimit: <int>,
+       }
      }
      ```
    - `storageTable` attributes
      - `catalog`: String - catalog id
      - `schema`: String - schema name
      - `table`: String - table name
-   - `facetChoicesThreshold`: for the default value of the name property of saved queries. Set this value to define when to show a shortened facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the shortened syntax.
-   - `facetTextLengthThreshold`: for the default value of the name property of saved queries. Set this value to define when to show a shortened facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the shortened syntax.
-   - `nameLengthThreshold`: for the default value of the name property of saved queries. Set this value to define when to show a further shortened facet syntax based on the total string length of all facets text when appended together. By default this value is 200. Set this to 0 to always show the further shortened syntax.
+   - `defaultName` attributes
+     - `facetChoiceLimit`: Set this value to define when to show a compressed facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the compressed syntax.
+     - `facetTextLimit`: Set this value to define when to show a compressed facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the compressed syntax.
+     - `totalTextLimit`: Set this value to define when to show a shortened facet syntax based on the total string length of all facets text when appended together. By default this value is 200. Set this to 0 to always show the further shortened syntax.
    - Default value: null
    - Sample syntax:
      ```
@@ -682,6 +685,11 @@ system columns:
             catalog: "73448",
             schema: "faceting",
             table: "saved_query"
+        },
+        defaultName: {
+            facetChoiceLimit: 2,
+            facetTextLimit: 40,
+            totalTextLimit: 150,
         }
      }
      ```
