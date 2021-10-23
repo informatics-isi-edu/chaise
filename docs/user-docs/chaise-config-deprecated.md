@@ -11,6 +11,7 @@ This document contains deprecated chaise-config parameters.
 * [Search Application](#search-application)
    * [sidebarPosition](#sidebarPosition)
    * [attributesSidebarHeading](#attributesSidebarHeading)
+   * [hideSearchTextFacet](hidesearchtextfacet)
 
 
 ### Login Configuration:
@@ -42,4 +43,13 @@ This document contains deprecated chaise-config parameters.
    - Sample syntax:
      ```
      "attributesSidebarHeading": "Attributes"
+     ```
+     
+ #### hideSearchTextFacet
+ Whether the search box for attributes names and values should be hidden
+   - Type: Boolean
+   - Default value: false
+   - Sample syntax:
+     ```
+     hideSearchTextFacet: true
      ```
