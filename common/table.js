@@ -1958,14 +1958,20 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        if ($rootScope.savedQuery && $rootScope.savedQuery.rid) {
+                        if (scope.vm.reference._context == "compact" && $rootScope.savedQuery && $rootScope.savedQuery.rid) {
                             var rows = [{}],
                                 updateRow = rows[0];
 
                             updateRow.RID = $rootScope.savedQuery.rid
                             updateRow.last_execution_time = "now";
 
+                            var logObj = {
+                                action: logService.getActionString(logService.logActions.SAVED_QUERY_EXECUTE, logService.logStackPaths.ENTITY),
+                                stack: logService.getStackObject()
+                            }
+
                             // attributegroup/CFDE:saved_query/RID;last_execution_status
+                            // TODO: replace with AG reference maybe so logObj can be included
                             ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
                                 $log.debug("new last executed time: ", response);
                             }).catch(function (error) {

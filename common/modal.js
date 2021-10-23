@@ -633,7 +633,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, messageMap, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'logService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, logService, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = [];
         var deleteAlert = function(alert) {
@@ -655,10 +655,15 @@
                 return;
             }
 
+            var logObj = {
+                action: logService.getActionString(logService.logActions.SAVED_QUERY_CREATE, logService.logStackPaths.ENTITY),
+                stack: logService.getStackObject()
+            }
+
             var row = vm.savedQueryForm.rows[0]
 
             row.last_execution_time = "now";
-            params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
+            params.reference.create(vm.savedQueryForm.rows, logObj).then(function success(query) {
                 // show success after close
                 $uibModalInstance.close(query.successful);
             }, function error(error) {

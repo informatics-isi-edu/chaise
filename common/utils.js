@@ -3012,6 +3012,8 @@
             FACET_HISTOGRAM_LOAD: "range" + clientPathActionSeparator + "load-histogram",
             FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
             PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
+            SAVED_QUERY_CREATE: "saved-query" + clientPathActionSeparator + "create",
+            SAVED_QUERY_EXECUTE: "saved-query" + clientPathActionSeparator + "execute",
 
             //   - client:
             PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
