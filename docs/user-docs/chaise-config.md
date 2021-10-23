@@ -36,7 +36,6 @@ If a property appears in the same configuration twice, the property defined late
    * [customCSS](#customcss)
    * [maxRecordsetRowHeight](#maxrecordsetrowheight)
    * [confirmDelete](#confirmdelete)
-   * [hideSearchTextFacet](#hidesearchtextfacet)
    * [editRecord](#editRecord)
    * [deleteRecord](#deleteRecord)
    * [allowErrorDismissal](#allowerrordismissal)
@@ -82,7 +81,6 @@ If a property appears in the same configuration twice, the property defined late
  #### defaultCatalog
  Use this parameter to specify which catalog Chaise shows by default. When a user navigates to “/chaise/recordset” and omits the rest of the path, the `defaultCatalog` paired with `defaultTables` are used to generate a valid recordset link for the user. It is strongly recommended defining this in your `chaise-config.js` file. This property is used to fetch the catalog annotation information for pages that rely on `chaise-config.js` but don’t have a catalog id in the path. For example, the navbar on static pages uses this property to try to fetch a catalog annotation for configuring the navbar.
    - Type: String - Catalog ID
-   - Default Value:	N/A
    - Sample syntax:
      ```
      defaultCatalog: "1"
@@ -100,7 +98,6 @@ If a property appears in the same configuration twice, the property defined late
        }
      }
      ```
-   - Default value: N/A
    - Sample syntax:
      ```
      defaultTables: {
@@ -115,16 +112,16 @@ If a property appears in the same configuration twice, the property defined late
  #### headTitle
  The application name to display in the browser tab and browser history.
    - Type: String
-   - Default value:	Chaise
+   - Default behavior:	"Chaise" will be used
    - Sample syntax:
      ```
-     headTitle: "Chaise"
+     headTitle: "Chaise development"
      ```
 
  #### navbarBanner
  Use this parameter to define banners that will be displayed on top or below the banner.
    - Type: Object or array of objects.
-   - Default value:	N/A
+   - Default behavior:	no banner will be shown
    - General syntax:
       - One banner:
         ```
@@ -163,7 +160,6 @@ If a property appears in the same configuration twice, the property defined late
      - `position`: `"bottom"` or `"top"` (_optional_) - By default the banner will be displayed above the banner and using this attribute you can change that.
      - `key`: String (_optional_) - Used in the `class` attribute that is attached to the banner using the `chaise-navbar-banner-container-<key>` format. For instance if the `key` is defined as `"feedback"`, you can use `.chaise-navbar-banner-container-feedback` to refer to this banner.
      - `acls`: Object _optional_ - has one attribute array (`show`) used to define lists of globus groups or users that can see the banner.  If missing, `["*"]` will be used as the default. An empty array (`[]`) will hide the banner for everyone.
-   - Default value: {}
    - Sample syntax:
      ```
      navbarBanner: {
@@ -173,7 +169,6 @@ If a property appears in the same configuration twice, the property defined late
  #### navbarBrand
  The URL for the branding logo in the top navigation bar.
    - Type: String - URL
-   - Default value:	N/A
    - Sample syntax:
      ```
      navbarBrand: "/"
@@ -182,16 +177,15 @@ If a property appears in the same configuration twice, the property defined late
  #### navbarBrandText
  The value to be displayed in the navigation bar.
    - Type: String
-   - Default value:	Chaise
+   - Default behavior:	"Chaise" will be used
    - Sample syntax:
      ```
-     navbarBrandText: "Chaise"
+     navbarBrandText: "Chaise development"
      ```
 
  #### navbarBrandImage
  The URL for an image to be displayed in the navigation bar.
    - Type: String - URL
-   - Default value:	N/A
    - Sample syntax:
      ```
      navbarBrandImage: "../images/logo.png"
@@ -232,7 +226,6 @@ If a property appears in the same configuration twice, the property defined late
      - `acls`: Object _optional_ - has two attribute arrays ('show' and 'enable') used to define lists of globus groups or users that can see and click that link. Follows the same rules for defaults defined above.
      - `newTab`: Boolean _optional_ - set to `true` to open the link in a new tab. Each child menu item checks for a `newTab` property on itself, if nothing is set, the child inherits from it's parent.
      - `header`: Boolean _optional_ - set to true to create an un-clickable bold menu option with class `chaise-dropdown-header`
-   - Default value: N/A
    - Sample syntax:
      ```
      navbarMenu: {
@@ -274,7 +267,7 @@ If a property appears in the same configuration twice, the property defined late
  #### logoutURL
  The URL to the logout page, root if not defined.
    - Type: String - URL
-   - Default value: "/"
+   - Default behavior: assumed that the logout page is at the root
    - Sample syntax:
      ```
      logoutURL: "/"
@@ -283,7 +276,7 @@ If a property appears in the same configuration twice, the property defined late
  #### dataBrowser
  The URL to continue after a logout. Also used when an error is thrown and we don't know where to redirect the user.
    - Type: String - URL
-   - Default value: "/"
+   - Default behavior: navigate the user to the root of the server (homepage) on logout
    - Sample syntax:
      ```
      dataBrowser: "/"
@@ -292,7 +285,7 @@ If a property appears in the same configuration twice, the property defined late
  #### signUpURL
  Use this parameter to specify what the "Sign Up" link in the navbar should link to. If `signUpURL` is unspecified, the navbar will not display a "Sign Up" link.
    - Type: String - URL
-   - Default value: N/A
+   - Default behavior: no signup link will be shown
    - Sample syntax:
      ```
      signUpURL: "<your-url>"
@@ -301,6 +294,7 @@ If a property appears in the same configuration twice, the property defined late
  #### termsAndConditionsConfig
  Use this property to enforce joining a globus group before continuing use of the application as a logged in user. This config property defaults to `null` when undefined. If the property is not an object containing all of the above 3 properties, this will be set to `null`.
    - Type: Object
+   - Default behavior: group inclusion check won't be enforced to continue login
    - General syntax:
      ```
      termsAndConditionsConfig: {
@@ -313,7 +307,6 @@ If a property appears in the same configuration twice, the property defined late
      - `groupId`: String - the identifier to the group (looks like a URL for globus groups, see example below)
      - `joinUrl`: String - URL to the join the required group
      - `groupName`: String - the name of the group as it appears in globus
-   - Default value: null
    - Sample syntax:
      ```
      termsAndConditionsConfig: {
@@ -326,6 +319,7 @@ If a property appears in the same configuration twice, the property defined late
  #### loggedInMenu
  Use this parameter to customize the menu items displayed in the navbar under the login dropdown after a user has logged into the system by supplying an object with your links and/or dropdown menus.
    - Type: Object
+   - Default behavior: The user's full name will be shown. Upon clicking, a dropdown menu will appear with a "My Profile" link that opens a modal popup to see information about the logged in user. The other dropdown menu option will be "Logout".
    - General syntax:
      ```
      loggedInMenu: {
@@ -364,7 +358,6 @@ If a property appears in the same configuration twice, the property defined late
      - `header`: display the menu item as an unclickable header with bold text
      - `my_profile`: display the existing "My Profile" menu item that opens the profile modal. If not defined in the list, "My Profile" menu item will not be shown
      - `logout`: display the existing "Log Out" menu item that logs the user out. If not defined in the list, the "Log Out" menu item will not be shown
-   - Default value:	{}
    - Sample syntax:
      ```
      loggedInMenu: {
@@ -381,7 +374,6 @@ If a property appears in the same configuration twice, the property defined late
  #### customCSS
  The URL for a style sheet file to be applied to the application header (`<head>` tag). This is typically a relative URL to a dedicated stylesheet in the CSS folder of the related static site repo (For example, in RBK, it's `/assets/css/chaise.css` in the rbk-www repo). More information can be found [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/custom-css.md).
    - Type: String - URL
-   - Default value: N/A
    - Sample syntax:
      ```
      customCSS: "/assets/css/chaise.css"
@@ -390,7 +382,7 @@ If a property appears in the same configuration twice, the property defined late
  #### maxRecordsetRowHeight
  Set this property to false if you don't want content to be clipped in tables else set it to a number which represents the maximum row height when not expanded.
    - Type: Boolean || Number
-   - Default value: 160
+   - Default behavior: 160 will be used if no value is supplied
    - Sample syntax:
      ```
      maxRecordsetRowHeight: 200
@@ -399,25 +391,16 @@ If a property appears in the same configuration twice, the property defined late
  #### confirmDelete
  If `false`, the user will not be prompted by a modal when deleting an item
    - Type: Boolean
-   - Default value: true
+   - Default behavior: user will be prompted with a dialog to confirm they want to delete
    - Sample syntax:
      ```
      confirmDelete: false
      ```
 
- #### hideSearchTextFacet
- Whether the search box for attributes names and values should be hidden
-   - Type: Boolean
-   - Default value: false
-   - Sample syntax:
-     ```
-     hideSearchTextFacet: true
-     ```
-
  #### editRecord
  If not present or equal to `true`, the recordedit page allows for inserting records and editing records. The record page will have an edit button for both of these cases as well. If equal to `false`, a dialog appears on recordedit that disallows use of the app for both create and edit, and the create/edit button does not appear in the record app.
    - Type: Boolean
-   - Default value: N/A
+   - Default behavior: Allows for inserting and editing records through the recordedit page
    - Sample syntax:
      ```
      editRecord: false
@@ -426,17 +409,16 @@ If a property appears in the same configuration twice, the property defined late
  #### deleteRecord
  If present and equal to `true`, the recordedit page will show delete button if editRecord is also true, and record page will show delete button if this is true. Otherwise, hide delete buttons.
    - Type: Boolean
-   - Default value: false
+   - Default behavior: recordset and record page will not show a delete buttons
    - Sample syntax:
      ```
      deleteRecord: true
      ```
 
  #### allowErrorDismissal
- All terminal error message display an error message dialog that is not dismissable by default. Set this property to `true` if you want to allow dismissable error message dialogs.
- This property when defined as `true` will cause a degraded UX experience that will prevent future errors from being thrown and other functionality might not behave as expected. This should ONLY be used in development environments.
+ Set this property to `true` if you want to allow dismissable error message dialogs. This property when defined as `true` will cause a degraded UX experience that will prevent future errors from being thrown and other functionality might not behave as expected. This should ONLY be used in development environments.
    - Type: Boolean
-   - Default value: false
+   - Default behavior: All terminal error message display an error message dialog that is not dismissable
    - Sample syntax:
      ```
      allowErrorDismissal: true
@@ -445,16 +427,16 @@ If a property appears in the same configuration twice, the property defined late
  #### maxRelatedTablesOpen
  It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
    - Type: Integer
-   - Default value: N/A
+   - Default behavior: all related tables will be expanded on load
    - Sample syntax:
      ```
      maxRelatedTablesOpen: 5
      ```
 
  #### showWriterEmptyRelatedOnLoad
- This property only applies to users with write permission to the main record being viewed. Set to `false` to hide all empty related tables on record page load ignoring the heuristics defined for writers. Set to `true` to show all empty related tables on record page load ignoring the heuristics. If `not defined`, the heuristics to show empty related tables based on the user being able to write to at least one of them will be used instead.
+ This property only applies to users with write permission to the main record being viewed. Set to `false` to hide all empty related tables on record page load ignoring the heuristics defined for writers. Set to `true` to show all empty related tables on record page load ignoring the heuristics. 
    - Type: Boolean
-   - Default value: N/A
+   - Default behavior: the heuristics to show empty related tables based on the user being able to write to at least one of them will be used
    - Sample syntax:
      ```
      showWriterEmptyRelatedOnLoad: false
@@ -463,25 +445,25 @@ If a property appears in the same configuration twice, the property defined late
  #### showFaceting
  If `true`, shows the faceting panel on the recordset app.
    - Type: Boolean
-   - Default value: false
+   - Default behavior: the faceting panel will not be available on recordset page
    - Sample syntax:
      ```
      showFaceting: true
      ```
 
  #### hideTableOfContents
- If true, hides the table of contents panel on the record app. By default table of contents will be visible.
+ If true, hides the table of contents panel on the record app.
    - Type: Boolean
-   - Default value: false
+   - Default behavior:  table of contents will be visible
    - Sample syntax:
      ```
      hideTableOfContents: true
      ```
 
  #### disableExternalLinkModal
- Set this to false to disable the external link notification.
+ Set this to true to disable the external link notification.
    - Type: Boolean
-   - Default value: false
+   - Default behavior: a notification that you are navigating to an external page in 5 seconds will show
    - Sample syntax:
      ```
      disableExternalLinkModal: true
@@ -490,7 +472,7 @@ If a property appears in the same configuration twice, the property defined late
  #### hideGoToRID
  Use this property to hide the RID search box in the navbar. The RID search box is present in the navbar when `resolverImplicitCatalog !== null` (meaning the resolver is in use) and `hideGoToRID !== true`
    - Type: Boolean
-   - Default value: false
+   - Default behavior: the RID search box will show in the navbar to the left of the login button or the logged in user information
    - Sample syntax:
      ```
      hideGoToRID: true
@@ -500,7 +482,7 @@ If a property appears in the same configuration twice, the property defined late
  #### defaultAnnotationColor
  In `/chaise/viewer`, annotations' borders and colors will default to this value.
    - Type: String - red|orange|gold|green|blue|purple
-   - Default value: red
+   - Default behavior: red will be used
    - Sample syntax:
      ```
      defaultAnnotationColor: purple
@@ -509,7 +491,7 @@ If a property appears in the same configuration twice, the property defined late
  #### userGroups
  For Viewer app only. The Viewer app assigns an authenticated user one of three permission levels depending on the user's Globus memberships. The permission levels, from highest to lowest, are `curator`, `annotator`, then `user`. The default Globus group IDs that determine who's a `curator`, `annotator`, or `user` are set by [RBK](https://github.com/informatics-isi-edu/rbk-project). To override these default group IDs for each permission level, you may specify your own via this `userGroups` setting.
    - Type: Object
-   - Default value: N/A
+   - Default behavior: The default Globus group IDs are set by RBK
    - Sample syntax:
      ```
      userGroups: {
@@ -523,7 +505,7 @@ If a property appears in the same configuration twice, the property defined late
  #### disableDefaultExport
  When the export annotation is missing from table and schema, ermrestjs will use the heuristics to generate a default export template. Set this attribute to `true` to avoid using the heuristics.
    - Type: Boolean
-   - Default value: false
+   - Default behavior:  ermrestjs will use the heuristics to generate a default export template
    - Sample syntax:
      ```
      disableDefaultExport: true
@@ -532,7 +514,7 @@ If a property appears in the same configuration twice, the property defined late
  #### exportServicePath
  You can use this variable to switch between different export services that might be available in the deployment.
    - Type: String
-   - Default value: "/deriva/export/"
+   - Default behavior: "/deriva/export/" will be used as the defailt path
    - Sample syntax:
      ```
      exportServicePath: "/deriva/export/"
@@ -542,7 +524,7 @@ If a property appears in the same configuration twice, the property defined late
  #### resolverImplicitCatalog
  Set to a catalog id, `N`, if your resolver accepts `/id/X` instead of `/id/N/X` and you prefer to share records with this shorter URL. If the property is `null`, the resolver functionality will be turned off and the default permalink will be used. Anything else will be ignored and the default behavior will be applied which is to always use the catalog-qualified form, `/id/N/X`.
    - Type: String
-   - Default value: N/A
+   - Default behavior: assume the resolver service uses the catalog-qualified form, `/id/N/X`
    - Sample syntax:
      ```
      resolverImplicitCatalog: "1"
@@ -552,7 +534,7 @@ If a property appears in the same configuration twice, the property defined late
  Use this property to show/hide or enable/disable the button used to open the share and cite dialog on Record app. The accepted values for the array for both show and enable are `"*"` or any valid globus group key. If either key/value pair is undefined in the object, it will default to `["*"]`. Consult the chaise-config-sample.js file for more details.
 system columns:
    - Type: Object
-   - Default value: {show: ["\*"], enable: ["\*"]}
+   - Default behavior: the share cite button is viewable and enabled for everyone
    - Sample syntax:
      ```
      shareCiteAcls: {
@@ -565,7 +547,7 @@ system columns:
  #### systemColumnsDisplayCompact
  If set to `true`, apply the system columns heuristics when no visible columns list is defined. This will put the RID system column as the first self referencing key column. 'RCB', 'RMB', 'RCT', 'RMT' will be placed at the very end of the list respectively. If set to an array, only system columns in the array will be displayed in the order mentioned earlier. This applies to compact and all subcontexts.
    - Type: Boolean || Array
-   - Default value: false
+   - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
    - Sample syntax:
      ```
      systemColumnsDisplayCompact: ["RMB", "RMT"]
@@ -574,7 +556,7 @@ system columns:
  #### systemColumnsDisplayDetailed
  See above description for `systemColumnsDisplayCompact`. This property behaves the same way except only for the detailed context.
    - Type: Boolean || Array
-   - Default value: false
+   - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
    - Sample syntax:
      ```
      systemColumnsDisplayDetailed: true
@@ -583,7 +565,7 @@ system columns:
  #### systemColumnsDisplayEntry
  See above description for `systemColumnsDisplayCompact`. This property behaves the same way except only for the entry contexts.
    - Type: Boolean || Array
-   - Default value: false
+   - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
    - Sample syntax:
      ```
      systemColumnsDisplayEntry: ["RMT", "RCT"]
@@ -593,7 +575,7 @@ system columns:
  #### internalHosts
  If external link notification is enabled, Chaise will use this array to determine whether the current host is external. List any hostnames that should be considered internal. If defined, `<current hostname>` will not be automatically added to the list.
    - Type: Array
-   - Default value: [<current hostname>]
+   - Default behavior: the current hostname will be treated as an internal host
    - Sample syntax:
      ```
      internaleHosts: ["dev.rebuildingakidney.org", "dev.gudmap.org"]
@@ -602,7 +584,7 @@ system columns:
  #### includeCanonicalTag
  This variable can be used to force chaise to include a tag in the tag that defines the canonical link for each of the entities and other resource pages.
    - Type: Boolean
-   - Default value: false
+   - Default behavior: canonical tag will not be included
    - Sample syntax:
      ```
      includeCanonicalTag: true
@@ -611,7 +593,7 @@ system columns:
  #### logClientActions
  Set this to `false` to disable the logging of client side actions which occurs when users interact with the app in ways that don't generate a request to the database.
    - Type: Boolean
-   - Default value: true
+   - Default behavior: client actions that don't normally interact with the database will be logged
    - Sample syntax:
      ```
      logClientActions: false
@@ -631,7 +613,6 @@ system columns:
        ...
      ]
      ```
-   - Default value: N/A
    - Sample syntax:
      ```
      configRules: [
@@ -654,6 +635,7 @@ system columns:
  #### savedQueryConfig
  Use this property to define the path to the saved query table for the saved query feature. The `storageTable` is required to be an object with 3 properties, `catalog`, `schema`, and `table`. This config property defaults to null when undefined. If `savedQueryConfig` is not an object with an object containing all of the above 3 properties, this will be set to `null`. The `defaultName` object has 3 properties that can be defined to change when a simplified default name syntax is applied.
    - Type: Object
+   - Default behavior: the saved query feature will be turned off
    - General syntax:
      ```
      savedQueryConfig: {
@@ -677,7 +659,6 @@ system columns:
      - `facetChoiceLimit`: Set this value to define when to show a compressed facet syntax based on how many choices are selected. By default this value is 5. Set this to 0 to always show the compressed syntax.
      - `facetTextLimit`: Set this value to define when to show a compressed facet syntax based on the total string length of the facet choices when appended together. By default this value is 60. Set this to 0 to always show the compressed syntax.
      - `totalTextLimit`: Set this value to define when to show a shortened facet syntax based on the total string length of all facets text when appended together. By default this value is 200. Set this to 0 to always show the further shortened syntax.
-   - Default value: null
    - Sample syntax:
      ```
      savedQueryConfig: {
@@ -698,7 +679,7 @@ system columns:
  #### footerMarkdown
  If present, it creates a footer at the bottom of the app with the markdown text.
    - Type: String
-   - Default value: N/A
+   - Default behavior: no footer will be shown
    - Sample syntax:
      ```
      footerMarkdown: "* Please check [Privacy Policy](/privacy-policy/){target='_blank'}"
@@ -706,9 +687,8 @@ system columns:
 
  #### assetDownloadPolicyURL
  Set this property to the url that points to the download policy for when an asset is fetched but the user is unauthorized to fetch that asset.
-
    - Type: String - URL
-   - Default value: N/A
+   - Default behavior: no asset policy link will be shown in the error modal
    - Sample syntax:
      ```
      assetDownloadPolicyURL: "<your url>"
