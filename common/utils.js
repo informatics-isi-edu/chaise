@@ -3013,6 +3013,7 @@
             FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
             PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
             SAVED_QUERY_CREATE: "saved-query" + clientPathActionSeparator + "create",
+            SAVED_QUERY_LOAD: "saved-query" + clientPathActionSeparator + "load",
             SAVED_QUERY_EXECUTE: "saved-query" + clientPathActionSeparator + "execute",
 
             //   - client:

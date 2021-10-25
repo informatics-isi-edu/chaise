@@ -1645,12 +1645,15 @@
                     // check to see if the saved query exists for the given user, table, schema, and selected facets
                     var queryUri = savedQueryReference.uri + "/user_id=" + UriUtils.fixedEncodeURIComponent(row.user_id) + "&schema_name=" + UriUtils.fixedEncodeURIComponent(row.schema_name) + "&table_name=" + UriUtils.fixedEncodeURIComponent(row.table_name) + "&query_id=" + row.query_id;
 
-                    var headers = {};
-                    headers[ERMrest.contextHeaderName] = ConfigUtils.getContextHeaderParams();
-                    ERMrest.resolve(queryUri, {headers: headers}).then(function (response) {
+                    ERMrest.resolve(queryUri, ConfigUtils.getContextHeaderParams()).then(function (response) {
                         console.log("reference: ", response);
 
-                        return response.read(1);
+                        var logObj = {
+                            action: logService.getActionString(logService.logActions.SAVED_QUERY_LOAD, logService.logStackPaths.ENTITY),
+                            stack: logService.getStackObject()
+                        };
+
+                        return response.read(1, logObj);
                     }).then(function (page) {
                         // if a row is returned, a query with this set of facets exists already
                         if (page.tuples.length > 0) {
@@ -1730,7 +1733,7 @@
                         );
 
                         var logStack = logService.getStackObject(stackElement),
-                        logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
+                            logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
 
                         params.logStack = logStack;
                         params.logStackPath = logStackPath;
