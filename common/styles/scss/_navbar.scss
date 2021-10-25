@@ -102,6 +102,24 @@ body > .container {
     padding-right: 20px;
 }
 
+.chaise-navbar-banner-container {
+    margin-bottom: 0;
+    padding: 10px 20px 10px 20px;
+    background-color: #f9e3a1;
+    text-align: center;
+
+    // use the normal font instead of light and make it bigger
+    font-family: "Helvetica Neue", Helvetica , Arial, sans-serif;
+    letter-spacing: 1px;
+    font-weight: 500;
+    font-size: 16px;
+
+    .close {
+        padding-right: 15px;
+    }
+}
+
+
 /* This value is in bootstrap for navbar-collapse but it isn't getting applied so its been added here */
 .navbar-collapse {
     max-height: 340px;
@@ -118,6 +136,7 @@ TODO we should be able to simplify the rules and also investigate whether
 */
 header {
     .dropdown-menu>li>a.chaise-dropdown-header,
+    .dropdown-menu>li>div>div>a.chaise-dropdown-header,
     .chaise-dropdown-header {
         padding: 3px 15px 3px 15px;
         cursor: default;
@@ -130,7 +149,8 @@ header {
         position: relative;
     }
 
-    .dropdown-submenu>.dropdown-menu {
+    .dropdown-submenu>.dropdown-menu,
+    .dropdown-submenu>div>div>.dropdown-menu {
         position: fixed;
         margin-top: -6px;
         margin-left: -1px;
@@ -139,7 +159,8 @@ header {
         border-radius: 0 6px 6px 6px;
     }
 
-    .dropdown-submenu>a:after {
+    .dropdown-submenu>a:after,
+    .dropdown-submenu>div>div>a:after {
         display: flex;
         content: " ";
         float: right;
@@ -156,7 +177,8 @@ header {
         margin-left: 10px;
     }
 
-    .dropdown-submenu:hover>a:after {
+    .dropdown-submenu:hover>a:after,
+    .dropdown-submenu:hover>div>div>a:after {
         border-left-color: #777; /* was #fff */
     }
 
@@ -164,7 +186,8 @@ header {
         float: none;
     }
 
-    .dropdown-submenu.pull-left>.dropdown-menu {
+    .dropdown-submenu.pull-left>.dropdown-menu,
+    .dropdown-submenu.pull-left>div>div>.dropdown-menu {
         left: -100%;
         margin-left: 10px;
         -webkit-border-radius: 6px 0 6px 6px;
@@ -173,7 +196,8 @@ header {
     }
 
     // Dummy selector to keep the same amount of space as submenu arrow
-    .dropdown-menu > .dropdown-submenu + li > a::after {
+    .dropdown-menu > .dropdown-submenu + li > a::after,
+    .dropdown-menu > .dropdown-submenu + li > div > div > a::after {
         content: " ";
         height: 12px;
         width: 12px;
@@ -194,17 +218,27 @@ header {
         min-width: 100px;
     }
 
-    .dropdown-menu > li > a {
+    .dropdown-menu > li > a,
+    .dropdown-menu > li > div > div > a {
         white-space: normal;
         cursor: pointer;
         display: flex;
         justify-content: space-between;
+        color: #333;
         margin-bottom: 2px;
         padding: 3px 15px 3px 15px;
         line-height: 1.4;
+
+        &:focus,
+        &:hover {
+            color: #262626;
+            text-decoration: none;
+            background-color: #f5f5f5;
+        }
     }
 
-    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a {
+    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a,
+    .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>div>div>a {
         padding-left: 22px;
     }
 
@@ -214,7 +248,10 @@ header {
             padding-left: 3%;
         }
         // !important is hacky but had to be used as we override width via js for horizontal navbar and this gets overriden too
-        .dropdown-menu, .navbar-nav ul.dropdown-menu, .dropdown-menu > li > a {
+        .dropdown-menu,
+        .navbar-nav ul.dropdown-menu,
+        .dropdown-menu > li > a,
+        .dropdown-menu > li > div > div > a {
             max-width: none !important;
             width: auto !important;
         }

@@ -474,7 +474,7 @@
                     }
 
                     $log.debug("counter", current, ": read main successful.");
-                    
+
 
                     return vm.getFavorites ? vm.getFavorites(vm, page) : {page: page};
                 }).then(function (result) {
@@ -1099,7 +1099,7 @@
            }
        }
 
-        /** 
+        /**
          * Transform facets to a more stable version that can be saved.
          * The overal returned format is like the following:
          * {
@@ -1510,10 +1510,9 @@
                 var facetTxt = "*::facets::";
                 scope.saveQuery = function () {
                     var chaiseConfig = ConfigUtils.getConfigJSON();
-
                     var columnModels = [];
-
                     var savedQueryReference = scope.vm.savedQueryReference.contextualize.entryCreate;
+                    var savedQueryConfig = scope.$root.savedQuery;
 
                     var rowData = {
                         rows: [{}],
@@ -1527,35 +1526,170 @@
                         columnModels.push(recordCreate.columnToColumnModel(col));
                     });
 
-                    
+                    var isDescriptionMarkdown = columnModels.filter(function (model) {
+                        return model.column.name == "description"
+                    })[0].inputType == "longtext"
+
+                    function facetOptionsToString (options) {
+                        var str = "";
+                        options.forEach(function (option, idx) {
+                            var name = option.displayname.value;
+                            if (name === null) {
+                                str += " _No value_";
+                            } else if (name === "<i>All records with value </i>") {
+                                str += " _All records with value_"
+                            } else if (name === '') {
+                                str += " _Empty_"
+                            } else {
+                                str += " " + name;
+                            }
+                            if (idx+1 != options.length) str += ","
+                        });
+                        return str;
+                    }
+
+                    function facetDescription (facet, optionsString, notLastIdx) {
+                        var value = (isDescriptionMarkdown ? "  -" : "") + facet + ":" + optionsString + ";";
+                        if (notLastIdx) value += "\n";
+
+                        return value;
+                    }
+
+                    /*
+                     * The following code is for creating the default name and description
+                     *
+                     * `name` begins with the reference displayname and "with". The rest of the name is created by
+                     * iterating over each facet and the selections made in the facets. The value appended to the
+                     * name for each facet will follow 1 of 3 formats:
+                     *   1. listing the options if under the numFacetChoices and facetTextLength thresholds
+                     *      <option1>, <option2>, <option3>, ...
+                     *   2. in the case of ranges, listing the facet displayname and the selections if under the numFacetChoices and facetTextLength thresholds
+                     *      <facet displayname> (<option1>, <option2>, <option3>, ...)
+                     *   3. listing the facet displayname and number of selections if over either of the numFacetChoices or facetTextLength thresholds
+                     *      <facet displayname> (6 choices)
+                     * If the name after appending all facet names together is over the nameLength threshold,
+                     * a further shortened syntax is used for the whole name:
+                     *     <reference displayname> with x facets: <facet1 displayname>, <facet2 displayname>, <facet3 displayname>, ...
+                     *
+                     * `description` begins with the reference displayname and "with" also. The rest of the
+                     * description is created by iterating over each facet and the selections made in the facets.
+                     * description format for each facet is generally:
+                     *     <facet displayname> (x choices): <option1>, <option2>, <option3>, ...
+                     *
+                     * The format for description slightly differs depending on whether the input type is text
+                     * or longtext. If longtext, each facet description is preceded by a hyphen (`-`) and is on a new line.
+                     * Otherwise, the description is all one line with no hyphens
+                     */
+                    var nameDescriptionPrefix = scope.vm.reference.displayname.value + " with";
+                    var facetNames = "";
+
+                    var name = nameDescriptionPrefix
+                    var description = nameDescriptionPrefix + ":\n";
+
+                    var modelsWFilters = scope.vm.facetModels.filter(function (fm, idx) {
+                        fm.displayname = scope.vm.reference.facetColumns[idx].displayname.value;
+                        fm.preferredMode = scope.vm.reference.facetColumns[idx].preferredMode;
+                        return (fm.appliedFilters.length > 0);
+                    });
+
+                    if (scope.vm.search) {
+                        name += " " + scope.vm.search + ";";
+                        description += facetDescription(" Search", scope.vm.search, modelsWFilters.length > 0)
+                    }
+
+                    // iterate over the facetModels to create the default name and description values;
+                    modelsWFilters.forEach(function (fm, modelIdx) {
+                        // ===== setting default name =====
+                        // create the facetNames string in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
+                        facetNames += " " + fm.displayname;
+                        if (modelIdx+1 != modelsWFilters.length) facetNames += ",";
+
+                        var numChoices = fm.appliedFilters.length;
+                        var facetDetails = " " + fm.displayname + " (" + numChoices + " choice" + (numChoices > 1 ? 's' : '') + ")";
+                        // set to default value to use if the threshold are broken
+                        var facetInfo = facetDetails;
+
+                        // used for the description and name if not too long
+                        var facetOptionsString = ""; // the concatenation of facet option names
+                        if (fm.preferredMode == "ranges") facetOptionsString += " " + fm.displayname + " (";
+                        facetOptionsString += facetOptionsToString(fm.appliedFilters);
+                        if (fm.preferredMode == "ranges") facetOptionsString += ")";
+
+                        // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
+                        if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
+                        name += facetInfo + ";"
+
+                        // ===== setting default description =====
+                        description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
+                    });
+
+                    // if name is longer than the set string length threshold, show the compact version with facet names only
+                    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) name = nameDescriptionPrefix + " " + modelsWFilters.length + " facets:" + facetNames;
+
+                    rowData.rows[0].name = name;
+                    rowData.rows[0].description = description;
+
                     // get the stable facet
                     var facetObj = _getStableFacets(scope);
+                    var query_id = SparkMD5.hash(JSON.stringify(facetObj));
 
+                    // set id based on hash of `facets` columns
+                    rowData.rows[0].query_id = query_id;
                     rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : null;
                     rowData.rows[0].facets = facetObj;
                     rowData.rows[0].table_name = scope.vm.reference.table.name;
                     rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
                     rowData.rows[0].user_id = scope.$root.session.client.id;
 
-                    modalUtils.showModal({
-                        templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
-                        windowClass:"create-saved-query",
-                        controller: "SavedQueryModalDialogController",
-                        controllerAs: "ctrl",
-                        size: "md",
-                        keyboard: true,
-                        resolve: {
-                            params: {
-                                reference: savedQueryReference,
-                                parentReference: scope.vm.reference,
-                                columnModels: columnModels,
-                                rowData: rowData
-                            }
+                    var row = rowData.rows[0];
+                    // check to see if the saved query exists for the given user, table, schema, and selected facets
+                    var queryUri = savedQueryReference.uri + "/user_id=" + UriUtils.fixedEncodeURIComponent(row.user_id) + "&schema_name=" + UriUtils.fixedEncodeURIComponent(row.schema_name) + "&table_name=" + UriUtils.fixedEncodeURIComponent(row.table_name) + "&query_id=" + row.query_id;
+
+                    var headers = {};
+                    headers[ERMrest.contextHeaderName] = ConfigUtils.getContextHeaderParams();
+                    ERMrest.resolve(queryUri, {headers: headers}).then(function (response) {
+                        console.log("reference: ", response);
+
+                        return response.read(1);
+                    }).then(function (page) {
+                        // if a row is returned, a query with this set of facets exists already
+                        if (page.tuples.length > 0) {
+                            modalUtils.showModal({
+                                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/duplicateSavedQuery.modal.html",
+                                windowClass:"duplicate-saved-query",
+                                controller: "DuplicateSavedQueryModalDialogController",
+                                controllerAs: "ctrl",
+                                keyboard: true,
+                                resolve: {
+                                    params: {
+                                        tuple: page.tuples[0]
+                                    }
+                                }
+                            }, null, null, false, false);
+                        } else {
+                            modalUtils.showModal({
+                                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
+                                windowClass:"create-saved-query",
+                                controller: "SavedQueryModalDialogController",
+                                controllerAs: "ctrl",
+                                size: "md",
+                                keyboard: true,
+                                resolve: {
+                                    params: {
+                                        reference: savedQueryReference,
+                                        parentReference: scope.vm.reference,
+                                        columnModels: columnModels,
+                                        rowData: rowData
+                                    }
+                                }
+                            }, function success() {
+                                // notify user of success before closing
+                                AlertsService.addAlert("Search criteria saved.", "success");
+                            }, null, false, false);
                         }
-                    }, function success() {
-                        // notify user of success before closing
-                        AlertsService.addAlert("Search criteria saved.", "success");
-                    }, null, false, false);
+                    }).catch(function (err) {
+                        $log.debug(err);
+                    });
                 }
 
                 scope.showSavedQueries = function () {

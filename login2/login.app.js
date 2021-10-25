@@ -67,6 +67,7 @@
         var subId = Session.subscribeOnChange(function () {
             Session.unsubscribeOnChange(subId);
             var session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
 
             var validConfig = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig),
                 hasGroup = false;

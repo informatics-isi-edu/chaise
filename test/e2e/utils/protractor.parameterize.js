@@ -172,7 +172,7 @@ exports.parameterize = function(config, configParams) {
             }).then(function (res) {
                 onErmrestLogin(defer);
             }).catch(function (err) {
-                defe.reject(err);
+                defer.reject(err);
             });
         }
 

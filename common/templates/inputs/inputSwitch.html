@@ -118,7 +118,7 @@
 
     <!-- longtext/textarea input -->
     <div ng-switch-when="longtext">
-        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box" ng-required="vm.isRequired" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box chaise-input-control" style="height: 120px" ng-required="vm.isRequired" empty-to-null markdown-editor="{iconlibrary: 'glyph', addExtraButtons: true, fullscreen: { enable: false, icons: {}}, resize: 'vertical'}"></textarea>
         <a href class="live-preview" markdown-preview textinput="vm.model"></a>
     </div>
 

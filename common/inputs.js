@@ -567,7 +567,6 @@
                     }
 
                     params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).contextualize.compactSelect;
-                    params.reference.session = $rootScope.session;
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
