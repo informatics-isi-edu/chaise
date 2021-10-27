@@ -7,10 +7,20 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux';
 import { store } from 'Store/store';
 
+import Navbar from 'Components/Navbar';
+
 const RecordSetApp: React.FC<{}> = (): JSX.Element => {
-  return (
-    <div>This is the recordset app</div>
-  )
+
+  const renderRecordset = () => {
+      return (<div>
+        <Navbar />
+        <div>This is the recordset app</div>
+      </div>)
+    }
+
+  return (<div>
+    {renderRecordset()}
+  </div>)
 }
 
 ReactDOM.render(
