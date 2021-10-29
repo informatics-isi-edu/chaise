@@ -3,12 +3,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
 
+var mode = process.env.NODE_ENV || 'development';
+console.log("webpack mode: " + mode);
 module.exports =  function (appName, filename) {
   filename = filename || appName;
   return {
       name: appName,
-      devtool: 'source-map',
-      mode: process.env.NODE_ENV || 'production',
+      devtool: (mode === 'development') ? 'inline-source-map' : false,
+      mode: mode,
       entry: path.join(__dirname, '..', 'src', 'pages', filename + '.tsx'),
       output: {
           path: path.resolve(__dirname, '..', 'dist', 'react', filename),
@@ -40,6 +42,8 @@ module.exports =  function (appName, filename) {
               {
                 test: /\.(css|scss)$/,
                 use: [MiniCssExtractPlugin.loader, "css-loader", "sass-loader"],
+                // cue up for tree shake
+                sideEffects: true
               },
               {
                 test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
