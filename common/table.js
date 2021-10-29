@@ -1506,6 +1506,13 @@
                     return _disableSavedQueryButton;
                 }
 
+                scope.logSavedQueryDropdownOpened = function () {
+                  logService.logClientAction({
+                      action: logService.getActionString(logService.logActions.SAVED_QUERY_OPEN),
+                      stack: logService.getStackObject()
+                  }, scope.vm.reference.defaultLogInfo);
+                }
+
                 // string constant used for both saved query functions
                 var facetTxt = "*::facets::";
                 scope.saveQuery = function () {
@@ -1648,11 +1655,16 @@
                     ERMrest.resolve(queryUri, ConfigUtils.getContextHeaderParams()).then(function (response) {
                         console.log("reference: ", response);
 
+                        var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+                        var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, savedQueryReference.table);
+
                         var logObj = {
-                            action: logService.getActionString(logService.logActions.SAVED_QUERY_LOAD, logService.logStackPaths.ENTITY),
-                            stack: logService.getStackObject()
+                            action: logService.getActionString(logService.logActions.PRELOAD, stackPath, logService.appModes.CREATE),
+                            stack: logService.getStackObject(currStackNode)
                         };
 
+                        // TODO: how does recordedit prepend appmode for logging
+                        // logObj.action = "create:" + current action
                         return response.read(1, logObj);
                     }).then(function (page) {
                         // if a row is returned, a query with this set of facets exists already

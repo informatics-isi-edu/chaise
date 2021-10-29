@@ -2979,6 +2979,7 @@
             // general
 
             // - server:
+            PRELOAD: clientPathActionSeparator + "preload",
             LOAD: clientPathActionSeparator + "load",
             RELOAD: clientPathActionSeparator + "reload",
             DELETE: clientPathActionSeparator + "delete",
@@ -3012,9 +3013,7 @@
             FACET_HISTOGRAM_LOAD: "range" + clientPathActionSeparator + "load-histogram",
             FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
             PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
-            SAVED_QUERY_CREATE: "saved-query" + clientPathActionSeparator + "create",
-            SAVED_QUERY_LOAD: "saved-query" + clientPathActionSeparator + "load",
-            SAVED_QUERY_EXECUTE: "saved-query" + clientPathActionSeparator + "execute",
+            SAVED_QUERY_OPEN: "saved-query" + clientPathActionSeparator + "open",
 
             //   - client:
             PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
@@ -3148,6 +3147,7 @@
             COLUMN: "col",
             PSEUDO_COLUMN: "pcol",
             FACET: "facet",
+            SAVED_QUERY: "saved_query",
 
             // used in viewer app:
             ANNOTATION: "annotation",
@@ -3167,6 +3167,7 @@
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_CREATE_POPUP: "saved-query-entity",
             SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
