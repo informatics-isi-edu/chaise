@@ -648,6 +648,9 @@
 
         vm.form = params.rowData;
 
+        var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+        var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, params.reference.table);
+
         vm.submit = function () {
             if (vm.form.$invalid) {
                 vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error', deleteAlert, true));
@@ -656,11 +659,11 @@
             }
 
             var logObj = {
-                action: logService.getActionString(logService.logActions.SAVED_QUERY_CREATE, logService.logStackPaths.ENTITY),
-                stack: logService.getStackObject()
-            }
+                action: logService.getActionString(logService.logActions.CREATE, stackPath, logService.appModes.CREATE),
+                stack: logService.addExtraInfoToStack(logService.getStackObject(currStackNode), {"num_created": 1})
+            };
 
-            var row = vm.savedQueryForm.rows[0]
+            var row = vm.savedQueryForm.rows[0];
 
             row.last_execution_time = "now";
             params.reference.create(vm.savedQueryForm.rows, logObj).then(function success(query) {
@@ -673,6 +676,11 @@
         }
 
         vm.cancel = function () {
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.CANCEL, stackPath, logService.appModes.CREATE),
+                stack: logService.getStackObject(currStackNode)
+            }, params.reference.defaultLogInfo);
+
             $uibModalInstance.dismiss("cancel");
         }
     }])

@@ -1482,7 +1482,7 @@
             // this function is called after recordset triggers that the reference is readyToInitialize
             // scope.$root.savedQuery is set once we have a reference
             function registerSavedQueryFunctions () {
-                scope.showSavedQueryUI = scope.$root.savedQuery.showUI;
+                scope.showSavedQueryUI = scope.$root.savedQuery && scope.$root.savedQuery.showUI;
                 // if the UI should not be shown return before doing anything
                 if (!scope.showSavedQueryUI) return;
 
@@ -1600,7 +1600,8 @@
                     });
 
                     if (scope.vm.search) {
-                        name += " " + scope.vm.search + ";";
+                        name += " " + scope.vm.search
+                        if (modelsWFilters.length > 0) name += ";";
                         description += facetDescription(" Search", scope.vm.search, modelsWFilters.length > 0)
                     }
 
@@ -1624,7 +1625,7 @@
 
                         // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
                         if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
-                        name += facetInfo + ";"
+                        if (modelIdx+1 != modelsWFilters.length) name += facetInfo + ";"
 
                         // ===== setting default description =====
                         description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
@@ -1653,8 +1654,6 @@
                     var queryUri = savedQueryReference.uri + "/user_id=" + UriUtils.fixedEncodeURIComponent(row.user_id) + "&schema_name=" + UriUtils.fixedEncodeURIComponent(row.schema_name) + "&table_name=" + UriUtils.fixedEncodeURIComponent(row.table_name) + "&query_id=" + row.query_id;
 
                     ERMrest.resolve(queryUri, ConfigUtils.getContextHeaderParams()).then(function (response) {
-                        console.log("reference: ", response);
-
                         var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
                         var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, savedQueryReference.table);
 
@@ -1663,8 +1662,6 @@
                             stack: logService.getStackObject(currStackNode)
                         };
 
-                        // TODO: how does recordedit prepend appmode for logging
-                        // logObj.action = "create:" + current action
                         return response.read(1, logObj);
                     }).then(function (page) {
                         // if a row is returned, a query with this set of facets exists already
@@ -1980,14 +1977,37 @@
                             updateRow.RID = $rootScope.savedQuery.rid
                             updateRow.last_execution_time = "now";
 
-                            var logObj = {
-                                action: logService.getActionString(logService.logActions.SAVED_QUERY_EXECUTE, logService.logStackPaths.ENTITY),
-                                stack: logService.getStackObject()
+                            // create this fake table object so getStackNode works
+                            var fauxTable = {
+                                name: $rootScope.savedQuery.mapping.table,
+                                schema: {
+                                    name: $rootScope.savedQuery.mapping.schema
+                                }
                             }
 
+                            var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+                            var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, fauxTable);
+
+                            var logObj = {
+                                action: logService.getActionString(logService.logActions.UPDATE, stackPath),
+                                stack: logService.addExtraInfoToStack(logService.getStackObject(currStackNode), {
+                                    "num_updated": 1,
+                                    "updated_keys": {
+                                        "cols": ["RID"],
+                                        "vals": [$rootScope.savedQuery.rid]
+                                    }
+                                }),
+                                rid: $rootScope.savedQuery.rid
+                            };
+
+                            var config = {
+                                skipHTTP401Handling: true,
+                                headers: {}
+                            };
+
+                            config.headers[ERMrest.contextHeaderName] = logObj;
                             // attributegroup/CFDE:saved_query/RID;last_execution_status
-                            // TODO: replace with AG reference maybe so logObj can be included
-                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
+                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows, config).then(function (response) {
                                 $log.debug("new last executed time: ", response);
                             }).catch(function (error) {
                                 $log.warn("saved query last executed time could not be updated");
