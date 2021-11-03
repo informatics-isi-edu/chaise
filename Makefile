@@ -273,8 +273,8 @@ SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
 	$(info - creating app.css and navbar.css)
-	@$(BIN)/node-sass --output-style compressed --source-map-embed --source-map-root $(CHAISE_BASE_PATH) $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --output-style compressed --source-map-embed --source-map-root $(CHAISE_BASE_PATH) $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	@$(BIN)/sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@$(BIN)/sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 JS_CONFIG=chaise-config.js
 $(JS_CONFIG): chaise-config-sample.js

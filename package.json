@@ -31,7 +31,7 @@
     "set-cookie-parser": "x"
   },
   "dependencies": {
-    "node-sass": "4.14.1",
+    "sass": "^1.43.4",
     "uglify-js": "3.9.2"
   }
 }
