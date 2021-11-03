@@ -205,6 +205,10 @@
             > td.disabled-cell {
                 background-color: #f7f0cf !important;
             }
+
+            .hover-show {
+                visibility: visible;
+            }
         }
 
         /* odd disabled cells need to be darker */
@@ -339,6 +343,11 @@
                 top: -2px;
             }
         }
+
+        .apply-saved-query-button.disabled {
+            cursor: not-allowed;
+            color: $disabled-color;
+        }
     }
 
 
@@ -357,7 +366,7 @@
 
 /************* search loader ***************/
 input.search-progress {
-    background: url("../images/loader.gif") no-repeat right center;
+    background: url("images/loader.gif") no-repeat right center;
     background-size: 25px 25px;
     background-position-x: 99%;
 }
@@ -528,9 +537,18 @@ faceting {
     .chaise-checkbox {
         margin-bottom: 7px;
         margin-left: 5px;
+
+        // puts the checkbox+label to the left and the favorite icon to the right
+        display: flex;
+        justify-content: space-between;
     }
+
     li:hover {
         background-color: rgb(241, 241, 241);
+
+        .hover-show {
+            visibility: visible;
+        }
     }
 }
 

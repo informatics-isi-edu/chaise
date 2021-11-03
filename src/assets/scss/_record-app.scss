@@ -541,7 +541,12 @@
 
         //In print we hide YouTube and other videos. This class is then made visible to display the relevant info in print mode
         .video-info-in-print{
-          visibility: visible !important;
+            /*
+            * NOTE: we're using display because visibility:hidden had aligment issues.
+            * With visibility hidden eventhough the element is invisibile, it will still take up space,
+            * and will add extra unnecessary space between the iframe and fullscreen button.
+            */
+            display: block !important;
         }
 
         alerts {
