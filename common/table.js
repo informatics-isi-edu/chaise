@@ -1970,7 +1970,11 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        if (scope.vm.reference._context == "compact" && $rootScope.savedQuery && $rootScope.savedQuery.rid) {
+                        if ($rootScope.savedQuery && !$rootScope.savedQuery.updated) {
+                            // to prevent the following code and request from triggering more than once
+                            // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
+                            $rootScope.savedQuery.updated = true;
+
                             var rows = [{}],
                                 updateRow = rows[0];
 
@@ -2008,7 +2012,7 @@
                             config.headers[ERMrest.contextHeaderName] = logObj;
                             // attributegroup/CFDE:saved_query/RID;last_execution_status
                             ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows, config).then(function (response) {
-                                $log.debug("new last executed time: ", response);
+                              // do nothing
                             }).catch(function (error) {
                                 $log.warn("saved query last executed time could not be updated");
                                 $log.warn(error);
