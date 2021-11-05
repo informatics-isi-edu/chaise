@@ -47,17 +47,17 @@ By providing `Deriva-Client-Context` header in ermrset requests we can log extra
       {
         "type": "set",
         "s_t": "isa:dataset"
-      }, 
+      },
       {
         "type": "facet",
         "s_t": "vocab:species",
         "source": [
           {
             "i": ["isa", "dataset_organism_dataset_id_fkey"]
-          }, 
+          },
           {
             "o": ["isa", "dataset_organism_organism_fkey"]
-          }, 
+          },
           "id"
         ],
         "entity": true
@@ -109,13 +109,14 @@ Depending on the request, we might log extra attributes that we are gong to list
 
 - `paction`: The action in the parent page that fired the current request. Acceptable values are:
   - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
+  - `applyQuery`: Available on the first read of the main set in recordset page. Indicates that the user clicked "Apply search criteria" button in tabular displays.
 
 - `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:
   - Required attributes:
     - `s_t`: The end table of this node in the format of `schema:table`.
       - As an exception, in viewer app, if an image annotation is derived from file (not database), this value will not be available on the stack object.
 
-    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related` (inline or related table), `annotation` (image annotation in viewer app).
+    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related` (inline or related table), `saved_query` (saved query dropdown functionality), `annotation` (image annotation in viewer app).
 
   - Optional attributes:
     - `filters`: The facet object using the [compressed syntax](#facet-compressed-syntax).
@@ -175,7 +176,7 @@ Depending on the request, we might log extra attributes that we are gong to list
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
 
-- `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
+- `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for. Available
 
 - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
@@ -213,6 +214,8 @@ Where,
   - `facet-picker`: Used for facet picker.
   - `fk`: Based on `fk` stack node `type`.
   - `fk-picker`: Used for foreign key picker.
+  - `saved-query-entity`: Used for saved query create popup.
+  - `saved-query-picker`: Used for saved query apply picker.
   - `annotation-set`: Annotation list displayed on the viewer app.
   - `annotation-entity`: Each individual annotation displayed in annotation list of viewer app.
 
@@ -408,6 +411,19 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ## Change Log
 
+
+### 11/04/21
+
+###### PR Links
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2137)
+
+###### Added
+  - Added a new UI context, `saved-query`, and stack path, `saved-query-entity`.
+    Together these create 5 new actions, `:set,saved-query;open`,
+    `create:set/saved-query-entity,;preload`, `create:set/saved-query-entity,;create`,
+    `create:set/saved-query-entity,;cancel`, and `:set/saved-query-entity,;update`
+  - Added stack path, `saved-query-picker`. This includes 15 actions as well
+    for a recordset modal selector further documented in the action list spreadsheet.
 
 ### 04/02/21
 
