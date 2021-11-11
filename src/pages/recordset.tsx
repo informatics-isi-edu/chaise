@@ -2,15 +2,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import 'Assets/scss/app.scss'
+import '@chaise/assets/scss/app.scss';
 
 import React  from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { store } from 'Store/store';
-import FontAwesome from 'Services/fontawesome';
+import { store } from '@chaise/store/store';
+import FontAwesome from '@chaise/services/fontawesome';
+import Spinner from '@chaise/components/spinner';
 
-const RecordSetApp: React.FC<{}> = (): JSX.Element => {
+const RecordSetApp = (): JSX.Element => {
 
   FontAwesome.addRecordsetFonts();
 
@@ -24,6 +25,12 @@ const RecordSetApp: React.FC<{}> = (): JSX.Element => {
         Bootstrap works!
       </div>
       <Button>bootstrap button</Button>
+      <div>
+        spinner is working:
+        <br/>
+        <Spinner/>
+      </div>
+
     </div>
   );
 };

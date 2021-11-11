@@ -23,13 +23,13 @@ module.exports =  function (appName, filename) {
               path.resolve(__dirname, '..', 'node_modules')
           ],
           alias: {
-              Assets: path.resolve(__dirname, '..', 'src', 'assets'),
-              Components: path.resolve(__dirname, '..', 'src', 'components'),
-              Legacy: path.resolve(__dirname, '..'),
-              Services: path.resolve(__dirname, '..', 'src', 'services'),
-              Store: path.resolve(__dirname, '..', 'src', 'store'),
-              Utils: path.resolve(__dirname, '..', 'src', 'utils'),
-              Vendor: path.resolve(__dirname, '..', 'src', 'vendor')
+              "@chaise/assets": path.resolve(__dirname, '..', 'src', 'assets'),
+              "@chaise/components": path.resolve(__dirname, '..', 'src', 'components'),
+              "@chaise/legacy": path.resolve(__dirname, '..'),
+              "@chaise/services": path.resolve(__dirname, '..', 'src', 'services'),
+              "@chaise/store": path.resolve(__dirname, '..', 'src', 'store'),
+              "@chaise/utils": path.resolve(__dirname, '..', 'src', 'utils'),
+              "@chaise/vendor": path.resolve(__dirname, '..', 'src', 'vendor')
           }
       },
       module: {
