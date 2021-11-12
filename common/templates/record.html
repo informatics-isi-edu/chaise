@@ -1,5 +1,5 @@
 <table class="table table-fixed-layout" id="tblRecord">
-    <tr ng-repeat="col in columnModels" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + col.column.name}}" ng-class="{'hide-border': $root.hideColumnHeaders}" class="row">
+    <tr ng-repeat="col in columnModels" ng-if="showColumn($index) || showInlineTable($index)" id="{{'row-' + col.column.name}}" ng-class="{'hide-border': $root.hideColumnHeaders, 'hidden-header': ($root.hideColumnHeaders || col.column.hideColumnHeader)}" class="row">
         <td ng-hide="$root.hideColumnHeaders || col.column.hideColumnHeader" class="entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2">
             <span class="column-displayname" ng-class="{'chaise-icon-for-tooltip': (col.column.commentDisplay == 'tooltip' && col.column.comment)}" ng-attr-uib-tooltip="{{::(col.column.commentDisplay == 'tooltip' && col.column.comment) ? col.column.comment : undefined}}" tooltip-placement="right">
                 <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
