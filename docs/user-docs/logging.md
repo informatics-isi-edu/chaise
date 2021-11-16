@@ -175,9 +175,9 @@ Depending on the request, we might log extra attributes that we are gong to list
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
 
-    - `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
+- `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
 
-    - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
+- `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
 - `names`: Used in "navbar" request to capture the path that user took to end up in a particular menu option. It is an array of navbar option "name"s. The last item in the array if the name of the navbar option that user is acting on, and the rest are the name of its ancestors.
 

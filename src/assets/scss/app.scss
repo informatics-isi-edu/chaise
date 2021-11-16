@@ -17,6 +17,7 @@
 @import "recordedit-app";
 @import "viewer-app";
 @import "switch-user-accounts";
+@import "login-app";
 @import "help-app";
 
 
@@ -574,8 +575,8 @@ html {
         position: relative;
 
         label {
-            display: inline-block;
-            margin-left: 25px;
+            padding-left: 25px;
+            padding-right: 5px;
             font-weight: 400;
             position: relative;
             vertical-align: middle;
@@ -632,6 +633,35 @@ html {
         overflow: hidden;
     }
 
+    // favorite icon used for favorites in faceting->choice-picker->list and ellipsis action column
+    .favorite-icon {
+        top: 2px;
+        margin-right: 8px;
+        cursor: pointer;
+        font-size: 18px;
+
+        &.glyphicon-star {
+            color: goldenrod;
+        }
+
+        // glyphicon-star-empty
+        &.hover-show {
+            visibility: hidden;
+        }
+
+        &.favorite-spinner-container {
+            font-size: 1em;
+            > .glyphicon-refresh {
+                cursor: not-allowed;
+                font-size: 14px;
+                padding-right: 0px;
+                margin-right: 2px;
+                margin-left: 2px;
+            }
+        }
+
+    }
+
     // changes the color of alert glyphicon (used for timeout error)
     .glyphicon-alert {
         color: $warning-color !important;
@@ -679,6 +709,22 @@ html {
         }
     }
 
+/****** longtext inputs *********/
+    .md-editor {
+        border-radius: $btn-border-radius;
+
+        .md-header {
+            border-top-left-radius: $btn-border-radius;
+            border-top-right-radius: $btn-border-radius;
+        }
+
+        .content-box {
+            border-bottom-left-radius: $btn-border-radius;
+            border-bottom-right-radius: $btn-border-radius;
+            border-bottom: 0;
+        }
+    }
+
 /******* range inputs ***********/
     range-inputs {
         .form-inline {
@@ -721,5 +767,22 @@ html {
 
     input[type=number]::-moz-placeholder {
         line-height: 1.2;
+    }
+
+    .chaise-table-top-scroll-wrapper {
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 0;
+        position: sticky;
+        width: -moz-available;
+        width: -webkit-fill-available;
+        z-index: 2;
+        top: 0;
+        display: none;
+    }
+
+    .chaise-table-top-scroll {
+        height: inherit;
+        overflow-x: scroll;
     }
 }

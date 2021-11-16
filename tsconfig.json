@@ -50,13 +50,13 @@
     "moduleResolution": "node",                  /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
     // "baseUrl": "./",                             /* Base directory to resolve non-absolute module names. */
      "paths": {                                      /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
-      "Assets/*": ["./src/assets/*"],
-      "Components/*": ["./src/components/*"],
-      "Legacy/*": ["./*"],
-      "Services/*": ["./src/services/*"],
-      "Store/*": ["./src/store/*"],
-      "Utils/*": ["./src/utils/*"],
-      "Vendor/*": ["./src/vendor/*"]
+      "@chaise/assets/*": ["./src/assets/*"],
+      "@chaise/components/*": ["./src/components/*"],
+      "@chaise/legacy/*": ["./*"],
+      "@chaise/services/*": ["./src/services/*"],
+      "@chaise/store/*": ["./src/store/*"],
+      "@chaise/utils/*": ["./src/utils/*"],
+      "@chaise/vendor/*": ["./src/vendor/*"]
     },
     // "rootDirs": [],                              /* List of root folders whose combined content represents the structure of the project at runtime. */
     // "typeRoots": [],                             /* List of folders to include type definitions from. */

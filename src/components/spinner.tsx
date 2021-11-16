@@ -1,16 +1,17 @@
-
-import React from 'react'
+import spinner from '@chaise/assets/images/loader.gif';
 
 interface SpinnerProps {
   message?: string;
 }
 
-const Spinner: React.FC<SpinnerProps> = (props: SpinnerProps): JSX.Element => {
+const Spinner = ({
+  message
+}: SpinnerProps): JSX.Element => {
   return (
   <div>
-    <img className="spinner"/>
+    <img src={spinner} className="spinner"/>
     <div style={{"marginTop": "15px"}}>
-      { props.message ? props.message : "Loading..." }
+      { message ? message : "Loading..." }
     </div>
   </div>
   )

@@ -24,6 +24,11 @@
         padding-left: 20px !important;
     }
 
+    // add more space when the title is hidden
+    .top-right-panel.no-title {
+        padding-top: 10px;
+    }
+
     .main-body, .side-panel-container {
         height: 100%;
     }
@@ -224,15 +229,6 @@
     	animation-duration:0.4s;
     }
 
-
-    /* .btn.pick {
-      background-color: #18558E;
-    } */
-
-    /* .btn.pick:hover {
-        background-color: #002D73;
-        border-color: #1E4E9A;
-    } */
 
     #viewer-content{
         display: flex;

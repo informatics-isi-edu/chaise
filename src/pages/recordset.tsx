@@ -1,27 +1,42 @@
-// import 'bootstrap/dist/css/bootstrap.min.css';
-// import 'Vendor/fontawesome/fontawesome.css'
-import 'Assets/scss/app.scss'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Button from 'react-bootstrap/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import React  from 'react'
-import ReactDOM from 'react-dom'
+import '@chaise/assets/scss/app.scss';
+
+import React  from 'react';
+import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { store } from 'Store/store';
+import { store } from '@chaise/store/store';
+import FontAwesome from '@chaise/services/fontawesome';
+import Spinner from '@chaise/components/spinner';
 
 import Navbar from 'Components/Navbar';
 
-const RecordSetApp: React.FC<{}> = (): JSX.Element => {
+const RecordSetApp = (): JSX.Element => {
 
-  const renderRecordset = () => {
-      return (<div>
-        <Navbar />
-        <div>This is the recordset app</div>
-      </div>)
-    }
+  FontAwesome.addRecordsetFonts();
 
-  return (<div>
-    {renderRecordset()}
-  </div>)
-}
+  return (
+    <div>
+      <Navbar />
+      <div>This is the recordset app</div>
+      <div>
+        fontawesome works: <FontAwesomeIcon icon="coffee" />
+      </div>
+      <div className="alert alert-primary">
+        Bootstrap works!
+      </div>
+      <Button>bootstrap button</Button>
+      <div>
+        spinner is working:
+        <br/>
+        <Spinner/>
+      </div>
+
+    </div>
+  );
+};
 
 ReactDOM.render(
   <Provider store={store}>
