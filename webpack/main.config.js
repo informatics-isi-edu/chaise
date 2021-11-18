@@ -1,5 +1,6 @@
 var getAppConfig = require('./app.config');
+var getLibConfig = require('./lib.config');
 
 module.exports = [
-  getAppConfig("recordset")
+  getAppConfig("recordset"), getLibConfig("navbar"),
 ];

@@ -1,3 +1,4 @@
+// Navbar App
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,31 +10,16 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { store } from '@chaise/store/store';
 import FontAwesome from '@chaise/services/fontawesome';
-import Spinner from '@chaise/components/spinner';
 
 import Navbar from '@chaise/components/navbar';
 
-const RecordSetApp = (): JSX.Element => {
+const NavbarApp = (): JSX.Element => {
 
   FontAwesome.addRecordsetFonts();
 
   return (
     <div>
       <Navbar />
-      <div>This is the recordset app</div>
-      <div>
-        fontawesome works: <FontAwesomeIcon icon="coffee" />
-      </div>
-      <div className="alert alert-primary">
-        Bootstrap works!
-      </div>
-      <Button>bootstrap button</Button>
-      <div>
-        spinner is working:
-        <br/>
-        <Spinner/>
-      </div>
-
     </div>
   );
 };
@@ -41,8 +27,8 @@ const RecordSetApp = (): JSX.Element => {
 ReactDOM.render(
   <Provider store={store}>
     <React.StrictMode>
-      <RecordSetApp />
+      <NavbarApp />
     </React.StrictMode>
   </Provider>,
-  document.getElementById("chaise-app-root")
+  document.getElementById("chaise-navbar-app-root")
 );

@@ -3,12 +3,13 @@
  * - get the session
  * - get the config
  * - resolve the reference
+ *   - intiaize ermrestJS?
  */
 
 
 import React from 'react'
-import Spinner from 'Components/spinner';
-import ERMrestService from 'Services/ermrest';
+import Spinner from '@chaise/components/spinner';
+import ERMrestService from '@chaise/services/ermrest';
 
 const ChaiseApp: React.FC<{}> = (): JSX.Element => {
 
