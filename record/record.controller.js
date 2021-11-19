@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -54,7 +54,7 @@
         };
 
         vm.canEdit = function() {
-            var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+            var canEdit = ($rootScope.tuple && $rootScope.tuple.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
 
@@ -79,7 +79,7 @@
         };
 
         vm.canDelete = function() {
-            return ($rootScope.reference && $rootScope.reference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
+            return ($rootScope.tuple && $rootScope.tuple.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
         };
 
         vm.deleteRecord = function() {
@@ -105,12 +105,22 @@
         // this function assumes tuple and reference are attached to the $rootScope
         vm.sharePopup = function() {
             vm.waitingForSharePopup = true;
-            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference).then(function () {
+            var params = {};
+            if ($rootScope.reference.citation) params.title = "Share and Cite";
+            modalUtils.openSharePopup($rootScope.tuple, $rootScope.reference, params).then(function () {
                 vm.waitingForSharePopup = false;
             }).catch(function (err) {
                 // the promise won't be rejected
             });
         };
+
+        vm.canShowSharePopup = function() {
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.show);
+        }
+
+        vm.canEnableSharePopup = function() {
+            return Session.isGroupIncluded(chaiseConfig.shareCiteAcls.enable);
+        }
 
         vm.toRecordSet = function(ref) {
             event.preventDefault();
@@ -616,7 +626,7 @@
 
             var elementObj = determineScrollElement(queryParam);
             // no element was returned, means there wasn't a matching displayname on the page
-            if (!elementObj.element) return;
+            if (!elementObj || !elementObj.element) return;
 
             scrollToElement(elementObj.element);
         }

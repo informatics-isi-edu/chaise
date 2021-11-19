@@ -37,6 +37,24 @@ var recordEditPage = function() {
         return element.all(by.css("td.entity-key > span.column-displayname > span"));
     };
 
+    this.getAllColumnPermissionOverlays = function () {
+      return element.all(by.css(".column-permission-overlay"));
+    }
+
+    this.getColumnPermissionOverlay = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));
+    }
+
+    this.getColumnPermissionError = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-warn"));
+    };
+
+    this.getDisabledRowIcon = function (rowIndex) {
+        return element.all(by.css('.form-header')).get(rowIndex).all(by.css('.disabled-row-icon'));
+    }
+
     this.getColumnCaptionsWithHtml = function() {
         return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
@@ -66,6 +84,35 @@ var recordEditPage = function() {
     this.getTextAreaForAcolumn = function(name, index) {
         index = index || 0;
         return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
+    };
+
+    this.getColorInputBackground = function (index, name) {
+        index = index || 0;
+        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+        script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
+        script += "return ctx.fillStyle;";
+        return browser.executeScript(script);
+    };
+
+    this.getColorInputBtn = function (index, columnDisplayName) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
+    }
+
+    this.getColorInputPopup = function () {
+        return element(by.css('.chaise-color-picker-popup:not(.sp-hidden)'));
+    };
+
+    this.getColorInputPopupInput = function () {
+        return this.getColorInputPopup().element(by.css('.sp-input'));
+    };
+
+    this.getColorInputPopupClearBtn = function () {
+        return this.getColorInputPopup().element(by.css('.sp-clear'));
+    };
+
+    this.getColorInputPopupSelectBtn = function () {
+        return this.getColorInputPopup().element(by.css('.sp-choose'));
     };
 
     this.getHelpTextBlock = function(el) {
@@ -112,8 +159,14 @@ var recordEditPage = function() {
         return element(by.id("select-all-cancel-"+columnDisplayName));
     }
 
+    // gets dropdowns relative to el
     this.getDropdownElements = function(el) {
         return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
+    };
+
+    // gets all dropdowns
+    this.getDropdowns = function() {
+        return element.all(by.css(".chaise-input-control.dropdown-toggle"));
     };
 
     this.getDropdownText = function(el) {
@@ -138,9 +191,14 @@ var recordEditPage = function() {
 
     // Gets the boolean dropdown options when the dropdown is closed/hidden
     // the list is relative to the input when hidden
-    this.getRelataiveDropdownOptions = function(el) {
+    this.getRelativeDropdownOptions = function(el) {
         // el is "form-x-colname-display"
         return el.element(by.xpath('ancestor::td')).all(by.tagName('li'));
+    }
+
+    this.getRelativeDropdownOptionsATag = function(el) {
+        // el is "form-x-colname-display"
+        return el.element(by.xpath('ancestor::td')).all(by.css('li a'));
     }
 
     this.getDropdownClear = function (el) {
@@ -379,10 +437,6 @@ var recordEditPage = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
-    this.getDeleteRecordButton = function () {
-        return element(by.id("delete-button"));
-    };
-
     this.getSubmitRecordButton = function () {
         return element(by.id("submit-record-button"));
     };
@@ -402,6 +456,22 @@ var recordEditPage = function() {
 
     this.getClearButton = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().parent().find('.glyphicon-remove')[0]", el);
+    };
+
+    this.getDisabledResultSet = function () {
+        return element(by.id("resultset-disabled-table"));
+    };
+
+    this.getDisabledResultSetHeader = function () {
+        return element(by.id("resultset-disabled-table")).element(by.tagName("h3"));
+    };
+
+    this.getDisabledResultSetRows = function () {
+        return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
+    };
+
+    this.getRecordSetTable = function() {
+        return element(by.className('recordset-table'));
     };
 };
 
@@ -539,12 +609,12 @@ var recordPage = function() {
 
     this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName, isInline);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".edit-action-button"));
     };
 
     this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -661,10 +731,6 @@ var recordPage = function() {
         return element(by.id("bibtex-download"));
     };
 
-    this.getErrorModalTitle = function(){
-        return browser.executeScript("return $('.modal-title')[0].innerHTML;");
-    };
-
     this.getErrorModalReloadButton = function(){
         return element(by.id('error-reload-button'));
     };
@@ -748,6 +814,10 @@ var recordsetPage = function() {
 
     this.getPageTitleTooltip = function () {
         return this.getPageTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+    };
+
+    this.getPageTitleInlineComment = function () {
+        return this.getPageTitleElement().element(by.css(".inline-tooltip"));
     };
 
     this.getPageSubtitle = function() {
@@ -1062,6 +1132,10 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
+    this.getModalTotalCount = function () {
+        return element(by.css(".modal-body")).element(by.css('.chaise-table-header-total-count'));
+    };
+
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
@@ -1069,6 +1143,10 @@ var recordsetPage = function() {
     this.getModalRecordsetTableOptionByIndex = function (index) {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
+
+    this.getModalClearSelection = function () {
+        return element(by.css(".modal-body")).element(by.css(".clear-all-btn"));
+    }
 
     this.getModalSubmit = function () {
         return element(by.id("multi-select-submit-btn"));
@@ -1180,7 +1258,26 @@ var errorModal = function () {
     this.getErrorDetails = function () {
         return element(by.id('error-details'));
     }
+
+    this.getTitle = function () {
+        return element(by.css(".modal-title"));
+    }
 };
+
+var navbar = function () {
+    this.getBanner = function (key) {
+        var selector = ".chaise-navbar-banner-container";
+        if (key) {
+            selector += ".chaise-navbar-banner-container-" + key;
+        }
+        return element(by.css(selector));
+    }
+
+    this.getBannerDismissBtn = function (key) {
+        var banner = this.getBanner(key);
+        return banner.element(by.css(".close"));
+    }
+}
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
@@ -1195,6 +1292,8 @@ function chaisePage() {
     this.recordsetPage = new recordsetPage();
     this.errorModal = new errorModal();
     this.searchPopup = new SearchPopup();
+    this.navbar = new navbar();
+
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
@@ -1228,12 +1327,13 @@ function chaisePage() {
         return this.waitForElement(element(by.css(".recordset-table")));
     }
     this.recordPageReady = function() {
+        this.waitForElement(this.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.id('tblRecord')));
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
     this.recordeditPageReady = function() {
-        this.waitForElement(element(by.id("submit-record-button")));
-        this.waitForElementInverse(element(by.id("spinner")));
+        this.waitForClickableElement(element(by.id("submit-record-button")));
+        return this.waitForElementInverse(element(by.id("recordedit-main-spinner")));
     }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
@@ -1306,6 +1406,10 @@ function chaisePage() {
         }, timeout || browser.params.defaultTimeout);
     };
 
+    this.waitForClickableElement = function (locator, timeout) {
+        return browser.wait(protractor.ExpectedConditions.elementToBeClickable(locator), timeout || browser.params.defaultTimeout);
+    };
+
     this.waitForElement = function (locator, timeout) {
         return browser.wait(protractor.ExpectedConditions.visibilityOf(locator), timeout || browser.params.defaultTimeout);
     };
@@ -1365,11 +1469,16 @@ function chaisePage() {
 
     this.catchTestError = function (done) {
         return function (err) {
-            console.log(err);
-            done.fail();
-        }
+            done.fail(err);
+        };
     };
 
+    /**
+     * Simulate the login process by navigating to a chaise page and
+     * changing cookie and localStorage values.
+     * NOTE if we change the cookie/localStorage that we're adding during login,
+     *      this function needs to be updated too.
+     */
     this.performLogin = function(cookie, isAlertPresent, defer) {
         defer = defer || require('q').defer();
 
@@ -1382,12 +1491,15 @@ function chaisePage() {
         browser.ignoreSynchronization = true;
 
         browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
-            browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.TRAVIS ? '"' : 'secure;"')).then(function() {
-              browser.ignoreSynchronization = false;
-              defer.resolve();
-            });
-        }, function() {
-            defer.reject();
+            return browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"'))
+        }).then(function() {
+            return browser.driver.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
+        }).then(function () {
+            browser.ignoreSynchronization = false;
+            defer.resolve();
+        }).catch(function (err) {
+            console.dir(err);
+            defer.reject(err);
         });
 
         return defer.promise;

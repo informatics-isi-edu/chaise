@@ -19,7 +19,7 @@
         forbidden: "Forbidden",
         notFound: "No data",
         multipleRecords: "Multiple Records Found",
-        noDataMessage: 'The record does not exist or may be hidden. If you continue to face this issue, please contact the system administrator.',
+        noDataMessage: 'The record does not exist or may be hidden. <br> If you continue to face this issue, please contact the system administrator.',
         multipleDataErrorCode: "Multiple Records Found",
         multipleDataMessage: "There are more than 1 record found for the filters provided.",
         facetFilterMissing: "No filtering criteria was specified to identify a specific record.",
@@ -28,7 +28,10 @@
         differentUserConflict1: "Continuing on this page requires that you be logged in as ",
         differentUserConflict2: ". However, you are currently logged in as ",
         anonUserConflict: "Your session has expired. Continuing on this page requires that you be logged in as ",
-        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. If you continue to face this issue, please contact the system administrator."
+        systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.",
+
+        viewerOSDFailed: "Couldn't process the image. <br> If you continue to face this issue, please contact the system administrator.",
+        viewerScreenshotFailed: "Couldn't process the screenshot."
     })
 
     .factory('Errors', ['ConfigUtils', 'errorNames', 'errorMessages', 'messageMap', function(ConfigUtils, errorNames, errorMessages, messageMap) {
@@ -121,6 +124,38 @@
         }
         noRecordError.prototype = Object.create(Error.prototype);
         noRecordError.prototype.constructor = noRecordError;
+
+        /**
+         * NoRecordRidError - In case resolveable link has invalid RID
+         *
+         * @param  {string} message Error message
+         * @return {object}         Error Object
+         */
+        function NoRecordRidError(message) {
+            /**
+             * @type {object}
+             * @desc  custom object to store miscellaneous elements viz. stacktrace
+             */
+            this.errorData = {};
+
+            /**
+             * @type {string}
+             * @desc   Error message status; acts as Title text for error dialog
+             */
+            this.status = errorNames.notFound;
+
+            this.clickOkToDismiss = true;
+
+            /**
+             * @type {string}
+             * @desc   Error message
+             */
+            this.message = message || errorMessages.noDataMessage;
+
+            this.errorData.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+        };
+        NoRecordRidError.prototype = Object.create(Error.prototype);
+        NoRecordRidError.prototype.constructor = NoRecordRidError;
 
         //TODO
         // InvalidInputError and MalformedUriError should be going away as they are redundant
@@ -340,7 +375,7 @@
          * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
          * @return {object}                     Error Object
          */
-        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss){
+        function CustomError(header, message, redirectUrl, clickActionMessage, clickOkToDismiss, subMessage){
             /**
              * @type {string}
              * @desc Text to display in the Error Modal Header
@@ -352,6 +387,13 @@
              * @desc Error message that shows in the Error modal body
              */
             this.message = message;
+
+
+            /**
+             * @type {string}
+             * @desc Error message details that will not be displayed in body
+             */
+            this.subMessage = subMessage;
 
             /**
              * @type {object}
@@ -383,6 +425,7 @@
         return {
             multipleRecordError: multipleRecordError,
             noRecordError: noRecordError,
+            NoRecordRidError: NoRecordRidError,
             InvalidInputError: InvalidInputError,
             MalformedUriError: MalformedUriError,
             UnauthorizedAssetAccess: UnauthorizedAssetAccess,
@@ -393,8 +436,8 @@
     }])
 
     // Factory for each error type
-    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$window',
-        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $window) {
+    .factory('ErrorService', ['AlertsService', 'ConfigUtils', 'DataUtils', 'errorMessages', 'errorNames', 'Errors', 'logService', 'messageMap', 'modalUtils', 'Session', 'UriUtils', '$document', '$log', '$rootScope', '$timeout', '$window',
+        function ErrorService(AlertsService, ConfigUtils, DataUtils, errorMessages, errorNames, Errors, logService, messageMap, modalUtils, Session, UriUtils, $document, $log, $rootScope, $timeout, $window) {
 
         // NOTE: overriding `window.onerror` in the ErrorService scope
         $window.onerror = function () {
@@ -402,17 +445,19 @@
         };
 
         /**
-         * exception    - the error that was thrown
-         * pageName     - the name of the page we will redirect to
-         * redirectLink - link that is used for redirect
-         * subMessage   - message displayed after the exception message
-         * stackTrace   - stack trace provided with error output
-         * isDismissible- if the error modal can be close
-         * showLogin    - if the login link should be shown
-         * message      - (optional) primary message displayed in modal (if defined, overwrites exception.message)
-         * errorStatus  - (optional) error "name" (if defined, overwrites exception.status)
+         * exception        - the error that was thrown
+         * pageName         - the name of the page we will redirect to
+         * redirectLink     - link that is used for redirect
+         * subMessage       - message displayed after the exception message
+         * stackTrace       - stack trace provided with error output
+         * isDismissible    - if the error modal can be close
+         * showLogin        - if the login link should be shown
+         * message          - (optional) primary message displayed in modal (if defined, overwrites exception.message)
+         * errorStatus      - (optional) error "name" (if defined, overwrites exception.status)
+         * okBtnCallback    - (optional) the function that will be called when users click on "OK" button
+         * closeBtnCallback - (optional) the function that will be called when users click on "Close" button
          */
-        function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus) {
+        function errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus, okBtnCallback, closeBtnCallback) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             var appName = UriUtils.appNamefromUrlPathname($window.location.pathname),
                 session = Session.getSessionValue(),
@@ -468,7 +513,9 @@
             }
 
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
-                if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                if (okBtnCallback) {
+                    okBtnCallback();
+                }else if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);
                 } else {
                     if(actionBtnIdentifier == "reload"){
@@ -477,23 +524,51 @@
                         $window.location = redirectLink;
                     }
                 }
-            }, false, moveErrorModal);
+            }, function () {
+                if (closeBtnCallback) {
+                    closeBtnCallback();
+                }
+            }, moveErrorModal);
 
             function moveErrorModal() {
-                var mainnav = $document[0].getElementById('mainnav');
+                var errorBody = $document[0].querySelector(".modal-error .modal-body");
+
+                // make sure error popup is below the navbar
+                var mainnav = $document[0].getElementById('navheader');
                 if (mainnav !== null) {
                     var errorModal = $document[0].getElementsByClassName('modal-error')[0];
                     if (errorModal !== null && errorModal !== undefined) {
                             errorModal.style.top = mainnav.offsetHeight + "px";
                     }
                 }
+
+                /**
+                 * make sure the error popup is scrollable
+                 * 
+                 * The previous block is changing the position of error modal, which will 
+                 * affect the following. Since the effect might not be applied right away,
+                 * I had to add this timeout. This will ensure that the errorBodyY that we
+                 * are fetching is correct.
+                 */
+                $timeout(function(){ 
+                    try {
+                        var footerHeight = document.querySelector(".modal-footer").offsetHeight;
+                        var errorBodyY = errorBody.getBoundingClientRect().y;
+                        errorBody.style.overflowY = "auto";
+                        errorBody.style.maxHeight = "calc(100vh - 2.5vh - " + (errorBodyY + footerHeight) + "px)";
+                    } catch (exp) {
+                        // fail silently
+                        // instead of adding multiple checks, just catching error
+                    }
+                }, 200);
+                
             }
         }
 
         var exceptionFlag = false;
 
         // TODO: implement hierarchies of exceptions in ermrestJS and use that hierarchy to conditionally check for certain exceptions
-        function handleException(exception, isDismissible) {
+        function handleException(exception, isDismissible, skipLogging, okBtnCallback, closeBtnCallback) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
             $log.info(exception);
 
@@ -511,8 +586,8 @@
             // if network is offline, use offline dialog workflow
             if (!$window.navigator.onLine) return offlineModalTemplate(exception, "Please check that you are still connected to your network. ", null, true);
 
-            // don't throw an angular error if in search/viewer or one has already been thrown
-            if (exceptionFlag || window.location.pathname.indexOf('/search/') != -1 || window.location.pathname.indexOf('/viewer/') != -1) return;
+            // don't throw an angular error if has already been thrown
+            if (exceptionFlag) return;
 
             // If not authorized, ask user to sign in first
             if (ERMrest && exception instanceof ERMrest.UnauthorizedError) {
@@ -529,18 +604,32 @@
 
             var assetPermissionError = (exception instanceof Errors.UnauthorizedAssetAccess || exception instanceof Errors.ForbiddenAssetAccess || exception instanceof Errors.DifferentUserConflictError);
 
-            if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError){
+            if (exception instanceof Errors.multipleRecordError || exception instanceof Errors.noRecordError || exception instanceof Errors.NoRecordRidError){
                 // change defaults
                 pageName = "Recordset";
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
+            } 
+            else if (ERMrest && exception instanceof ERMrest.InvalidServerResponse) {
+                if (!skipLogging) {
+                    logError(exception, ConfigUtils.getContextHeaderParams());
+                }
+                message = errorMessages.systemAdminMessage;
+                subMessage = exception.message;
+            }
+            else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
-            } else if (exception instanceof Errors.CustomError ) {
-                logError(exception);
+            } 
+            else if (exception instanceof Errors.CustomError ) {
+                if (!skipLogging) {
+                    logError(exception, ConfigUtils.getContextHeaderParams());
+                }
                 redirectLink = exception.errorData.redirectUrl;
-            } else if (!assetPermissionError) {
-                logError(exception);
+            }
+            else if (!assetPermissionError) {
+                if (!skipLogging) {
+                    logError(exception, ConfigUtils.getContextHeaderParams());
+                }
                 message = errorMessages.systemAdminMessage;
                 subMessage = exception.message;
             }
@@ -550,18 +639,19 @@
 
             if (!Session.getSessionValue() && !assetPermissionError) {
                 showLogin = true;
-                if (exception instanceof Errors.noRecordError) {
+                if (exception instanceof Errors.noRecordError || exception instanceof Errors.NoRecordRidError) {
                     // if no logged in user, change the message
-                    message = messageMap.noRecordForFilter + '<br>' + messageMap.maybeUnauthorizedMessage;
+                    var messageReplacement = (exception instanceof Errors.noRecordError ? messageMap.noRecordForFilter : messageMap.noRecordForRid);
+                    message = messageReplacement + '<br>' + messageMap.maybeUnauthorizedMessage;
                 } else {
                     message += " " + messageMap.maybeNeedLogin;
                 }
             }
 
-            errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus);
+            errorPopup(exception, pageName, redirectLink, subMessage, stackTrace, isDismissible, showLogin, message, errorStatus, okBtnCallback, closeBtnCallback);
 
-            // if not a dismissible errror then exception should be suppressed
-            if (!isDismissible && !exception.showContinueBtn) exceptionFlag = true;
+            // if not a dismissible error then exception should be suppressed
+            if (!isDismissible && !exception.showContinueBtn && !exception.clickOkToDismiss) exceptionFlag = true;
         }
 
         return {
@@ -587,10 +677,16 @@
  * Log the error in ermrest
  * @param  {object} error the error object
  */
-var logError = function (error) {
+var logError = function (error, contextHeaderParams) {
     if (!ERMrest) return;
     var ermrestUri = (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest');
-    ERMrest.logError(error, ermrestUri).then(function () {
+
+    if (!contextHeaderParams || typeof contextHeaderParams !== "object" && 
+        typeof window.dcctx === "object" && typeof window.dcctx.contextHeaderParams === "object") {
+        contextHeaderParams = window.dcctx.contextHeaderParams;
+    }
+
+    ERMrest.logError(error, ermrestUri, contextHeaderParams).then(function () {
         console.log("logged the error");
     }).catch(function (err) {
         console.log("couldn't log the error.");
@@ -614,7 +710,7 @@ var offlineModalTemplate = function (error, dialogMessage, redirectLink, canClos
                     + '<h2 class="modal-title ">Error: ' + errName + '</h2>'
                 + '</div>'
                 + '<div class="modal-body ">'
-                    + 'An unexpected error has occurred. ' + dialogMessage + 'If you continue to face this issue, please contact the system administrator.'
+                    + 'An unexpected error has occurred. ' + dialogMessage + '<br>If you continue to face this issue, please contact the system administrator.'
                     + '<br><br>'
                     + 'Click OK to return to the Home Page.'
                     + '<br>'

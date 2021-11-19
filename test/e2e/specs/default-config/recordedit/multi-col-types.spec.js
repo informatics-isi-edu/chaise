@@ -50,6 +50,8 @@ var testParams = {
             {name: "timestamp_txt", displayType: "text", value: currentTimestampTime}, // used for generating the hatrac path
             {name: "asset_null_col", displayType: "asset", value: files[0]},
             {name: "asset_col", displayType: "asset"},
+            {name: "color_rgb_hex_null_col", displayType: "color", value: "#123456"},
+            {name: "color_rgb_hex_col", displayType: "color"},
         ],
         submitted_values: {
             int2_col: "32,767",
@@ -72,7 +74,8 @@ var testParams = {
             asset_col: {link: "/hatrac/js/chaise/somepath.png", value: "filenamevalue.png"},
             asset_col_filename: "filenamevalue.png",
             asset_col_bytes: "12,345",
-            asset_col_md5: "md5value"
+            asset_col_md5: "md5value",
+            color_rgb_hex_col: "#123456"
         },
         // the rest of the columns are null and therefore not displayed:
         null_submitted_values: {
@@ -94,9 +97,10 @@ var testParams = {
             json_null_col: "89.586",
             json_col: "null",
             timestamp_txt: currentTimestampTime,
-            asset_null_col: {ignoreInTRAVIS: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
-            asset_null_col_filename: {ignoreInTRAVIS: true, value: "testfile500kb_nulltest.png"},
-            asset_null_col_bytes: {ignoreInTRAVIS: true, value: "512,000"}
+            asset_null_col: {ignoreInCI: true, link: "/hatrac/js/chaise/" + currentTimestampTime + "/multi-col-asset-null/", value: "testfile500kb_nulltest.png"},
+            asset_null_col_filename: {ignoreInCI: true, value: "testfile500kb_nulltest.png"},
+            asset_null_col_bytes: {ignoreInCI: true, value: "512,000"},
+            color_rgb_hex_null_col: "#123456"
         }
     },
     table_w_generated_columns : {
@@ -128,9 +132,9 @@ describe('When editing a record', function() {
     beforeAll(function() {
         browser.ignoreSynchronization = true;
         browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
-        chaisePage.waitForElement(element(by.id("submit-record-button")));
+        chaisePage.recordeditPageReady();
 
-        if (!process.env.TRAVIS && files.length > 0) {
+        if (!process.env.CI && files.length > 0) {
             // create files that will be uploaded
             recordEditHelpers.createFiles(files);
             console.log("\n");
@@ -158,7 +162,7 @@ describe('When editing a record', function() {
     describe('if the user made no edits', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
-            chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
+            chaisePage.recordeditPageReady().then(function() {
                 return recordEditPage.submitForm();
             });
         });
@@ -186,7 +190,7 @@ describe('When editing a record', function() {
     describe('if the user did make edits', function() {
         beforeAll(function() {
             browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
-            chaisePage.waitForElement(element(by.id("submit-record-button")));
+            chaisePage.recordeditPageReady();
         });
 
         // Test each column type to check that the app converts the submission data correctly for each type
@@ -254,7 +258,7 @@ describe('When editing a record', function() {
                         // clear the asset
                         chaisePage.clickButton(clearBtn).then(function () {
                             // select new file
-                            if (newValue && !process.env.TRAVIS) {
+                            if (newValue && !process.env.CI) {
                                 recordEditHelpers.testFileInput(name, 0, newValue, "", true, false);
                             }
                         }).catch(function(error) {
@@ -289,14 +293,14 @@ describe('When editing a record', function() {
 
                 var colNames = Object.keys(testParams.table_1.null_submitted_values).filter(function (colName) {
                     var el = testParams.table_1.null_submitted_values[colName];
-                    return !process.env.TRAVIS || !(typeof el === 'object' && el != null && el.ignoreInTRAVIS === true);
+                    return !process.env.CI || !(typeof el === 'object' && el != null && el.ignoreInCI === true);
                 });
                 recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.null_submitted_values, colNames.length+5); // +5 for system columns
             });
         });
     });
 
-    if (!process.env.TRAVIS && files.length > 0) {
+    if (!process.env.CI && files.length > 0) {
         afterAll(function() {
             recordEditHelpers.deleteFiles(files);
             console.log("\n");

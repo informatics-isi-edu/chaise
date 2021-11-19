@@ -117,7 +117,7 @@ var testParams = {
 
 };
 
-if (!process.env.TRAVIS) {
+if (!process.env.CI) {
     // keep track of namespaces that we use, so we can delete them afterwards
     testConfiguration.hatracNamespaces.push(process.env.ERMREST_URL.replace("/ermrest", "") + "/hatrac/js/chaise/" + currentTimestampTime);
 }
@@ -135,8 +135,8 @@ describe('Edit multiple existing record,', function() {
                 keyPairs.push(key.name + key.operator + key.value);
             });
 
-            // don't run upload test cases on travis
-            if (process.env.TRAVIS && hasFile) {
+            // don't run upload test cases on ci
+            if (process.env.CI && hasFile) {
                 return;
             }
 
@@ -154,10 +154,24 @@ describe('Edit multiple existing record,', function() {
                     browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")");
                 });
 
+                var titleText = "Edit " + tableParams.table_name;
                 it("should have the title displayed properly.", function() {
                     // if submit button is visible, this means the recordedit page has loaded
                     chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe("Edit " + tableParams.table_name, "Multi-edit title is incorrect.");
+                        expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe(titleText, "Multi-edit title is incorrect.");
+                    });
+                });
+
+                it ("should have the correct head title using the heuristics for recordedit app in entry/edit mode with multiple records", function (done) {
+                    browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                        // Edit <table-name>: <row-name> | Chaise
+                        // no chaiseConfig.headTitle so use default value of Chaise
+                        expect(browser.getTitle()).toBe(titleText + " | Chaise");
+
+                        done();
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
                     });
                 });
 
@@ -223,7 +237,7 @@ describe('Edit multiple existing record,', function() {
 
                     describe("result page", function () {
                         it("should have the correct title.", function() {
-                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length +  " " + tableParams.table_name + " Records Updated Successfully", "Resultset title is incorrect.");
+                            expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(tableParams.results.length + "/" + tableParams.results.length +  " " + tableParams.table_name + " records updated successfully", "Resultset title is incorrect.");
                         });
 
                         it('should point to the correct link with caption.', function () {

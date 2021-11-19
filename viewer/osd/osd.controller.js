@@ -3,7 +3,10 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController', ['AlertsService', 'deviceDetector', 'context', 'image', '$window', '$rootScope','$scope', function OSDController(AlertsService, deviceDetector,context, image, $window, $rootScope, $scope) {
+    .controller('OSDController',
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'image', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function OSDController(AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, image, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
+
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
@@ -13,57 +16,118 @@
         vm.zoomOutView = zoomOutView;
         vm.homeView = homeView;
         vm.alerts = AlertsService.alerts;
-        var showTitle = context.queryParams.showTitle;
-        if (showTitle === "true") {
-            vm.showTitle = true;
-        } else if (showTitle === "false") {
-            vm.showTitle = false;
-        } else {
-            vm.showTitle = true;
-        }
-        vm.disablefilterChannels = false;
-        vm.filterChannelsAreHidden = false;
-        vm.filterChannels = filterChannels;
+        vm.showChannelList = false;
+        vm.toggleChannelList = toggleChannelList;
 
         vm.annotationsAreHidden = false;
         vm.toggleAnnotations = toggleAnnotations;
-
 
         // the top-left-panel that needs to be resizable with toc
         vm.resizePartners = document.querySelector(".top-left-panel");
 
         vm.openAnnotations = openAnnotations;
-        vm.error = '';
-        vm.device = deviceDetector;
-        vm.isSafari = false;
-        testSafari();
-        vm.isRetina = false;
-        testRetina();
-
         $rootScope.$on("dismissEvent", function () {
             openAnnotations();
         });
 
         $window.addEventListener('message', function channelControllerListener(event) {
             if (event.origin === window.location.origin) {
-                var data = event.data;
-                var messageType = data.messageType;
+                var data = event.data.content;
+                var messageType = event.data.messageType;
 
                 switch (messageType) {
+                    case "osdLoaded":
+                        $scope.$apply(function(){
+                            // initialize viewer
+                            if (DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters)) {
+                                iframe.postMessage({messageType: 'initializeViewer', content: $rootScope.osdViewerParameters}, origin);
+                            }
+                        });
+                        break;
+                    case "fetchZPlaneList":
+                        $scope.$apply(function () {
+                            viewerAppUtils.fetchZPlaneList(data.requestID, data.pageSize, data.before, data.after, data.reloadCauses).then(function (res) {
+                                iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
+                            }).catch(function (err) {
+                                throw err;
+                            });
+                        });
+                        break;
+                    // TODO change this to a better name
+                    case "fetchZPlaneListByZIndex":
+                        $scope.$apply(function () {
+                            viewerAppUtils.fetchZPlaneListByZIndex(data.requestID, data.pageSize, data.zIndex, data.source).then(function (res) {
+                                iframe.postMessage({messageType: "updateZPlaneList", content: res}, origin);
+                            }).catch(function (err) {
+                                throw err;
+                            });
+                        });
+                        break;
+                    case "openDrawingHelpPage":
+                        $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
+                        break;
                     case "hideChannelList":
                         $scope.$apply(function(){
-                          vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
+                            vm.showChannelList = false;
+                        });
+                        break;
+                    case "showChannelList":
+                        $scope.$apply(function(){
+                            vm.showChannelList = true;
                         });
                         break;
                     case "downloadViewDone":
                         $scope.$apply(function(){
-                          vm.waitingForScreenshot = false;
+                            vm.waitingForScreenshot = false;
                         });
                         break;
                     case "downloadViewError":
                         $scope.$apply(function(){
-                          vm.waitingForScreenshot = false;
-                          AlertsService.addAlert("Couldn't process the screenshot.", "warning");
+                            vm.waitingForScreenshot = false;
+                            AlertsService.addAlert(errorMessages.viewerScreenshotFailed, "warning");
+                        });
+                        break;
+                    case "updateDefaultZIndex":
+                        $scope.$apply(function () {
+                            viewerAppUtils.updateDefaultZIndex(data.zIndex).then(function (res) {
+                                // we don't need to do anything on success.
+                                // the alerts are disaplyed by the updateDefaultZIndex function
+                            }).catch(function (error) {
+                                throw error;
+                            }).finally(function () {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateDefaultZIndexDone", content: { 'zIndex': data.zIndex}}, origin);
+                            })
+                        });
+                        break;
+                    case "updateChannelConfig":
+                        $scope.$apply(function () {
+                            viewerAppUtils.updateChannelConfig(data).then(function (res) {
+                                // the alerts are disaplyed by the updateChannelConfig function
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: res}}, origin);
+                            }).catch(function (error) {
+                                // let osd viewer know that the process is done
+                                iframe.postMessage({ messageType: "updateChannelConfigDone", content: {channels: data, success: false}}, origin);
+
+                                // show the error
+                                throw error;
+                            });
+                        });
+                        break;
+                    case "showAlert":
+                        $scope.$apply(function(){
+                            AlertsService.addAlert(data.message, data.type);
+                        });
+                        break;
+                    case "showPopupError":
+                        $scope.$apply(function(){
+                            var clickActionMessage = data.clickActionMessage;
+                            if (data.isDismissible && !DataUtils.isNoneEmptyString(clickActionMessage)) {
+                                clickActionMessage = messageMap.clickActionMessage.dismissDialog
+                            }
+                            var err = new Errors.CustomError(data.header, data.message, null, clickActionMessage, data.isDismissible);
+                            ErrorService.handleException(err, data.isDismissible, true);
                         });
                         break;
                     default:
@@ -75,10 +139,7 @@
         });
 
         function downloadView() {
-            var filename = vm.image.entity.slide_id;
-            if (!filename) {
-                filename = 'image';
-            }
+            var filename = context.imageID || "image";
             var obj = {
                 messageType: 'downloadView',
                 content: filename
@@ -86,93 +147,72 @@
 
             vm.waitingForScreenshot = true;
             iframe.postMessage(obj, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_SCREENSHOT, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function zoomInView() {
             iframe.postMessage({messageType: 'zoomInView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_IN, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function zoomOutView() {
             iframe.postMessage({messageType: 'zoomOutView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_OUT, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function homeView() {
             iframe.postMessage({messageType: 'homeView'}, origin);
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.VIEWER_ZOOM_RESET, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
         function toggleAnnotations() {
-            var btnptr = $('#hide-btn');
-            btnptr.blur();
-//            event.currentTarget.blur();
             var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
-            // iframe.postMessage({messageType: messageType}, origin);
             vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
         function openAnnotations() {
-            var btnptr = $('#edit-btn');
-            btnptr.blur();
-            // var panelptr=$('#annotations-panel');
-            var sidebarptr=$('#sidebar');
-            if($rootScope.hideAnnotationSidebar) {
-              // if(!vm.filterChannelsAreHidden) { // close channels
-              //   filterChannels();
-              // }
-              sidebarptr.css("display","block");
-
-              // panelptr.removeClass('fade-out').addClass('fade-in');
-              } else {
-                sidebarptr.css("display","none");
-            }
-            // iframe.postMessage({messageType: 'openAnnotations'}, origin);
+            var action = $rootScope.hideAnnotationSidebar ? logService.logActions.VIEWER_ANNOT_PANEL_SHOW : logService.logActions.VIEWER_ANNOT_PANEL_HIDE;
             $rootScope.hideAnnotationSidebar = !$rootScope.hideAnnotationSidebar;
+
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(action, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
 
-        function covered() {
-            var sidebarptr=$('#sidebar');
-            var covered=false;
-            var tmp=sidebarptr.css("display");
-            if(tmp && tmp!='none')
-              covered=true;
-            return covered;
-        }
+        function toggleChannelList() {
+            var action = vm.showChannelList ? logService.logActions.VIEWER_CHANNEL_HIDE : logService.logActions.VIEWER_CHANNEL_SHOW;
 
-        function filterChannels() {
-            var btnptr = $('#filter-btn');
-            btnptr.blur();
-            var sidebarptr=$('#sidebar');
+            iframe.postMessage({messageType: 'toggleChannelList'}, origin);
+            vm.showChannelList = !vm.showChannelList;
 
-            // if(vm.filterChannelsAreHidden) {
-            //   if(!vm.hideAnnotationSidebar) { // annotation is up
-                // openAnnotations(); // close it
-            //   }
-            //   if(covered())
-                //   sidebarptr.css("display","none");
-            // }
-            iframe.postMessage({messageType: 'filterChannels'}, origin);
-            vm.filterChannelsAreHidden = !vm.filterChannelsAreHidden;
-        }
-
-        function testSafari() {
-//            var deviceData = JSON.stringify(vm.device, null, 2);
-            var browser=vm.device.browser;
-            if(browser=='safari') {
-               vm.isSafari = true;
-               } else {
-                   vm.isSafari = false;
-            }
-        }
-        function testRetina() {
-//https://coderwall.com/p/q2z2uw/detect-hidpi-retina-displays-in-javascript
-            var mediaQuery = "(-webkit-min-device-pixel-ratio: 1.5),\
-                               (min--moz-device-pixel-ratio: 1.5),\
-                               (-o-min-device-pixel-ratio: 3/2),\
-                               (min-resolution: 1.5dppx)";
-
-            if ((window.devicePixelRatio > 1) ||
-                 (window.matchMedia && window.matchMedia(mediaQuery).matches)) {
-                vm.isRetina=true;
-            }
+            // log the click
+            // app mode will change by annotation controller, this one should be independent of that
+            logService.logClientAction({
+                action: logService.getActionString(action, null, ""),
+                stack: logService.getStackObject()
+            }, $rootScope.reference.defaultLogInfo);
         }
     }]);
 })();

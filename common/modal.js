@@ -40,11 +40,6 @@
             var modalInstance = $uibModal.open(params);
 
             modalInstance.rendered.then(function () {
-                try {
-                    // angular.element(document.querySelector(".modal-body")).scrollTop(0);
-                } catch (err) {
-                    $log.warn(err);
-                }
                 if (postRenderCB) postRenderCB();
             }).catch(function (error) {
                 $log.warn(error);
@@ -69,7 +64,9 @@
          *  - hideCitation: hide the citation section
          *  - hideHeader: hides all the section headers.
          *  - extraInformation: An array of objects that will be displayed. Each element can be either
-         *    {value: "string", title: "string"} or {title: "string", value: "string", link: "string", ype: "link"}
+         *    {value: "string", title: "string"} or {title: "string", value: "string", link: "string", type: "link"}
+         *  - logStackPath: if you want to change the default log stack path of the app
+         *  - logStack: if you want to change the default log stack object of the app
          */
         function openSharePopup (tuple, reference, extraParams) {
             var defer = $q.defer();
@@ -79,6 +76,7 @@
 
             params.displayname = refTable.name+'_'+tuple.uniqueId,
             params.reference = reference;
+            params.title = (extraParams.title ? extraParams.title : "Share");
 
             var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
             params.permalink = UriUtils.resolvePermalink(tuple, reference);
@@ -86,9 +84,10 @@
             params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
             params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
+            var stack = params.logStack ? params.logStack : logService.getStackObject();
             var snaptimeHeader = {
-                action: logService.getActionString(logService.logActions.SHARE_OPEN),
-                stack: logService.getStackObject(),
+                action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
+                stack: stack,
                 catalog: reference.defaultLogInfo.catalog,
                 schema_table: reference.defaultLogInfo.schema_table
             }
@@ -203,9 +202,11 @@
             vm.clickActionMessage =  messageMap.clickActionMessage.multipleRecords;
         } else if (exception instanceof Errors.noRecordError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (exception instanceof Errors.NoRecordRidError) {
+            vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (exception instanceof Errors.DifferentUserConflictError) {
             vm.showOkBtn = false;
-            vm.showReloadBtn = exception.showReloadBtn;;
+            vm.showReloadBtn = exception.showReloadBtn;
             vm.showContinueBtn = exception.showContinueBtn;
             // contains the `reloadMessage` already since it's customized in the error
             vm.clickActionMessage = exception.errorData.clickActionMessage;
@@ -223,6 +224,8 @@
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (ERMrest && exception instanceof ERMrest.UnsupportedFilters) {
+            vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
@@ -249,12 +252,16 @@
         };
 
         vm.ok = function () {
+            $rootScope.error = false;
+
             // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
             // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
 
         vm.cancel = function cancel() {
+            $rootScope.error = false;
+
             $uibModalInstance.dismiss('cancel');
         };
 
@@ -302,8 +309,13 @@
         function SearchPopupController(ConfigUtils, DataUtils, logActions, modalBox, params, recordCreate, recordsetDisplayModes, Session, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
+        // rowOnLoad is used to determine if the submit button should be disabled
+        // if there are selected rows from the facet options when the modal loads, don't disable the submit button when there are 0 rows selected
+        // the submit button can be disabled when there are no selected rows on load and there are none selected
+        vm.rowsOnLoad = params.selectedRows.length > 0;
         vm.params = params;
         vm.onSelectedRowsChanged = onSelectedRowsChanged;
+        vm.onFavoritesChanged = params.onFavoritesChanged;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;
@@ -335,8 +347,8 @@
             readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
-            displayname:   params.displayname ? params.displayname : null,
-            comment:       (typeof params.comment === "string") ? params.comment: null,
+            displayname:        params.displayname ? params.displayname : null,
+            comment:            (typeof params.comment === "string") ? params.comment: null,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
@@ -348,20 +360,24 @@
             matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {
-                viewable: false, deletable: false,
+                viewable:           false,
+                deletable:          (typeof params.allowDelete === "boolean") ? params.allowDelete : false, // saved query mode we want to allow delete (per row)
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
-                showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showFaceting:       showFaceting,
+                facetPanelOpen:     params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
+                enableFavorites:     params.enableFavorites ? params.enableFavorites : false
             },
             getDisabledTuples:          params.getDisabledTuples,
 
             // log related attributes
             logStack:                  logStack,
-            logStackPath:               params.logStackPath ? params.logStackPath : null,
+            logStackPath:              params.logStackPath ? params.logStackPath : null,
+            logAppMode:                params.logAppMode ? params.logAppMode : null,
 
             // used for the recordset height and sticky section logic
             // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
@@ -556,7 +572,13 @@
      *   - {String} versionDateRelative - version decoded to it's datetime then presented as relative to today's date
      *   - {boolean} showVersionWarning - decides whether to show "out of date content" warning
      *   - {Object} citation - citation object returned from ERMrest.tuple.citation
-     *
+     *   - {String} title (optional) - will be displayed in the modal title
+     *   - {boolean} hideCitation (optional) - hide the citation section
+     *   - {boolean} hideHeader (optional) - hides all the section headers.
+     *   - {Object[]} extraInformation (optional) - An array of objects that will be displayed. Each element can be either
+     *                {value: "string", title: "string"} or {title: "string", value: "string", link: "string", type: "link"}
+     *   - {Object} logStackPath (optional) - if you want to change the default log stack path of the app
+     *   - {Object} logStack (optional) - if you want to change the default log stack object of the app
      */
     .controller('ShareCitationController', ['logService', 'params', '$rootScope', '$uibModalInstance', '$window', function (logService, params, $rootScope, $uibModalInstance, $window) {
         var vm = this;
@@ -608,8 +630,8 @@
 
         vm.copyToClipboard = function (text, action) {
             logService.logClientAction({
-                action: logService.getActionString(action),
-                stack: logService.getStackObject()
+                action: logService.getActionString(action, params.logStackPath),
+                stack: params.logStack ? params.logStack : logService.getStackObject()
             }, params.reference.defaultLogInfo);
             // Create a dummy input to put the text string into it, select it, then copy it
             // this has to be done because of HTML security and not letting scripts just copy stuff to the clipboard
@@ -630,8 +652,8 @@
 
         vm.logCitationDownload = function (action) {
             logService.logClientAction({
-                action: logService.getActionString(action),
-                stack: logService.getStackObject()
+                action: logService.getActionString(action, params.logStackPath),
+                stack: params.logStack ? params.logStack : logService.getStackObject()
             }, params.reference.defaultLogInfo);
         }
 
@@ -688,6 +710,58 @@
         function ok() {
             $uibModalInstance.close();
         }
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, messageMap, params, $scope, $uibModalInstance) {
+        var vm = this;
+        vm.alerts = [];
+        var deleteAlert = function(alert) {
+            var index = vm.alerts.indexOf(alert);
+            DataUtils.verify((index > -1), 'Alert not found.');
+            return vm.alerts.splice(index, 1);
+        }
+
+        vm.columnModels = params.columnModels;
+        vm.parentReference = params.parentReference;
+        vm.savedQueryForm = params.rowData;
+
+        vm.form = params.rowData;
+
+        vm.submit = function () {
+            if (vm.form.$invalid) {
+                vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error', deleteAlert, true));
+                vm.form.$setSubmitted();
+                return;
+            }
+
+            var row = vm.savedQueryForm.rows[0]
+
+            row.last_execution_time = "now";
+            params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
+                // show success after close
+                $uibModalInstance.close(query.successful);
+            }, function error(error) {
+                // show error without close
+                vm.alerts.push(AlertsService.createAlert(error.message, 'error', deleteAlert, true));
+            });
+        }
+
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('DuplicateSavedQueryModalDialogController', ['messageMap', 'params', '$uibModalInstance', '$window', function SavedQueryModalDialogController(messageMap, params, $uibModalInstance, $window) {
+        var vm = this;
+        vm.tuple = params.tuple;
+
+        vm.editAppLink = function () {
+            return params.tuple.reference.contextualize.entryEdit.appLink;
+        }
+
         vm.cancel = function () {
             $uibModalInstance.dismiss("cancel");
         }

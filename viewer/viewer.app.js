@@ -3,7 +3,14 @@
 
     angular.module('chaise.configure-viewer', ['chaise.config'])
 
-    .constant('appName', 'viewer')
+    .constant('settings', {
+        appName: "viewer",
+        appTitle: "Image Viewer",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true,
+        openIframeLinksInTab: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -41,9 +48,7 @@
         'ngSanitize',
         'ngMessages',
         'ui.mask',
-        'ui.select',
         'ui.bootstrap',
-        'ng.deviceDetector',
         'angular-markdown-editor'
     ])
 
@@ -55,6 +60,7 @@
         }]);
     }])
 
+    // TODO this should be removed, viewer shouldn't parse the url
     // Configure the context info from the URI
     .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
         var utils = UriUtilsProvider.$get();
@@ -63,8 +69,7 @@
         utils.setOrigin();
         utils.parseURLFragment(window.location, context);
 
-        // TODO this should be removed, viewer shouldn't parse the url
-        console.log('Context', context);
+        // console.log('Context', context);
     }])
 
     // Configure all tooltips to be attached to the body by default. To attach a
@@ -115,7 +120,7 @@
                 user.role = null;
             }
 
-            console.log('User: ', user);
+            // console.log('User: ', user);
             return;
         }, function error(response) {
             throw response;
@@ -124,8 +129,8 @@
 
     // Hydrate values providers and set up iframe
     .run([
-        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'UriUtils', 'logService', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, UriUtils, logService, $window, context, image, $rootScope, Session, AlertsService, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', 'messageMap', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConfig', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, messageMap, $window, context, image, $rootScope, Session, AlertsService, viewerConfig, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
 
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
@@ -145,11 +150,12 @@
         var rectangles = [];
         var sections = [];
         var session;
-        var imageURI, svgURIs = [];
+        var imageURI, svgURIs = [], imageTuple;
         var config = ConfigUtils.getContextJSON();
-        var annotConstant = viewerConstant.annotation;
-        var imageConstant = viewerConstant.image;
+        var imageConfig = viewerConfig.getImageConfig();
+        var osdConstant = viewerConstant.osdViewer;
 
+        // TODO are these needed?
         context.server = config.server;
         context.wid = config.contextHeaderParams.wid;
         context.cid = config.contextHeaderParams.cid;
@@ -157,44 +163,32 @@
         context.chaiseBaseURL = UriUtils.chaiseBaseURL();
         UriUtils.setOrigin();
 
-        var res = UriUtils.chaiseURItoErmrestURI($window.location, true);
+        // NOTE: we're not decoding query parameters because it will mess with the encoding of url values
+        var res = UriUtils.chaiseURItoErmrestURI($window.location, true, true);
         var ermrestUri = res.ermrestUri,
-            pcid = config.contextHeaderParams.cid,
-            ppid = config.contextHeaderParams.pid,
+            pcid = res.cid,
+            ppid = res.pid,
             isQueryParameter = res.isQueryParameter,
-            queryParamsString = res.queryParamsString,
-            queryParams = res.queryParams;
+            pageQueryParamsString = res.pageQueryParamsString,
+            pageQueryParams = res.queryParams;
 
         context.catalogID = res.catalogId;
 
-        context.queryParams = res.queryParams;
+        context.queryParams = pageQueryParams;
 
         FunctionUtils.registerErmrestCallbacks();
 
-        var session, annotationEditReference;
-        var osdViewerQueryParams = queryParamsString, // what will be passed onto osd viewer
+        var session,
+            headTitleDisplayname, // used for generating the and head title
             hasAnnotationQueryParam = false, // if there are svgs in query param, we should just use it and shouldn't get it from db.
-            hasImageQueryParam = false, // if there is an image in query, we should just use it and shouldn't use the image uri from db
-            osdCanShowAnnotation = false; // whether we can show image annotations or not (if not, we will disable the sidebar)
+            noImageData = false; // if the main image request didnt return any rows
 
-        // HACK: this is just a hack to allow quick testing
         // if there are any svg files in the query params, ignore the annotation table.
-        // we cannot use the queryParams object that is returned since it only give us the last url
-        // (it's a key-value so it's not supporting duplicated key values)
-        // NOTE we're using the same logic as osd viewer, if that one changed, we should this as well
-        if (queryParamsString && queryParamsString.length > 0) {
-            queryParamsString.split('&').forEach(function (queryStr) {
-                var qpart = queryStr.split("=");
-                if (qpart.length != 2 || qpart[0] !== "url") return;
-
-                if (qpart[1].indexOf(".svg") != -1 || qpart[1].indexOf(annotConstant.OVERLAY_HATRAC_PATH) != -1) {
-                    $rootScope.hideAnnotationSidebar = false;
-                    $rootScope.loadingAnnotations = true;
-                    hasAnnotationQueryParam = true;
-                } else {
-                    hasImageQueryParam = true;
-                }
-            });
+        // (added here because we want to hide the sidebar as soon as we can)
+        if (viewerAppUtils.hasURLQueryParam(pageQueryParams, true)) {
+            $rootScope.hideAnnotationSidebar = false;
+            $rootScope.loadingAnnotations = true;
+            hasAnnotationQueryParam = true;
         }
 
         // Subscribe to on change event for session
@@ -202,26 +196,30 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
+            session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
+
             var imageReference;
             // resolve the main (image) reference
-            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (ref) {
-                imageReference = ref;
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (reference) {
+                // TODO added this to get rid of terminal error, but this doesn't make sense to me
+                //      we shouldn't polute rootScope in other apps for no reason.
+                //      and also this should be based on contextualized reference
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
+
+                imageReference = reference;
 
                 // TODO check for filter
                 // context.filter = imageReference.location.filter;
                 // context.facets = imageReference.location.facets;
                 // DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                 // TODO is it needed?
                 $rootScope.session = session;
 
-                var logObj = {};
-                if (pcid) logObj.pcid = pcid;
-                if (ppid) logObj.ppid = ppid;
-                if (isQueryParameter) logObj.cqp = 1;
+                $rootScope.reference = imageReference;
 
                 $rootScope.logStackPath = logService.logStackPaths.ENTITY;
                 $rootScope.logStack = [
@@ -231,80 +229,194 @@
                         imageReference.filterLogInfo
                     )
                 ];
+                $rootScope.logAppMode = null;
 
-                return imageReference.contextualize.detailed.read(1, logObj, true, true);
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.LOAD),
+                    stack: logService.getStackObject()
+                };
+                if (pcid) logObj.pcid = pcid;
+                if (ppid) logObj.ppid = ppid;
+                if (isQueryParameter) logObj.cqp = 1;
+
+                // since we want to check the ACL for updating the default_Z we have to ask for TCRS
+                return imageReference.contextualize.detailed.read(1, logObj, false, true, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {
 
-                // TODO throw error
-                // what if the record doesn't exist (or there are multiple)
-                if (imagePage.length != 1) {
-                    console.log("Image request didn't return a row.");
-                    return false;
+                var tableDisplayName = imagePage.reference.displayname.value;
+
+                if (imagePage.length > 1) {
+                    recordSetLink = imagePage.reference.contextualize.compact.appLink;
+                    throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
                 }
 
-                image.entity = imagePage.tuples[0].data;
-                context.imageID = image.entity.RID;
-                imageURI = image.entity[imageConstant.URI_COLUMN_NAME];
+                if (imagePage.length == 1) {
+                    imageTuple = imagePage.tuples[0];
 
-                // TODO some sort of warning maybe?
-                if (!imageURI) {
-                    console.log("The " + imageConstant.URI_COLUMN_NAME + " value is empty. We cannot show any image from database.");
-                }
+                    $rootScope.tuple = imageTuple;
 
-                // TODO this feels hacky
-                // get the default zindex value
-                if (imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME in image.entity) {
-                    context.defaultZIndex = image.entity[imageConstant.DEFAULT_Z_INDEX_COLUMN_NAME];
-                }
+                    image.entity = imageTuple.data;
+                    context.imageID = image.entity.RID;
+                    imageURI = image.entity[imageConfig.legacy_osd_url_column_name];
 
-                /**
-                * - if url is passed in query parameters, don't use image.uri value
-                *   (TODO maybe we shouldn't even read the image? (we're reading image for RID value etc..)
-                * - otherwise, if image.uri value exists
-                *    - and has query parameter, use the image.uri query parameter.
-                *    - otherwise, use the image.uri value
-                */
-                if(!hasImageQueryParam && (typeof imageURI === "string")){
-                    osdViewerQueryParams += (osdViewerQueryParams.length > 0 ?  "&" : "");
-                    if (imageURI.indexOf("?") !== -1) {
-                        osdViewerQueryParams += imageURI.split("?")[1];
-                    } else {
-                        osdViewerQueryParams += imageURI;
+                    if (!imageURI) {
+                        console.log("The " + imageConfig.legacy_osd_url_column_name + " value is empty in Image table.");
                     }
+
+                    // TODO this feels hacky
+                    // get the default zindex value
+                    if (imageConfig.default_z_index_column_name in image.entity) {
+                        context.defaultZIndex = image.entity[imageConfig.default_z_index_column_name];
+                    }
+
+                    /**
+                     * page title logic:
+                     * - if iframe, don't show it.
+                     * - otherwise, compute the markdown_pattern in constant, if it didn't work, use the tuple.rowName.
+                     *   if there wasn't any links in the computed value, add a link to the row.
+                     *
+                     * head title link:
+                     *  - if iframe, not applicable.
+                     *  - otherwise, compute the markdown_pattern in constant, if it didn't work, use the tuple.displayname.
+                     */
+                    if ($window.self == $window.parent) {
+                        // page title:
+
+                        // get it from the constant
+                        var pageTitleCaption = ERMrest.processMarkdownPattern(
+                            imageConfig.page_title_markdown_pattern,
+                            imageTuple.data,
+                            imageReference.table,
+                            "detailed",
+                            {templateEngine: "handlebars"}
+                        );
+                        // use the tuple rowName
+                        if (pageTitleCaption.value == "" || pageTitleCaption.value == null) {
+                            pageTitleCaption = imageTuple.rowName;
+                        }
+
+                        //attach link if it doesn't have any
+                        if (!pageTitleCaption.isHTML || !pageTitleCaption.value.match(/<a\b.+href=/)) {
+                            $rootScope.pageTitle = '<a href="' + imageTuple.reference.contextualize.detailed.appLink + '">' + pageTitleCaption.value + '</a>';
+                        } else {
+                            $rootScope.pageTitle = pageTitleCaption.value;
+                        }
+
+                        // head title:
+
+                        // get it from the constant
+                        headTitleDisplayname = ERMrest.processMarkdownPattern(
+                            imageConfig.head_title_markdown_pattern,
+                            imageTuple.data,
+                            imageReference.table,
+                            "detailed",
+                            {templateEngine: "handlebars"}
+                        );
+                        // use the tuple rowName
+                        if (headTitleDisplayname.value == "" || headTitleDisplayname.value == null) {
+                            headTitleDisplayname = imageTuple.displayname;
+                        }
+                    }
+
+                } else {
+                    noImageData = true;
+                    $rootScope.pageTitle = "Image";
                 }
 
-                // TODO throw an error if there wasn't any image
+                // if missing, use 0 instead
+                if (context.defaultZIndex == null) {
+                    context.defaultZIndex = 0;
+                }
 
-                osdCanShowAnnotation = viewerAppUtils.canOSDShowAnnotation(osdViewerQueryParams);
+                // properly merge the query parameter and ImageURI
+                var res = viewerAppUtils.initializeOSDParams(pageQueryParams, imageURI);
 
-                // if there's svg query param, don't fetch the annotations from DB.
-                // if we cannot show any overlay, there's no point in reading
-                if (hasAnnotationQueryParam || !osdCanShowAnnotation) {
+                $rootScope.osdViewerParameters = res.osdViewerParams;
+
+                // fetch the missing parameters from database
+                if (imageTuple) {
+                    // add meterScaleInPixels query param if missing
+                    var val = parseFloat(imageTuple.data[imageConfig.pixel_per_meter_column_name]);
+                    var qParamName = osdConstant.PIXEL_PER_METER_QPARAM;
+                    if (!(qParamName in $rootScope.osdViewerParameters) && !isNaN(val)) {
+                        $rootScope.osdViewerParameters[qParamName] = val;
+                    }
+
+                    // add waterMark query param if missing
+                    var watermark = null;
+                    if (DataUtils.isNoneEmptyString(imageConfig.watermark_column_name)) {
+                        // get it from the vis columns
+                        watermark = imageTuple.data[imageConfig.watermark_column_name]
+                    } else if (DataUtils.isNoneEmptyString(imageConfig.watermark_foreign_key_visible_column_name)) {
+                        // get it from foreign key relationship
+                        val = imageTuple.linkedData[imageConfig.watermark_foreign_key_visible_column_name];
+                        if (DataUtils.isObjectAndNotNull(val)) {
+                            watermark = val[imageConfig.watermark_foreign_key_data_column_name];
+                        }
+                    }
+
+                    // properly set the mainImage acls
+                    $rootScope.osdViewerParameters.acls.mainImage = {
+                        canUpdateDefaultZIndex: imageTuple.canUpdate && imageTuple.checkPermissions("column_update", imageConfig.default_z_index_column_name)
+                    };
+                }
+
+                qParamName = osdConstant.WATERMARK_QPARAM;
+                if (!(qParamName in $rootScope.osdViewerParameters) && DataUtils.isNoneEmptyString(watermark)) {
+                    $rootScope.osdViewerParameters[qParamName] = watermark;
+                }
+
+                // if channel info was avaibale on queryParams or imageURI, don't fetch it from DB.
+                if (noImageData || !res.loadImageMetadata) {
+                    return [];
+                }
+
+                return viewerAppUtils.loadImageMetadata();
+            }).then(function () {
+                // dont fetch annotation from db if:
+                // - we have annotation query params
+                // - or main image request didn't return any rows
+                if (hasAnnotationQueryParam || noImageData) {
                     return false;
                 }
 
-                return viewerAppUtils.readAllAnnotations();
-            })
-            // read the annotation reference
-            .then(function (res) {
+                // read the annotation reference
+                return viewerAppUtils.readAllAnnotations(true);
+            }).then(function () {
+
+                // view <table displayname>: tuple displayname
+                var headTitle = "View " + DataUtils.getDisplaynameInnerText($rootScope.reference.displayname);
+                if (headTitleDisplayname) {
+                    headTitle += ": " + DataUtils.getDisplaynameInnerText(headTitleDisplayname);
+                }
+                headInjector.updateHeadTitle(headTitle);
+
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
-                if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
-                    $rootScope.disableAnnotationSidebar = true;
-                }
+                // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
+                //     $rootScope.disableAnnotationSidebar = true;
+                // }
 
                 if ($rootScope.annotationTuples.length > 0) {
                     $rootScope.loadingAnnotations = true;
                 }
 
-                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html?" + osdViewerQueryParams;
-                console.log('osd viewer location: ', osdViewerURI);
+                if (!DataUtils.isObjectAndNotNull($rootScope.osdViewerParameters) || $rootScope.osdViewerParameters.mainImage.info.length === 0) {
+                    console.log("there wasn't any parameters that we could send to OSD viewer");
+                    // TODO better error
+                    throw new ERMrest.MalformedURIError("Image information is missing.");
+                }
+
+                var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
                 iframe.location.replace(osdViewerURI);
 
-                // TODO there should be a way that osd tells us it's done doing it's setup.
+                // NOTE if we move displayReady and displayIframe to be after the osdLoaded,
+                //      the scalebar value doesn't properly display. the viewport must be visible
+                //      before initializing the osd viewer (and its scalebar)
+                // show the page while the image info will be loaded by osd viewer
                 $rootScope.displayReady = true;
 
                 /**

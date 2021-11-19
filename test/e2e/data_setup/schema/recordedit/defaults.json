@@ -330,13 +330,43 @@
                         "tag:isrd.isi.edu,2016:generated": null,
                         "tag:isrd.isi.edu,2016:immutable": null
                     }
+                }, {
+                    "name": "color_rgb_hex",
+                    "default": "#123456",
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    }
+                }, {
+                    "name": "color_rgb_hex_disabled",
+                    "default": "#654321",
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null,
+                        "tag:isrd.isi.edu,2016:immutable": null
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns": {
-                    "entry/create": ["asset_disabled", "asset_disabled_no_default", "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default", "asset", "RID", "RCB", "RMB", "RCT", "RMT"],
-                    "entry/edit": ["asset_disabled", "text", "text_disabled", "markdown_disabled", ["defaults", "fk_text_disabled"], "int_disabled", "float_disabled", "boolean_disabled", "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled"],
-                    "detailed": ["text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default"]
+                    "entry/create": [
+                        "asset_disabled", "asset_disabled_no_default", "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"],
+                        "int", "int_disabled", "float", "float_disabled", "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled",
+                         "timestamp_disabled_no_default", "timestamptz", "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default",
+                         "asset", "color_rgb_hex", "color_rgb_hex_disabled", "RID", "RCB", "RMB", "RCT", "RMT"
+                    ],
+                    "entry/edit": [
+                        "asset_disabled", "text", "text_disabled", "markdown_disabled", ["defaults", "fk_text_disabled"], "int_disabled", "float_disabled", "boolean_disabled", "date_disabled",
+                        "timestamp_disabled", "timestamptz_disabled", "json_disabled", "color_rgb_hex_disabled"
+                    ],
+                    "detailed": [
+                        "text", "text_disabled", "markdown", "markdown_disabled", ["defaults", "fk_text"], ["defaults", "fk_text_disabled"], "int", "int_disabled", "float", "float_disabled",
+                        "boolean_true", "boolean_false", "boolean_disabled", "date", "date_disabled", "timestamp", "timestamp_disabled", "timestamp_disabled_no_default", "timestamptz",
+                        "timestamptz_disabled", "timestamptz_disabled_no_default", "json", "json_disabled", "json_disabled_no_default", "color_rgb_hex", "color_rgb_hex_disabled"
+                    ]
                 }
             }
         },

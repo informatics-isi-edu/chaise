@@ -337,7 +337,6 @@
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
-            params.reference.session = rsSession;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
@@ -520,42 +519,73 @@
             if (column.isAsset) {
                 type = 'file'
             } else if (isDisabled) {
-                type = 'disabled';
+                type = "disabled";
             } else if (column.isForeignKey) {
                 type = 'popup-select';
             } else {
                 type =  UiUtils.getInputType(column.type);
             }
 
+            if (type == 'boolean') {
+                var trueVal = InputUtils.formatBoolean(column, true),
+                    falseVal = InputUtils.formatBoolean(column, false),
+                    booleanArray = [trueVal, falseVal];
+
+                // create map
+                var booleanMap = {};
+                booleanMap[trueVal] = true;
+                booleanMap[falseVal] = false;
+            }
+
             return {
                 allInput: undefined,
+                booleanArray: booleanArray || [],
+                booleanMap: booleanMap || {},
                 column: column,
                 isDisabled: isDisabled,
                 isRequired: !column.nullok && !isDisabled,
                 inputType: type,
                 highlightRow: false,
                 showSelectAll: false,
-                logStack: logService.getStackObject(stackNode),
-                logStackPath: logService.getStackPath("", stackPath)
+                logStackNode: stackNode, // should not be used directly, take a look at getColumnModelLogStack
+                logStackPathChild: stackPath // should not be used directly, use getColumnModelLogAction getting the action string
             };
         }
 
+        /**
+         * Given a columnModel and the parent model that it belongs to, return the log stack that should be used.
+         * NOTES:
+         *   - The parentModel might have a logStack object that is different from $rootScope,
+         *     so this function will merge the columnModel.logStackNode with its parent object.
+         *   - In some cases (currently viewer annotation form), the logStack that is present on the
+         *     parentModel might change, so we cannot create the whole stack while creating the columnModel.
+         *     So while creating columnModel I'm just creating the node and on run time the parentLogStack will be added.
+         *
+         */
+        function getColumnModelLogStack(colModel, parentModel) {
+            return logService.getStackObject(colModel.logStackNode, parentModel ? parentModel.logStack : null);
+        }
+
+        /**
+         * Given a columnModel and the parent model that is belogns to, returns the action string that should be used.
+         * Take a look at the Notes on getColumnModelLogStack function for more info
+         */
+        function getColumnModelLogAction(action, colModel, parentModel) {
+            var logStackPath = logService.getStackPath(parentModel ? parentModel.logStackPath : null, colModel.logStackPathChild);
+            return logService.getActionString(action, logStackPath);
+        }
 
         /**
          * In case of prefill and default we only have a reference to the foreignkey,
          * we should do extra reads to get the actual data.
          *
+         * @param  {Object} model the tableModel object
          * @param  {int} rowIndex The row index that this data is for (it's usually zero, first row)
          * @param  {string[]} colNames Array of foreignkey names that can be prefilled
          * @param  {ERMrest.Refernece} fkRef   Reference to the foreign key table
-         * @param  {Object} contextHeaderParams the object will be passed to read as contextHeaderParams
+         * @param  {Object} logObj the object will be passed to read as contextHeaderParams
          */
-        function _getForeignKeyData (model, rowIndex, colNames, fkRef, logAction, logStack) {
-            var stackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY);
-            var logObj = {
-                action: logService.getActionString(logAction, stackPath),
-                stack: logStack
-            };
+        function _getForeignKeyData (model, rowIndex, colNames, fkRef, logObj) {
             fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
                     // default value is validated
@@ -609,13 +639,19 @@
                         break;
                     }
                 }
+
+                // create proper logObject
                 var stackNode = logService.getStackNode(
                     logService.logStackTypes.FOREIGN_KEY,
                     ref.table,
                     {source: source, entity: true}
                 );
-                var logStack = logService.getStackObject(stackNode);
-                _getForeignKeyData(model, newRow, fkColumnNames, ref, logService.logActions.FOREIGN_KEY_PRESELECT, logStack);
+                var logStackPath = logService.getStackPath(model.logStackPath, logService.logStackPaths.FOREIGN_KEY);
+                var logObj = {
+                    action: logService.getActionString(logService.logActions.FOREIGN_KEY_PRESELECT, logStackPath),
+                    stack: logService.getStackObject(stackNode, model.logStack)
+                }
+                _getForeignKeyData(model, newRow, fkColumnNames, ref, logObj);
             }).catch(function (err) {
                 fkColumnNames.forEach(function (cn) {
                     $rootScope.showColumnSpinner[newRow][cn] = false;
@@ -706,6 +742,11 @@
                         // formatDatetime takes care of column.default if null || undefined
                         initialModelValue = InputUtils.formatDatetime(defaultValue, tsOptions);
                         break;
+                    case "boolean":
+                        if (defaultValue != null) {
+                            initialModelValue = InputUtils.formatBoolean(column, defaultValue);
+                        }
+                        break;
                     default:
                         if (column.isAsset) {
                             var metaObj = {};
@@ -729,7 +770,7 @@
                             });
 
                             if (allPrefilled || allInitialized) {
-                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues);
+                                var defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : initialValues), logObj;
 
                                 if (allPrefilled) {
                                     colModel.isDisabled = true;
@@ -739,14 +780,36 @@
                                 initialModelValue = defaultDisplay.rowname.value;
                                 // initialize foreignKey data
                                 model.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.values;
+
+                                // populate the log object
+                                logObj = {
+                                    action: getColumnModelLogAction(
+                                        logService.logActions.FOREIGN_KEY_PRESELECT,
+                                        colModel,
+                                        model
+                                    ),
+                                    stack: getColumnModelLogStack(colModel, model)
+                                };
+
                                 // get the actual foreign key data
-                                _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logService.logActions.FOREIGN_KEY_PRESELECT, colModel.logStack);
+                                _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logObj);
                             } else if (defaultValue != null) {
                                 initialModelValue = defaultValue;
                                 // initialize foreignKey data
                                 model.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+
+                                // populate the log object
+                                logObj = {
+                                    action: getColumnModelLogAction(
+                                        logService.logActions.FOREIGN_KEY_DEFAULT,
+                                        colModel,
+                                        model
+                                    ),
+                                    stack: getColumnModelLogStack(colModel, model)
+                                };
+
                                 // get the actual foreign key data
-                                _getForeignKeyData(model, 0, [column.name], column.defaultReference, logService.logActions.FOREIGN_KEY_DEFAULT, colModel.logStack);
+                                _getForeignKeyData(model, 0, [column.name], column.defaultReference, logObj);
                             }
                         } else {
                             // all other column types
@@ -760,6 +823,38 @@
             }
         }
 
+        /**
+         * if because of column-level acls, columns of one of the rows cannot be
+         * updated, we cannot update any other rows. so we should precompute this
+         * and attach the error so we can show it later to the users.
+         * This should be called on load, as well as when one of the records
+         * in the form is removed.
+         * TODO technically could be improved. we've already gone through the
+         * list of columns, we might not need to to do it again here
+         */
+        function populateColumnPermissionError(model, columnModel) {
+            if (!model.columnPermissionError) {
+                model.columnPermissionError = {};
+            }
+
+            if (columnModel.isDisabled) {
+                model.columnPermissionError[columnModel.column.name] = null;
+                return;
+            }
+
+            var firstIndex = model.canUpdateRows.findIndex(function (curr, index) {
+                // the whole row can be updated but the column cannot
+                return $rootScope.tuples[index].canUpdate && !curr[columnModel.column.name];
+            });
+            if (firstIndex === -1) {
+                model.columnPermissionError[columnModel.column.name] = null;
+                return;
+            }
+            var message = "This field cannot be modified. To modify it, remove all records that have this field disabled (e.g. Record Number ";
+            message +=  (firstIndex+1) + ")";
+            model.columnPermissionError[columnModel.column.name] =  message;
+        }
+
         function populateEditModelValues(model, reference, tuple, tupleIndex, isCopy) {
             // initialize row objects {column-name: value,...}
             model.rows[tupleIndex] = {};
@@ -767,6 +862,10 @@
             // these are the values that we're sending to ermrestjs,
             // chaise should not use these values and we should just populate the values
             model.submissionRows[tupleIndex] = {};
+
+            if (!isCopy) {
+                model.canUpdateRows[tupleIndex] = {};
+            }
 
             var values = tuple.values;
 
@@ -781,7 +880,14 @@
                 var i = reference.columns.findIndex(function (col) {return col.name === column.name});
 
                 // If input is disabled, and it's copy, we don't want to copy the value
-                if (colModel.inputType == "disabled" && isCopy) return;
+                var isDisabled = colModel.inputType == "disabled";
+                if (isDisabled && isCopy) return;
+
+                if (!isCopy) {
+                    // whether certain columns are disabled or not
+                    model.canUpdateRows[tupleIndex][column.name] = tuple.canUpdate && tuple.canUpdateValues[i];
+                    isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[i]);
+                }
 
                 // stringify the returned array value
                 if (column.type.isArray) {
@@ -796,10 +902,10 @@
                 switch (column.type.name) {
                     case "timestamp":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatDatetime(values[i], options);
+                        value = isDisabled ? values[i] : InputUtils.formatDatetime(values[i], options);
                         break;
                     case "timestamptz":
-                        if (colModel.inputType == "disabled") {
+                        if (isDisabled) {
                             options.outputType = "string";
                             options.outputMomentFormat = dataFormats.datetime.return;
                         }
@@ -809,13 +915,16 @@
                     case "int4":
                     case "int8":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatInt(values[i]);
+                        value = isDisabled ? values[i] : InputUtils.formatInt(values[i]);
                         break;
                     case "float4":
                     case "float8":
                     case "numeric":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
+                        value = isDisabled ? values[i] : InputUtils.formatFloat(values[i]);
+                        break;
+                    case "boolean":
+                        value = InputUtils.formatBoolean(column, values[i]);
                         break;
                     default:
                         // the structure for asset type columns is an object with a 'url' property
@@ -866,8 +975,8 @@
          * @param {ERMrest.Tuple=} originalTuple - the original tuple that comes from the first read
          * @param {Boolean} editOrCopy - true if it's edit or copy, otherwise it's false.
          */
-        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy) {
-            reference.columns.forEach(function (column) {
+        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy, canUpdateRows) {
+            reference.columns.forEach(function (column, columnIndex) {
                 // If the column is a foreign key column, it needs to get the originating columns name for data submission
                 if (column.isForeignKey) {
 
@@ -876,7 +985,7 @@
                         var referenceColumn = foreignKeyColumns[k];
                         var foreignTableColumn = column.foreignKey.mapping.get(referenceColumn);
                         // check if value is set in submission data yet (searchPopup will set this value if foreignkey is picked)
-                        if (!submissionRow[referenceColumn.name]) {
+                        if (submissionRow[referenceColumn.name] == null) {
                             /**
                              * User didn't change the foreign key, copy the value over to the submission data with the proper column name
                              * In the case of edit, the originating value is set on $rootScope.tuples.data. Use that value if the user didn't touch it (value could be null, which is fine, just means it was unset)
@@ -894,7 +1003,8 @@
                 }
                 // not foreign key, column.name is sufficient for the keys
                 var rowVal = modelRow[column.name];
-                if (rowVal && !column.isDisabled) {
+                var canUpdateCol = !DataUtils.isObjectAndNotNull(canUpdateRows) || canUpdateRows[column.name] == true;
+                if (rowVal && !column.isDisabled && canUpdateCol) {
                     if (column.type.isArray) {
                         rowVal = JSON.parse(rowVal);
                     } else {
@@ -918,7 +1028,11 @@
                                 break;
                             case "json":
                             case "jsonb":
-                                rowVal=JSON.parse(rowVal);
+                                rowVal = JSON.parse(rowVal);
+                                break;
+                            case "boolean":
+                                // call columnToColumnModel to set booleanArray and booleanMap for proper un-formatting
+                                rowVal = InputUtils.unformatBoolean(columnToColumnModel(column), rowVal);
                                 break;
                             default:
                                 break;
@@ -926,7 +1040,7 @@
                     }
                 }
                 // set null if not set so that the whole data object is filled out for posting to ermrestJS
-                submissionRow[column.name] = (rowVal === undefined) ? null : rowVal;
+                submissionRow[column.name] = (rowVal === undefined || rowVal === "") ? null : rowVal;
             });
 
             return submissionRow;
@@ -936,9 +1050,12 @@
             addRelatedRecordFact: addRelatedRecordFact,
             addRecords: addRecords,
             columnToColumnModel: columnToColumnModel,
+            getColumnModelLogStack: getColumnModelLogStack,
+            getColumnModelLogAction: getColumnModelLogAction,
             populateCreateModelValues: populateCreateModelValues,
             populateEditModelValues: populateEditModelValues,
-            populateSubmissionRow: populateSubmissionRow
+            populateSubmissionRow: populateSubmissionRow,
+            populateColumnPermissionError: populateColumnPermissionError
         }
     }])
 })();

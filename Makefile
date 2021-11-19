@@ -67,13 +67,12 @@ E2EDrecordsetEdit=test/e2e/specs/default-config/recordset/edit.conf.js
 E2ErecordsetAdd=test/e2e/specs/default-config/recordset/add.conf.js
 E2EDrecordsetIndFacet=test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
 E2EDrecordsetHistFacet=test/e2e/specs/delete-prohibited/recordset/histogram-facet.conf.js
-# Viewer tests
-E2EDviewer=test/e2e/specs/all-features/viewer/presentation.conf.js
+
 # misc tests
 E2Enavbar=test/e2e/specs/all-features/navbar/protractor.conf.js
 E2EnavbarHeadTitle=test/e2e/specs/all-features-confirmation/navbar/protractor.conf.js
 E2EnavbarCatalogConfig=test/e2e/specs/delete-prohibited/navbar/protractor.conf.js
-E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions-visibility.conf.js
+E2EmultiPermissionsVisibility=test/e2e/specs/all-features/permissions.conf.js
 # footer test
 E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
 # errors test
@@ -99,8 +98,7 @@ DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
 FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
-PARALLEL_TESTS=$(FullFeaturesParallel) $(FullFeaturesConfirmationParallel) $(DeleteProhibitedParallel) $(DefaultConfigParallel)
-VIEWER_TESTS=$(E2EDviewer)
+PARALLEL_TESTS=$(FullFeaturesConfirmationParallel) $(DefaultConfigParallel) $(FullFeaturesParallel) $(DeleteProhibitedParallel)
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
 
@@ -136,10 +134,6 @@ testrecordedit: test-RECORDEDIT_TESTS
 
 .PHONY: testpermissions
 testpermissions:test-PERMISSIONS_TESTS
-
-#Rule to run viewer app tests
-.PHONY: testviewer
-testviewer: test-VIEWER_TESTS
 
 #Rule to run recordset app tests
 .PHONY: testrecordset
@@ -188,13 +182,15 @@ test: test-ALL_TESTS
 
 # HTML files that need to be created
 HTML=login/index.html \
+	 login2/index.html \
 	 recordset/index.html \
 	 viewer/index.html \
 	 recordedit/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
-	 $(DIST)/chaise-dependencies.html
+	 $(DIST)/chaise-dependencies.html \
+	 help/index.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
@@ -203,7 +199,9 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(RECORDSET_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
 	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
-	$(DIST)/$(LOGIN_JS_SOURCE_MIN)
+	$(DIST)/$(LOGIN_JS_SOURCE_MIN) \
+	$(DIST)/$(LOGIN2_JS_SOURCE_MIN) \
+	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
  DIST=dist
 
@@ -262,9 +260,7 @@ SHARED_JS_VENDOR_ASSET=$(JS)/vendor/angular-plotly.js \
 	$(COMMON)/vendor/angular-animate.min.js \
 	$(COMMON)/vendor/angular-scroll.min.js \
 	$(COMMON)/vendor/css-element-queries.js \
-	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js \
-	$(JS)/vendor/select.js \
-	$(COMMON)/vendor/mask.min.js
+	$(JS)/vendor/ui-bootstrap-tpls-2.5.0.min.js
 
 SHARED_JS_VENDOR_ASSET_MIN=chaise.vendor.min.js
 $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN): $(SHARED_JS_VENDOR_ASSET)
@@ -277,13 +273,15 @@ SHARED_CSS_SOURCE=$(CSS)/vendor/bootstrap.min.css \
 SASS=$(COMMON)/styles/app.css
 $(SASS): $(shell find $(COMMON)/styles/scss/)
 	$(info - creating app.css and navbar.css)
-	@$(BIN)/node-sass --output-style compressed --source-map-embed --source-map-root $(CHAISE_BASE_PATH) $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
-	@$(BIN)/node-sass --include-path $(COMMON)/styles/scss/_variables.scss --output-style compressed --source-map-embed --source-map-root $(CHAISE_BASE_PATH) $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
+	@$(BIN)/sass --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/app.scss $(COMMON)/styles/app.css
+	@$(BIN)/sass --load-path=$(COMMON)/styles/scss/_variables.scss --style=compressed --embed-source-map --source-map-urls=relative $(COMMON)/styles/scss/_navbar.scss $(COMMON)/styles/navbar.css
 
 JS_CONFIG=chaise-config.js
 $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
+
+GOOGLE_DATASET_CONFIG=google-dataset-config.js
 
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
@@ -320,7 +318,7 @@ RECORD_CSS_SOURCE=
 	$(info - creating .make-record-includes)
 	@> .make-record-includes
 	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
-	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
+	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(GOOGLE_DATASET_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-record-includes)
 
 record/index.html: record/index.html.in .make-record-includes
@@ -338,9 +336,15 @@ RECORDSET_JS_SOURCE_MIN=recordset.min.js
 $(DIST)/$(RECORDSET_JS_SOURCE_MIN): $(RECORDSET_JS_SOURCE)
 	$(call bundle_js_files,$(RECORDSET_JS_SOURCE_MIN),$(RECORDSET_JS_SOURCE))
 
-RECORDSET_JS_VENDOR_ASSET=
+# TODO why four different files for markdown? if inputswitch will be used everywhere, this should move to shared
+RECORDSET_JS_VENDOR_ASSET=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
+	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
 
-RECORDSET_CSS_SOURCE=
+RECORDSET_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
 
 .make-recordset-includes: $(BUILD_VERSION)
 	@> .make-recordset-includes
@@ -370,11 +374,14 @@ $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN): $(RECORDEDIT_JS_SOURCE)
 RECORDEDIT_JS_VENDOR_ASSET=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/spectrum/spectrum.min.js
 
 RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(COMMON)/vendor/spectrum/spectrum.min.css
 
 .make-recordedit-includes: $(BUILD_VERSION)
 	@> .make-recordedit-includes
@@ -406,9 +413,13 @@ recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
 
+VIEWER_CONFIG=$(VIEWER_ROOT)/viewer-config.js
+$(VIEWER_CONFIG): $(VIEWER_ROOT)/viewer-config-sample.js
+	cp -n $(VIEWER_ROOT)/viewer-config-sample.js $(VIEWER_CONFIG) || true
+	touch $(VIEWER_CONFIG)
+
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
 	$(VIEWER_ROOT)/viewer.utils.js \
-	$(VIEWER_ROOT)/constant.js \
 	$(VIEWER_ROOT)/common/providers/context.js \
 	$(VIEWER_ROOT)/common/providers/image.js \
 	$(VIEWER_ROOT)/common/providers/user.js \
@@ -430,23 +441,23 @@ $(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
 	$(call bundle_js_files,$(VIEWER_JS_SOURCE_MIN),$(VIEWER_JS_SOURCE))
 
 VIEWER_JS_VENDOR_ASSET=$(COMMON)/vendor/re-tree.js \
-	$(COMMON)/vendor/ng-device-detector.js \
 	$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
 	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
 	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js
+	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
+	$(COMMON)/vendor/mask.min.js \
+	$(COMMON)/vendor/spectrum/spectrum.min.js
 
-VIEWER_CSS_SOURCE=$(CSS)/vendor/select.css \
-	$(CSS)/vendor/select2.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
+VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
 	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css
+	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
+	$(COMMON)/vendor/spectrum/spectrum.min.css
 
 .make-viewer-includes: $(BUILD_VERSION)
 	@> .make-viewer-includes
 	$(info - creating .make-viewer-includes)
 	@$(call add_css_link, .make-viewer-includes,$(VIEWER_CSS_SOURCE))
-	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
+	@$(call add_js_script, .make-viewer-includes, $(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(VIEWER_JS_VENDOR_ASSET) $(VIEWER_CONFIG) $(DIST)/$(VIEWER_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,.make-viewer-includes)
 
 viewer/index.html: viewer/index.html.in .make-viewer-includes
@@ -480,7 +491,8 @@ LOGIN_JS_VENDOR_ASSET=$(JS)/vendor/jquery-ui-tooltip.min.js \
 	$(JS)/vendor/jquery.nouislider.all.min.js \
 	$(JS)/vendor/jquery.cookie.js \
 	$(JS)/vendor/ng-grid.js \
-	$(JS)/vendor/bootstrap-tour.min.js
+	$(JS)/vendor/bootstrap-tour.min.js \
+	$(JS)/vendor/select.js
 
 LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
 	$(CSS)/vendor/ng-grid.css \
@@ -500,6 +512,28 @@ login/index.html: login/index.html.in .make-login-includes
 	$(info - creating login/index.html)
 	@$(call build_html, .make-login-includes, login/index.html)
 
+# ------------------------------- Login2 app --------------------------------#
+LOGIN2_JS_SOURCE=login2/login.app.js
+
+LOGIN2_JS_SOURCE_MIN=login2.min.js
+$(DIST)/$(LOGIN2_JS_SOURCE_MIN): $(LOGIN2_JS_SOURCE)
+	$(call bundle_js_files,$(LOGIN2_JS_SOURCE_MIN),$(LOGIN2_JS_SOURCE))
+
+LOGIN2_JS_VENDOR_ASSET=
+
+LOGIN2_CSS_SOURCE=
+
+.make-login2-includes: $(BUILD_VERSION)
+	@> .make-login2-includes
+	$(info - creating .make-login2-includes)
+	@$(call add_css_link,.make-login2-includes,$(LOGIN2_CSS_SOURCE))
+	@$(call add_js_script,.make-login2-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN2_JS_VENDOR_ASSET) $(DIST)/$(LOGIN2_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-login2-includes)
+
+login2/index.html: login2/index.html.in .make-login2-includes
+	$(info - creating login2/index.html)
+	@$(call build_html, .make-login2-includes, login2/index.html)
+
 # -------------------------- switch user help app -------------------------- #
 SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 
@@ -513,6 +547,28 @@ SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
 	$(info - creating lib/switchUserAccounts.html)
 	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
+
+# -------------------------- help app -------------------------- #
+HELP_JS_SOURCE=help/help.app.js
+
+HELP_JS_SOURCE_MIN=help.min.js
+$(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
+	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
+
+HELP_CSS_SOURCE=
+
+HELP_VENDOR_ASSET=
+
+.make-help-includes: $(BUILD_VERSION)
+	@> .make-help-includes
+	$(info - creating .make-help-includes)
+	@$(call add_css_link,.make-help-includes,$(HELP_CSS_SOURCE))
+	@$(call add_js_script,.make-help-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(HELP)/$(HELP_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(HELP_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-help-includes)
+
+help/index.html: help/index.html.in .make-help-includes
+	$(info - creating help/index.html)
+	@$(call build_html,.make-help-includes,help/index.html)
 
 
 # -------------------------- utility functions -------------------------- #
@@ -601,13 +657,13 @@ all: $(DIST)
 .PHONY: install dont_install_in_root
 install: $(DIST) dont_install_in_root
 	$(info - deploying the package)
-	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' --exclude=/chaise-config.js . $(CHAISEDIR)
+	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
 
 # Rule for installing during testing (build chaise and deploy with the chaise-config)
 .PHONY: install-w-config dont_install_in_root
-install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG)
-	$(info - deploying the package with the existing default chaise-config)
-	@rsync -avz --exclude='.*' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
+	$(info - deploying the package with the existing default config files)
+	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 
 # Rule to create version.txt
 .PHONY: gitversion

@@ -1,5 +1,8 @@
-<li ng-repeat="item in menu" ng-class="{'dropdown-submenu': item.children && canEnable(item)}" ng-if="canShow(item)">
-    <a ng-if="!item.children || !canEnable(item)" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-class="{'disable-link': !canEnable(item)}" ng-click="::onLinkClick($event, item)">{{item.name}}</a>
-    <a ng-if="item.children && canEnable(item)" class="dropdown-toggle" ng-class="{'disable-link': !canEnable(item)}" ng-click="::toggleSubMenu($event, item)">{{item.name}}</a>
+<li ng-repeat="item in menu" ng-class="{'dropdown-submenu': item.children && canEnable(item), 'dropdown-header-container': item.header == true}" ng-if="canShow(item)">
+    <span ng-if="item.header == true && !item.children && !item.url" class="dropdown-header chaise-dropdown-header">{{item.name}}</span>
+    <!-- the following case is for showing a url link or a disabled menu that has children -->
+    <a ng-if="(!item.children && item.url) || !canEnable(item)" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-class="{'disable-link': !canEnable(item), 'chaise-dropdown-header': item.header == true}" ng-click="::onLinkClick($event, item)" ng-bind-html="renderName(item)"></a>
+    <!-- the following case is for showing an enabled menu that has children -->
+    <a ng-if="item.children && canEnable(item)" class="dropdown-toggle" ng-class="{'chaise-dropdown-header': item.header == true}" ng-click="::toggleSubMenu($event, item)" ng-bind-html="renderName(item)"></a>
     <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
 </li>

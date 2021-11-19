@@ -4,8 +4,6 @@
     angular.module('chaise.inputs', ['chaise.validators', 'chaise.utils'])
 
     .factory('InputUtils', ['dataFormats', 'defaultDisplayname', '$rootScope', function(dataFormats, defaultDisplayname, $rootScope) {
-        var booleanValues = [true, false];
-
         /* Functions for all input types */
         // determines if input should be disabled based on ermrestJS API
         function isDisabled(column) {
@@ -22,6 +20,18 @@
             } else if (column.isAsset) {
                 return "No file Selected";
             }
+        }
+
+        /* boolean specific function */
+        var defaultBooleanValues = [true, false];
+
+        // checks for preformat config before returning true/false
+        function formatBoolean(column, value) {
+            return column.formatvalue(value);
+        }
+
+        function unformatBoolean(columnModel, value) {
+            return columnModel.booleanMap[value];
         }
 
         /* numeric specific functions */
@@ -114,9 +124,11 @@
         return {
             applyCurrentDatetime: applyCurrentDatetime,
             blurElement: blurElement,
-            booleanValues: booleanValues,
+            defaultBooleanValues: defaultBooleanValues,
             clearDatetime: clearDatetime,
             fileExtensionTypes: fileExtensionTypes,
+            formatBoolean: formatBoolean,
+            unformatBoolean: unformatBoolean,
             formatDatetime: formatDatetime,
             formatFloat: formatFloat,
             formatInt: formatInt,
@@ -296,7 +308,66 @@
             }
         }
     }])
-    
+
+    /**
+     * NOTE: this directive uses spectrum library which uses jQuery
+     */
+    .directive('colorPicker',[function () {
+        return {
+            require: '?ngModel',
+            scope: {
+                toggleCallback: "=?",
+                isRequired: "="
+            },
+            link: function (scope, elem, attrs, ngModel) {
+                if (!ngModel) return;
+
+                // create the spectrum color picker
+                elem.spectrum({
+                    containerClassName: 'chaise-color-picker-popup',
+                    showAlpha: false,
+                    showPalette: false,
+                    showInitial: true,
+                    showInput: true,
+                    allowEmpty: (scope.isRequired !== true)
+                });
+
+                // when the model changed, change the input
+                ngModel.$render = function () {
+                    elem.spectrum('set', ngModel.$viewValue);
+                };
+
+                // keep it updated on change
+                elem.on('change', function () {
+                    scope.$apply(function () {
+                        var val = null;
+                        try {
+                            val = elem.spectrum("get").toHexString();
+                        } catch(exp) {
+                            // if the value is empty (null), it might throw an error
+                            // fail silently and use null
+                        }
+
+                        elem.spectrum("set", val);
+                        ngModel.$setViewValue(val);
+                    });
+                });
+
+                var togglePopup = function ($event) {
+                    elem.spectrum("toggle");
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    return false;
+                }
+
+                // clicking on the color should open the picker
+                elem.prev().on('click', togglePopup);
+
+                scope.toggleCallback = togglePopup;
+            }
+        }
+    }])
+
     /**
      * This directive can be used to display an appropriate input element based on the given columnModel in a form.
      * Based on the passed values, it can be used in two different modes:
@@ -305,13 +376,50 @@
      * The mode is determined by the directive itself based on the given attributes.
      * If you pass parentModel and parentReference, it will assume that you want the form mode, otherwise it will be in standalone mode.
      * The only noticable difference is just how the scope.model value works (especially in the case of foreignkey inputs).
-     * In standalone mode, 
+     * In standalone mode,
      *  - the initial value of scope.model for foreignkeys is ignored.
      *  - the value of scope.model for foreignkeys is a "tuple" (instead of rowname).
      *  - since we don't have access to the parentModel, there must be a translation layer to properly set the value of foreignkey columns.
      */
     .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'DataUtils', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
                 function(ConfigUtils, dataFormats, DataUtils, InputUtils, integerLimits, logService, maskOptions, modalBox, modalUtils, recordCreate, recordsetDisplayModes, UriUtils, $log, $rootScope) {
+
+        /**
+         * We have multiple ways to determine a disabled input, or rather, when an input should be shown as disabled
+         *   1. the input should not be file (the upload directive handls showing proper disabled input for those)
+         *   2. If the column must be disabled based on acl or annotation
+         * NOTE: in recordedit if select-all is open the column is also marked as disabled but not here
+         */
+        function _populateInputTypeOrDisabled(vm) {
+            if (vm.columnModel.inputType === "file") {
+                return vm.columnModel.inputType;
+            }
+
+            if (vm.isDisabled) {
+                return 'disabled';
+            }
+
+            return vm.columnModel.inputType
+        }
+
+        /**
+         * - column is marked as disabled by annotation
+         * - in edit mode and column in the row is marked as disabled by acl
+         * NOTE: in recordedit there's also `we're showing the select-all control` case but not here
+         */
+        function _populateIsDisabled (vm) {
+            if (vm.columnModel.isDisabled) return true;
+
+            if (vm.mode === "edit" && vm.hasParentModel && vm.parentModel.canUpdateRows) {
+                var canUpdateRow = vm.parentModel.canUpdateRows[vm.rowIndex];
+                if (canUpdateRow && !canUpdateRow[vm.columnModel.column.name]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -359,11 +467,16 @@
                 vm.hasParentModel = false;
                 if (typeof vm.parentModel === "object" && typeof vm.parentReference === "object") {
                     vm.hasParentModel = true;
+                    vm.parentLogStack = vm.parentModel.logStack;
+                    vm.parentLogStackPath = vm.parentModel.parentLogStackPath;
                 }
+
+                vm.isDisabled = _populateIsDisabled(vm);
+                vm.inputTypeOrDisabled = _populateInputTypeOrDisabled(vm);
 
                 vm.customErrorMessage = null;
                 vm.blurElement = InputUtils.blurElement;
-                vm.booleanValues = InputUtils.booleanValues;
+                vm.defaultBooleanValues = InputUtils.defaultBooleanValues;
                 vm.dataFormats = dataFormats;
                 vm.fileExtensionTypes = InputUtils.fileExtensionTypes;
                 vm.maskOptions = maskOptions;
@@ -454,7 +567,6 @@
                     }
 
                     params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).contextualize.compactSelect;
-                    params.reference.session = $rootScope.session;
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
@@ -465,8 +577,10 @@
                     }
 
                     // log attributes
-                    params.logStack = vm.columnModel.logStack;
-                    params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
+                    // TODO should eventually be moved outside this function and directly under link
+                    //      if we want to do more logs for other column types as well
+                    params.logStack = recordCreate.getColumnModelLogStack(vm.columnModel, vm.parentModel);
+                    params.logStackPath = logService.getStackPath(vm.parentLogStackPath, logService.logStackPaths.FOREIGN_KEY_POPUP);
 
                     modalUtils.showModal({
                         animation: false,
@@ -587,6 +701,10 @@
                         "margin-top": '14px'
                     };
                 }
+
+                // just a placeholder to make sure this is defined
+                // this function will be defiend by color-picker directive
+                vm.toggleColorPicker = function () {}
             }
         }
     }]);

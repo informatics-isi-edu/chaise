@@ -405,6 +405,12 @@
               "typename": "int4"
             }
           }
+        },
+        {
+          "name": "color_rgb_hex_column",
+          "type": {
+            "typename": "color_rgb_hex"
+          }
         }
       ],
       "annotations": {
@@ -421,18 +427,18 @@
         "tag:isrd.isi.edu,2016:visible-columns" : {
           "detailed" : [
               "title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious","json_col",
-              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array", "color_rgb_hex_column"
           ],
           "entry/create": [
-              "id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col"
+              "id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col", "color_rgb_hex_column"
           ],
           "entry/edit": [
               "id", "title", "website", ["product-edit", "fk_category"], "rating", "summary", "description", "no_of_rooms", "opened_on", "date_col","luxurious","json_col",
-              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array", "color_rgb_hex_column"
           ],
           "compact" : [
               "title", "website", ["product-edit", "fk_category"], "rating", "summary","description", "no_of_rooms", "opened_on", "date_col", "luxurious",
-              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array"
+              "text_array", "boolean_array", "int4_array", "float4_array", "date_array", "timestamp_array", "timestamptz_array", "color_rgb_hex_column"
           ]
         },
 

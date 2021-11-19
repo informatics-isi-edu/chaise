@@ -41,6 +41,10 @@ To make sure you're familiar with both CSS and SASS. The following are some guid
     (part - 2)
   - [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority but they
     too can be overwritten when the element is accessed as shown in the document.
+  - [Important Information on CSS position](https://css-tricks.com/almanac/properties/p/position/) : Adding scrolling to a collapsible navbar can be
+    tricky. This link explains how you can add scrolling without affecting any level of dropdown menus.
+  - [Calculating position of element](https://javascript.info/size-and-scroll) : This link gives an in-depth understanding of how we can manually
+    calculate the position of any element dynamically in the DOM
 
 ### Useful CSS rules
 How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc). Hence we need to keep in mind the following while writing print rules in css.
@@ -58,6 +62,8 @@ How each browser renders printing styles is different from the other. Mac and Wi
 
   - The print preview that is seen when doing a `Ctrl-P` on Windows or a `Cmd-P` on Mac doesn't necessarily give you the right picture of
     the document to be printed. To view what will be printed, either save to PDF file or chose to switch to the 'Print mode' as described above.
+
+  - Scrolling can be persisted by using the `scrolling : scroll` option.
 
 ### SCSS structure
 
@@ -116,12 +122,24 @@ The purpose of using variables or enumeration is to avoid rewriting (or copy-and
 - Example: The `messageMap` constant can be used to store and display user-facing messages in Chaise. [ERMrestJS#68](https://github.com/informatics-isi-edu/ermrestjs/issues/68) contains detail discussion related to this topic.
 
 ### Naming Conventions
+
+#### Chaise
 There are a few naming conventions that are being used across the apps. This pertains to variables, module names, and file names.
 - File names should be written in camel case (camelCase) with identifying information separated by `.` (`*.controller.js`, `*.app.js`, `*.html`).
 - AngularJS modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in Chaise.
 - Service, Factory, Provider, Controller, and other angular classes should be defined with camel case text leading with a capital letter. For example: `ErrorDialogController` is the convention for naming controllers. Don't shorten the text to `ctrl` because we should be using controller as syntax and want to have a more readable structure to our code.
 - Variables should follow a similar naming convention using camel case text. Variables and functions that are prefixed with an underscore, should be treated as private variables and used with caution.
 - Folder names should be different from file names. Of course folders don't have an extension so it's more apparent that they are folders, but developers should use `-` separated names for folders, i.e. `common\templates\data-link`.
+- Chaise config properties are technically case-insensitive, but to make the documents easier to read we are writing them as camel case in code and documentation.
+
+#### ERMrestJS
+- Related to annotations,
+  - All the keys and properties are case sensitive and written in lower case.
+  - Annotation keys are using kebab case (dash case).
+  - Annotation properties are using snake case.
+  - Properties that are enforcing a boolean state should be defined based on the oposite default value. For example if a button is displayed by default and we want to add a property to force its state, we have to add `hide_button`.
+- Related to markdown and templating:
+  - The helper functions are case sensitive and using came case.
 
 ## Error Handling
 

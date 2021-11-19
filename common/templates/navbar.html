@@ -1,8 +1,14 @@
-<header ng-hide="hideNavbar" class="row" style="z-index: -1;">
+<header ng-hide="hideNavbar" id="navheader" class="row">
+    <div class="chaise-navbar-banner-container" ng-repeat="banner in topBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+        <button class="close" ng-click="hideBanner($index, true)" ng-if="banner.dismissible">
+            <span aria-hidden="true">×</span>
+        </button>
+        <div class="markdown-container" ng-bind-html="banner.html | trustedHTML"></div>
+    </div>
     <nav id="mainnav" class="navbar navbar-inverse" role="navigation">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-target="#fb-navbar-main-collapse">
+            <button type="button" class="navbar-toggle collapsed" data-target="#fb-navbar-main-collapse" data-toggle="collapse">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="md-chevron-down"></span>
                 MENU
@@ -17,8 +23,8 @@
         <div class="collapse navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
             <ul id="navbar-menu" class="nav navbar-nav">
                 <li ng-repeat="item in menu" class="dropdown" on-toggle="onToggle(open, item)" ng-if="canShow(item)" uib-dropdown>
-                    <a ng-if="!item.children || !canEnable(item)" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-class="{'disable-link': !canEnable(item)}" ng-click="::onLinkClick($event, item)">{{item.name}}</a>
-                    <a ng-if="item.children && canEnable(item)" class="dropdown-toggle" uib-dropdown-toggle>{{item.name}} <span class="caret"></span></a>
+                    <a ng-if="!item.children || !canEnable(item)" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-class="{'disable-link': !canEnable(item)}" ng-click="::onLinkClick($event, item)" ng-bind-html="renderName(item)"></a>
+                    <a ng-if="item.children && canEnable(item)" class="dropdown-toggle" uib-dropdown-toggle ng-click="::resetHeight($event)"><span ng-bind-html="renderName(item)"></span> <span class="caret"></span></a>
                     <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
                 </li>
             </ul>
@@ -27,6 +33,22 @@
             <login> will be pulled right first, then versioned data pulled right next to it (on the left) -->
             <login></login>
             <a ng-if="isVersioned()" id="live-btn" class="nav navbar-nav navbar-right" ng-click="::toLive()" uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom">View Live Data</a>
+            <span ng-show="showRidSearch()" class="nav navbar-nav navbar-right rid-search">
+                <div class="chaise-search-box chaise-input-group">
+                    <input id="rid-search-input" class="chaise-input-control chaise-input-control-sm has-feedback" type="text" ng-model="ridSearchTerm" on-enter="::ridSearch()" placeholder="Go to RID"></input>
+                    <div class="chaise-input-group-append">
+                        <button class="chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary" ng-click="::ridSearch()" role="button">
+                            <span class="glyphicon chaise-btn-icon" ng-class="{'glyphicon-share-alt': !showRidSpinner, 'glyphicon-refresh glyphicon-refresh-animate': showRidSpinner}"></span>
+                        </button>
+                    </div>
+                </div>
+            </span>
         </div><!--/.nav-collapse -->
     </nav>
+    <div class="chaise-navbar-banner-container" ng-repeat="banner in bottomBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+        <button class="close" ng-click="hideBanner($index, false)" ng-if="banner.dismissible">
+            <span aria-hidden="true">×</span>
+        </button>
+        <div class="markdown-container" ng-bind-html="banner.html | trustedHTML"></div>
+    </div>
 </header>

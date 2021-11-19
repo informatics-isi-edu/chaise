@@ -25,10 +25,14 @@ describe('Recordset add record,', function() {
 
     });
 
+    it("show an inline comment instead of tooltip", function () {
+        expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
+    });
+
     it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function () {
         // default config: maxRecordsetRowHeight = 160
-        // 160 for max height, 10 for padding, 1 for border
-        var testCell, cellHeight = 171;
+        // 160 for max height, 10 for padding
+        var testCell, cellHeight = 170;
         chaisePage.recordsetPage.getRows().then(function (rows) {
             return chaisePage.recordsetPage.getRowCells(rows[0]);
         }).then(function (cells) {

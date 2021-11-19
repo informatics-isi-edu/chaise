@@ -4,7 +4,13 @@
 /* Configuration of the Recordset App */
     angular.module('chaise.configure-recordset', ['chaise.config'])
 
-    .constant('appName', 'recordset')
+    .constant('settings', {
+        appName: "recordset",
+        appTitle: "Record Set",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -28,14 +34,17 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
+        'ngMessages',
         'ngSanitize',
         'ngAnimate',
         'duScroll',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'angular-markdown-editor'
     ])
 
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
@@ -91,7 +100,7 @@
                 displayMode: recordsetDisplayModes.fullscreen
             };
 
-            recordsetModel.parentStickyAreaSelector = "#mainnav";
+            recordsetModel.parentStickyAreaSelector = "#navheader";
 
             recordsetModel.queryTimeoutTooltip = messageMap.queryTimeoutTooltip;
             $rootScope.alerts = AlertsService.alerts;
@@ -107,7 +116,6 @@
 
             context.catalogID = res.catalogId;
 
-
             FunctionUtils.registerErmrestCallbacks();
 
             // Subscribe to on change event for session
@@ -116,9 +124,14 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
+                session = Session.getSessionValue();
+                ERMrest.setClientSession(session);
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
-                    session = Session.getSessionValue();
+                    $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
+                    // send string to prepend to "headTitle"
+                    // <table-name>
+                    headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                     var location = reference.location;
@@ -133,14 +146,13 @@
 
 
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.reference.session = session;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,
                     // so we can construct the redirectPath correctly.
                     // NOTE we might want to eventually remove this and have
                     // the redirectPath logic in the catch all.
-                    var facetColumns = recordsetModel.reference.facetColumns;
+                    // var facetColumns = recordsetModel.reference.facetColumns;
 
                     $log.info("Reference:", recordsetModel.reference);
 

@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body">
     <span ng-bind-html="ctrl.params.message"></span>
-    <span ng-if="ctrl.params.showLogin"><a id="login-link" ng-click="ctrl.login()"> Please login</a> to continue.</span>
+    <span ng-if="ctrl.params.showLogin"><a id="error-modal-login-link" ng-click="ctrl.login()"> Please login</a> to continue.</span>
     <span ng-if="ctrl.showDownloadPolicy">The download instructions can be found <a id="download-policy-link" ng-href="{{ctrl.downloadPolicy}}">here</a>.</span>
 
     <br><br>
@@ -16,8 +16,6 @@
         <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.displayDetails, 'glyphicon-triangle-right': !ctrl.displayDetails}"></i>
         {{ctrl.linkText}}
     </a>
-
-    <br>
 
     <span ng-show="ctrl.displayDetails" id="error-details">
     	<br>

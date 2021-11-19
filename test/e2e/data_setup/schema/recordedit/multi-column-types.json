@@ -360,6 +360,24 @@
                 {
                   "name": "asset_null_col_bytes",
                   "type": {"typename": "int"}
+                },
+                {
+                    "comment": "A color_rgb_hex column with an initial value of null",
+                    "name": "color_rgb_hex_col",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    }
+                },
+                {
+                    "comment": "A color_rgb_hex column with an initial null value",
+                    "name": "color_rgb_hex_null_col",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    }
                 }
             ],
             "keys": [
@@ -618,6 +636,18 @@
                     },
                     "annotations": {
                         "tag:isrd.isi.edu,2017:asset": null
+                    }
+                },
+                {
+                    "comment": "A generated color_rgb_hex column with an initial non-null value",
+                    "name": "color_rgb_hex_gen",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": null
                     }
                 }
             ],

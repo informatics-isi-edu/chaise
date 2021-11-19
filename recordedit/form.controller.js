@@ -34,6 +34,9 @@
         vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
+        // placeholder for the color picker callbacks
+        vm.toggleColorPickerCallbacks = [{}];
+
         vm.MAX_ROWS_TO_ADD = context.MAX_ROWS_TO_ADD;
         vm.numberRowsToAdd = 1;
         vm.showMultiInsert = false;
@@ -48,7 +51,7 @@
         vm.int8min = integerLimits.INT_8_MIN;
         vm.int8max = integerLimits.INT_8_MAX;
 
-        vm.booleanValues = InputUtils.booleanValues;
+        vm.booleanValues = booleanValues;
 
         vm.applyCurrentDatetime = applyCurrentDatetime;
         vm.toggleMeridiem = toggleMeridiem;
@@ -96,16 +99,17 @@
          * @param  {object} result object has result messages
          */
         function onSuccess (model, result){
-            var page = result.successful;
-            var failedPage = result.failed;
-            var resultsReference = page.reference;
+            var page = result.successful,
+                failedPage = result.failed,
+                disabledPage = result.disabled;
+
             vm.successfulSubmission = true;
             if (model.rows.length == 1) {
                 vm.redirectAfterSubmission(page);
-            }
-            else {
+            } else {
                 AlertsService.addAlert("Your data has been submitted. Showing you the result set...", "success");
 
+                var resultsReference = page.reference;
                 // NOTE currently this has been added just to make sure nothing is broken,
                 // but it's not used since the displayed table doesn't have any controls.
                 // if we end up adding more controls and needed to log them, we might want to
@@ -117,12 +121,15 @@
                 );
 
                 // includes identifiers for specific records modified
+                // TODO: the above comment seems wrong
+                // NOTE: I think we are using the base reference for the page so we go to either an unconstrained recordset (multi create)
+                // or a constrained recordset (multi edit we entered recordedit with)
                 vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
-                //set values for the view to flip to recordedit resultset view
+
+                // set values for the view to flip to recordedit resultset view
                 vm.resultsetModel = {
                     hasLoaded: true,
                     reference: resultsReference,
-                    columns: resultsReference.columns,
                     enableSort: false,
                     sortby: null,
                     sortOrder: null,
@@ -142,17 +149,16 @@
                     logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_SUCCESFUL_SET)
                 };
 
-                // NOTE: This case is for a pseudo-failure case
-                // When multiple rows are updated and a smaller set is returned, the user doesn't have permission to update those rows based on row-level security
                 if (failedPage !== null) {
+                    var failedReference = failedPage.reference;
+
                     vm.omittedResultsetModel = {
                         hasLoaded: true,
-                        reference: resultsReference,
-                        columns: resultsReference.columns,
+                        reference: failedReference,
                         enableSort: false,
                         sortby: null,
                         sortOrder: null,
-                        page: page,
+                        page: failedPage,
                         pageLimit: model.rows.length,
                         rowValues: DataUtils.getRowValuesFromTuples(failedPage.tuples),
                         selectedRows: [],
@@ -168,6 +174,36 @@
                         logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_FAILED_SET)
                     };
                 }
+
+                // NOTE: This case is for the unchanged rows
+                // When multiple rows are updated and a smaller set is returned,
+                // the user doesn't have permission to update those rows based on row-level security
+                if (disabledPage !== null) {
+                    var disabledReference = disabledPage.reference;
+
+                    vm.disabledResultsetModel = {
+                        hasLoaded: true,
+                        reference: disabledReference,
+                        enableSort: false,
+                        sortby: null,
+                        sortOrder: null,
+                        page: disabledPage,
+                        pageLimit: model.rows.length,
+                        rowValues: DataUtils.getRowValuesFromTuples(disabledPage.tuples),
+                        selectedRows: [],
+                        search: null,
+                        config: {
+                            viewable: false,
+                            editable: false,
+                            deletable: false,
+                            selectMode: modalBox.noSelect,
+                            displayMode: recordsetDisplayModes.table
+                        },
+                        logStack: logService.getStackObject(logStackNode),
+                        logStackPath: logService.getStackPath("", logService.logStackPaths.RESULT_DISABLED_SET)
+                    };
+                }
+
                 vm.resultset = true;
                 // delay updating the height of DOM elements so the current digest cycle can complete and "show" the resultset view
                 $timeout(function() {
@@ -212,7 +248,14 @@
                     originalTuple = null;
                     editOrCopy = false;
                 }
-                recordCreate.populateSubmissionRow(model.rows[j], model.submissionRows[j], $rootScope.reference, originalTuple, editOrCopy);
+                recordCreate.populateSubmissionRow(
+                    model.rows[j],
+                    model.submissionRows[j],
+                    $rootScope.reference,
+                    originalTuple,
+                    editOrCopy,
+                    vm.editMode ? model.canUpdateRows[j] : null
+                );
             }
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
@@ -251,7 +294,14 @@
                 editOrCopy = false;
             }
 
-            var submissionRow = recordCreate.populateSubmissionRow(vm.recordEditModel.rows[rowIndex], vm.recordEditModel.submissionRows[rowIndex], $rootScope.reference, originalTuple, editOrCopy);
+            var submissionRow = recordCreate.populateSubmissionRow(
+                vm.recordEditModel.rows[rowIndex],
+                vm.recordEditModel.submissionRows[rowIndex],
+                $rootScope.reference,
+                originalTuple,
+                editOrCopy,
+                vm.editMode ? vm.recordEditModel.canUpdateRows[rowIndex] : null
+            );
 
             // used for title
             params.parentReference = $rootScope.reference;
@@ -261,7 +311,6 @@
             params.displayMode = vm.editMode ? recordsetDisplayModes.foreignKeyPopupEdit : recordsetDisplayModes.foreignKeyPopupCreate;
 
             params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
-            params.reference.session = $rootScope.session;
 
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
@@ -269,7 +318,7 @@
             params.facetPanelOpen = false;
 
             var columnModel = vm.recordEditModel.columnModels[columnIndex];
-            params.logStack = columnModel.logStack;
+            params.logStack = recordCreate.getColumnModelLogStack(columnModel);
             params.logStackPath = logService.getStackPath("", logService.logStackPaths.FOREIGN_KEY_POPUP);
 
             modalUtils.showModal({
@@ -476,7 +525,15 @@
             vm.recordEditModel.oldRows.splice(index, 1);
             vm.recordEditModel.submissionRows.splice(index, 1);
             vm.recordEditModel.foreignKeyData.splice(index, 1);
-            if (vm.editMode) $rootScope.tuples.splice(index, 1);
+            if (vm.editMode) {
+                vm.recordEditModel.canUpdateRows.splice(index, 1);
+                $rootScope.tuples.splice(index, 1);
+                // when some rows has changed, we should make sure the errors are updated
+                vm.recordEditModel.columnModels.forEach(function (cm) {
+                    recordCreate.populateColumnPermissionError(vm.recordEditModel, cm);
+                });
+                vm.showColumnPermissionError = [];
+            }
             $timeout(function() {
                 onResize();
                 $rootScope.showSpinner = false;
@@ -504,6 +561,11 @@
             }
 
             return disabledValue;
+        }
+
+        // returns columnModel.booleanArray for use in boolean dropdown
+        function booleanValues(colIndex) {
+            return vm.recordEditModel.columnModels[colIndex].booleanArray;
         }
 
         // Assigns the current date or timestamp to a column's model
@@ -542,11 +604,26 @@
         }
 
         /**
-         * if ermrestjs says the column should be disabled, or we're showing select-all
+         * - we're showing the select-all control
+         * - column is marked as disabled by annotation
+         * - in edit mode and column in the row is marked as disabled by acl
          */
-        function isDisabled(columnIndex) {
+        function isDisabled(columnIndex, rowIndex) {
             var cm = vm.recordEditModel.columnModels[columnIndex];
-            return cm && (cm.isDisabled || cm.showSelectAll);
+            if (!cm) return false;
+
+            // model based
+            if (cm.isDisabled || cm.showSelectAll) return true;
+
+            // row based in edit mode
+            if (vm.editMode) {
+                var canUpdateRow = vm.recordEditModel.canUpdateRows[rowIndex];
+                if (canUpdateRow && !canUpdateRow[cm.column.name]) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // when a boolean dropdown is opened, resize the dropdown menu to match the width of the input
@@ -575,6 +652,34 @@
             selectAllOpen = false;
         }
 
+        vm.canShowSelectAllBtn = function (columnIndex) {
+            var model = vm.recordEditModel.columnModels[columnIndex];
+            // if we're already showing the select-all UI, then we have to show the button
+            if (model.showSelectAll) {
+                return true;
+            }
+
+            // in this case we want to show the button and instead disable it
+            if (vm.editMode && vm.recordEditModel.columnPermissionError && vm.recordEditModel.columnPermissionError[model.column.name]) {
+                return true;
+            }
+
+            // it must be multi-row, column must not be disabled,
+            // and at least one row can be edited (if in edit mode)
+            if (vm.recordEditModel.rows.length < 2) return false;
+            if (model.isDisabled) return false;
+
+            return !vm.editMode || vm.recordEditModel.canUpdateRows.some(function (item) {
+                return item[model.column.name];
+            });
+        };
+
+        // if because of column-level acl some rows cannot be edited, select-all should be disabled.
+        vm.disableSelectAllBtn = function (columnIndex) {
+            var model = vm.recordEditModel.columnModels[columnIndex];
+            return vm.editMode && vm.recordEditModel.columnPermissionError[model.column.name];
+        }
+
         /**
          * this function will be called when user toggles the select-all panel. it will,
          * - log the client action
@@ -588,8 +693,8 @@
 
             var action = model.showSelectAll ? logService.logActions.SET_ALL_CLOSE : logService.logActions.SET_ALL_OPEN;
             logService.logClientAction({
-                action: logService.getActionString(action, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(action, model),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             if (selectAllOpen) {
@@ -611,6 +716,9 @@
             // change view/display model value into an object or string depending on state
             vm.recordEditModel.columnModels.forEach(function (cm) {
                 vm.recordEditModel.rows.forEach(function (row, index) {
+                    // if column cannot be updated don't do anything
+                    if (vm.editMode && !vm.recordEditModel.canUpdateRows[index][cm.column.name]) return;
+
                     var value = row[cm.column.name];
                     if (cm.showSelectAll) {
                         if (cm.inputType == "timestamp") {
@@ -653,8 +761,8 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(logService.logActions.SET_ALL_CANCEL, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_CANCEL, model),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             model.showSelectAll = false;
@@ -681,32 +789,27 @@
             var column = columnModel.column;
 
             var inputType = columnModel.inputType;
-            switch (inputType) {
-                case "popup-select":
-                    // value should be an ERMrest.tuple object
-                    // set data in view model (model.rows) and submission model (model.submissionRows)
+            model.rows.forEach(function (row, rowIndex) {
+                // ignore the ones that cannot be updated
+                if (vm.editMode && !model.canUpdateRows[rowIndex][column.name]) return;
 
-                    // udpate the foreign key data
-                    model.foreignKeyData.forEach(function (fkeyData) {
-                        fkeyData[column.foreignKey.name] = value ? value.data : null;
-                    });
+                switch (inputType) {
+                    case "popup-select":
+                        // udpate the foreign key data
+                        model.foreignKeyData[rowIndex][column.foreignKey.name] = value ? value.data : null;
 
-                    var foreignKeyColumns = column.foreignKey.colset.columns;
-                    for (var i = 0; i < foreignKeyColumns.length; i++) {
-                        var referenceCol = foreignKeyColumns[i];
-                        var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
+                        // update the submission rows
+                        var foreignKeyColumns = column.foreignKey.colset.columns;
+                        for (var i = 0; i < foreignKeyColumns.length; i++) {
+                            var referenceCol = foreignKeyColumns[i];
+                            var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
-                        model.submissionRows.forEach(function (submissionRow) {
-                            submissionRow[referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
-                        });
-                    }
+                            model.submissionRows[rowIndex][referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
+                        }
 
-                    model.rows.forEach(function (row) {
                         row[column.name] = value ? value.displayname.value : null;
-                    });
-                    break;
-                case "file":
-                    model.rows.forEach(function (row) {
+                        break;
+                    case "file":
                         // need to set each property to avoid having a reference to the same object
                         row[column.name] = {}
                         Object.keys(value).forEach(function (key) {
@@ -724,11 +827,9 @@
                                 reference: $rootScope.reference
                             });
                         }
-                    });
-                    break;
-                case "timestamp":
-                    // set input value for each record to create. populate ui model
-                    model.rows.forEach(function (row) {
+                        break;
+                    case "timestamp":
+                        // set input value for each record to create. populate ui model
                         // input stays in disabled format (a string)
                         var options = {
                             outputType: "string",
@@ -737,14 +838,14 @@
                         };
                         var valueOrNull = value.date ? value.date + value.time + value.meridiem : null;
                         row[column.name] = InputUtils.formatDatetime(valueOrNull, options);
-                    });
-                    break;
-                default:
-                    model.rows.forEach(function (row) {
+                        break;
+                    default:
                         row[column.name] = value;
-                    });
-                    break;
-            }
+                        break;
+                }
+
+            });
+
         }
 
         vm.applySelectAll = function applySelectAll(index) {
@@ -752,8 +853,8 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(logService.logActions.SET_ALL_APPLY, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_APPLY, model),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             setValueAllInputs(index, model.allInput);
@@ -764,8 +865,8 @@
 
             var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
             logService.logClientAction({
-                action: logService.getActionString(logService.logActions.SET_ALL_CLEAR, model.logStackPath),
-                stack: model.logStack
+                action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_CLEAR, model),
+                stack: recordCreate.getColumnModelLogStack(model)
             }, defaultLogInfo);
 
             var value = null;
@@ -797,21 +898,41 @@
                 if (DataUtils.isObjectAndNotNull(value) && value.url) noValue = false;
             } else if (columnModel.inputType === "boolean") {
                 // check if the selected value is a boolean (true|false)
-                if (typeof value === "boolean") noValue = false;
+                if (typeof value === "boolean" || (typeof value === "string" && value.length > 0)) noValue = false;
             } else {
                 if (value != null) noValue = false;
             }
             return noValue;
         }
 
-        // We have 2 ways to determine a disabled input, or rather, when an input should be shown as disabled
-        //   1. we check the column beforehand and determine if the input should ALWAYS be disabled
-        //   2. If the select all dialog is open and input is not file, the form inputs should be disabled
-        vm.inputTypeOrDisabled = function inputTypeOrDisabled(index) {
+        // We have multiple ways to determine a disabled input, or rather, when an input should be shown as disabled
+        //   1. the input should not be file (the upload directive handls showing proper disabled input for those)
+        //   2. If the select all dialog is open
+        //   3. If the column must be disabled based on acl or annotation
+        vm.inputTypeOrDisabled = function inputTypeOrDisabled(rowIndex, columnIndex) {
             try {
-                var model = vm.recordEditModel.columnModels[index];
-                return (model.showSelectAll && model.inputType !== "file") ? "disabled" : model.inputType;
-            } catch (err) {}
+                var model = vm.recordEditModel.columnModels[columnIndex];
+                if (model.inputType === "file") {
+                    return model.inputType;
+                }
+                if (model.showSelectAll || vm.isDisabled(columnIndex, rowIndex)) {
+                    return 'disabled';
+                }
+                return model.inputType;
+            } catch (err) {
+                console.log("couldn't figure out the type: ", err);
+            }
+        }
+
+
+        vm.showColumnPermissionErrorClick = function (rowIndex, columnName) {
+            if (!vm.showColumnPermissionError) {
+                vm.showColumnPermissionError = [];
+            }
+            if (!(rowIndex in vm.showColumnPermissionError)) {
+                vm.showColumnPermissionError[rowIndex] = {};
+            }
+            vm.showColumnPermissionError[rowIndex][columnName] = true;
         }
 
         // if any of the columns is showing spinner, that means it's waiting for some

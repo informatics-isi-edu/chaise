@@ -362,6 +362,15 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "comment": null,
+                    "name": "color_rgb_hex_column",
+                    "default": null,
+                    "nullok": true,
+                    "type": {
+                        "typename": "color_rgb_hex"
+                    }
                 }
             ],
             "annotations": {
@@ -402,8 +411,8 @@
                             "comment": "collections",
                             "display": {
                                 "template_engine": "handlebars",
-                                "markdown_pattern": "{{#each $self}}{{#unless @first}}| {{/unless}}{{{this.rowName}}}{{/each}}, {{{entity_all_outbound_outbound1_outbound2.rowName}}}",
-                                "wait_for": ["entity_all_outbound_outbound1_outbound2"]
+                                "markdown_pattern": "{{#each $self}}{{#unless @first}}| {{/unless}}{{{this.rowName}}}{{/each}}, {{{entity_all_outbound_outbound1_outbound2.rowName}}}, max: {{{max_title_accommodation_collection_cover}}}",
+                                "wait_for": ["entity_all_outbound_outbound1_outbound2", "max_title_accommodation_collection_cover"]
                             }
                         },
                         {
@@ -493,7 +502,8 @@
                                  "markdown_pattern": "{{# each entity_set_accommodation_collection_cover}}{{#unless @first}}| {{/unless}}{{this.rowName}}{{/each}}",
                                  "wait_for": ["entity_set_accommodation_collection_cover"]
                              }
-                        }
+                        },
+                        "color_rgb_hex_column"
                     ]
                 },
                 "tag:isrd.isi.edu,2016:visible-foreign-keys": {
@@ -531,6 +541,12 @@
                     "fkeys": true,
                     "columns": true,
                     "sources": {
+                        "fk_cover_prefix": {
+                            "source": [
+                                {"outbound": ["product-record", "fk_cover"]},
+                                "RID"
+                            ]
+                        },
                         "cnt_d_accommodation_inbound1": {
                             "source": [
                                 {"inbound": ["product-record", "accommodation_inbound1_fk1"]},
@@ -540,7 +556,7 @@
                         },
                         "max_title_accommodation_collection_cover": {
                             "source": [
-                                {"outbound": ["product-record", "fk_cover"]},
+                                {"sourcekey": "fk_cover_prefix"},
                                 {"inbound": ["product-record", "fk_thumbnail_collection"]},
                                 "title"
                             ],
@@ -548,7 +564,7 @@
                         },
                         "min_title_accommodation_collection_cover": {
                             "source": [
-                                {"outbound": ["product-record", "fk_cover"]},
+                                {"sourcekey": "fk_cover_prefix"},
                                 {"inbound": ["product-record", "fk_thumbnail_collection"]},
                                 "title"
                             ],
@@ -556,7 +572,7 @@
                         },
                         "entity_set_accommodation_collection_cover": {
                             "source": [
-                                {"outbound": ["product-record", "fk_cover"]},
+                                {"sourcekey": "fk_cover_prefix"},
                                 {"inbound": ["product-record", "fk_thumbnail_collection"]},
                                 "RID"
                             ]
@@ -579,23 +595,29 @@
                                 "RID"
                             ]
                         },
-                        "entity_all_outbound_outbound1_outbound1": {
+                        "fk_to_accommodation_outbound1_prefix": {
                             "source": [
                                 {"outbound": ["product-record", "fk_to_accommodation_outbound1"]},
+                                "RID"
+                            ]
+                        },
+                        "entity_all_outbound_outbound1_outbound1": {
+                            "source": [
+                                {"sourcekey": "fk_to_accommodation_outbound1_prefix"},
                                 {"outbound": ["product-record", "accommodation_outbound1_fk1"]},
                                 "RID"
                             ]
                         },
                         "entity_all_outbound_outbound1_outbound2": {
                             "source": [
-                                {"outbound": ["product-record", "fk_to_accommodation_outbound1"]},
+                                {"sourcekey": "fk_to_accommodation_outbound1_prefix"},
                                 {"outbound": ["product-record", "accommodation_outbound1_fk2"]},
                                 "RID"
                             ]
                         },
                         "entity_all_outbound_outbound1_outbound3": {
                             "source": [
-                                {"outbound": ["product-record", "fk_to_accommodation_outbound1"]},
+                                {"sourcekey": "fk_to_accommodation_outbound1_prefix"},
                                 {"outbound": ["product-record", "accommodation_outbound1_fk3"]},
                                 "RID"
                             ]

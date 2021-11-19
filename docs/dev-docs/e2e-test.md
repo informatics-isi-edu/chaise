@@ -7,8 +7,8 @@ For now, we only have E2E tests in Chaise. E2E tests are automation tests that s
 - **Protractor**: E2E framework tailored for AngularJS apps
 - **Jasmine**: the way in which the automation tests are written
 - **NPM**: to install necessary NodeJS packages
-- **SauceLabs**: platform for executing E2E tests and record (in video) the testing results by Travis CI
-- **Travis CI**: to test automatically every time code is pushed to Github repo
+- **SauceLabs**: platform for executing E2E tests and record (in video) the testing results by CI
+- **Github workflow**: to do continuous integration (CI) by automatically testing every time code is pushed to Github repo
 - **Makefile**: to invoke NPM to install packages necessary for running tests and invoke Protractor (which will run the tests).
 - **ErmrestDataUtils**: tool created in house for catalog/schema creation and seeding data ([Found here](https://github.com/informatics-isi-edu/ErmrestDataUtils))
 
@@ -20,12 +20,13 @@ To run E2E tests on your machine, make sure that you've installed the following 
 - **JAVA**
 - **JDK**
 
-Before running the test cases you also need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
+Before running the test cases you also need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, `RESTRICTED_AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
 
 ```sh
 export CHAISE_BASE_URL=YOUR_CHAISE_BASE_URL
 export ERMREST_URL=YOUR_ERMREST_URL
-export AUTH_COOKIE=YOUR_ERMREST_COOKIE
+export AUTH_COOKIE=YOUR_WEBAUTHN_COOKIE
+export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 ```
 
@@ -35,13 +36,14 @@ These variables are used in `ErmrestDataUtils` to communicate with `ERMrest`. A 
 export CHAISE_BASE_URL=https://dev.isrd.isi.edu/~<your-user-directory>chaise # No trailing `/`
 export ERMREST_URL=https://dev.isrd.isi.edu/ermrest # No trailing `/`
 export AUTH_COOKIE="webauthn=PutYourCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
+export RESTRICTED_AUTH_COOKIE="webauthn=PutAnotherCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
 export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise # No trailing `/`
 export SHARDING=false
 ```
 
 You can get your cookie by querying the database, or using the following simple steps:
 
-1. Open up [https://dev.isrd.isi.edu/chaise/search/](https://dev.isrd.isi.edu/chaise/search/) website.
+1. Open up any chaise page in the deployment that you want to run test cases on.
 2. Login. The account that you are using must have delete and create access. We use this cookie to create and delete catalogs.
 3. Open the Developer tools in your browser.
 4. Go to the console section and write `$.cookie("webauthn")`.
@@ -222,7 +224,7 @@ $ ssh-add PATH/TO/KEY
 $ export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise
 ```
 
-**TRAVIS**: For TRAVIS there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
+**CI**: For CI there is no need to set `REMOTE_CHAISE_DIR_PATH` as it copies the actual file to the **chaise-config.js** in its local directory where it is running the test-suite.
 
 ### Test Configuration JSON file
 
@@ -320,9 +322,9 @@ export SAUCE_ACCESS_KEY="your_access_key"
 
 Now when you run the tests, they will be executed on Sauce Labs instead of your machine. You can monitor them on their dashboard.
 
-## Running tests in TRAVIS
+## Running tests in CI
 
-### Travis Testing workflow
+### CI Testing workflow
 in the Chaise folder, invoke command
 ```sh
 npm test
@@ -345,25 +347,48 @@ sauceKey: process.env.SAUCE_ACCESS_KEY,
 ```
 These lines will set up credentials necessary to login SauceLabs and when detected, will execute these tests on SauceLabs. SauceLabs will then print the testing result on terminal and record the testing video on that account as well. When tests are finished, there will be a URL printed on terminal directing you to see the recorded results.
 
-When the code is pushed to ISI repo, the existence of **.travis.yml** will run "npm test" command in Travis CI, which will trigger the testing chain specified above.
+When the code is pushed to ISI repo, the "Chaise end-to-end tests" Github workflow will run appropriate make commands, which will trigger the testing chain specified above.
 
 ### Environment Variables
 
-**.travis.yml**: [.travis.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.travis.yml)
-specifies environment variables in Travis CI so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in Travis CI one has to configure .travis.yml file.
+**./.github/workflows/main.yml**: [.e2e.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.github/workflows/e2e.yml)
+specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure e2e.yml file.
 
-```sh
-env:
-    global:
-        - CHAISE_BASE_URL: http://localhost/chaise
-        - ERMREST_URL: http://localhost/ermrest
-        - secure: KKPijZEdaQ7wyubNojHcJi/pgqwemhOzD8lHBV9c521+iybrHJRyR8fJE22OoMrn9UVPlk2pYgljpF1Vjubms10Kga4GT3vxjZ7kbadkgs09vIzo4SUQDi7XBrm3NbWIgYgcLhE8ZqhZo75idtkFMJCQclwLQ7vn5P5xSzNI3CUVxoQJ+uB6ZgVDn0b2ldfmqCBM5B52ocOBF1c4yLTmJwCkSRNdM2aVj4scf+S0h3InGCitHNyuu0WUYNvrIVIFhjCi7VuadCtJ7fy7Z2uFksHIxkT5Lx9WkdZX1M522ckvKhlFrOOB8ejIl//JsPsvy7cPAs7R9w+8LwiE3lmU376fxO9cKCrY7vnW78zHhbs3q6iFO2hhAiPILlcK3H626zbblHms8wsqUHkXlFx19FyTU8pqW86/4LKr6sdVRPyutokMdrFtgjFC1KevseK7GUWzOepOBJazXCc0WvQvUOUIWET5auRztLPEt0P9fh0hNamKWqYUiaW/nl0cUGAL/70PWSQBwIAHAry9mI9xVsBVVl0JhF5ljzqGmzFxRik7ylaYSZh1nTrjwjZDmBEOvycNsDqZBmU6Vc0KXtHaWF/AbCj1Lyng72YCe5jks058DGzv4nKonphNsG0bn3sb1oNHzFoHMncx8FxjZACsmuVzvzXtWTcv9O/iu+rbYxg=
-        - secure: hSGHl2cRYx9gmE2lrjRWu3H45ogd8hIiI9QlLZpvXonROZJSw8VqQWpLe/7m+95L8UDhOpnCXKct/V9+qUDsQM2kDpEP+9bNCf3skg7MFLkpr1te+y1mCkO0xu2vhoqrzJKtvXGIenZ/aEY1nQrnIYuF/5MaOzNRliHQ+7rmhigW7M4LSFqDQdj7CvqXsyk3cfNMbIeUI9H8/SrG9mxYfAa61H1zJtPmdDegvjFNcQeeT57lgYyoArOw4lcGm9KHQp2Hn4EtXv1L65DS7eogFit0CnS/1QHEinU2ibpgfb/vnAnRun5OAmjsiPAURLb6AuhevzDHeyMZrTPIGUHiIyuzG8qP264sWq1ukyjolyarwcwJoifJAdGWhVPT41XAlgAy+xgfN4xSKNp+tGPo9+iJqVGgccbpKAYqMQKvWSXO6DVQEqPHtpFuXsqNBBwvzCBAS+VdHFoKOy9bv2AEIpVOZJszIkuaNAQVqG/iD0pXQT9rEsZ4Ghm0N/RQf7qhGA4Ot1u5yOko1zgm15ATzpacy6qEzqQQwG3qilO2hUNK8xehqU52a4KQu79yGOG8zFkyvcUS3H/e4NQVeBFQ8GIrfcjg1vD5PXzdnun3iiLwwSXSk9CMHMW0B2z34qvg0q4++LWP2UMHkrx+yf/MzABoYuiZ6LshCvobftU7zmQ=
-```
-The two "secure"s above set up the SauceLabs username and password and the ERMRest authCookie, and encrypt them. The last 2 lines set up env variable "CHAISE_BASE_URL" and "ERMREST_URL" without encryption. More details about it, take a look at Travis CI official website.
+- Since CI e2e test require connecting to saucelabs, `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY`,
+  and `SAUCE_TUNNEL_IDENTIFIER` are defined . `SAUCE_TUNNEL_IDENTIFIER` is used
+  internally in the `e2e.yml` to create a saucelab tunnel with that identifier. And then
+  during the setup the same identifier is used to ensure connecting to the correct tunnel.
+- `SHARDING: true` ensures running test cases in parallel.
 
-While running tests on **TRAVIS** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **travis.yml** file.
+While running tests on **CI** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **main.yml** file.
 
+## Debugging
+
+You can use [the Node.js built-in inspector](https://nodejs.org/en/docs/inspector) to debug the test cases. To do so,
+
+1. Find the configuration that you want to debug. Since we're going to use Node.js, we have to directly target the configuration and cannot use the existing `make` targets. To make this easier, you can find the config locations in `Makefile`. In this example, we want to only debug faceting tests which is,
+    ```
+    test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+    ```
+
+2. Run protractor using `--inspect-break` to ensure debugging client waits for you to open it:
+    ```
+    node --inspect-break ./node_modules/.bin/protractor test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+    ```
+    - By default this will use the `9229` port. You can change this by doing `--inspect-break=0.0.0.0:1234`.
+
+3. The previous command will create a debugger that listens to a specific port, and then waits for you to open an [inspector client](https://nodejs.org/en/docs/guides/debugging-getting-started/#inspector-clients). For the purpose of this document, we're going to use Chrome DevTools. So open Chrome and navigate to the following location:
+    ```
+    chrome://inspect
+    ```
+
+4. In the Chrome's inspect page, under the "Remote Target", you should see your target. Click on "inspect" for that target.
+
+5. Chrome will open a new window that is focused on "Sources" tab. If this is the first time that you're debugging, you need to add Chaise folder to Chrome's workspace. To do so just click on "Add folder to workspace" and choose Chaise folder.
+
+6. Now you can go ahead and find the file that you want to debug in Chaise folder and add your break points to the test folder.
+
+7. Resume the execution after you've added your breakpoints and wait for protractor to reach that part of code.
 
 ## Writing test
 

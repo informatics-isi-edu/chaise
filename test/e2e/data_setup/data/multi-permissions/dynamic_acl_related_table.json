@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "fk_col": 1,
+        "name": "related one"
+    },
+    {
+        "id": 2,
+        "fk_col": 1,
+        "name": "related two"
+    },
+    {
+        "id": 3,
+        "fk_col": 1,
+        "name": "related three"
+    },
+    {
+        "id": 4,
+        "fk_col": 1,
+        "name": "related four"
+    }
+]

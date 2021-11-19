@@ -18,7 +18,7 @@
             </div>
             <div class="top-right-panel">
                 <div class="recordset-title-container title-container" ng-if="vm.reference && vm.config.displayMode === recordsetDisplayModes.fullscreen">
-                    <div class="recordset-title-buttons title-buttons" ng-show="vm.config.displayMode === recordsetDisplayModes.fullscreen">
+                    <div class="recordset-title-buttons title-buttons">
                         <!-- download CSV included by default -->
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
@@ -26,11 +26,27 @@
                             <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
                             <span>Permalink</span>
                         </a>
+                        <!-- save query -->
+                        <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown>
+                            <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" uib-dropdown-toggle tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
+                                <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
+                                <span>Saved searches</span>
+                                <span class="caret "></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
+                                <li>
+                                    <a ng-click="::saveQuery()">Save current search criteria</a>
+                                    <a ng-click="::showSavedQueries()">Show saved search criteria</a>
+                                </li>
+                            </ul>
+                        </div>
+
                     </div>
                         <!-- TODO UX-M should change to class -->
                     <h1 id="page-title">
                         <chaise-title add-link="false" reference="vm.reference"></chaise-title>
                         <small ng-if="vm.reference && vm.reference.location.version" class="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small>
+                        <span ng-if="vm.reference.commentDisplay == 'inline' && vm.reference.comment" class="inline-tooltip">{{vm.reference.comment}}</span>
                     </h1>
                 </div>
                 <div class="recordset-controls-container">
@@ -56,7 +72,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="recordset-chiclets-container recordset-chiclets" ng-if="vm.reference.location.filter || vm.reference.location.customFacets || vm.hasFilter()">
+                <div class="recordset-chiclets-container recordset-chiclets" ng-if="vm.reference.location.filter || vm.hasFilter() || (vm.reference.location.customFacets && vm.reference.location.customFacets.displayname)">
                     <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.filter">
                         <button class="clear-custom-filters filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
                             <i class="icon-btn glyphicon glyphicon-remove"></i>
@@ -64,14 +80,18 @@
                         <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
-                    <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.customFacets">
-                        <button class="clear-custom-facets filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
+                    <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.customFacets && vm.reference.location.customFacets.displayname">
+                        <button ng-if="vm.reference.location.customFacets.removable" class="clear-custom-facets filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
                             <i class="glyphicon glyphicon-remove"></i>
                         </button>
-                        <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
-                        <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-bind="vm.reference.location.customFacets.displayname" tooltip-placement="bottom-left" uib-tooltip="{{vm.reference.location.customFacets.displayname}}" tooltip-class="custom-filter-tooltip"></span>
+                        <span ng-if="!vm.reference.location.customFacets.removable" class="clear-custom-facets filter-chiclet-remove chaise-btn chaise-btn-secondary" tooltip-placement="bottom-left" uib-tooltip="Predefined filter(s)">
+                            <i class="fas fa-filter"></i>
+                        </span>
+                        <span class="filter-chiclet-title chaise-btn chaise-btn-secondary" ng-if="vm.reference.location.customFacets.removable">Custom Filter</span>
+                        <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-if="!vm.reference.location.customFacets.displayname.isHTML" ng-bind="vm.reference.location.customFacets.displayname.value" uib-tooltip="{{vm.reference.location.customFacets.displayname.value}}" tooltip-placement="bottom-left" tooltip-class="custom-filter-tooltip"></span>
+                        <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-if="vm.reference.location.customFacets.displayname.isHTML" ng-bind-html="vm.reference.location.customFacets.displayname.value" uib-tooltip-html="'{{vm.reference.location.customFacets.displayname.value}}'" tooltip-placement="bottom-left" tooltip-class="custom-filter-tooltip"></span>
                     </div>
-                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.hasFilter($index)">
+                    <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.facetColumnsReady && vm.hasFilter($index)">
                         <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied">
                             <i class="glyphicon glyphicon-remove"></i>
                         </button>
@@ -96,7 +116,8 @@
                             </span>
                         </span>
                     </div>
-                    <button ng-click="vm.removeFilter()" class="clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
+                    <!-- don't show clear all filters when the custom facet is not removable -->
+                    <button ng-if="vm.reference.location.filter || vm.hasFilter() || (vm.reference.location.customFacets && vm.reference.location.customFacets.removable)" ng-click="vm.removeFilter()" class="clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn" uib-tooltip="Clear all filters applied" tooltip-placement="bottom">
                         <span>Clear all filters</span>
                     </button>
                 </div>
@@ -109,7 +130,7 @@
         </div>
     </div>
     <div class="bottom-panel-container">
-        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-partners="resizePartners" ng-show="vm.config.showFaceting && vm.reference" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
+        <div class="side-panel-resizable" resizable r-directions=["right"] r-flex="true" r-partners="resizePartners" ng-if="vm.facetColumnsReady" ng-show="vm.config.showFaceting" ng-class="{'open-panel': vm.config.facetPanelOpen, 'close-panel': !vm.config.facetPanelOpen, 'initializing': !vm.initialized}">
             <faceting vm="vm"></faceting>
         </div>
         <div class="main-container dynamic-padding">

@@ -18,6 +18,8 @@ deployment-config.json
 .make-*
 index.html
 /chaise-config.js
+/google-dataset-config.js
+viewer/viewer-config.js
 sftp-config.json
 npm-debug.log
 version.txt

@@ -58,7 +58,7 @@ var testParams = {
         { title: "Thumbnail", value: null, type: "int4"},
         { title: "Operational Since", value: "2008-12-09 00:00:00", type: "timestamptz" },
         { title: "Is Luxurious", value: "true", type: "boolean" },
-        { title: "accommodation_collections", value: "<p>Sherathon Hotel, accommodation_outbound1_outbound2 one</p>", comment: "collections", type: "inline" },
+        { title: "accommodation_collections", value: "<p>Sherathon Hotel, accommodation_outbound1_outbound2 one, max: Sherathon Hotel</p>", comment: "collections", type: "inline" },
         { title: "table_w_aggregates", value: "3", comment: "has aggregates", presentation: { type: "inline", template: "{{{chaise_url}}}/record/#{{catalog_id}}/product-record:table_w_aggregates/", table_name: "table_w_aggregates", key_value: [{column: "id", value: "3"}]} },
         { title: "# thumbnail collection", comment: "Count of thumbnail collection", value: "1", markdown_title: "# thumbnail collection"},
         { title: "# distinct thumbnail collection", comment: "Count distinct of thumbnail collection", value: "1", markdown_title: "# distinct thumbnail collection"},
@@ -70,8 +70,9 @@ var testParams = {
         { title: "table_w_invalid_row_markdown_pattern"},
         { title: "virtual column wait_for all-outbound", "value": "virtual value of 2002 with title Sherathon Hotel", markdown_title: "virtual column wait_for all-outbound"},
         { title: "virtual column wait_for agg", "value": "virtual Sherathon Hotel", markdown_title: "virtual column wait_for agg"},
-        { title: "virtual column wait_for entity set", "value": "Sherathon Hotel", markdown_title: "virtual column wait_for entity set"}
-      ],
+        { title: "virtual column wait_for entity set", "value": "Sherathon Hotel", markdown_title: "virtual column wait_for entity set"},
+        { title: "color_rgb_hex_column", value: '<p><span class="chaise-color-preview" style="background-color:#323456"> </span> #323456</p>\n', match: "html"}
+    ],
     no_related_data: {
         key: {
             name: "id",
@@ -95,7 +96,8 @@ var testParams = {
         permalink: browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
         verifyVersionedLink: true,
         citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3) Sherathon Hotel, accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
-        bibtextFile: "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
+        bibtextFile: "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib",
+        title: "Share and Cite"
     },
     inline_columns: [
       {
@@ -208,24 +210,24 @@ describe('View existing record,', function() {
             });
         });
 
-        it('should load document title defined in chaise-config.js and have deleteRecord=true and resolverImplicitCatalog=2', function() {
+        it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCiteAcls defined', function() {
             browser.manage().logs().get('browser').then(function(browserLog) {
                 browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                     expect(chaiseConfig.deleteRecord).toBe(true);
-                    if (chaiseConfig.headTitle) {
-                        browser.getTitle().then(function(title) {
-                            expect(title).toEqual(chaiseConfig.headTitle);
-                        });
-                    }
 
                     expect(chaiseConfig.resolverImplicitCatalog).toBe(2);
+
+                    expect(chaiseConfig.shareCiteAcls).toBeDefined();
+                    // both defined in chiase-config
+                    expect(chaiseConfig.shareCiteAcls.show).toEqual(["*"]);
+                    expect(chaiseConfig.shareCiteAcls.enable).toEqual(["*"]);
                 });
             });
 
         });
 
         describe("Presentation ,", function() {
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 beforeAll(function() {
                     // delete files that may have been downloaded before
                     console.log("delete files");
@@ -235,7 +237,7 @@ describe('View existing record,', function() {
 
             recordHelpers.testPresentation(testParams);
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 afterAll(function() {
                     // delete files that have been downloaded during tests
                     console.log("delete files");
@@ -293,8 +295,8 @@ describe('View existing record,', function() {
         });
 
         it('A error modal window should appear with multiple records found error with correct title', function(){
-            var modalTitle = chaisePage.recordPage.getErrorModalTitle();
-            expect(modalTitle).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
 
         });
 

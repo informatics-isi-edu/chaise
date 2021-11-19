@@ -3,12 +3,6 @@
 
     angular.module('chaise.record.display', ['chaise.record.table', 'chaise.utils'])
 
-        .filter('trustedHTML', ['$sce', function($sce) {
-            return function(text) {
-                return $sce.trustAsHtml(text);
-            };
-        }])
-
         /**
          * Directive <record-display> is called to display related table as part of entity layout.
          * These items will be passed to <record-table> diretive for table display.

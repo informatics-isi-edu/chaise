@@ -31,20 +31,46 @@ describe('Navbar ', function() {
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
     });
 
+    it('should include the headTitle from chaiseConfig in the tab title (head > title)', function(done) {
+        browser.getTitle().then(function (title) {
+            // only testing headTitle is included. Tests for full head title are distributed between each presentation spec
+            expect(title.indexOf(chaiseConfig.headTitle)).toBeGreaterThan(-1, "the headTitle from the chaise config is not included in the head title element");
+
+            done();
+        }).catch(function (err) {
+            done.fail();
+            console.log(err);
+        });
+    });
+
     it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
         var nodesInDOM = menu.all(by.tagName('li'));
         // Count the number of nodes that are being shown (top level and submenus)
-        //   - Local: config has 12 but 1 is hidden by ACLs
-        //   - Travis: config has 12 but 7 are hidden based on ACLs
-        var counter = (!process.env.TRAVIS ? 11 : 5); // counted from chaise config doc rather than having code count
+        //   - Local: config has 13 but 1 is hidden by ACLs
+        //   - CI: config has 13 but 7 are hidden based on ACLs
+        var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
             expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
         });
     });
 
-    if (!process.env.TRAVIS) {
-        var menuDropdowns, subMenuOptions;
+    it('should prefer markdownName over name when both are defined', function () {
+        // option #2 has both name and markdownName defined
+        expect(element.all(by.css('#navbar-menu > li.dropdown')).get(1).getText()).toBe("Test Recordsets", "name was used instead of markdownName");
+    });
+
+    it('should render a markdown pattern using proper HTML', function () {
+        // in ci we don't have the same globus groups so the "show" ACL hides the 3rd link ("Records")
+        var idx = (!process.env.CI ? 3 : 2);
+        // option #4 has only markdownName defined
+        element.all(by.css('#navbar-menu > li.dropdown')).get(idx).element(by.css("a")).getAttribute('innerHTML').then(function (aInnerHTML) {
+            expect(aInnerHTML.indexOf("<strong>")).toBeGreaterThan(-1, "name was used instead of markdownName");
+        });
+    });
+
+    if (!process.env.CI) {
+        var menuDropdowns, disabledSubMenuOptions;
         it('should have a disabled "Records" link.', function () {
             menuDropdowns = element.all(by.css('#navbar-menu > li.dropdown'));
 
@@ -53,22 +79,30 @@ describe('Navbar ', function() {
             expect(menuDropdowns.get(2).element(by.css("a.disable-link")).getText()).toBe("Records", "text is incorrect, may include caret");
         });
 
-        it('should have a disabled "Edit Existing Record" submenu link (no children).', function () {
+        it('should have a header and a disabled "Edit Existing Record" submenu link (no children).', function () {
+            var editMenu = menuDropdowns.get(3);
             // need to open menu so it renders and has a value
-            menuDropdowns.get(3).click().then(function () {
-                subMenuOptions = menuDropdowns.get(3).all(by.css("a.disable-link"));
-                expect(subMenuOptions.get(0).getText()).toBe("Edit Existing Record", "the wrong link is disabled or none were selected");
+            editMenu.click().then(function () {
+                subMenuHeader = editMenu.all(by.css("span.chaise-dropdown-header"));
+                expect(subMenuHeader.get(0).getText()).toBe("For Mutating Data", "Sub menu header is incorrect or not showing");
+
+                return editMenu.all(by.css("a.disable-link"));
+            }).then(function (options) {
+                disabledSubMenuOptions = options;
+
+                expect(options.length).toBe(4, "some options are not shown properly");
+                expect(disabledSubMenuOptions[0].getText()).toBe("Edit Existing Record", "the wrong link is disabled or none were selected");
             });
         });
 
         it('should have disabled "Edit Records" submenu link (has children)', function () {
             //menu should still be open from previous test case
-            expect(subMenuOptions.get(1).getText()).toBe("Edit Records", "the wrong link is disabled or caret is still visible");
+            expect(disabledSubMenuOptions[1].getText()).toBe("Edit Records", "the wrong link is disabled or caret is still visible");
         });
     }
 
     it('should show the "Full Name" of the logged in user in the top right', function () {
-        var name = (!process.env.TRAVIS ? browser.params.client.full_name : browser.params.client.display_name);
+        var name = (!process.env.CI ? browser.params.client.full_name : browser.params.client.display_name);
         expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
     });
 
@@ -109,7 +143,7 @@ describe('Navbar ', function() {
     });
 
     // TODO: These tests are xit'd because we don't handle tests logging in via Globus/other services just yet
-    // e.g. On Travis, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
+    // e.g. On CI, the user is logged in. On local machines, you must log in manually, which changes the desired order of specs.
     xit('should have a "Log In" link', function() {
         var actualLink = element(by.id('login-link'));
         browser.wait(EC.elementToBeClickable(actualLink), browser.params.defaultTimeout).then(function() {

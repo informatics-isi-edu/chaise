@@ -3,10 +3,6 @@
         padding: 5px 3px;
     }
 
-    .remove-form-btn {
-        padding: 1px 7px 0px 7px;
-    }
-
     .main-container {
         overflow-y: auto;
         overflow-x: hidden;
@@ -118,6 +114,15 @@
                         > td {
                             &.form-header {
                                 height: 47px;
+
+                                .remove-form-btn {
+                                    padding: 1px 7px 0px 7px;
+                                }
+
+                                .disabled-row-icon {
+                                    margin: 6px 10px 0 0;
+                                    font-size: 1.3em;
+                                }
                             }
 
                             &.entity-key,
@@ -141,6 +146,26 @@
                                 word-wrap: break-word;
                                 min-width: 250px;
                                 border-right: 1px solid $border-color;
+                            }
+
+                            &.entity-value {
+                                position: relative;
+
+                                .column-permission-overlay {
+                                    position: absolute;
+                                    left: 0;
+                                    top: 0;
+                                    height: 100%;
+                                    width: 100%;
+                                    z-index: 6; // higher than the chaise-clear
+                                }
+
+                                .column-permission-warning {
+                                    margin: 0;
+                                    padding: 5px;
+                                    color: rgb(180,95,6);
+                                }
+
                             }
 
                             .modal-popup .chaise-input-control {
@@ -175,21 +200,6 @@
     .chaise-input-control[readonly] {
         background-color: $white-color;
         opacity: 1;
-    }
-
-    .md-editor {
-        border-radius: $btn-border-radius;
-
-        .md-header {
-            border-top-left-radius: $btn-border-radius;
-            border-top-right-radius: $btn-border-radius;
-        }
-
-        .content-box {
-            border-bottom-left-radius: $btn-border-radius;
-            border-bottom-right-radius: $btn-border-radius;
-            border-bottom: 0;
-        }
     }
 
     textarea {

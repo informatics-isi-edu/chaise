@@ -4,7 +4,13 @@
 /* Configuration of the Record App */
     angular.module('chaise.configure-record', ['chaise.config'])
 
-    .constant('appName', 'record')
+    .constant('settings', {
+        appName: "record",
+        appTitle: "Record",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -66,6 +72,7 @@
 
         UriUtils.setOrigin();
 
+        // NOTE: default to false until we know a user is logged in and they can modify the main record and modify at least 1 of the related tables
         $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
@@ -74,6 +81,7 @@
         var ermrestUri = res.ermrestUri,
             pcid = res.pcid,
             ppid = res.ppid,
+            paction = res.paction,
             isQueryParameter = res.isQueryParameter;
 
         context.catalogID = res.catalogId;
@@ -86,24 +94,38 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
+            session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
                 DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+
+                // 'promptlogin' query parameter comes from static generated chaise record pages
+                if (!session && UriUtils.getQueryParam($window.location.href, "promptlogin")) {
+                    Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
+                }
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
-                $rootScope.reference.session = session;
+
+                // send string to prepend to "headTitle"
+                // <table-name>: pending... until we get row information back
+                headInjector.updateHeadTitle(
+                    DataUtils.getDisplaynameInnerText($rootScope.reference.displayname) +
+                    ": pending..."
+                );
 
                 $log.info("Reference: ", $rootScope.reference);
 
                 var logObj = {};
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
+                if (paction) logObj.paction = paction;
                 if (isQueryParameter) logObj.cqp = 1;
 
 
@@ -120,7 +142,13 @@
                 return recordAppUtils.readMainEntity(false, logObj);
             }).then(function (page) {
                 var tuple = page.tuples[0];
-
+                // send string to prepend to "headTitle"
+                // <table-name>: <row-name>
+                headInjector.updateHeadTitle(
+                    DataUtils.getDisplaynameInnerText($rootScope.reference.displayname) +
+                    ": " +
+                    DataUtils.getDisplaynameInnerText(tuple.displayname)
+                );
 
                 // update the window location with tuple to remove query params (namely ppid and pcid)
                 // and also change the url to always be based on RID
@@ -129,9 +157,12 @@
 
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
-                $window.history.replaceState('', '', url);
+                $window.history.replaceState({}, '', url);
 
-                //NOTE when the read is called, reference.activeList will be generated
+                // populate the google dataset metadata
+                recordAppUtils.attachGoogleDatasetJsonLd(tuple);
+
+                // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,
                 // so the links are based on facet. We might be able to improve this and avoid
                 // duplicated logic.
@@ -233,6 +264,7 @@
                 $rootScope.lastRendered = null;
                 related.forEach(function (ref, index) {
                     ref = ref.contextualize.compactBrief;
+                    // user can modify the current record page and can modify at least 1 of the related tables
                     if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && ref.canCreate) {
                         $rootScope.showEmptyRelatedTables = true;
                     }
@@ -256,6 +288,12 @@
                         baseTableName: $rootScope.reference.displayname
                     });
                 });
+
+                // chaiseConfig.showWriterEmptyRelatedOnLoad takes precedence over heuristics above for $rootScope.showEmptyRelatedTables when true or false
+                // showWriterEmptyRelatedOnLoad only applies to users with write permissions for current table
+                if ($rootScope.reference.canCreate && typeof chaiseConfig.showWriterEmptyRelatedOnLoad === "boolean") {
+                    $rootScope.showEmptyRelatedTables = chaiseConfig.showWriterEmptyRelatedOnLoad;
+                }
 
                 $rootScope.loading = related.length > 0;
                 $timeout(function () {

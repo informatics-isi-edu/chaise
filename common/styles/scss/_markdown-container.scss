@@ -21,9 +21,66 @@
         margin: 5px 5px 5px 0;
     }
 
-    // override the browser's default border
-    iframe {
-        border: 2px solid #ccc;
+    figure {
+        overflow-x: auto;
+        figcaption {
+            min-height: 20px;
+        }
+
+        .figcaption-wrapper {
+            // min height should include enough space for the button height and the margin above
+            min-height: 40px;
+
+            figcaption {
+                display: inline;
+            }
+        }
+
+        .iframe-btn-container {
+            float: right;
+            text-align: right;
+            margin-top: 10px;
+
+            .chaise-btn.chaise-btn-iframe {
+                border: 2px solid #ccc;
+                border-bottom: none;
+                border-bottom-right-radius: 0px;
+                border-bottom-left-radius: 0px;
+            }
+
+            .chaise-btn-iframe:hover {
+                text-decoration: none;
+            }
+        }
+
+        &.fullscreen-off  {
+            .iframe-btn-container {
+                display: none;
+            }
+        }
+
+        // override the browser's default border
+        iframe {
+            border: 2px solid #ccc;
+        }
+    }
+
+    .chaise-autofill {
+        height: 90%;
+        height: -webkit-fill-available;
+        height: -moz-available;
+        width: 100%;
+        width: -webkit-fill-available;
+        width: -moz-available;
+    }
+
+    // chaise-color-preview
+    .chaise-color-preview {
+        display: inline-block;
+        height: 11px;
+        width: 11px;
+        border-radius: 3px;
+        border: 1px solid $black-color;
     }
 
     .vocab {
@@ -34,6 +91,28 @@
         display: inline-block;
         margin: 2px;
     }
+
+    ul.chaise-list-csv {
+        list-style: none;
+        display: inline;
+        li {
+            display: inline;
+            > p {
+                display: inline;
+            }
+
+            margin: 0 !important;
+
+            &:after {
+                content: ", ";
+            }
+            &:last-child:after {
+                content: "";
+            }
+        }
+    }
+
+
 
     a.download {
         @include chaise-btn();
@@ -60,6 +139,15 @@
         padding: 0 !important;
         /*existing rule is padding=2, which should be changed for the other changes*/
 
+        &:only-child {
+            > li {
+                // when there is only one list and one list item within it, hide the bullets
+                &:only-child {
+                    margin-left: 0;
+                    list-style: none;
+                }
+            }
+        }
         > li {
             margin-left: 1em;
             padding-left: 0;
@@ -69,10 +157,6 @@
             }
 
             list-style: inherit;
-            &:only-child {
-                margin-left: 0;
-                list-style: none;
-            }
         }
     }
 }
@@ -367,7 +451,12 @@
 .markdown-container table,
 .markdown-container ul {
     margin-top: 0;
-    margin-bottom: 16px
+    // changed the following from 16 to 8
+    // in the cases that there's just a single p and ul,
+    // the space between them were too much, so we reduced it.
+    // we couldn't reduce this any further since in the cases of multiple p,
+    // they would be too close each other and it was hard to read.
+    margin-bottom: 8px;
 }
 
 .markdown-container hr {

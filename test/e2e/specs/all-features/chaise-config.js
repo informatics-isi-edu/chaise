@@ -15,6 +15,7 @@ var chaiseConfig = {
     resolverImplicitCatalog: null,
     disableDefaultExport: true,
     disableExternalLinkModal: true,
+    showWriterEmptyRelatedOnLoad: false,
     logClientActions: false,
     navbarMenu: {
         children: [
@@ -24,6 +25,8 @@ var chaiseConfig = {
             },
             {
                 name: "Recordsets",
+                // tests markdownName is prefered
+                markdownName: "Test Recordsets",
                 children: [
                     {
                         name: "Dataset",
@@ -37,14 +40,20 @@ var chaiseConfig = {
             },
             {
                 name: "Records",
+                url: "/chaise/search/#1/isa:dataset",
                 acls: {
                     show: ["https://auth.globus.org/9d596ac6-22b9-11e6-b519-22000aef184d"],
                     enable: []
                 }
             },
             {
-                name: "RecordEdit",
+                // should bold value instead of showing ** before and after
+                markdownName: "**Recordedit**",
                 children: [
+                    {
+                        name: "For Mutating Data",
+                        header: true
+                    },
                     {
                         name: "Add Records",
                         url: "/chaise/recordedit/#1/isa:dataset",

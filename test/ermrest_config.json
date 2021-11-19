@@ -38,6 +38,7 @@
       "text": { "aliases": [ "character varying" ] },
       "longtext": null,
       "markdown": null,
+      "color_rgb_hex": null,
       "gene_sequence": null,
       "timestamp": { "aliases": ["timestamp without time zone"] },
       "timestamptz": { "aliases": [ "timestamptz", "timestamp with time zone" ] },

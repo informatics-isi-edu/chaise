@@ -3,6 +3,9 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var testParams = {
     table_name: "editable-id-table",
+    tocHeaders: ['Summary', 'accommodation_image (4)', 'booking (2)', 'more-files (1)',
+        'more-media (1)', 'new_media (2)', 'new_media_2 (2)', 'new_media_3 (2)',
+        'new_media_4 (2)', 'new_media_5 (2)', 'new_media_6 (2)'],
     table_displayname: "Editable Id Table",
     table_inner_html_display: "<strong>Editable Id Table</strong>",
     entity_title: "1",
@@ -34,13 +37,14 @@ describe('View existing record,', function() {
             keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
-
+            chaisePage.recordPageReady();
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=11", function() {
+        it("should load chaise-config.js and have maxRelatedTablesOpen=11, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.maxRelatedTablesOpen).toBe(11);
+                expect(chaiseConfig.disableDefaultExport).toBeTruthy();
+                expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeFalsy();
             });
         });
 
@@ -48,14 +52,18 @@ describe('View existing record,', function() {
             expect(element.all(by.css('.panel-open')).count()).toEqual(0);
         });
 
-        it ("should have only 'search results (csv)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
+        it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
             var options = chaisePage.recordsetPage.getExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
         });
 
+        it('should hide empty related tables on load',function(){
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        });
+
     });
 
-    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal
+    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal, and disabled export button
     describe("For table " + testParams.html_table_name + ",", function() {
 
         var currentBrowserUrl;
@@ -78,6 +86,11 @@ describe('View existing record,', function() {
             });
         });
 
+        // we're not using default tempaltes and csv option is disabled
+        it ("export button should be disabled", function () {
+            expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
+        });
+
         it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
             chaisePage.recordPage.getColumns().then(function (cols) {
                 expect(cols[0].isDisplayed()).toBeFalsy("Column names are showing.");
@@ -90,7 +103,8 @@ describe('View existing record,', function() {
             permalink: testParams.html_table_name_record_url,
             verifyVersionedLink: false,
             citation: null,
-            bibtextFile: null
+            bibtextFile: null,
+            title: "Share"
         });
 
         it("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {
@@ -141,7 +155,7 @@ describe('View existing record,', function() {
         });
     });
 
-    // below are the tests for the copy button
+    // below are the tests for the copy button, and no csv option
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record;
@@ -163,6 +177,19 @@ describe('View existing record,', function() {
             });
         });
 
+        it ("should not have the default csv export option and only the defined template should be available", function (done) {
+            var options = chaisePage.recordsetPage.getExportOptions();
+            expect(options.count()).toBe(1, "count missmatch");
+
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
+                expect(csvOption.getText()).toBe("Defined template");
+                done();
+            }).catch(function(err) {
+                done.fail(err);
+            })
+        });
+
         describe("for the copy record button,", function() {
             var EC = protractor.ExpectedConditions,
                 copyButton = chaisePage.recordPage.getCopyRecordButton();
@@ -170,7 +197,7 @@ describe('View existing record,', function() {
             it("should display the entity title and subtitle based on their markdown patterns.", function() {
                 var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
                 chaisePage.waitForElement(subTitleEl);
-                
+
                 // page-title and page-subtitle are attached to chaise-title,
                 // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
                 // title structure is: chaise-title -> span -> span (therefore we need to be more specific)
@@ -230,11 +257,32 @@ describe('View existing record,', function() {
                 });
             });
 
+            it ("should have the correct head title using the heuristics for recordedit app", function (done) {
+                browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                    // Create new <table-name> | chaiseConfig.headTitle
+                    // should only use the inner text and should not have the <strong> tag
+                    expect(browser.getTitle()).toBe("Create new " + testParams.table_displayname + " | " + chaiseConfig.headTitle);
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+
             it("should have 'Automatically Generated' in an input that is generated rather than copying the value from the copied record.", function() {
                 chaisePage.recordEditPage.getInputById(0, "generated").getAttribute("placeholder").then(function (text) {
                     expect(text).toBe("Automatically generated");
                 });
             });
+
+            // because of a bug in column permission error,
+            // chaise was showing the column permission overlay and users couldn't
+            // edit the values. This test case is to make sure that logic is correct
+            it ("should not show any permission errors", function () {
+              var colPermissionErrors = chaisePage.recordEditPage.getAllColumnPermissionOverlays();
+              expect(colPermissionErrors.isPresent()).toBeFalsy();
+            })
 
             it("should alert the user if trying to submit data without changing the id.", function() {
                 chaisePage.recordEditPage.submitForm();

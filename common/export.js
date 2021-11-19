@@ -5,8 +5,7 @@
 
     .directive('export', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ErrorService', 'logService', 'modalUtils', '$rootScope', '$timeout', 'UriUtils', '$window', function (AlertsService, ConfigUtils, DataUtils, ErrorService, logService, modalUtils, $rootScope, $timeout, UriUtils, $window) {
         var chaiseConfig = ConfigUtils.getConfigJSON();
-        var context = ConfigUtils.getContextJSON();
-        var DEFAULT_CSV_NAME = "search results (csv)";
+        var settings = ConfigUtils.getSettings();
         /**
          * Cancel the current export request
          */
@@ -22,6 +21,18 @@
          * Update the list of templates in UI
          */
         function _updateExportFormats(scope) {
+            scope.exportOptions.supportedFormats = [];
+
+            // add the default csv option
+            if (scope.reference.csvDownloadLink) {
+                scope.exportOptions.supportedFormats.push({
+                    outputs: [],
+                    displayname: scope.csvOptionName,
+                    type: "DIRECT"
+                });
+            }
+
+            // add the export templates
             var templates = scope.reference.getExportTemplates(!chaiseConfig.disableDefaultExport);
 
             templates.forEach(function (template) {
@@ -40,7 +51,7 @@
             var formatType = template.type;
             switch (formatType) {
                 case "DIRECT":
-                    if (formatName === DEFAULT_CSV_NAME) {
+                    if (formatName === scope.csvOptionName) {
                         location.href = scope.reference.csvDownloadLink;
                     }
                     // NOTE: uncomment below when we want to support JSON
@@ -122,13 +133,18 @@
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/export.html',
             scope: {
                 reference: "=",
-                disabled: "="
+                disabled: "=",
+                csvOptionName: "@?"
             },
             link: function (scope, element, attributes) {
                 scope.isLoading = false;
                 scope.exporter = null;
                 scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
-                scope.hideNavbar = context.hideNavbar;
+                scope.hideNavbar = settings.hideNavbar;
+
+                if (!DataUtils.isNoneEmptyString(scope.csvOptionName)) {
+                    scope.csvOptionName = "Search results (CSV)";
+                }
 
                 scope.logDropdownOpened = function () {
                     logService.logClientAction({
@@ -138,13 +154,7 @@
                 };
 
                 scope.exportOptions = {
-                    supportedFormats: [
-                        {
-                            outputs: [],
-                            displayname: DEFAULT_CSV_NAME,
-                            type: "DIRECT"
-                        }
-                    ]
+                    supportedFormats: []
                 };
 
                 scope.submit = function (template) {
@@ -153,9 +163,14 @@
                     _doExport(scope, template);
                 };
 
-                scope.$watch('reference', function (newValue, oldValue) {
-                    if (newValue && scope.exportOptions.supportedFormats.length === 1) {
+                // NOTE the assumption is that the directive is disabled on load and will be enabled when we 
+                //      can populate the templates
+                var watcher = scope.$watch('disabled', function (newValue, oldValue) {
+                    if (!newValue && scope.exportOptions.supportedFormats.length === 0) {
                         _updateExportFormats(scope);
+                        
+                        // unbind the watcher
+                        watcher();
                     }
                 });
             }

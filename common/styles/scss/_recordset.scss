@@ -61,22 +61,26 @@
                         padding-right: 2px;
                         text-align: left;
                         white-space: nowrap;
+
+                        // only add the colon if the title exists
+                        & ~ .chaise-btn.filter-chiclet-value {
+                            border-left: 0;
+
+                            position: relative;
+                            &:before {
+                                content: ":";
+                                position: absolute;
+                                left: 0;
+                            }
+                        }
                     }
                     .chaise-btn.filter-chiclet-value {
                         text-overflow: ellipsis;
                         overflow: hidden;
                         white-space: nowrap;
                         max-width: 200px;
-                        border-left: 0;
                         padding-left: 7px;
                         padding-right: 4px;
-
-                        position: relative;
-                        &:before {
-                            content: ":";
-                            position: absolute;
-                            left: 0;
-                        }
                     }
 
                     span {
@@ -200,6 +204,10 @@
             /* match color from row highlight for disabled cells */
             > td.disabled-cell {
                 background-color: #f7f0cf !important;
+            }
+
+            .hover-show {
+                visibility: visible;
             }
         }
 
@@ -334,6 +342,11 @@
                 position: relative;
                 top: -2px;
             }
+        }
+
+        .apply-saved-query-button.disabled {
+            cursor: not-allowed;
+            color: $disabled-color;
         }
     }
 
@@ -524,9 +537,18 @@ faceting {
     .chaise-checkbox {
         margin-bottom: 7px;
         margin-left: 5px;
+
+        // puts the checkbox+label to the left and the favorite icon to the right
+        display: flex;
+        justify-content: space-between;
     }
+
     li:hover {
         background-color: rgb(241, 241, 241);
+
+        .hover-show {
+            visibility: visible;
+        }
     }
 }
 

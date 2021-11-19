@@ -1,3 +1,4 @@
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
@@ -13,7 +14,8 @@ var testParams = {
         modalOption: 2,
         totalNumOptions: 11,
         numRows: 10,
-        numRowsAfterModal: 11
+        numRowsAfterModal: 11,
+        removingOptionsNumRowsAfterModal: 25
     },
     facet_order: [
         {
@@ -65,6 +67,19 @@ var testParams = {
             }
         }
     },
+    hide_row_count: {
+        hidden: {
+            facetIdx: 11,
+            displayingText: "Displaying\nall 13\nrecords",
+            numModalOptions: 13
+
+        },
+        shown: {
+            facetIdx: 10,
+            displayingText: "Displaying\nall 12\nof 12 records",
+            numModalOptions: 12
+        }
+    },
     customFilter: {
         ermrestFilter: "id=1;id=2;int_col::geq::20",
         ermrestFilterDisplayed: "id=1; id=2; int_col::geq::20",
@@ -101,7 +116,7 @@ var testParams = {
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
     recordValues: {
         text_col: "one",
-        longtext_col: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.",
+        longtext_col: "lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc scelerisque vitae nisl tempus blandit. Nam at tellus sit amet ex consequat euismod. Aenean placerat dui a imperdiet dignissim. Fusce non nulla sed lectus interdum consequat. Praesent vehicula odio ut mauris posuere semper sit amet vitae enim. Vivamus faucibus quam in felis commodo eleifend. Nunc varius sit amet est eget euismod.",
         markdown_col: "one",
         int_col: "11",
         float_col: "11.1100",
@@ -111,6 +126,63 @@ var testParams = {
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
         "1-o7Ye2EkulrWcCVFNHi3A": "one", // faceting_main_fk1
         "hmZyP_Ufo3E5v_nmdTXyyA": "one" // faceting_main_fk2
+    },
+    unsupported_filters_error: {
+        facetObject: {
+            "and": [
+              // will be ignored because of invalid sourcekey name
+              {
+                "sourcekey": "some_invalid_key",
+                "markdown_name": "Facet 1",
+                "choices": ["1", "2"]
+              },
+              // will be ignored because it's ending in f4 table not f5:
+              {
+                "sourcekey": "path_to_f4_scalar_w_id",
+                "markdown_name": "from_name",
+                "source_domain": {
+                  "schema": "faceting",
+                  "table": "f5"
+                },
+                "choices": ["3", "4"]
+              },
+              // partially will be ignored
+              {
+                "sourcekey": "outbound_to_f1",
+                "markdown_name": "F1",
+                "source_domain": {
+                  "schema": "faceting",
+                  "table": "f1",
+                  "column": "term"
+                },
+                "choices": ["one", "missing data", "two", "three", "four", "more missing data"]
+              }
+            ]
+        },
+        facetBlob: [
+            "N4IghgdgJiBcDaoDOB7ArgJwMYFMDWOAnnCKgLY4D6AlhAG5gA21UlBxANCGWBnlCgDuEShDAUSAMTC4ALg",
+            "AIAjCC5YAFimq4kceCGVcATCAC6AXw7J02fERIAHMLLWVZKSgDMALJSRYmvJSCNDBcPHwCwqLiOCQeGChk0",
+            "RJcqJi4lAI8tHDI6jg8cTI4srQA5iogsmAARoyxsCAeAKwgFiDqmtq6IADMlV6mFlbptsSN6LI16NCu7h4G",
+            "3Lz8QiJiEo2Si2k2mYlgObB5agVgRXLlldV1DU2LWCiMaGQQJLI4GGRtqhpaODoIEAoCCxMLUJBIcryKBOM",
+            "5cWSCFBXNQYHCgprWSpkFCo+RkcGQiBlaGwobmIA"
+        ].join(""),
+        errorTitle: "Unsupported Filters",
+        errorMessage: [
+            "Some (or all) externally supplied filter criteria cannot be implemented with the current catalog content. ",
+            "This may be due to lack of permissions or changes made to the content since the criteria were initially saved.\n",
+            "Discarded facets: Facet 1, from_name\n",
+            "Facets with some discarded choices: F1\n\n\n",
+            "Click OK to continue with the subset of filter criteria which are supported at this time.",
+            "\nShow Error Details"
+        ].join(""),
+        errorDetails: [
+            "Discarded facets:\n\n- Facet 1 (2 choices):\n  - 1\n  - 2\n- from_name (2 choices):\n  - 3\n  - 4\n\n\n",
+            "Partially discarded facets:\n\n- F1 (2/6 choices):\n  - missing data\n  - more missing data"
+        ].join(""),
+        facetBlobAfterOK: [
+            "N4IghgdgJiBcDaoDOB7ArgJwMYFM6JHQBcAjdafEAMzFyIEsIBzEAGhAFsxGB9KgawCMIALoBfdvRgj2WABYp6uJPgAsrQawDMrAEzjxQA"
+        ].join(""),
+        numRows: 22
     },
     hideFilterPanelClass: "chaise-sidebar-close",
     showFilterPanelClass: "chaise-sidebar-open",
@@ -217,6 +289,8 @@ describe("Other facet features, ", function() {
             chaisePage.recordsetPage.getModalOptions().then(function (options) {
                 return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption]);
             }).then(function () {
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Submit", "Submit button text for add pure and binary popup is incorrect");
+
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
 
@@ -226,12 +300,42 @@ describe("Other facet features, ", function() {
                     });
                 }, browser.params.defaultTimeout, "number of visible rows after selecting a second option missmatch.");
 
-                return chaisePage.recordsetPage.getCheckedFacetOptions(idx).count();
-            }).then (function (cnt) {
-                expect(cnt).toBe(2, "Number of facet options is incorrect after returning from modal");
+                browser.wait(function() {
+                    return  chaisePage.recordsetPage.getCheckedFacetOptions(idx).count().then(function(ct) {
+                        return (ct == 2);
+                    });
+                }, browser.params.defaultTimeout, "Number of facet options is incorrect after returning from modal");
 
-                return chaisePage.clickButton(chaisePage.recordsetPage.getClearAllFilters());
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("removing values in the modal should allow for submitting to remove the set of selected options for that facet.", function (done) {
+            chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(2, "number of checked rows missmatch.");
+
+                // clear selections in modal to remove selections in facet
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalClearSelection());
             }).then(function () {
+                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch after clearing selection.");
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                browser.wait(function() {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return (ct == testParams.filter_secondary_key.removingOptionsNumRowsAfterModal);
+                    });
+                }, browser.params.defaultTimeout, "number of visible rows after selecting a second option missmatch.");
+
+                browser.wait(function() {
+                    return  chaisePage.recordsetPage.getCheckedFacetOptions(idx).count().then(function(ct) {
+                        return (ct == 0);
+                    });
+                }, browser.params.defaultTimeout, "Number of facet options is incorrect after returning from modal");
+
+                //no need to clear all filters, this test removed the last selected facet options
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -244,7 +348,8 @@ describe("Other facet features, ", function() {
 
         beforeAll(function (done) {
             browser.ignoreSynchronization=true;
-            browser.get(uri);
+            // using browser.get with the same uri doesn't work, so we should just refresh
+            browser.navigate().refresh();
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -270,6 +375,11 @@ describe("Other facet features, ", function() {
                         return chaisePage.clickButton(showMore);
                     }).then(function () {
                         chaisePage.recordsetPage.waitForInverseModalSpinner();
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                                return values.length == params.modalOptions.length;
+                            });
+                        }, browser.params.defaultTimeout);
 
                         return chaisePage.recordsetPage.getModalFirstColumnValues();
                     }).then(function (values) {
@@ -338,7 +448,8 @@ describe("Other facet features, ", function() {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
             browser.ignoreSynchronization=true;
-            browser.get(uri);
+            // using browser.get with the same uri doesn't work, so we should just refresh
+            browser.navigate().refresh();
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -445,7 +556,8 @@ describe("Other facet features, ", function() {
 
         beforeAll(function (done) {
             browser.ignoreSynchronization=true;
-            browser.get(uri);
+            // using browser.get with the same uri doesn't work, so we should just refresh
+            browser.navigate().refresh();
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -453,7 +565,6 @@ describe("Other facet features, ", function() {
 
             clearAll.click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
-
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -461,17 +572,12 @@ describe("Other facet features, ", function() {
         it ("null should be provided as an option and user should be able to select it.", function (done) {
             var params = testParams.null_filter.panel;
             chaisePage.recordsetPage.getFacetById(params.facetIdx).click().then(function () {
-                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
-
                 // wait for facet checkboxes to load
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getFacetOptions(params.facetIdx).count().then(function(ct) {
                         return ct == params.totalNumOptions;
                     });
                 }, browser.params.defaultTimeout);
-
-                // wait for list to be fully visible
-                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(params.facetIdx)), browser.params.defaultTimeout);
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(params.facetIdx, params.option));
             }).then(function () {
@@ -523,8 +629,124 @@ describe("Other facet features, ", function() {
     });
 
     /***********************************************************  local test cases ***********************************************************/
-    if (process.env.TRAVIS) return;
+    if (process.env.CI) return;
     // NOTE the following test cases will only run locally.
+
+    describe("regarding UnsupportedFilters handling, ", function () {
+        var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var currParams = testParams.unsupported_filters_error;
+
+        beforeAll(function() {
+            var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('Proper error should be displayed', function(){
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Unsupported Filters");
+        });
+
+        it('Error modal message must summarize the issue', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toEqual(currParams.errorMessage, "The message in modal pop is not correct");
+        });
+
+        it('Error modal should Show Error Details', function(done){
+            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
+            var errorDetails = chaisePage.errorModal.getErrorDetails();
+            chaisePage.waitForElement(showDetails);
+            showDetails.click().then(function(){
+                chaisePage.waitForElement(errorDetails);
+                expect(showDetails.getText()).toBe("Hide Error Details", "The Show/Hide message in modal pop is not correct");
+                expect(errorDetails.getText()).toEqual(currParams.errorDetails, "error missmatch.");
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it('On click of OK button the page should dismiss the error and show proper results', function(done){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+                // make sure it's showing proper number of values
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == currParams.numRows;
+                    });
+                }, browser.params.defaultTimeout);
+
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
+
+                var newURL = uriPrefix + "/*::facets::" + currParams.facetBlobAfterOK;
+                expect(currentUrl).toContain(newURL, "The redirection from record page to recordset in case of multiple records failed");
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+    });
+
+    describe("regarding hide_row_count support in entity facet popups", function () {
+        beforeAll(function (done) {
+            var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            chaisePage.waitForElement(clearAll);
+            chaisePage.clickButton(clearAll).then(function () {
+                done()
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("should hide the total count when hide_row_count=true", function (done) {
+            // facet is already open so we don't have to click to open
+            var facetParams = testParams.hide_row_count.hidden;
+            var showMore = chaisePage.recordsetPage.getShowMore(facetParams.facetIdx);
+            browser.wait(EC.elementToBeClickable(showMore));
+            chaisePage.clickButton(showMore).then(function () {
+                chaisePage.recordsetPage.waitForInverseModalSpinner();
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                        return values.length == facetParams.numModalOptions;
+                    });
+                }, browser.params.defaultTimeout);
+
+                expect(chaisePage.recordsetPage.getModalTotalCount().getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
+
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
+            }).then(function (){
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+        it ("otherwise should show the total count", function (done) {
+            var facetParams = testParams.hide_row_count.shown;
+            var facet = chaisePage.recordsetPage.getFacetById(facetParams.facetIdx);
+
+            // open the facet first and then open the modal
+            chaisePage.clickButton(facet).then(function () {
+                var showMore = chaisePage.recordsetPage.getShowMore(facetParams.facetIdx);
+                browser.wait(EC.elementToBeClickable(showMore));
+                return chaisePage.clickButton(showMore)
+            }).then(function () {
+                chaisePage.recordsetPage.waitForInverseModalSpinner();
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                        return values.length == facetParams.numModalOptions;
+                    });
+                }, browser.params.defaultTimeout);
+
+                expect(chaisePage.recordsetPage.getModalTotalCount().getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
+
+                return chaisePage.recordsetPage.getModalCloseBtn().click();
+            }).then(function (){
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+
+    });
 
     describe("navigating to recordset with filters that faceting doesn't support.", function () {
         var customFilterParams = testParams.customFilter;

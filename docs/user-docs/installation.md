@@ -24,7 +24,7 @@ Development dependencies include:
 
 * [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any unix/linux/osx host.
 * [Rsync](https://en.wikipedia.org/wiki/Rsync): usually present on any unix/linux/osx host.
-* [Node](https://nodejs.org/) version 6.x: Mac users, we recommend downloading
+* [Node](https://nodejs.org/): Mac users, we recommend downloading
 direct from the node site as we have seen problems with the version installed
 by Homebrew.
 * Additional dependencies specified in [package.json](./package.json) will be
@@ -38,7 +38,7 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
 
 ## Deploying
 
-1. First you need to setup some environment variables to tell ERMRestJS where it should install the package. The following are the variables and their default values:
+1. First you need to setup some environment variables to tell Chaise where it should install the package. The following are the variables and their default values:
 
     ```
     WEB_URL_ROOT=/
@@ -77,14 +77,15 @@ Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `
 
 This section assumes you have already installed _and tested_ [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs). If you have not, stop here and do that first, then return this step.
 
-Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](../dev-docs/e2e-test.md#how-to-get-your-auth-cookie).
+Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, `RESTRICTED_AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](../dev-docs/e2e-test.md#how-to-get-your-auth-cookie).
 
 The example here is based on the assumption that the tests are installed and executed against a deployment to a userdir.
 
 ```sh
 export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
 export ERMREST_URL=https://HOST/ermrest
-export AUTH_COOKIE=YOUR_ERMREST_COOKIE
+export AUTH_COOKIE=YOUR_WEBAUTHN_COOKIE
+export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 ```
 

@@ -157,6 +157,10 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     configs.forEach(function (config) {
         // copy annotations and ACLs over to the submitted catalog object
         if (config.catalog && typeof config.catalog === "object") {
+            if (!("acls" in config.catalog)) {
+                config.catalog["acls"] = { "select": ["*"] };
+            }
+
             // if empty object, this loop is skipped
             for (var prop in config.catalog) {
                 // if property is set already
@@ -182,7 +186,9 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
     // reuse the same catalogid
     if (catalogId) settings.setup.catalog.id = catalogId;
 
-    ermrestUtils.createSchemasAndEntities(settings).then(function (data) {
+    http.get(process.env.ERMREST_URL).then(function (res) {
+        return ermrestUtils.createSchemasAndEntities(settings);
+    }).then(function (data) {
         process.env.catalogId = data.catalogId;
         if (data.schemas) {
             for(schemaName in data.schemas) {
@@ -201,6 +207,8 @@ var bulkImportSchemas = function(configs, defer, authCookie, catalogId, entities
         }
         defer.resolve({entities: entities, catalogId: data.catalogId});
     }).catch(function (err) {
+        console.log("error while trying to create model and data:");
+        console.log(err);
         defer.reject(err);
     });
 };
@@ -316,4 +324,21 @@ exports.deleteHatracNamespaces = function (authCookie, namespaces) {
     });
 
     return Q.all(promises);
+}
+
+exports.importACLs = function (params) {
+    var defer = Q.defer();
+    ermrestUtils.importACLS({
+        url: process.env.ERMREST_URL,
+        authCookie: process.env.AUTH_COOKIE,
+        setup: params
+    }).then(function () {
+        console.log("successfully updated the ACLs");
+        defer.resolve();
+    }).catch(function (err) {
+        console.log("error while trying to change ACLs");
+        console.dir(err);
+        defer.reject(err);
+    });
+    return defer.promise;
 }

@@ -31,7 +31,7 @@ describe('View existing record,', function() {
             chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.CI) {
             describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
@@ -41,11 +41,11 @@ describe('View existing record,', function() {
                     recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
                 });
 
-                it ("first option must be `search results (csv)` and user should be able to download the file.", function (done) {
+                it ("first option must be `This record (CSV)` and user should be able to download the file.", function (done) {
                     browser.wait(EC.elementToBeClickable(exportBtn));
                     chaisePage.clickButton(exportBtn).then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
-                        expect(csvOption.getText()).toBe("search results (csv)");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
+                        expect(csvOption.getText()).toBe("This record (CSV)");
                         return chaisePage.clickButton(csvOption);
                     }).then(function () {
                         browser.wait(function() {
@@ -60,12 +60,12 @@ describe('View existing record,', function() {
                     });
                 });
 
-                it ("second option must be default `BAG` and user should be able to download the file.", function (done) {
+                it ("second option must be default `BDBag` and user should be able to download the file.", function (done) {
                     var exportModal = chaisePage.recordsetPage.getExportModal();
                     browser.wait(EC.elementToBeClickable(exportBtn));
                     exportBtn.click().then(function () {
-                        var bagOption = chaisePage.recordsetPage.getExportOption("BAG");
-                        expect(bagOption.getText()).toBe("BAG");
+                        var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                        expect(bagOption.getText()).toBe("BDBag");
                         return bagOption.click();
                     }).then(function () {
                         return chaisePage.waitForElement(exportModal);
@@ -93,6 +93,20 @@ describe('View existing record,', function() {
             });
         }
 
+        it("should hide the text column based on hide_column_header property of column-display annotation", function (done) {
+            chaisePage.recordPage.getColumns().then(function (cols) {
+                // shown column headers
+                expect(cols[0].isDisplayed()).toBeTruthy("Column header is hidden for id column");
+                expect(cols[2].isDisplayed()).toBeTruthy("Column header is hidden for int column");
+                // hidden column headers
+                expect(cols[1].isDisplayed()).toBeFalsy("Column header is shown for text column");
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
+            });
+        });
+
         it ("The proper permalink (browser url) should appear in the share popup if resolverImplicitCatalog is undefined", function (done) {
             var shareButton = chaisePage.recordPage.getShareButton(),
                 shareModal = chaisePage.recordPage.getShareModal();
@@ -119,7 +133,7 @@ describe('View existing record,', function() {
             });
         });
 
-        it("Clicking the subtitle should redirect to recordset app", function() {
+        it("Clicking the subtitle should redirect to recordset app", function(done) {
             var subtitleLink = chaisePage.recordPage.getEntitySubTitleLink();
 
             browser.wait(EC.elementToBeClickable(subtitleLink), browser.params.defaultTimeout);
@@ -128,7 +142,47 @@ describe('View existing record,', function() {
                 return browser.driver.getCurrentUrl();
             }).then(function(url) {
                 expect(url.indexOf('recordset')).toBeGreaterThan(-1);
+
+                chaisePage.recordsetPageReady();
+                done();
+            }).catch(function(err){
+                console.log(err);
+                done.fail();
             });
         });
+
+        if (!process.env.CI) {
+            // resolver is only configured to work locally
+            it("Searching in go to RID input should navigate the user to the resolved record page matching that RID", function (done) {
+                var rid = chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;
+
+                element(by.id('rid-search-input')).sendKeys(rid);
+                element(by.css('.rid-search .chaise-search-btn')).click().then(function () {
+                    browser.wait(function() {
+                        return browser.getAllWindowHandles().then(function(tabs) {
+                            return (tabs.length == 2);
+                        });
+                    }, browser.params.defaultTimeout);
+
+                    return browser.getAllWindowHandles();
+                }).then(function (tabs) {
+                    allWindows = tabs;
+
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+
+                    return browser.driver.getCurrentUrl();
+                }).then(function (url) {
+                    var newTabUrl = "chaise/record/#" + browser.params.catalogId + "/links:" + testParams.table_name + "/RID=" + rid;
+
+                    expect(url.indexOf(newTabUrl)).toBeGreaterThan(-1, "new tab url is not the right page");
+
+                    done();
+                }).catch(function (err) {
+                    console.dir(err);
+                    done.fail();
+                });
+            });
+        }
     });
 });

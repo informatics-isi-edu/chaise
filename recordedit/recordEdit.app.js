@@ -4,7 +4,13 @@
 /* Configuration of the Recordedit App */
     angular.module('chaise.configure-recordedit', ['chaise.config'])
 
-    .constant('appName', 'recordedit')
+    .constant('settings', {
+        appName: "recordedit",
+        appTitle: "Record Edit",
+        overrideHeadTitle: true,
+        overrideDownloadClickBehavior: true,
+        overrideExternalLinkBehavior: true
+    })
 
     .run(['$rootScope', function ($rootScope) {
         // When the configuration module's run block emits the `configuration-done` event, attach the app to the DOM
@@ -40,7 +46,6 @@
         'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ui.select',
         'angular-markdown-editor',
         'chaise.footer',
         'chaise.recordcreate'
@@ -147,6 +152,7 @@
 
             // Get existing session value
             session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
 
             // If session is not defined or null (Anonymous user) prompt the user to login
             if (!session) {
@@ -156,8 +162,7 @@
 
             // On resolution
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
-
-
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
@@ -181,7 +186,6 @@
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
 
-                $rootScope.reference.session = session;
                 $rootScope.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
@@ -232,8 +236,8 @@
                         var numberRowsToRead;
                         if (context.queryParams.limit) {
                             numberRowsToRead = Number(context.queryParams.limit);
-                            if (context.queryParams.limit > context.MAX_ROWS_TO_ADD) {
-                                var limitMessage = "Trying to edit " + context.queryParams.limit + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
+                            if (numberRowsToRead > context.MAX_ROWS_TO_ADD) {
+                                var limitMessage = "Trying to edit " + numberRowsToRead + " records. A maximum of " + context.MAX_ROWS_TO_ADD + " records can be edited at once. Showing the first " + context.MAX_ROWS_TO_ADD + " records.";
                                 AlertsService.addAlert(limitMessage, 'error');
                             }
                         } else {
@@ -244,7 +248,10 @@
                             action: logService.getActionString(logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
-                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
+
+                        // in edit mode, we have to check the TCRS (row-level acls)
+                        var getTCRS = context.mode === context.modes.EDIT;
+                        $rootScope.reference.read(numberRowsToRead, logObj, false, false, false, getTCRS).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
@@ -253,14 +260,39 @@
                                 throw new Errors.noRecordError({}, page.reference.displayname.value, recordSetLink);
                             }
 
-                            var column, value;
+                            // make sure at least one row is editable
+                            if (context.mode == context.modes.EDIT) {
+                                var forbiddenTuples = page.tuples.filter(function (t) {
+                                    return !t.canUpdate;
+                                });
+                                // all the rows are disabled
+                                if (forbiddenTuples.length === page.tuples.length) {
+                                    var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
+                                    // NOTE there might be different reasons for this (column vs row)
+                                    // should we list all of them?
+                                    forbiddenError.subMessage = forbiddenTuples[0].canUpdateReason;
+                                    throw forbiddenError;
+                                }
+                            }
 
+                            var column, value, headTitle;
 
                             // $rootScope.tuples is used for keeping track of changes in the tuple data before it is submitted for update
                             $rootScope.tuples = [];
-                            if (context.mode == context.modes.EDIT && page.tuples.length == 1) {
-                                $rootScope.displayname = page.tuples[0].displayname;
+                            if (context.mode == context.modes.EDIT) {
+                                headTitle = "Edit " + DataUtils.getDisplaynameInnerText($rootScope.reference.displayname);
+                                if (page.tuples.length == 1) {
+                                    $rootScope.displayname = page.tuples[0].displayname;
+                                    // Edit <table>: <rowname>
+                                    headTitle += ": " + DataUtils.getDisplaynameInnerText($rootScope.displayname);
+                                }
+                            } else {
+                                headTitle = "Create new " + DataUtils.getDisplaynameInnerText($rootScope.reference.displayname);
                             }
+                            // send string to prepend to "headTitle"
+                            // For editing ==1 record - "Edit <table>: <rowname>"
+                            // For editing >1 record - "Edit <table>"
+                            headInjector.updateHeadTitle(headTitle);
                             $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                             $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);
 
@@ -271,6 +303,12 @@
                                 $rootScope.tuples.push(shallowTuple);
 
                                 recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
+                            }
+
+                            if (context.mode == context.modes.EDIT) {
+                              recordEditModel.columnModels.forEach(function (cm) {
+                                recordCreate.populateColumnPermissionError(recordEditModel, cm);
+                              });
                             }
 
                             $rootScope.displayReady = true;
@@ -300,6 +338,9 @@
                         throw notAuthorizedError;
                     }
                 } else if (context.mode == context.modes.CREATE) {
+                    // send string to prepend to "headTitle"
+                    // Create new <table-name>
+                    headInjector.updateHeadTitle("Create new " + $rootScope.reference.displayname.value);
                     if ($rootScope.reference.canCreate) {
                         $rootScope.idSafeTableName = DataUtils.makeSafeIdAttr($rootScope.reference.table.name);
                         $rootScope.idSafeSchemaName = DataUtils.makeSafeIdAttr($rootScope.reference.table.schema.name);

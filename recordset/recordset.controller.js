@@ -13,9 +13,11 @@
         $scope.makeSafeIdAttr = DataUtils.makeSafeIdAttr;
 
         function updateLocation() {
+            // if we're showing an error popup, don't change the location
+            if ($rootScope.error) return;
+
             $window.scrollTo(0, 0);
-            $window.location.replace(UriUtils.getRecordsetLink(recordsetModel.reference));
-            $rootScope.location = $window.location.href;
+            $window.history.replaceState({}, '', UriUtils.getRecordsetLink(recordsetModel.reference));
         }
 
         $rootScope.$on('reference-modified', function() {

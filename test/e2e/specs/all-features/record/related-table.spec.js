@@ -80,7 +80,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
             permalink: RIDLink,
             verifyVersionedLink: false,
             citation: "Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (" + moment().format("YYYY") + ").",
-            bibtextFile: false // we don't need to test this here as well (it has been tested in record presentation)
+            bibtextFile: false, // we don't need to test this here as well (it has been tested in record presentation)
+            title: "Share and Cite"
         });
     })
 
@@ -236,10 +237,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isAssociation: true,
         canEdit: true
     };
-    describe("for a pure and binary association with page_size, ", function () {
+    describe("for a pure and binary association with page_size and hide_row_count, ", function () {
         recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
 
-        it ("Opened modal by `Add` button should honor the page_size.", function () {
+        it ("Opened modal by `Add` button should honor the page_size and hide_row_count.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
             addRelatedRecordLink.click().then(function(){
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
@@ -255,6 +256,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 return chaisePage.recordsetPage.getModalRows().count();
             }).then(function(ct){
                 expect(ct).toBe(2, "association count missmatch for file domain table.");
+
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nfirst 2\nrecords", "hide_row_count not honored");
+
                 return chaisePage.recordEditPage.getModalCloseBtn().click();
             }).catch(function(error) {
                 console.log(error);

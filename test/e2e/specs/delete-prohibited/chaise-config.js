@@ -11,7 +11,14 @@ var chaiseConfig = {
     disableExternalLinkModal: true,
     logClientActions: false,
     hideTableOfContents: true,
-    resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in travis
+    showWriterEmptyRelatedOnLoad: true,
+    loggedInMenu: {
+        menuOptions: { nameMarkdownPattern: "Outbound Profile Link", urlPattern: "/", newTab: true, type: "url" }
+    },
+    navbarBanner: {
+        markdownPattern: "This is a banner with [link](https://example.com)"
+    },
+    resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in ci
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

@@ -25,7 +25,7 @@
         'ui.bootstrap'
     ])
 
-    .run(['appName', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(appName, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
+    .run(['settings', 'ConfigUtils', 'ERMrest', 'headInjector', 'MathUtils', 'UriUtils', '$rootScope', '$window', function(settings, ConfigUtils, ERMrest, headInjector, MathUtils, UriUtils, $rootScope, $window) {
 
         // TODO navbar changes (these should move to ConfigUtils)
         // because we might call that one first. these should be in the setter...
@@ -51,15 +51,25 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
+        var openLinksInTab = inIframe && settings.openIframeLinksInTab;
 
         // initialize dcctx object
         $window.dcctx = {
             contextHeaderParams: {
-                cid: appName,
+                cid: settings.appName,
                 pid: MathUtils.uuid(),
                 wid: $window.name
             },
-            hideNavbar: hideNavbar
+            settings: {
+                hideNavbar: hideNavbar,
+                // the settings constant is not accessible from chaise apps,
+                // therefore we're capturing them here so they can be used in chaise
+                appTitle: settings.appTitle,
+                overrideHeadTitle: settings.overrideHeadTitle,
+                overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
+                overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
+                openLinksInTab: openLinksInTab
+            }
         };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();

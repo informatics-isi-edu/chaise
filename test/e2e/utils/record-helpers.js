@@ -34,6 +34,19 @@ exports.testPresentation = function (tableParams) {
         expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
     });
 
+    it ("should have the correct head title using the heuristics for record app", function (done) {
+        browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+            // <table-name>: <row-name> | chaiseConfig.headTitle
+            // NOTE: subTitle and title are badly named
+            expect(browser.getTitle()).toBe(tableParams.subTitle + ": " + tableParams.title + " | " + chaiseConfig.headTitle);
+
+            done();
+        }).catch(function (err) {
+            console.log(err);
+            done.fail();
+        });
+    });
+
     it("should show " +notNullColumns.length + " columns only", function() {
         expect(chaisePage.recordPage.getColumns().count()).toBe(notNullColumns.length);
     });
@@ -96,11 +109,11 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    if (!process.env.TRAVIS) {
-        it("should have 'search results (csv)' as a download option and download the file.", function(done) {
+    if (!process.env.CI) {
+        it("should have 'This record (CSV)' as a download option and download the file.", function(done) {
             chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
-                expect(csvOption.getText()).toBe("search results (csv)");
+                var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
+                expect(csvOption.getText()).toBe("This record (CSV)");
                 return csvOption.click();
             }).then(function () {
                 browser.wait(function() {
@@ -483,7 +496,7 @@ exports.testSharePopup = function (citationParams) {
             chaisePage.waitForElement(modalTitle);
             chaisePage.recordPage.waitForCitation();
             // make sure the loader is not displayed
-            expect(modalTitle.getText()).toBe("Share", "Share citation modal title is incorrect");
+            expect(modalTitle.getText()).toBe(citationParams.title, "Share citation modal title is incorrect");
 
             // share link
             var num = 1;
@@ -560,7 +573,7 @@ exports.testSharePopup = function (citationParams) {
             });
         }
 
-        if (!process.env.TRAVIS && citationParams.bibtextFile) {
+        if (!process.env.CI && citationParams.bibtextFile) {
             it("should download the citation in BibTex format.", function (done) {
                 chaisePage.recordPage.getBibtex().click().then(function () {
                     browser.wait(function() {
@@ -1010,6 +1023,10 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 return chaisePage.recordsetPage.getModalRows().count();
             }).then(function(ct){
                 expect(ct).toBe(params.totalCount, "association count missmatch.");
+
+                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
+                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+
                 done();
             }).catch(function(error) {
                 console.log(error);
@@ -1073,6 +1090,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
         it ("user should be able to select new values and submit.", function (done) {
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
             chaisePage.clickButton(inp).then(function (){
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Save", "Submit button text for add pure and binary popup is incorrect");
+
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
                 browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);

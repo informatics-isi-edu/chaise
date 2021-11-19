@@ -3,27 +3,48 @@
 
     angular.module('chaise.utils', ['chaise.errors'])
 
+    .constant("chaiseConfigPropertyNames", [
+        "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
+        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
+        "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
+        "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+        "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
+        "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+        "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "configRules"
+    ])
+
     .constant("defaultChaiseConfig", {
           "internalHosts": [window.location.host],
           "ermrestLocation": window.location.origin + "/ermrest",
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
+          "dataBrowser": "/",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
           "deleteRecord": false,
           "signUpURL": "",
-          "profileURL": "",
           "allowErrorDismissal": false,
           "showFaceting": false,
           "hideTableOfContents": false,
-          "showExportButton": false,
+          "navbarBanner": {},
           "navbarMenu": {},
           "navbarBrand": "",
+          "termsAndConditionsConfig": null,
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
-          "logClientActions": true
+          "logClientActions": true,
+          "hideGoToRID": false,
+          "showWriterEmptyRelatedOnLoad": null,
+          "savedQueryConfig": null,
+          "loggedInMenu": {},
+          "shareCiteAcls": {
+              "show": ["*"],
+              "enable": ["*"]
+          }
     })
 
     .constant("appTagMapping", {
@@ -70,7 +91,11 @@
             title: "Your session has expired. Please login to continue.",
         },
         "previousSession": {
-            message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
+            message: [
+                "Your login session has expired. You are now accessing data anonymously. ",
+                "<a ng-click='login()'>Log in</a> to continue your privileged access. ",
+                "<i class=\"chaise-icon chaise-info\" tooltip-placement=\"bottom-left\" uib-tooltip=\"Clicking on '×' button on the right will snooze this alert for one hour.\"></i>"
+            ].join("")
         },
         "noSession": {
             title: "You need to be logged in to continue."
@@ -88,7 +113,8 @@
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
             "pageRedirect": "Click <b>OK</b> to go to the ",
-            "reloadMessage": "Click <b>Reload</b> to start over."
+            "reloadMessage": "Click <b>Reload</b> to start over.",
+            "unsupportedFilters": "Click <b>OK</b> to continue with the subset of filter criteria which are supported at this time."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -97,6 +123,7 @@
         "unauthorizedMessage" : "You are not authorized to perform this action.",
         "reportErrorToAdmin" : " Please report this problem to your system administrators.",
         "noRecordForFilter" : "No matching record found for the given filter or facet.",
+        "noRecordForRid" : "No matching record found for the given RID.",
         "loginRequired": "Login Required",
         "permissionDenied": "Permission Denied",
         "loginStatusChanged": "Unexpected Change of Login Status",
@@ -113,12 +140,13 @@
             null: "Search for any record with no value assigned",
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
-            showMore: "Click to show more available fitlers",
+            showMore: "Click to show more available filters",
             showDetails: "Click to show more details about the filters"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
-        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
+        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again.",
+        "duplicateSavedQueryMessage": "This search has already been saved. Please edit it under <b>Show Saved Search Criteria</b> if you wish to change its name or description."
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -144,7 +172,8 @@
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
         unlinkPureBinaryPopup: "popup/purebinary/unlink",
-        facetPopup: "popup/facet"
+        facetPopup: "popup/facet",
+        savedQuery: "popup/savedquery"
     })
 
     .constant("defaultDisplayname", {
@@ -200,8 +229,18 @@
         INT_8_MAX: 9223372036854775807
     })
 
-    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
-        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
+    // should be used in combination with ng-bind-html
+    // if we use ng-bind-html without this filter:
+    //  - it will throw error when encounterd and "unsafe" html, while with this, we fail silently.
+    //  - it might ignore style tags
+    .filter('trustedHTML', ['$sce', function($sce){
+        return function(text) {
+            return $sce.trustAsHtml(text);
+        };
+    }])
+
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'logService', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, logService, messageMap, ParsedFilter, $injector, $rootScope, $window) {
 
         function getCatalogId() {
             var catalogId = "",
@@ -224,11 +263,17 @@
          * @desc
          * Converts a chaise URI to an ermrest resource URI object or string.
          * @returns {string|Object}
-         * if returnObject = true: an object that has 'ermrestURI', `ppid`, 'pcid', and `isQueryParameter`
+         * if returnObject = true: an object with the following attributes:
+         *  - 'ermrestURI': the uri that should be used for communicating with ermrestjs
+         *  - `isQueryParameter`: whether the hash was written using ? (not #)
+         *  - `ppid`, 'pcid', `paction`: parent context
+         *  - `queryParams`: an object containing query parameters of the url.
+         *                   The keys are query params names, and value either a
+         *                   string value or an array containing multiple strings.
          * otherwise it will return the ermrest uri string.
          * @throws {MalformedUriError} if table or catalog data are missing.
          */
-        function chaiseURItoErmrestURI(location, returnObject) {
+        function chaiseURItoErmrestURI(location, returnObject, dontDecodeQueryParams) {
             var tableMissing = messageMap.tableMissing,
                 catalogMissing = messageMap.catalogMissing,
                 chaiseConfig = ConfigUtils.getConfigJSON();
@@ -247,29 +292,53 @@
             var ermrestUri = {},
                 queryParams = {},
                 queryParamsString = "",
-                catalogId, ppid, pcid;
+                catalogId, ppid, pcid, paction;
 
             // remove query params other than limit
             if (hash && hash.indexOf('?') !== -1) {
                 queryParamsString = hash.match(/\?(.+)/)[1];
                 var queries = queryParamsString.split("&"); // get the query params
-                var acceptedQueries = [], i;
+                var acceptedQueries = [], i, q_parts, q_key, q_val;
 
-                hash = hash.slice(0, hash.indexOf('?')); // remove queries
-                // add back only the valid queries
+                hash = hash.slice(0, hash.indexOf('?'));
+
+                // remove queries add back only the valid queries
                 // "valid queries" are ones that the ermrest APIs allow in the uri (like limit)
                 for (i = 0; i < queries.length; i++) {
-                    if (queries[i].indexOf("limit=") === 0) {
-                        acceptedQueries.push(queries[i]);
+                    q_parts = queries[i].split("=");
+                    if (q_parts.length != 2) continue;
+
+                    if (dontDecodeQueryParams) {
+                        q_key = q_parts[0], q_val = q_parts[1];
+                    } else {
+                        q_key = decodeURIComponent(q_parts[0]), q_val = decodeURIComponent(q_parts[1]);
                     }
-                    if (queries[i].indexOf("pcid=") === 0) {
-                        pcid = queries[i].split("=")[1];
+
+                    // capture the special values
+                    switch (q_key) {
+                        case "limit":
+                            acceptedQueries.push(queries[i]);
+                            break;
+                        case "pcid":
+                            pcid = q_val;
+                            break;
+                        case "ppid":
+                            ppid = q_val;
+                            break;
+                        case "paction":
+                            paction = q_val;
+                            break;
                     }
-                    if (queries[i].indexOf("ppid=") === 0) {
-                        ppid = queries[i].split("=")[1];
+
+                    // save the query param
+                    if (q_key in queryParams) {
+                        if (!Array.isArray(queryParams[q_key])) {
+                            queryParams[q_key] = [queryParams[q_key]]
+                        }
+                        queryParams[q_key].push(q_val);
+                    } else {
+                        queryParams[q_key] = q_val;
                     }
-                    var q_parts = queries[i].split("=");
-                    queryParams[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
                 }
                 if (acceptedQueries.length != 0) {
                     hash = hash + "?" + acceptedQueries.join("&");
@@ -369,6 +438,7 @@
                     hash: originalHash,
                     ppid: ppid,
                     pcid: pcid,
+                    paction: paction,
                     queryParamsString: queryParamsString,
                     queryParams: queryParams,
                     isQueryParameter: isQueryParameter
@@ -408,12 +478,12 @@
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
 
-            var contextObj = ConfigUtils.getContextJSON();
+            var settingsObj = ConfigUtils.getSettings();
             var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             pcontext.push("pcid=" + contextHeaderParams.cid);
             pcontext.push("ppid=" + contextHeaderParams.pid);
             // only add the value to the applink function if it's true
-            if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
+            if (settingsObj.hideNavbar) pcontext.push("hideNavbar=" + settingsObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -826,7 +896,8 @@
          * Gives the path of the chaise deployment directory.
          *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
          *   - otherwise, returns the default value '/chaise/'
-        */
+         * Assume this function will return a value with a leading and trailing `/`
+         */
         function chaiseDeploymentPath() {
             if (typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
                 var path = chaiseBuildVariables.chaiseBasePath;
@@ -887,7 +958,7 @@
                 return url.replace('#' + reference.location.catalog, '#' + currCatalog + (version ? version : ""));
             }
 
-            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current  catalog
+            // if it's a number (isNaN tries to parse to integer before checking) and is the same as current catalog
             if (!isNaN(resolverId) && resolverId == currCatalog) {
                 return $window.location.origin + "/id/" + tuple.data.RID + (version ? version : "");
             }
@@ -908,6 +979,19 @@
 
             return hash;
         }
+
+        /**
+         *
+         */
+        function splitVersionFromCatalog(id) {
+            var split = id.split('@');
+
+            return {
+                catalog: split[0],
+                version: split[1]
+            }
+        }
+
         /**
          * @param {String} hash - window.location.hash string
          */
@@ -924,10 +1008,11 @@
          * Given a location href and key, return the query param value that matches that key
          * @param {String} url - the full url for the current page
          * @param {String} key - the key of the query parameter you want the value of
-         * @returns {String} the value of that key or null, if that key doesn't exist as a query parameter
+         * @returns {String|Array|Null} the value of that key or null, if that key doesn't exist as a query parameter
          *
-         * Note: This won't handle the case where the url might be like this:
-         * '?catalog/schema:table/limit=20' where limit is a column name
+         * Note: This won't handle urls that use `?` instead of `#` for hash fragment.
+         * so should not be used for the main url. if we're looking for the query params
+         * of the main url, we should just use the queryParams that chaiseURItoErmrestURI returns
          */
         function getQueryParam(url, key) {
             return getQueryParams(url)[key];
@@ -936,22 +1021,74 @@
         /**
          * Given a location href, return all the query parameters available on the url.
          * @param {String} url - the full url for the current page
+         * @param {Boolean=} dontDecodeQueryParams - if true, the values will not be decoded.
          * @returns {Object} an object, containing the query parameters.
+         *                   The keys are query params names, and value either a
+         *                   string value or an array containing multiple strings.
          *
-         * Note: This won't handle the case where the url might be like this:
-         * '?catalog/schema:table/limit=20' where limit is a column name
+         * Note: This won't handle urls that use `?` instead of `#` for hash fragment.
+         * so should not be used for the main url. if we're looking for the query params
+         * of the main url, we should just use the queryParams that chaiseURItoErmrestURI returns
          */
-        function getQueryParams(url) {
+        function getQueryParams(url, dontDecodeQueryParams) {
             var params = {};
             var idx = url.lastIndexOf("?");
             if (idx !== -1) {
                 var queries = url.slice(idx+1).split("&");
                 for (var i = 0; i < queries.length; i++) {
                     var q_parts = queries[i].split("=");
-                    params[decodeURIComponent(q_parts[0])] = decodeURIComponent(q_parts[1]);
+                    // allow for length 1 query params
+                    if (q_parts.length > 2) continue;
+                    // if value is not defined, use true since key would still be defined
+                    q_parts[1] = q_parts[1] || true
+
+                    var q_key, q_val;
+                    if (dontDecodeQueryParams) {
+                        q_key = q_parts[0], q_val = q_parts[1];
+                    } else {
+                        q_key = decodeURIComponent(q_parts[0]), q_val = decodeURIComponent(q_parts[1]);
+                    }
+
+                    if (q_key in params) {
+                        if (!Array.isArray(params[q_key])) {
+                            params[q_key] = [params[q_key]]
+                        }
+                        params[q_key].push(q_val);
+                    } else {
+                        params[q_key] = q_val;
+                    }
                 }
             }
             return params;
+        }
+
+        /**
+         * Given a queryParams object, will return the string representation of it.
+         * @param {Object} queryParams - the query params object
+         * @param {Boolean=} dontEncodeQueryParams - if true, the values will not be encoded.
+         * @returns {String} the string representation of the query params (doesn't include ? at the beginning)
+         *
+         */
+        function queryParamsToString(queryParams, dontEncodeQueryParams) {
+            var res = [];
+            var addKeyValue = function(k, v) {
+                if (dontEncodeQueryParams) {
+                    res.push(k + "=" + v);
+                } else {
+                    res.push(fixedEncodeURIComponent(k) + "=" + fixedEncodeURIComponent(v));
+                }
+            }
+
+            for (var k in queryParams) {
+                if (Array.isArray(queryParams[k])) {
+                    queryParams[k].forEach(function (q) {
+                        addKeyValue(k, q);
+                    });
+                } else {
+                    addKeyValue(k, queryParams[k])
+                }
+            }
+            return res.join("&");
         }
 
         /**
@@ -999,9 +1136,9 @@
             }
 
             // add hideNavbar if present/defined
-            var dcctx = ConfigUtils.getContextJSON();
-            if (dcctx.hideNavbar) {
-                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
+            var settings = ConfigUtils.getSettings();
+            if (settings.hideNavbar) {
+                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + settings.hideNavbar;
             }
 
             return url;
@@ -1042,6 +1179,7 @@
             getHash: getHash,
             getQueryParam: getQueryParam,
             getQueryParams: getQueryParams,
+            queryParamsToString: queryParamsToString,
             isBrowserIE: isBrowserIE,
             isSameOrigin: isSameOrigin,
             OSDViewerDeploymentPath: OSDViewerDeploymentPath,
@@ -1051,9 +1189,345 @@
             resolvePermalink: resolvePermalink,
             setLocationChangeHandling: setLocationChangeHandling,
             setOrigin: setOrigin,
+            splitVersionFromCatalog: splitVersionFromCatalog,
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
             getAbsoluteURL: getAbsoluteURL
+        }
+    }])
+
+    .factory('MenuUtils', ['ConfigUtils', 'logService', 'modalUtils', 'Session', 'UriUtils', '$sce', '$window', function (ConfigUtils, logService, modalUtils, Session, UriUtils, $sce, $window) {
+        /* ===== Private Functions and variables ===== */
+        var _path;
+        function _getPath(dcctx) {
+            if (!_path) {
+                var path = "/chaise/";
+                if (dcctx && typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                    var path = chaiseBuildVariables.chaiseBasePath;
+                    // append "/" if not present
+                    if (path[path.length-1] !== "/") path += "/";
+                }
+
+                _path = window.location.host + path;
+            }
+
+            return _path;
+        }
+
+        /* Function to calculate the left of the toggleSubMenu*/
+        function _getOffsetValue(element){
+           var offsetLeft = 0
+           while(element) {
+              offsetLeft += element.offsetLeft;
+              element = element.offsetParent;
+           }
+           return offsetLeft;
+        }
+
+        function _getNextSibling(elem, selector) {
+            var sibling = elem.nextElementSibling;
+            if (!selector) return sibling;
+            while (sibling) {
+                if (sibling.matches(selector)) return sibling;
+                sibling = sibling.nextElementSibling;
+            }
+        }
+
+        // Function to open the menu on the left if not enough space on right
+        function _checkWidth(ele, winWidth) {
+            //revert to defaults
+            ele.classList.remove("dropdown-menu-right");
+            ele.style.width = "max-content";
+
+            // If dropdown is spilling over
+            if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
+                ele.style.width = "max-content";
+            }
+            else {
+                var visibleContent =  winWidth - ele.getBoundingClientRect().left;
+                //hard-coded limit of width for opening on the left hand side
+                if (Math.round(visibleContent) < 200) {
+                    ele.classList.add("dropdown-menu-right");
+                }
+                else {
+                    ele.style.width = visibleContent + "px";
+                }
+            }
+        }
+
+        /* ===== Public Functions attached to return object ===== */
+
+        // ele - dropdown ul element
+        function checkHeight(ele, winHeight) {
+            // no dropdown is open
+            if (!ele) return;
+
+            var dropdownHeight = ele.offsetHeight;
+            var fromTop = ele.offsetTop;
+            var footerBuffer = 50;
+
+            if ((dropdownHeight + fromTop) > winHeight) {
+                var newHeight = winHeight - fromTop - footerBuffer;
+                ele.style.height = newHeight + "px";
+            }
+        }
+
+        /**
+         * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
+         * it will close all the other dropdowns and also will return `true`.
+         * @return{boolean} if true, it means that we opened the menu
+         */
+        function toggleMenu($event) {
+            $event.stopPropagation();
+            $event.preventDefault();
+
+            var target = $event.target;
+            // added markdownName support allows for inline template to be defined like :span:TEXT:/span:{.class-name}
+            if ($event.target.localName != "a") {
+                target = $event.target.parentElement;
+            }
+
+            var menuTarget = _getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+            menuTarget.style.width = "max-content";
+            var immediateParent = target.offsetParent; // parent, <li>
+            var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
+            var posValues = _getOffsetValue(immediateParent);
+
+            // calculate the position the submenu should open from the top fo the viewport
+            menuTarget.style.top = parseInt(immediateParent.getBoundingClientRect().y) + 5 + 'px';
+
+            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
+
+            var open = !menuTarget.classList.contains("show");
+
+            // if we're opening this, close all the other dropdowns on navbar.
+            if (open) {
+                target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+                    el.parentElement.classList.remove("child-opened");
+                    el.classList.remove("show");
+                });
+            }
+
+            menuTarget.classList.toggle("show"); // toggle the class
+            menuTarget.style.height = "unset"; // remove height in case it was set for a different position
+            immediateParent.classList.toggle("child-opened"); // used for setting highlight color
+
+            if (open) {
+                // recalculate the height for each open submenu, <ul>
+                var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
+                [].forEach.call(openSubmenus, function(el) {
+                    checkHeight(el, window.innerHeight);
+                });
+            }
+
+            //If not enough space to expand on right
+            var widthOfSubMenu = menuTarget.offsetWidth;
+            var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
+
+            if (submenuEndOnRight > window.innerWidth) {
+                var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
+                var visibleContent = window.innerWidth - submenuEndOnLeft;
+
+                if (visibleContent < 200) {
+                    menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
+                }
+                else {
+                    menuTarget.style.width = visibleContent + "px";
+                }
+            }
+            else {
+                // if vertical scrollbar then offset a bit more to make scrollbar visible
+                if (parent.scrollHeight > parent.clientHeight) {
+                    menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
+                }
+            }
+
+            return open;
+        }
+
+        function isChaise(link, dcctx) {
+            if (!link) return false;
+
+            var appNames = ["record", "recordset", "recordedit", "login", "help"];
+
+            // parses the url into a location object
+            var eleUrl = document.createElement('a');
+            eleUrl.href = link;
+
+            for (var i=0; i<appNames.length; i++) {
+                var name = appNames[i];
+                // path/appName exists in our url
+                if (eleUrl.href.indexOf(_getPath(dcctx) + name) !== -1) return true;
+            }
+
+            return false;
+        }
+
+        function addLogParams(url, contextHeaderParams) {
+            // if `?` already in the url, use &
+            var paramChar = url.lastIndexOf("?") !== -1 ? "&" : "?";
+
+            var pcid = "navbar";
+            // if not navbar app, append appname
+            if (contextHeaderParams.cid !== "navbar") {
+                pcid += "/" + contextHeaderParams.cid;
+            }
+            // ppid should be the pid for the current page
+            return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
+        }
+
+        function resetHeight(event) {
+            var menuTarget = _getNextSibling(event.target,".dropdown-menu");
+            if (menuTarget) menuTarget.style.height = "unset";
+        }
+
+        function isOptionValid(option) {
+            // if no nameMarkdownPattern, we can't show anything
+            if (!option.nameMarkdownPattern) return false;
+
+            var isValid = true;
+            switch (option.type) {
+                case "menu":
+                    // must have children to be considered a valid menu
+                    isValid = option.children && option.children.length > 0;
+                    break;
+                case "url":
+                    // accepts "urlPattern"
+                    isValid = option.url ? true : false;
+                    break;
+                case "header":
+                case "logout":
+                case "my_profile":
+                    // ignore "children", "urlPattern"
+                    break;
+                default:
+                    // if option has both children and url defined, prefer to use the children and ignore the url
+                    // if neither are defined, either the type is not supported or type was not defined
+                    if (option.children && option.children.length > 0) {
+                        option.type = "menu"
+                    } else if (option.url) {
+                        option.type = "url";
+                    } else {
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            return isValid;
+        }
+
+        // triggered when top level menu is opened/closed
+        function onToggle(open) {
+            var elems = document.querySelectorAll(".dropdown-menu.show");
+            [].forEach.call(elems, function(el) {
+                el.classList.remove("show");
+            });
+
+            // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
+            var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
+            [].forEach.call(highlightedParents, function(el) {
+                el.classList.remove("child-opened");
+            });
+
+            // calculate height for each open dropdown menu
+            if (open) {
+                var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                [].forEach.call(openDropdowns, function(el) {
+                    checkHeight(el, window.innerHeight);
+                    _checkWidth(el, window.innerWidth);
+                });
+            }
+        }
+
+        /**
+         * Just to make sure browsers are not ignoring the ng-click, we are first
+         * preventing the default behavior of link, then logging the client action
+         * and then changing the location without waiting for the request,
+         * This will ensure that we're at least sending the log to server.
+         */
+        function onLinkClick() {
+            return function ($event, menuObject) {
+                $event.preventDefault();
+                $event.stopPropagation();
+
+                // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
+                if (!isChaise(menuObject.url, ConfigUtils.getContextJSON())) {
+                    // check if external or internal resource page
+                    var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
+                    logService.logClientAction({
+                        action: logService.getActionString(action, "", ""),
+                        names: menuObject.names
+                    });
+                }
+
+                if (menuObject.newTab) {
+                    $window.open(menuObject.url, '_blank');
+                } else {
+                    $window.location = menuObject.url;
+                }
+            };
+        }
+
+        function renderName(option) {
+            // new syntax will always use nameMarkdownPattern
+            if (option.nameMarkdownPattern) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), {inline: true}));
+            }
+
+            // support markdownName backwards compatibility for navbarMenu
+            if (option.markdownName) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(option.markdownName, {inline: true}));
+            }
+
+            // support name backwards compatibility for navbarMenu
+            return $sce.trustAsHtml(option.name);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canShow (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.show);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canEnable (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.enable);
+        }
+
+        // NOTE: hard coded action
+        function openProfileModal() {
+            logService.logClientAction({
+                action: logService.logActions.NAVBAR_PROFILE_OPEN
+            });
+
+            modalUtils.showModal({
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
+                controller: "profileModalDialogController",
+                controllerAs: "ctrl",
+                windowClass: "profile-popup"
+            }, false, false, false);
+        }
+
+        // NOTE: hard coded action
+        function logout() {
+            Session.logout(logService.logActions.LOGOUT_NAVBAR);
+        }
+
+        return {
+            addLogParams: addLogParams,
+            canEnable: canEnable,
+            canShow: canShow,
+            checkHeight: checkHeight,
+            isChaise: isChaise,
+            isOptionValid: isOptionValid,
+            logout: logout,
+            onLinkClick: onLinkClick,
+            openProfileModal: openProfileModal,
+            onToggle: onToggle,
+            renderName: renderName,
+            resetHeight: resetHeight,
+            toggleMenu: toggleMenu
         }
     }])
 
@@ -1209,6 +1683,10 @@
             return (obj && typeof obj[keyName] == 'string' && obj[keyName] != '')
         }
 
+        function isNonEmptyObject(obj) {
+            return typeof obj === "object" && obj !== null && Object.keys(obj).length > 0;
+        }
+
         /**
          * Verifies that the object is not null and is defined.
          */
@@ -1223,6 +1701,30 @@
          */
         function isInteger(data) {
             return (typeof data === 'number') && (data % 1 === 0);
+        }
+
+        /**
+         * Verifies that the given data is a non-empty string.
+         * @param {Object} data
+         * @return {Boolean} whether it is non-empty string.
+         */
+        function isNoneEmptyString (data) {
+            return typeof data === "string" && data.length > 0;
+        }
+
+        /**
+         * return the inner text of a displayname object ({value: string, isHTML:boolean})
+         * @param {Object} displayname {value: string, isHTML:boolean}
+         * @return {String}
+         */
+        function getDisplaynameInnerText(displayname) {
+            if (!displayname.isHTML) {
+                return displayname.value;
+            }
+            var dummy = document.createElement("div"), res;
+            dummy.innerHTML = displayname.value;
+            res = dummy.innerText;
+            return res;
         }
 
         var ID_SAFE_REGEX = /[^\w-]+/g;
@@ -1310,7 +1812,10 @@
             getRowValuesFromTuples: getRowValuesFromTuples,
             isObjectAndKeyDefined: isObjectAndKeyDefined,
             isObjectAndNotNull: isObjectAndNotNull,
+            isNonEmptyObject: isNonEmptyObject,
             isInteger: isInteger,
+            isNoneEmptyString: isNoneEmptyString,
+            getDisplaynameInnerText: getDisplaynameInnerText,
             makeSafeIdAttr: makeSafeIdAttr,
             makeSafeHTML: makeSafeHTML,
             addSpaceAfterLogicalOperators: addSpaceAfterLogicalOperators,
@@ -1454,6 +1959,9 @@
                 case 'jsonb':
                     inputType = 'json';
                     break;
+                case 'color_rgb_hex':
+                    inputType = 'color';
+                    break;
                 case 'shorttext':
                 default:
                     inputType = type.baseType ? getInputType(type.baseType) : 'text';
@@ -1492,7 +2000,7 @@
 
         /**
          * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
-         * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#mainnav` will be used.
+         * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#navheader` will be used.
          * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
          * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
          * If you don't pass any parentContainer, it will use the body
@@ -1565,7 +2073,7 @@
 
                 // get the parent sticky
                 if (parentContainerSticky == null) {
-                    parentContainerSticky = document.querySelector("#mainnav");
+                    parentContainerSticky = document.querySelector("#navheader");
                 }
 
                 // the content that we should make scrollable if the content height is too small
@@ -1699,6 +2207,63 @@
             }
         }
 
+        /**
+         * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
+         * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+         * @param {DOMElement} parent - the parent element
+         */
+        function addTopHorizontalScroll(parent) {
+            if (!parent) return;
+
+            var topScrollElementWrapper = parent.querySelector(".chaise-table-top-scroll-wrapper"),
+                topScrollElement = parent.querySelector(".chaise-table-top-scroll"),
+                recordsetTable = parent.querySelector(".recordset-table");
+
+            if (!topScrollElementWrapper || !topScrollElement || !recordsetTable) {
+                return;
+            }
+
+            // these 2 flags help us prevent cascading scroll changes back and forth across the 2 elements
+            var isSyncingTopScroll = false;
+            var isSyncingTableScroll = false;
+            // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+            topScrollElementWrapper.addEventListener('scroll', function() {
+                if (!isSyncingTopScroll) {
+                    isSyncingTableScroll = true;
+                    recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
+                }
+                isSyncingTopScroll = false;
+            });
+
+            recordsetTable.addEventListener('scroll', function() {
+                if (!isSyncingTableScroll) {
+                    isSyncingTopScroll = true;
+                    topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+                }
+                isSyncingTableScroll = false;
+            });
+
+            // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+            new ResizeSensor(recordsetTable, function () {
+                // there is no need of a scrollbar, content is not overflowing
+                if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                    topScrollElement.style.width = 0;
+                    topScrollElementWrapper.style.height = 0;
+                }
+                else {
+                    topScrollElementWrapper.style.height = "15px";
+                    topScrollElement.style.width = recordsetTable.scrollWidth + "px";
+                }
+            });
+
+            // make top scroll visible after adding the handlers to ensure its visible only when working
+            topScrollElementWrapper.style.display = "block";
+            // show only if content is overflowing
+            if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                topScrollElementWrapper.style.height = "15px";
+            }
+        }
+
         return {
             humanizeTimestamp: humanizeTimestamp,
             versionDate: versionDate,
@@ -1711,7 +2276,8 @@
             attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor,
+            addTopHorizontalScroll: addTopHorizontalScroll
         }
     }])
 
@@ -1761,7 +2327,9 @@
         }
     }])
 
-    .factory("ConfigUtils", ['defaultChaiseConfig', '$http', '$rootScope', '$window', function(defaultConfig, $http, $rootScope, $window) {
+    .factory("ConfigUtils", ['chaiseConfigPropertyNames', 'defaultChaiseConfig', '$http', '$log', '$rootScope', '$window', function(chaiseConfigPropertyNames, defaultConfig, $http, $log, $rootScope, $window) {
+        // List of all accepted chaiseConfig properties in defined case from chaise-config.md
+
         /**
          * Will return the dcctx object that has the following attributes:
          *  - cid: client id (app name)
@@ -1774,6 +2342,10 @@
         function getContextJSON() {
             return $window.dcctx;
         };
+
+        function getSettings() {
+            return getContextJSON().settings;
+        }
 
         function getConfigJSON() {
             return getContextJSON().chaiseConfig;
@@ -1789,20 +2361,51 @@
          *     a. Apply base level configuration properties
          *     b. Apply config-rules in order depending on matching host definitions
          *
+         * NOTE: Chaise Config properties can be case-insensitive since we check the properties against a whitelist of accepted property names.
+         * If the same property is defined in the same "chaise config" more than once with different case, the latter defined property will be used.
+         *
+         * For instance, given the below object, defaultCATALOG will be used over defaultCatalog:
+         * chaise-config.js = {
+         *   "defaultCatalog": 1,
+         *   "defaultCATALOG": 2
+         * }
+         *
          * @params {Object} catalogAnnotation - the chaise-config object returned from the 2019 chaise-config annotation tag attached to the catalog object
          *
          */
         function setConfigJSON(catalogAnnotation) {
+            function matchKey(collection, keyToMatch) {
+                return collection.filter(function (key) {
+                    // toLowerCase both keys for a case insensitive comparison
+                    return keyToMatch.toLowerCase() === key.toLowerCase();
+                });
+            }
             var cc = {};
             // check to see if global chaise-config (chaise-config.js) is available
-            if (typeof chaiseConfig != 'undefined') cc = Object.assign({}, chaiseConfig);
+            if (typeof chaiseConfig != 'undefined') {
+                // loop through properties and compare to defaultConfig to see if they are valid
+                // chaiseConfigPropertyNames is a whitelist of all accepted values
+                for (var key in chaiseConfig) {
+                    // see if returned key is in the list we accept
+                    var matchedKey = matchKey(chaiseConfigPropertyNames, key);
+
+                    // if we found a match for the current key in chaiseConfig, use the match from chaiseConfigPropertyNames as the key and set the value
+                    if (matchedKey.length > 0 && matchedKey[0]) {
+                        cc[matchedKey[0]] = chaiseConfig[key];
+                    }
+                }
+            }
 
             // Loop over default properties (global chaise config (chaise-config.js) may not be defined)
             // Handles case 1 and 2a
             for (var property in defaultConfig) {
                 // use chaise-config.js property instead of default if defined
-                if (typeof chaiseConfig != 'undefined' && typeof chaiseConfig[property] != 'undefined') {
-                    cc[property] = chaiseConfig[property];
+                if (typeof chaiseConfig != 'undefined') {
+                    // see if "property" matches a key in chaiseConfig
+                    var matchedKey = matchKey(Object.keys(chaiseConfig), property);
+
+                    // property will be in proper case already since it comes from our config object in JS
+                    cc[property] = ((matchedKey.length > 0 && matchedKey[0]) ? chaiseConfig[property] : defaultConfig[property]);
                 } else {
                     // property doesn't exist
                     cc[property] = defaultConfig[property];
@@ -1830,7 +2433,12 @@
                                 // $window.location.hostname refers to just the hostname (www.something.com)
                                 if (ruleset.host[i] === $window.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
                                     for (var property in ruleset.config) {
-                                        cc[property] = ruleset.config[property];
+                                        var matchedKey = matchKey(chaiseConfigPropertyNames, property);
+
+                                        // if we found a match for the current key in ruleset.config, use the match from chaiseConfigPropertyNames as the key and set the value
+                                        if (matchedKey.length > 0 && matchedKey[0]) {
+                                            cc[matchedKey[0]] = ruleset.config[property];
+                                        }
                                     }
                                     break;
                                 }
@@ -1849,12 +2457,24 @@
             if (typeof catalogAnnotation == "object") {
                 // case 3a
                 for (var property in catalogAnnotation) {
-                    cc[property] = catalogAnnotation[property];
+                    var matchedKey = matchKey(chaiseConfigPropertyNames, property);
+
+                    // if we found a match for the current key in catalogAnnotation, use the match from chaiseConfigPropertyNames as the key and set the value
+                    if (matchedKey.length > 0 && matchedKey[0]) {
+                        cc[matchedKey[0]] = catalogAnnotation[property];
+                    }
                 }
 
                 // case 3b
                 applyHostConfigRules(catalogAnnotation);
             }
+
+            // shareCiteAcls is a nested object, user could define shareCiteAcls:
+            //     { show: ["*"] }
+            // with no enable array defined
+            // make sure the object has both defined and apply the default if one or the other is missing
+            if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = defaultConfig.shareCiteAcls.show;
+            if (!cc.shareCiteAcls.enable) cc.shareCiteAcls.enable = defaultConfig.shareCiteAcls.enable;
 
             if (!$window.dcctx) $window.dcctx = {};
             $window.dcctx.chaiseConfig = cc;
@@ -1913,13 +2533,83 @@
             var cc = getConfigJSON();
 
             var mode = null;
-            if (context.indexOf('compact') != -1 && cc.SystemColumnsDisplayCompact)  {
-                mode = cc.SystemColumnsDisplayCompact;
-            } else if (context == 'detailed' && cc.SystemColumnsDisplayDetailed) {
-                mode = cc.SystemColumnsDisplayDetailed;
+            if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
+                mode = cc.systemColumnsDisplayCompact;
+            } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
+                mode = cc.systemColumnsDisplayDetailed;
+            } else if (context.indexOf('entry') != -1 && cc.systemColumnsDisplayEntry) {
+                mode = cc.systemColumnsDisplayEntry;
             }
 
             return mode;
+        }
+
+        // NOTE: should use DataUtils.isNoneEmptyString but including causes a circular dependency
+        // DataUtils relies on errors for one functions, `verify()`. `verify` should be moved to
+        // errors to remove this circular dependency and allow utility functions with no dependencies
+        // to be used everywhere
+        function isStringAndNotEmpty(str) {
+            return typeof str === "string" && str.length > 0;
+        };
+
+        function initializeSavingQueries(reference, queryParams) {
+            var chaiseConfig = getConfigJSON();
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            var savedQuery = {
+                showUI: reference.display.showSavedQuery
+            }
+
+            // NOTE: if this is not set, saved query UI should be turned off
+            if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
+                var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+                // limits for when to use a modified simpler syntax for the default name value
+                // set the 3 threshold properties: facetChoiceLimit, facetTextLimit, totalTextLimit
+                var limits = chaiseConfig.savedQueryConfig.defaultName || {};
+                savedQuery.defaultNameLimits = {
+                    facetChoiceLimit: !isNaN(limits.facetChoiceLimit) ? limits.facetChoiceLimit : 5,
+                    facetTextLimit: !isNaN(limits.facetTextLimit) ? limits.facetTextLimit : 60,
+                    totalTextLimit: !isNaN(limits.totalTextLimit) ? limits.totalTextLimit : 200
+                }
+
+                var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                if (validMapping) {
+                    savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+                    savedQuery.ermrestAGPath = "/ermrest/catalog/" + mapping.catalog + "/attributegroup/" + mapping.schema + ":" + mapping.table
+
+                    // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
+                    if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
+                } else {
+                    // if mapping is invalid, the config is ill-defined and the feature will be turned off
+                    savedQuery.showUI = false;
+                }
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                savedQuery.showUI = false;
+            }
+
+            return savedQuery;
+        }
+
+        /**
+         * Returns true if the object passed is valid for the terms and conditions feature
+         * @params {Object} obj - the termaAndConditions object from chaise-config
+         * @return {boolean} boolean - value to use the terms and conditions config requiring a specific globus group for access
+         *
+         * termsAndConditionsConfig: {
+         *     "groupId": "https://auth.globus.org/123a4bcd-ef5a-67bc-8912-d34e5fa67b89",
+         *     "joinUrl": "https://app.globus.org/groups/123a4bcd-ef5a-67bc-8912-d34e5fa67b89/join",
+         *     "groupName": "Globus group name"
+         * },
+         */
+        function validateTermsAndConditionsConfig(obj) {
+            if (!obj || typeof obj !== "object") return false;
+            var tacConfig = getConfigJSON().termsAndConditionsConfig;
+
+            // all 3 properties must be defined for this to function, if not the old login app will be used
+            return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));
         }
 
         return {
@@ -1930,7 +2620,10 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
-            systemColumnsMode: systemColumnsMode
+            initializeSavingQueries: initializeSavingQueries,
+            systemColumnsMode: systemColumnsMode,
+            getSettings: getSettings,
+            validateTermsAndConditionsConfig: validateTermsAndConditionsConfig
         }
     }])
 
@@ -1941,6 +2634,9 @@
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
             scope: {
                 message: "@?"
+            },
+            link: function (scope, elem, attrs) {
+                scope.spinnerPath = UriUtils.chaiseDeploymentPath() + "common/styles/images/loader.gif";
             }
         }
     }])
@@ -2090,19 +2786,19 @@
     .directive('chaiseTitle', [function () {
         return {
             restrict: 'E',
-            // there shouldn't be any extra between closing span tag and a
+            // there shouldn't be any extra between closing <span> tag and <a>
             // if added, it will show an extra underline for the space
-            template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+            template: '<a ng-if="addLink && !displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</a>' +
-                      '<a ng-if="addLink && displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '<a ng-if="addLink && displayname.isHTML" ng-href="{{::recordset()}}" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</a>' +
-                      '<span ng-if="!addLink && !displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '<span ng-if="!addLink && !displayname.isHTML" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</span>' +
-                      '<span ng-if="!addLink && displayname.isHTML" ng-attr-uib-tooltip="{{::comment}}" tooltip-placement="bottom-left">' +
-                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': comment}"></span>' +
+                      '<span ng-if="!addLink && displayname.isHTML" ng-attr-uib-tooltip="{{::(showTooltip ? comment : undefined)}}" tooltip-placement="bottom-left">' +
+                        '<span ng-bind-html="displayname.value" ng-class="{\'chaise-icon-for-tooltip\': showTooltip}"></span>' +
                       '</span>',
             scope: {
                 reference: "=?",
@@ -2123,13 +2819,18 @@
                     return scope.reference.unfilteredReference.contextualize.compact.appLink;
                 }
 
-                if (typeof scope.displayname !== "object" && scope.reference) {
-                    scope.displayname = scope.reference.displayname;
-                }
+                scope.showTooltip = scope.comment ? true : false;
 
-                // TODO: this needs to be extended to use reference.comment once table display is being digested for the title of each app
-                if (!scope.comment && scope.reference && scope.reference.table.comment) {
-                    scope.comment = scope.reference.table.comment;
+                if (scope.reference) {
+                    if (typeof scope.displayname !== "object") {
+                        scope.displayname = scope.reference.displayname;
+                    }
+
+                    if (!scope.comment && scope.reference.comment) {
+                        scope.comment = scope.reference.comment;
+                    }
+
+                    scope.showTooltip = scope.reference.commentDisplay == 'tooltip' && (scope.comment || scope.reference.comment);
                 }
             }
         };
@@ -2274,6 +2975,7 @@
             stackPathClientPathSeparator = ",",
             clientPathActionSeparator = ";",
             separator = "/";
+
         var logActions = Object.freeze({
             // general
 
@@ -2282,6 +2984,9 @@
             RELOAD: clientPathActionSeparator + "reload",
             DELETE: clientPathActionSeparator + "delete",
             EXPORT: clientPathActionSeparator + "export",
+            SHARE_OPEN: "share" + clientPathActionSeparator + "open",
+            CREATE: clientPathActionSeparator + "create",
+            UPDATE: clientPathActionSeparator + "update",
 
             // - client:
             CANCEL: clientPathActionSeparator + "cancel",
@@ -2292,6 +2997,9 @@
             EDIT_INTEND: "edit" + clientPathActionSeparator + "intend",
             DELETE_INTEND: "delete" + clientPathActionSeparator + "intend",
             DELETE_CANCEL: "delete" + clientPathActionSeparator + "cancel",
+            SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
+            SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
+            CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
 
             // recordset app and table:
 
@@ -2334,7 +3042,6 @@
             // record app:
 
             // - server:
-            SHARE_OPEN: "share" + clientPathActionSeparator + "open",
             LOAD_DOMAIN: clientPathActionSeparator + "load-domain", // add pure and binary first request
             RELOAD_DOMAIN: clientPathActionSeparator + "reload-domain",
             LINK: clientPathActionSeparator + "link",
@@ -2354,19 +3061,12 @@
             TOC_SCROLL_TOP: "toc" + separator + "main" + clientPathActionSeparator + "scroll-to",
             TOC_SCROLL_RELATED: "toc" + separator + "section" + clientPathActionSeparator + "scroll-to",
 
-            SHARE_LIVE_LINK_COPY: "share" + separator + "live" + clientPathActionSeparator + "copy",
-            SHARE_VERSIONED_LINK_COPY: "share" + separator + "version" + clientPathActionSeparator + "copy",
-
-            CITE_BIBTEXT_DOWNLOAD: "cite" + separator + "bibtex" + clientPathActionSeparator + "download",
-
 
             // recordedit app:
 
             // - server:
             FOREIGN_KEY_PRESELECT: clientPathActionSeparator +  "preselect",
             FOREIGN_KEY_DEFAULT: clientPathActionSeparator + "default",
-            CREATE: clientPathActionSeparator + "create",
-            UPDATE: clientPathActionSeparator + "update",
 
             // - client:
             FORM_CLONE: clientPathActionSeparator + "clone",
@@ -2380,13 +3080,36 @@
 
 
             // viewer app:
+            // TODO viewer logs are a bit different, so for now I just used a prefix for them.
+            //      I should later evaluate this decision and see whether I should remove these prefixes
+            //      after that we should be able to merge some of the actions with the rest of the chaise
 
             // - server:
-            VIEWER_ANNOT_LOAD: "annotation" + clientPathActionSeparator + "read",
-            VIEWER_ANNOT_COMMENT_LOAD: "annotation_comment" + clientPathActionSeparator + "read",
-            VIEWER_COMMENT_LOAD: "commnet" + clientPathActionSeparator + "read",
-            VIEWER_ANATOMY_LOAD: "anatomy" + clientPathActionSeparator + "read",
+            VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
+            VIEWER_LOAD_BEFORE: clientPathActionSeparator + "load-before",
+            VIEWER_LOAD_AFTER: clientPathActionSeparator + "load-after",
 
+            // - client:
+            VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",
+            VIEWER_ANNOT_PANEL_HIDE: "toolbar/panel" + clientPathActionSeparator + "hide",
+            VIEWER_CHANNEL_SHOW: "toolbar/channel" + clientPathActionSeparator + "show",
+            VIEWER_CHANNEL_HIDE: "toolbar/channel" + clientPathActionSeparator + "hide",
+            VIEWER_SCREENSHOT: "toolbar" + clientPathActionSeparator + "screenshot",
+            VIEWER_ZOOM_RESET: "toolbar" + clientPathActionSeparator + "zoom-reset",
+            VIEWER_ZOOM_IN: "toolbar" + clientPathActionSeparator + "zoom-in",
+            VIEWER_ZOOM_OUT: "toolbar" + clientPathActionSeparator + "zoom-out",
+            // VIEWER_ZOOM_IN_MOUSE: "mouse" + clientPathActionSeparator + "zoom-in",
+            // VIEWER_ZOOM_OUT_MOUSE: "mouse" + clientPathActionSeparator + "zoom-out",
+
+            VIEWER_ANNOT_LINE_THICKNESS: "line-thickness" + clientPathActionSeparator + "adjust",
+            VIEWER_ANNOT_DISPLAY_ALL: clientPathActionSeparator + "display-all",
+            VIEWER_ANNOT_DISPLAY_NONE: clientPathActionSeparator + "display-none",
+            VIEWER_ANNOT_SHOW: clientPathActionSeparator + "show",
+            VIEWER_ANNOT_HIDE: clientPathActionSeparator + "hide",
+            VIEWER_ANNOT_HIGHLIGHT: clientPathActionSeparator + "highlight",
+
+            VIEWER_ANNOT_DRAW_MODE_SHOW: "draw-mode" + clientPathActionSeparator + "show",
+            VIEWER_ANNOT_DRAW_MODE_HIDE: "draw-mode" + clientPathActionSeparator + "hide",
 
             // - authen:
             LOGOUT_NAVBAR: "navbar/account" + clientPathActionSeparator + "logout",
@@ -2401,13 +3124,18 @@
             SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
 
+            // - login2:
+            VERIFY_GLOBUS_GROUP_LOGIN: "verify-globus-group" + clientPathActionSeparator + "login",
+            VERIFY_GLOBUS_GROUP_LOGOUT: "verify-globus-group" + clientPathActionSeparator + "logout",
+
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
             NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",
             NAVBAR_MENU_INTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-internal",
             NAVBAR_MENU_OPEN: "navbar/menu" + clientPathActionSeparator + "open",
             NAVBAR_ACCOUNT_DROPDOWN: "navbar/account" + clientPathActionSeparator + "open",
-            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open"
+            NAVBAR_PROFILE_OPEN: "navbar/account/profile" + clientPathActionSeparator + "open",
+            NAVBAR_RID_SEARCH: "navbar/go-to-rid" + clientPathActionSeparator + "navigate"
         });
 
         var logStackTypes = Object.freeze({
@@ -2417,7 +3145,12 @@
             FOREIGN_KEY: "fk",
             COLUMN: "col",
             PSEUDO_COLUMN: "pcol",
-            FACET: "facet"
+            FACET: "facet",
+
+            // used in viewer app:
+            ANNOTATION: "annotation",
+            CHANNEL: "channel",
+            Z_PLANE: "z-plane"
         });
 
         var logStackPaths = Object.freeze({
@@ -2432,10 +3165,19 @@
             ADD_PB_POPUP: "related-link-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",
-            RESULT_FAILED_SET: "result-failed-set"
+            RESULT_FAILED_SET: "result-failed-set",
+            RESULT_DISABLED_SET: "result-disabled-set",
+
+            // used in viewer app:
+            ANNOTATION_ENTITY: "annotation-entity",
+            ANNOTATION_SET: "annotation-set",
+            CHANNEL_SET: "channel-set",
+            Z_PLANE_ENTITY: "z-plane-entity",
+            Z_PLANE_SET: "z-plane-set"
         });
 
         var appModes = Object.freeze({
@@ -2509,12 +3251,16 @@
          * Returns the appropriate stack object that should be used.
          * If childStackElement passed, it will append it to the existing logStack of the app.
          * @param {Object} childStackElement
+         * @param {Object=} logStack if passed, will be used instead of the default value of the app.
          */
-        function getStackObject(childStackNode) {
-            if (childStackNode) {
-                return $rootScope.logStack.concat(childStackNode);
+        function getStackObject(childStackNode, logStack) {
+            if (!logStack) {
+                logStack = $rootScope.logStack;
             }
-            return $rootScope.logStack;
+            if (childStackNode) {
+                return logStack.concat(childStackNode);
+            }
+            return logStack;
         }
 
         /**
@@ -2532,14 +3278,14 @@
         /**
          * Creates a new stack node given the type, table, and extra information.
          * @param {String} type - one of the logStackTypes
-         * @param {ERMrest.Table} table - the table object of this node
+         * @param {ERMrest.Table=} table - the table object of this node
          * @param {Object=} extraInfo - if you want to attach more info to this node.
          */
         function getStackNode(type, table, extraInfo) {
-            var obj = {
-                type: type,
-                s_t: table.schema.name + ":" + table.name
-            };
+            var obj = {type: type};
+            if (table) {
+                obj.s_t = table.schema.name + ":" + table.name;
+            }
             if (typeof extraInfo === "object" && extraInfo !== null) {
                 for (var k in extraInfo) {
                     if (!extraInfo.hasOwnProperty(k)) continue;
@@ -2671,31 +3417,55 @@
             return defer.promise;
         }
 
-        /* Custom function to add styling based on browser type and operating system */
-        function addMacFirefoxClass(){
-          var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
-          var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
+        /**
+         * Detects the running enviornments and adss the following classes to chaise-body:
+         *  - chaise-mac: if it's running on macOS
+         *  - chaise-firefox: if it's running on Firefox
+         *  - chaise-iframe: if running in an iframe
+         */
+        function addBodyClasses(){
+            var osClass = (navigator.platform.indexOf("Mac") != -1 ? "chaise-mac" : undefined);
+            var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? "chaise-firefox" : undefined);
 
-          var bodyElement = document.querySelector(".chaise-body");
-          if (bodyElement){
-            if(osClass)
-              UiUtils.addClass(bodyElement, osClass);
-            if(browserClass)
-              UiUtils.addClass(bodyElement, browserClass);
-           }
+            var bodyElement = document.querySelector(".chaise-body");
+            if (!bodyElement) return;
+
+            if(osClass) {
+                UiUtils.addClass(bodyElement, osClass);
+            }
+            if(browserClass) {
+                UiUtils.addClass(bodyElement, browserClass);
+            }
+            if ($window.self !== $window.parent) {
+                UiUtils.addClass(bodyElement, "chaise-iframe");
+            }
         }
 
-        function addTitle() {
+        function addTitle(title) {
             var chaiseConfig = ConfigUtils.getConfigJSON();
+
+            if (typeof title !== "string" || title.length === 0) {
+                title = chaiseConfig.headTitle;
+            } else {
+                title += " | " + chaiseConfig.headTitle;
+            }
 
             var titleTag = document.head.getElementsByTagName('title')[0];
             if (titleTag) {
-                titleTag.innerHTML = chaiseConfig.headTitle;
+                titleTag.innerHTML = title;
             } else {
-                var title = document.createElement("title");
-                title.innerHTML = chaiseConfig.headTitle;
-                document.head.appendChild(title);
+                titleTag = document.createElement("title");
+                titleTag.innerHTML = title;
+                document.head.appendChild(titleTag);
             }
+        }
+
+        // <title> should already be created in <head> and set to default chaiseConfig.headTitle from config app before app loads
+        function updateHeadTitle(contextTitle) {
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+
+            var titleTag = document.head.getElementsByTagName('title')[0];
+            titleTag.innerHTML = (contextTitle ? contextTitle + ' | ' : "") + chaiseConfig.headTitle;
         }
 
         // sets the WID if it doesn't already exist
@@ -2796,6 +3566,15 @@
         }
 
         /**
+         * make sure links open in new tab
+         */
+        function openLinksInTab () {
+            addClickListener('a[href]', function (e, element) {
+                element.target = "_blank";
+            });
+        }
+
+        /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
          * @param {function} handler  the handler callback function.
@@ -2839,16 +3618,23 @@
 
         /**
          * Will return a promise that is resolved when the setup is done
+         *
+         * NOTE: should only be called by config.js (or equivalent configuration app)
          */
         function setupHead() {
-            addPolyfills();
-            addCanonicalTag();
-            addTitle();
-            setWindowName();
-            overrideDownloadClickBehavior();
-            overrideExternalLinkBehavior();
-            addMacFirefoxClass();
-            return addCustomCSS();
+            addPolyfills();                                 // needs to be set for navbar functionality (and other chaise functionality)
+            addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
+            addCanonicalTag();                              // controlled by chaise-config value to turn on/off
+            setWindowName();                                // will only update if not already set
+
+            var settings = ConfigUtils.getSettings();
+            if (settings.openLinksInTab) openLinksInTab();
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
+            if (settings.overrideHeadTitle) addTitle(settings.appTitle);
+
+
+            return addCustomCSS();                          // controlled by chaise-config value to attach
         }
 
         return {
@@ -2856,7 +3642,8 @@
             addCustomCSS: addCustomCSS,
             addTitle: addTitle,
             setWindowName: setWindowName,
-            setupHead: setupHead
+            setupHead: setupHead,
+            updateHeadTitle: updateHeadTitle
         };
     }]);
 })();

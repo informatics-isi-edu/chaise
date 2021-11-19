@@ -7,6 +7,11 @@ This document is a summary of code changes in Chaise. This is the vocabulary use
   - `[Fixed]`: bug fixes.
   - `[No changes]` means that Chaise hasn't been changed in the described duration.
 
+# 8/
+  - [Improved] Print layout for record page.
+  - [Improved] The UI for viewer app has some more improvements. Communication with OSD viewer has been made more robust.
+  - [Changed] Deprecated the following chaise-config properties: catalog, schema, layout, recordResource, facetPolicy, feedbackURL, helpURL, showBadgeCounts, tableThreshold, showAllAttributes, maxColumns, showUnfilteredResults, searchPageSize
+
 # 7/27/20
   - [Improved] The annotation feature of viewer app was improved to allow for further manipulation of the annotations.
 

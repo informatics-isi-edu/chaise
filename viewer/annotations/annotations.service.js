@@ -3,10 +3,82 @@
 
     angular.module('chaise.viewer')
 
-    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', 'viewerConstant', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q, viewerConstant) {
+    .factory('AnnotationsService', ['context', 'user', 'image', 'annotations', 'AlertsService', 'ERMrest', '$window', '$q', '$rootScope', 'logService', function(context, user, image, annotations, AlertsService, ERMrest, $window, $q, $rootScope, logService) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
         var table = null;
+
+
+        /**
+         * Given the action and item, log the client action
+         * if item is not passed, it will create the log based on annotation list
+         * @param {String} action - the actions string
+         * @param {Object=}
+         */
+        function logAnnotationClientAction(action, item, extraInfo) {
+            var commonLogInfo = null;
+            if ($rootScope.annotationEditReference) {
+                commonLogInfo = $rootScope.annotationEditReference.defaultLogInfo;
+            }
+            logService.logClientAction({
+                action: getAnnotationLogAction(action, item),
+                stack: getAnnotationLogStack(item, extraInfo)
+            }, commonLogInfo);
+        }
+
+        /**
+         * Get the log stack path of an annotation (or the whole annotation list)
+         * if item is not passed, we will return the log stack path string that can be used for the whole annotation panel
+         * @param {string}
+         * @param {Object=}
+         */
+        function getAnnotationLogStackPath(item) {
+            var stackPath = $rootScope.logStackPath;
+            if (item) {
+                stackPath = logService.getStackPath(stackPath, logService.logStackPaths.ANNOTATION_ENTITY);
+            } else {
+                stackPath = logService.getStackPath(stackPath, logService.logStackPaths.ANNOTATION_SET);
+            }
+            return stackPath;
+        }
+
+
+        /**
+         * Get the log action string of an annotation (or the whole annotation list)
+         * if item is not passed, we will return the action string that can be used for the whole annotation panel
+         * @param {string}
+         * @param {Object=}
+         */
+        function getAnnotationLogAction(actionPath, item) {
+            return logService.getActionString(actionPath, getAnnotationLogStackPath(item));
+        }
+
+        /**
+         * Get the log stack of an annotation (or the whole annotation list)
+         * if item is not passed, we will return the stack that can be used for the whole annotation panel
+         * @param {Object=} item any of the annotationModels object
+         * @param {Object=} extraInfo - if we want to log extra information
+         */
+        function getAnnotationLogStack(item, extraInfo) {
+            var stackNode;
+            if (item) {
+                stackNode = item.logStackNode;
+            } else {
+                var table, fileInfo;
+                if ($rootScope.annotationEditReference) {
+                    table = $rootScope.annotationEditReference.table;
+                } else {
+                    fileInfo = {"file": 1}
+                }
+                stackNode = logService.getStackNode(logService.logStackTypes.ANNOTATION, table, fileInfo);
+            }
+
+            var obj = logService.getStackObject(stackNode);
+            if (extraInfo) {
+                return logService.addExtraInfoToStack(obj, extraInfo);
+            }
+            return obj;
+        }
 
         // function drawAnnotation() {
         //     iframe.postMessage({messageType: 'drawAnnotation'}, origin);
@@ -59,8 +131,11 @@
                 return defer.reject("given item didn't have proper tuple"), defer.promise;
             }
 
-            // TODO proper log object
-            item.tuple.reference.delete().then(function () {
+            var logObj = {
+                action: getAnnotationLogAction(logService.logActions.DELETE, item),
+                stack: getAnnotationLogStack(item)
+            };
+            item.tuple.reference.delete(logObj).then(function () {
                 defer.resolve();
             }).catch(function (err) {
                 defer.reject(err);
@@ -159,12 +234,24 @@
         function saveAnnotationRecord(data){
             iframe.postMessage({messageType: 'saveAnnotationRecord', content: data}, origin);
         }
-        
+
         function loadAnnotations(data) {
             iframe.postMessage({messageType: 'loadAnnotations', content: data}, origin);
         }
 
+        function startAnnotationChange(data) {
+            iframe.postMessage({messageType: 'startAnnotationChange', content: data}, origin);
+        }
+
+        function discardAnnotationChange(data) {
+            iframe.postMessage({messageType: 'discardAnnotationChange', content: data}, origin);
+        }
+
         return {
+            logAnnotationClientAction: logAnnotationClientAction,
+            getAnnotationLogStackPath: getAnnotationLogStackPath,
+            getAnnotationLogAction: getAnnotationLogAction,
+            getAnnotationLogStack: getAnnotationLogStack,
             drawAnnotation: drawAnnotation,
             createAnnotation: createAnnotation,
             cancelNewAnnotation: cancelNewAnnotation,
@@ -182,7 +269,9 @@
             removeEntry : removeEntry,
             removeSVG : removeSVG,
             saveAnnotationRecord : saveAnnotationRecord,
-            loadAnnotations: loadAnnotations
+            loadAnnotations: loadAnnotations,
+            discardAnnotationChange: discardAnnotationChange,
+            startAnnotationChange: startAnnotationChange
         };
 
     }]);

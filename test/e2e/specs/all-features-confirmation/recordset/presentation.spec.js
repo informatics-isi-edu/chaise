@@ -30,6 +30,7 @@ var testParams = {
             { title: "Image Distinct Count", comment: "Image Distinct Count"},
             { title: "Min Image ID", comment: "Min Image ID"},
             { title: "summary of Image ID", comment: "Summary of Image ID"},
+            { title: "color_rgb_hex_column"}
         ],
         data: [
             {
@@ -50,7 +51,8 @@ var testParams = {
                 count_image_id: "1",
                 count_distinct_image_id: "1",
                 min_image_id: "3001",
-                max_image_id: "rating: 3.2000, max: 3001, count: 1, category: Resort"
+                max_image_id: "rating: 3.2000, max: 3001, count: 1, category: Resort",
+                color_rgb_hex_column: "#123456"
             },
             {
                 id: 2002,
@@ -70,7 +72,8 @@ var testParams = {
                 count_image_id: "4",
                 count_distinct_image_id: "4",
                 min_image_id: "3005",
-                max_image_id: "rating: 4.3000, max: 30007, count: 4, category: Hotel"
+                max_image_id: "rating: 4.3000, max: 30007, count: 4, category: Hotel",
+                color_rgb_hex_column: "#323456"
             },
             {
                 id: 2004,
@@ -90,7 +93,8 @@ var testParams = {
                 count_image_id: "3",
                 count_distinct_image_id: "3",
                 min_image_id: "3009",
-                max_image_id: "rating: 2.8000, max: 3011, count: 3, category: Motel"
+                max_image_id: "rating: 2.8000, max: 3011, count: 3, category: Motel",
+                color_rgb_hex_column: "#423456"
             },
             {
                 id: 4004,
@@ -110,7 +114,8 @@ var testParams = {
                 count_image_id: "0",
                 count_distinct_image_id: "0",
                 min_image_id: "",
-                max_image_id: ""
+                max_image_id: "",
+                color_rgb_hex_column: "#523456"
             }
         ],
         sortedData:[
@@ -235,10 +240,12 @@ var testParams = {
     system_columns: {
         table_name: "system-columns",
         compactConfig: ['RCB', 'RMT'],
-        detailedCofnig: true,
+        detailedConfig: true,
+        entryConfig: ['RCB', 'RMB', 'RMT'],
         compactColumnsSystemColumnsTable: ['id', 'text', 'int', 'RCB', 'RMT'],
         detailedColumns: ['RID', 'id', 'text', 'int', 'RCB', 'RMB', 'RCT', 'RMT'],
-        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'] // no int column because it's the fireogn key link (would be redundent)
+        compactColumnsPersonTable: ['id', 'text', 'RCB', 'RMT'], // no int column because it's the foreign key link (would be redundent)
+        entryColumns: ['id', 'text', 'int', 'RCB', 'RMB', 'RMT']
     }
 };
 
@@ -248,7 +255,7 @@ describe('View recordset,', function() {
         fileParams = testParams.file_tuple;
 
 
-    if (!process.env.TRAVIS) {
+    if (!process.env.CI) {
         describe("For recordset with columns with waitfor, ", function () {
             var activeListParams = testParams.activeList;
             var activeListData = activeListParams.data;
@@ -259,6 +266,10 @@ describe('View recordset,', function() {
 
                 chaisePage.recordsetPageReady();
                 chaisePage.waitForAggregates();
+            });
+
+            it ("should not show the total count if hide_row_count is true.", function () {
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nall "+ activeListData.length + "\nrecords", "hide_row_count not honored");
             });
 
             it ("should show correct table rows.", function (done) {
@@ -310,7 +321,7 @@ describe('View recordset,', function() {
 
         describe("Presentation ,", function() {
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 beforeAll(function() {
                     // delete files that may have been downloaded before
                     console.log("delete files");
@@ -326,6 +337,18 @@ describe('View recordset,', function() {
 
             it ('should have the correct tooltip.', function () {
                 expect(chaisePage.recordsetPage.getPageTitleTooltip()).toBe(accommodationParams.comment);
+            });
+
+            it ("should have the correct head title using the heuristics for recordset app", function (done) {
+                browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
+                    // <table-name> | chaiseConfig.headTitle
+                    expect(browser.getTitle()).toBe(accommodationParams.title + " | " + chaiseConfig.headTitle);
+
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
             });
 
             it('should display the permalink button & a tooltip on hovering over it', function () {
@@ -420,11 +443,11 @@ describe('View recordset,', function() {
                 });
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-                        var csvOption = chaisePage.recordsetPage.getExportOption("search results (csv)");
-                        expect(csvOption.getText()).toBe("search results (csv)");
+                        var csvOption = chaisePage.recordsetPage.getExportOption("Search results (CSV)");
+                        expect(csvOption.getText()).toBe("Search results (CSV)");
                         return csvOption.click();
                     }).then(function () {
                         browser.wait(function() {
@@ -721,7 +744,7 @@ describe('View recordset,', function() {
                 });
             });
 
-            if (!process.env.TRAVIS) {
+            if (!process.env.CI) {
                 afterAll(function() {
                     // delete files that have been downloaded during tests
                     console.log("delete files");
@@ -931,7 +954,7 @@ describe('View recordset,', function() {
             }).then(function() {
                 //wait for it to be on the first page again
                 browser.wait(EC.not(EC.elementToBeClickable(previousBtn)), browser.params.defaultTimeout);
-                
+
                 //make sure the button is clickable
                 browser.wait(EC.elementToBeClickable(pageLimitBtn), browser.params.defaultTimeout);
 
@@ -1066,7 +1089,8 @@ describe('View recordset,', function() {
             }).then(function(config) {
                 chaiseConfig = config;
                 expect(chaiseConfig.confirmDelete).toBeTruthy();
-                expect(chaiseConfig.defaultCatalog).toBe(1);
+                // use "deFAuLtCaTAlog" since we are grabbing the property directly from chaise config. The application will use the right value
+                expect(chaiseConfig.deFAuLtCaTAlog).toBe(1);
                 expect(chaiseConfig.defaultTables['1'].schema).toBe("isa");
                 expect(chaiseConfig.defaultTables['1'].table).toBe("dataset");
             }).catch(function(error) {
@@ -1076,7 +1100,7 @@ describe('View recordset,', function() {
             });
         });
 
-        if (!process.env.TRAVIS) {
+        if (!process.env.CI) {
             describe("For when no catalog or schema:table is specified,", function() {
                 var baseUrl;
 
@@ -1129,10 +1153,13 @@ describe('View recordset,', function() {
                     chaisePage.recordsetPageReady();
                 });
 
-                it('should load chaise-config.js with confirmDelete=true && defaults catalog and table set', function() {
+                it('should have values defined in config with odd cases', function() {
                     browser.executeScript('return chaiseConfig').then(function(config) {
-                        expect(config.SystemColumnsDisplayCompact).toEqual(systemColumnsParams.compactConfig);
+                        // testing the following based on case defined in chaise-config.js
+                        // the application will digest this properly and test that below by inspecting the UI
+                        expect(config.systemcolumnsdisplaycompact).toEqual(systemColumnsParams.compactConfig);
                         expect(config.SystemColumnsDisplayDetailed).toBeTruthy();
+                        expect(config.systemColumnsDisplayENTRY).toEqual(systemColumnsParams.entryConfig);
                     }).catch(function(error) {
                         console.log('ERROR:', error);
                         // Fail the test
@@ -1140,7 +1167,7 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("with SystemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
+                it("with systemColumnsDisplayCompact: ['RCB', 'RMT'], should have proper columns.", function () {
                     chaisePage.recordsetPage.getColumnNames().then(function(columns) {
                         expect(columns.length).toBe(systemColumnsParams.compactColumnsSystemColumnsTable.length);
                         for (var i = 0; i < columns.length; i++) {
@@ -1149,7 +1176,7 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("SystemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
                     chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
                         expect(buttons.length).toBe(1);
                         return buttons[0].click();
@@ -1171,11 +1198,28 @@ describe('View recordset,', function() {
                     });
                 });
 
-                it("on record page, SystemColumnsDisplayCompact should also be honored for related tables.", function () {
+                it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
                     chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
                         expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
                         for (var i = 0; i < columns.length; i++) {
                             expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
+                    });
+                });
+
+                it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
+                    // click create
+                    chaisePage.recordPage.getCreateRecordButton().click().then(function () {
+                        // test columns length
+
+                        chaisePage.recordeditPageReady();
+                        return chaisePage.recordEditPage.getAllColumnCaptions();
+                    }).then(function(pageColumns) {
+                        expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
+
+                        // test each column
+                        for (var i=0; i<pageColumns.length; i++) {
+                            expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
                         }
                     });
                 });
