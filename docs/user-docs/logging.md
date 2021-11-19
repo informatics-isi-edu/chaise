@@ -105,7 +105,7 @@ Depending on the request, we might log extra attributes that we are gong to list
   - `navbar/recordset`
   - `navbar/recordedit`
 
-  If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
+  If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well. A full list of `PCID` values (including applications that are not chaise) can be [found here](https://docs.google.com/spreadsheets/d/1zoNTG0Vx4cedIKsHvGN1mZBTeFmDMWyQ1rfKR3ksSbU).
 
 - `paction`: The action in the parent page that fired the current request. Acceptable values are:
   - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
