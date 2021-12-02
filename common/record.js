@@ -25,6 +25,7 @@
                     // functions
                     addRelatedRecord: '&',
                     canCreateRelated: '&',
+                    canCreateRelatedDisabled: '&',
                     canEditRelated: '&',
                     toggleInlineDisplayMode: '&',
                     toRecordSet: '&',
@@ -84,6 +85,7 @@
                     toRecordset: '&', // redirects the current page to recordset
                     // booleans
                     canCreate: '=',
+                    canCreateDisabled: '=',
                     canEdit: '=',
                     isInline: "=",
                     isTableDisplay: '=', // is the table in table display mode or other custom mode ('markdown' display)

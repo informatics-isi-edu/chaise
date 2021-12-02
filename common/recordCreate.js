@@ -333,7 +333,17 @@
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
 
-            params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
+            var andFilters = [];
+            // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+            domainRef.derivedAssociationReference._secondFKR.key.colset.columns.forEach(function (col) {
+                andFilters.push({
+                    "source": col.name,
+                    "hidden": true,
+                    "not_null": true
+                });
+            });
+
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelect;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;

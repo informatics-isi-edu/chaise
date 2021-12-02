@@ -266,6 +266,30 @@
             return ref.canCreate;
         };
 
+        vm.canCreateRelatedDisabled = function(relatedRef) {
+            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
+                return false;
+            }
+
+            // we are not supporting disable in this case
+            // NOTE: probably won't be reached since the button won't even be shown
+            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
+                return false;
+            }
+
+            var fkr = relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference.origFKR : relatedRef.origFKR
+            // some checks for whether at least one element in the array passes the test implemented by the provided function
+            // if one column test passes (key data is `null` or `undefined`), the key info is invalid
+            var invalidKeyInfo = fkr.key.colset.columns.some(function (col) {
+                // check if necessary key material is set/valid
+                // checks for equal to null or undefined
+                return $rootScope.tuple.data[col.name] == null
+            });
+
+            // return true to disable button
+            return invalidKeyInfo;
+        }
+
         // Send user to RecordEdit to create a new row in this related table
         function onSuccess (tableModel){
             return function () {

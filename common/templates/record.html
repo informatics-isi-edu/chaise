@@ -15,7 +15,7 @@
             <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
                 <record-action-bar id="actionbar-{{$index}}" is-inline="true" is-table-display="col.tableModel.isTableDisplay"
                     toggle-display-mode='toggleInlineDisplayMode({dataModel:col.tableModel})' can-edit="canEditRelated({ref:col.tableModel.reference}) && !showError($index)"
-                    can-create="canCreateRelated({ref:col.tableModel.reference})" show-toggle-display-btn="allowInlineTableMarkdown($index)"
+                    can-create="canCreateRelated({ref:col.tableModel.reference})" can-create-disabled="canCreateRelatedDisabled({ref:col.tableModel.reference})" show-toggle-display-btn="allowInlineTableMarkdown($index)"
                     add-related-record="addRelatedRecord({tableModel:col.tableModel})" to-recordset="toRecordSet({ref:col.tableModel.reference})"
                     displayname="col.column.displayname" base-table-name="col.baseTableName">
                 </record-action-bar>
