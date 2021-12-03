@@ -30,6 +30,7 @@ jobs:
       - name: Setup the system
         run: |
           node --version
+          npm --version
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
@@ -105,8 +106,7 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
-          sudo npm install
-          sudo npm list protractor
+          sudo make deps
           sudo make install
       - name: Add tests users
         run: |
