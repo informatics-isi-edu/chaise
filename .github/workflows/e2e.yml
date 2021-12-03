@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - 'master'
+      - 'debug-ci'
   pull_request:
     branches:
       - 'master'
@@ -28,6 +29,7 @@ jobs:
           path: chaise
       - name: Setup the system
         run: |
+          node --version
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
@@ -104,6 +106,7 @@ jobs:
           sudo mkdir -p /var/www/html/chaise
           cd chaise
           sudo npm install
+          sudo npm list protractor
           sudo make install
       - name: Add tests users
         run: |
