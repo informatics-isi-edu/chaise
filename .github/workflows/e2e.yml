@@ -28,8 +28,12 @@ jobs:
           path: chaise
       - name: Setup the system
         run: |
+          echo "node version:"
           node --version
+          echo "npm version:"
           npm --version
+          echo "env variables:"
+          printenv
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
