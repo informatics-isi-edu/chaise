@@ -85,6 +85,7 @@ exports.parameterize = function(config, configParams) {
 
                 defer.resolve(body);
             } else {
+                console.log(error)
                 defer.reject('Unable to retreive userinfo for ' + authCookieEnvName);
             }
         });

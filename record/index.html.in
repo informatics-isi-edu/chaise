@@ -145,7 +145,8 @@
                                             can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
                                             is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
                                             add-related-record="ctrl.addRelatedRecord(rtm.tableModel)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
-                                            to-recordset="ctrl.toRecordSet(rtm.tableModel.reference)" base-table-name="rtm.baseTableName" displayname="rtm.displayname">
+                                            to-recordset="ctrl.toRecordSet(rtm.tableModel.reference)" base-table-name="rtm.baseTableName" displayname="rtm.displayname"
+                                            keyset="rtm.tableModel.reference.derivedAssociationReference ? rtm.tableModel.reference.derivedAssociationReference.origFKR.key.colset.columns : rtm.tableModel.reference.origFKR.key.colset.columns">
                                         </record-action-bar>
                                     </uib-accordion-heading>
 

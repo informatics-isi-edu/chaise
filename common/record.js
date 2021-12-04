@@ -92,7 +92,9 @@
                     showToggleDisplayBtn: "=",
                     // strings
                     baseTableName: '=',
-                    displayname: '='
+                    displayname: '=',
+                    // set of columns that make up the key info (for tooltip purposes)
+                    keyset: '='
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
                 controller: "RecordActionController",
@@ -111,6 +113,16 @@
                 createButton: "Add more " + displayname + " related to this " + tablename + ".",
                 exploreButton: "Explore more " + displayname + " records related to this " + tablename + "."
             };
+
+            if ($scope.canCreateDisabled) {
+                var keysetString = "";
+                $scope.keyset.forEach(function (col, idx) {
+                    keysetString += col.name;
+                    if (idx+1 != $scope.keyset.length) keysetString += ", "
+                });
+
+                $scope.tooltip.createButton = "Adding to " + displayname + " is disabled until " + keysetString + " in " + tablename + " is set.";
+            }
 
             if ($scope.canEdit) {
                 $scope.tooltip.tableModeButton = "Display edit controls for " + displayname + " related to this " + tablename + ".";
