@@ -141,6 +141,7 @@ exports.parameterize = function(config, configParams) {
 
         console.log("before launch");
         console.log(process.env.CI);
+        console.log(process.env);
 
         if (process.env.CI) {
             console.log("getting the hostname from the CI environment");
