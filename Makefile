@@ -112,7 +112,7 @@ define make_test
 	exit $$rc;
 endef
 
-test-%: deps
+test-%: testdeps
 	$(call make_test, $($*), "0")
 
 #### Sequential make commands - these commands will run tests in sequential order
@@ -612,24 +612,37 @@ define bundle_js_files
 	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
 endef
 
-# Rule to ensure Node bin scripts are present
-$(BIN): $(MODULES)
-	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
-
-# Rule to install Node modules locally
-$(MODULES): package.json
-	npm install
-
 # Rule to create the package.
 # - we have to make sure the npm dependencies required for build are installed.
 # - we have to clean all the dist files because we need to generate new ones.
-$(DIST): print_variables npm_install_prod_modules $(SASS) $(MIN) $(HTML) gitversion
+$(DIST): print_variables deps $(SASS) $(MIN) $(HTML) gitversion
 
 # build version will change everytime make all or install is called
 $(BUILD_VERSION):
 
+# make sure the latest webdriver is installed
+.PHONY: update_webdriver
+update_webdriver:
+	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
+
+# install packages needed for production
+.PHONY: npm_install_prod_modules
+npm_install_prod_modules:
+	npm install --production
+
+# install packages needed for production and development (including testing)
+.PHONY: npm_install_all_modules
+npm_install_all_modules:
+	npm install
+
+# for test cases we have to make sure we're installing dev dependencies and
+# webdriver is always updated to the latest version
+.PHONY: testdeps
+testdeps: npm_install_all_modules update_webdriver
+
+# install all the dependencies
 .PHONY: deps
-deps: $(BIN)
+deps: npm_install_prod_modules
 
 .PHONY: updeps
 updeps:
@@ -670,12 +683,6 @@ install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
 gitversion:
 	$(info - creating version.txt)
 	@sh ./git_version_info.sh
-
-# we want to make sure npm install is done for production
-# if we don't run this, npm install without any flags will be called from
-# make install which will install all the dependencies of npm.
-npm_install_prod_modules:
-	npm install --production
 
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
