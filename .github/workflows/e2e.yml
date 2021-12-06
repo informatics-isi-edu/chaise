@@ -139,6 +139,8 @@ jobs:
         continue-on-error: true
         run: |
           cd chaise
+          echo "env variables:"
+          printenv
           sudo make testfullfeaturesconfirmation
       - name: Run default config test spec
         id: test-default-config
