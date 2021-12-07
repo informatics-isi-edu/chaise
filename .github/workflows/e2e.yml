@@ -109,7 +109,7 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
-          sudo make install
+          make install
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1
@@ -147,19 +147,19 @@ jobs:
         continue-on-error: true
         run: |
           cd chaise
-          sudo make testdefaultconfig
+          make testdefaultconfig
       - name: Run full features test spec
         id: test-full-features
         continue-on-error: true
         run: |
           cd chaise
-          sudo make testfullfeatures
+          make testfullfeatures
       - name: Run delete prohibited test spec
         id: test-delete-prohibited
         continue-on-error: true
         run: |
           cd chaise
-          sudo make testdeleteprohibited
+          make testdeleteprohibited
       - name: Check on full features confirmation test spec
         if: always() && steps.test-full-features-confirmation.outcome != 'success'
         run: exit 1
