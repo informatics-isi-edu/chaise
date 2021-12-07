@@ -112,7 +112,7 @@ define make_test
 	exit $$rc;
 endef
 
-test-%: testdeps
+test-%: update-webdriver
 	$(call make_test, $($*), "0")
 
 #### Sequential make commands - these commands will run tests in sequential order
@@ -621,28 +621,28 @@ $(DIST): print_variables deps $(SASS) $(MIN) $(HTML) gitversion
 $(BUILD_VERSION):
 
 # make sure the latest webdriver is installed
-.PHONY: update_webdriver
-update_webdriver:
+.PHONY: update-webdriver
+update-webdriver:
 	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
 
 # install packages needed for production
-.PHONY: npm_install_prod_modules
-npm_install_prod_modules:
+.PHONY: npm-install-prod-modules
+npm-install-prod-modules:
 	npm install --production
 
 # install packages needed for production and development (including testing)
-.PHONY: npm_install_all_modules
-npm_install_all_modules:
+.PHONY: npm-install-all-modules
+npm-install-all-modules:
 	npm install
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
-.PHONY: testdeps
-testdeps: npm_install_all_modules update_webdriver
+.PHONY: install-test-deps
+install-test-deps: npm-install-all-modules update-webdriver
 
 # install all the dependencies
 .PHONY: deps
-deps: npm_install_prod_modules
+deps: npm-install-prod-modules
 
 .PHONY: updeps
 updeps:

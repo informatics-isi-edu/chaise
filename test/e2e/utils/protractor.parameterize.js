@@ -140,8 +140,6 @@ exports.parameterize = function(config, configParams) {
         var defer = Q.defer();
 
         console.log("before launch");
-        console.log(process.env.CI);
-        console.log(process.env);
 
         if (process.env.CI) {
             console.log("getting the hostname from the CI environment");
