@@ -112,7 +112,7 @@ define make_test
 	exit $$rc;
 endef
 
-test-%: update-webdriver
+test-%:
 	$(call make_test, $($*), "0")
 
 #### Sequential make commands - these commands will run tests in sequential order
