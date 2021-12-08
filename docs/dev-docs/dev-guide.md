@@ -123,9 +123,7 @@ And we're using the following CSS rule
 
 Eventhough by using `fas` we were meant to use the solid version of the font,
 the CSS rule will make sure we're using the regular version instead. And in this
-case, the regular version of `fa-ellipsis-v` is not available in pro.
-
-So,
+case, the regular version of `fa-ellipsis-v` is not available in free version of font-awesome that we're using. So,
 - We have to be careful where we're using font-awesome and avoid any manual changing
 of `font-family` or `font-weight` and let font-awesome handle it for us.
 - While changing font-awesome versions we have to make sure the fonts that we're using
