@@ -109,8 +109,8 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
-          sudo make install
-          sudo make install-test-deps
+          sudo make deps-test
+          sudo make install-wo-deps
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1
