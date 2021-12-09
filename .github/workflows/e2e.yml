@@ -28,6 +28,12 @@ jobs:
           path: chaise
       - name: Setup the system
         run: |
+          echo "node version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          echo "env variables:"
+          printenv
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
@@ -104,8 +110,8 @@ jobs:
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
-          sudo npm install
-          sudo make install
+          sudo make deps-test
+          sudo make install-wo-deps
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1
