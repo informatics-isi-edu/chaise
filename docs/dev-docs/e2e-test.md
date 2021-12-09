@@ -51,51 +51,60 @@ You can get your cookie by querying the database, or using the following simple 
 
 ## How To Run Tests
 ### Prerequistes
-- After setting up the environment variables, make sure that the `https://dev.isrd.isi.edu/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
+1. After setting up the environment variables, make sure that the `https://dev.isrd.isi.edu/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
 
-- Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository. (This will upload your local code to the remote server)
-```sh
-$ make install
-```
+2. Make sure all the dependencies are installed by running the following command:
 
-- Make sure all the npm dependencies are installed by running `npm install`.
+    ```sh
+    $ make deps-test
+    ```
 
-```sh
-$ npm install
-```
+    This will install all the npm dependencies that are needed and will also make sure the Selenium's WebDriver that protractor uses is updated.
+
+    - If you just want to update the WebDriver you can do `make update-webdriver`.
+    - If the version of Chrome that is installed on your machine is different from the ChromeDriver that Selenium uses, it will throw an error. So make sure both versions are always updated and compatible.
+
+
+3. Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository. (This will upload your local code to the remote server)
+    ```sh
+    $ make install-wo-deps
+    ```
+
+    - As the name suggests this will not install dependencies. That's why you need to install all the dependencies in step 2. The following are other available targets related to install:
+      - `install`: Will install production dependencies before installing (not advised for testing purposes and should be used for production)
+      - `install-w-config`: The same as `install` and will also copy the `chaise-config.js` file to the remote location.
+      - `install-wo-deps-w-config`: The same as `install-w-deps` and will also copy the `chaise-config.js` file to the remote location.
+
 
 ### Test cases
 - To execute all test cases in sequential order, set the following:
-```sh
-export SHARDING=false
-```
+  ```sh
+  export SHARDING=false
+  ```
 
-and then run the following command:
+  and then run the following command:
 
-```sh
-$ make test
-```
-
-This will automatically update the *selenium* web-driver that protractor is using.
+  ```sh
+  $ make test
+  ```
 
 - To execute all the test cases in parallel, set the following:
 
-```sh
-export SHARDING=true
-```
+  ```sh
+  export SHARDING=true
+  ```
 
-and then run the following command:
+  and then run the following command:
 
-```sh
-$ make testparallel
-```
+  ```sh
+  $ make testparallel
+  ```
 
 - To run a specific test spec
 
     ```sh
     $ node_modules/.bin/protractor test/e2e/specs/search/data-independent/protractor.conf.js
     ```
-> Calling protractor directly won't install npm modules and will not update the selenium web-driver. So you have to do those steps manually.
 
 ## File structure
 
@@ -104,7 +113,7 @@ chaise/
 `-- test/
     |-- unit
     `-- e2e
-	|-- data_setup                       
+	|-- data_setup
 	|   |-- config                       # test configuration files
         |   |   |-- record
         |   |   |   |-- *.dev.json  # lists the schema config files (*.config.json)
@@ -120,10 +129,10 @@ chaise/
 	|	`-- SCHEMA_NAME.json         # Schema Definition json
 	|-- specs
 	|   `-- all-features
-	|       |-- record           
-	|       |   |-- TEST_NAME1.spec.js   
+	|       |-- record
+	|       |   |-- TEST_NAME1.spec.js
 	|       |   `-- TEST_NAME1.conf.js   # protractor configuration for similarly named single test
-	|       |-- recordedit         
+	|       |-- recordedit
 	|    	|                            # They introspect the existing schema to run the cases*/
 	|       `-- protractor.conf.js   # configuration for the parallel tests
 	`-- utils
