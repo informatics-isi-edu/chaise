@@ -73,6 +73,7 @@
   "json_col_with_markdown": "Processing",
   "date_col": "12/9/2008",
   "luxurious": false,
+  "nullable_assoc_key2": "value",
   "fk_col_outbound1": "o1_2",
   "color_rgb_hex_column": "#423456"
 },

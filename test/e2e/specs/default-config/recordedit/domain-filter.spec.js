@@ -57,7 +57,8 @@ describe("Domain filter pattern support,", function() {
         var rows, modalTitle,
             multiColName = "multi_constrained_col",
             colWFkeys = "col_w_fkeys",
-            colWFkeysDefault = "col_w_fkeys_default";
+            colWFkeysDefault = "col_w_fkeys_default",
+            colWNullFkeys = "col_w_null_fkey_key";
 
         describe("In create mode, ", function() {
 
@@ -206,6 +207,11 @@ describe("Domain filter pattern support,", function() {
                     });
                 });
 
+            });
+
+            it("for a foreign key popup where the associated column is nullable, only rows with non null keys should show in modal selector", function (done) {
+                // There are 5 rows in the table but the term column is null for 3 of the 5 rows
+                testModalCount(colWNullFkeys, 2, done);
             });
 
         });

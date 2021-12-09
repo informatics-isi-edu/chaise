@@ -333,7 +333,17 @@
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
 
-            params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
+            var andFilters = [];
+            // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+            domainRef.derivedAssociationReference.associationToRelatedFKR.key.colset.columns.forEach(function (col) {
+                andFilters.push({
+                    "source": col.name,
+                    "hidden": true,
+                    "not_null": true
+                });
+            });
+
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelect;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
@@ -401,10 +411,10 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
                 // we assume that the data for the main table has been populated before
-                var mapping = derivedref._secondFKR.mapping;
+                var mapping = derivedref.associationToRelatedFKR.mapping;
 
                 for (i = 0; i < tuples.length; i++) {
-                    derivedref._secondFKR.key.colset.columns.forEach(function(col) {
+                    derivedref.associationToRelatedFKR.key.colset.columns.forEach(function(col) {
                         if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
                             var obj = {};
                             angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
