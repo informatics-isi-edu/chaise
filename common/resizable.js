@@ -71,7 +71,7 @@
                         dir = scope.rDirections || ['right'],
                         vx = scope.rCenteredX ? 2 : 1, // if centered double velocity
                         vy = scope.rCenteredY ? 2 : 1, // if centered double velocity
-                        inner = scope.rGrabber ? scope.rGrabber : '<span class="fas fa-ellipsis-v"></span>',
+                        inner = scope.rGrabber ? scope.rGrabber : '<span class="fas fa-ellipsis-v" title="Resize"></span>',
                         start,
                         dragDir,
                         axis,
