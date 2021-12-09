@@ -18,7 +18,7 @@
                     can-create="canCreateRelated({ref:col.tableModel.reference})" can-create-disabled="canCreateRelatedDisabled({ref:col.tableModel.reference})" show-toggle-display-btn="allowInlineTableMarkdown($index)"
                     add-related-record="addRelatedRecord({tableModel:col.tableModel})" to-recordset="toRecordSet({ref:col.tableModel.reference})"
                     displayname="col.column.displayname" base-table-name="col.baseTableName"
-                    keyset="col.tableModel.reference.derivedAssociationReference ? col.tableModel.reference.derivedAssociationReference.origFKR.key.colset.columns : col.tableModel.reference.origFKR.key.colset.columns">
+                    keyset="col.tableModel.reference.origFKR.key.colset.columns">
                 </record-action-bar>
                 <div ng-hide="showError($index) || showLoader($index)" ng-switch="!col.tableModel.isTableDisplay && allowInlineTableMarkdown($index)" ng-class="{'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}">
                     <div ng-if="col.column.commentDisplay == 'inline' && col.column.comment" class="inline-tooltip">{{col.column.comment}}</div>
