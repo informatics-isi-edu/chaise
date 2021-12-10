@@ -451,10 +451,10 @@
             params.showFaceting = true;
             params.facetPanelOpen = false;
             //NOTE assumption is that this function is only called for unlinking pure and binary association
-            params.logObject = {
-                action: logActions.preUnlinkAssociation,
-                referrer: $rootScope.reference.defaultLogInfo
-            };
+            // params.logObject = {
+            //     action: logActions.preUnlinkAssociation,
+            //     referrer: $rootScope.reference.defaultLogInfo
+            // };
 
             modalUtils.showModal({
                 animation: false,

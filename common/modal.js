@@ -306,7 +306,7 @@
      *  - selectMode {String} - the select mode the modal uses
      */
     .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'logService', 'modalBox', 'params', 'recordCreate', 'recordsetDisplayModes', 'Session', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, logActions, modalBox, params, recordCreate, recordsetDisplayModes, Session, $rootScope, $timeout, $uibModalInstance) {
+        function SearchPopupController(ConfigUtils, DataUtils, logService, modalBox, params, recordCreate, recordsetDisplayModes, Session, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         // rowOnLoad is used to determine if the submit button should be disabled
@@ -329,6 +329,7 @@
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
 
+        console.log(params.displayMode);
         if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
             vm.submitTooltip = "Disconnect the selected rows from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
@@ -425,70 +426,70 @@
             return {rows: Array.isArray(vm.tableModel.selectedRows) ? vm.tableModel.selectedRows : []};
         }
 
-        function createSelectedRows() {
-            var tuples = (Array.isArray(vm.tableModel.selectedRows) ? vm.tableModel.selectedRows : []);
-            // if no rows, nothing to create
-            if (tuples.length < 1) $uibModalInstance.dismiss("cancel");
+        // function createSelectedRows() {
+        //     var tuples = (Array.isArray(vm.tableModel.selectedRows) ? vm.tableModel.selectedRows : []);
+        //     // if no rows, nothing to create
+        //     if (tuples.length < 1) $uibModalInstance.dismiss("cancel");
+        //
+        //     // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+        //     // set data in view model (model.rows) and submission model (model.submissionRows)
+        //     // we assume that the data for the main table has been populated before
+        //     var mapping = params.derivedref.associationToRelatedFKR.mapping;
+        //     var GV_recordEditModel = params.GV_recordEditModel;
+        //
+        //     for (i = 0; i < tuples.length; i++) {
+        //         params.derivedref.associationToRelatedFKR.key.colset.columns.forEach(function(col) {
+        //             if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
+        //                 var obj = {};
+        //                 angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
+        //                 GV_recordEditModel.submissionRows.push(obj);
+        //             }
+        //             GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
+        //         });
+        //
+        //     }
+        //
+        //     var logObject = {
+        //         action: logActions.createAssociation,
+        //         referrer: params.parentReference.defaultLogInfo
+        //     };
+        //
+        //     var rsTuples = [params.parentTuple];
+        //     recordCreate.addRecords(params.viewModel.editMode, params.derivedref, [], true, params.parentReference, rsTuples, params.queryParams, params.viewModel, params.viewModel.onSuccess, logObject, $uibModalInstance.close);
+        // }
 
-            // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
-            // set data in view model (model.rows) and submission model (model.submissionRows)
-            // we assume that the data for the main table has been populated before
-            var mapping = params.derivedref._secondFKR.mapping;
-            var GV_recordEditModel = params.GV_recordEditModel;
-
-            for (i = 0; i < tuples.length; i++) {
-                params.derivedref._secondFKR.key.colset.columns.forEach(function(col) {
-                    if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
-                        var obj = {};
-                        angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
-                        GV_recordEditModel.submissionRows.push(obj);
-                    }
-                    GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
-                });
-
-            }
-
-            var logObject = {
-                action: logActions.createAssociation,
-                referrer: params.parentReference.defaultLogInfo
-            };
-
-            var rsTuples = [params.parentTuple];
-            recordCreate.addRecords(params.viewModel.editMode, params.derivedref, [], true, params.parentReference, rsTuples, params.queryParams, params.viewModel, params.viewModel.onSuccess, logObject, $uibModalInstance.close);
-        }
-
-        function deleteSelectedRows() {
-            // tuples returned are for leaf table, need to get tuples from assocation table instead
-            var tuples = (Array.isArray(vm.tableModel.selectedRows) ? vm.tableModel.selectedRows : []);
-            // if no rows, nothing to delete
-            if (tuples.length < 1) $uibModalInstance.dismiss("cancel");
-
-            var logObject = {
-                // TODO: what options to add?
-            };
-            $rootScope.showSpinner = true;
-            var deleteReferences = tuples[0].reference.getBatchAssociationRef(tuples);
-
-            var i = 0;
-            function recursiveDelete(reference) {
-                reference.delete(logObject).then(function () {
-                    if (i < deleteReferences.length-1) {
-                        i++;
-                        recursiveDelete(deleteReferences[i])
-                    } else {
-                        $rootScope.showSpinner = false;
-                        // modal close needs to be issued in callback because of asynchronous delete call
-                        $uibModalInstance.close();
-                    }
-                }, function () {
-                    // TODO: alert something failed?
-                    // keep track of what succeeds?
-                }).catch(function () {
-                    // TODO: alert something failed?
-                });
-            }
-            recursiveDelete(deleteReferences[i]);
-        }
+        // function deleteSelectedRows() {
+        //     // tuples returned are for leaf table, need to get tuples from assocation table instead
+        //     var tuples = (Array.isArray(vm.tableModel.selectedRows) ? vm.tableModel.selectedRows : []);
+        //     // if no rows, nothing to delete
+        //     if (tuples.length < 1) $uibModalInstance.dismiss("cancel");
+        //
+        //     var logObject = {
+        //         // TODO: what options to add?
+        //     };
+        //     $rootScope.showSpinner = true;
+        //     var deleteReferences = tuples[0].reference.getBatchAssociationRef(tuples);
+        //
+        //     var i = 0;
+        //     function recursiveDelete(reference) {
+        //         reference.delete(logObject).then(function () {
+        //             if (i < deleteReferences.length-1) {
+        //                 i++;
+        //                 recursiveDelete(deleteReferences[i])
+        //             } else {
+        //                 $rootScope.showSpinner = false;
+        //                 // modal close needs to be issued in callback because of asynchronous delete call
+        //                 $uibModalInstance.close();
+        //             }
+        //         }, function () {
+        //             // TODO: alert something failed?
+        //             // keep track of what succeeds?
+        //         }).catch(function () {
+        //             // TODO: alert something failed?
+        //         });
+        //     }
+        //     recursiveDelete(deleteReferences[i]);
+        // }
 
         /**
          * Will call the close modal with the appropriate results.
@@ -496,14 +497,15 @@
          */
         function submitMultiSelection() {
             // do creation/deletion here before closing the modal
-
             // TODO:
-            // if (vm.params.submitBeforeClose) {
-            //    vm.params.submitBeforeClose(getMultiSelectionResult());
-            if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
-                createSelectedRows();
-            } else if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
-                deleteSelectedRows();
+            // if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
+            //     createSelectedRows();
+            // } else if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
+            //     deleteSelectedRows();
+
+            // TODO: remove submitBeforeClose if it's only used for add p&b
+            if (vm.params.submitBeforeClose) {
+               vm.params.submitBeforeClose(getMultiSelectionResult());
             } else {
                 $uibModalInstance.close(getMultiSelectionResult());
             }

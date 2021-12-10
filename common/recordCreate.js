@@ -149,7 +149,7 @@
          * @param  {object} onSuccessFunction   callback
          * @param  {object} logObj           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObject, closeModal) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj, closeModal) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
 
@@ -261,11 +261,15 @@
                         // comparing data from the old data set for the tuple with the updated data set from the UI
                     }
 
-                    if (isModalUpdate) {
-                        // case only for p&b association update
-                        // modal close needs to be issued in callback because of asynchronous delete call
-                        // onSuccessFunction is called in the callback after closing the modal
-                        closeModal();
+
+
+                    // if (isModalUpdate) {
+                    //     // case only for p&b association update
+                    //     // modal close needs to be issued in callback because of asynchronous delete call
+                    //     // onSuccessFunction is called in the callback after closing the modal
+                    //     closeModal();
+                    if (!isUpdate) {
+                       createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     } else {
                         rsReference.update(rsTuples, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     }
@@ -335,13 +339,21 @@
             params.parentTuple = rsTuples[rowIndex];
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
+            // params.parentDisplayMode = dcctx.cid; // should be "record"
 
             params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
+            // params.derivedref = derivedref;
+            // params.GV_recordEditModel = GV_recordEditModel;
+            // params.viewModel = viewModel;
+            // params.queryParams = rsQueryParams;
+            // // should only be the case with adding row(s) to an association table
+            // params.referenceWDisplayname = domainRef;
+            // params.reference.session = rsSession;
+            // params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
             params.facetPanelOpen = false;
-            //NOTE assumption is that this function is only is called for adding pure and binary association
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackNode(
@@ -395,48 +407,43 @@
                 return defer.promise;
             };
 
-            // assumption is that this function is only called for p&b
-            params.parentTuple = rsTuples[rowIndex];
-            params.parentReference = rsReference;
-            params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
-            params.parentDisplayMode = dcctx.cid; // should be "record"
+            params.submitBeforeClose = function dataSelected(res) {
+                //TODO this is written only for modal update (multi-select), isModalUpdate is unnecessary
 
-            params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
-            params.derivedref = derivedref;
-            params.GV_recordEditModel = GV_recordEditModel;
-            params.viewModel = viewModel;
-            params.queryParams = rsQueryParams;
-            // should only be the case with adding row(s) to an association table
-            params.referenceWDisplayname = domainRef;
-            params.reference.session = rsSession;
-            params.context = "compact/select";
-            params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
-            params.selectedRows = [];
-            params.showFaceting = true;
-            params.facetPanelOpen = false;
-            //NOTE assumption is that this function is only is called for adding pure and binary association
-            params.logObject = {
-                action: logActions.preCreateAssociation,
-                referrer: rsReference.defaultLogInfo
-            };
+                if (!res || !res.rows) return;
+                var tuples = res.rows;
 
-            modalUtils.showModal({
-                animation: false,
-                controller: "SearchPopupController",
-                windowClass: "search-popup add-pure-and-binary-popup",
-                controllerAs: "ctrl",
-                resolve: {
-                    params: params
-                },
-                size: modalUtils.getSearchPopupSize(params),
-                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
-            }, function dataSelected() {
-                viewModel.onSuccess();
-            }, function () {
-                var pbCancelHeader = {
-                    action: logActions.recordPBCancel
+                // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
+                // set data in view model (model.rows) and submission model (model.submissionRows)
+                // we assume that the data for the main table has been populated before
+                var mapping = derivedref.associationToRelatedFKR.mapping;
+
+                for (i = 0; i < tuples.length; i++) {
+                    derivedref.associationToRelatedFKR.key.colset.columns.forEach(function(col) {
+                        if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
+                            var obj = {};
+                            angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
+                            GV_recordEditModel.submissionRows.push(obj);
+                        }
+                        GV_recordEditModel.submissionRows[i][mapping.getFromColumn(col).name] = tuples[i].data[col.name];
+                    });
+
+                }
+
+                // NOTE this if case is unnecessary, this is always modal update
+                if (isModalUpdate) {
+                    var logObj = {
+                        action: logService.getActionString(logService.logActions.LINK, logStackPath),
+                        stack: logStack
+                    };
+                    addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, null, logObj);
                 }
             }
+
+            // params.logObject = {
+            //     action: logActions.preCreateAssociation,
+            //     referrer: rsReference.defaultLogInfo
+            // };
 
             pbModalInstance = modalUtils.showModal({
                 animation: false,
@@ -451,6 +458,9 @@
             }, function (res) {
                 viewModel.onSuccess();
             }, function () {
+                // var pbCancelHeader = {
+                //     action: logActions.recordPBCancel
+                // }
                 viewModel.onModalClose();
             }, false);
         }
