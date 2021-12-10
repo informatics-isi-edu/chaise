@@ -394,6 +394,71 @@ describe ("Viewing exisiting record with related entities, ", function () {
     describe("for a related entity with wait_for aggregate and markdown_pattern", function () {
         recordHelpers.testRelatedTable(related_w_agg_waitfor, pageReadyCondition);
     });
+
+    describe("for a pure and binary association with a null value for the key on main", function () {
+        var displayname = "association_table_null_keys",
+            tablename = "Accommodations",
+            columnname = "nullable_assoc_key",
+            addBtn;
+
+        beforeAll(function() {
+            pageReadyCondition();
+            // click show empty sections button
+            chaisePage.recordPage.getShowAllRelatedEntitiesButton().click().then(function () {
+                addBtn = chaisePage.recordPage.getAddRecordLink(displayname, true);
+            });
+        });
+
+        it("should disable the add record button", function () {
+            expect(addBtn.isEnabled()).toBeFalsy();
+        });
+
+        it("should have the proper tooltip", function () {
+            chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
+                expect(comment).toBe("'Adding to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+            });
+        });
+    });
+
+    describe("for a inbound fk with a null value for the key on main", function () {
+        var displayname = "inbound_null_key",
+            tablename = "Accommodations",
+            columnname = "nullable_assoc_key",
+            addBtn;
+
+        beforeAll(function() {
+            pageReadyCondition();
+
+            addBtn = chaisePage.recordPage.getAddRecordLink("inbound_null_key", true);
+        });
+
+        it("should disable the add record button", function () {
+            expect(addBtn.isEnabled()).toBeFalsy();
+        });
+
+        it("should have the proper tooltip", function () {
+            chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
+                expect(comment).toBe("'Adding to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+            });
+        });
+    });
+
+    describe("for a pure and binary association with a null value for the key on the leaf table", function () {
+        it("should add a not null filter and only show 2 of the 5 rows for related_table_null_key", function () {
+            var addBtn = chaisePage.recordPage.getAddRecordLink("association_table_null_keys2", true);
+            expect(addBtn.isEnabled()).toBeTruthy();
+
+            addBtn.click().then(function () {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == 2);
+                    });
+                });
+
+                expect(chaisePage.recordsetPage.getModalRows().count()).toBe(2, "Number of rows after applying not null filter is incorrect")
+            });
+        });
+    });
 });
 
 describe("For scroll to query parameter", function() {

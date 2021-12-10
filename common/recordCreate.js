@@ -341,7 +341,17 @@
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
             // params.parentDisplayMode = dcctx.cid; // should be "record"
 
-            params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
+            var andFilters = [];
+            // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+            domainRef.derivedAssociationReference.associationToRelatedFKR.key.colset.columns.forEach(function (col) {
+                andFilters.push({
+                    "source": col.name,
+                    "hidden": true,
+                    "not_null": true
+                });
+            });
+
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelect;
             // params.derivedref = derivedref;
             // params.GV_recordEditModel = GV_recordEditModel;
             // params.viewModel = viewModel;
