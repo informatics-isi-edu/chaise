@@ -269,7 +269,7 @@
                     //     // onSuccessFunction is called in the callback after closing the modal
                     //     closeModal();
                     if (!isUpdate) {
-                       createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
+                        createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     } else {
                         rsReference.update(rsTuples, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     }

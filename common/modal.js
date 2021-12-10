@@ -505,7 +505,7 @@
 
             // TODO: remove submitBeforeClose if it's only used for add p&b
             if (vm.params.submitBeforeClose) {
-               vm.params.submitBeforeClose(getMultiSelectionResult());
+                vm.params.submitBeforeClose(getMultiSelectionResult());
             } else {
                 $uibModalInstance.close(getMultiSelectionResult());
             }
