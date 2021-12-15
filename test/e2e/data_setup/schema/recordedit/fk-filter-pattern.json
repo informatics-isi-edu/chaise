@@ -201,6 +201,24 @@
                             "column_name": "id"
                         }
                     ]
+                },
+                {
+                    "comment": "Foreign key that allows the key to be null.",
+                    "names": [["fk-filter-pattern", "fk_w_nullable_key"]],
+                    "foreign_key_columns": [
+                        {
+                            "table_name": "main-entity-table",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "col_w_null_fkey_key"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "table_name": "related_table_null_key",
+                            "schema_name": "fk-filter-pattern",
+                            "column_name": "term"
+                        }
+                    ]
                 }
             ],
             "table_name": "main-entity-table",
@@ -283,6 +301,13 @@
                     "name": "col_w_fkeys",
                     "type": {
                         "typename": "int4"
+                    }
+                },
+                {
+                    "comment": "nullable key foreign key column",
+                    "name": "col_w_null_fkey_key",
+                    "type": {
+                        "typename": "text"
                     }
                 }
             ],
@@ -457,13 +482,61 @@
                     }
                 }
             }
+        },
+        "related_table_null_key": {
+            "comment": "Related table with a nullable key value",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                },
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "term"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "related_table_null_key",
+            "schema_name": "fk-filter-pattern",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["term"]
+                }
+            }
         }
     },
     "table_names": [
         "main-entity-table",
         "fk-no-constraint-table",
         "fk-constrained-table",
-        "position-type-table"
+        "position-type-table",
+        "related_table_null_key"
     ],
     "comment": null,
     "annotations": {}

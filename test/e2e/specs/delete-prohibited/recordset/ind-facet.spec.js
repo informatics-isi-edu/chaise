@@ -6,11 +6,11 @@ var testParams = {
     schema_name: "faceting",
     table_name: "main",
     sort: "@sort(id)",
-    totalNumFacets: 21,
+    totalNumFacets: 22,
     facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col",
                   "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1",
                   "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text",
-                  "F3 Entity", "F5",
+                  "F3 Entity", "F5", "F5 with filter",
                   "col_w_column_order_false", "col_w_column_order", "col_w_long_values"],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
@@ -278,6 +278,17 @@ var testParams = {
             filter: "F5\none",
             numRows: 1,
             options: ["All records with value", "No value", "one", "two"],
+            isEntityMode: true
+        },
+        {
+            name: "F5 with filter",
+            type: "choice",
+            totalNumOptions: 2,
+            option: 1,
+            filter: "F5 with filter\ntwo",
+            numRows: 1,
+            comment: "has filters",
+            options: ["All records with value", "two"],
             isEntityMode: true
         },
         {

@@ -776,7 +776,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
                 expect(addBtn.isPresent()).toBe(params.canCreate);
                 if(params.canCreate){
-                    chaisePage.recordPage.getColumnCommentHTML(addBtn).then(function(comment){
+                    chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
                         expect(comment).toBe("'Add more " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
                     });
                 }

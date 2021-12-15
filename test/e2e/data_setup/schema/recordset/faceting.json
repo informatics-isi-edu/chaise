@@ -212,7 +212,7 @@
                             {"source": "timestamp_col", "bar_plot": false, "comment": "timestamp column"},
                             {"source": "text_col"},
                             {"source": "longtext_col", "comment": "A lengthy comment for the facet of the longtext_col. This should be displyed properly in the facet.", "hide_not_null_choice": true, "hide_null_choice": true},
-                            {"source": "markdown_col", "hide_null_choice": true, "hide_not_null_choice": true, "hide_null_choice": true},
+                            {"source": "markdown_col", "hide_null_choice": true, "hide_not_null_choice": true},
                             {"source": "boolean_col", "hide_null_choice": true},
                             {"source": "jsonb_col", "order": [{"num_occurrences": true, "descending": true}, "jsonb_sort_col"], "hide_null_choice": true},
                             {"sourcekey": "outbound_to_f1", "markdown_name": "**F1**", "hide_not_null_choice": true},
@@ -223,6 +223,20 @@
                             {"source": "text_col_2", "ux_mode": "check_presence", "markdown_name": "Check Presence Text"},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "id"], "markdown_name": "F3 Entity"},
                             {"source": [{"inbound": ["faceting", "main_f5_fk1"]}, {"inbound": ["faceting", "f5_fk1"]}, "id"], "markdown_name": "F5", "comment": "F5 comment"},
+                            {
+                                "source": [
+                                    {"filter": "int_col", "operand_pattern": "-3", "operator": "::gt::"},
+                                    {"inbound": ["faceting", "main_f5_fk1"]}, 
+                                    {"inbound": ["faceting", "f5_fk1"]},
+                                    {"and": [
+                                        {"filter": "term", "operand_pattern": "one", "negate": true},
+                                        {"filter": "RCB", "operand_pattern": "{{{$session.id}}}"}
+                                    ]},
+                                    "id"
+                                ], 
+                                "markdown_name": "F5 with filter",
+                                "comment": "has filters"
+                            },
                             {"source": "col_w_column_order_false", "order": [{"column": "col_w_column_order_false_facet_order", "descending": true}], "hide_null_choice": true},
                             {"source": "col_w_column_order", "hide_num_occurrences": true, "hide_null_choice": true},
                             {"source": "col_w_long_values", "hide_null_choice": true}
