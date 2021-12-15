@@ -3163,6 +3163,7 @@
             RELATED: "related",
             RELATED_INLINE: "related-inline",
             ADD_PB_POPUP: "related-link-picker",
+            UNLINK_PB_POPUP: "related-unlink-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
             SAVED_QUERY_SELECT_POPUP: "saved-query-picker",

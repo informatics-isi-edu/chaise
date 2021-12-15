@@ -465,22 +465,64 @@
             params.parentTuple = tableModel.parentTuple
             params.parentReference = tableModel.parentReference;
             params.displayMode = recordsetDisplayModes.unlinkPureBinaryPopup;
-            params.parentDisplayMode = dcctx.cid; // should be "record"
 
             params.reference = ref.hideFacets().contextualize.compactSelect; // column reference
-            params.reference.session = $rootScope.session;
-            params.context = "compact/select";
             params.selectMode = modalBox.multiSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
             params.facetPanelOpen = false;
-            //NOTE assumption is that this function is only called for unlinking pure and binary association
-            // params.logObject = {
-            //     action: logActions.preUnlinkAssociation,
-            //     referrer: $rootScope.reference.defaultLogInfo
-            // };
 
-            modalUtils.showModal({
+            var stackElement = logService.getStackNode(
+                logService.logStackTypes.RELATED,
+                params.reference.table,
+                {source: ref.compressedDataSource, entity: true}
+            );
+
+            var logStack = logService.getStackObject(stackElement),
+                logStackPath = logService.getStackPath("", logService.logStackPaths.UNLINK_PB_POPUP);
+
+            params.logStack = logStack;
+            params.logStackPath = logStackPath;
+
+            params.submitBeforeClose = function dataSelected(res) {
+                // tuples returned are for leaf table, need to get tuples from assocation table instead
+                // if no rows, nothing to delete
+                if (!res || !Array.isArray(res.rows)) return;
+                var tuples = res.rows;
+
+                var logObject = {
+                    // TODO
+                };
+
+                $rootScope.showSpinner = true;
+                var deleteReferences = tuples[0].reference.getBatchAssociationRef(tuples);
+
+                var i = 0;
+                function recursiveDelete(reference) {
+                    reference.delete(logObject).then(function () {
+                        if (i < deleteReferences.length-1) {
+                            i++;
+                            recursiveDelete(deleteReferences[i])
+                        } else {
+                            $rootScope.showSpinner = false;
+                            // modal close needs to be issued in callback because of asynchronous delete call
+                            pbUnlinkModal.close();
+                        }
+                    }, function () {
+                        // TODO: alert something failed?
+                        // keep track of what succeeds?
+                        $rootScope.showSpinner = false;
+                        pbUnlinkModal.close();
+                    }).catch(function () {
+                        // TODO: alert something failed?
+                        $rootScope.showSpinner = false;
+                        pbUnlinkModal.close();
+                    });
+                }
+                recursiveDelete(deleteReferences[i]);
+            }
+
+            var pbUnlinkModal = modalUtils.showModal({
                 animation: false,
                 controller: "SearchPopupController",
                 windowClass: "search-popup unlink-pure-and-binary-popup",
@@ -491,18 +533,10 @@
                 size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function rowsDeleted() {
+
                 recordAppUtils.updateRecordPage(true);
             }, function () {
-                // no spinner should be showing
-                recordAppUtils.updateRecordPage(true);
-                // TODO: pbUnlinkCancelHeader
-                // var pbCancelHeader = {
-                //     action: logActions.recordPBCancel
-                // }
-                //
-                // logService.logClientAction(pbCancelHeader, params.reference.defaultLogInfo);
-                //
-                // viewModel.onModalClose();
+                // cancel
             }, false);
         }
 

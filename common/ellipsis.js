@@ -212,23 +212,11 @@
                         associationRef = scope.tuple.getAssociationRef(scope.tableModel.parentTuple.data);
                     }
 
-                    // if (scope.isUnLink) {
-                    //     scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.parentReference.displayname.value + '.';
-                    //     var associatedRefTuples = [];
-                    //     // define unlink function
-                    //     scope.unlink = function() {
-                    //         deleteReference(scope, scope.associationRef);
-                    //     };
-                    // } else if (scope.config.deletable) {
-                    //     // define delete function
-                    //     scope.delete = function() {
-                    //         deleteReference(scope, scope.tuple.reference);
-                    //     };
-
                     // delete/unlink button
                     if (scope.config.deletable) {
                         if (associationRef) {
                             if (scope.tuple.canUnlink) {
+                                scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.tableModel.parentReference.displayname.value + '.';
                                 // define unlink function
                                 scope.unlink = function() {
                                     deleteReference(scope, associationRef, isRelated, true);

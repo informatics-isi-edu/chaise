@@ -189,6 +189,10 @@ body.error-open loading-spinner {
         }
     }
 
+    &.unlink-pure-and-binary-popup .chaise-table-header-create-link {
+        display: none;
+    }
+
 }
 
 // don't show alerts on modals

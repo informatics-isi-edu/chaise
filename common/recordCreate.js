@@ -468,9 +468,6 @@
             }, function (res) {
                 viewModel.onSuccess();
             }, function () {
-                // var pbCancelHeader = {
-                //     action: logActions.recordPBCancel
-                // }
                 viewModel.onModalClose();
             }, false);
         }

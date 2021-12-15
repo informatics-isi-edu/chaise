@@ -620,8 +620,7 @@ html {
 
             &:checked:after {
                 font-family: 'Glyphicons Halflings';
-                // content: "\e013"; // check mark
-                content: "\e014"; // x mark
+                content: "\e013"; // check mark
                 font-size: 1.21rem;
             }
         }
