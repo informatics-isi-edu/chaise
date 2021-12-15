@@ -1,4 +1,4 @@
-import { windowRef } from 'Utils/window-ref';
+import { windowRef } from '@chaise/utils/window-ref';
 
 export const appTagMapping = {
   "tag:isrd.isi.edu,2016:chaise:record": "/record",

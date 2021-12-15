@@ -1,19 +1,112 @@
 import axios from "axios";
 
+import StorageService from "@chaise/utils/storage";
+import { UriUtils } from "@chaise/utils/utils";
+
 export default class AuthenService {
+  // authn API no longer communicates through ermrest, removing the need to check for ermrest location
+  static serviceURL: string = window.location.origin;
+
+  static LOCAL_STORAGE_KEY: string = 'session';              // name of object session information is stored under
+  static PROMPT_EXPIRATION_KEY: string = 'promptExpiration'; // name of key for prompt expiration value
+  static PREVIOUS_SESSION_KEY: string = 'previousSession';   // name of key for previous session boolean
+
+  // TODO: how to make these as private variables and private functions
+  static _session: any | null = null;                        // current session object
+  static _prevSession: any | null = null;                    // previous session object
+  static _sameSessionAsPrevious: boolean = false;
+
+  static _changeCbs: any = {};
+
+  static _counter: number = 0;
+
+  static _executeListeners = function () {
+    for (var k in AuthenService._changeCbs) {
+      AuthenService._changeCbs[k]();
+    }
+  };
+
+  /**
+   * Functions that interact with the StorageService tokens
+   * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
+   */
+
+  // returns data stored in loacal storage for `keyName`
+  static _getKeyFromStorage = function (keyName: string) {
+    return StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY)[keyName];
+  }
+
+  // create value in storage with `keyName` and `value`
+  static _setKeyInStorage = function (keyName: string, value: string | boolean) {
+    var data = {} as any;
+
+    data[keyName] = value;
+
+    StorageService.updateStorage(AuthenService.LOCAL_STORAGE_KEY, data);
+  }
+
+  // verifies value exists for `keyName`
+  static _keyExistsInStorage = function (keyName: string) {
+    var sessionStorage = StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY);
+
+    return (sessionStorage && sessionStorage[keyName]);
+  };
+
+  // removes the key/value pair at `keyName`
+  static _removeKeyFromStorage = function (keyName: string) {
+    if (AuthenService._keyExistsInStorage(keyName)) {
+      StorageService.deleteStorageValue(AuthenService.LOCAL_STORAGE_KEY, keyName);
+    }
+  };
+
+  // creates an expiration token with `keyName`
+  static _createToken = function (keyName: string) {
+    var data = {} as any;
+    var hourFromNow = new Date();
+    hourFromNow.setHours(hourFromNow.getHours() + 1);
+
+    data[keyName] = hourFromNow.getTime();
+
+    StorageService.updateStorage(AuthenService.LOCAL_STORAGE_KEY, data);
+  };
+
+  // checks if the expiration token with `keyName` has expired
+  static _expiredToken = function (keyName: string) {
+    var sessionStorage = StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY);
+
+    return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
+  };
+
+  // extends the expiration token with `keyName` if it hasn't expired
+  private _extendToken = function (keyName: string) {
+    if (AuthenService._keyExistsInStorage(keyName) && !AuthenService._expiredToken(keyName)) {
+      AuthenService._createToken(keyName);
+    }
+  };
+
+  // Checks for a session or previous session being set, if neither allow the page to reload
+  // the page will reload after login when the page started with no user
+  // _session can become null if getSession is called and the session has timed out or the user logged out
+  static shouldReloadPageAfterLogin = function () {
+    if (AuthenService._session === null && AuthenService._prevSession == null) return true;
+    return false;
+  };
+
   /**
    * opens a window dialog for logging in
    */
-  static popupLogin = function (logAction: String, postLoginCB: Function) {
+  static popupLogin = function (logAction: string | null, postLoginCB: Function | null) {
     if (!postLoginCB) {
       postLoginCB = function () {
-        // if (!shouldReloadPageAfterLogin()) {
-        //   // fetches the session of the user that just logged in
-        //   _getSession().then(function () {
-        //     if (modalInstance) modalInstance.close();
-        //   });
+        // if (!AuthenService.shouldReloadPageAfterLogin()) {
+          // fetches the session of the user that just logged in
+          AuthenService._getSession("").then(function (response) {
+            // if (modalInstance) modalInstance.close();
+
+              alert(response.client.full_name + " logged in")
+          });
         // } else {
-          window.location.reload();
+        //   // window.location.reload();
         // }
       };
     }
@@ -23,325 +116,248 @@ export default class AuthenService {
 
     var win = window.open("", '_blank', 'width=800,height=600,left=' + x + ',top=' + y);
 
-    // logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
+    AuthenService.logInHelper(AuthenService.loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };
-}
-   
 
-//     var serviceURL = $window.location.origin;
+  static logInHelper = function (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) {
+    var referrerId = (new Date().getTime());
 
-// var LOCAL_STORAGE_KEY = 'session';              // name of object session information is stored under
-// var PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
-// var PREVIOUS_SESSION_KEY = 'previousSession';   // name of key for previous session boolean
+    // var chaiseConfig = ConfigUtils.getConfigJSON();
+    var loginApp = "login";
+    // TODO: ConfigUtils
+    // var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
 
-// var _session = null;                            // current session object
-// var _prevSession = null;                        // previous session object
-// var _sameSessionAsPrevious = false;
+    var url = AuthenService.serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.origin + "/~jchudy/chaise/" + loginApp + "/?referrerid=" + referrerId);
+    var config = {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept': 'application/json'
+      },
+      skipHTTP401Handling: true
+    };
 
-// var _changeCbs = {};
+    // TODO in the case of loginInAModal, we're not doing the actual login,
+    // but we're still sending the request. Since we need to change this anyways,
+    // I decided to not add any log action in that case and instead we should just
+    // fix that function.
+    // TODO: fix this
+    // if (logAction) {
+    //   config.headers[ERMrest.contextHeaderName] = {
+    //     action: logService.getActionString(logAction, "", "")
+    //   }
+    // }
+    axios.get(url, config).then(function (response) {
+    // ConfigUtils.getHTTPService().get(url, config).then(function (response) {
+      var data = response.data;
+      console.log(data);
 
-// var _counter = 0;
+      var login_url = "";
+      if (data['redirect_url'] !== undefined) {
+        login_url = data['redirect_url'];
+      } else if (data['login_form'] !== undefined) {
+        // we want to use the old login flow to login
+        // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
+        win = window;
+        // prevents the dialog from popping up shortly before the page redirects to login
+        type = "";
+        var referrer = window.location.href;
+        var login_form = data['login_form'];
+        login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
+        var method = login_form['method'];
+        var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
+        var text = '';
+        var hidden = '';
+        for (var i = 0; i < login_form['input_fields'].length; i++) {
+          var field = login_form['input_fields'][i];
+          if (field.type === 'text') {
+            text = UriUtils.fixedEncodeURIComponent(field.name);
+          } else {
+            hidden = UriUtils.fixedEncodeURIComponent(field.name);
+          }
+        }
+        login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
+      }
 
-// var _executeListeners = function () {
-//   for (var k in _changeCbs) {
-//     _changeCbs[k]();
-//   }
-// };
+      var params = {
+        login_url: login_url
+      };
+      if (win) {
+        win.location = params.login_url;
+      }
+      logInTypeCb(params, referrerId, cb, type, rejectCb);
+    }, function (error) {
+      // throw ERMrest.responseToError(error);
+    });
+  };
 
-// /**
-//  * Functions that interact with the StorageService tokens
-//  * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
-//  */
+  // post login callback function
+  static loginWindowCb = function (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) {
+    if (type.indexOf('modal') !== -1) {
+      // TODO: messageMap
+      // if (AuthenService._session) {
+      //   params.title = messageMap.sessionExpired.title;
+      // } else {
+      //   params.title = messageMap.noSession.title;
+      // }
+      params.title = "temporary title";
+      var closed = false;
 
-// // returns data stored in loacal storage for `keyName`
-// var _getKeyFromStorage = function (keyName) {
-//   return StorageService.getStorage(LOCAL_STORAGE_KEY)[keyName];
-// }
+      // var cleanupModal = function (message) {
+      //   $interval.cancel(intervalId);
+      //   $cookies.remove("chaise-" + referrerId, { path: "/" });
+      //   closed = true;
+      // }
+      var onModalCloseSuccess = function () {
+        // cleanupModal("login refreshed");
+        closed = true;
+        cb();
+      }
 
-// // create value in storage with `keyName` and `value`
-// var _setKeyInStorage = function (keyName, value) {
-//   var data = {};
+      var onModalClose = function (response: any) {
+        // cleanupModal("no login");
+        closed = true;
+        if (rejectCb) {
+          //  ermrestJS throws error if 'response' is not formatted as an Error
+          if (typeof response == "string") {
+            response = new Error(response);
+          }
+          rejectCb(response);
+        }
+      };
 
-//   data[keyName] = value;
-
-//   StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
-// }
-
-// // removes the key/value pair at `keyName`
-// var _removeKeyFromStorage = function (keyName) {
-//   if (_keyExistsInStorage(keyName)) {
-//     StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
-//   }
-// };
-
-// // verifies value exists for `keyName`
-// var _keyExistsInStorage = function (keyName) {
-//   var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
-
-//   return (sessionStorage && sessionStorage[keyName]);
-// };
+      // TODO: implement modalUtils
+      // modalInstance = modalUtils.showModal({
+      //   windowClass: "modal-login-instruction",
+      //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/loginDialog.modal.html",
+      //   controller: 'LoginDialogController',
+      //   controllerAs: 'ctrl',
+      //   resolve: {
+      //     params: params
+      //   },
+      //   openedClass: 'modal-login',
+      //   backdrop: 'static',
+      //   keyboard: false
+      // }, onModalCloseSuccess, onModalClose, false);
+    }
 
 
-// // creates an expiration token with `keyName`
-// var _createToken = function (keyName) {
-//   var data = {};
-//   var hourFromNow = new Date();
-//   hourFromNow.setHours(hourFromNow.getHours() + 1);
+    /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
+     * variable
+     */
+    if (false) {
+    // if (UriUtils.isBrowserIE()) {
+      // $cookies.put("chaise-" + referrerId, true, { path: "/" });
+      // var intervalId;
+      // var watchChangeInReferrerId = function () {
+      //   if (!$cookies.get("chaise-" + referrerId)) {
+      //     $interval.cancel(intervalId);
+      //     if (typeof cb == 'function') {
+      //       if (type.indexOf('modal') !== -1) {
+      //         intervalId = $interval(watchChangeInReferrerId, 50);
+      //         modalInstance.close("Done");
+      //         cb();
+      //         closed = true;
+      //       } else {
+      //         cb();
+      //       }
+      //     }
+      //     return;
+      //   }
+      // }
+    } else {
+      window.addEventListener('message', function (args) {
+        if (args && args.data && (typeof args.data == 'string')) {
+          console.log("do local storage things");
+          AuthenService._setKeyInStorage(AuthenService.PREVIOUS_SESSION_KEY, true);
+          AuthenService._removeKeyFromStorage(AuthenService.PROMPT_EXPIRATION_KEY);
+          var obj = UriUtils.queryStringToJSON(args.data);
+          if (obj.referrerid == referrerId && (typeof cb == 'function')) {
+            if (type.indexOf('modal') !== -1) {
+              // modalInstance.close("Done");
+              cb();
+              closed = true;
+            } else {
+              cb();
+            }
+          }
+        }
+      });
+    }
+  };
 
-//   data[keyName] = hourFromNow.getTime();
+  /**
+   * Will return a promise that is resolved with the session.
+   * It will also call the _executeListeners() functions and sets the _session.
+   * If we couldn't fetch the session, it will resolve with `null`.
+   *
+   * @param  {string=} context undefined or "401"
+   */
+  static _getSession = function (context: string) {
+    var config = {
+      skipHTTP401Handling: true,
+      headers: {} as any
+    };
 
-//   StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
-// };
+    // config.headers[ERMrest.contextHeaderName] = {
+    //   action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
+    // }
 
-// // checks if the expiration token with `keyName` has expired
-// var _expiredToken = function (keyName) {
-//   var sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
+    /**
+     * NOTE: the following is for future implementation when we decide to verify session against the cookie object
+     * see if there's a token before doing any decision making
+     *
+     * if there's no webauthnCookie || no cookieFromStorage, login flow
+     *
+     * if there's a webauthnCookie user was logged in at some point on this machine, check to see if it matches _cookie
+     *  - if NOT match page was used by someone that's not the current webauthn cookie holder, check webauthnCookie matches cookieFromStorage
+     *    - if match, check cookieFromStorage.expires is not expired
+     *      - if expired, login flow
+     *      - if not expired, use local storage session
+     *    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
+     *  - if match user had a session on this page, make sure _session.expires is not expired
+     *    - if not expired, TODO leasing idea
+     *    - if expired, login timeout warning
+     *
+     * no webauthn
+     * if there's a cookieFromStorage user was here before, see if it is expired
+     *  - if expired
+     **/
 
-//   return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
-// };
+    return axios.get(AuthenService.serviceURL + "/authn/session", config).then(function (response) {
+      console.log(response);
+      if (context === "401" && AuthenService.shouldReloadPageAfterLogin()) {
+        // window.location.reload();
+        return response.data;
+      }
 
-// // extends the expiration token with `keyName` if it hasn't expired
-// var _extendToken = function (keyName) {
-//   if (_keyExistsInStorage(keyName) && !_expiredToken(keyName)) {
-//     _createToken(keyName);
-//   }
-// };
+      // keep track of only the first session, so when a timeout occurs, we can compare the sessions
+      // when a new session is fetched after timeout, check if the identities are the same
+      if (AuthenService._prevSession) {
+        AuthenService._sameSessionAsPrevious = AuthenService._prevSession.client.id == response.data.client.id;
+      } else {
+        AuthenService._prevSession = response.data
+      }
+
+      if (!AuthenService._session) {
+        // only update _session if no session is set
+        AuthenService._session = response.data;
+      }
+
+      AuthenService._executeListeners();
+      return AuthenService._session;
+    }).catch(function (err) {
+      // $log.warn(ERMrest.responseToError(err));
+
+      AuthenService._session = null;
+      AuthenService._executeListeners();
+      return AuthenService._session;
+    });
+  }
+
+} // end class
 
 // // variable so the modal can be passed to another function outside of this scope to close it when appropriate
 // var modalInstance = null;
-
-// // post login callback function
-// var loginWindowCb = function (params, referrerId, cb, type, rejectCb) {
-//   if (type.indexOf('modal') !== -1) {
-//     if (_session) {
-//       params.title = messageMap.sessionExpired.title;
-//     } else {
-//       params.title = messageMap.noSession.title;
-//     }
-//     var closed = false;
-
-//     var cleanupModal = function (message) {
-//       $interval.cancel(intervalId);
-//       $cookies.remove("chaise-" + referrerId, { path: "/" });
-//       closed = true;
-//     }
-//     var onModalCloseSuccess = function () {
-//       cleanupModal("login refreshed");
-//       cb();
-//     }
-
-//     var onModalClose = function (response) {
-//       cleanupModal("no login");
-//       if (rejectCb) {
-//         //  ermrestJS throws error if 'response' is not formatted as an Error
-//         if (typeof response == "String") {
-//           response = new Error(response);
-//         }
-//         rejectCb(response);
-//       }
-//     };
-
-//     modalInstance = modalUtils.showModal({
-//       windowClass: "modal-login-instruction",
-//       templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/loginDialog.modal.html",
-//       controller: 'LoginDialogController',
-//       controllerAs: 'ctrl',
-//       resolve: {
-//         params: params
-//       },
-//       openedClass: 'modal-login',
-//       backdrop: 'static',
-//       keyboard: false
-//     }, onModalCloseSuccess, onModalClose, false);
-//   }
-
-
-//   /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
-//    * variable
-//    */
-//   if (UriUtils.isBrowserIE()) {
-//     $cookies.put("chaise-" + referrerId, true, { path: "/" });
-//     var intervalId;
-//     var watchChangeInReferrerId = function () {
-//       if (!$cookies.get("chaise-" + referrerId)) {
-//         $interval.cancel(intervalId);
-//         if (typeof cb == 'function') {
-//           if (type.indexOf('modal') !== -1) {
-//             intervalId = $interval(watchChangeInReferrerId, 50);
-//             modalInstance.close("Done");
-//             cb();
-//             closed = true;
-//           }
-//           else {
-//             cb();
-//           }
-//         }
-//         return;
-//       }
-//     }
-//   }
-//   else {
-//     window.addEventListener('message', function (args) {
-//       if (args && args.data && (typeof args.data == 'string')) {
-//         _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
-//         _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
-//         var obj = UriUtils.queryStringToJSON(args.data);
-//         if (obj.referrerid == referrerId && (typeof cb == 'function')) {
-//           if (type.indexOf('modal') !== -1) {
-//             modalInstance.close("Done");
-//             cb();
-//             closed = true;
-//           }
-//           else {
-//             cb();
-//           }
-//         }
-//       }
-//     });
-//   }
-// };
-
-
-// var logInHelper = function (logInTypeCb, win, cb, type, rejectCb, logAction) {
-//   var referrerId = (new Date().getTime());
-
-//   var chaiseConfig = ConfigUtils.getConfigJSON();
-//   var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
-//   var url = serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + loginApp + "/?referrerid=" + referrerId);
-//   var config = {
-//     headers: {
-//       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-//       'Accept': 'application/json'
-//     },
-//     skipHTTP401Handling: true
-//   };
-
-//   // TODO in the case of loginInAModal, we're not doing the actual login,
-//   // but we're still sending the request. Since we need to change this anyways,
-//   // I decided to not add any log action in that case and instead we should just
-//   // fix that function.
-//   if (logAction) {
-//     config.headers[ERMrest.contextHeaderName] = {
-//       action: logService.getActionString(logAction, "", "")
-//     }
-//   }
-//   ConfigUtils.getHTTPService().get(url, config).then(function (response) {
-//     var data = response.data;
-
-//     var login_url = "";
-//     if (data['redirect_url'] !== undefined) {
-//       login_url = data['redirect_url'];
-//     } else if (data['login_form'] !== undefined) {
-//       // we want to use the old login flow to login
-//       // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
-//       win = $window;
-//       // prevents the dialog from popping up shortly before the page redirects to login
-//       type = "";
-//       var referrer = $window.location.href;
-//       var login_form = data['login_form'];
-//       login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
-//       var method = login_form['method'];
-//       var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
-//       var text = '';
-//       var hidden = '';
-//       for (var i = 0; i < login_form['input_fields'].length; i++) {
-//         var field = login_form['input_fields'][i];
-//         if (field.type === 'text') {
-//           text = UriUtils.fixedEncodeURIComponent(field.name);
-//         } else {
-//           hidden = UriUtils.fixedEncodeURIComponent(field.name);
-//         }
-//       }
-//       login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
-//     }
-
-//     var params = {
-//       login_url: login_url
-//     };
-//     if (win) {
-//       win.location = params.login_url;
-//     }
-//     logInTypeCb(params, referrerId, cb, type, rejectCb);
-//   }, function (error) {
-//     throw ERMrest.responseToError(error);
-//   });
-// };
-
-// // Checks for a session or previous session being set, if neither allow the page to reload
-// // the page will reload after login when the page started with no user
-// // _session can become null if getSession is called and the session has timed out or the user logged out
-// var shouldReloadPageAfterLogin = function () {
-//   if (_session === null && _prevSession == null) return true;
-//   return false;
-// };
-
-// /**
-//  * Will return a promise that is resolved with the session.
-//  * It will also call the _executeListeners() functions and sets the _session.
-//  * If we couldn't fetch the session, it will resolve with `null`.
-//  *
-//  * @param  {string=} context undefined or "401"
-//  */
-// var _getSession = function (context) {
-//   var config = {
-//     skipHTTP401Handling: true,
-//     headers: {}
-//   };
-
-//   config.headers[ERMrest.contextHeaderName] = {
-//     action: logService.getActionString(logService.logActions.SESSION_RETRIEVE, "", "")
-//   }
-
-//   /**
-//    * NOTE: the following is for future implementation when we decide to verify session against the cookie object
-//    * see if there's a token before doing any decision making
-//    *
-//    * if there's no webauthnCookie || no cookieFromStorage, login flow
-//    *
-//    * if there's a webauthnCookie user was logged in at some point on this machine, check to see if it matches _cookie
-//    *  - if NOT match page was used by someone that's not the current webauthn cookie holder, check webauthnCookie matches cookieFromStorage
-//    *    - if match, check cookieFromStorage.expires is not expired
-//    *      - if expired, login flow
-//    *      - if not expired, use local storage session
-//    *    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
-//    *  - if match user had a session on this page, make sure _session.expires is not expired
-//    *    - if not expired, TODO leasing idea
-//    *    - if expired, login timeout warning
-//    *
-//    * no webauthn
-//    * if there's a cookieFromStorage user was here before, see if it is expired
-//    *  - if expired
-//   **/
-
-//   return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function (response) {
-//     if (context === "401" && shouldReloadPageAfterLogin()) {
-//       window.location.reload();
-//       return response.data;
-//     }
-
-//     // keep track of only the first session, so when a timeout occurs, we can compare the sessions
-//     // when a new session is fetched after timeout, check if the identities are the same
-//     if (_prevSession) {
-//       _sameSessionAsPrevious = _prevSession.client.id == response.data.client.id;
-//     } else {
-//       _prevSession = response.data
-//     }
-
-//     if (!_session) {
-//       // only update _session if no session is set
-//       _session = response.data;
-//     }
-
-//     _executeListeners();
-//     return _session;
-//   }).catch(function (err) {
-//     $log.warn(ERMrest.responseToError(err));
-
-//     _session = null;
-//     _executeListeners();
-//     return _session;
-//   });
-// }
 
 // return {
 //   getSession: _getSession,

@@ -14,7 +14,7 @@ module.exports =  function (libName, filename) {
       entry: path.join(__dirname, '..', 'src', 'pages', filename + '.tsx'),
       output: {
           path: path.resolve(__dirname, '..', 'dist', 'react', filename),
-          filename: '[name].bundle.js'
+          filename: 'navbar.bundle.js'
       },
       resolve: {
           extensions: ['.ts', '.tsx', '.js'],
@@ -58,10 +58,8 @@ module.exports =  function (libName, filename) {
       plugins: [
         new MiniCssExtractPlugin(),
         new HtmlWebpackPlugin({
-          template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
+          // template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
         }),
-      ],
-      optimization: {
-      }
+      ]
   }
 }
