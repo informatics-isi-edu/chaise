@@ -1,12 +1,3 @@
-missing:
- - invalidate (recordset, record)
- - prefill (recordedit)
- - savedQueryRid (recordset)
- - paction (recordset, record)
- - page (help)
- - promptlogin (record)
- - copy (recordedit)
-
 The query parameters appear in the browser url after the filter path and after the `?` character. There are a number of parameters that are consumed by chaise that the user doesn't need to be aware of. This document will outline the ones that the user can define that will affect how the application will behave.
 
 #### Configurable parameters for users
@@ -56,3 +47,17 @@ The query parameters appear in the browser url after the filter path and after t
 
 #### Set by application
  - `ppid` and `pcid`: These two parameters will be available only on a number of requests. They will indicate which app and page led to this current request. More info can be found in the [logging document here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/logging.md#attributes).
+
+#### Parameters for developers
+<details>
+<summary>Click to see detailed information about other query parameters used by the application.</summary>
+
+ - `paction`: This parameter will be available only on a number of requests. They will indicate what action was taken to get to the current page. This is a parameter set by the application. More info can be found in the [logging document here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/logging.md#attributes).
+ - `invalidate`: This parameter is used to signal that create or edit was clicked in recordset or record app and the originating page needs to have the data refreshed after create or update succeeds and the page is focused again. This is a parameter set by the application.
+ - `savedQueryRid`: This parameter indicates that recordset app is being initialized from a saved query. This is a parameter set by the application (`recordset` only) and used for a specific use case in CFDE to navigate to recordset and apply a saved query from a static page.
+ - `promptlogin`: This parameter is used to signal that the application should present a login dialog on page load. This was initially added for the SSR experiment for angularJS record pages. This is a parameter set by the application but could be used to force showing a login dialog (`record` only).
+ - `copy`: This parameter is used to signal to recordedit app that the app should be in "copy mode". Recordedit will read the data that mathes the filter information from the url and use that fetched data to set up a create form with information already filled in. This is a parameter set by the application (`record` and `recordedit` only). 
+ - `prefill`: This parameter is used to signal to recordedit app that the app should load data from cookie storage to prefill some of the inputs fields. This is used when linking related records in record app using the "Add Records" button. This is a parameter set by the application (`record` and `recordedit` only).
+ - `page`: This parameter is used to indicate which help page to load. This is a parameter set by the application (`help` only).
+
+</details>
