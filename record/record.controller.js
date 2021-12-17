@@ -134,7 +134,10 @@
             } else {
                 recordSetUrl = appUrl;
             }
-            return $window.location.href = recordSetUrl;
+
+            // append paction=explore
+            var qCharacter = recordSetUrl.indexOf("?") !== -1 ? "&" : "?";
+            return $window.location.href = recordSetUrl + qCharacter + "paction=" + logService.pactions.EXPLORE;
         };
 
         /**

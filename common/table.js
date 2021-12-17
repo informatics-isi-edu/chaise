@@ -2000,8 +2000,7 @@
                                         "cols": ["RID"],
                                         "vals": [$rootScope.savedQuery.rid]
                                     }
-                                }),
-                                rid: $rootScope.savedQuery.rid
+                                })
                             };
 
                             var config = {

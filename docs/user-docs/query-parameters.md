@@ -46,18 +46,17 @@ The query parameters appear in the browser url after the filter path and after t
  - `limit`: This parameter changes the number of rows that are returned by the `ermrest` request. This parameter is consumed by chaise and sent along with the requests to fetch data (`recordset` and `recordedit` only)
 
 #### Set by application
- - `ppid` and `pcid`: These two parameters will be available only on a number of requests. They will indicate which app and page led to this current request. More info can be found in the [logging document here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/logging.md#attributes).
+ - `ppid`, `pcid`, and `paction`: These two parameters will be available only on a number of requests. They will indicate which app, page, and action led to this current request. More info can be found in the [logging document here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/logging.md#attributes).
 
 #### Parameters for developers
 <details>
 <summary>Click to see detailed information about other query parameters used by the application.</summary>
 
- - `paction`: This parameter will be available only on a number of requests. They will indicate what action was taken to get to the current page. This is a parameter set by the application. More info can be found in the [logging document here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/logging.md#attributes).
- - `invalidate`: This parameter is used to signal that create or edit was clicked in recordset or record app and the originating page needs to have the data refreshed after create or update succeeds and the page is focused again. This is a parameter set by the application.
- - `savedQueryRid`: This parameter indicates that recordset app is being initialized from a saved query. This is a parameter set by the application (`recordset` only) and used for a specific use case in CFDE to navigate to recordset and apply a saved query from a static page.
- - `promptlogin`: This parameter is used to signal that the application should present a login dialog on page load. This was initially added for the SSR experiment for angularJS record pages. This is a parameter set by the application but could be used to force showing a login dialog (`record` only).
- - `copy`: This parameter is used to signal to recordedit app that the app should be in "copy mode". Recordedit will read the data that mathes the filter information from the url and use that fetched data to set up a create form with information already filled in. This is a parameter set by the application (`record` and `recordedit` only). 
+ - `invalidate`: This parameter is used to signal that create or edit was clicked in recordset or record app and the originating page needs to have the data refreshed after create or update succeeds and the page is focused again. This parameter is consumed by chaise and used for internal logic.
+ - `savedQueryRid`: This parameter indicates that recordset app is being initialized from a saved query. This parameter is consumed by chaise and used for internal logic (`recordset` only). Note: it is used for a specific use case in CFDE to navigate to recordset and apply a saved query from a static page.
+ - `promptlogin`: This parameter is used to signal that the application should present a login dialog on page load. This parameter is consumed by chaise and used for internal logic (`record` only) but could also be used to force showing a login dialog.
+ - `copy`: This parameter is used to signal to recordedit app that the app should be in "copy mode". Recordedit will read the data that mathes the filter information from the url and use that fetched data to set up a create form with information already filled in. This parameter is consumed by chaise and used for internal logic (`record` and `recordedit` only).
  - `prefill`: This parameter is used to signal to recordedit app that the app should load data from cookie storage to prefill some of the inputs fields. This is used when linking related records in record app using the "Add Records" button. This is a parameter set by the application (`record` and `recordedit` only).
- - `page`: This parameter is used to indicate which help page to load. This is a parameter set by the application (`help` only).
+ - `page`: This parameter is used to indicate which help page to load. This parameter is consumed by chaise and used for internal logic (`help` only).
 
 </details>

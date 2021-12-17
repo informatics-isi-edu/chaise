@@ -3193,6 +3193,14 @@
             CREATE_PRESELECT: "create-preselect"
         });
 
+        var pactions = Object.freeze({
+            // APPLY_COLLECTION: "apply-co", // proposed for applying a personal collection
+            APPLY_SAVED_QUERY: "apply-sq",
+            EXPLORE: "explore",
+            // TITLE: "title", // proposed for title for record app
+            VIEW: "view"
+        });
+
         // why we had to reload a request
         var reloadCauses = Object.freeze({
             CLEAR_ALL: "clear-all", // clear all button
@@ -3382,6 +3390,7 @@
             logStackTypes: logStackTypes,
             logStackPaths: logStackPaths,
             logActions: logActions,
+            pactions: pactions,
             reloadCauses: reloadCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
