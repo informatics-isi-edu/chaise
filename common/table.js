@@ -1970,7 +1970,7 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        if ($rootScope.savedQuery && !$rootScope.savedQuery.updated) {
+                        if ($rootScope.savedQuery && $rootScope.savedQuery.showUI && !$rootScope.savedQuery.updated) {
                             // to prevent the following code and request from triggering more than once
                             // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
                             $rootScope.savedQuery.updated = true;
