@@ -109,7 +109,8 @@ Depending on the request, we might log extra attributes that we are gong to list
 
 - `paction`: The action in the parent page that fired the current request. Acceptable values are:
   - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
-  - `applyQuery`: Available on the first read of the main set in recordset page. Indicates that the user clicked "Apply search criteria" button in tabular displays.
+  - `apply_sq`: Available on the first read of the main set in recordset page. Indicates that the user clicked "Apply search criteria" button in tabular displays.
+  - `explore`: Available on the first read of the main set in recordset page. Indicates that the user clicked the "Explore" button on record app.
 
 - `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:
   - Required attributes:
@@ -176,7 +177,9 @@ Depending on the request, we might log extra attributes that we are gong to list
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
 
-- `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for. Available
+- `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
+
+- `sq_rid`: Available on the first read of the main set in recordset page. Indicates that the user navigated to this recordset page from a saved query link.
 
 - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
