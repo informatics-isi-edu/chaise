@@ -1499,8 +1499,9 @@
                 scope.disableSavedQueryButton = function () {
                     if (_disableSavedQueryButton === undefined && scope.vm.savedQueryReference) {
                         // if insert is false, disable the button
-                        // should this be checking for insert !== true
+                        // should this be checking for insert !== true ?
                         _disableSavedQueryButton = !scope.vm.savedQueryReference.table.rights.insert;
+                        if (_disableSavedQueryButton) scope.tooltip.saveQuery = "Please login to be able to save searches for " + scope.vm.reference.displayname.value + ".";
                     }
 
                     return _disableSavedQueryButton;

@@ -141,7 +141,8 @@
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
             showMore: "Click to show more available filters",
-            showDetails: "Click to show more details about the filters"
+            showDetails: "Click to show more details about the filters",
+            saveQuery: "Click to save the current search criteria"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
