@@ -1,6 +1,8 @@
 interface ICustomWindow extends Window {
   // ERMrset object that is attached to window in ermrestjs:
   ERMrest: any;
+  // chaiseConfig is attached to the window with the chaise-config.js file
+  chaiseConfig: any;
   dcctx: {
     // the object that will be logged with every request:
     contextHeaderParams: {

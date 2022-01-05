@@ -53,7 +53,38 @@ export const defaultChaiseConfig = {
   "hideGoToRID": false,
   "showWriterEmptyRelatedOnLoad": null,
   "shareCiteAcls": {
-      "show": ["*"],
-      "enable": ["*"]
+    "show": ["*"],
+    "enable": ["*"]
   }
+};
+
+export const errorNames = {
+  unauthorized: "Unauthorized",
+  forbidden: "Forbidden",
+  conflict: "Conflict",
+  notFound: "Record Not Found",
+  multipleRecords: "Multiple Records Found",
+  noDataMessage: "No entity exists",
+  multipleDataErrorCode: "Multiple Records Found",
+  facetFilterMissing: "No filter or facet was defined.",
+  multipleDataMessage: "There are more than 1 record found for the filters provided."
+};
+
+export const errorMessages = {
+  unauthorized: "Unauthorized",
+  forbidden: "Forbidden",
+  notFound: "No data",
+  multipleRecords: "Multiple Records Found",
+  noDataMessage: 'The record does not exist or may be hidden. <br> If you continue to face this issue, please contact the system administrator.',
+  multipleDataErrorCode: "Multiple Records Found",
+  multipleDataMessage: "There are more than 1 record found for the filters provided.",
+  facetFilterMissing: "No filtering criteria was specified to identify a specific record.",
+  unauthorizedAssetRetrieval: "You must be logged in and authorized to download this asset.",
+  forbiddenAssetRetrieval: " is logged in but not authorized to download this asset.",
+  differentUserConflict1: "Continuing on this page requires that you be logged in as ",
+  differentUserConflict2: ". However, you are currently logged in as ",
+  anonUserConflict: "Your session has expired. Continuing on this page requires that you be logged in as ",
+  systemAdminMessage: "An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.",
+  viewerOSDFailed: "Couldn't process the image. <br> If you continue to face this issue, please contact the system administrator.",
+  viewerScreenshotFailed: "Couldn't process the screenshot."
 };
