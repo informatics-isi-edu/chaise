@@ -436,14 +436,7 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
-            // do creation/deletion here before closing the modal
-            // TODO:
-            // if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
-            //     createSelectedRows();
-            // } else if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
-            //     deleteSelectedRows();
-
-            // TODO: remove submitBeforeClose if it's only used for add p&b
+            // add and unlink p&b rely on a function being defined to submit the request before closing the modal
             if (vm.params.submitBeforeClose) {
                 vm.params.submitBeforeClose(getMultiSelectionResult());
             } else {
