@@ -152,7 +152,7 @@
                             // TODO: change from HTML link to refresh page to:
                             //    "updateFacets on main entity and add to browser history stack"
                             // after update, put last_execution_time as "now"
-                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID;
+                            scope.applySavedQuery = savedQueryLink + qCharacter + "savedQueryRid=" + scope.tuple.data.RID + "&paction=" + logService.pactions.APPLY_SAVED_QUERY;
                         }).catch(function (error) {
                             $log.warn(error);
                             // fail silently and degrade the UX (hide the apply button)
@@ -168,7 +168,7 @@
                     if (scope.config.viewable) {
                         var viewLink = tupleReference.contextualize.detailed.appLink;
                         var qCharacter = viewLink.indexOf("?") !== -1 ? "&" : "?";
-                        scope.viewLink = viewLink + qCharacter + "paction=view";
+                        scope.viewLink = viewLink + qCharacter + "paction=" + logService.pactions.VIEW;
                     }
 
                     // if tupleReference is not defined

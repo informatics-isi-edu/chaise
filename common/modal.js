@@ -633,7 +633,7 @@
         }
     }])
 
-    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, messageMap, params, $scope, $uibModalInstance) {
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'logService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, logService, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = [];
         var deleteAlert = function(alert) {
@@ -648,6 +648,9 @@
 
         vm.form = params.rowData;
 
+        var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+        var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, params.reference.table);
+
         vm.submit = function () {
             if (vm.form.$invalid) {
                 vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error', deleteAlert, true));
@@ -655,10 +658,15 @@
                 return;
             }
 
-            var row = vm.savedQueryForm.rows[0]
+            var logObj = {
+                action: logService.getActionString(logService.logActions.CREATE, stackPath, logService.appModes.CREATE),
+                stack: logService.addExtraInfoToStack(logService.getStackObject(currStackNode), {"num_created": 1})
+            };
+
+            var row = vm.savedQueryForm.rows[0];
 
             row.last_execution_time = "now";
-            params.reference.create(vm.savedQueryForm.rows).then(function success(query) {
+            params.reference.create(vm.savedQueryForm.rows, logObj).then(function success(query) {
                 // show success after close
                 $uibModalInstance.close(query.successful);
             }, function error(error) {
@@ -668,6 +676,11 @@
         }
 
         vm.cancel = function () {
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.CANCEL, stackPath, logService.appModes.CREATE),
+                stack: logService.getStackObject(currStackNode)
+            }, params.reference.defaultLogInfo);
+
             $uibModalInstance.dismiss("cancel");
         }
     }])
