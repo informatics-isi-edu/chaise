@@ -27,8 +27,8 @@
                             <span>Permalink</span>
                         </a>
                         <!-- save query -->
-                        <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown>
-                            <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" uib-dropdown-toggle tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
+                        <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown tooltip-placement="bottom-right" uib-tooltip="{{tooltip.saveQuery}}">
+                            <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" ng-click="logSavedQueryDropdownOpened()" uib-dropdown-toggle ng-style="{'pointer-events': disableSavedQueryButton() ? 'none' : ''}">
                                 <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
                                 <span>Saved searches</span>
                                 <span class="caret "></span>

@@ -566,7 +566,18 @@
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
                     }
 
-                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).contextualize.compactSelect;
+                    var andFilters = [];
+                    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+                    vm.column.foreignKey.key.colset.columns.forEach(function (col) {
+                        andFilters.push({
+                            "source": col.name,
+                            "hidden": true,
+                            "not_null": true
+                        });
+                    });
+
+                    // add not null filters for key information
+                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).addFacets(andFilters).contextualize.compactSelect;
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;

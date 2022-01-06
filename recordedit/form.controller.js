@@ -88,8 +88,11 @@
                 redirectUrl += "recordset/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             }
 
+            // append pcid
+            var qCharacter = redirectUrl.indexOf("?") !== -1 ? "&" : "?";
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             // Redirect to record or recordset app..
-            $window.location = redirectUrl;
+            $window.location = redirectUrl + qCharacter + "pcid=" + contextHeaderParams.cid + "&ppid=" + contextHeaderParams.pid;
         }
 
         /**
@@ -310,7 +313,18 @@
 
             params.displayMode = vm.editMode ? recordsetDisplayModes.foreignKeyPopupEdit : recordsetDisplayModes.foreignKeyPopupCreate;
 
-            params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).contextualize.compactSelect;
+            var andFilters = [];
+            // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+            column.foreignKey.key.colset.columns.forEach(function (col) {
+                andFilters.push({
+                    "source": col.name,
+                    "hidden": true,
+                    "not_null": true
+                });
+            });
+
+            // add not null filters for key information
+            params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).addFacets(andFilters).contextualize.compactSelect;
 
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;

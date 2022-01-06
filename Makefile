@@ -112,7 +112,7 @@ define make_test
 	exit $$rc;
 endef
 
-test-%: deps
+test-%:
 	$(call make_test, $($*), "0")
 
 #### Sequential make commands - these commands will run tests in sequential order
@@ -614,24 +614,35 @@ define bundle_js_files
 	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
 endef
 
-# Rule to ensure Node bin scripts are present
-$(BIN): $(MODULES)
-	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
-
-# Rule to install Node modules locally
-$(MODULES): package.json
-	npm install
-
 # Rule to create the package.
-# - we have to make sure the npm dependencies required for build are installed.
-# - we have to clean all the dist files because we need to generate new ones.
-$(DIST): print_variables npm_install_prod_modules run_webpack $(SASS) $(MIN) $(HTML) gitversion
+$(DIST): print-variables run-webpack $(SASS) $(MIN) $(HTML) gitversion
 
 # build version will change everytime make all or install is called
 $(BUILD_VERSION):
 
+# make sure the latest webdriver is installed
+.PHONY: update-webdriver
+update-webdriver:
+	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
+
+# install packages needed for production
+.PHONY: npm-install-prod-modules
+npm-install-prod-modules:
+	npm install --production
+
+# install packages needed for production and development (including testing)
+.PHONY: npm-install-all-modules
+npm-install-all-modules:
+	npm install
+
+# for test cases we have to make sure we're installing dev dependencies and
+# webdriver is always updated to the latest version
+.PHONY: test-deps
+deps-test: npm-install-all-modules update-webdriver
+
+# install all the dependencies
 .PHONY: deps
-deps: $(BIN)
+deps: npm-install-prod-modules
 
 .PHONY: updeps
 updeps:
@@ -657,17 +668,19 @@ all: $(DIST)
 
 # Rule for installing for normal deployment (build chaise and deploy)
 .PHONY: install dont_install_in_root
-install: $(DIST) dont_install_in_root
-	$(info - deploying the package)
-	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
-	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
+install: deps $(DIST) dont_install_in_root rsync-chaise
+
+# Rule for installing without installing dependencies
+.PHONY: install-wo-deps dont_install_in_root
+install-wo-deps: $(DIST) dont_install_in_root rsync-chaise
 
 # Rule for installing during testing (build chaise and deploy with the chaise-config)
 .PHONY: install-w-config dont_install_in_root
-install-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
-	$(info - deploying the package with the existing default config files)
-	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
-	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
+install-w-config: deps $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG) rsync-chaise-w-config
+
+# Rule for installing during testing without updating dependencies (build chaise and deploy with the chaise-config)
+.PHONY: install-w-config dont_install_in_root
+install-wo-deps-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG) rsync-chaise-w-config
 
 # Rule to create version.txt
 .PHONY: gitversion
@@ -675,20 +688,24 @@ gitversion:
 	$(info - creating version.txt)
 	@sh ./git_version_info.sh
 
-run_webpack: $(SOURCE)
-	$(info - creating webpack bundles)
-	@./node_modules/.bin/webpack --config ./webpack/main.config.js
-
-# we want to make sure npm install is done for production
-# if we don't run this, npm install without any flags will be called from
-# make install which will install all the dependencies of npm.
-npm_install_prod_modules:
-	npm install --production
-
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
 
-print_variables:
+run-webpack: $(SOURCE)
+	$(info - creating webpack bundles)
+	@./node_modules/.bin/webpack --config ./webpack/main.config.js
+
+# rsync the build files to the location
+rsync-chaise:
+	$(info - deploying the package)
+	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+
+# rsync the build and config files to the location
+rsync-chaise-w-config:
+	$(info - deploying the package with the existing default config files)
+	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+
+print-variables:
 	@mkdir -p $(DIST)
 	$(info =================)
 	$(info BUILD_VERSION=$(BUILD_VERSION))
@@ -702,17 +719,23 @@ print_variables:
 .PHONY: help usage
 help: usage
 usage:
-	@echo "Available 'make' targets:"
-	@echo "    all       		- an alias for build"
-	@echo "    install          - installs the client (CHAISEDIR=$(CHAISEDIR))"
-	@echo "    deps      		- local install of node dependencies"
-	@echo "    updeps    		- update local dependencies"
-	@echo "    test      		- runs e2e tests"
-	@echo "    clean     		- cleans the dist dir"
-	@echo "    distclean 		- cleans the dist dir and the dependencies"
-	@echo "    testrecordadd 	- runs data entry app add e2e tests"
-	@echo "    testrecordedit 	- runs data entry app edit e2e tests"
-	@echo "    testrecord 		- runs record app e2e tests"
-	@echo "    testrecordset 	- runs recordset app e2e tests"
-	@echo "    testviewer   	- runs viewer app e2e tests"
-	@echo "    testnavbar   	- runs navbar e2e tests"
+	@echo "Usage: make [target]"
+	@echo "Available targets:"
+	@echo "  install                    local install of node dependencies, build and install the client"
+	@echo "  install-w-config           local install of node dependencies, build and install the client with chaise-config.js file"
+	@echo "  install-wo-deps            build and install the client"
+	@echo "  install-wo-deps-w-config   build and install the client with chaise-config.js file"
+	@echo "  all                        build the client"
+	@echo "  clean                      clean the files and folders created during build"
+	@echo "  distclean                  clean the files and folders created during build and npm dependencies"
+	@echo "  deps                       local install of node dependencies"
+	@echo "  updeps                     local update  of node dependencies"
+	@echo "  update-webdriver           update the protractor's webdriver"
+	@echo "  deps-test                  install dev node dependencies and update protractor's webdriver"
+	@echo "  test                       run e2e tests"
+	@echo "  testrecordadd              run data entry app add e2e tests"
+	@echo "  testrecordedit             run data entry app edit e2e tests"
+	@echo "  testrecord                 run record app e2e tests"
+	@echo "  testrecordset              run recordset app e2e tests"
+	@echo "  testviewer                 run viewer app e2e tests"
+	@echo "  testnavbar                 run navbar e2e tests"
