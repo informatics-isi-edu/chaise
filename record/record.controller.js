@@ -257,9 +257,14 @@
                 return false;
             }
 
-            // we are not supporting add in this case
-            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
-                return false;
+            // we are not supporting add if
+            //  - it's a free-form related table
+            //  - has filters
+            if (relatedRef.pseudoColumn) {
+                var pc = relatedRef.pseudoColumn;
+                if (!pc.isInboundForeignKey || pc.isFiltered) {
+                    return false;
+                }
             }
 
             var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
