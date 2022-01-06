@@ -109,7 +109,7 @@ Depending on the request, we might log extra attributes that we are gong to list
 
 - `paction`: The action in the parent page that fired the current request. Acceptable values are:
   - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
-  - `apply_sq`: Available on the first read of the main set in recordset page. Indicates that the user clicked "Apply search criteria" button in tabular displays.
+  - `apply-sq`: Available on the first read of the main set in recordset page. Indicates that the user clicked "Apply search criteria" button in tabular displays.
   - `explore`: Available on the first read of the main set in recordset page. Indicates that the user clicked the "Explore" button on record app.
 
 - `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:

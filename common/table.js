@@ -1999,7 +1999,7 @@
                                     "num_updated": 1,
                                     "updated_keys": {
                                         "cols": ["RID"],
-                                        "vals": [$rootScope.savedQuery.rid]
+                                        "vals": [[$rootScope.savedQuery.rid]]
                                     }
                                 })
                             };

@@ -2582,7 +2582,7 @@
                     // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
                     if (queryParams && queryParams.savedQueryRid) {
                       savedQuery.rid = queryParams.savedQueryRid;
-                      savedQuery.updated = false; // to track that the query's last execution time has been updated
+                      savedQuery.updated = false; // initialized here to track that the query's last execution time has been updated
                     }
                 } else {
                     // if mapping is invalid, the config is ill-defined and the feature will be turned off
