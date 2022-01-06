@@ -20,7 +20,7 @@ var testParams = {
     facet_order: [
         {
             title: "facet with order and column_order false for scalar",
-            facetIdx: 18,
+            facetIdx: 19,
             modalOptions: ['01', '02', '03', '04', '05', '06', '07'],
             sortable: false,
             modalOptionsSortedByNumOfOccurences: ['07', '06', '05', '04', '03', '02', '01'],
@@ -28,7 +28,7 @@ var testParams = {
         },
         {
             title: "facet without order and hide_num_occurrences\ntrue",
-            facetIdx: 19,
+            facetIdx: 20,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,
             modalOptionsSortedByScalar: ['13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02', '01'],
@@ -105,7 +105,7 @@ var testParams = {
         optionsWOCustomFacet: ['No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
     },
     maximumLength: {
-        facetIdx: 20,
+        facetIdx: 21,
         numRows: 25,
         filteredNumRows: 24,
         secondFacetIdx: 16,

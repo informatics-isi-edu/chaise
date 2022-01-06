@@ -1482,7 +1482,7 @@
             // this function is called after recordset triggers that the reference is readyToInitialize
             // scope.$root.savedQuery is set once we have a reference
             function registerSavedQueryFunctions () {
-                scope.showSavedQueryUI = scope.$root.savedQuery.showUI;
+                scope.showSavedQueryUI = scope.$root.savedQuery && scope.$root.savedQuery.showUI;
                 // if the UI should not be shown return before doing anything
                 if (!scope.showSavedQueryUI) return;
 
@@ -1499,11 +1499,19 @@
                 scope.disableSavedQueryButton = function () {
                     if (_disableSavedQueryButton === undefined && scope.vm.savedQueryReference) {
                         // if insert is false, disable the button
-                        // should this be checking for insert !== true
+                        // should this be checking for insert !== true ?
                         _disableSavedQueryButton = !scope.vm.savedQueryReference.table.rights.insert;
+                        if (_disableSavedQueryButton) scope.tooltip.saveQuery = "Please login to be able to save searches for " + scope.vm.reference.displayname.value + ".";
                     }
 
                     return _disableSavedQueryButton;
+                }
+
+                scope.logSavedQueryDropdownOpened = function () {
+                  logService.logClientAction({
+                      action: logService.getActionString(logService.logActions.SAVED_QUERY_OPEN),
+                      stack: logService.getStackObject()
+                  }, scope.vm.reference.defaultLogInfo);
                 }
 
                 // string constant used for both saved query functions
@@ -1593,7 +1601,8 @@
                     });
 
                     if (scope.vm.search) {
-                        name += " " + scope.vm.search + ";";
+                        name += " " + scope.vm.search
+                        if (modelsWFilters.length > 0) name += ";";
                         description += facetDescription(" Search", scope.vm.search, modelsWFilters.length > 0)
                     }
 
@@ -1617,7 +1626,7 @@
 
                         // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
                         if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
-                        name += facetInfo + ";"
+                        if (modelIdx+1 != modelsWFilters.length) name += facetInfo + ";"
 
                         // ===== setting default description =====
                         description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
@@ -1645,12 +1654,16 @@
                     // check to see if the saved query exists for the given user, table, schema, and selected facets
                     var queryUri = savedQueryReference.uri + "/user_id=" + UriUtils.fixedEncodeURIComponent(row.user_id) + "&schema_name=" + UriUtils.fixedEncodeURIComponent(row.schema_name) + "&table_name=" + UriUtils.fixedEncodeURIComponent(row.table_name) + "&query_id=" + row.query_id;
 
-                    var headers = {};
-                    headers[ERMrest.contextHeaderName] = ConfigUtils.getContextHeaderParams();
-                    ERMrest.resolve(queryUri, {headers: headers}).then(function (response) {
-                        console.log("reference: ", response);
+                    ERMrest.resolve(queryUri, ConfigUtils.getContextHeaderParams()).then(function (response) {
+                        var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+                        var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, savedQueryReference.table);
 
-                        return response.read(1);
+                        var logObj = {
+                            action: logService.getActionString(logService.logActions.PRELOAD, stackPath, logService.appModes.CREATE),
+                            stack: logService.getStackObject(currStackNode)
+                        };
+
+                        return response.read(1, logObj);
                     }).then(function (page) {
                         // if a row is returned, a query with this set of facets exists already
                         if (page.tuples.length > 0) {
@@ -1730,7 +1743,7 @@
                         );
 
                         var logStack = logService.getStackObject(stackElement),
-                        logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
+                            logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
 
                         params.logStack = logStack;
                         params.logStackPath = logStackPath;
@@ -1958,16 +1971,48 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        if ($rootScope.savedQuery && $rootScope.savedQuery.rid) {
+                        if ($rootScope.savedQuery && $rootScope.savedQuery.showUI && !$rootScope.savedQuery.updated) {
+                            // to prevent the following code and request from triggering more than once
+                            // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
+                            $rootScope.savedQuery.updated = true;
+
                             var rows = [{}],
                                 updateRow = rows[0];
 
                             updateRow.RID = $rootScope.savedQuery.rid
                             updateRow.last_execution_time = "now";
 
+                            // create this fake table object so getStackNode works
+                            var fauxTable = {
+                                name: $rootScope.savedQuery.mapping.table,
+                                schema: {
+                                    name: $rootScope.savedQuery.mapping.schema
+                                }
+                            }
+
+                            var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+                            var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, fauxTable);
+
+                            var logObj = {
+                                action: logService.getActionString(logService.logActions.UPDATE, stackPath),
+                                stack: logService.addExtraInfoToStack(logService.getStackObject(currStackNode), {
+                                    "num_updated": 1,
+                                    "updated_keys": {
+                                        "cols": ["RID"],
+                                        "vals": [[$rootScope.savedQuery.rid]]
+                                    }
+                                })
+                            };
+
+                            var config = {
+                                skipHTTP401Handling: true,
+                                headers: {}
+                            };
+
+                            config.headers[ERMrest.contextHeaderName] = logObj;
                             // attributegroup/CFDE:saved_query/RID;last_execution_status
-                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows).then(function (response) {
-                                $log.debug("new last executed time: ", response);
+                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows, config).then(function (response) {
+                              // do nothing
                             }).catch(function (error) {
                                 $log.warn("saved query last executed time could not be updated");
                                 $log.warn(error);

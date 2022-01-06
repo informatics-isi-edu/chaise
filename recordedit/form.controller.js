@@ -88,8 +88,11 @@
                 redirectUrl += "recordset/#" + page.reference.location.catalog + '/' + page.reference.location.compactPath;
             }
 
+            // append pcid
+            var qCharacter = redirectUrl.indexOf("?") !== -1 ? "&" : "?";
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             // Redirect to record or recordset app..
-            $window.location = redirectUrl;
+            $window.location = redirectUrl + qCharacter + "pcid=" + contextHeaderParams.cid + "&ppid=" + contextHeaderParams.pid;
         }
 
         /**

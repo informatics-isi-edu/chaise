@@ -141,7 +141,8 @@
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
             showMore: "Click to show more available filters",
-            showDetails: "Click to show more details about the filters"
+            showDetails: "Click to show more details about the filters",
+            saveQuery: "Click to save the current search criteria"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
@@ -2580,7 +2581,10 @@
                     savedQuery.ermrestAGPath = "/ermrest/catalog/" + mapping.catalog + "/attributegroup/" + mapping.schema + ":" + mapping.table
 
                     // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
-                    if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
+                    if (queryParams && queryParams.savedQueryRid) {
+                      savedQuery.rid = queryParams.savedQueryRid;
+                      savedQuery.updated = false; // initialized here to track that the query's last execution time has been updated
+                    }
                 } else {
                     // if mapping is invalid, the config is ill-defined and the feature will be turned off
                     savedQuery.showUI = false;
@@ -2980,6 +2984,7 @@
             // general
 
             // - server:
+            PRELOAD: clientPathActionSeparator + "preload",
             LOAD: clientPathActionSeparator + "load",
             RELOAD: clientPathActionSeparator + "reload",
             DELETE: clientPathActionSeparator + "delete",
@@ -3013,6 +3018,7 @@
             FACET_HISTOGRAM_LOAD: "range" + clientPathActionSeparator + "load-histogram",
             FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
             PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
+            SAVED_QUERY_OPEN: "saved-query" + clientPathActionSeparator + "open",
 
             //   - client:
             PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
@@ -3146,6 +3152,7 @@
             COLUMN: "col",
             PSEUDO_COLUMN: "pcol",
             FACET: "facet",
+            SAVED_QUERY: "saved_query",
 
             // used in viewer app:
             ANNOTATION: "annotation",
@@ -3166,6 +3173,7 @@
             UNLINK_PB_POPUP: "related-unlink-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_CREATE_POPUP: "saved-query-entity",
             SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
@@ -3186,6 +3194,14 @@
             CREATE: "create",
             CREATE_COPY: "create-copy",
             CREATE_PRESELECT: "create-preselect"
+        });
+
+        var pactions = Object.freeze({
+            // APPLY_COLLECTION: "apply-co", // proposed for applying a personal collection
+            APPLY_SAVED_QUERY: "apply-sq",
+            EXPLORE: "explore",
+            // TITLE: "title", // proposed for title for record app
+            VIEW: "view"
         });
 
         // why we had to reload a request
@@ -3377,6 +3393,7 @@
             logStackTypes: logStackTypes,
             logStackPaths: logStackPaths,
             logActions: logActions,
+            pactions: pactions,
             reloadCauses: reloadCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
