@@ -380,6 +380,12 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "name": "date_col",
+                    "type": {
+                        "typename": "date"
+                    }
                 }
             ],
             "annotations": {
@@ -434,6 +440,46 @@
                                 "wait_for": ["cnt_d_accommodation_inbound2"],
                                 "markdown_pattern": "{{#each $self}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}} ({{{cnt_d_accommodation_inbound2}}})"
                             }
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_booking_accommodation"]},
+                                {
+                                  "or": [
+                                    {"filter": "price", "operand_pattern": "90", "operator": "::lt::"},
+                                    {"filter": "booking_date", "operator": "::null::"}
+                                  ]
+                                },
+                                "RID"
+                            ],
+                            "comment": "booking with inline filter 2",
+                            "markdown_name": "inbound related with filter on related table"
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                {"filter": "facility", "operand_pattern": "Television"},
+                                "RID"
+                            ],
+                            "markdown_name": "association with filter on related table"
+                        },
+                        {
+                            "source": [
+                                {"filter": "id", "operand_pattern": "2004"},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {
+                                    "and": [
+                                        {"filter": "RID", "operand_pattern": "::null::"},
+                                        {"filter": "RCB", "operand_pattern": "::null::"}
+                                    ],
+                                    "negate": true
+                                },
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
+                                "id"
+                            ],
+                            "markdown_name": "path of length 3 with filters"
                         }
                     ]
                 },
