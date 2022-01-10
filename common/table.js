@@ -1626,7 +1626,8 @@
 
                         // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
                         if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
-                        if (modelIdx+1 != modelsWFilters.length) name += facetInfo + ";"
+                        name += facetInfo;
+                        if (modelIdx+1 != modelsWFilters.length) name += ";"
 
                         // ===== setting default description =====
                         description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
