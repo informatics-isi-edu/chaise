@@ -620,10 +620,16 @@
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
 
-                // the conflict error message is not readable by users,
+                // the raw conflict error message is not readable by users,
                 // so we're going to show a terminal error instead
                 // NOTE we might want to do the same thing for all the other ermrest HTTP errors
-                if (exception instanceof ERMrest.ConflictError) {
+                if (
+                    exception instanceof ERMrest.ConflictError &&
+                    !(
+                        exception instanceof ERMrest.IntegrityConflictError ||
+                        exception instanceof ERMrest.DuplicateConflictError
+                    )
+                ) {
                     message = errorMessages.systemAdminMessage;
                 }
             }
