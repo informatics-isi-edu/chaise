@@ -260,7 +260,7 @@
                 return false;
             }
 
-            // we are not supporting add in this case
+            // we are not supporting add if it's a free-form related table
             if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
                 return false;
             }

@@ -27,6 +27,19 @@ var testParams = {
       invalidFacetFilterBody: "Click OK to reload this page without Invalid Facet Filters.",
       invalidFilterOperatorErrorTitle : "Invalid Filter",
       invalidFilterOperatorErrorBody : "Click OK to show the list of all records."
+    },
+    conflictErrors: {
+        title: "Conflict",
+        message: [
+            "An unexpected error has occurred. Try clearing your cache.",
+            "If you continue to face this issue, please contact the system administrator.",
+            "\nClick OK to go to the Home Page.",
+            "Show Error Details"
+        ].join("\n"),
+        details: [
+            "409 Conflict",
+            "The request conflicts with the state of the server. invalid input syntax for type boolean: \"12\"",
+        ].join("\n")
     }
 };
 
@@ -236,42 +249,6 @@ describe('Error related test cases,', function() {
         });
     }).pend("no button on Recordedit for delete");
 
-    describe("Error formatting during 409 check", function(){
-
-      beforeAll(function() {
-        browser.ignoreSynchronization = true;
-        var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
-        browser.get(url);
-      });
-
-      it("should be returned as a 409 error with deletion conflict.", function (done) {
-
-          var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle(),
-              deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton();
-
-          chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-              chaisePage.waitForElement(deleteReccordBtn);
-              return deleteReccordBtn.click();
-          }).then(function () {
-              chaisePage.waitForElement(modalTitle);
-              return modalTitle.getText();
-          }).then(function (text) {
-              expect(text).toBe("Confirm Delete", "Deleteion confirmation pop-up could not be opened!");
-              return chaisePage.recordPage.getConfirmDeleteButton().click();
-          }).then(function() {
-            errModalClass =  chaisePage.recordPage.getModalText();
-            return chaisePage.waitForElement(errModalClass);
-          }).then(function() {
-            return errModalClass.getText();
-          }).then(function (errorText) {
-              // Added OR case to avoid discrepancy in error message when table is deleted
-              expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "409 Conflict could not be matched! Check conflict during deletion.");
-              expect(chaisePage.errorModal.getTitle().getText()).toBe(testParams.conflict, "Error title missmatch");
-              done();
-          }).catch(chaisePage.catchTestError(done));
-      });
-    });
-
     describe("History for errorneous Url", function(){
 
         beforeAll(function() {
@@ -318,7 +295,15 @@ describe('Error related test cases,', function() {
                 var confirmBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 browser.wait(EC.presenceOf(confirmBtn), browser.params.defaultTimeout);
                 return confirmBtn.click();
-            }).then (function() {
+            }).then(function () {
+                errModalClass =  chaisePage.recordPage.getModalText();
+                return chaisePage.waitForElement(errModalClass);
+            }).then(function() {
+                return errModalClass.getText();
+            }).then(function (errorText) {
+                // Added OR case to avoid discrepancy in error message when table is deleted
+              expect(errorText == testParams.deletionErrTextBooking || errorText == testParams.deletionErrTextAccommodationImg).toBe(true, "409 Conflict could not be matched! Check conflict during deletion.");
+
                 closeModal = chaisePage.recordEditPage.getModalCloseBtn();
                 chaisePage.waitForElement(closeModal);
                 expect(closeModal.isDisplayed()).toBeTruthy('Close modal option is not available for conflict/forbiddden errors');
@@ -537,6 +522,57 @@ describe('Error related test cases,', function() {
                   lastSlash = newapplink.lastIndexOf("/"),
                   recordsetUrl = newapplink.slice(0, lastSlash);
                 expect(currentUrl).toContain(recordsetUrl, "The redirection from recordedit page to recordset failed");
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
+    });
+
+    describe("For a generic Conflict (409) error", function () {
+        var params = testParams.conflictErrors;
+
+        beforeAll(function() {
+            browser.ignoreSynchronization = true;
+            /**
+             * In this the case the error is happening because the facetblob
+             * has a filter that is not compatible with the value,
+             * the filter is:
+             * {
+             *   "and": [
+             *     {
+             *       "source": [
+             *         {"filter": "luxurious", "operand_pattern": "12"},
+             *         "id"
+             *       ],
+             *       "choices": ["2003"]
+             *     }
+             *   ]
+             * }
+             */
+            var facetBlob = "N4IghgdgJiBcDaoDOB7ArgJwMYFM6JADMBLAGwBccM4RS0APTY9JEAGhBQAcrIoB9LmHKUMEGgEYATCAC+HYjAC6HLAAsUxXKwQgpABn0BmEEtlmgA";
+            url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/*::facets::" + facetBlob;
+            browser.refresh();
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('An error modal window should appear with proper title', function(){
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe(params.title, "The title of no record error pop is not correct");
+        });
+
+        it ("error modal should not display the raw message", function () {
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toBe(params.message, "The message in modal pop is not correct");
+        });
+
+        it ("error modal details should contain the raw error message", function (done) {
+            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
+            var errorDetails = chaisePage.errorModal.getErrorDetails();
+            chaisePage.waitForElement(showDetails);
+            showDetails.click().then(function(){
+                chaisePage.waitForElement(errorDetails);
+                expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
+                expect(errorDetails.getText()).toContain(params.details, "error missmatch.");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });

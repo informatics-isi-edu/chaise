@@ -544,6 +544,13 @@
               "image_id_aggregate_cnt": {
                   "source": [
                       {"inbound": ["product-recordset", "fk_accommodation_image"]},
+                      {
+                        "and": [
+                          {"filter": "RID", "operator": "::null::"},
+                          {"filter": "RCT", "operator": "::null::"}
+                        ],
+                        "negate": true
+                      },
                       {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
                       "id"
                   ],
@@ -555,6 +562,7 @@
                   "source": [
                       {"inbound": ["product-recordset", "fk_accommodation_image"]},
                       {"outbound": ["product-recordset", "fk_accommodation_image_2"]},
+                      {"filter": "id", "operator": "::null::", "negate": true},
                       "id"
                   ],
                   "aggregate": "array_d",  "entity": true

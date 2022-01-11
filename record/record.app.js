@@ -249,7 +249,7 @@
                         model = {
                             columnError: false,
                             isLoading: true,
-                            hasWaitForOrNotUnique: true
+                            requireSecondaryRequest: true
                         };
                     }
 
