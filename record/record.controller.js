@@ -493,36 +493,69 @@
                 if (!res || !Array.isArray(res.rows)) return;
                 var tuples = res.rows;
 
-                var logObject = {
-                    // TODO
-                };
-
+                var CONFIRM_DELETE = (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
+                var leafReference = tuples[0].reference;
                 $rootScope.showSpinner = true;
-                var deleteReferences = tuples[0].reference.getBatchAssociationRef(tuples);
 
-                var i = 0;
-                function recursiveDelete(reference) {
-                    reference.delete(logObject).then(function () {
-                        if (i < deleteReferences.length-1) {
-                            i++;
-                            recursiveDelete(deleteReferences[i])
-                        } else {
-                            $rootScope.showSpinner = false;
-                            // modal close needs to be issued in callback because of asynchronous delete call
-                            pbUnlinkModal.close();
-                        }
-                    }, function () {
-                        // TODO: alert something failed?
-                        // keep track of what succeeds?
+                if (!CONFIRM_DELETE) {
+                    return ERMrest.deleteBatchAssociationRef(leafReference, tuples).then(function () {
                         $rootScope.showSpinner = false;
+                        // modal close needs to be issued in callback because of asynchronous delete call
                         pbUnlinkModal.close();
-                    }).catch(function () {
-                        // TODO: alert something failed?
-                        $rootScope.showSpinner = false;
-                        pbUnlinkModal.close();
+                    }).catch(function (err) {
+                        throw err;
                     });
                 }
-                recursiveDelete(deleteReferences[i]);
+
+                // log the opening of the confirm delete modal
+                logService.logClientAction({
+                    action: logService.getActionString(logService.logActions.UNLINK_INTEND),
+                    stack: logService.getStackObject()
+                }, ref.defaultLogInfo);
+
+                var confirmParams = {
+                    count: tuples.length
+                };
+
+                modalUtils.showModal({
+                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete_multiple.modal.html",
+                    controller: 'ConfirmDeleteController',
+                    controllerAs: 'ctrl',
+                    resolve: {
+                        params: confirmParams
+                    },
+                    size: 'sm'
+                }, function onSuccess() {
+                    // user accepted prompt to delete
+                    ERMrest.deleteBatchAssociationRef(leafReference, tuples).then(function (successResponses, deleteErrors) {
+                        // deleteErrors is an array of all errors that were caught during deletion
+                        // if no errors caught, assume deletion succeeded without issue
+                        console.log("successes: ", successResponses);
+                        console.log("errors: ", deleteErrors);
+                        $rootScope.showSpinner = false;
+
+                        // Show modal popup summarizing total # of deletions succeeded and failed
+                        // notify of the errors
+                        // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
+                        //       - some errors could have been because of row level security
+                        // TODO: modify return of deleteBatchAssociationRef to communicate count that each path response represents
+
+                    }).catch(function (err) {
+                        $rootScope.showSpinner = false;
+                        // errors that land here would be execution of code errors
+                        // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+                        //   as part of the deleteErrors object in the success cb
+                        $log.warn(err);
+                        throw err;
+                    });
+                }, function onError() {
+                    $rootScope.showSpinner = false;
+
+                    logService.logClientAction({
+                        action: logService.getActionString(logService.logActions.UNLINK_CANCEL),
+                        stack: logService.getStackObject()
+                    }, ref.defaultLogInfo);
+                }, false);
             }
 
             var pbUnlinkModal = modalUtils.showModal({

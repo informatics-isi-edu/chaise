@@ -332,6 +332,9 @@
                         templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
                         controller: 'ConfirmDeleteController',
                         controllerAs: 'ctrl',
+                        resolve: {
+                            params: { count: 1 }
+                        },
                         size: 'sm'
                     });
 
@@ -1140,6 +1143,9 @@
                 templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                 controller: "ConfirmDeleteController",
                 controllerAs: "ctrl",
+                resolve: {
+                    params: { count: 1 }
+                },
                 size: "sm"
             }, function onSuccess(res) {
                 vm.submissionButtonDisabled = true;

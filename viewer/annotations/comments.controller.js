@@ -58,6 +58,9 @@
                     templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
                     controller: 'ConfirmDeleteController',
                     controllerAs: 'ctrl',
+                    resolve: {
+                        params: { count: 1 }
+                    },
                     size: 'sm'
                 });
 

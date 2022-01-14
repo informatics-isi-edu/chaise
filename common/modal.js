@@ -139,11 +139,12 @@
         }
     }])
 
-    .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
+    .controller('ConfirmDeleteController', ['params', '$uibModalInstance', function ConfirmDeleteController(params, $uibModalInstance) {
         var vm = this;
         vm.ok = ok;
         vm.cancel = cancel;
         vm.status = 0;
+        vm.count = params.count;
 
         function ok() {
             $uibModalInstance.close();
