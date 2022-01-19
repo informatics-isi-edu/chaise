@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
+import errorReducer from '@chaise/store/slices/error'
 
 export const store = configureStore({
   reducer: {
-    // TODO reducers go here
+    error: errorReducer
   },
 });
 

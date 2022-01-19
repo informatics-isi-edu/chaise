@@ -1,6 +1,8 @@
 import { windowRef } from '@chaise/utils/window-ref'
 
-class ErrorHandler {
+// TODO not used for now
+
+export class ErrorHandler {
 
   static handleException(exception: any, isDismissible?: boolean, skipLogging?: boolean, okBtnCallback?: Function, closeBtnCallback?: Function) {
     // TODO
@@ -87,27 +89,3 @@ class ErrorHandler {
     });
   };
 }
-
-
-// TODO this should call the handle exception instead...
-windowRef.onerror = function () {
-
-  var canClose = false;
-
-  if (typeof windowRef.chaiseConfig != 'undefined' && windowRef.chaiseConfig.allowErrorDismissal) {
-    canClose = true;
-  }
-
-  var error = arguments[4];
-  error.stack = [
-    arguments[1],
-    arguments[2],
-    arguments[3]
-  ].join(':');
-
-  var redirectLink = (typeof windowRef.chaiseConfig != 'undefined' && windowRef.chaiseConfig.dataBrowser ? windowRef.chaiseConfig.dataBrowser : windowRef.location.origin);
-  var message = "Try clearing your cache. ";
-  ErrorHandler.offlineModalTemplate(error, message, redirectLink, canClose);
-};
-
-
