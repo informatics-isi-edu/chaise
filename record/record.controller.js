@@ -498,7 +498,7 @@
                 $rootScope.showSpinner = true;
 
                 if (!CONFIRM_DELETE) {
-                    return ERMrest.deleteBatchAssociationRef(leafReference, tuples).then(function () {
+                    return leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(function () {
                         $rootScope.showSpinner = false;
                         // modal close needs to be issued in callback because of asynchronous delete call
                         pbUnlinkModal.close();
@@ -527,24 +527,24 @@
                     size: 'sm'
                 }, function onSuccess() {
                     // user accepted prompt to delete
-                    ERMrest.deleteBatchAssociationRef(leafReference, tuples).then(function (successResponses, deleteErrors) {
-                        // deleteErrors is an array of all errors that were caught during deletion
-                        // if no errors caught, assume deletion succeeded without issue
-                        console.log("successes: ", successResponses);
-                        console.log("errors: ", deleteErrors);
+                    leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(function (response) {
+                        // response is an error object with message for both success and error info
                         $rootScope.showSpinner = false;
 
                         // Show modal popup summarizing total # of deletions succeeded and failed
-                        // notify of the errors
+                        response.clickOkToDismiss = true;
+                        var reloadModalRows = function () {
+                            console.log("delete success/error dismiss");
+                        }
+                        ErrorService.handleException(response, false, false, reloadModalRows, reloadModalRows);
                         // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
                         //       - some errors could have been because of row level security
-                        // TODO: modify return of deleteBatchAssociationRef to communicate count that each path response represents
-
                     }).catch(function (err) {
                         $rootScope.showSpinner = false;
                         // errors that land here would be execution of code errors
                         // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
                         //   as part of the deleteErrors object in the success cb
+                        // NOTE: if one of the identifying values is empty or null, an error is thrown here
                         $log.warn(err);
                         throw err;
                     });
@@ -569,10 +569,11 @@
                 size: modalUtils.getSearchPopupSize(params),
                 templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
             }, function rowsDeleted() {
-
-                recordAppUtils.updateRecordPage(true);
+                // code doesn't trigger this case any more since modal doesn't automatically close
+                // recordAppUtils.updateRecordPage(true);
             }, function () {
                 // cancel
+                recordAppUtils.updateRecordPage(true);
             }, false);
         }
 

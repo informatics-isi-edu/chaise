@@ -227,6 +227,8 @@
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
         } else if (ERMrest && exception instanceof ERMrest.UnsupportedFilters) {
             vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
+        } else if (ERMrest && exception instanceof ERMrest.BatchUnlinkResponse) {
+            vm.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
