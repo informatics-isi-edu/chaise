@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@chaise/assets/scss/app.scss';
 
-import React  from 'react';
+import React, { useEffect }  from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import Button from 'react-bootstrap/Button';
@@ -13,12 +13,11 @@ import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
 
 import FontAwesome from '@chaise/services/fontawesome';
-import { windowRef } from '@chaise/utils/window-ref';
 
-import Spinner from '@chaise/components/spinner';
 import Navbar from '@chaise/components/navbar';
 import ErrorTest from '@chaise/components/error-test';
 import ErrorModal from '@chaise/components/error-modal';
+import ExampleComponent from '@chaise/components/example';
 
 const RecordSetApp = (): JSX.Element => {
 
@@ -26,17 +25,24 @@ const RecordSetApp = (): JSX.Element => {
 
   FontAwesome.addRecordsetFonts();
 
-  const errorFallback = ({ error }: FallbackProps) => {
-    dispatch(showError({error: error}));
+  useEffect(() => {
+    window.addEventListener("error", (event) => {
+      console.log("got the error in catch-all");
+      dispatch(showError({error: event.error, isGlobal: true}));
+      return true;
+    });
 
-    // return empty, so only the error modal is displayed
-    return null;
-  };
+    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+      console.log("got the error in catch-all (unhandled rejection)");
+      dispatch(showError({error: event.reason, isGlobal: true}));
+    });
+  });
 
   return (
     <>
     <ErrorBoundary
-      FallbackComponent={errorFallback}
+      // the onerror will catch the error and show the proper error
+      FallbackComponent={() => null}
     >
       <Navbar />
       <div>This is the recordset app</div>
@@ -48,11 +54,10 @@ const RecordSetApp = (): JSX.Element => {
       </div>
       <Button>bootstrap button</Button>
       <div>
-        spinner is working:
-        <br/>
-        <Spinner/>
+        <ExampleComponent app="recordset" />
       </div>
       <div>
+        <br/><br/>
         Test error handling:
         <ErrorTest/>
       </div>

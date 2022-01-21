@@ -1,23 +1,37 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface ErrorState {
+/**
+ * what's stored in the store must be a plain serializable objects...
+ * so it's better if we just map everything in the showError function
+ * to something that will be used in the modal...
+ * then modal just uses those and shows the error
+ */
+interface ErrorState {
   isDisplayed: boolean;
-  error: Error | null;
   isDismissible: boolean;
   isPopup: boolean;
+  isGlobal: boolean;
+  // error: {
+  //   status: string;
+  //   message: string;
+  //   subMessage?: string;
+  // }
+  error: Error | null;
 }
 
-export interface ErrorPayloadAction {
+interface ErrorPayloadAction {
   error: Error;
   isDismissible?: boolean;
   isPopup?: boolean;
+  isGlobal?: boolean;
 }
 
 const initialState: ErrorState = {
   isDisplayed: false,
   error: null,
   isDismissible: false,
-  isPopup: true
+  isPopup: true,
+  isGlobal: false
 };
 
 export const errorSlice = createSlice({
@@ -28,12 +42,14 @@ export const errorSlice = createSlice({
       const {
         error,
         isDismissible=initialState.isDismissible,
-        isPopup=initialState.isPopup
+        isPopup=initialState.isPopup,
+        isGlobal=initialState.isGlobal
       } = action.payload;
       state.isDisplayed = true;
       state.error = error;
       state.isDismissible = isDismissible;
       state.isPopup = isPopup;
+      state.isGlobal = isGlobal;
 
       // set the state properly based on the object...
     },
@@ -42,6 +58,7 @@ export const errorSlice = createSlice({
       state.error = initialState.error;
       state.isDismissible = initialState.isDismissible;
       state.isPopup = initialState.isPopup;
+      state.isGlobal = initialState.isGlobal;
     }
   }
 });

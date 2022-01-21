@@ -544,13 +544,13 @@
 
                 /**
                  * make sure the error popup is scrollable
-                 * 
-                 * The previous block is changing the position of error modal, which will 
+                 *
+                 * The previous block is changing the position of error modal, which will
                  * affect the following. Since the effect might not be applied right away,
                  * I had to add this timeout. This will ensure that the errorBodyY that we
                  * are fetching is correct.
                  */
-                $timeout(function(){ 
+                $timeout(function(){
                     try {
                         var footerHeight = document.querySelector(".modal-footer").offsetHeight;
                         var errorBodyY = errorBody.getBoundingClientRect().y;
@@ -561,7 +561,7 @@
                         // instead of adding multiple checks, just catching error
                     }
                 }, 200);
-                
+
             }
         }
 
@@ -608,7 +608,7 @@
                 // change defaults
                 pageName = "Recordset";
                 redirectLink = exception.errorData.redirectUrl;
-            } 
+            }
             else if (ERMrest && exception instanceof ERMrest.InvalidServerResponse) {
                 if (!skipLogging) {
                     logError(exception, ConfigUtils.getContextHeaderParams());
@@ -619,7 +619,7 @@
             else if (ERMrest && exception instanceof ERMrest.ERMrestError ) {
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'gotoTableDisplayname')) pageName = exception.errorData.gotoTableDisplayname;
                 if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectUrl')) redirectLink = exception.errorData.redirectUrl;
-            } 
+            }
             else if (exception instanceof Errors.CustomError ) {
                 if (!skipLogging) {
                     logError(exception, ConfigUtils.getContextHeaderParams());
@@ -681,7 +681,7 @@ var logError = function (error, contextHeaderParams) {
     if (!ERMrest) return;
     var ermrestUri = (typeof chaiseConfig != 'undefined' && chaiseConfig.ermrestLocation ? chaiseConfig.ermrestLocation : window.location.origin + '/ermrest');
 
-    if (!contextHeaderParams || typeof contextHeaderParams !== "object" && 
+    if (!contextHeaderParams || typeof contextHeaderParams !== "object" &&
         typeof window.dcctx === "object" && typeof window.dcctx.contextHeaderParams === "object") {
         contextHeaderParams = window.dcctx.contextHeaderParams;
     }

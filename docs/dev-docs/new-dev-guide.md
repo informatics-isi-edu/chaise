@@ -45,25 +45,7 @@ This document should be organized later, I just wanted to make sure the things t
   - Ideally, use item IDs
   - Fallback, use array indices, but only if data won’t reorder
 
-- Sample React component:
-
-```typescript
-type ListItemProps = {
-  name: string;
-  selected: boolean;
-  onClick: (name: string) => void;
-};
-
-const ListItem = ( {
-  name, selected, onClick
-}: ListItemProps) => {
-
-
-
-}
-
-
-```
+- Please refer to `example.tsx` for a sample component.
 
 
 ### Parent/child component communication

@@ -6,7 +6,8 @@ interface ChaiseModalProps {
   body: JSX.Element,
   footer: JSX.Element,
   size?: 'sm' | 'lg' | 'xl',
-  show: boolean
+  show: boolean,
+  onHide?: Function
 }
 
 const ChaiseModal = ({
@@ -14,14 +15,16 @@ const ChaiseModal = ({
   body,
   footer,
   size,
-  show
+  show,
+  onHide
 }: ChaiseModalProps): JSX.Element => {
   return (
     <Modal
       size={size}
       show={show}
+      onHide={onHide}
     >
-      <Modal.Header>
+      <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
 

@@ -1,5 +1,27 @@
 import { errorNames, errorMessages } from "@chaise/utils/constants";
 
+interface ChaiseERMrestJSError {
+  /**
+   * the error header
+   */
+  status: string;
+  /**
+   * whats displayed in the body
+   */
+  message: string;
+  /**
+   * what's displayed in the details
+   */
+  subMessage?: string;
+
+  errorData?: {
+    // in ermrestjs
+    redirectPath?: string;
+
+    redirectUrl?: string;
+    gotoTableDisplayname?: string;
+  }
+}
 
 interface ChaiseErrorParameters {
   status: string;

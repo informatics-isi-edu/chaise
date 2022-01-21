@@ -23,3 +23,16 @@ export class UriUtils {
 export class ConfigUtils {
 
 }
+
+
+export class TypeUtils {
+
+  /**
+   * Return true if the input is string, otherwise false.
+   * @param inp
+   * @returns
+   */
+  static isStringAndNotEmpty = (inp: any) => {
+    return typeof inp === "string" && inp.length > 0;
+  }
+}
