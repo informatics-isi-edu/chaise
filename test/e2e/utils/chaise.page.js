@@ -629,6 +629,12 @@ var recordPage = function() {
         return el.element(by.css(".add-records-link"));
     };
 
+    this.getRemoveRecordsLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
+        // the link is not a child of the table, rather one of the accordion group
+        return el.element(by.css(".unlink-records-link"));
+    }
+
     this.getToggleDisplayLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
         // the link is not a child of the table, rather one of the accordion group
@@ -1152,6 +1158,10 @@ var recordsetPage = function() {
         return element(by.id("multi-select-submit-btn"));
     }
 
+    this.getModalCancel = function () {
+        return element(by.css(".modal-close"));
+    }
+
     this.getRangeFacetForm = function (idx) {
         return element(by.id("fc-"+ idx)).element(by.css("fieldset"));
     };
@@ -1260,7 +1270,7 @@ var errorModal = function () {
     }
 
     this.getTitle = function () {
-        return element(by.css(".modal-title"));
+        return element(by.css(".modal-error .modal-title"));
     }
 };
 

@@ -441,7 +441,7 @@
         function submitMultiSelection() {
             // add and unlink p&b rely on a function being defined to submit the request before closing the modal
             if (vm.params.submitBeforeClose) {
-                vm.params.submitBeforeClose(getMultiSelectionResult());
+                vm.params.submitBeforeClose(getMultiSelectionResult(), vm.tableModel);
             } else {
                 $uibModalInstance.close(getMultiSelectionResult());
             }

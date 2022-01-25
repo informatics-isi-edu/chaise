@@ -3206,6 +3206,7 @@
 
         // why we had to reload a request
         var reloadCauses = Object.freeze({
+            BATCH_UNLINK: "batch-unlink", // remove records for assocation 
             CLEAR_ALL: "clear-all", // clear all button
             CLEAR_CFACET: "clear-cfacet",
             CLEAR_CUSTOM_FILTER: "clear-custom-filter",

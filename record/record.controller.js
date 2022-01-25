@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordTableUtils', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordTableUtils, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -487,24 +487,66 @@
             params.logStack = logStack;
             params.logStackPath = logStackPath;
 
-            params.submitBeforeClose = function dataSelected(res) {
+            params.submitBeforeClose = function dataSelected(res, searchPopupTableModel) {
                 // tuples returned are for leaf table, need to get tuples from assocation table instead
                 // if no rows, nothing to delete
                 if (!res || !Array.isArray(res.rows)) return;
                 var tuples = res.rows;
 
                 var CONFIRM_DELETE = (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
+                // NOTE: This reference has to be filtered so creating the path in the ermrestJS function works properly
                 var leafReference = tuples[0].reference;
                 $rootScope.showSpinner = true;
 
+                // success response function for deleteBatchAssociationTuples
+                // response is an error object with message for both success and error info
+                var deleteResponse = function (response) {
+                    $rootScope.showSpinner = false;
+
+                    // Show modal popup summarizing total # of deletions succeeded and failed
+                    response.clickOkToDismiss = true;
+                    var reloadModalRows = function () {
+                        if (response.failedTupleData > 0) {
+                            // iterate over the set of successful ids and find them in selected rows, then remove them
+                            response.successTupleData.forEach(function (data) {
+                                // data is an object of key/value pairs for each piece of key information
+                                // { keycol1: val, keycol2: val2, ... }
+                                // TODO: what to do with multiple keys?
+                                // Object.keys(data).forEach(function (key) {
+                                var key = Object.keys(data)[0];
+                                var idx = searchPopupTableModel.selectedRows.findIndex(function (tuple) {
+                                    return tuple.data[key] == data[key];
+                                });
+
+                                searchPopupTableModel.selectedRows.splice(idx, 1);
+                                // });
+                            });
+                        } else {
+                            // if everything is successful, empty selected rows
+                            searchPopupTableModel.selectedRows = [];
+                        }
+
+                        recordTableUtils.update(searchPopupTableModel, true, true, true, false, logService.reloadCauses.BATCH_UNLINK);
+                    }
+
+                    // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
+                    //       - some errors could have been because of row level security
+                    ErrorService.handleException(response, false, false, reloadModalRows, reloadModalRows);
+                }
+
+                // error response function for deleteBatchAssociationTuples
+                var deleteError = function (err) {
+                    $rootScope.showSpinner = false;
+                    // errors that land here would be execution of code errors
+                    // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+                    //   as part of the deleteErrors object in the success cb
+                    // NOTE: if one of the identifying values is empty or null, an error is thrown here
+                    $log.warn(err);
+                    throw err;
+                }
+
                 if (!CONFIRM_DELETE) {
-                    return leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(function () {
-                        $rootScope.showSpinner = false;
-                        // modal close needs to be issued in callback because of asynchronous delete call
-                        pbUnlinkModal.close();
-                    }).catch(function (err) {
-                        throw err;
-                    });
+                    return leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(deleteResponse).catch(deleteError);
                 }
 
                 // log the opening of the confirm delete modal
@@ -527,27 +569,7 @@
                     size: 'sm'
                 }, function onSuccess() {
                     // user accepted prompt to delete
-                    leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(function (response) {
-                        // response is an error object with message for both success and error info
-                        $rootScope.showSpinner = false;
-
-                        // Show modal popup summarizing total # of deletions succeeded and failed
-                        response.clickOkToDismiss = true;
-                        var reloadModalRows = function () {
-                            console.log("delete success/error dismiss");
-                        }
-                        ErrorService.handleException(response, false, false, reloadModalRows, reloadModalRows);
-                        // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
-                        //       - some errors could have been because of row level security
-                    }).catch(function (err) {
-                        $rootScope.showSpinner = false;
-                        // errors that land here would be execution of code errors
-                        // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
-                        //   as part of the deleteErrors object in the success cb
-                        // NOTE: if one of the identifying values is empty or null, an error is thrown here
-                        $log.warn(err);
-                        throw err;
-                    });
+                    leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(deleteResponse).catch(deleteError);
                 }, function onError() {
                     $rootScope.showSpinner = false;
 

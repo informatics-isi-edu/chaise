@@ -203,7 +203,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         add: {
             relatedDisplayname: "association_table",
             tableDisplayname: "related_table",
-            modalTitle: "Add association_table to Accommodations : Super 8 North Hollywood Motel",
+            modalTitle: "Add related_table to Accommodations: Super 8 North Hollywood Motel",
             totalCount: 4,
             existingCount: 1,
             disabledRows: ["1"],
@@ -213,8 +213,19 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 afterSearchDisabledRows: ["1"]
             },
             selectIndex: 1, // after search
+            selectIndex2: 2,
             rowValuesAfter: [
                 ["Television"],
+                ["Air Conditioning"],
+                ["Coffee Maker"]
+            ]
+        },
+        unlink: {
+            relatedDisplayname: "association_table",
+            modalTitle: "Remove association_table from Accommodations : Super 8 North Hollywood Motel",
+            totalCount: 3,
+            postDeleteMessage: "2 rows successfully removed.\n\nClick OK to dismiss this dialog.",
+            rowValuesAfter: [
                 ["Coffee Maker"]
             ]
         }
@@ -223,6 +234,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
         recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
+
+        recordHelpers.testBatchUnlinkAssociationTable(association_table.unlink, false, pageReadyCondition);
     });
 
     var association_with_page_size = {
