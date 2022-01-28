@@ -26,23 +26,34 @@ const RecordSetApp = (): JSX.Element => {
   FontAwesome.addRecordsetFonts();
 
   useEffect(() => {
+    /**
+     * global error handler for uncaught errors
+     */
     window.addEventListener("error", (event) => {
       console.log("got the error in catch-all");
       dispatch(showError({error: event.error, isGlobal: true}));
-      return true;
     });
-
     window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
       console.log("got the error in catch-all (unhandled rejection)");
       dispatch(showError({error: event.reason, isGlobal: true}));
     });
   });
 
+  const errorFallback = ({error}: FallbackProps) => {
+    console.log("error fallback of the main error boundary");
+
+    // TODO context header params
+    //ErrorHandler.logTerminalError(error);
+    dispatch(showError({error: error, isGlobal: true}));
+
+    // the error modal portal will be displayed so there's no need for the fallback
+    return null;
+  }
+
   return (
     <>
     <ErrorBoundary
-      // the onerror will catch the error and show the proper error
-      FallbackComponent={() => null}
+      FallbackComponent={errorFallback}
     >
       <Navbar />
       <div>This is the recordset app</div>

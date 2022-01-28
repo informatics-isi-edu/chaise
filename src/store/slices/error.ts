@@ -16,7 +16,10 @@ interface ErrorState {
   //   message: string;
   //   subMessage?: string;
   // }
-  error: Error | null;
+  error: {
+    name?: string,
+    message: string
+  } | null;
 }
 
 interface ErrorPayloadAction {
@@ -46,7 +49,10 @@ export const errorSlice = createSlice({
         isGlobal=initialState.isGlobal
       } = action.payload;
       state.isDisplayed = true;
-      state.error = error;
+      state.error = {
+        name: error.name,
+        message: error.message
+      };
       state.isDismissible = isDismissible;
       state.isPopup = isPopup;
       state.isGlobal = isGlobal;

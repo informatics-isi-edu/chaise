@@ -1,47 +1,84 @@
 import { useState } from "react";
 import { Alert, Button, ButtonGroup } from "react-bootstrap";
-import { ErrorBoundary, FallbackProps} from 'react-error-boundary';
+import { ErrorBoundary, FallbackProps, useErrorHandler} from 'react-error-boundary';
 import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
 
-type ErrorComponentProps = {
-  catchError?: boolean;
+const ExplodeComponent = () : JSX.Element => {
+  throw new Error('Something went wrong in the component.');
 }
 
-const ExplodeComponent = ({catchError}: ErrorComponentProps) : JSX.Element => {
+const ExplodeComponentWithManualHandling = () : JSX.Element => {
   const dispatch = useAppDispatch();
-  if (catchError) {
+  try {
+    throw new Error('Something went wrong in the component.');
+  } catch (exp) {
+    if (exp instanceof Error) {
+      dispatch(showError({error: exp}));
+    }
+  }
+  return <></>;
+}
+
+const ErrorComponent = () : JSX.Element => {
+  const dispatch = useAppDispatch();
+  const [explode, setExplode] = useState(false);
+
+  const onClickError = () => {
+    throw new Error('Something went wrong in the event handler.');
+  };
+
+  return (
+    <>
+      <ButtonGroup>
+        <Button onClick={() => setExplode(e => !e)}>throw error</Button>
+        <Button onClick={onClickError}>throw error on click</Button>
+      </ButtonGroup>
+      {explode ? <ExplodeComponent/> : null}
+    </>
+  );
+}
+
+const ErrorComponentWithBoundary = () : JSX.Element => {
+  const handleError = useErrorHandler();
+  const [explode, setExplode] = useState(false);
+
+
+  const onClickError = () => {
     try {
-      throw new Error('Something went wrong in the component.');
+      throw new Error('Something went wrong in the event handler.');
+    } catch (exp) {
+      console.log('wow');
+      handleError(exp);
+    }
+  };
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={({error}) => <Alert variant="danger">inner: {error.message}</Alert>}
+    >
+      <ButtonGroup>
+        <Button onClick={() => setExplode(e => !e)}>throw error</Button>
+        <Button onClick={onClickError}>throw error on click</Button>
+      </ButtonGroup>
+      {explode ? <ExplodeComponent/> : null}
+    </ErrorBoundary>
+  );
+};
+
+const ErrorComponentWithManualHandling = () : JSX.Element => {
+  const dispatch = useAppDispatch();
+  const [explode, setExplode] = useState(false);
+
+
+  const onClickError = () => {
+    try {
+      throw new Error('Something went wrong in the event handler.');
     } catch (exp) {
       if (exp instanceof Error) {
         dispatch(showError({error: exp}));
       }
-    }
-  } else {
-    throw new Error('Something went wrong in the component.');
-  }
-
-  return <></>;
-}
-
-const ErrorComponent = ({catchError}: ErrorComponentProps) : JSX.Element => {
-  const dispatch = useAppDispatch();
-
-  const [explode, setExplode] = useState(false);
-
-  const onClickError = () => {
-    if (catchError) {
-      try {
-        throw new Error('Something went wrong in the event handler.');
-      } catch (exp) {
-        if (exp instanceof Error) {
-          dispatch(showError({error: exp}));
-        }
-        return null;
-      }
-    } else {
-      throw new Error('Something went wrong in the event handler.');
+      return null;
     }
   };
 
@@ -51,47 +88,43 @@ const ErrorComponent = ({catchError}: ErrorComponentProps) : JSX.Element => {
         <Button onClick={() => setExplode(e => !e)}>throw error</Button>
         <Button onClick={onClickError}>throw error on click</Button>
       </ButtonGroup>
-      {explode ? <ExplodeComponent catchError={catchError}/> : null}
+      {explode ? <ExplodeComponentWithManualHandling/> : null}
     </>
   );
-}
-
-const errorFallback = ({ error }: FallbackProps) => {
-  return (<Alert variant="danger">{error.message}</Alert>);
 };
 
-const ErrorComponentWithBoundary = () : JSX.Element => {
-  return (
-    <ErrorBoundary
-      FallbackComponent={errorFallback}
-    >
-      <ErrorComponent/>
-    </ErrorBoundary>
-  )
-}
-
-const ErrorComponentWithCatch = () : JSX.Element => {
-  return (
-    <ErrorComponent catchError={true}/>
-  )
-}
-
 const ErrorTest = () : JSX.Element => {
+
+  let catchedErrorComponent;
+  try {
+    catchedErrorComponent = <ErrorComponent/>;
+  } catch (exp) {
+    console.log("caught the error here!");
+    catchedErrorComponent = (<div>wow errored!</div>);
+  }
 
   return (
     <div>
       <div>
-        <p>testing comp error vs. event listener error:</p>
+        <p>General case:</p>
         <ErrorComponent/>
+      </div>
+      <div>
+        <p>wrapping the component in a try-catch:</p>
+        {catchedErrorComponent}
       </div>
       <br/>
       <div>
-        <p>Testing local comp error boundary:</p>
-        <ErrorComponentWithBoundary/>
+        <p>Local error boundary:</p>
+        <ErrorBoundary
+          FallbackComponent={({error}) => <Alert variant="danger">outer: {error.message}</Alert>}
+        >
+          <ErrorComponentWithBoundary/>
+        </ErrorBoundary>
       </div>
       <div>
-        <p>Testing local handling of error:</p>
-        <ErrorComponentWithCatch/>
+        <p>Catching the error and manually calling the handler</p>
+        <ErrorComponentWithManualHandling/>
       </div>
     </div>
   );
