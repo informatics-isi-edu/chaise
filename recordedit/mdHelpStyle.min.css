@@ -9,3 +9,12 @@
 #mdHelp footer {
     position: relative;
 }
+
+.markdown-reference {
+    margin-bottom: 0;
+}
+
+.markdown-reference .more-details-row td{
+    text-align: center;
+    border-bottom: 0;
+}

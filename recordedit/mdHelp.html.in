@@ -234,6 +234,13 @@ Cell 3 | Cell 4
                         </tr>
 
                     </tbody>
+                    <tfoot>
+                        <tr class="more-details-row">
+                            <td colspan="3">
+                                For more advanced features please refer to <a target="_blank" href="https://github.com/informatics-isi-edu/ermrestjs/blob/master/docs/user-docs/markdown-formatting.md">this document</a>.
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         </div>
