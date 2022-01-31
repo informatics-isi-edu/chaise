@@ -458,7 +458,7 @@
                     }
 
                     _addCauseToModel(m.tableModel, cause);
-                } else if (m.hasWaitForOrNotUnique) {
+                } else if (m.requireSecondaryRequest) {
                     m.isLoading = true;
                 }
             })

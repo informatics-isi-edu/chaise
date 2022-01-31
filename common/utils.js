@@ -1447,7 +1447,6 @@
          */
         function onLinkClick() {
             return function ($event, menuObject) {
-                $event.preventDefault();
                 $event.stopPropagation();
 
                 // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
@@ -1458,12 +1457,6 @@
                         action: logService.getActionString(action, "", ""),
                         names: menuObject.names
                     });
-                }
-
-                if (menuObject.newTab) {
-                    $window.open(menuObject.url, '_blank');
-                } else {
-                    $window.location = menuObject.url;
                 }
             };
         }
@@ -2557,7 +2550,13 @@
             // initalize to null as if there is no saved query table
             // savedQuery object should be defined with showUI true || false for UI purposes
             var savedQuery = {
-                showUI: reference.display.showSavedQuery
+                defaultNameLimits: {},
+                ermrestTablePath: null,
+                ermrestAGPath: null,
+                mapping: {},
+                rid: null,
+                showUI: reference.display.showSavedQuery,
+                updated: true
             }
 
             // NOTE: if this is not set, saved query UI should be turned off
@@ -2581,8 +2580,8 @@
 
                     // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
                     if (queryParams && queryParams.savedQueryRid) {
-                      savedQuery.rid = queryParams.savedQueryRid;
-                      savedQuery.updated = false; // initialized here to track that the query's last execution time has been updated
+                        savedQuery.rid = queryParams.savedQueryRid;
+                        savedQuery.updated = false; // initialized here to track that the query's last execution time has been updated
                     }
                 } else {
                     // if mapping is invalid, the config is ill-defined and the feature will be turned off

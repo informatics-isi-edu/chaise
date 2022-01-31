@@ -54,7 +54,7 @@
                     // returns true if we should show the column value (as oppose to not showing or showing an inline table)
                     // column is not inline and value is not null or it is a secondary request (has wait for or it's not unique)
                     scope.showColumn = function (i) {
-                        return !isInline(i) && (scope.values[i].value != null || scope.columnModels[i].hasWaitForOrNotUnique);
+                        return !isInline(i) && (scope.values[i].value != null || scope.columnModels[i].requireSecondaryRequest);
                     };
 
                     // returns true if we should show a table (data is non-empty or we can show empty)

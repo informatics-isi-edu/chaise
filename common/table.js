@@ -1626,7 +1626,8 @@
 
                         // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
                         if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
-                        if (modelIdx+1 != modelsWFilters.length) name += facetInfo + ";"
+                        name += facetInfo;
+                        if (modelIdx+1 != modelsWFilters.length) name += ";"
 
                         // ===== setting default description =====
                         description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
@@ -1971,7 +1972,12 @@
                         };
                         ErrorService.handleException(res.issues, false, false, cb, cb);
                     } else {
-                        if ($rootScope.savedQuery && $rootScope.savedQuery.showUI && !$rootScope.savedQuery.updated) {
+                        // execute the following if:
+                        //   - the savedQuery UI is being shown
+                        //   - a savedQuery rid is present in the url on page load
+                        //   - the updated flag is not true
+                        //     - savedQuery.updated is initialized to true unless there is a proper savedQuery mapping and defined savedQuery rid is set
+                        if ($rootScope.savedQuery && $rootScope.savedQuery.showUI && $rootScope.savedQuery.rid && !$rootScope.savedQuery.updated) {
                             // to prevent the following code and request from triggering more than once
                             // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
                             $rootScope.savedQuery.updated = true;
@@ -2012,7 +2018,7 @@
                             config.headers[ERMrest.contextHeaderName] = logObj;
                             // attributegroup/CFDE:saved_query/RID;last_execution_status
                             ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows, config).then(function (response) {
-                              // do nothing
+                                // do nothing
                             }).catch(function (error) {
                                 $log.warn("saved query last executed time could not be updated");
                                 $log.warn(error);

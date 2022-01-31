@@ -189,16 +189,11 @@
                     }
 
                     scope.logBranding = function ($event, link) {
-                        // prevent the default link behavior, so we log the action first
-                        $event.preventDefault();
                         $event.stopPropagation();
 
                         logService.logClientAction({
                             action: logService.getActionString(logService.logActions.NAVBAR_BRANDING, "", "")
                         });
-
-                        // change the window location (do the default link behavior)
-                        $window.location = link;
                     }
 
                     scope.onLinkClick = MenuUtils.onLinkClick();

@@ -416,8 +416,14 @@
                             }
                         },
                         {
-                            "source": [{
+                            "source": [
+                                {
                                     "inbound": ["product-record", "fk_table_w_agg_accommodation"]
+                                },
+                                {
+                                    "filter": "value",
+                                    "operand_pattern": "some_invalid_value",
+                                    "negate": true
                                 },
                                 "id"
                             ],
@@ -429,6 +435,13 @@
                                 },
                                 {
                                     "inbound": ["product-record", "fk_thumbnail_collection"]
+                                },
+                                {
+                                    "or": [
+                                        {"filter": "id", "operator": "::null::"},
+                                        {"filter": "title", "operand_pattern": "some_title_that_should_not_be_used"}
+                                    ],
+                                    "negate": true
                                 },
                                 "id"
                             ],
