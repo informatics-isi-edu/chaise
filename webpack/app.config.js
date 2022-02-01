@@ -2,10 +2,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
+const webpack = require("webpack");
 
-var mode = process.env.NODE_ENV || 'development';
-console.log("webpack mode: " + mode);
-module.exports =  function (appName, filename) {
+module.exports =  function (appName, filename, mode) {
   filename = filename || appName;
   return {
       name: appName,
@@ -57,6 +56,9 @@ module.exports =  function (appName, filename) {
           ]
       },
       plugins: [
+        new webpack.DefinePlugin({
+          'process.env.NODE_ENV': JSON.stringify(mode),
+        }),
         new MiniCssExtractPlugin(),
         new HtmlWebpackPlugin({
           template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
