@@ -1,52 +1,308 @@
-# Error handling
+# Error handling in React
+
+This document focuses on error handling practices that we should follow while migrating from AngularJS to React.
+
+In the AngularJS implementation of Chaise, we rely on `window.onerror` and `$exceptionHandler` to catch any asynchrouns or syncronous errors that might happen while processing the page.
+
+Both of the mentioned methods are working as a "catch all" where we're calling the `handleException` function in `ErrorService`. This function can handle both expected/known errors (e.g. 403 from a read request), or unexpected/unknown errors (e.g. JavaScript errors because of programmatic mistakes).
+
+Therefore the general guideline regardless of asynchrouns or synchronous nature of error was:
+- If you want a local treatment of errors, catch the errors locally.
+- Otherwise throw the error (which means the "catch all" logic would handle it properly).
+
+This is not fully the case anymore. In React, any synchronous error that happens during the rendering of a component will break the whole app and to avoid that we need to make some modifications to our error handling logic.
+## How it works
+
+The following is how error handling should work in Chaise using React:
+
+### Error service
+
+- To make sure we can call the error handler from anywhere in the page structure, we will use `redux`. This will allow us to store the state of errors. This way,
+  - We can `dispatch` a message to show the error.
+  - The logic to show proper error message or UX behavior based on the error object will be part of the error reducer.
+  - The error modal component can use the `error` in store to determine whether it should show any errors or not.
+
+### Global handler (catch all)
+
+- The whole app should be wrapped in an error boundary. This will ensure that even if there's an unexpected error, we can show the error modal to users (and also log the error).
+- `error` and `unhandledrejection` event listeners must be defined in the app component, so we can `dispatch` the unhandled errors.
+
+Based on this, the following is how each app should roughly look like:
+```tsx
+const RecordSetApp = () : JSX.Element => {
+  ...
+
+  useEffect(() => {
+    /**
+     * global error handler for uncaught errors
+    */
+    window.addEventListener("error", (event) => {
+      dispatch(...);
+    });
+    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+      dispatch(...);
+    });
+
+    ...
+  });
+
+  ...
+
+  const errorFallback = ({error}: FallbackProps) => {
+    // log the error
+    ...
+
+    // dispatch the error
+    dispatch(...);
+
+    // the error modal will be displayed so there's no need for the fallback
+    return null;
+  }
 
 
-## Previous guidelines
+  return (
+    <ErrorBoundary FallbackComponent={errorFallback}>
+      ...
+    </ErrorBoundary>
+  )
+}
+```
 
-- Regarding async calls or different parts of the code:
-  - Handle errors localy if you want a local treatment of errors.
-  - Otherwise just throw the error
+### Local handler
 
-- Catch all logic: If AngularJS encountered an error, it will call the catch-all logic. This error could be because of an expected/known error in the code (403 from a read request for example), or an unexpected/unkown error (syntax error because of a programmer mistake)
+- We should not let any error be unhandeled. All errors should be catched.
+  - If we don't want to do anything specific for the error, we should dispatch the catched error.
+  - If we want a local treatment for errors, we can wrap the component in an error boundary. This will allow us to offer an alternative UI.
 
+## Guidelines
 
-## New guideline
+### Development vs. Production
 
-- Regarding async calls or different parts of the code:
-  - Handle errors localy if you want a local treatment of errors (through ErroBoundary or just a customize behavior)
-  - Otherwise catch the errors and manually call the error service
-
-- app-wide ErrorBoundary logic: Ensures the app doesn't crash because of an unexpected error. Instead will show a proper error popup to the users and potentially allows a way to get out of the error state.
-
-- Error service: Ensures proper error handling for expected/known errors.
+React will behave differently in case of errors in development and production modes. As it is [described here](https://github.com/facebook/react/issues/10384#issuecomment-334142138), React is basically rethrowing an error and doesn't allow you to swallow an error in development mode. Since our whole error handling logic rely on this, make sure you're using production mode while testing error handling.
 
 
+### Error boundary
 
-The issue with error boundary:
+As we mentioned JavaScript error in any part of the UI will break the whole app. To solve this problem, React 16 introduces a new concept of [error boundaries](https://reactjs.org/docs/error-boundaries.html).
+
+Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of the component tree that crashed. Error boundaries catch errors during rendering, in lifecycle methods, and in constructors of the whole tree below them.
 
 Error boundaries do not catch errors for:
-- Event handlers
-- Asynchronous code (e.g. setTimeout or requestAnimationFrame callbacks)
-- Server side rendering
-- Errors thrown in the error boundary itself (rather than its children)
+  - Event handlers
+  - Asynchronous code (e.g. setTimeout or requestAnimationFrame callbacks)
+  - Server side rendering
+  - Errors thrown in the error boundary itself (rather than its children)
 
-----------------------------------------------
+That being said, instead of just using built-in errror boundary class component, we're using [react-error-boundary](https://github.com/bvaughn/react-error-boundary) instead. With this component,
 
-1. If an error happens in the "render" function of a react component, it will break the whole app. To avoid that, you can wrap the component in an error boundary. This way you can offer an alternative component to let users know what went wrong and potentially log the error. If our goal is to log without any UI element, we can do `window.onerror`.
+- We can use error boundaries in functional components.
+- We can use the `useError` hook to manually call the error boundary in order to offer a uniform error handling for a component (we can catch the errors in async calls that error boundary doesn't support and manually call the error boundary logic).
 
-2. If any of the following errors is thrown:
-    - Event handlers
-    - Asynchronous code (e.g. setTimeout or requestAnimationFrame callbacks)
-    - Server side rendering
+Therefore, if we want a uniform error handling for a component, we should use `react-error-boundary`.
 
-  The app can properly render the UI and continue without any issues. To catch these errors globally we would have to do `window.onerror`.
+```tsx
+const ParentComponent = () : JSX.Element => {
 
-‌Because of this,
- - We should wrap the whole app in a error boundary to ensure the app doesn't fully break.
- - We should use `window.onerror` to catch all the unhandeled errors. It should call the error service that we have to show the error.
- - We should not let any error be unhandeled while rendering a function, while it's safe to just throw an error in a async call...
-   -> But I think as a rule it's better if we just say that you should always call the global handler
+  const fallbackComp = ({error}: FallbackProps) => {
+    // dispatch the error message
+    // return a fallback component
+  }
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={fallbackComp}
+    >
+      <ChildComponent/>
+    </ErrorBoundary>
+  )
+}
+
+// a component that might throw some errors
+function ChildComponent = (): JSX.Element => {
+  const handleError = useErrorHandler();
+  ...
+
+  // somewhere in a async call
+  somePromise.then({
+    ...
+  }).catch(function (err) {
+    // call the closest error boundary
+    handleError(err);
+  })
+
+  ...
+}
+```
 
 
 
 
+
+
+
+
+### Guidelines for promise chains
+
+The general guidelines for handling errors in promises are that:
+- do not let your handlers "silence" any unhandled errors, _always_ throw an unhandled error so that later catch blocks may handle it;
+- when you do not have any (or any _more_) catch blocks, dispatch the unhandled error so that the general exception handler service can handle it.
+- reject is a callback function that gets carried out after the promise is rejected, whereas throw cannot be used asynchronously. If you chose to use reject, your code will continue to run normally in asynchronous fashion whereas throw will prioritize completing the resolver function (this function will run immediately).
+
+### Promise with success, reject, and catch handlers
+
+One style when working with a single promise is to use success, reject, and "catch" handlers. The `catch` function is just a syntactic sugar for `then(null, function)` where the success handler is not given.
+
+```javascript
+promise.then(
+  function(result) {
+    // this handler will get called if the promise was resolved
+    ...
+  },
+  function(err){
+    // this handler will get called if the promise was rejected
+    ...
+    // as a general practice, conclude by throwing any unhandled error
+    throw err;
+  }
+).catch(
+  function(err) {
+    // this handler will get called if:
+    //   - the success handler threw an exception, or...
+    //   - the previous reject handler threw an exception
+    // this can be useful for adding some common error handling logic
+    // for errors that could be raised by either of the previous handlers
+    ...
+    // again as a general practice, conclude by dispatching unhandled error
+    dispatch(...);
+  }
+);
+```
+
+The above convention should run logically like the following:
+
+```python
+try:
+  resp = http.method()
+  if resp.status = 200
+    handle_success();
+  else
+    handle_reject();
+except my_errors:
+  handle_my_errors();
+```
+
+#### Promise with success and catch handlers
+
+An alternate style for working with a single promise is to use only success and catch handlers. One advantage of this style is that a single reject handler defined in the `catch` block will handle _both_ a rejected promise or any exceptions thrown by the success block.
+
+```javascript
+promise.then(
+  function(result) {
+    // this handler will get called if the promise was resolved
+    ...
+  }
+).catch(
+  function(err) {
+    // this handler will get called if:
+    //  - the original promise was rejected, OR...
+    //  - the success handler threw an exception
+    ...
+    // as a general practice, conclude by dispatching unhandled error
+    dispatch(...);
+  }
+);
+```
+
+#### Promise chaining with single catch
+
+One style for handling errors in a promise chain is to first chain all of your success blocks and then conclude with a catch for your particular errors. The advantage of this style is that it is relatively easy to read and is logically similar to a try/catch block that has (depending on the language, one or more) type-specific catch block(s) at the end.
+
+```javascript
+promise.then(
+  function(result) {
+    // handle the first response
+    ...
+  }
+).then(
+  function(result) {
+    // handle the next response
+    ...
+  }
+).then(
+  function(result) {
+    // handle the next response
+    ...
+  }
+).catch(
+  function(err) {
+    // handle any upstream errors from any of the promises being rejected or
+    // any exceptions thrown within any of the success handlers.
+
+    // you might want conditional checks for different categories of error
+    // conditions. This is actually true of any error handling blocks of course,
+    // but in this example it is particularly worth noting.
+    if (...) {
+      // handle error case 1
+      ...
+      return; // if you resolved the error, return
+    }
+    if (...) {
+      // handle error case 2
+      ...
+      return; // if you resolved the error, return
+    }
+    // if none of the above error handling blocks resolved the error.
+    // then make sure to dispatch the error again, as usual.
+    dispatch(...);
+  }
+);
+```
+
+#### Promise chaining with interleaved catches
+
+When it is possible to recover from an error, you may want to interleave catch blocks so that subsequent success blocks may execute.
+
+```javascript
+promise.then(
+  function(result) {
+    // handle the first response
+    ...
+  }
+).catch(
+  function(err) {
+    // handle a recoverable error
+    ...
+
+    // if the error could not be recovered from, then you will need to
+    // throw the error again so that the next reject/catch handler will
+    // process it, and so that it will skip any success handlers.
+    throw err;
+
+    // if the error was recovered from, you may need to return something
+    // based on what the next success handler expects. Otherwise you can
+    // return without a return parameter or technically the function could
+    // terminate without any return statement (again, so long as the next
+    // success handler is expecting no required parameters). In this example,
+    // the next handler expects a result.
+    return recovered_result;
+  }
+).then(
+  function(result) {
+    // handle the next response
+    ...
+  }
+).then(
+  function(result) {
+    // handle the next response
+    ...
+  }
+).catch(
+  function(err) {
+    // handle any upstream errors that were not previously recovered from.
+    ...
+
+    // as usual, if the error could not be handled in this block, dispatch it
+    dispatch(...);
+  }
+);
+```
