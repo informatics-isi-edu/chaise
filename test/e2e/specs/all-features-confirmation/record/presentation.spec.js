@@ -129,7 +129,7 @@ var testParams = {
           displayname: "table_w_aggregates",
           count: 1,
           canEdit: true,
-          canCreate: true,
+          canCreate: false, // it has filter in source, so create is disabled
           isInline: true,
           viewMore: {
               name: "table_w_aggregates",

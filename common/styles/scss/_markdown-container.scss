@@ -600,7 +600,6 @@
     border-collapse: collapse;
     display: block;
     width: 100%;
-    overflow: auto
 }
 
 .markdown-container table td,
@@ -616,6 +615,15 @@
 
 .markdown-container table tr:nth-child(2n) {
     background-color: #f6f8fa
+}
+
+/*
+ * tables are usually used for card view where the header is completely
+ * ignored and left empty. with this rule we're making sure such headers
+ * are hidden.
+ */
+.markdown-container table th:empty {
+    display: none;
 }
 
 .markdown-container img {

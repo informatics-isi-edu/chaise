@@ -12,14 +12,16 @@ body > .container {
 	padding-top: 70px;
 }
 
-#mainnav {
+// navheader includes navbar as well as banners
+#navheader {
     z-index: 1037;
+    position: relative; // for z-index to work, position must be non-static
 }
 
 // default modal z-index is 1050 (for the first modal)
 // as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
 // we tried to be safe about it before by increasing it by only 1
-.modal-login #mainnav, .error-open #mainnav {
+.modal-login #navheader, .error-open #navheader {
     z-index: 1501;
 }
 

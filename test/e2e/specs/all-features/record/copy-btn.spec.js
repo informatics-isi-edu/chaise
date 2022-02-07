@@ -5,7 +5,8 @@ var testParams = {
     table_name: "editable-id-table",
     tocHeaders: ['Summary', 'accommodation_image (4)', 'booking (2)', 'more-files (1)',
         'more-media (1)', 'new_media (2)', 'new_media_2 (2)', 'new_media_3 (2)',
-        'new_media_4 (2)', 'new_media_5 (2)', 'new_media_6 (2)'],
+        'new_media_4 (2)', 'new_media_5 (2)', 'new_media_6 (2)',
+        'new_media_7 (2)', 'new_media_8 (2)', 'new_media_9 (2)'],
     table_displayname: "Editable Id Table",
     table_inner_html_display: "<strong>Editable Id Table</strong>",
     entity_title: "1",
@@ -40,9 +41,9 @@ describe('View existing record,', function() {
             chaisePage.recordPageReady();
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=11, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
+        it("should load chaise-config.js and have correct maxRelatedTablesOpen, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(11);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(14);
                 expect(chaiseConfig.disableDefaultExport).toBeTruthy();
                 expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeFalsy();
             });
