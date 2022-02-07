@@ -6,7 +6,7 @@ In the AngularJS implementation of Chaise, we rely on `window.onerror` and `$exc
 
 Both of the mentioned methods are working as a "catch-all" where we're calling the `handleException` function in `ErrorService`. This function can handle both expected/known errors (e.g. 403 from a read request), or unexpected/unknown errors (e.g. JavaScript errors because of programmatic mistakes).
 
-Therefore the general guideline regardless of asynchronous or synchronous nature of the error was:
+Therefore the general guideline regardless of the asynchronous or synchronous nature of the error was:
 - If you want a local treatment of errors, catch the errors locally.
 - Otherwise throw the error (which means the "catch-all" logic would handle it properly).
 
@@ -20,7 +20,7 @@ The following is how error handling should work in Chaise using React:
 - To make sure we can call the error handler from anywhere in the page structure, we will use `redux`. This will allow us to store the state of errors. This way,
   - We can `dispatch` a message to show the error.
   - The logic to show a proper error message or UX behavior based on the error object will be part of the error reducer.
-  - The error modal component can use the `error` in redux store to determine whether it should show any errors or not.
+  - The error modal component can use the `error` in the redux store to determine whether it should show any errors or not.
 
 ### Global handler (catch-all)
 
@@ -72,7 +72,52 @@ const RecordSetApp = () : JSX.Element => {
 
 - We should not let any error be unhandled. All errors should be caught.
   - If we don't want to do anything specific for the error, we should dispatch the caught error.
-  - If we want a local treatment for errors, we can wrap the component in an error boundary. This will allow us to offer an alternative UI.
+    ```tsx
+    // async errors:
+    reference.read(pageSize, logObject).then(function (page) {
+      ...
+    }).catch(function (err) {
+      // do the local handling if we have to
+      ...
+
+      // dispatch the error
+      dispatch(...);
+    });
+
+    // sync errors:
+    try {
+      // some function call that is error prone
+      ...
+    } catch (exp) {
+      // do the local handling if we have to
+      ...
+
+      // dispatch the error
+      dispatch(...);
+    }
+    ```
+
+
+  - If we want a local treatment for errors, we can wrap the component in an error boundary like the example in [here](#error-boundary). This will allow us to offer an alternative UI.
+
+
+#### Multiple errors on the page
+
+Since our apps are complicated and can have multiple components that behave somewhat independently (and in an asynchronous fashion), there might be a case that the page throws multiple errors. As soon as an error is thrown, we're dispatching it to the error service and the error service will display it right away. If in this state (while we're showing the error) another error is dispatched, the error handler is going to act differently depending on the type of the error. In general, we can categorize errors in the following categories:
+
+1. Blocking errors: When we encounter such errors, we cannot simply recover the app state. In this case, the error popup is supposed to block the user from interacting with the page and offer a way to get out of the broken state. The actions in this type of error are usually redirecting the user to a completely different location, or the same page with different settings.
+
+2. Non-blocking errors: These errors don't affect the overall state of the app, and users can simply dismiss them. For example, a 409 error while trying to delete a row.
+
+Therefore,
+
+1. If the displayed error is a blocking error, we should just swallow the newer error. All of our blocking errors offer a way to get out of the error state, either by removing part of the URL or completely redirecting to another location. Therefore even if we mask all the errors except one, users can still get out of the error state.
+
+2. If the displayed error is non-blocking, we cannot simply swallow the other errors. If users dismiss the error modal, then the page will be in an error state without users realizing it. Therefore we should keep track of all the errors. This way after dismissing the first error we can display the other one. The same two rules should apply depending on whether the error can be dismissed or not.
+
+> If any of these errors is a 401, since we have special handling for it, it should just show on top of everything else. 401 errors will trigger the login modal which can completely change the state of the app and most probably fix all the other issues on the page.
+
+While discussing this, we also talked about the possibility of combining all the errors into one. To make this work, we have to make sure the error message and actions that we offer are well-designed for any combination of errors. This seems unnecessarily complex given that we have a lot of different error types in ERMrestJS and Chaise, that's why we are not going to pursue this.
 
 ## Guidelines
 
@@ -148,7 +193,7 @@ The general guidelines for handling errors in promises are:
 - when you do not have any (or any _more_) catch blocks, dispatch the unhandled error so that the general exception handler service can handle it.
 - reject is a callback function that gets carried out after the promise is rejected, whereas throw cannot be used asynchronously. If you chose to use reject, your code will continue to run normally in an asynchronous fashion whereas throw will prioritize completing the resolver function (this function will run immediately).
 
-### Promise with success, reject, and catch handlers
+#### Promise with success, reject, and catch handlers
 
 One style when working with a single promise is to use success, reject, and "catch" handlers. The `catch` function is just syntactic sugar for `then(null, function)` where the success handler is not given.
 
