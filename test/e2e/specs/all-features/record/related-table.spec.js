@@ -209,7 +209,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
             relatedDisplayname: "association_table",
             tableDisplayname: "related_table",
             modalTitle: "Add related_table to Accommodations: Super 8 North Hollywood Motel",
-            totalCount: 4,
+            totalCount: 5,
             existingCount: 1,
             disabledRows: ["1"],
             search: {
@@ -217,30 +217,57 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 afterSearchCount: 2,
                 afterSearchDisabledRows: ["1"]
             },
-            selectIndex: 1, // after search
-            selectIndex2: 2,
             rowValuesAfter: [
                 ["Television"],
                 ["Air Conditioning"],
-                ["Coffee Maker"]
+                ["Coffee Maker"],
+                ["UHD TV"],
+                ["Space Heater"]
             ]
         },
         unlink: {
+            // we unlink rows 2 and 4 ("Air Conditioning" and "UHD TV")
+            catalogId: browser.params.catalogId,
             relatedDisplayname: "association_table",
             modalTitle: "Remove association_table from Accommodations : Super 8 North Hollywood Motel",
-            totalCount: 3,
-            postDeleteMessage: "2 rows successfully removed.\n\nClick OK to dismiss this dialog.",
+            totalCount: 5,
+            postDeleteMessage: "2 records successfully removed.\n\nClick OK to dismiss this dialog.",
+            countAfterUnlink: 3,
             rowValuesAfter: [
-                ["Coffee Maker"]
+                ["Television"],
+                ["Coffee Maker"],
+                ["Space Heater"]
+            ],
+            failedPostDeleteMessage: "2 records could not be removed. Check the error details below to see more information.\n\nClick OK to dismiss this dialog.\nShow Error Details",
+            // we unlink row 5 ("Space Heater")
+            aclPostDeleteMessage: "1 record successfully removed.\n\nClick OK to dismiss this dialog.",
+            countAfterAclUnlink: 2,
+            rowValuesAfterAclRemove: [
+                ["Television"],
+                ["Coffee Maker"],
             ]
         }
     };
+
     describe("for a pure and binary association,", function () {
         recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
         recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
 
         recordHelpers.testBatchUnlinkAssociationTable(association_table.unlink, false, pageReadyCondition);
+
+        // test trying to unlink 2 rows where 1 is allowed and 1 is not
+        // verifies the error case works as expected and rows are still selected after failure
+        // need to attach a "postLogin" function to reload the record page we are testing
+        recordHelpers.testBatchUnlinkDynamicAclsAssociationTable(association_table.unlink, false, pageReadyCondition, function () {
+            var keys = [];
+            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
+            browser.get(url);
+
+            pageReadyCondition();
+        });
     });
 
     var association_with_page_size = {
@@ -264,7 +291,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Add accommodation_image to Accommodations : Super 8 North Hollywood Motel", "title missmatch.");
+                expect(title).toBe("Add file to Accommodations: Super 8 North Hollywood Motel", "title missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
@@ -325,6 +352,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canCreate: false,
         canDelete: true
     };
+
+    // When rows are added to association_table, it affects this test.
+    // data relies on rows from p&b unlink tests above
     describe("for a related entity with a path of length 3, ", function () {
         recordHelpers.testRelatedTable(path_related, pageReadyCondition);
     });

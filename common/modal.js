@@ -144,7 +144,12 @@
         vm.ok = ok;
         vm.cancel = cancel;
         vm.status = 0;
-        vm.count = params.count;
+        var multiple = '';
+        if (params.count > 1) {
+            multiple += 's';
+        }
+
+        vm.message = "Are you sure you want to remove " + params.count + " record" + multiple + '?';
 
         function ok() {
             $uibModalInstance.close();

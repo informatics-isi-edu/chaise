@@ -506,7 +506,7 @@
                     // Show modal popup summarizing total # of deletions succeeded and failed
                     response.clickOkToDismiss = true;
                     var reloadModalRows = function () {
-                        if (response.failedTupleData > 0) {
+                        if (response.failedTupleData.length > 0) {
                             // iterate over the set of successful ids and find them in selected rows, then remove them
                             response.successTupleData.forEach(function (data) {
                                 // data is an object of key/value pairs for each piece of key information
