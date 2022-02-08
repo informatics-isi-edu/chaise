@@ -244,7 +244,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
             countAfterAclUnlink: 2,
             rowValuesAfterAclRemove: [
                 ["Television"],
-                ["Coffee Maker"],
+                ["Coffee Maker"]
             ]
         }
     };

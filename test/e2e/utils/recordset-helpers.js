@@ -1,4 +1,4 @@
-  var chaisePage = require('../utils/chaise.page.js');
+var chaisePage = require('../utils/chaise.page.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 

@@ -352,11 +352,11 @@
 
         if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
             vm.submitText = "Remove";
-            vm.submitTooltip = "Disconnect the selected rows from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+            vm.submitTooltip = "Disconnect the selected records from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
-            vm.submitTooltip = "Connect the selected rows to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+            vm.submitTooltip = "Connect the selected records to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else {
-            vm.submitTooltip = "Apply the selected rows";
+            vm.submitTooltip = "Apply the selected records";
         }
 
         var logStack = {};
