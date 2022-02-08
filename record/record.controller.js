@@ -556,11 +556,12 @@
                 }, ref.defaultLogInfo);
 
                 var confirmParams = {
-                    count: tuples.length
+                    count: tuples.length,
+                    batchUnlink: true // use remove instead of delete
                 };
 
                 modalUtils.showModal({
-                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete_multiple.modal.html",
+                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                     controller: 'ConfirmDeleteController',
                     controllerAs: 'ctrl',
                     resolve: {

@@ -144,12 +144,20 @@
         vm.ok = ok;
         vm.cancel = cancel;
         vm.status = 0;
-        var multiple = '';
-        if (params.count > 1) {
-            multiple += 's';
-        }
 
-        vm.message = "Are you sure you want to remove " + params.count + " record" + multiple + '?';
+        vm.title = "Confirm Delete";
+        vm.message = "Are you sure you want to delete this?";
+        vm.deleteBtn = "Delete";
+
+        if (params.batchUnlink) {
+            vm.title = "Confirm Remove";
+
+            var multiple = '';
+            if (params.count > 1) multiple += 's';
+            vm.message = "Are you sure you want to remove " + params.count + " record" + multiple + '?';
+
+            vm.deleteBtn = "Remove";
+        }
 
         function ok() {
             $uibModalInstance.close();
