@@ -261,13 +261,6 @@
                         // comparing data from the old data set for the tuple with the updated data set from the UI
                     }
 
-
-
-                    // if (isModalUpdate) {
-                    //     // case only for p&b association update
-                    //     // modal close needs to be issued in callback because of asynchronous delete call
-                    //     // onSuccessFunction is called in the callback after closing the modal
-                    //     closeModal();
                     if (!isUpdate) {
                         createRef.create(submissionRowsCopy, logObj).then(submitSuccessCB).catch(submitErrorHandler);
                     } else {
@@ -339,7 +332,6 @@
             params.parentTuple = rsTuples[rowIndex];
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
-            // params.parentDisplayMode = dcctx.cid; // should be "record"
 
             var andFilters = [];
             // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
@@ -352,14 +344,6 @@
             });
 
             params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelect;
-            // params.derivedref = derivedref;
-            // params.GV_recordEditModel = GV_recordEditModel;
-            // params.viewModel = viewModel;
-            // params.queryParams = rsQueryParams;
-            // // should only be the case with adding row(s) to an association table
-            // params.referenceWDisplayname = domainRef;
-            // params.reference.session = rsSession;
-            // params.context = "compact/select";
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
@@ -449,11 +433,6 @@
                     addRecords(viewModel.editMode, derivedref, nullArr, isModalUpdate, rsReference, rsTuples, rsQueryParams, viewModel, null, logObj);
                 }
             }
-
-            // params.logObject = {
-            //     action: logActions.preCreateAssociation,
-            //     referrer: rsReference.defaultLogInfo
-            // };
 
             pbModalInstance = modalUtils.showModal({
                 animation: false,
