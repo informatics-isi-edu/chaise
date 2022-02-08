@@ -2258,7 +2258,7 @@
                 scope.showAddRecord = function () {
                     var vm = scope.vm;
                     var isAddableDisplayMode = vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.config.displayMode !== recordsetDisplayModes.unlinkPureBinaryPopup;
-                    return isAddableDisplayMode && vm.reference.canCreate && vm.config.editable;
+                    return isAddableDisplayMode && scope.canCreate();
                 }
 
                 scope.addRecord = function() {

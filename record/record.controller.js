@@ -258,7 +258,7 @@
         // NOTE: currently used for unlink case only
         vm.canDeleteRelated = function (ref) {
             if(angular.isUndefined(ref)) return false;
-            return (ref.canDelete && ref.derivedAssociationReference && $rootScope.modifyRecord && $rootScope.showDeleteButton)
+            return (ref.derivedAssociationReference && ref.derivedAssociationReference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton)
         }
 
         vm.canCreateRelated = function(relatedRef) {
@@ -511,15 +511,13 @@
                             response.successTupleData.forEach(function (data) {
                                 // data is an object of key/value pairs for each piece of key information
                                 // { keycol1: val, keycol2: val2, ... }
-                                // TODO: what to do with multiple keys?
-                                // Object.keys(data).forEach(function (key) {
-                                var key = Object.keys(data)[0];
                                 var idx = searchPopupTableModel.selectedRows.findIndex(function (tuple) {
-                                    return tuple.data[key] == data[key];
+                                    return Object.keys(data).every(function (key) {
+                                        return tuple.data[key] == data[key]
+                                    });
                                 });
 
                                 searchPopupTableModel.selectedRows.splice(idx, 1);
-                                // });
                             });
                         } else {
                             // if everything is successful, empty selected rows
@@ -552,7 +550,7 @@
                 // log the opening of the confirm delete modal
                 logService.logClientAction({
                     action: logService.getActionString(logService.logActions.UNLINK_INTEND),
-                    stack: logService.getStackObject()
+                    stack: logStack
                 }, ref.defaultLogInfo);
 
                 var confirmParams = {

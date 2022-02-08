@@ -26,7 +26,6 @@
         <button ng-if="edit" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom" uib-tooltip="Edit">
             <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
         </button>
-        <!-- TODO: should this be "config.deletable && unlink && associationRef.canDelete" || "unlink" -->
         <button ng-if="unlink" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="unlink()" tooltip-placement="bottom" uib-tooltip="{{tooltip.unlink}}">
             <span class="chaise-btn-icon glyphicon glyphicon-remove-circle"></span>
         </button>
