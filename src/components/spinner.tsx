@@ -8,7 +8,7 @@ const Spinner = ({
   message
 }: SpinnerProps): JSX.Element => {
   return (
-  <div>
+  <div id="spinner">
     <img src={spinner} className="spinner"/>
     <div style={{"marginTop": "15px"}}>
       { message ? message : "Loading..." }

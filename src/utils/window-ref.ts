@@ -1,4 +1,6 @@
 interface ICustomWindow extends Window {
+  // WID
+  name: string;
   // ERMrset object that is attached to window in ermrestjs:
   ERMrest: any;
   // chaiseConfig is attached to the window with the chaise-config.js file
