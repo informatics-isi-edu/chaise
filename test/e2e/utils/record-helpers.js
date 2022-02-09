@@ -1191,8 +1191,8 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 return removeBtn.click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
-                chaisePage.waitForElement(unlinkSummaryModal);
                 unlinkSummaryModal.allowAnimations(false);
+                chaisePage.waitForElement(unlinkSummaryModal);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1371,11 +1371,11 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
+                unlinkSummaryModal.allowAnimations(false);
                 chaisePage.waitForElement(unlinkSummaryModal);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
-                unlinkSummaryModal.allowAnimations(false);
 
                 return errorTitle.getText();
             }).then(function (text) {
@@ -1428,11 +1428,11 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
+                unlinkSummaryModal.allowAnimations(false);
                 chaisePage.waitForElement(unlinkSummaryModal);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
-                unlinkSummaryModal.allowAnimations(false);
 
                 return errorTitle.getText();
             }).then(function (text) {
