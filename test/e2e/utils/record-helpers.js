@@ -1193,10 +1193,13 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog ')));
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
-                // check error popup
-                expect(errorTitle.getText()).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
 
+                return errorTitle.getText();
+            }).then(function (text) {
+                // check error popup
+                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
+
                 // click ok
                 return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
             }).then(function () {
@@ -1362,7 +1365,6 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
-
                 chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog ')));
                 // check error popup
                 expect(chaisePage.errorModal.getTitle().getText()).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
@@ -1415,10 +1417,13 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog ')));
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
-                // check error popup
-                expect(errorTitle.getText()).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
 
+                return errorTitle.getText();
+            }).then(function (text) {
+                // check error popup
+                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
+
                 // click ok
                 return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
             }).then(function () {
