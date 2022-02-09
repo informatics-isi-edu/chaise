@@ -1190,7 +1190,10 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
 
                 return removeBtn.click();
             }).then(function () {
-                chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog ')));
+                var unlinkSummaryModal = element(by.css('.modal-error'));
+                chaisePage.waitForElement(unlinkSummaryModal);
+                unlinkSummaryModal.allowAnimations(false);
+
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
 
@@ -1365,11 +1368,14 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
-                chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog ')));
+                var unlinkSummaryModal = element(by.css('.modal-error'));
+                chaisePage.waitForElement(unlinkSummaryModal);
+                unlinkSummaryModal.allowAnimations(false);
+
                 // check error popup
                 expect(chaisePage.errorModal.getTitle().getText()).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
-
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
+
                 // click ok
                 return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
             }).then(function () {
