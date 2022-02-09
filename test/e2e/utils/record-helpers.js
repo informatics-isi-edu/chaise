@@ -1203,8 +1203,10 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
 
+                var modalOkBtn = chaisePage.recordPage.getErrorModalOkButton()
+                browser.wait(EC.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
                 // click ok
-                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+                return chaisePage.clickButton(modalOkBtn);
             }).then(function () {
                 // check modal has 3 rows
                 browser.wait(function () {
@@ -1370,10 +1372,15 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
+
+                var errorTitle = chaisePage.errorModal.getTitle();
+                browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
                 unlinkSummaryModal.allowAnimations(false);
 
+                return errorTitle.getText();
+            }).then(function (text) {
                 // check error popup
-                expect(chaisePage.errorModal.getTitle().getText()).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
@@ -1420,9 +1427,12 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
-                chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog ')));
+                var unlinkSummaryModal = element(by.css('.modal-error'));
+                chaisePage.waitForElement(unlinkSummaryModal);
+
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
+                unlinkSummaryModal.allowAnimations(false);
 
                 return errorTitle.getText();
             }).then(function (text) {
