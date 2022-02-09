@@ -559,6 +559,7 @@
                 };
 
                 modalUtils.showModal({
+                    animations: false,
                     templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                     controller: 'ConfirmDeleteController',
                     controllerAs: 'ctrl',
