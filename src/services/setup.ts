@@ -1,10 +1,10 @@
-// TODO how ermrestjs should be configured?
-// import Q from '@chaise/vendor/q';
+import Q from '@chaise/vendor/q';
 import axios from 'axios';
 import { windowRef } from '@chaise/utils/window-ref';
 
 // needed for async/await to work
 import "regenerator-runtime";
+import { BUILD_VARIABLES } from '@chaise/utils/constants';
 
 // TODO
 // legacy chaise-config
@@ -48,7 +48,7 @@ function appTagToURL(tag: string, location: any, context: string) {
         appPath = getValueFromContext(appContextMapping, context);
     }
 
-    var url = "/~ashafaei/chaise" + appPath + "/#" + location.catalog + "/" + location.path;
+    var url = BUILD_VARIABLES.CHAISE_BASE_PATH + appPath + "/#" + location.catalog + "/" + location.path;
 
     if (location.queryParamsString) {
         url = url + "?" + location.queryParamsString;
@@ -63,20 +63,16 @@ function appTagToURL(tag: string, location: any, context: string) {
  * - other global settings
  */
 const setup = async () : Promise<any> => {
-    // windowRef.ERMrest.configure(axios, Q);
+    windowRef.ERMrest.configure(axios, Q);
 
     // ermrest.onload doesn't return rejection
-    // await windowRef.ERMrest.onload();
+    await windowRef.ERMrest.onload();
 
-    // windowRef.ERMrest.appLinkFn(appTagToURL);
+    windowRef.ERMrest.appLinkFn(appTagToURL);
 
     // TODO
     // windowRef.ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
-    // TODO how to include ermrestjs?
-    // either npm install or ...?
-    // return windowRef.ERMrest;
-
-    return true;
+    return windowRef.ERMrest;
 }
 
 export default setup;

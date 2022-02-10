@@ -14,7 +14,7 @@ CHAISE_REL_PATH?=chaise/
 OSD_VIEWER_REL_PATH?=openseadragon-viewer/
 
 # version number added to all the assets
-BUILD_VERSION:=$(shell date +%Y%m%d%H%M%S)
+BUILD_VERSION:=$(shell date -u +%Y%m%d%H%M%S)
 
 # where chaise will be installed
 CHAISEDIR:=$(WEB_INSTALL_ROOT)$(CHAISE_REL_PATH)
@@ -692,9 +692,9 @@ gitversion:
 dont_install_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
 
-run-webpack: $(SOURCE)
+run-webpack: $(SOURCE) $(BUILD_VERSION)
 	$(info - creating webpack bundles)
-	@./node_modules/.bin/webpack --config ./webpack/main.config.js
+	@npx webpack --config ./webpack/main.config.js --env BUILD_VARIABLES.BUILD_VERSION=$(BUILD_VERSION) --env BUILD_VARIABLES.CHAISE_BASE_PATH=$(CHAISE_BASE_PATH) --env BUILD_VARIABLES.ERMRESTJS_BASE_PATH=$(ERMRESTJS_BASE_PATH) --env BUILD_VARIABLES.OSD_VIEWER_BASE_PATH=$(OSD_VIEWER_BASE_PATH)
 
 # rsync the build files to the location
 rsync-chaise:

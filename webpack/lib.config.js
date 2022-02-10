@@ -4,15 +4,14 @@ const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
 
-module.exports =  function (libName, filename, mode) {
-  filename = filename || libName;
+module.exports =  function (libName, mode, env) {
   return {
       name: libName,
       devtool: (mode === 'development') ? 'inline-source-map' : false,
       mode: mode,
-      entry: path.join(__dirname, '..', 'src', 'pages', filename + '.tsx'),
+      entry: path.join(__dirname, '..', 'src', 'pages', libName + '.tsx'),
       output: {
-          path: path.resolve(__dirname, '..', 'dist', 'react', filename),
+          path: path.resolve(__dirname, '..', 'dist', 'react', libName),
           filename: 'navbar.bundle.js'
       },
       resolve: {

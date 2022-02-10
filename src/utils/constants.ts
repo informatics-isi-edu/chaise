@@ -88,3 +88,13 @@ export const errorMessages = {
   viewerOSDFailed: "Couldn't process the image. <br> If you continue to face this issue, please contact the system administrator.",
   viewerScreenshotFailed: "Couldn't process the screenshot."
 };
+
+// NOTE: this global variable is defined in webpack,
+//       but we have to declare it here so typescript doesn't complain about it
+declare var CHAISE_BUILD_VARIABLES : {
+  BUILD_VERSION: string,
+  CHAISE_BASE_PATH: string,
+  ERMRESTJS_BASE_PATH: string,
+  OSD_VIEWER_BASE_PATH: string
+};
+export const BUILD_VARIABLES = CHAISE_BUILD_VARIABLES;

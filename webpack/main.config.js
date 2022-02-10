@@ -9,6 +9,13 @@ if (nodeDevs.indexOf(mode) == -1) {
 }
 
 console.log("webpack mode: "+ mode);
-module.exports = [
-  getAppConfig("recordset", "", mode), getLibConfig("navbar", "", mode),
-];
+
+module.exports = (env) => {
+  return [
+    // chaise apps:
+    getAppConfig("recordset", "Recordset", mode, env),
+
+    // chaise libs:
+    getLibConfig("navbar", mode, env),
+  ]
+}
