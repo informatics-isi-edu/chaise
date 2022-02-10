@@ -139,11 +139,25 @@
         }
     }])
 
-    .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
+    .controller('ConfirmDeleteController', ['params', '$uibModalInstance', function ConfirmDeleteController(params, $uibModalInstance) {
         var vm = this;
         vm.ok = ok;
         vm.cancel = cancel;
         vm.status = 0;
+
+        vm.title = "Confirm Delete";
+        vm.message = "Are you sure you want to delete this?";
+        vm.deleteBtn = "Delete";
+
+        if (params.batchUnlink) {
+            vm.title = "Confirm Remove";
+
+            var multiple = '';
+            if (params.count > 1) multiple += 's';
+            vm.message = "Are you sure you want to remove " + params.count + " record" + multiple + '?';
+
+            vm.deleteBtn = "Remove";
+        }
 
         function ok() {
             $uibModalInstance.close();
@@ -226,6 +240,8 @@
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
         } else if (ERMrest && exception instanceof ERMrest.UnsupportedFilters) {
             vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
+        } else if (ERMrest && exception instanceof ERMrest.BatchUnlinkResponse) {
+            vm.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
@@ -305,8 +321,8 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'logService', 'modalBox', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, logService, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'logService', 'modalBox', 'params', 'recordCreate', 'recordsetDisplayModes', 'Session', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, logService, modalBox, params, recordCreate, recordsetDisplayModes, Session, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
         // rowOnLoad is used to determine if the submit button should be disabled
@@ -324,8 +340,24 @@
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
+        // params.referenceWDisplayname should only be defined when creating association records
+        vm.referenceWDisplayname = params.referenceWDisplayname || params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
+
+        vm.submitText = "Save";
+        if (vm.mode == "selectFaceting") {
+            vm.submitText = "Submit";
+        }
+
+        if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
+            vm.submitText = "Remove";
+            vm.submitTooltip = "Disconnect the selected records from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+        } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
+            vm.submitTooltip = "Connect the selected records to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+        } else {
+            vm.submitTooltip = "Apply the selected records";
+        }
 
         var logStack = {};
         if (params.logStack) {
@@ -420,8 +452,9 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
+            // add and unlink p&b rely on a function being defined to submit the request before closing the modal
             if (vm.params.submitBeforeClose) {
-                vm.params.submitBeforeClose(getMultiSelectionResult());
+                vm.params.submitBeforeClose(getMultiSelectionResult(), vm.tableModel);
             } else {
                 $uibModalInstance.close(getMultiSelectionResult());
             }

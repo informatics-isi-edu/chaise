@@ -26,7 +26,9 @@
                     addRelatedRecord: '&',
                     canCreateRelated: '&',
                     canCreateRelatedDisabled: '&',
+                    canDeleteRelated: '&',
                     canEditRelated: '&',
+                    deleteRelatedRecord: '&',
                     toggleInlineDisplayMode: '&',
                     toRecordSet: '&',
                     // boolean
@@ -81,11 +83,13 @@
                 scope: {
                     // functions
                     addRelatedRecord: '&', // add a record with RE app or P&B popup
+                    deleteRelatedRecord: '&', // unlink a record with the P&B popup
                     toggleDisplayMode: '&', // toggles the display mode of the RT
                     toRecordset: '&', // redirects the current page to recordset
                     // booleans
                     canCreate: '=',
                     canCreateDisabled: '=',
+                    canDelete: '=',
                     canEdit: '=',
                     isInline: "=",
                     isTableDisplay: '=', // is the table in table display mode or other custom mode ('markdown' display)
@@ -110,7 +114,8 @@
             if ($scope.baseTableName.isHTML) tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
 
             $scope.tooltip = {
-                createButton: "Add more " + displayname + " related to this " + tablename + ".",
+                createButton: "Connect " + displayname + " records to this " + tablename + ".",
+                deleteButton: "Disconnect " + displayname + " records from this " + tablename + ".",
                 exploreButton: "Explore more " + displayname + " records related to this " + tablename + "."
             };
 

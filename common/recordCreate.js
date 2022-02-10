@@ -149,7 +149,7 @@
          * @param  {object} onSuccessFunction   callback
          * @param  {object} logObj           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj, closeModal) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
 
@@ -348,7 +348,6 @@
             params.selectedRows = [];
             params.showFaceting = true;
             params.facetPanelOpen = false;
-            //NOTE assumption is that this function is only is called for adding pure and binary association
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackNode(

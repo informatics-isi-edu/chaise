@@ -515,7 +515,7 @@
             modalUtils.showModal(modalProperties, function (actionBtnIdentifier) {
                 if (okBtnCallback) {
                     okBtnCallback();
-                }else if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                } else if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
                     Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);
                 } else {
                     if(actionBtnIdentifier == "reload"){
