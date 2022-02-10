@@ -549,7 +549,7 @@
 
                 // log the opening of the confirm delete modal
                 logService.logClientAction({
-                    action: logService.getActionString(logService.logActions.UNLINK_INTEND),
+                    action: logService.getActionString(logService.logActions.UNLINK_INTEND, logStackPath),
                     stack: logStack
                 }, ref.defaultLogInfo);
 
@@ -574,8 +574,8 @@
                     $rootScope.showSpinner = false;
 
                     logService.logClientAction({
-                        action: logService.getActionString(logService.logActions.UNLINK_CANCEL),
-                        stack: logService.getStackObject()
+                        action: logService.getActionString(logService.logActions.UNLINK_CANCEL, logStackPath),
+                        stack: logStack
                     }, ref.defaultLogInfo);
                 }, false);
             }
@@ -595,7 +595,12 @@
                 // recordAppUtils.updateRecordPage(true);
             }, function () {
                 // cancel
-                recordAppUtils.updateRecordPage(true);
+                var isInline = tableModel.config.displayMode === recordsetDisplayModes.inline;
+                recordAppUtils.updateRecordPage(true, "", [{
+                    cause: isInline ? logService.reloadCauses.RELATED_INLINE_BATCH_UNLINK : logService.reloadCauses.RELATED_BATCH_UNLINK,
+                    isInline: isInline,
+                    index: tableModel.config.containerIndex
+                }]);
             }, false);
         }
 

@@ -3205,10 +3205,10 @@
 
         // why we had to reload a request
         var reloadCauses = Object.freeze({
-            BATCH_UNLINK: "batch-unlink", // remove records for assocation 
             CLEAR_ALL: "clear-all", // clear all button
             CLEAR_CFACET: "clear-cfacet",
             CLEAR_CUSTOM_FILTER: "clear-custom-filter",
+            ENTITY_BATCH_UNLINK: "entity-batch-unlink", // row(s) in the table has been unlinked
             ENTITY_CREATE: "entity-create", // new rows has been created in the table
             ENTITY_DELETE: "entity-delete", // a row in the table has been deleted
             ENTITY_UPDATE: "entity-update", // a row in the table has been updated
@@ -3222,9 +3222,11 @@
             PAGE_LIMIT: "page-limit", // change page limit
             PAGE_NEXT: "page-next", // go to next page
             PAGE_PREV: "page-prev", // go to previous page
+            RELATED_BATCH_UNLINK: "related-batch-unlink", // row(s) in one of the related tables have been unlinked
             RELATED_CREATE: "related-create", // new rows in one of the related tables has been created
             RELATED_DELETE: "related-delete", // a row in one of the related tables has been deleted
             RELATED_UPDATE: "related-update", // a row in one of the related tables has been edited
+            RELATED_INLINE_BATCH_UNLINK: "related-inline-batch-unlink", // row(s) in one of the related (inline) tables have been unlinked
             RELATED_INLINE_CREATE: "related-inline-create", // new rows in one of the related (inline) tables has been created
             RELATED_INLINE_DELETE: "related-inline-delete", // a row in one of the related (inline) tables has been deleted
             RELATED_INLINE_UPDATE: "related-inline-update", // a row in one of the related (inline) tables has been edited
