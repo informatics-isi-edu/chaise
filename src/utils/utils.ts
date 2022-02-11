@@ -20,11 +20,6 @@ export class UriUtils {
   }
 }
 
-export class ConfigUtils {
-
-}
-
-
 export class TypeUtils {
 
   /**

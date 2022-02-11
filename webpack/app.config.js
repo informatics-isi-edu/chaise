@@ -4,15 +4,19 @@ const TerserPlugin = require("terser-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
 
-module.exports =  function (appName, filename, mode) {
-  filename = filename || appName;
+module.exports =  function (appName, title, mode, env) {
+
+  const ermrestjsPath = env.BUILD_VARIABLES.ERMRESTJS_BASE_PATH;
+  const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
+  const buildVersion =env.BUILD_VARIABLES.BUILD_VERSION;
+
   return {
       name: appName,
       devtool: (mode === 'development') ? 'inline-source-map' : false,
       mode: mode,
-      entry: path.join(__dirname, '..', 'src', 'pages', filename + '.tsx'),
+      entry: path.join(__dirname, '..', 'src', 'pages', appName + '.tsx'),
       output: {
-          path: path.resolve(__dirname, '..', 'dist', 'react', filename),
+          path: path.resolve(__dirname, '..', 'dist', 'react', appName),
           filename: '[name].bundle.js'
       },
       resolve: {
@@ -57,12 +61,21 @@ module.exports =  function (appName, filename, mode) {
       },
       plugins: [
         new webpack.DefinePlugin({
+          // make sure to use the proper mode (even if the env variable is not defined)
           'process.env.NODE_ENV': JSON.stringify(mode),
+          // create a global variable for the build variables
+          CHAISE_BUILD_VARIABLES: JSON.stringify(env.BUILD_VARIABLES)
         }),
         new MiniCssExtractPlugin(),
         new HtmlWebpackPlugin({
           template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
-        }),
+          title: title,
+          ermrestjs: [
+            "<script src='" + ermrestjsPath + "ermrest.vendor.min.js?v=" +  buildVersion + "'></script>",
+            "<script src='" + ermrestjsPath + "ermrest.min.js?v=" +  buildVersion + "'></script>"
+          ].join("\n"),
+          chaise_config: "<script src='" + chaisePath + "chaise-config.js?v=" +  buildVersion + "'></script>"
+        })
       ],
       optimization: {
         splitChunks: {

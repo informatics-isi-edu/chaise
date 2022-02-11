@@ -4,12 +4,33 @@
 <html lang="en" id="recordset" class="ng-scope">
     <head>
         <meta charset="UTF-8">
+        <title><%= htmlWebpackPlugin.options.title %></title>
+        <%= htmlWebpackPlugin.options.ermrestjs %>
+        <%= htmlWebpackPlugin.options.chaise_config %>
         <script src="/gtm-id.js"></script>
     </head>
     <body class="chaise-body">
       <noscript>
-        You need to enable JavaScript to run this app.
-        <!-- TODO proper error modal -->
+        <div class="modal" tabindex="-1" role="dialog" style="z-index: 1050; display: block;">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h2 class="modal-title ">JavaScript Required</h2>
+              </div>
+              <div class="modal-body">
+                For full functionality of this site it is necessary to enable JavaScript.
+                <br>
+                Here are <a href="http://www.enable-javascript.com/" target="_blank">instructions how to enable JavaScript in your web browser</a>.
+                <br><br>
+                Click OK to return to the Home Page.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="chaise-btn chaise-btn-danger">OK</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-backdrop fade in" style="z-index: 1040;"></div>
       </noscript>
       <div id="chaise-app-root"></div>
     </body>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import { TypeUtils } from "../utils/utils";
+import { TypeUtils } from "@chaise/utils/utils";
 
 type ExampleComponentProps = {
   app: string;
@@ -18,7 +18,7 @@ const ExampleComponent = ({
 
   // - useEffect or other hooks
   useEffect(() => {
-    document.title = app;
+    // document.title = app;
   })
 
   // - any callbacks
