@@ -50,6 +50,10 @@ export const authenSlice = createSlice({
   reducers: {
     loginUser: (state, action: PayloadAction<AuthenPayloadAction>) => {
       console.log(action);
+      if (!action.payload) {
+        return;
+      }
+
       const {
         attributes=initialState.attributes,
         client=initialState.client,
