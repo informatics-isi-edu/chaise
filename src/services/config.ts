@@ -1,13 +1,13 @@
 import axios from "axios";
-import Q, { defer } from "q";
+import Q from "q";
 import { windowRef } from "@chaise/utils/window-ref";
 
 // needed for async/await to work
 import "regenerator-runtime";
 import { APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG } from '@chaise/utils/constants';
 import { MathUtils } from "@chaise/utils/utils";
-// import {setupHead} from "@chaise/utils/head-injector";
-import { getCatalogId } from "@chaise/utils/uri-utils";
+import { getCatalogId } from "@chaise/legacy/src/utils/uri-utils";
+import { setupHead, setWindowName } from "@chaise/utils/head-injector";
 
 export class ConfigService {
   private static _setupDone = false;
@@ -28,6 +28,11 @@ export class ConfigService {
   };
   private static _chaiseConfig: any; // TODO
 
+  /**
+   * Should be called in useEffect of the main app, to ensure all the
+   * configurations are done before any other components are running.
+   * @param settings
+   */
   static async configure(settings: {
     appName: string,
     appTitle: string,
@@ -38,8 +43,7 @@ export class ConfigService {
     openIframeLinksInTab?: boolean
   }) {
 
-    // TODO
-    // headInjector.setWindowName();
+    setWindowName();
 
     // trick to verify if this config app is running inside of an iframe as part of another app
     var inIframe = windowRef.self !== windowRef.parent;
@@ -102,24 +106,20 @@ export class ConfigService {
       ConfigService._server = ERMrest.ermrestFactory.getServer(service, ConfigService._contextHeaderParams);
 
       const response = await ConfigService._server.catalogs.get(catalogId, true);
-
       // we already setup the defaults and the configuration based on chaise-config.js
-      if (response && response.chaiseConfig) ConfigService._setChaiseConfig(response.chaiseConfig);
-
-      // TODO
-      // setup ermrestjs and setup head
-    } else {
-      // there's no catalog to fetch (may be an index page)
-      // TODO setup ermrestjs and setup head
+      if (response && response.chaiseConfig) {
+        ConfigService._setChaiseConfig(response.chaiseConfig);
+      }
     }
 
-    return true;
+    ConfigService._setupERMrest(ERMrest);
+    return setupHead();
   }
 
   /**
    * ermrestjs instance that can be used for talking with ermrest
    */
-  static get ermrest() {
+  static get ERMrest() {
     return ConfigService._ermrest;
   }
 
@@ -145,8 +145,25 @@ export class ConfigService {
     return ConfigService._contextHeaderParams;
   }
 
+
+  // -------------------------- private functions: --------------------------- //
+
+  /**
+   * setup ermrestjs and all the callbacks that it needs.
+   * @param ERMrest the ermrestjs instance
+   * @private
+   */
   private static _setupERMrest(ERMrest: any) {
-    // TODO setup ermrestjs
+    ERMrest.appLinkFn(ConfigService._appTagToURL);
+    ERMrest.systemColumnsHeuristicsMode(ConfigService._systemColumnsMode);
+    // TODO
+    // ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
+
+    var chaiseConfig = ConfigService.chaiseConfig;
+    ERMrest.setClientConfig({
+        internalHosts: chaiseConfig.internalHosts,
+        disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+    });
 
     ConfigService._setupDone = true;
     ConfigService._ermrest = ERMrest;
@@ -180,9 +197,13 @@ export class ConfigService {
         var matchedKey = ConfigService._matchKey(Object.keys(chaiseConfig), property);
 
         // property will be in proper case already since it comes from our config object in JS
+        // TODO we have to most probably refactor this code so we don't have to do the following ts-ignore
+        // @ts-ignore:
         cc[property] = ((matchedKey.length > 0 && matchedKey[0]) ? chaiseConfig[property] : DEFAULT_CHAISE_CONFIG[property]);
       } else {
         // property doesn't exist
+        // TODO we have to most probably refactor this code so we don't have to do the following ts-ignore
+        // @ts-ignore:
         cc[property] = DEFAULT_CHAISE_CONFIG[property];
       }
     }
@@ -227,8 +248,8 @@ export class ConfigService {
   }
 
   /**
-   * NOTE: defined within function scope so cc is available in the function
    * @params {Object} config - chaise config with configRules defined
+   * @private
    */
   private static _applyHostConfigRules(config: any, resultChaiseConfig: any) {
     if (Array.isArray(config.configRules)) {
@@ -264,7 +285,7 @@ export class ConfigService {
   }
 
   /**
-   *
+   * Used in _appTagToURL to properly map context to a map.
    * @param object
    * @param context
    * @private
@@ -283,7 +304,7 @@ export class ConfigService {
   }
 
   /**
-   *
+   * The function that will be passed to ermrestjs to turn tag into an app.
    * @param tag
    * @param location
    * @param context
@@ -300,9 +321,21 @@ export class ConfigService {
     }
 
     var url = BUILD_VARIABLES.CHAISE_BASE_PATH + appPath + "/#" + location.catalog + "/" + location.path;
+    var pcontext = [];
 
+    var settingsObj = ConfigService.appSettings;
+    var contextHeaderParams = ConfigService.contextHeaderParams;
+    pcontext.push("pcid=" + contextHeaderParams.cid);
+    pcontext.push("ppid=" + contextHeaderParams.pid);
+    // only add the value to the applink function if it's true
+    if (settingsObj.hideNavbar) pcontext.push("hideNavbar=" + settingsObj.hideNavbar)
+
+    // TODO we might want to allow only certian query parameters
     if (location.queryParamsString) {
       url = url + "?" + location.queryParamsString;
+    }
+    if (pcontext.length > 0) {
+      url = url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
     }
     return url;
   }

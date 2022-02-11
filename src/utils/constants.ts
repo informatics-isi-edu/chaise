@@ -92,6 +92,13 @@ export const errorMessages = {
   viewerScreenshotFailed: "Couldn't process the screenshot."
 };
 
+export const BODY_CLASS_NAMES = {
+  "self": "chaise-body",
+  "mac": "chaise-mac",
+  "firefox": "chaise-firefox",
+  "iframe": "chaise-iframe"
+};
+
 // NOTE: this global variable is defined in webpack,
 //       but we have to declare it here so typescript doesn't complain about it
 declare var CHAISE_BUILD_VARIABLES: {
