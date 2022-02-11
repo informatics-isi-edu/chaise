@@ -1,4 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min.js';
 import '@chaise/assets/scss/app.scss';
 
 import React, { useEffect, useState } from 'react';

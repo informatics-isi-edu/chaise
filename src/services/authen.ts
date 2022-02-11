@@ -12,15 +12,15 @@ export default class AuthenService {
   static PREVIOUS_SESSION_KEY: string = 'previousSession';   // name of key for previous session boolean
 
   // TODO: how to make these as private variables and private functions
-  static _session: any | null = null;                        // current session object
-  static _prevSession: any | null = null;                    // previous session object
-  static _sameSessionAsPrevious: boolean = false;
+  private static _session: any | null = null;                        // current session object
+  private static _prevSession: any | null = null;                    // previous session object
+  private static _sameSessionAsPrevious: boolean = false;
 
-  static _changeCbs: any = {};
+  private static _changeCbs: any = {};
 
-  static _counter: number = 0;
+  private static _counter: number = 0;
 
-  static _executeListeners = function () {
+  private static _executeListeners = function () {
     for (var k in AuthenService._changeCbs) {
       AuthenService._changeCbs[k]();
     }
@@ -32,12 +32,12 @@ export default class AuthenService {
    */
 
   // returns data stored in loacal storage for `keyName`
-  static _getKeyFromStorage = function (keyName: string) {
+  private static _getKeyFromStorage = function (keyName: string) {
     return StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY)[keyName];
   }
 
   // create value in storage with `keyName` and `value`
-  static _setKeyInStorage = function (keyName: string, value: string | boolean) {
+  private static _setKeyInStorage = function (keyName: string, value: string | boolean) {
     var data = {} as any;
 
     data[keyName] = value;
@@ -46,21 +46,21 @@ export default class AuthenService {
   }
 
   // verifies value exists for `keyName`
-  static _keyExistsInStorage = function (keyName: string) {
+  private static _keyExistsInStorage = function (keyName: string) {
     var sessionStorage = StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY);
 
     return (sessionStorage && sessionStorage[keyName]);
   };
 
   // removes the key/value pair at `keyName`
-  static _removeKeyFromStorage = function (keyName: string) {
+  private static _removeKeyFromStorage = function (keyName: string) {
     if (AuthenService._keyExistsInStorage(keyName)) {
       StorageService.deleteStorageValue(AuthenService.LOCAL_STORAGE_KEY, keyName);
     }
   };
 
   // creates an expiration token with `keyName`
-  static _createToken = function (keyName: string) {
+  private static _createToken = function (keyName: string) {
     var data = {} as any;
     var hourFromNow = new Date();
     hourFromNow.setHours(hourFromNow.getHours() + 1);
@@ -71,14 +71,14 @@ export default class AuthenService {
   };
 
   // checks if the expiration token with `keyName` has expired
-  static _expiredToken = function (keyName: string) {
+  private static _expiredToken = function (keyName: string) {
     var sessionStorage = StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY);
 
     return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
   };
 
   // extends the expiration token with `keyName` if it hasn't expired
-  private _extendToken = function (keyName: string) {
+  private static _extendToken = function (keyName: string) {
     if (AuthenService._keyExistsInStorage(keyName) && !AuthenService._expiredToken(keyName)) {
       AuthenService._createToken(keyName);
     }
@@ -100,10 +100,9 @@ export default class AuthenService {
       postLoginCB = function () {
         // if (!AuthenService.shouldReloadPageAfterLogin()) {
           // fetches the session of the user that just logged in
-          AuthenService._getSession("").then(function (response) {
+          AuthenService.getSession("").then(function (response) {
             // if (modalInstance) modalInstance.close();
-
-              alert(response.client.full_name + " logged in")
+            alert(response.client.full_name + " logged in")
           });
         // } else {
         //   // window.location.reload();
@@ -149,7 +148,6 @@ export default class AuthenService {
     axios.get(url, config).then(function (response) {
     // ConfigUtils.getHTTPService().get(url, config).then(function (response) {
       var data = response.data;
-      console.log(data);
 
       var login_url = "";
       if (data['redirect_url'] !== undefined) {
@@ -292,7 +290,7 @@ export default class AuthenService {
    *
    * @param  {string=} context undefined or "401"
    */
-  static _getSession = function (context: string) {
+  static getSession = function (context: string) {
     var config = {
       skipHTTP401Handling: true,
       headers: {} as any
@@ -360,7 +358,6 @@ export default class AuthenService {
 // var modalInstance = null;
 
 // return {
-//   getSession: _getSession,
 
 //   /**
 //    * Will return a promise that is resolved with the session.

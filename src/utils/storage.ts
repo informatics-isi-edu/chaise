@@ -13,6 +13,7 @@ export default class LocalStorage {
       localStorage.removeItem(test);
     } catch (e: unknown) {
       // $log.warn(messageMap.localStorageDisabled);
+      console.log("local storage disabled");
       LocalStorage.localStorageNotAvailable = true;
     }
 

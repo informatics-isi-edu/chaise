@@ -1,8 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import errorReducer from '@chaise/store/slices/error'
+import authenReducer from '@chaise/store/slices/authen';
+import errorReducer from '@chaise/store/slices/error';
 
 export const store = configureStore({
   reducer: {
+    authen: authenReducer,
     error: errorReducer
   },
 });
