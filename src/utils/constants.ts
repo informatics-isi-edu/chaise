@@ -1,6 +1,6 @@
 import { windowRef } from '@chaise/utils/window-ref';
 
-export const appTagMapping = {
+export const APP_TAG_MAPPING = {
   "tag:isrd.isi.edu,2016:chaise:record": "/record",
   "tag:isrd.isi.edu,2016:chaise:detailed": "/detailed",
   "tag:isrd.isi.edu,2016:chaise:viewer": "/viewer",
@@ -9,7 +9,7 @@ export const appTagMapping = {
   "tag:isrd.isi.edu,2016:chaise:recordedit": "/recordedit"
 };
 
-export const appContextMapping = {
+export const APP_CONTEXT_MAPPING = {
   "detailed": "/record",
   "compact": "/recordset",
   "edit": "/recordedit",
@@ -17,20 +17,21 @@ export const appContextMapping = {
   "*": "/record"
 };
 
-export const chaiseConfigPropertyNames = [
+export const CHAISE_CONFIG_PROPERTY_NAMES = [
   "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
   "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
   "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
-  "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+  "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
   "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
-  "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+  "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
   "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-  "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad", "configRules"
+  "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+  "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "configRules"
 ];
 
-export const defaultChaiseConfig = {
-  "internalHosts": [windowRef.location.host],
-  "ermrestLocation": windowRef.location.origin + "/ermrest",
+export const DEFAULT_CHAISE_CONFIG = {
+  "internalHosts": [window.location.host],
+  "ermrestLocation": window.location.origin + "/ermrest",
   "headTitle": "Chaise",
   "navbarBrandText": "Chaise",
   "logoutURL": "/",
@@ -39,19 +40,21 @@ export const defaultChaiseConfig = {
   "confirmDelete": true,
   "deleteRecord": false,
   "signUpURL": "",
-  "profileURL": "",
   "allowErrorDismissal": false,
   "showFaceting": false,
   "hideTableOfContents": false,
-  "showExportButton": false,
+  "navbarBanner": {},
   "navbarMenu": {},
   "navbarBrand": "",
+  "termsAndConditionsConfig": null,
   "disableDefaultExport": false,
   "exportServicePath": "/deriva/export",
   "disableExternalLinkModal": false,
   "logClientActions": true,
   "hideGoToRID": false,
   "showWriterEmptyRelatedOnLoad": null,
+  "savedQueryConfig": null,
+  "loggedInMenu": {},
   "shareCiteAcls": {
     "show": ["*"],
     "enable": ["*"]
@@ -91,7 +94,7 @@ export const errorMessages = {
 
 // NOTE: this global variable is defined in webpack,
 //       but we have to declare it here so typescript doesn't complain about it
-declare var CHAISE_BUILD_VARIABLES : {
+declare var CHAISE_BUILD_VARIABLES: {
   BUILD_VERSION: string,
   CHAISE_BASE_PATH: string,
   ERMRESTJS_BASE_PATH: string,

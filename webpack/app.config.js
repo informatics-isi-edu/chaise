@@ -7,6 +7,7 @@ const webpack = require("webpack");
 module.exports =  function (appName, title, mode, env) {
 
   const ermrestjsPath = env.BUILD_VARIABLES.ERMRESTJS_BASE_PATH;
+  const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
   const buildVersion =env.BUILD_VARIABLES.BUILD_VERSION;
 
   return {
@@ -59,9 +60,10 @@ module.exports =  function (appName, title, mode, env) {
           ]
       },
       plugins: [
-        // make sure to use the proper mode (even if the env variable is not defined)
         new webpack.DefinePlugin({
+          // make sure to use the proper mode (even if the env variable is not defined)
           'process.env.NODE_ENV': JSON.stringify(mode),
+          // create a global variable for the build variables
           CHAISE_BUILD_VARIABLES: JSON.stringify(env.BUILD_VARIABLES)
         }),
         new MiniCssExtractPlugin(),
@@ -71,7 +73,8 @@ module.exports =  function (appName, title, mode, env) {
           ermrestjs: [
             "<script src='" + ermrestjsPath + "ermrest.vendor.min.js?v=" +  buildVersion + "'></script>",
             "<script src='" + ermrestjsPath + "ermrest.min.js?v=" +  buildVersion + "'></script>"
-          ].join("\n")
+          ].join("\n"),
+          chaise_config: "<script src='" + chaisePath + "chaise-config.js?v=" +  buildVersion + "'></script>"
         })
       ],
       optimization: {

@@ -11,7 +11,7 @@ import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
 
 import FontAwesome from '@chaise/services/fontawesome';
-import setup from '@chaise/services/setup';
+import {ConfigService} from '@chaise/services/config';
 
 import Navbar from '@chaise/components/navbar';
 import ErrorModal from '@chaise/components/error-modal';
@@ -19,15 +19,22 @@ import Spinner from '@chaise/components/spinner';
 import RecordSet from '@chaise/components/recordset';
 
 const RecordSetApp = (): JSX.Element => {
+  const recordsetSettings = {
+    appName: "recordset",
+    appTitle: "Record Set",
+    overrideHeadTitle: true,
+    overrideDownloadClickBehavior: true,
+    overrideExternalLinkBehavior: true
+  };
 
   const dispatch = useAppDispatch();
-  const [setupDone, setSetupDone] = useState(false);
+  const [configDone, setConfigDone] = useState(false);
 
   // add all the font awesomes that are used
   FontAwesome.addRecordsetFonts();
 
   useEffect(() => {
-    if (setupDone) return;
+    if (configDone) return;
 
     /**
      * global error handler for uncaught errors
@@ -44,8 +51,9 @@ const RecordSetApp = (): JSX.Element => {
     /**
      * Setup the app (chaise-config, etc)
      */
-    setup().then(() => {
-      setSetupDone(true);
+     ConfigService.configure(recordsetSettings).then(() => {
+      console.dir(ConfigService.chaiseConfig);
+      setConfigDone(true);
     }).catch((err) => {
       dispatch(showError({ error: err, isGlobal: true }));
     });
@@ -63,7 +71,7 @@ const RecordSetApp = (): JSX.Element => {
   }
 
   const recordsetContent = () => {
-    if (!setupDone) {
+    if (!configDone) {
       return <Spinner />
     }
 
