@@ -172,6 +172,7 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
+        unlinkPureBinaryPopup: "popup/purebinary/unlink",
         facetPopup: "popup/facet",
         savedQuery: "popup/savedquery"
     })
@@ -2503,7 +2504,7 @@
         }
 
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
-            // return a function that will be called when a template needs t be fetched
+            // return a function that will be called when a template needs to be fetched
             return function(templateUrl) {
                 var version = "";
                 if (typeof chaiseBuildVariables === "object") {
@@ -3168,6 +3169,7 @@
             RELATED: "related",
             RELATED_INLINE: "related-inline",
             ADD_PB_POPUP: "related-link-picker",
+            UNLINK_PB_POPUP: "related-unlink-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
             SAVED_QUERY_CREATE_POPUP: "saved-query-entity",
@@ -3206,6 +3208,7 @@
             CLEAR_ALL: "clear-all", // clear all button
             CLEAR_CFACET: "clear-cfacet",
             CLEAR_CUSTOM_FILTER: "clear-custom-filter",
+            ENTITY_BATCH_UNLINK: "entity-batch-unlink", // row(s) in the table has been unlinked
             ENTITY_CREATE: "entity-create", // new rows has been created in the table
             ENTITY_DELETE: "entity-delete", // a row in the table has been deleted
             ENTITY_UPDATE: "entity-update", // a row in the table has been updated
@@ -3219,9 +3222,11 @@
             PAGE_LIMIT: "page-limit", // change page limit
             PAGE_NEXT: "page-next", // go to next page
             PAGE_PREV: "page-prev", // go to previous page
+            RELATED_BATCH_UNLINK: "related-batch-unlink", // row(s) in one of the related tables have been unlinked
             RELATED_CREATE: "related-create", // new rows in one of the related tables has been created
             RELATED_DELETE: "related-delete", // a row in one of the related tables has been deleted
             RELATED_UPDATE: "related-update", // a row in one of the related tables has been edited
+            RELATED_INLINE_BATCH_UNLINK: "related-inline-batch-unlink", // row(s) in one of the related (inline) tables have been unlinked
             RELATED_INLINE_CREATE: "related-inline-create", // new rows in one of the related (inline) tables has been created
             RELATED_INLINE_DELETE: "related-inline-delete", // a row in one of the related (inline) tables has been deleted
             RELATED_INLINE_UPDATE: "related-inline-update", // a row in one of the related (inline) tables has been edited

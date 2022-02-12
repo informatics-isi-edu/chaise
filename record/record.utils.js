@@ -486,6 +486,7 @@
             // update the cause list
             var uc = logService.reloadCauses;
             var selfCause = {};
+            selfCause[uc.RELATED_BATCH_UNLINK] = selfCause[uc.RELATED_INLINE_BATCH_UNLINK] = uc.ENTITY_BATCH_UNLINK;
             selfCause[uc.RELATED_CREATE] = selfCause[uc.RELATED_INLINE_CREATE] = uc.ENTITY_CREATE;
             selfCause[uc.RELATED_DELETE] = selfCause[uc.RELATED_INLINE_DELETE] = uc.ENTITY_DELETE;
             selfCause[uc.RELATED_UPDATE] = selfCause[uc.RELATED_INLINE_UPDATE] = uc.ENTITY_UPDATE;

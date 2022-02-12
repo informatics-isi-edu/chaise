@@ -106,14 +106,14 @@ describe('When viewing Record app', function() {
             it('should show an "Add record" link if the table is an inbound relationship', function() {
                 var link = recordPage.getAddRecordLink('in_create_table');
                 expect(link.isDisplayed()).toBeTruthy();
-                expect(link.getText()).toBe('Add record');
+                expect(link.getText()).toBe('Add records');
             });
 
             it('should show an "Add record" link if the table is an associative relationship', function() {
                 // If a related table is an association table, it should show "Unlink"
                 var link = recordPage.getAddRecordLink('assoc_create_table');
                 expect(link.isDisplayed()).toBeTruthy();
-                expect(link.getText()).toBe('Add record');
+                expect(link.getText()).toBe('Add records');
             });
 
             it('should not show an "Add record" or "Unlink" link if the table doesn\'t allow adding a new row', function() {
