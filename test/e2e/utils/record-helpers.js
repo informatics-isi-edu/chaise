@@ -1,3 +1,4 @@
+var pImport =  require('../utils/protractor.import.js');
 var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
@@ -777,7 +778,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 expect(addBtn.isPresent()).toBe(params.canCreate);
                 if(params.canCreate){
                     chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
-                        expect(comment).toBe("'Add more " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
+                        expect(comment).toBe("'Connect " + params.displayname + " records to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
                     });
                 }
             });
@@ -848,7 +849,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                     if (params.isAssociation) {
                         it ("button tooltip should be `Unlink`.", function () {
-                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe("Unlink");
+                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe('Disconnect ' + params.displayname + ': ' + params.entityMarkdownName + ' from this ' + params.baseTable + '.');
                         });
                     } else {
                         it ("button tooltip be `Delete`.", function () {
@@ -1079,6 +1080,16 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                         });
                     });
 
+                    // clear search
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getSearchClearButton());
+                }).then(function () {
+                    // tests the count
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                            return (ct == params.totalCount);
+                        });
+                    });
+
                     done();
                 }).catch(function(error) {
                     console.log(error);
@@ -1088,8 +1099,17 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
         }
 
         it ("user should be able to select new values and submit.", function (done) {
-            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(params.selectIndex);
+            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1);
             chaisePage.clickButton(inp).then(function (){
+                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(2);
+                return chaisePage.clickButton(inp2);
+            }).then(function (){
+                var inp3 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(3);
+                return chaisePage.clickButton(inp3);
+            }).then(function (){
+                var inp4 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(4);
+                return chaisePage.clickButton(inp4);
+            }).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Save", "Submit button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
@@ -1097,14 +1117,14 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 browser.wait(function () {
                     return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
-                        return (rows.length == params.existingCount+1);
+                        return (rows.length == params.existingCount + 4);
                     });
                 });
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 
                 return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
             }).then(function (count){
-                expect(count).toBe(params.existingCount + 1);
+                expect(count).toBe(params.existingCount + 4);
                 done();
             }).catch(function(error) {
                 console.log(error);
@@ -1114,6 +1134,363 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
     });
 };
+
+exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyCondition) {
+    describe("Batch Unlink feature, ", function () {
+        it ("clicking on `Remove records` button should open up a modal.", function (done) {
+            var removeBtn = chaisePage.recordPage.getRemoveRecordsLink(params.relatedDisplayname);
+            removeBtn.click().then(function () {
+                chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                return chaisePage.recordEditPage.getModalTitle().getText();
+            }).then(function (title) {
+                expect(title).toBe(params.modalTitle, "title missmatch.");
+
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == params.totalCount);
+                    });
+                });
+
+                return chaisePage.recordsetPage.getModalRows().count();
+            }).then(function(ct){
+                expect(ct).toBe(params.totalCount, "association count missmatch.");
+
+                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
+                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+
+        it ("user should be able to select values to unlink and submit.", function (done) {
+            // select rows 2 and 4, then remove them
+            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1);
+            chaisePage.clickButton(inp).then(function (){
+                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(3);
+                return chaisePage.clickButton(inp2);
+            }).then(function (){
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Remove", "Remove button text for add pure and binary popup is incorrect");
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                // expect modal to open
+                return modalTitle.getText();
+            }).then(function (text) {
+                expect(text).toBe("Confirm Remove");
+
+                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to remove 2 records?");
+
+                var removeBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                expect(removeBtn.getText()).toBe("Remove");
+
+                return removeBtn.click();
+            }).then(function () {
+                var unlinkSummaryModal = element(by.css('.modal-error'));
+                unlinkSummaryModal.allowAnimations(false);
+                chaisePage.waitForElement(unlinkSummaryModal);
+
+                var errorTitle = chaisePage.errorModal.getTitle();
+                browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
+
+                return errorTitle.getText();
+            }).then(function (text) {
+                // check error popup
+                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
+
+                var modalOkBtn = chaisePage.recordPage.getErrorModalOkButton()
+                browser.wait(EC.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+                // click ok
+                return chaisePage.clickButton(modalOkBtn);
+            }).then(function () {
+                // check modal has 3 rows
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == params.countAfterUnlink);
+                    });
+                });
+
+                return chaisePage.recordsetPage.getModalRows().count();
+            }).then(function(ct){
+                expect(ct).toBe(params.countAfterUnlink, "association count missmatch after delete.");
+                // close modal and check UI after
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
+            }).then(function () {
+                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
+                        return (rows.length == params.countAfterUnlink);
+                    });
+                });
+                checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
+
+                return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
+            }).then(function (count){
+                expect(count).toBe(params.countAfterUnlink);
+
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+    });
+};
+
+exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline, pageReadyCondition, postLoginCb) {
+    var restrictedUserId = process.env.RESTRICTED_AUTH_COOKIE_ID;
+    var aclConfig = {
+        "catalog": {
+            "id": params.catalogId,
+            "schemas" : {
+                "product-unordered-related-tables-links": {
+                    "tables" : {
+                        "accommodation": {
+                            "acls": {
+                                "select": [restrictedUserId]
+                            }
+                        },
+                        "related_table": {
+                            "acls": {
+                                "select": [restrictedUserId],
+                                "delete": [restrictedUserId]
+                            }
+                        },
+                        "association_table": {
+                            "acls": {
+                                "select": [restrictedUserId]
+                            },
+                            "acl_bindings": {
+                                "can_delete_row": {
+                                    "types": ["delete"],
+                                    "projection": [
+                                        {"filter": "id_related", "operand": 5}, "id_related" // "Space Heater"
+                                    ],
+                                    "projection_type": "nonnull"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    var resetAclConfig = {
+        "catalog": {
+            "id": params.catalogId,
+            "schemas" : {
+                "product-unordered-related-tables-links": {
+                    "tables" : {
+                        "accommodation": {
+                            "acls": {
+                                "select": []
+                            }
+                        },
+                        "related_table": {
+                            "acls": {
+                                "select": [],
+                                "delete": []
+                            }
+                        },
+                        "association_table": {
+                            "acls": {
+                                "select": []
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    describe("batch unlink with dynamic acls,", function () {
+        beforeAll(function (done) {
+            // set acls
+            pImport.importACLs(aclConfig).then(function () {
+                // make sure the restricted user is logged in
+                return chaisePage.performLogin(process.env.RESTRICTED_AUTH_COOKIE);
+            }).then(function() {
+                postLoginCb()
+
+                done();
+            }).catch(function(err) {
+                console.log("error while trying to login as restricted user");
+                done.fail(err);
+            });
+        });
+
+        it("should fail to unlink rows that can't be unlinked with an error message in the batch remove summary", function (done) {
+            var removeBtn = chaisePage.recordPage.getRemoveRecordsLink(params.relatedDisplayname);
+            browser.wait(EC.elementToBeClickable(removeBtn), browser.params.defaultTimeout);
+            removeBtn.click().then(function () {
+                chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                return chaisePage.recordEditPage.getModalTitle().getText();
+            }).then(function (title) {
+                expect(title).toBe(params.modalTitle, "title missmatch.");
+
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == params.countAfterUnlink);
+                    });
+                });
+
+                return chaisePage.recordsetPage.getModalRows().count();
+            }).then(function(ct){
+                expect(ct).toBe(params.countAfterUnlink, "association count missmatch.");
+
+                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
+                expect(totalCountText).toBe("Displaying\nall " + params.countAfterUnlink +"\nof " + params.countAfterUnlink + " records", "association count display missmatch.");
+
+                // select "Television" (not deletable)
+                var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
+                return chaisePage.clickButton(inp)
+            }).then(function (){
+                // select "Space Heater" (deletable)
+                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(2);
+                return chaisePage.clickButton(inp2)
+            }).then(function (){
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Remove", "Remove button text for add pure and binary popup is incorrect");
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                // expect modal to open
+                return modalTitle.getText();
+            }).then(function (text) {
+                expect(text).toBe("Confirm Remove");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to remove 2 records?");
+
+                return chaisePage.recordPage.getConfirmDeleteButton().click();
+            }).then(function () {
+                var unlinkSummaryModal = element(by.css('.modal-error'));
+                unlinkSummaryModal.allowAnimations(false);
+                chaisePage.waitForElement(unlinkSummaryModal);
+
+                var errorTitle = chaisePage.errorModal.getTitle();
+                browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
+
+                return errorTitle.getText();
+            }).then(function (text) {
+                // check error popup
+                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
+
+                // click ok
+                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+            }).then(function () {
+                // check modal has 2 rows
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == params.countAfterUnlink);
+                    });
+                });
+
+                return chaisePage.recordsetPage.getModalRows().count();
+            }).then(function(ct){
+                expect(ct).toBe(params.countAfterUnlink, "association count missmatch after delete.");
+
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+
+        it("should have rows still selected after failed delete", function () {
+            expect(chaisePage.recordsetPage.getSelectedRowsFilters().count()).toBe(2);
+        });
+
+        it("should deselect the 2nd row and resubmit delete", function (done) {
+            // deselect "Television"
+            var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
+
+            chaisePage.clickButton(inp2).then(function (){
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Remove", "Remove button text for add pure and binary popup is incorrect");
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
+            }).then(function () {
+                var modalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
+                // expect modal to open
+                return modalTitle.getText();
+            }).then(function (text) {
+                expect(text).toBe("Confirm Remove");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to remove 1 record?");
+
+                return chaisePage.recordPage.getConfirmDeleteButton().click();
+            }).then(function () {
+                var unlinkSummaryModal = element(by.css('.modal-error'));
+                unlinkSummaryModal.allowAnimations(false);
+                chaisePage.waitForElement(unlinkSummaryModal);
+
+                var errorTitle = chaisePage.errorModal.getTitle();
+                browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
+
+                return errorTitle.getText();
+            }).then(function (text) {
+                // check error popup
+                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
+
+                // click ok
+                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+            }).then(function () {
+                // check modal has 1 row
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == params.countAfterAclUnlink);
+                    });
+                });
+
+                return chaisePage.recordsetPage.getModalRows().count();
+            }).then(function(ct){
+                expect(ct).toBe(params.countAfterAclUnlink, "association count missmatch after delete.");
+
+                return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
+            }).then(function () {
+                browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
+                        return (rows.length == params.countAfterAclUnlink);
+                    });
+                });
+                checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfterAclRemove, done);
+
+                return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
+            }).then(function (count){
+                expect(count).toBe(params.countAfterAclUnlink);
+
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
+        });
+
+        afterAll(function (done) {
+            // remove acls
+            pImport.importACLs(resetAclConfig).then(function () {
+                // login as the original user
+                return chaisePage.performLogin(process.env.AUTH_COOKIE);
+            }).then(function() {
+                postLoginCb();
+
+                done();
+            }).catch(function(err) {
+                console.log("error while trying to login as normal user");
+                done.fail(err);
+            });
+        });
+    });
+}
 
 
 function checkRelatedRowValues(displayname, isInline, rowValues, done) {

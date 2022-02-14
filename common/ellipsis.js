@@ -57,6 +57,9 @@
                         templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                         controller: "ConfirmDeleteController",
                         controllerAs: "ctrl",
+                        resolve: {
+                            params: { count: 1 }
+                        },
                         size: "sm"
                     }, function onSuccess(res) {
                         scope.$root.showSpinner = true;
@@ -133,8 +136,11 @@
                         });
                     }
 
+                    scope.tooltip = {};
+
                     var tupleReference = scope.tuple.reference,
                         isRelated = scope.config.displayMode.indexOf(recordsetDisplayModes.related) === 0,
+                        editLink = null,
                         isSavedQueryPopup = scope.config.displayMode === recordsetDisplayModes.savedQuery,
                         associationRef;
 
@@ -213,6 +219,7 @@
                     if (scope.config.deletable) {
                         if (associationRef) {
                             if (scope.tuple.canUnlink) {
+                                scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.tableModel.parentReference.displayname.value + '.';
                                 // define unlink function
                                 scope.unlink = function() {
                                     deleteReference(scope, associationRef, isRelated, true);
