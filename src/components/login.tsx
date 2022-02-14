@@ -11,15 +11,19 @@ const Login = (): JSX.Element => {
   const dispatch = useAppDispatch();
   // instantiate type to ChaiseUser
   const [authenRes, setAuthenRes] = useState<ChaiseUser>();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     // TODO: fill in context
     AuthenService.getSession("").then(function (response) {
       setAuthenRes(response);
+      setIsLoaded(true);
       console.log("before store: ", response);
       // TODO: ingest response and create User and Client objects
 
-      dispatch(loginUser(response));
+      if (response) {
+        dispatch(loginUser(response));
+      }
     });
   });
 
@@ -57,7 +61,7 @@ const Login = (): JSX.Element => {
   }
 
   const loginDropdown = () => {
-    if (!authenRes) {
+    if (!authenRes && isLoaded) {
       return (<>
         {showSignupLink()}
         <li>
