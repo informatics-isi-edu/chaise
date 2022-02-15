@@ -1166,6 +1166,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
         });
 
         it ("user should be able to select values to unlink and submit.", function (done) {
+            element(by.css('body')).allowAnimations(false);
             // select rows 2 and 4, then remove them
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1);
             chaisePage.clickButton(inp).then(function (){
@@ -1192,7 +1193,6 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
-                unlinkSummaryModal.allowAnimations(false);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
