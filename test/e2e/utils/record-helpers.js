@@ -1007,7 +1007,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
  */
 exports.testAddAssociationTable = function (params, isInline, pageReadyCondition) {
     describe("Add feature, ", function () {
-        it ("clicking on `Add` button should open up a modal.", function (done) {
+        it ("clicking on `Link` button should open up a modal.", function (done) {
             var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
             addBtn.click().then(function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
@@ -1110,7 +1110,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 var inp4 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(4);
                 return chaisePage.clickButton(inp4);
             }).then(function (){
-                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Save", "Submit button text for add pure and binary popup is incorrect");
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Link", "Submit button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
@@ -1137,9 +1137,9 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
 exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyCondition) {
     describe("Batch Unlink feature, ", function () {
-        it ("clicking on `Remove records` button should open up a modal.", function (done) {
-            var removeBtn = chaisePage.recordPage.getRemoveRecordsLink(params.relatedDisplayname);
-            removeBtn.click().then(function () {
+        it ("clicking on `Unlink records` button should open up a modal.", function (done) {
+            var unlinkBtn = chaisePage.recordPage.getUnlinkRecordsLink(params.relatedDisplayname);
+            unlinkBtn.click().then(function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
@@ -1172,7 +1172,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(3);
                 return chaisePage.clickButton(inp2);
             }).then(function (){
-                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Remove", "Remove button text for add pure and binary popup is incorrect");
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
@@ -1181,18 +1181,18 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 // expect modal to open
                 return modalTitle.getText();
             }).then(function (text) {
-                expect(text).toBe("Confirm Remove");
+                expect(text).toBe("Confirm Unlink");
 
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to remove 2 records?");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
-                var removeBtn = chaisePage.recordPage.getConfirmDeleteButton();
-                expect(removeBtn.getText()).toBe("Remove");
+                var unlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                expect(unlinkBtn.getText()).toBe("Unlink");
 
-                return removeBtn.click();
+                return unlinkBtn.click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
-                unlinkSummaryModal.allowAnimations(false);
                 chaisePage.waitForElement(unlinkSummaryModal);
+                unlinkSummaryModal.allowAnimations(false);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1200,7 +1200,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 return errorTitle.getText();
             }).then(function (text) {
                 // check error popup
-                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
 
                 var modalOkBtn = chaisePage.recordPage.getErrorModalOkButton()
@@ -1327,9 +1327,9 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
         });
 
         it("should fail to unlink rows that can't be unlinked with an error message in the batch remove summary", function (done) {
-            var removeBtn = chaisePage.recordPage.getRemoveRecordsLink(params.relatedDisplayname);
-            browser.wait(EC.elementToBeClickable(removeBtn), browser.params.defaultTimeout);
-            removeBtn.click().then(function () {
+            var unlinkBtn = chaisePage.recordPage.getUnlinkRecordsLink(params.relatedDisplayname);
+            browser.wait(EC.elementToBeClickable(unlinkBtn), browser.params.defaultTimeout);
+            unlinkBtn.click().then(function () {
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
@@ -1356,7 +1356,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(2);
                 return chaisePage.clickButton(inp2)
             }).then(function (){
-                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Remove", "Remove button text for add pure and binary popup is incorrect");
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
@@ -1365,14 +1365,14 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 // expect modal to open
                 return modalTitle.getText();
             }).then(function (text) {
-                expect(text).toBe("Confirm Remove");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to remove 2 records?");
+                expect(text).toBe("Confirm Unlink");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
-                unlinkSummaryModal.allowAnimations(false);
                 chaisePage.waitForElement(unlinkSummaryModal);
+                unlinkSummaryModal.allowAnimations(false);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1380,7 +1380,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return errorTitle.getText();
             }).then(function (text) {
                 // check error popup
-                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
@@ -1413,7 +1413,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
 
             chaisePage.clickButton(inp2).then(function (){
-                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Remove", "Remove button text for add pure and binary popup is incorrect");
+                expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
@@ -1422,14 +1422,14 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 // expect modal to open
                 return modalTitle.getText();
             }).then(function (text) {
-                expect(text).toBe("Confirm Remove");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to remove 1 record?");
+                expect(text).toBe("Confirm Unlink");
+                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 1 record?");
 
                 return chaisePage.recordPage.getConfirmDeleteButton().click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
-                unlinkSummaryModal.allowAnimations(false);
                 chaisePage.waitForElement(unlinkSummaryModal);
+                unlinkSummaryModal.allowAnimations(false);
 
                 var errorTitle = chaisePage.errorModal.getTitle();
                 browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1437,7 +1437,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return errorTitle.getText();
             }).then(function (text) {
                 // check error popup
-                expect(text).toBe("Batch Remove Summary", "The title of batch unlink summary popup is not correct");
+                expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok

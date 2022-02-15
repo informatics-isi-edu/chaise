@@ -13,7 +13,7 @@
                 <span ng-if="!values[$index].isHTML">{{values[$index].value}}</span>
             </span>
             <span ng-if="showInlineTable($index)" id="entity-{{$index}}-table">
-                <record-action-bar id="actionbar-{{$index}}" is-inline="true" is-table-display="col.tableModel.isTableDisplay"
+                <record-action-bar id="actionbar-{{$index}}" is-inline="true" is-table-display="col.tableModel.isTableDisplay" is-pure-and-binary="col.tableModel.reference.derivedAssociationReference"
                     show-toggle-display-btn="allowInlineTableMarkdown($index)" toggle-display-mode='toggleInlineDisplayMode({dataModel:col.tableModel})' can-edit="canEditRelated({ref:col.tableModel.reference}) && !showError($index)"
                     can-create="canCreateRelated({ref:col.tableModel.reference})" can-create-disabled="canCreateRelatedDisabled({ref:col.tableModel.reference})" can-delete="canDeleteRelated({ref:col.tableModel.reference})"
                     add-related-record="addRelatedRecord({tableModel:col.tableModel})" delete-related-record="deleteRelatedRecord({tableModel:col.tableModel})" to-recordset="toRecordSet({ref:col.tableModel.reference})"
