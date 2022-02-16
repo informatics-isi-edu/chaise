@@ -143,7 +143,7 @@
                                             </span>
                                         </div>
                                         <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-create-disabled="ctrl.canCreateRelatedDisabled(rtm.tableModel.reference)"
-                                            can-delete="ctrl.canDeleteRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)"
+                                            can-delete="ctrl.canDeleteRelated(rtm.tableModel.reference)" can-edit="ctrl.canEditRelated(rtm.tableModel.reference)" is-pure-and-binary="rtm.tableModel.reference.derivedAssociationReference"
                                             is-inline="false" is-table-display="rtm.isTableDisplay" show-toggle-display-btn="ctrl.allowRelatedTableMarkdown($index)"
                                             add-related-record="ctrl.addRelatedRecord(rtm.tableModel)" delete-related-record="ctrl.deleteRelatedRecord(rtm.tableModel)" toggle-display-mode='ctrl.toggleDisplayMode(rtm)'
                                             to-recordset="ctrl.toRecordSet(rtm.tableModel.reference)" base-table-name="rtm.baseTableName" displayname="rtm.displayname"

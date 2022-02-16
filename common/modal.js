@@ -150,13 +150,13 @@
         vm.deleteBtn = "Delete";
 
         if (params.batchUnlink) {
-            vm.title = "Confirm Remove";
+            vm.title = "Confirm Unlink";
 
             var multiple = '';
             if (params.count > 1) multiple += 's';
-            vm.message = "Are you sure you want to remove " + params.count + " record" + multiple + '?';
+            vm.message = "Are you sure you want to unlink " + params.count + " record" + multiple + '?';
 
-            vm.deleteBtn = "Remove";
+            vm.deleteBtn = "Unlink";
         }
 
         function ok() {
@@ -351,9 +351,10 @@
         }
 
         if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
-            vm.submitText = "Remove";
+            vm.submitText = "Unlink";
             vm.submitTooltip = "Disconnect the selected records from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
+            vm.submitText = "Link";
             vm.submitTooltip = "Connect the selected records to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else {
             vm.submitTooltip = "Apply the selected records";
