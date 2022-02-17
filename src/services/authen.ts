@@ -351,6 +351,25 @@ export default class AuthenService {
     });
   }
 
+  //   // groupArray should be the array of globus group
+  static isGroupIncluded = (groupArray: string[]) => {
+    // if no array, assume it wasn't defined and default hasn't been set yet
+    if (!groupArray || groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
+    if (!AuthenService._session) return false; // no "*" exists and no session, hide the option
+
+    for (var i = 0; i < groupArray.length; i++) {
+      var attribute = groupArray[i];
+
+      var match = AuthenService._session.attributes.some(function (attr: any) {
+        return attr.id === attribute;
+      });
+
+      if (match) return true;
+    };
+
+    return false;
+  }
+
 } // end class
 
 // // variable so the modal can be passed to another function outside of this scope to close it when appropriate
@@ -474,25 +493,6 @@ export default class AuthenService {
 //       _changeCbs[id] = fn;
 //     }
 //     return id;
-//   },
-
-//   // groupArray should be the array of globus group
-//   isGroupIncluded: function (groupArray) {
-//     // if no array, assume it wasn't defined and default hasn't been set yet
-//     if (!groupArray || groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
-//     if (!_session) return false; // no "*" exists and no session, hide the option
-
-//     for (var i = 0; i < groupArray.length; i++) {
-//       var attribute = groupArray[i];
-
-//       var match = _session.attributes.some(function (attr) {
-//         return attr.id === attribute;
-//       });
-
-//       if (match) return true;
-//     };
-
-//     return false;
 //   },
 
 //   unsubscribeOnChange: function (id) {

@@ -12,14 +12,16 @@ body > .container {
 	padding-top: 70px;
 }
 
-#mainnav {
+// navheader includes navbar as well as banners
+#navheader {
     z-index: 1037;
+    position: relative; // for z-index to work, position must be non-static
 }
 
 // default modal z-index is 1050 (for the first modal)
 // as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
 // we tried to be safe about it before by increasing it by only 1
-.modal-login #mainnav, .error-open #mainnav {
+.modal-login #navheader, .error-open #navheader {
     z-index: 1501;
 }
 
@@ -32,8 +34,17 @@ body > .container {
    color: #C1C1C1;
 }
 
-.navbar-inverse .navbar-brand, .navbar-inverse .navbar-nav.navbar-right > li > a{
+.navbar-inverse .navbar-nav.navbar-right > li > a{
    color: #59C4FF;
+}
+
+.navbar-inverse .navbar-brand {
+    color: #59C4FF;
+    float: left;
+    height: 50px;
+    padding: 15px 15px;
+    font-size: 18px;
+    line-height: 20px;
 }
 
 #live-btn {
@@ -100,6 +111,28 @@ body > .container {
     margin-bottom: 0;
     padding: 0px 20px;
     min-height: 50px;
+    flex-wrap: nowrap;
+}
+
+.navbar-nav {
+    flex-direction: row;
+
+    li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        line-height: 20px;
+    }
+}
+
+.nav>li {
+    position: relative;
+    display: block;
+
+    a {
+        position: relative;
+        display: block;
+        padding: 10px 15px;
+    }
 }
 
 .chaise-navbar-banner-container {
@@ -213,8 +246,18 @@ header {
         max-width: 450px;
     }
 
-    .dropdown .dropdown-toggle {
+    .dropdown .dropdown-toggle,
+    .dropdown a {
         text-decoration: none;
+    }
+
+    .dropdown .dropdown-toggle::after {
+        border-top: 5px solid;
+        border-right: 5px solid transparent;
+        border-left: 5px solid transparent;
+
+        margin-left: 5px;
+        vertical-align: middle;
     }
 
     .dropdown-menu {
@@ -272,6 +315,23 @@ header {
     @media (min-width: 768px) {
         .child-opened {
             background-color: $table-header-background-color;
+        }
+        .navbar-header {
+            float: left;
+        }
+
+        .navbar-nav {
+            float: left;
+            margin: 0;
+
+            li {
+                float: left;
+
+                a {
+                    padding-top: 15px;
+                    padding-bottom: 15px;
+                }
+            }
         }
     }
 }
