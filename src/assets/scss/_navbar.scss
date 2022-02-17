@@ -98,8 +98,8 @@ body > .container {
 
 .navbar {
     margin-bottom: 0;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 0px 20px;
+    min-height: 50px;
 }
 
 .chaise-navbar-banner-container {
@@ -213,9 +213,19 @@ header {
         max-width: 450px;
     }
 
+    .dropdown .dropdown-toggle {
+        text-decoration: none;
+    }
+
     .dropdown-menu {
         // To keep it more compact
         min-width: 100px;
+        padding: 5px 0;
+    }
+
+    // style to override react-bootstrap
+    .dropdown-item {
+        padding: 0;
     }
 
     .dropdown-menu > li > a,

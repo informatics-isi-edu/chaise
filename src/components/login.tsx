@@ -14,17 +14,19 @@ const Login = (): JSX.Element => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // TODO: fill in context
-    AuthenService.getSession("").then(function (response) {
-      setAuthenRes(response);
-      setIsLoaded(true);
-      console.log("before store: ", response);
-      // TODO: ingest response and create User and Client objects
+    if (!isLoaded) {
+      // TODO: fill in context
+      AuthenService.getSession("").then(function (response) {
+        setAuthenRes(response);
+        setIsLoaded(true);
+        console.log("before store: ", response);
+        // TODO: ingest response and create User and Client objects
 
-      if (response) {
-        dispatch(loginUser(response));
-      }
-    });
+        if (response) {
+          dispatch(loginUser(response));
+        }
+      });
+    }
   });
 
   const handleLoginClick = () => {
@@ -70,22 +72,20 @@ const Login = (): JSX.Element => {
       </>)
     }
 
-    // TODO: fix dropdown menu not opening
+    // TODO: fix onClick={logDropdownOpen}
     // TODO: add logged in user tooltip
     // TODO: list of menu options from config
     return (
-      <li>
-        <Dropdown>
-          <Dropdown.Toggle variant="success" onClick={logDropdownOpen}>
-            <span className="username-display">{displayName()}</span>
-          </Dropdown.Toggle>
+      <Dropdown as="li">
+        <Dropdown.Toggle as="a">
+          <span className="username-display">{displayName()}</span>
+        </Dropdown.Toggle>
 
-          <Dropdown.Menu className="chaise-login-menu">
-            <Dropdown.Item id="profile-link" onClick={openProfile}>My Profile</Dropdown.Item>
-            <Dropdown.Item id="logout-link" onClick={handeLogoutClick}>Log Out</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
-      </li>
+        <Dropdown.Menu className="chaise-login-menu" as="ul">
+          <Dropdown.Item as="li" id="profile-link" onClick={openProfile}><a>My Profile</a></Dropdown.Item>
+          <Dropdown.Item as="li" id="logout-link" onClick={handeLogoutClick}><a>Log Out</a></Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
     )
 
   }

@@ -322,7 +322,6 @@ export default class AuthenService {
      **/
 
     return axios.get(AuthenService.serviceURL + "/authn/session", config).then(function (response) {
-      console.log(response);
       if (context === "401" && AuthenService.shouldReloadPageAfterLogin()) {
         // window.location.reload();
         return response.data;
