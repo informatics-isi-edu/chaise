@@ -1,25 +1,9 @@
-// Required first
 @import "variables";
 @import "helpers";
 
-// components
-@import "navbar";
+// globally used
 @import "chaise-icon";
 @import "markdown-container";
-@import "resizable";
-@import "inputs";
-@import "button-group";
-@import "buttons";
-@import "recordset";
-@import "modal";
-
-// app specific
-@import "recordedit-app";
-@import "viewer-app";
-@import "switch-user-accounts";
-@import "login-app";
-@import "help-app";
-
 
 // if we want to hide the page and then show navbar and content together
 .wait-for-navbar {
@@ -29,27 +13,11 @@
     visibility: visible;
 }
 
-// configure app rules
-.chaise-body .app-container {
-    display: none;
-}
-html.ng-scope {
-    .app-container {
-        display: block;
-    }
-
-    .configure-container {
-        display: none;
-    }
-}
-
 html {
     font-size: $font-size;
 }
 
 .chaise-body {
-    @import "record-app";
-    @import "recordset-app";
 
     // TODO this might be problematic, we might want to be more specific to each app
     /****************** GLOBAL ******************/
@@ -165,7 +133,6 @@ html {
             max-width: inherit;
         }
     }
-
 
     // disabled row and form
     .disabled-form,
@@ -562,14 +529,6 @@ html {
     }
     // END remove
 
-
-    // copy btn (used in share dialog)
-    .chaise-copy-btn {
-        color: $black-color;
-        font-size: 65%;
-        cursor: pointer;
-    }
-
     // chaise checkbox
     .chaise-checkbox {
         position: relative;
@@ -706,22 +665,6 @@ html {
 
         to {
             -moz-transform: rotate(360deg);
-        }
-    }
-
-/****** longtext inputs *********/
-    .md-editor {
-        border-radius: $btn-border-radius;
-
-        .md-header {
-            border-top-left-radius: $btn-border-radius;
-            border-top-right-radius: $btn-border-radius;
-        }
-
-        .content-box {
-            border-bottom-left-radius: $btn-border-radius;
-            border-bottom-right-radius: $btn-border-radius;
-            border-bottom: 0;
         }
     }
 

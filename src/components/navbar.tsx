@@ -1,3 +1,5 @@
+import '@chaise/assets/scss/_navbar.scss';
+
 import React from 'react'
 
 import { ConfigService } from '@chaise/services/config';
