@@ -14,7 +14,7 @@ const Navbar = (): JSX.Element => {
   var root = cc.navbarMenu || {};
   var catalogId = getCatalogId();
 
-  let ERMrest = windowRef.ERMrest;
+  let ERMrest = ConfigService.ERMrest;
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -48,7 +48,7 @@ const Navbar = (): JSX.Element => {
       obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, { id: catalogId });
 
       // only append pcid/ppid if link is to a chaise url
-      if (MenuUtils.isChaise(obj.url, ConfigService.contextJSON)) {
+      if (MenuUtils.isChaise(obj.url, ConfigService.chaiseConfig)) {
         obj.url = MenuUtils.addLogParams(obj.url, ConfigService.contextHeaderParams);
       }
     }
@@ -135,7 +135,7 @@ const Navbar = (): JSX.Element => {
   const renderNavbarMenu = () => {
     return menu.map((item: any, index: number) => {
       if (!MenuUtils.canShow(item)) return
-      
+
       // TODO: onToggle
       return (<li key={index} className="dropdown">
         {renderMenuItem(item)}

@@ -1,5 +1,4 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min.js';
 import '@chaise/assets/scss/app.scss';
 
 import React, { useEffect, useState } from 'react';
@@ -12,7 +11,7 @@ import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
 
 import FontAwesome from '@chaise/services/fontawesome';
-import {ConfigService} from '@chaise/services/config';
+import { ConfigService } from '@chaise/services/config';
 
 import Navbar from '@chaise/components/navbar';
 import ErrorModal from '@chaise/components/error-modal';
@@ -49,12 +48,15 @@ const RecordSetApp = (): JSX.Element => {
       dispatch(showError({ error: event.reason, isGlobal: true }));
     });
 
+    // TODO we should get the session first
     /**
      * Setup the app (chaise-config, etc)
      */
-     ConfigService.configure(recordsetSettings).then(() => {
+    ConfigService.configure(recordsetSettings).then(() => {
       console.dir(ConfigService.chaiseConfig);
       setConfigDone(true);
+
+      // we should ge the reference
     }).catch((err) => {
       dispatch(showError({ error: err, isGlobal: true }));
     });

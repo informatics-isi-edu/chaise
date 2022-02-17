@@ -141,10 +141,6 @@ export class ConfigService {
     return ConfigService._chaiseConfig;
   }
 
-  static get contextJSON() {
-    return windowRef.dcctx;
-  }
-
   static get contextHeaderParams() {
     return ConfigService._contextHeaderParams;
   }

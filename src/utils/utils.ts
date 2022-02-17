@@ -321,7 +321,7 @@ export class MenuUtils {
       $event.stopPropagation();
 
       // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
-      if (!MenuUtils.isChaise(menuObject.url, ConfigService.contextJSON)) {
+      if (!MenuUtils.isChaise(menuObject.url, ConfigService.chaiseConfig)) {
         // check if external or internal resource page
 
         // TODO: logging
@@ -339,12 +339,12 @@ export class MenuUtils {
   static renderName = (option: any) => {
     // new syntax will always use nameMarkdownPattern
     if (option.nameMarkdownPattern) {
-      return windowRef.ERMrest.renderMarkdown(windowRef.ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), { inline: true });
+      return ConfigService.ERMrest.renderMarkdown(ConfigService.ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), { inline: true });
     }
 
     // support markdownName backwards compatibility for navbarMenu
     if (option.markdownName) {
-      return windowRef.ERMrest.renderMarkdown(option.markdownName, { inline: true });
+      return ConfigService.ERMrest.renderMarkdown(option.markdownName, { inline: true });
     }
 
     // support name backwards compatibility for navbarMenu
