@@ -1185,10 +1185,11 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
 
                 expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
-                var unlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
-                expect(unlinkBtn.getText()).toBe("Unlink");
+                var confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
+                expect(confirmUnlinkBtn.getText()).toBe("Unlink");
 
-                return unlinkBtn.click();
+                return confirmUnlinkBtn.click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
@@ -1368,7 +1369,11 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 expect(text).toBe("Confirm Unlink");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
-                return chaisePage.recordPage.getConfirmDeleteButton().click();
+                var confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
+                expect(confirmUnlinkBtn.getText()).toBe("Unlink");
+
+                return confirmUnlinkBtn.click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
@@ -1425,7 +1430,11 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 expect(text).toBe("Confirm Unlink");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 1 record?");
 
-                return chaisePage.recordPage.getConfirmDeleteButton().click();
+                var confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
+                browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
+                expect(confirmUnlinkBtn.getText()).toBe("Unlink");
+
+                return confirmUnlinkBtn.click();
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
