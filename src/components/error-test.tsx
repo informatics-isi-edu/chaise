@@ -3,6 +3,7 @@ import { Alert, Button, ButtonGroup } from "react-bootstrap";
 import { ErrorBoundary, FallbackProps, useErrorHandler} from 'react-error-boundary';
 import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
+import $log from "@chaise/services/logger";
 
 const ExplodeComponent = () : JSX.Element => {
   throw new Error('Something went wrong in the component.');
@@ -48,7 +49,7 @@ const ErrorComponentWithBoundary = () : JSX.Element => {
     try {
       throw new Error('Something went wrong in the event handler.');
     } catch (exp) {
-      console.log('wow');
+      $log.log('wow');
       handleError(exp);
     }
   };
@@ -99,7 +100,7 @@ const ErrorTest = () : JSX.Element => {
   try {
     catchedErrorComponent = <ErrorComponent/>;
   } catch (exp) {
-    console.log("caught the error here!");
+    $log.log("caught the error here!");
     catchedErrorComponent = (<div>wow errored!</div>);
   }
 

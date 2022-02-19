@@ -266,7 +266,6 @@ export class ConfigService {
             // if there is a config rule for the current host, overwrite the properties defined
             // windowRef.location.host refers to the hostname and port (www.something.com:0000)
             // windowRef.location.hostname refers to just the hostname (www.something.com)
-            console.log(windowRef.location.hostname);
             if (ruleset.host[i] === windowRef.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
               for (var property in ruleset.config) {
                 var matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
