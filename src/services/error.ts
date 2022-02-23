@@ -1,4 +1,5 @@
 import { windowRef } from '@chaise/utils/window-ref'
+import $log from '@chaise/services/logger';
 
 // TODO not used for now
 
@@ -31,9 +32,9 @@ export class ErrorHandler {
     }
 
     windowRef.ERMrest.logError(error, ermrestUri, contextHeaderParams).then(function () {
-      console.log("logged the error");
+      $log.log("logged the error");
     }).catch(function (err: Error) {
-      console.log("couldn't log the error.");
+      $log.log("couldn't log the error.");
     });
   };
 }

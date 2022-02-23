@@ -17,6 +17,7 @@ import ChaiseNavbar from '@chaise/components/navbar';
 import ErrorModal from '@chaise/components/error-modal';
 import Spinner from '@chaise/components/spinner';
 import RecordSet from '@chaise/components/recordset';
+import $log from '@chaise/services/logger';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
@@ -40,11 +41,11 @@ const RecordSetApp = (): JSX.Element => {
      * global error handler for uncaught errors
      */
     window.addEventListener("error", (event) => {
-      console.log("got the error in catch-all");
+      $log.log("got the error in catch-all");
       dispatch(showError({ error: event.error, isGlobal: true }));
     });
     window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-      console.log("got the error in catch-all (unhandled rejection)");
+      $log.log("got the error in catch-all (unhandled rejection)");
       dispatch(showError({ error: event.reason, isGlobal: true }));
     });
 
@@ -63,7 +64,7 @@ const RecordSetApp = (): JSX.Element => {
   });
 
   const errorFallback = ({ error }: FallbackProps) => {
-    console.log("error fallback of the main error boundary");
+    $log.log("error fallback of the main error boundary");
 
     // TODO context header params
     //ErrorHandler.logTerminalError(error);
