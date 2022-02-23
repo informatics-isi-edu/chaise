@@ -11,7 +11,7 @@ import { Provider } from 'react-redux';
 import { store } from '@chaise/store/store';
 import FontAwesome from '@chaise/services/fontawesome';
 
-import Navbar from '@chaise/components/navbar';
+import ChaiseNavbar from '@chaise/components/navbar';
 
 const NavbarApp = (): JSX.Element => {
 
@@ -19,7 +19,7 @@ const NavbarApp = (): JSX.Element => {
 
   return (
     <div>
-      <Navbar />
+      <ChaiseNavbar />
     </div>
   );
 };

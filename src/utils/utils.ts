@@ -1,4 +1,4 @@
-import { windowRef } from "@chaise/utils/window-ref";
+import { BUILD_VARIABLES } from "@chaise/utils/constants";
 import { ConfigService } from '@chaise/services/config';
 import AuthenService from "@chaise/services/authen";
 import { isSameOrigin } from "@chaise/legacy/src/utils/uri-utils";
@@ -66,12 +66,11 @@ export class MenuUtils {
   //   /* ===== Private Functions and variables ===== */
   static _path: string;
   // TODO: fix param types
-  private static _getPath = (dcctx: any) => {
+  private static _getPath = (dcctx: any): string => {
     if (!MenuUtils._path) {
       var path = "/chaise/";
-      var cbv = windowRef.chaiseBuildVariables;
-      if (dcctx && typeof cbv === "object" && typeof cbv.chaiseBasePath === "string") {
-        var path: string = cbv.chaiseBasePath;
+      if (dcctx && typeof BUILD_VARIABLES === "object" && typeof BUILD_VARIABLES.CHAISE_BASE_PATH === "string") {
+        var path: string = BUILD_VARIABLES.CHAISE_BASE_PATH;
         // append "/" if not present
         if (path[path.length - 1] !== "/") path += "/";
       }
@@ -333,6 +332,13 @@ export class MenuUtils {
         return;
       }
     };
+  }
+
+  static menuItemClasses = (option: any, checkHeader: boolean): string => {
+    var classes = "";
+    if (!MenuUtils.canEnable(option)) classes += 'disable-link ';
+    if (checkHeader && option.header === true) classes += 'chaise-dropdown-header';
+    return classes;
   }
 
   // make sure to use dangerouslySetInnerHTML when calling renderName

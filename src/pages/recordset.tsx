@@ -13,7 +13,7 @@ import { showError } from '@chaise/store/slices/error';
 import FontAwesome from '@chaise/services/fontawesome';
 import { ConfigService } from '@chaise/services/config';
 
-import Navbar from '@chaise/components/navbar';
+import ChaiseNavbar from '@chaise/components/navbar';
 import ErrorModal from '@chaise/components/error-modal';
 import Spinner from '@chaise/components/spinner';
 import RecordSet from '@chaise/components/recordset';
@@ -80,7 +80,7 @@ const RecordSetApp = (): JSX.Element => {
 
     return (
       <div className="app-container">
-        <Navbar />
+        <ChaiseNavbar />
         <RecordSet />
       </div>
     )

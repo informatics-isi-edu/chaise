@@ -1,6 +1,11 @@
 import '@chaise/assets/scss/_navbar.scss';
 
 import React from 'react'
+import Container from 'react-bootstrap/Container';
+import Dropdown from 'react-bootstrap/Dropdown';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 
 import { ConfigService } from '@chaise/services/config';
 import { MenuUtils } from '@chaise/utils/utils';
@@ -9,7 +14,7 @@ import { getCatalogId } from "@chaise/legacy/src/utils/uri-utils";
 
 import Login from '@chaise/components/login';
 
-const Navbar = (): JSX.Element => {
+const ChaiseNavbar = (): JSX.Element => {
   var cc = ConfigService.chaiseConfig;
   var settings = ConfigService.appSettings;
 
@@ -92,81 +97,144 @@ const Navbar = (): JSX.Element => {
   const menu = cc.navbarMenu ? cc.navbarMenu.children : [];
   console.log(menu);
 
-  const brandHref = () => {
-    return cc.navbarBrandUrl || "/";
-  }
-
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
 
-    return (<span>
-      <img id="brand-image" src={cc.navbarBrandImage}></img>
-    </span>)
+    return (<img id="brand-image" alt="" src={cc.navbarBrandImage}></img>)
   }
 
   const renderBrandingHTML = () => {
+    if (!cc.navbarBrandText) return;
+
     return (<>
-      {renderBrandImage()}
       <span id="brand-text">{cc.navbarBrandText}</span>
     </>)
   }
 
   const renderDropdownName = (item: any) => {
-    if (!MenuUtils.canEnable(item)) return;
+    return (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}></span>)
+  }
 
-    return(<a className="dropdown-toggle" onClick={MenuUtils.resetHeight}>
-      <span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}></span>
-    </a>)
+  const renderMenuChildren = (children: any) => {
+    return children.map((child: any, index: number) => {
+      if (!MenuUtils.canShow(child)) return;
+
+      // create an unclickable header
+      if (child.header == true && !child.children && !child.url) {
+        return (<NavDropdown.Header key={index} className="chaise-dropdown-header">{child.name}</NavDropdown.Header>);
+      }
+
+      // TODO: onClick logging
+      if ((!child.children && child.url) || !MenuUtils.canEnable(child)) {
+        return (<NavDropdown.Item
+          key={index}
+          href={child.url}
+          target={child.newTab ? '_blank' : '_self'}
+          className={MenuUtils.menuItemClasses(child, true)}
+          dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}
+        >
+        </NavDropdown.Item>);
+      }
+
+      if (child.children && MenuUtils.canEnable(child)) {
+        return (<Dropdown key={index} drop='end'>
+          <Dropdown.Toggle as='a' variant="dark" className={MenuUtils.menuItemClasses(child, true)} dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}></Dropdown.Toggle>
+          <Dropdown.Menu>
+            {renderMenuChildren(child.children)}
+          </Dropdown.Menu>
+        </Dropdown>)
+        // TODO: navbar-header-container
+      }
+
+      return (<></>);
+    });
   }
 
   // TODO: onClick logging
-  const renderMenuItem = (item: any) => {
+  const renderMenuItem = (item: any, idx: number) => {
     if (!item.children || !MenuUtils.canEnable(item)) {
-      return (<a href={item.url} target={item.newTab ? '_blank' : '_self'} className={!MenuUtils.canEnable(item) ? 'disable-link' : ''} dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}></a>)
+      return (<Nav.Link
+        key={idx}
+        href={item.url}
+        target={item.newTab ? '_blank' : '_self'}
+        className={MenuUtils.menuItemClasses(item, false)}
+        dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+      >
+      </Nav.Link>)
     }
 
+    // NOTE: this conditional might be unnecessary
     if (item.children) {
-      return (<>
-        {renderDropdownName(item)}
-        {/* <NavbarMenu></NavbarMenu> */}
-      </>)
+      return (<NavDropdown
+        key={idx}
+        id="nav-dropdown-dark-example"
+        title={renderDropdownName(item)}
+        menuVariant="dark"
+      >
+        {renderMenuChildren(item.children)}
+      </NavDropdown>)
     }
+
+    // NOTE: I don't it should reach this case
     return (<></>)
   }
 
-  const renderNavbarMenu = () => {
+  // const renderNavbarMenu = () => {
+  //   if (!menu) return;
+
+  //   return menu.map((item: any, index: number) => {
+  //     if (!MenuUtils.canShow(item)) return
+
+  //     // TODO: onToggle
+  //     return (<li key={index} className="dropdown">
+  //       {renderMenuItem(item)}
+  //     </li>)
+  //   });
+  // }
+
+  const renderNavbarMenuDropdowns = () => {
+    if (!menu) return;
+
     return menu.map((item: any, index: number) => {
       if (!MenuUtils.canShow(item)) return
 
-      // TODO: onToggle
-      return (<li key={index} className="dropdown">
-        {renderMenuItem(item)}
-      </li>)
-      // <li className="dropdown" on-toggle="onToggle(open, item)" ng-if="canShow(item)" uib-dropdown>
-      //   <a ng-if="!item.children || !canEnable(item)" ng-href="{{item.url}}" target="{{item.newTab ? '_blank' : '_self'}}" ng-class="{'disable-link': !canEnable(item)}" ng-click="::onLinkClick($event, item)" ng-bind-html="renderName(item)"></a>
-      //   <a ng-if="item.children && canEnable(item)" class="dropdown-toggle" uib-dropdown-toggle ng-click="::resetHeight($event)"><span ng-bind-html="renderName(item)"></span> <span class="caret"></span></a>
-      //   <ul ng-if="item.children" navbar-menu menu="item.children" class="dropdown-menu"></ul>
-      // </li>
+      return (<>
+        {renderMenuItem(item, index)}
+      </>)
     });
   }
 
   // TODO: add banner above <nav>
   // TODO: navbar toggle button when it shrinks
   // TODO: log branding
-  return (<header id="navheader" className="row">
-    <nav id="mainnav" className="navbar navbar-inverse" role="navigation">
-      <div className="navbar-header">
-        <a className="navbar-brand" href={(brandHref())}>{renderBrandingHTML()}</a>
-      </div>
-      <div className="navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
-        <ul id="navbar-menu" className="nav navbar-nav">
-          {renderNavbarMenu()}
-        </ul>
-        <Login />
-      </div>
-    </nav>
-  </header>)
+  // return (<header id="navheader" className="row">
+  //   <nav id="mainnav" className="navbar navbar-inverse" role="navigation">
+  //     <div className="navbar-header">
+  //       <a className="navbar-brand" href={(brandHref())}>{renderBrandingHTML()}</a>
+  //     </div>
+  //     <div className="navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
+  //       <ul id="navbar-menu" className="nav navbar-nav">
+  //         {renderNavbarMenu()}
+  //       </ul>
+  //       <Login />
+  //     </div>
+  //   </nav>
+  // </header>)
+  return (<Navbar variant="dark" bg="dark" expand="lg">
+    <Container fluid>
+      <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : "/")}>
+        {renderBrandImage()}{' '}
+        {renderBrandingHTML()}
+      </Navbar.Brand>
+      <Navbar.Toggle aria-controls="navbar-dark-example" />
+      <Navbar.Collapse id="navbar-dark-example">
+        <Nav>
+          {renderNavbarMenuDropdowns()}
+        </Nav>
+      </Navbar.Collapse>
+    </Container>
+  </Navbar>)
 
 }
 
-export default Navbar;
+export default ChaiseNavbar;
