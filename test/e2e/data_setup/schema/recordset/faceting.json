@@ -219,7 +219,7 @@
                             {"source": [{"outbound": ["faceting", "main_fk2"]}, "id"], "open": true, "comment": "open facet", "hide_null_choice": true},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "term"]},
                             {"sourcekey": "path_to_f4_scalar_w_id", "ux_mode": "choices", "hide_null_choice": true},
-                            {"source": [{"outbound": ["faceting", "main_fk1"]}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment", "hide_null_choice": true},
+                            {"source": [{"sourcekey": "outbound_to_f1"}, "term"], "markdown_name": "F1 with Term", "comment": "F1 with Term comment", "hide_null_choice": true, "hide_not_null_choice": true},
                             {"source": "text_col_2", "ux_mode": "check_presence", "markdown_name": "Check Presence Text"},
                             {"source": [{"inbound": ["faceting", "main_f3_assoc_fk1"]}, {"outbound": ["faceting", "main_f3_assoc_fk2"]}, "id"], "markdown_name": "F3 Entity"},
                             {"source": [{"inbound": ["faceting", "main_f5_fk1"]}, {"inbound": ["faceting", "f5_fk1"]}, "id"], "markdown_name": "F5", "comment": "F5 comment"},
@@ -236,6 +236,11 @@
                                 ], 
                                 "markdown_name": "F5 with filter",
                                 "comment": "has filters"
+                            },
+                            {
+                                "sourcekey": "outbound_to_f1_to_outbound1",
+                                "hide_not_null_choice": true,
+                                "hide_null_choice": true
                             },
                             {"source": "col_w_column_order_false", "order": [{"column": "col_w_column_order_false_facet_order", "descending": true}], "hide_null_choice": true},
                             {"source": "col_w_column_order", "hide_num_occurrences": true, "hide_null_choice": true},
@@ -256,6 +261,15 @@
                         "outbound_to_f1": {
                             "source": [{"outbound": ["faceting", "main_fk1"]}, "id"]
                         },
+                        "outbound_to_f1_to_outbound1": {
+                            "source": [
+                                {"sourcekey": "outbound_to_f1"},
+                                {"outbound": ["faceting", "f1_fk1"]},
+                                "id"
+                            ],
+                            "markdown_name": "Outbound1 (using **F1**)",
+                            "comment": "is using another facet sourcekey in source"
+                        },
                         "path_to_f4_scalar_w_id": {
                             "source": [{"inbound": ["faceting", "f4_fk1"]}, "id"], "entity": false
                         }
@@ -268,6 +282,82 @@
             "table_name": "f1",
             "schema_name": "faceting",
             "comment": "main table has fk to this table",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["faceting", "f1_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_to_f1_outbound1",
+                            "table_name": "f1",
+                            "schema_name": "faceting"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f1_outbound1",
+                            "schema_name": "faceting"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk_to_f1_outbound1",
+                    "nullok": true,
+                    "default": null,
+                    "type": {
+                        "typename": "int4"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "filter": {
+                        "and": [
+                            {"source": "term", "hide_null_choice": true, "hide_not_null_choice": true}
+                        ]
+                    }
+                },
+                "tag:isrd.isi.edu,2019:source-definitions": {
+                    "fkeys": true,
+                    "columns": true,
+                    "search-box": {
+                        "or": [
+                            {"source": "term", "markdown_name": "term column"}
+                        ]
+                    }
+                }
+            }
+        },
+        "f1_outbound1": {
+            "kind": "table",
+            "table_name": "f1_outbound1",
+            "schema_name": "faceting",
+            "comment": "f1 table has fk to this table",
             "keys": [
                 {"unique_columns": ["id"]},
                 {"unique_columns": ["term"]}
@@ -295,21 +385,8 @@
                         "row_order": [{"column": "id"}]
                     }
                 },
-                "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "filter": {
-                        "and": [
-                            {"source": "term", "hide_null_choice": true, "hide_not_null_choice": true}
-                        ]
-                    }
-                },
-                "tag:isrd.isi.edu,2019:source-definitions": {
-                    "fkeys": true,
-                    "columns": true,
-                    "search-box": {
-                        "or": [
-                            {"source": "term", "markdown_name": "term column"}
-                        ]
-                    }
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "*": ["id", "term"]
                 }
             }
         },

@@ -10,9 +10,10 @@ var testParams = {
     table_name: "main",
     filter_secondary_key: {
         facetIdx: 14,
-        option: 1,
-        modalOption: 2,
-        totalNumOptions: 11,
+        option: 0,
+        selectedModalOption: 0,
+        newModalOption: 2,
+        totalNumOptions: 10,
         numRows: 10,
         numRowsAfterModal: 11,
         removingOptionsNumRowsAfterModal: 25
@@ -20,7 +21,7 @@ var testParams = {
     facet_order: [
         {
             title: "facet with order and column_order false for scalar",
-            facetIdx: 19,
+            facetIdx: 20,
             modalOptions: ['01', '02', '03', '04', '05', '06', '07'],
             sortable: false,
             modalOptionsSortedByNumOfOccurences: ['07', '06', '05', '04', '03', '02', '01'],
@@ -28,7 +29,7 @@ var testParams = {
         },
         {
             title: "facet without order and hide_num_occurrences\ntrue",
-            facetIdx: 20,
+            facetIdx: 21,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,
             modalOptionsSortedByScalar: ['13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02', '01'],
@@ -105,7 +106,7 @@ var testParams = {
         optionsWOCustomFacet: ['No value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten']
     },
     maximumLength: {
-        facetIdx: 21,
+        facetIdx: 22,
         numRows: 25,
         filteredNumRows: 24,
         secondFacetIdx: 16,
@@ -126,6 +127,28 @@ var testParams = {
         jsonb_col: JSON.stringify({"key":"one"},undefined,2),
         "1-o7Ye2EkulrWcCVFNHi3A": "one", // faceting_main_fk1
         "hmZyP_Ufo3E5v_nmdTXyyA": "one" // faceting_main_fk2
+    },
+    shared_path_prefix: {
+        facetObject: {
+            "and": [
+                {"sourcekey": "outbound_to_f1", "choices": [1, 2, 3, 4, 5, 6]},
+                {"sourcekey": "outbound_to_f1_to_outbound1", "choices": [3, 4]}
+            ]
+        },
+        facetBlob: [
+            "N4IghgdgJiBcDaoDOB7ArgJwMYFMDWOAnnCOgC4BG60A+mSjQGYCMIANCFgBYoCWuSOPGZsATGwDMbACxsArGwBsAXQC+bZOmz4iJclTS16TZnQb7qUVh258BQqdLVqgA"
+        ].join(""),
+        numRows: 2,
+        firstFacet: {
+            index: 10,
+            options: ["No value", "one", "two", "three", "four", "five", "six"],
+            modalOptions: ["three", "four"]
+        },
+        secondFacet: {
+            index: 19,
+            options: ["three (o1)", "four (o1)", "one (o1)", "six (o1)"],
+            modalOptions: ["1", "3", "4", "6"]
+        }
     },
     unsupported_filters_error: {
         facetObject: {
@@ -280,14 +303,14 @@ describe("Other facet features, ", function() {
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(1, "number of checked rows missmatch.");
                 return chaisePage.recordsetPage.getModalOptions();
             }).then(function (options) {
-                expect(options[testParams.filter_secondary_key.option-1].isSelected()).toBeTruthy("the correct option was not selected.");
+                expect(options[testParams.filter_secondary_key.selectedModalOption].isSelected()).toBeTruthy("the correct option was not selected.");
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
 
         it ("selecting new values on the modal and submitting them, should change the filters on submit.", function (done) {
             chaisePage.recordsetPage.getModalOptions().then(function (options) {
-                return chaisePage.clickButton(options[testParams.filter_secondary_key.modalOption]);
+                return chaisePage.clickButton(options[testParams.filter_secondary_key.newModalOption]);
             }).then(function () {
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Submit", "Submit button text for add pure and binary popup is incorrect");
 
@@ -632,6 +655,48 @@ describe("Other facet features, ", function() {
     if (process.env.CI) return;
     // NOTE the following test cases will only run locally.
 
+    describe("regarding facets with shared path,", function () {
+        var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var currParams = testParams.shared_path_prefix;
+
+        beforeAll(function(done) {
+            var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
+            browser.ignoreSynchronization=true;
+            browser.get(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+            done();
+        });
+
+        it ("the main results should be correct", function (done) {
+            // wait for table rows to load
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return ct == currParams.numRows;
+                });
+            }, browser.params.defaultTimeout);
+
+            // the wait itself is doing the test
+            done();
+        });
+
+        describe("for the facet with subset path, ", function () {
+            recordSetHelpers.testFacetOptions(
+                currParams.firstFacet.index,
+                currParams.firstFacet.options,
+                currParams.firstFacet.modalOptions
+            );
+        });
+
+        describe("for the facet with superset path, ", function () {
+            recordSetHelpers.testFacetOptions(
+                currParams.secondFacet.index,
+                currParams.secondFacet.options,
+                currParams.secondFacet.modalOptions
+            );
+        });
+    });
+
+    return;
     describe("regarding UnsupportedFilters handling, ", function () {
         var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var currParams = testParams.unsupported_filters_error;

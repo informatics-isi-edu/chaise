@@ -1,15 +1,15 @@
 [
-    {"id": "1", "term": "one"},
+    {"id": "1", "term": "one", "fk_to_f1_outbound1": "1"},
     {"id": "2", "term": "two"},
-    {"id": "3", "term": "three"},
-    {"id": "4", "term": "four"},
+    {"id": "3", "term": "three", "fk_to_f1_outbound1": "3"},
+    {"id": "4", "term": "four", "fk_to_f1_outbound1": "4"},
     {"id": "5", "term": "five"},
-    {"id": "6", "term": "six"},
-    {"id": "7", "term": "seven"},
-    {"id": "8", "term": "eight"},
-    {"id": "9", "term": "nine"},
-    {"id": "10", "term": "ten"},
-    {"id": "11", "term": "eleven"},
-    {"id": "12", "term": "twelve"},
-    {"id": "13", "term": "thirteen"}
+    {"id": "6", "term": "six", "fk_to_f1_outbound1": "6"},
+    {"id": "7", "term": "seven", "fk_to_f1_outbound1": "7"},
+    {"id": "8", "term": "eight", "fk_to_f1_outbound1": "8"},
+    {"id": "9", "term": "nine", "fk_to_f1_outbound1": "9"},
+    {"id": "10", "term": "ten", "fk_to_f1_outbound1": "10"},
+    {"id": "11", "term": "eleven", "fk_to_f1_outbound1": "11"},
+    {"id": "12", "term": "twelve", "fk_to_f1_outbound1": "12"},
+    {"id": "13", "term": "thirteen", "fk_to_f1_outbound1": "13"}
 ]
