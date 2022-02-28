@@ -84,6 +84,10 @@ export default class AuthenService {
     }
   };
 
+  static get session() {
+    return AuthenService._session;
+  };
+
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
   // _session can become null if getSession is called and the session has timed out or the user logged out

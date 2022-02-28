@@ -8,6 +8,7 @@ import { APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PR
 import { MathUtils } from "@chaise/utils/utils";
 import { getCatalogId } from "@chaise/legacy/src/utils/uri-utils";
 import { setupHead, setWindowName } from "@chaise/utils/head-injector";
+import AuthenService from "@chaise/services/authen";
 
 export class ConfigService {
   private static _setupDone = false;
@@ -164,6 +165,8 @@ export class ConfigService {
         internalHosts: chaiseConfig.internalHosts,
         disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
     });
+
+    ERMrest.setClientSession(AuthenService.session);
 
     ConfigService._setupDone = true;
     ConfigService._ermrest = ERMrest;

@@ -1,33 +1,15 @@
-import React, { useEffect, useState } from 'react'
 import AuthenService from '@chaise/services/authen';
 
-import { useAppDispatch } from '@chaise/store/hooks';
-import { loginUser } from '@chaise/store/slices/authen';
+import { useAppSelector } from '@chaise/store/hooks';
+import { RootState } from '@chaise/store/store';
 
 import Dropdown from 'react-bootstrap/Dropdown';
+import { TypeUtils } from '@chaise/utils/utils';
 
 const Login = (): JSX.Element => {
 
-  const dispatch = useAppDispatch();
-  // instantiate type to ChaiseUser
-  const [authenRes, setAuthenRes] = useState<ChaiseUser>();
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!isLoaded) {
-      // TODO: fill in context
-      AuthenService.getSession("").then(function (response) {
-        setAuthenRes(response);
-        setIsLoaded(true);
-        console.log("before store: ", response);
-        // TODO: ingest response and create User and Client objects
-
-        if (response) {
-          dispatch(loginUser(response));
-        }
-      });
-    }
-  });
+  // get the user from the store
+  const authenRes = useAppSelector((state: RootState) => state.authen);
 
   const handleLoginClick = () => {
     AuthenService.popupLogin(null, null);
@@ -57,13 +39,13 @@ const Login = (): JSX.Element => {
   }
 
   const displayName = () => {
-    if (!authenRes) return;
+    if (!TypeUtils.isStringAndNotEmpty(authenRes.client.id)) return;
 
     return authenRes.client.full_name || authenRes.client.display_name || authenRes.client.email || authenRes.client.id;
   }
 
   const loginDropdown = () => {
-    if (!authenRes && isLoaded) {
+    if (!TypeUtils.isStringAndNotEmpty(authenRes.client.id)) {
       return (<>
         {showSignupLink()}
         <li>

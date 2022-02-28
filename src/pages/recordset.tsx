@@ -18,6 +18,8 @@ import ErrorModal from '@chaise/components/error-modal';
 import Spinner from '@chaise/components/spinner';
 import RecordSet from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
+import AuthenService from '@chaise/services/authen';
+import { loginUser } from '@chaise/store/slices/authen';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
@@ -49,11 +51,17 @@ const RecordSetApp = (): JSX.Element => {
       dispatch(showError({ error: event.reason, isGlobal: true }));
     });
 
-    // TODO we should get the session first
     /**
-     * Setup the app (chaise-config, etc)
+     * - get session
+     * - Setup the app (chaise-config, etc)
+     * - setup ermrestjs
      */
-    ConfigService.configure(recordsetSettings).then(() => {
+    AuthenService.getSession("").then((response) => {
+      if (response) {
+        dispatch(loginUser(response));
+      }
+      return ConfigService.configure(recordsetSettings);
+    }).then(() => {
       console.dir(ConfigService.chaiseConfig);
       setConfigDone(true);
 
