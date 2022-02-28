@@ -8,7 +8,7 @@ interface ClientState {
   identities: string[];
 }
 
-interface AuthenState {
+interface AuthnState {
   attributes: ClientState[];
   client: ClientState;
   expires: string;
@@ -18,7 +18,7 @@ interface AuthenState {
   vary_headers: string[];
 }
 
-interface AuthenPayloadAction {
+interface AuthnPayloadAction {
   attributes: Client[];
   client: Client;
   expires: string;
@@ -28,7 +28,7 @@ interface AuthenPayloadAction {
   vary_headers: string[];
 }
 
-const initialState: AuthenState = {
+const initialState: AuthnState = {
   attributes: [],
   client: {
     display_name: "",
@@ -44,11 +44,11 @@ const initialState: AuthenState = {
   vary_headers: []
 };
 
-export const authenSlice = createSlice({
-  name: 'authen',
+export const authnSlice = createSlice({
+  name: 'authn',
   initialState,
   reducers: {
-    loginUser: (state, action: PayloadAction<AuthenPayloadAction>) => {
+    loginUser: (state, action: PayloadAction<AuthnPayloadAction>) => {
       if (!action.payload) {
         return;
       }
@@ -84,6 +84,6 @@ export const authenSlice = createSlice({
 });
 
 
-export const { loginUser, logoutUser } = authenSlice.actions;
+export const { loginUser, logoutUser } = authnSlice.actions;
 
-export default authenSlice.reducer;
+export default authnSlice.reducer;

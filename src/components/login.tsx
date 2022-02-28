@@ -1,4 +1,4 @@
-import AuthenService from '@chaise/services/authen';
+import AuthnService from '@chaise/services/authn';
 
 import { useAppSelector } from '@chaise/store/hooks';
 import { RootState } from '@chaise/store/store';
@@ -9,10 +9,10 @@ import { TypeUtils } from '@chaise/utils/utils';
 const Login = (): JSX.Element => {
 
   // get the user from the store
-  const authenRes = useAppSelector((state: RootState) => state.authen);
+  const authnRes = useAppSelector((state: RootState) => state.authn);
 
   const handleLoginClick = () => {
-    AuthenService.popupLogin(null, null);
+    AuthnService.popupLogin(null, null);
   }
 
   const handeLogoutClick = () => {
@@ -39,13 +39,13 @@ const Login = (): JSX.Element => {
   }
 
   const displayName = () => {
-    if (!TypeUtils.isStringAndNotEmpty(authenRes.client.id)) return;
+    if (!TypeUtils.isStringAndNotEmpty(authnRes.client.id)) return;
 
-    return authenRes.client.full_name || authenRes.client.display_name || authenRes.client.email || authenRes.client.id;
+    return authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id;
   }
 
   const loginDropdown = () => {
-    if (!TypeUtils.isStringAndNotEmpty(authenRes.client.id)) {
+    if (!TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
       return (<>
         {showSignupLink()}
         <li>

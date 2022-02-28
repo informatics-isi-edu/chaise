@@ -18,8 +18,8 @@ import ErrorModal from '@chaise/components/error-modal';
 import Spinner from '@chaise/components/spinner';
 import RecordSet from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
-import AuthenService from '@chaise/services/authen';
-import { loginUser } from '@chaise/store/slices/authen';
+import AuthnService from '@chaise/services/authn';
+import { loginUser } from '@chaise/store/slices/authn';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
@@ -56,7 +56,7 @@ const RecordSetApp = (): JSX.Element => {
      * - Setup the app (chaise-config, etc)
      * - setup ermrestjs
      */
-    AuthenService.getSession("").then((response) => {
+    AuthnService.getSession("").then((response) => {
       if (response) {
         dispatch(loginUser(response));
       }

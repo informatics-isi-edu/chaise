@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authenReducer from '@chaise/store/slices/authen';
+import authnReducer from '@chaise/store/slices/authn';
 import errorReducer from '@chaise/store/slices/error';
 
 export const store = configureStore({
   reducer: {
-    authen: authenReducer,
+    authn: authnReducer,
     error: errorReducer
   },
 });
