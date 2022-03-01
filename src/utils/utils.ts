@@ -4,13 +4,13 @@ import AuthenService from "@chaise/services/authen";
 import { isSameOrigin } from "@chaise/legacy/src/utils/uri-utils";
 
 export class UriUtils {
-  static fixedEncodeURIComponent = function (str: string) {
+  static fixedEncodeURIComponent = (str: string) => {
     return encodeURIComponent(str).replace(/[!'()*]/g, function (c) {
       return '%' + c.charCodeAt(0).toString(16).toUpperCase();
     });
   }
 
-  static queryStringToJSON = function (queryString: string) {
+  static queryStringToJSON = (queryString: string) => {
     queryString = queryString || window.location.search;
     if (queryString.indexOf('?') > -1) {
       queryString = queryString.split('?')[1];
@@ -22,6 +22,15 @@ export class UriUtils {
       result[pairList[0]] = decodeURIComponent(pairList[1] || '');
     });
     return result;
+  }
+
+  static splitVersionFromCatalog = (id: string) => {
+    var split = id.split('@');
+
+    return {
+      catalog: split[0],
+      version: split[1]
+    }
   }
 }
 
