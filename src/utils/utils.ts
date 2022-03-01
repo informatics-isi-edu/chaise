@@ -1,6 +1,6 @@
 import { BUILD_VARIABLES } from "@chaise/utils/constants";
 import { ConfigService } from '@chaise/services/config';
-import AuthenService from "@chaise/services/authen";
+import AuthnService from "@chaise/services/authn";
 import { isSameOrigin } from "@chaise/legacy/src/utils/uri-utils";
 
 export class UriUtils {
@@ -369,13 +369,13 @@ export class MenuUtils {
   // item - navbar menu object form children array
   // session - Session factory
   static canShow = (option: any) => {
-    return option.acls && AuthenService.isGroupIncluded(option.acls.show);
+    return option.acls && AuthnService.isGroupIncluded(option.acls.show);
   }
 
   // item - navbar menu object form children array
   // session - Session factory
   static canEnable = (option: any) => {
-    return option.acls && AuthenService.isGroupIncluded(option.acls.enable);
+    return option.acls && AuthnService.isGroupIncluded(option.acls.enable);
   }
 
   // NOTE: hard coded action
@@ -397,7 +397,7 @@ export class MenuUtils {
   // NOTE: hard coded action
   static logout = () => {
     console.log("logout")
-    // AuthenService.logout(logService.logActions.LOGOUT_NAVBAR);
-    // AuthenService.logout("");
+    // AuthnService.logout(logService.logActions.LOGOUT_NAVBAR);
+    // AuthnService.logout("");
   }
 }

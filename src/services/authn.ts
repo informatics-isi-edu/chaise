@@ -3,7 +3,7 @@ import axios from "axios";
 import StorageService from "@chaise/utils/storage";
 import { UriUtils } from "@chaise/utils/utils";
 
-export default class AuthenService {
+export default class AuthnService {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location
   static serviceURL: string = window.location.origin;
 
@@ -21,8 +21,8 @@ export default class AuthenService {
   private static _counter: number = 0;
 
   private static _executeListeners = function () {
-    for (var k in AuthenService._changeCbs) {
-      AuthenService._changeCbs[k]();
+    for (var k in AuthnService._changeCbs) {
+      AuthnService._changeCbs[k]();
     }
   };
 
@@ -33,7 +33,7 @@ export default class AuthenService {
 
   // returns data stored in loacal storage for `keyName`
   private static _getKeyFromStorage = function (keyName: string) {
-    return StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY)[keyName];
+    return StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY)[keyName];
   }
 
   // create value in storage with `keyName` and `value`
@@ -42,20 +42,20 @@ export default class AuthenService {
 
     data[keyName] = value;
 
-    StorageService.updateStorage(AuthenService.LOCAL_STORAGE_KEY, data);
+    StorageService.updateStorage(AuthnService.LOCAL_STORAGE_KEY, data);
   }
 
   // verifies value exists for `keyName`
   private static _keyExistsInStorage = function (keyName: string) {
-    var sessionStorage = StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY);
+    var sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
 
     return (sessionStorage && sessionStorage[keyName]);
   };
 
   // removes the key/value pair at `keyName`
   private static _removeKeyFromStorage = function (keyName: string) {
-    if (AuthenService._keyExistsInStorage(keyName)) {
-      StorageService.deleteStorageValue(AuthenService.LOCAL_STORAGE_KEY, keyName);
+    if (AuthnService._keyExistsInStorage(keyName)) {
+      StorageService.deleteStorageValue(AuthnService.LOCAL_STORAGE_KEY, keyName);
     }
   };
 
@@ -67,28 +67,32 @@ export default class AuthenService {
 
     data[keyName] = hourFromNow.getTime();
 
-    StorageService.updateStorage(AuthenService.LOCAL_STORAGE_KEY, data);
+    StorageService.updateStorage(AuthnService.LOCAL_STORAGE_KEY, data);
   };
 
   // checks if the expiration token with `keyName` has expired
   private static _expiredToken = function (keyName: string) {
-    var sessionStorage = StorageService.getStorage(AuthenService.LOCAL_STORAGE_KEY);
+    var sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
 
     return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
   };
 
   // extends the expiration token with `keyName` if it hasn't expired
   private static _extendToken = function (keyName: string) {
-    if (AuthenService._keyExistsInStorage(keyName) && !AuthenService._expiredToken(keyName)) {
-      AuthenService._createToken(keyName);
+    if (AuthnService._keyExistsInStorage(keyName) && !AuthnService._expiredToken(keyName)) {
+      AuthnService._createToken(keyName);
     }
+  };
+
+  static get session() {
+    return AuthnService._session;
   };
 
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
   // _session can become null if getSession is called and the session has timed out or the user logged out
   static shouldReloadPageAfterLogin = function () {
-    if (AuthenService._session === null && AuthenService._prevSession == null) return true;
+    if (AuthnService._session === null && AuthnService._prevSession == null) return true;
     return false;
   };
 
@@ -98,9 +102,9 @@ export default class AuthenService {
   static popupLogin = function (logAction: string | null, postLoginCB: Function | null) {
     if (!postLoginCB) {
       postLoginCB = function () {
-        // if (!AuthenService.shouldReloadPageAfterLogin()) {
+        // if (!AuthnService.shouldReloadPageAfterLogin()) {
           // fetches the session of the user that just logged in
-          AuthenService.getSession("").then(function (response) {
+          AuthnService.getSession("").then(function (response) {
             // if (modalInstance) modalInstance.close();
             alert(response.client.full_name + " logged in")
           });
@@ -115,7 +119,7 @@ export default class AuthenService {
 
     var win = window.open("", '_blank', 'width=800,height=600,left=' + x + ',top=' + y);
 
-    AuthenService.logInHelper(AuthenService.loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
+    AuthnService.logInHelper(AuthnService.loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };
 
   static logInHelper = function (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) {
@@ -126,7 +130,7 @@ export default class AuthenService {
     // TODO: ConfigUtils
     // var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
 
-    var url = AuthenService.serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.origin + "/~jchudy/chaise/" + loginApp + "/?referrerid=" + referrerId);
+    var url = AuthnService.serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.origin + "/~jchudy/chaise/" + loginApp + "/?referrerid=" + referrerId);
     var config = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -192,7 +196,7 @@ export default class AuthenService {
   static loginWindowCb = function (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) {
     if (type.indexOf('modal') !== -1) {
       // TODO: messageMap
-      // if (AuthenService._session) {
+      // if (AuthnService._session) {
       //   params.title = messageMap.sessionExpired.title;
       // } else {
       //   params.title = messageMap.noSession.title;
@@ -266,8 +270,8 @@ export default class AuthenService {
       window.addEventListener('message', function (args) {
         if (args && args.data && (typeof args.data == 'string')) {
           console.log("do local storage things");
-          AuthenService._setKeyInStorage(AuthenService.PREVIOUS_SESSION_KEY, true);
-          AuthenService._removeKeyFromStorage(AuthenService.PROMPT_EXPIRATION_KEY);
+          AuthnService._setKeyInStorage(AuthnService.PREVIOUS_SESSION_KEY, true);
+          AuthnService._removeKeyFromStorage(AuthnService.PROMPT_EXPIRATION_KEY);
           var obj = UriUtils.queryStringToJSON(args.data);
           if (obj.referrerid == referrerId && (typeof cb == 'function')) {
             if (type.indexOf('modal') !== -1) {
@@ -321,33 +325,33 @@ export default class AuthenService {
      *  - if expired
      **/
 
-    return axios.get(AuthenService.serviceURL + "/authn/session", config).then(function (response) {
-      if (context === "401" && AuthenService.shouldReloadPageAfterLogin()) {
+    return axios.get(AuthnService.serviceURL + "/authn/session", config).then(function (response) {
+      if (context === "401" && AuthnService.shouldReloadPageAfterLogin()) {
         // window.location.reload();
         return response.data;
       }
 
       // keep track of only the first session, so when a timeout occurs, we can compare the sessions
       // when a new session is fetched after timeout, check if the identities are the same
-      if (AuthenService._prevSession) {
-        AuthenService._sameSessionAsPrevious = AuthenService._prevSession.client.id == response.data.client.id;
+      if (AuthnService._prevSession) {
+        AuthnService._sameSessionAsPrevious = AuthnService._prevSession.client.id == response.data.client.id;
       } else {
-        AuthenService._prevSession = response.data
+        AuthnService._prevSession = response.data
       }
 
-      if (!AuthenService._session) {
+      if (!AuthnService._session) {
         // only update _session if no session is set
-        AuthenService._session = response.data;
+        AuthnService._session = response.data;
       }
 
-      AuthenService._executeListeners();
-      return AuthenService._session;
+      AuthnService._executeListeners();
+      return AuthnService._session;
     }).catch(function (err) {
       // $log.warn(ERMrest.responseToError(err));
 
-      AuthenService._session = null;
-      AuthenService._executeListeners();
-      return AuthenService._session;
+      AuthnService._session = null;
+      AuthnService._executeListeners();
+      return AuthnService._session;
     });
   }
 
@@ -355,12 +359,12 @@ export default class AuthenService {
   static isGroupIncluded = (groupArray: string[]) => {
     // if no array, assume it wasn't defined and default hasn't been set yet
     if (!groupArray || groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
-    if (!AuthenService._session) return false; // no "*" exists and no session, hide the option
+    if (!AuthnService._session) return false; // no "*" exists and no session, hide the option
 
     for (var i = 0; i < groupArray.length; i++) {
       var attribute = groupArray[i];
 
-      var match = AuthenService._session.attributes.some(function (attr: any) {
+      var match = AuthnService._session.attributes.some(function (attr: any) {
         return attr.id === attribute;
       });
 
@@ -608,7 +612,7 @@ export default class AuthenService {
 
 // if (pathname.indexOf('/login') == -1) {
 
-//   angular.module('chaise.authen')
+//   angular.module('chaise.authn')
 
 //     .run(['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', '$injector', '$q', function runRecordEditApp(ConfigUtils, ERMrest, Errors, ErrorService, $injector, $q) {
 
@@ -620,7 +624,7 @@ export default class AuthenService {
 //       ERMrest.setHTTP401Handler(function () {
 //         var defer = $q.defer();
 
-//         // Call login in a new modal window to perform authentication
+//         // Call login in a new modal window to perform authntication
 //         // and return a promise to notify ermrestjs that the user has loggedin
 //         Session.loginInAModal(function () {
 

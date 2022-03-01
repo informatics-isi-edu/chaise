@@ -1,41 +1,23 @@
-import React, { useEffect, useState } from 'react'
-
 import { ConfigService } from '@chaise/services/config';
-import AuthenService from '@chaise/services/authen';
+import AuthnService from '@chaise/services/authn';
 
-import { useAppDispatch } from '@chaise/store/hooks';
-import { loginUser } from '@chaise/store/slices/authen';
+import { useAppSelector } from '@chaise/store/hooks';
+import { RootState } from '@chaise/store/store';
 
 import Dropdown from 'react-bootstrap/Dropdown';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
+import { TypeUtils } from '@chaise/utils/utils';
+
 const ChaiseLogin = (): JSX.Element => {
-  const dispatch = useAppDispatch();
-  // instantiate type to ChaiseUser
-  const [authenRes, setAuthenRes] = useState<ChaiseUser>();
-  const [isLoaded, setIsLoaded] = useState(false);
+  // get the user from the store
+  const authnRes = useAppSelector((state: RootState) => state.authn);
 
   var cc = ConfigService.chaiseConfig;
 
-  useEffect(() => {
-    if (!isLoaded) {
-      // TODO: fill in context
-      AuthenService.getSession("").then(function (response) {
-        setAuthenRes(response);
-        setIsLoaded(true);
-        console.log("before store: ", response);
-        // TODO: ingest response and create User and Client objects
-
-        if (response) {
-          dispatch(loginUser(response));
-        }
-      });
-    }
-  });
-
   const handleLoginClick = () => {
-    AuthenService.popupLogin(null, null);
+    AuthnService.popupLogin(null, null);
   }
 
   const handeLogoutClick = () => {
@@ -59,9 +41,9 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   const displayName = () => {
-    if (!authenRes) return;
+    if (!TypeUtils.isStringAndNotEmpty(authnRes.client.id)) return;
 
-    return authenRes.client.full_name || authenRes.client.display_name || authenRes.client.email || authenRes.client.id;
+    return authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id;
   }
 
   const renderMenuChildren = () => {
@@ -107,7 +89,7 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   const renderLoginDropdown = () => {
-    if (!authenRes && isLoaded) {
+    if (!TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
       return (<>
         {showSignupLink()}
         <Nav.Link id="login-link" className="navbar-nav" onClick={handleLoginClick}>Log In</Nav.Link>

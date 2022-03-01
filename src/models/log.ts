@@ -135,7 +135,7 @@ export enum LogActions {
   VIEWER_ANNOT_DRAW_MODE_SHOW= "draw-mode" + ";show",
   VIEWER_ANNOT_DRAW_MODE_HIDE= "draw-mode" + ";hide",
 
-  // - authen=
+  // - authn=
   LOGOUT_NAVBAR= "navbar/account" + ";logout",
   LOGIN_NAVBAR= "navbar/account" + ";login",
   LOGIN_ERROR_MODAL= "error-modal" + ";login",
