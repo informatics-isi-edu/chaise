@@ -167,7 +167,7 @@ but since custom-css rules are written based on that, I didn't change them.
 TODO we should be able to simplify the rules and also investigate whether
      we want to move other rules to be in this wraper.
 */
-header {
+nav.navbar {
     .dropdown-menu>li>a.chaise-dropdown-header,
     .dropdown-menu>li>div>div>a.chaise-dropdown-header,
     .chaise-dropdown-header {
@@ -184,7 +184,8 @@ header {
 
     .dropdown-submenu>.dropdown-menu,
     .dropdown-submenu>div>div>.dropdown-menu {
-        position: fixed;
+        // TODO: why is this here? Maybe to fix positioning of menus for scrolling?
+        // position: fixed;
         margin-top: -6px;
         margin-left: -1px;
         -webkit-border-radius: 0 6px 6px 6px;
@@ -238,10 +239,11 @@ header {
     }
 
     /*Adding the scroll bar to the menu */
-    .navbar-nav ul.dropdown-menu {
+    .navbar-nav div.dropdown-menu {
         min-height: 30px;
-        overflow-x: hidden;
-        overflow-y: auto;
+        // TODO: add scrollbar for y back
+        // overflow-x: hidden;
+        // overflow-y: auto;
         width: max-content;
         max-width: 450px;
     }
@@ -271,8 +273,8 @@ header {
         padding: 0;
     }
 
-    .dropdown-menu > li > a,
-    .dropdown-menu > li > div > div > a {
+    .dropdown-menu > a,
+    .dropdown-menu > div > a{
         white-space: normal;
         cursor: pointer;
         display: flex;

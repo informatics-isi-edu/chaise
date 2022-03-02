@@ -64,7 +64,6 @@ const ChaiseNavbar = (): JSX.Element => {
     var parentAcls = obj.acls;
     var parentNames = obj.names;
     // template the url
-    // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
     if (obj.url && isValueDefined(catalogId)) {
       obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, { id: catalogId });
 
@@ -159,7 +158,7 @@ const ChaiseNavbar = (): JSX.Element => {
       }
 
       if (child.children && MenuUtils.canEnable(child)) {
-        return (<Dropdown key={index} drop='end'>
+        return (<Dropdown key={index} drop='end' className="dropdown-submenu">
           <Dropdown.Toggle as='a' variant="dark" className={MenuUtils.menuItemClasses(child, true)} dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}></Dropdown.Toggle>
           <Dropdown.Menu>
             {renderMenuChildren(child.children)}
