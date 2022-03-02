@@ -98,7 +98,7 @@ const ChaiseLogin = (): JSX.Element => {
 
     // TODO: fix onClick={logDropdownOpen}
     // TODO: add logged in user tooltip
-    return (<NavDropdown title={displayName()} className="navbar-nav username-display">
+    return (<NavDropdown title={displayName()} className="navbar-nav username-display" style={{marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? "auto" : ''}}>
       {renderMenuChildren()}
     </NavDropdown>)
 

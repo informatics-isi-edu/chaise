@@ -326,6 +326,10 @@ nav.navbar {
             float: left;
             margin: 0;
 
+            &.navbar-menu-options {
+                margin-right: auto;
+            }
+
             li {
                 float: left;
 

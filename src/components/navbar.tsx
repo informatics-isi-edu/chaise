@@ -279,7 +279,7 @@ const ChaiseNavbar = (): JSX.Element => {
   const renderRidSearch = () => {
     if (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) return;
 
-    return (<span className="rid-search" style={{"marginLeft": "auto"}}>
+    return (<span className="rid-search">
       <div className="chaise-search-box chaise-input-group">
         <input 
           id="rid-search-input" 
@@ -309,7 +309,7 @@ const ChaiseNavbar = (): JSX.Element => {
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="navbar-dark-example" />
       <Navbar.Collapse id="navbar-dark-example">
-        <Nav>
+        <Nav className="navbar-menu-options">
           {renderNavbarMenuDropdowns()}
         </Nav>
         {renderRidSearch()}
