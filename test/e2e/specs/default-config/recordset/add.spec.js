@@ -141,7 +141,7 @@ describe('Recordset add record,', function() {
 
     it("go back to recordset should refresh the table with the new record", function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
-        browser.close();
+        // browser.close();
         browser.switchTo().window(allWindows[0]).then(function() {
             return chaisePage.waitForElementInverse(element(by.id("spinner")));
         }).then(function() {
