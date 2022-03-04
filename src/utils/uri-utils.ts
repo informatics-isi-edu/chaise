@@ -46,7 +46,9 @@ export function chaiseURItoErmrestURI(location: Location, dontDecodeQueryParams?
   pcid: string,
   paction: string,
   queryParamsString: string,
-  queryParams: object,
+  queryParams: {
+    [key: string]: string
+  },
   isQueryParameter: boolean
 } {
   var tableMissing = MESSAGE_MAP.tableMissing,

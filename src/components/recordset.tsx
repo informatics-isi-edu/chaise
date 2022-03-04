@@ -2,26 +2,31 @@ import Button from 'react-bootstrap/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ExampleComponent from '@chaise/components/example';
 import ErrorTest from '@chaise/components/error-test';
+import { RecordsetViewModel } from '@chaise/services/table';
+import Spinner from '@chaise/components/spinner';
 
-const RecordSet = (): JSX.Element => {
+type RecordSetProps = {
+  vm: RecordsetViewModel
+}
+
+const RecordSet = ({
+  vm
+}: RecordSetProps): JSX.Element => {
+
   return (
-    <div>
-      <div>This is the recordset app</div>
-      <div>
-        fontawesome works: <FontAwesomeIcon icon="coffee" />
+    <div className='recordset-container app-content-container'>
+      {/* <Spinner/> */}
+      Table name is : {vm.displayname.value}
+      {/* <div className='top-panel-container'>
+        <div className='top-flex-panel'>
+          <div className='top-left-panel'>
+
+          </div>
+        </div>
       </div>
-      <div className="alert alert-primary">
-        Bootstrap works!
-      </div>
-      <Button>bootstrap button</Button>
-      <div>
-        <ExampleComponent app="recordset" />
-      </div>
-      <div>
-        <br /><br />
-        Test error handling:
-        <ErrorTest />
-      </div>
+      <div className='bottom-panel-container'>
+
+      </div> */}
     </div>
   )
 }

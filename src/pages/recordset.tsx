@@ -20,6 +20,14 @@ import RecordSet from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
 import AuthnService from '@chaise/services/authn';
 import { loginUser } from '@chaise/store/slices/authn';
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '../utils/uri-utils';
+import { windowRef } from '../utils/window-ref';
+import { TypeUtils } from '../utils/utils';
+import { updateHeadTitle } from '../utils/head-injector';
+import { getDisplaynameInnerText } from '../utils/data-utils';
+import { LogService } from '../services/log';
+import { LogStackTypes } from '../models/log';
+import { RecordSetDisplayMode, RecordsetSelectMode, RecordsetViewModel } from '../services/table';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
@@ -32,6 +40,7 @@ const RecordSetApp = (): JSX.Element => {
 
   const dispatch = useAppDispatch();
   const [configDone, setConfigDone] = useState(false);
+  const [recordsetViewModel, setRecordsetViewModel] = useState<RecordsetViewModel|undefined>(undefined);
 
   // add all the font awesomes that are used
   FontAwesome.addRecordsetFonts();
@@ -56,6 +65,7 @@ const RecordSetApp = (): JSX.Element => {
      * - Setup the app (chaise-config, etc)
      * - setup ermrestjs
      */
+    let logObject : any = {};
     AuthnService.getSession("").then((response) => {
       if (response) {
         dispatch(loginUser(response));
@@ -63,10 +73,88 @@ const RecordSetApp = (): JSX.Element => {
       return ConfigService.configure(recordsetSettings);
     }).then(() => {
       console.dir(ConfigService.chaiseConfig);
-      setConfigDone(true);
 
       // we should ge the reference
+      let res = chaiseURItoErmrestURI(windowRef.location);
+      if (res.pcid) logObject.pcid = res.pcid;
+      if (res.ppid) logObject.ppid = res.ppid;
+      if (res.paction) logObject.paction = res.paction; // currently only captures the "applyQuery" action from the show saved query popup
+      if (res.queryParams && "savedQueryRid" in res.queryParams) logObject.sq_rid = res.queryParams.savedQueryRid;
+      if (res.isQueryParameter) logObject.cqp = 1;
+
+
+      return ConfigService.ERMrest.resolve(res.ermrestUri);
+
+    }).then((response: any) => {
+      let reference = response.contextualize.compact;
+
+      updateHeadTitle(getDisplaynameInnerText(reference.displayname));
+
+      // TODO saved query?
+
+      // TODO show the session alert
+      // if (!session && Session.showPreviousSessionAlert()) {
+      //   AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+      // }
+
+      const logStack = [
+        LogService.getStackNode(
+          LogStackTypes.SET,
+          reference.table,
+          reference.filterLogInfo
+        )
+      ];
+      const logStackPath = LogStackTypes.SET
+
+      // set the global log stack and log stack path
+      LogService.config(logStack, logStackPath);
+
+      // TODO properly get t
+      let pageLimit = 25;
+      if (reference.location.queryParams.limit) {
+        pageLimit = parseInt(reference.location.queryParams.limit);
+    } else if (reference.display.defaultPageSize) {
+        pageLimit = reference.display.defaultPageSize;
+    }
+
+      let chaiseConfig = ConfigService.chaiseConfig;
+      let modifyEnabled = chaiseConfig.editRecord === false ? false : true;
+      let deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
+      let showFaceting = chaiseConfig.showFaceting === true ? true : false;
+      setRecordsetViewModel(
+        new RecordsetViewModel(
+          reference,
+          pageLimit,
+          {
+            viewable: true,
+            editable: modifyEnabled,
+            deletable: modifyEnabled && deleteEnabled,
+            selectMode: RecordsetSelectMode.NO_SELECT,
+            showFaceting: showFaceting,
+            facetPanelOpen: showFaceting,
+            displayMode: RecordSetDisplayMode.FULLSCREEN
+            // enableFavorites
+          },
+          {
+            logObject: logObject,
+            logStack: [
+              LogService.getStackNode(
+                LogStackTypes.SET,
+                reference.table,
+                reference.filterLogInfo
+              )
+            ],
+            logStackPath:logStackPath
+          }
+        )
+      );
+
+      setConfigDone(true);
+
     }).catch((err) => {
+      if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+        err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
+      }
       dispatch(showError({ error: err, isGlobal: true }));
     });
   });
@@ -83,14 +171,14 @@ const RecordSetApp = (): JSX.Element => {
   }
 
   const recordsetContent = () => {
-    if (!configDone) {
+    if (!configDone || !recordsetViewModel) {
       return <Spinner />
     }
 
     return (
       <div className="app-container">
         <ChaiseNavbar />
-        <RecordSet />
+        <RecordSet vm={recordsetViewModel} />
       </div>
     )
 

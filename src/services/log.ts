@@ -12,6 +12,14 @@ export class LogService {
   private static _logStack : any; // TODO proper type
   private static _logStackPath : string;
 
+  static config(logStack: any, logStackPath: string, logAppMode?: LogAppModes) {
+    if (logAppMode) {
+      LogService._logAppMode = logAppMode;
+    }
+    LogService._logStack = logStack;
+    LogService._logStackPath = logStackPath;
+  }
+
    /**
    * Takes a object, adds default logging info to it, and logs the request with ermrest
    * @params {Object} logObj - object of key/value pairs that are specific to this action
@@ -51,7 +59,7 @@ export class LogService {
    * @param {Object} childStackElement
    * @param {Object=} logStack if passed, will be used instead of the default value of the app.
    */
-   static getStackObject(childStackNode : any, logStack: any) {
+   static getStackObject(childStackNode: any, logStack: any) {
       if (!logStack) {
           logStack = LogService._logStack;
       }
