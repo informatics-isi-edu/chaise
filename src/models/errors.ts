@@ -76,7 +76,7 @@ export class MultipleRecordError extends ChaiseError {
 /**
  * When the URI returns empty set in record page
  */
-export class noRecordError extends ChaiseError {
+export class NoRecordError extends ChaiseError {
   constructor(filters: any, tableDisplayName: string, redirectUrl: string, message: string) {
     let noDataMessage = (message === undefined) ? errorMessages.noDataMessage : message;
     if (filters) {

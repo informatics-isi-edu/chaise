@@ -1,20 +1,32 @@
 import '@chaise/assets/scss/_navbar.scss';
 
-import React from 'react'
+import React, { useState } from 'react'
+
 import Container from 'react-bootstrap/Container';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
+import Form from 'react-bootstrap/Form';  
+import FormControl from 'react-bootstrap/FormControl';
+import Button from 'react-bootstrap/Button';
+
+import FontAwesome from '@chaise/services/fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { ConfigService } from '@chaise/services/config';
-import { MenuUtils } from '@chaise/utils/utils';
+import { MenuUtils, UriUtils } from '@chaise/utils/utils';
 import { windowRef } from "@chaise/utils/window-ref";
 import { getCatalogId } from "@chaise/legacy/src/utils/uri-utils";
+import { NoRecordError } from "@chaise/models/errors";
 
-import Login from '@chaise/components/login';
+import ChaiseLogin from '@chaise/components/login';
 
 const ChaiseNavbar = (): JSX.Element => {
+  const [formModel, setFormModel] = useState({ ridSearchTerm: "" });
+  const [showRidSpinner, setShowRidSpinner] = useState(false);
+
   var cc = ConfigService.chaiseConfig;
   var settings = ConfigService.appSettings;
 
@@ -22,6 +34,8 @@ const ChaiseNavbar = (): JSX.Element => {
   var catalogId = getCatalogId();
 
   let ERMrest = ConfigService.ERMrest;
+
+  FontAwesome.addNavbarFonts();
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -50,7 +64,6 @@ const ChaiseNavbar = (): JSX.Element => {
     var parentAcls = obj.acls;
     var parentNames = obj.names;
     // template the url
-    // TODO: This is done here to prevent writing a recursive function (again) in `setConfigJSON()`
     if (obj.url && isValueDefined(catalogId)) {
       obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, { id: catalogId });
 
@@ -97,6 +110,14 @@ const ChaiseNavbar = (): JSX.Element => {
   const menu = cc.navbarMenu ? cc.navbarMenu.children : [];
   console.log(menu);
 
+  const isVersioned = () => {
+    return catalogId.split("@")[1] ? true : false;
+  }
+
+  const toLive = () => {
+    // windowRef.location = MenuUtils.addLogParams(windowRef.location.href.replace(catalogId, catalogId.split("@")[0]), ConfigService.getContextHeaderParams());
+  }
+
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
 
@@ -137,7 +158,7 @@ const ChaiseNavbar = (): JSX.Element => {
       }
 
       if (child.children && MenuUtils.canEnable(child)) {
-        return (<Dropdown key={index} drop='end'>
+        return (<Dropdown key={index} drop='end' className="dropdown-submenu">
           <Dropdown.Toggle as='a' variant="dark" className={MenuUtils.menuItemClasses(child, true)} dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}></Dropdown.Toggle>
           <Dropdown.Menu>
             {renderMenuChildren(child.children)}
@@ -167,9 +188,7 @@ const ChaiseNavbar = (): JSX.Element => {
     if (item.children) {
       return (<NavDropdown
         key={idx}
-        id="nav-dropdown-dark-example"
         title={renderDropdownName(item)}
-        menuVariant="dark"
       >
         {renderMenuChildren(item.children)}
       </NavDropdown>)
@@ -178,19 +197,6 @@ const ChaiseNavbar = (): JSX.Element => {
     // NOTE: I don't it should reach this case
     return (<></>)
   }
-
-  // const renderNavbarMenu = () => {
-  //   if (!menu) return;
-
-  //   return menu.map((item: any, index: number) => {
-  //     if (!MenuUtils.canShow(item)) return
-
-  //     // TODO: onToggle
-  //     return (<li key={index} className="dropdown">
-  //       {renderMenuItem(item)}
-  //     </li>)
-  //   });
-  // }
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
@@ -204,22 +210,97 @@ const ChaiseNavbar = (): JSX.Element => {
     });
   }
 
+  const renderRidSearchIcon = () => {
+    if (showRidSpinner) return (<FontAwesomeIcon className="chaise-btn-icon fa-spin" icon="sync-alt" />);
+
+    return (<FontAwesomeIcon className="chaise-btn-icon" icon="share" />)
+  }
+  
+  const handleRidSearchEnter = (e: any) => {
+    if (e.key === 'Enter') handleRidSearch();
+  }
+
+  const handleRidSearch = () => {
+    var resolverId = cc.resolverImplicitCatalog,
+      splitId = {
+        catalog: "",
+        version: ""
+      },
+      url = "/id/", catId;
+
+    setShowRidSpinner(true);
+
+    if (isValueDefined(catalogId)) {
+      splitId = UriUtils.splitVersionFromCatalog(catalogId);
+
+      // use `/id/catalog/ridSearchTerm` format if:
+      //   - resolver id is NaN and !null
+      //   - resolver id is a different catalog id than current page
+      if (isNaN(resolverId) || resolverId != catalogId) {
+        url += splitId.catalog + "/"
+      }
+    }
+
+    url += formModel.ridSearchTerm;
+    // implicitly does the isValueDefined(catalogId) check with how function returns true/false
+    if (isValueDefined(catalogId) && isVersioned()) url += "@" + splitId.version;
+
+    // TODO: RID button logging
+    // var logObj = ConfigUtils.getContextHeaderParams(), headers = {};
+
+    // logObj.action = logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", "");
+    // logObj.rid = scope.ridSearchTerm;
+
+    // headers[ERMrest.contextHeaderName] = logObj;
+
+
+    // try to fetch the resolver link to see if the path resolves before sending the user
+    ConfigService.http.get(url, { headers: {} }).then(function () {
+      setShowRidSpinner(false);
+      windowRef.open(url, '_blank');
+    }).catch(function (err: any) {
+      setShowRidSpinner(false);
+      if (err.status == 404) {
+        err = new NoRecordError({ 
+          filters: [{ column: "RID", operator: "=", value: formModel.ridSearchTerm }]
+        }, "", "", "");
+      }
+      throw err;
+    });
+  }
+
+  const handleRidSearchChange = (event: any) => {
+    setFormModel(formModel => ({
+      ...formModel,
+      "ridSearchTerm": event.target.value
+    }));
+  }
+
+  const renderRidSearch = () => {
+    if (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) return;
+
+    return (<span className="rid-search">
+      <div className="chaise-search-box chaise-input-group">
+        <input 
+          id="rid-search-input" 
+          className="chaise-input-control chaise-input-control-sm has-feedback" 
+          type="text" 
+          placeholder="Go to RID" 
+          onChange={handleRidSearchChange}
+          onKeyDown={handleRidSearchEnter}
+        />
+        <div className="chaise-input-group-append">
+          <button className="chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary" onClick={handleRidSearch} role="button">
+            {renderRidSearchIcon()}
+          </button>
+        </div>
+      </div>
+    </span>)
+  }
+
   // TODO: add banner above <nav>
   // TODO: navbar toggle button when it shrinks
   // TODO: log branding
-  // return (<header id="navheader" className="row">
-  //   <nav id="mainnav" className="navbar navbar-inverse" role="navigation">
-  //     <div className="navbar-header">
-  //       <a className="navbar-brand" href={(brandHref())}>{renderBrandingHTML()}</a>
-  //     </div>
-  //     <div className="navbar-collapse navbar-inverse" id="fb-navbar-main-collapse">
-  //       <ul id="navbar-menu" className="nav navbar-nav">
-  //         {renderNavbarMenu()}
-  //       </ul>
-  //       <Login />
-  //     </div>
-  //   </nav>
-  // </header>)
   return (<Navbar variant="dark" bg="dark" expand="lg">
     <Container fluid>
       <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : "/")}>
@@ -228,9 +309,11 @@ const ChaiseNavbar = (): JSX.Element => {
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="navbar-dark-example" />
       <Navbar.Collapse id="navbar-dark-example">
-        <Nav>
+        <Nav className="navbar-menu-options">
           {renderNavbarMenuDropdowns()}
         </Nav>
+        {renderRidSearch()}
+        <ChaiseLogin />
       </Navbar.Collapse>
     </Container>
   </Navbar>)
