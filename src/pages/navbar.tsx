@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import '@chaise/assets/scss/app.scss';
 
-import React  from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { store } from '@chaise/store/store';
@@ -14,7 +14,6 @@ import FontAwesome from '@chaise/services/fontawesome';
 import ChaiseNavbar from '@chaise/components/navbar';
 
 const NavbarApp = (): JSX.Element => {
-
   FontAwesome.addRecordsetFonts();
 
   return (
@@ -30,5 +29,5 @@ ReactDOM.render(
       <NavbarApp />
     </React.StrictMode>
   </Provider>,
-  document.getElementById("chaise-navbar-app-root")
+  document.getElementById('chaise-navbar-app-root'),
 );

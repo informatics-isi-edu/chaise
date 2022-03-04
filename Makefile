@@ -663,6 +663,14 @@ clean:
 distclean: clean
 	rm -rf $(MODULES) || true
 
+.PHONY: lint
+lint: $(SOURCE)
+	@npx eslint src --ext .ts,.tsx --quiet
+
+.PHONY: lint-w-warn
+lint-w-warn: $(SOURCE)
+	@npx eslint src --ext .ts,.tsx
+
 # Rule to build chaise
 .PHONY: all
 all: $(DIST)
@@ -728,6 +736,8 @@ usage:
 	@echo "  install-w-config           local install of node dependencies, build and install the client with chaise-config.js file"
 	@echo "  install-wo-deps            build and install the client"
 	@echo "  install-wo-deps-w-config   build and install the client with chaise-config.js file"
+	@echo "  lint                       show the error and warnings in the code"
+	@echo "  lint-w-warn                show the error and warnings in the code"
 	@echo "  all                        build the client"
 	@echo "  clean                      clean the files and folders created during build"
 	@echo "  distclean                  clean the files and folders created during build and npm dependencies"

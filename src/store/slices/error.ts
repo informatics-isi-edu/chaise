@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 /**
  * what's stored in the store must be a plain serializable objects...
@@ -34,7 +34,7 @@ const initialState: ErrorState = {
   error: null,
   isDismissible: false,
   isPopup: true,
-  isGlobal: false
+  isGlobal: false,
 };
 
 export const errorSlice = createSlice({
@@ -44,14 +44,14 @@ export const errorSlice = createSlice({
     showError: (state, action: PayloadAction<ErrorPayloadAction>) => {
       const {
         error,
-        isDismissible=initialState.isDismissible,
-        isPopup=initialState.isPopup,
-        isGlobal=initialState.isGlobal
+        isDismissible = initialState.isDismissible,
+        isPopup = initialState.isPopup,
+        isGlobal = initialState.isGlobal,
       } = action.payload;
       state.isDisplayed = true;
       state.error = {
         name: error.name,
-        message: error.message
+        message: error.message,
       };
       state.isDismissible = isDismissible;
       state.isPopup = isPopup;
@@ -65,12 +65,10 @@ export const errorSlice = createSlice({
       state.isDismissible = initialState.isDismissible;
       state.isPopup = initialState.isPopup;
       state.isGlobal = initialState.isGlobal;
-    }
-  }
+    },
+  },
 });
-
 
 export const { showError, hideError } = errorSlice.actions;
 
 export default errorSlice.reducer;
-

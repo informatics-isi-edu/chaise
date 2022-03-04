@@ -1,47 +1,49 @@
-import { Displayname } from "@chaise/models/displayname";
-import { LogActions, LogStackPaths, LogStackTypes } from "@chaise/models/log";
-import { LogService } from "@chaise/services/log";
-import { MathUtils, TypeUtils } from "@chaise/utils/utils";
-import Q from "q";
-import { getRowValuesFromPage } from "../utils/data-utils";
-import { MESSAGE_MAP } from "../utils/message-map";
-import { createRedirectLinkFromPath } from "../utils/uri-utils";
-import { ConfigService } from "./config";
-import $log from "./logger";
+import { Displayname } from '@chaise/models/displayname';
+import { LogActions, LogStackPaths, LogStackTypes } from '@chaise/models/log';
+import { LogService } from '@chaise/services/log';
+import MathUtils from '@chaise/utils/math-utils';
+import TypeUtils from '@chaise/utils/type-utils';
+import Q from 'q';
+import { getRowValuesFromPage } from '../utils/data-utils';
+import { MESSAGE_MAP } from '../utils/message-map';
+import { createRedirectLinkFromPath } from '../utils/uri-utils';
+import { ConfigService } from './config';
+import $log from './logger';
 
 export enum RecordsetSelectMode {
   NO_SELECT,
   SINGLE_SELECT,
   MULTI_SELECT
-};
+}
 
 export enum RecordSetDisplayMode {
-  FULLSCREEN = "fullscreen",
-  TABLE = "table",
-  RELATED = "related",
-  INLINE = "related/inline",
-  POPUP = "popup",
-  FK_POPUP = "popup/foreignkey",
-  FK_POPUP_CREATE = "popup/foreignkey/create",
-  FK_POPUP_EDIT = "popup/foreignkey/edit",
-  PURE_BINARY_POPUP_ADD = "popup/purebinary/add",
-  PURE_BINARY_POPUP_UNLINK = "popup/facet",
-  SAVED_QUERY_POPUP = "popup/savedquery"
-};
+  FULLSCREEN = 'fullscreen',
+  TABLE = 'table',
+  RELATED = 'related',
+  INLINE = 'related/inline',
+  POPUP = 'popup',
+  FK_POPUP = 'popup/foreignkey',
+  FK_POPUP_CREATE = 'popup/foreignkey/create',
+  FK_POPUP_EDIT = 'popup/foreignkey/edit',
+  PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
+  PURE_BINARY_POPUP_UNLINK = 'popup/facet',
+  SAVED_QUERY_POPUP = 'popup/savedquery'
+}
 
-
-const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
-
-const MAX_CONCURENT_REQUEST = 4;
-const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
-const FACET_PAGE_SIZE = 10;
-const AUTO_SEARCH_TIMEOUT = 2000;
+// const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
+// const MAX_CONCURENT_REQUEST = 4;
+// const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
+// const FACET_PAGE_SIZE = 10;
+// const AUTO_SEARCH_TIMEOUT = 2000;
 const CELL_LIMIT = 500;
 
 class FlowControlObject {
-  maxRequests: number = 4;
+  maxRequests = 4;
+
   occupiedSlots = 0;
+
   counter = 0;
+
   constructor(maxRequests?: number) {
     if (maxRequests) {
       this.maxRequests = maxRequests;
@@ -51,20 +53,29 @@ class FlowControlObject {
 
 export class RecordsetViewModel {
   readyToInitialize = true; // TODO needed?
+
   initialized = false;
+
   hasLoaded = false;
 
   reference: any;
+
   displayname: Displayname;
+
   comment?: string;
 
   // sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null; not needed
   // sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null; not needed
-  enableSort = true
+  enableSort = true;
+
   pageLimit = 25;
+
   rowValues: any; // array of objects
+
   selectedRows: any; // array of objects
+
   disabledRows: any;
+
   // matchNotNull:       params.matchNotNull; deprecated and not needed
   // matchNull:          params.matchNull; deprecated and not needed
   // search:             reference.location.searchTerm; not needed
@@ -79,41 +90,54 @@ export class RecordsetViewModel {
     // hideNotNullChoice:  params.hideNotNullChoice;
     // hideNullChoice:     params.hideNullChoice;
     displayMode: RecordSetDisplayMode.FULLSCREEN,
-    enableFavorites: false
+    enableFavorites: false,
   };
 
   getDisabledTuples?: Function;
+
   getFavorites?: Function;
 
   // log related attributes
   logObject?: any;
+
   logStack: any;
+
   logStackPath: string;
+
   logAppMode?: string;
 
   // used for the recordset height and sticky section logic
   // TODO different modals should pass different strings (ultimatly it should be the element and not selector)
   parentContainerSelector?: string;
+
   parentStickyAreaSelector?: string;
 
   columns: any;
+
   columnModels: any;
+
   aggregateModels: any;
+
   page: any;
 
   facetModels: any;
-  lastActiveFacet: number = -1;
+
+  lastActiveFacet = -1;
 
   // for the aggregate values
   aggregateResults: any;
+
   templateVariables: any;
 
   // for the logic of showing result overtime
   pendingRowValues: any;
+
   pushMoreRowsPending: any;
+
   private _pushMoreID: string | null = null;
 
   sortby: any;
+
   sortOrder: any;
 
   // search term
@@ -126,22 +150,25 @@ export class RecordsetViewModel {
   internalID: string;
 
   private reloadCauses : string[] = [];
-  private _recountCauses : string[] = [];
-  private reloadStartTime = -1;
-  private _recountStartTime = -1;
 
+  private _recountCauses : string[] = [];
+
+  private reloadStartTime = -1;
+
+  private _recountStartTime = -1;
 
   private flowControlObject: FlowControlObject;
 
   // flow control
   dirtyResult = false;
+
   dirtyCount = false;
 
   // whether we should show the timeout error for main table
   tableError = false;
+
   // whether we should the timeout error for count
   countError = false;
-
 
   // used for displayname logic
   // parentReference: any,
@@ -157,7 +184,7 @@ export class RecordsetViewModel {
       logStackPath: string,
       logAppMode?: string
     },
-    displayname?: Displayname
+    displayname?: Displayname,
   ) {
     this.reference = reference;
     this.pageLimit = pageLimit;
@@ -166,7 +193,7 @@ export class RecordsetViewModel {
 
     this.search = reference.location.searchTerm;
 
-    this.displayname = displayname ? displayname : reference.displayname;
+    this.displayname = displayname || reference.displayname;
 
     this.config = config;
 
@@ -174,7 +201,7 @@ export class RecordsetViewModel {
     this.reference.columns.forEach((col: any) => {
       this.columnModels.push({
         column: col,
-        isLoading: col.hasWaitFor === true || col.isUnique === false
+        isLoading: col.hasWaitFor === true || col.isUnique === false,
       });
     });
 
@@ -182,26 +209,26 @@ export class RecordsetViewModel {
     if (this.reference.activeList) {
       this.reference.activeList.requests.forEach((activeListModel: any) => {
         // we cannot capture the whole stack object here since it might get updated
-        var pcolStackNode = LogService.getStackNode(
+        const pcolStackNode = LogService.getStackNode(
           LogStackTypes.PSEUDO_COLUMN,
           activeListModel.column.table,
-          { source: activeListModel.column.compressedDataSource, entity: activeListModel.column.isEntityMode, agg: activeListModel.column.aggregateFn }
+          { source: activeListModel.column.compressedDataSource, entity: activeListModel.column.isEntityMode, agg: activeListModel.column.aggregateFn },
         );
         this.aggregateModels.push({
-          activeListModel: activeListModel, // the api that ermrestjs returns (has .objects and .column)
+          activeListModel, // the api that ermrestjs returns (has .objects and .column)
           processed: true, // whether we should get the data or not
           reloadCauses: [], // why the request is being sent to the server (might be empty)
           reloadStartTime: -1, // when the page became dirty
-          logStackNode: pcolStackNode
+          logStackNode: pcolStackNode,
         });
-      })
+      });
     }
 
     // only allowing single column sort here
-    var location = this.reference.location;
+    const location = this.reference.location;
     if (location.sortObject) {
       this.sortby = location.sortObject[0].column;
-      this.sortOrder = (location.sortObject[0].descending ? "desc" : "asc");
+      this.sortOrder = (location.sortObject[0].descending ? 'desc' : 'asc');
     }
 
     // log related
@@ -217,7 +244,6 @@ export class RecordsetViewModel {
     this.internalID = MathUtils.uuid();
 
     this.flowControlObject = new FlowControlObject();
-
   }
 
   /**
@@ -225,9 +251,9 @@ export class RecordsetViewModel {
    * @return {boolean}
    */
   private _haveFreeSlot() {
-    var res = this.flowControlObject.occupiedSlots < this.flowControlObject.maxRequests;
+    const res = this.flowControlObject.occupiedSlots < this.flowControlObject.maxRequests;
     if (!res) {
-      $log.debug("No free slot available.");
+      $log.debug('No free slot available.');
     }
     return res;
   }
@@ -252,15 +278,15 @@ export class RecordsetViewModel {
 
       aggModel.processed = true;
 
-      $log.debug("counter", this.flowControlObject.counter, ": getting aggregated values for column (index=" + index + ")");
+      $log.debug('counter', this.flowControlObject.counter, `: getting aggregated values for column (index=${index})`);
       this._updateColumnAggregate(aggModel, this.flowControlObject.counter, hideSpinner).then((res: any) => {
         this.flowControlObject.occupiedSlots--;
         aggModel.processed = res;
 
-        $log.debug("counter", this.flowControlObject.counter, ": after aggregated value for column (index=" + index + ") update: " + (res ? "successful." : "unsuccessful."));
+        $log.debug('counter', this.flowControlObject.counter, `: after aggregated value for column (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
 
         updatePageCB(this);
-      }).catch(function (err: any) {
+      }).catch((err: any) => {
         // TODO should it throw?
         throw err;
       });
@@ -274,8 +300,8 @@ export class RecordsetViewModel {
    * A rejected promise should be displayed as an error.
    */
   private _updateColumnAggregate(aggModel: any, current: number, hideSpinner?: boolean) {
-    var defer = Q.defer();
-    var activeListModel = aggModel.activeListModel;
+    const defer = Q.defer();
+    const activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
     activeListModel.objects.forEach((obj: any) => {
@@ -286,15 +312,15 @@ export class RecordsetViewModel {
     });
 
     // we have to get the stack everytime because the filters might change.
-    var action = LogActions.LOAD, stack = this.getTableLogStack(aggModel.logStackNode);
+    let action = LogActions.LOAD, stack = this.getTableLogStack(aggModel.logStackNode);
     if (Array.isArray(aggModel.reloadCauses) && aggModel.reloadCauses.length > 0) {
       action = LogActions.RELOAD;
       stack = LogService.addCausesToStack(stack, aggModel.reloadCauses, aggModel.reloadStartTime);
     }
-    var logObj = {
+    const logObj = {
       action: this.getTableLogAction(action, LogStackPaths.PSEUDO_COLUMN),
-      stack: stack
-    }
+      stack,
+    };
     activeListModel.column.getAggregatedValue(this.page, logObj).then((values: any) => {
       if (this.flowControlObject.counter !== current) {
         return defer.resolve(false), defer.promise;
@@ -305,15 +331,14 @@ export class RecordsetViewModel {
         if (obj.column) {
           this.columnModels[obj.index].columnError = false;
         }
-      })
+      });
 
       // use the returned value and:
       //  - update the templateVariables
       //  - update the aggregateResults
       //  - attach the values to the appropriate columnModel if we have all the data.
-      var sourceDefinitions = this.reference.table.sourceDefinitions;
+      const sourceDefinitions = this.reference.table.sourceDefinitions;
       values.forEach((val: any, valIndex: number) => {
-
         // update the templateVariables
         if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[activeListModel.column.name])) {
           // NOTE: not needed
@@ -326,11 +351,11 @@ export class RecordsetViewModel {
           }
 
           sourceDefinitions.sourceMapping[activeListModel.column.name].forEach((k: any) => {
-            if (val.templateVariables["$self"]) {
-              this.templateVariables[valIndex][k] = val.templateVariables["$self"];
+            if (val.templateVariables.$self) {
+              this.templateVariables[valIndex][k] = val.templateVariables.$self;
             }
-            if (val.templateVariables["$_self"]) {
-              this.templateVariables[valIndex]["_" + k] = val.templateVariables["$_self"];
+            if (val.templateVariables.$_self) {
+              this.templateVariables[valIndex][`_${k}`] = val.templateVariables.$_self;
             }
           });
         }
@@ -366,7 +391,6 @@ export class RecordsetViewModel {
           this.columnModels[obj.index].columnError = true;
           return defer.resolve(true), defer.promise;
         }
-
       });
 
       defer.reject(err);
@@ -386,40 +410,38 @@ export class RecordsetViewModel {
    * @param {Integer} valIndex - the row index
    */
   private _attachPseudoColumnValue(activeListModel: any, valIndex: number) {
-  activeListModel.objects.forEach((obj: any) => {
+    activeListModel.objects.forEach((obj: any) => {
     // this is only called in recordset so it won't be any other type
-    if (!obj.column) return;
+      if (!obj.column) return;
 
-    var model = this.columnModels[obj.index];
+      const model = this.columnModels[obj.index];
 
-    // do we have all the waitfor results?
-    var hasAll = model.column.waitFor.every((col: any) => {
-      return col.isUnique || col.name in this.aggregateResults[valIndex];
-    });
-    if (!(hasAll && (model.column.name in this.aggregateResults[valIndex] || model.column.isUnique))) return;
+      // do we have all the waitfor results?
+      const hasAll = model.column.waitFor.every((col: any) => col.isUnique || col.name in this.aggregateResults[valIndex]);
+      if (!(hasAll && (model.column.name in this.aggregateResults[valIndex] || model.column.isUnique))) return;
 
-    var displayValue = model.column.sourceFormatPresentation(
-      this.templateVariables[valIndex],
-      this.aggregateResults[valIndex][model.column.name],
-      this.page.tuples[valIndex]
-    );
+      const displayValue = model.column.sourceFormatPresentation(
+        this.templateVariables[valIndex],
+        this.aggregateResults[valIndex][model.column.name],
+        this.page.tuples[valIndex],
+      );
 
-    model.isLoading = false;
+      model.isLoading = false;
 
-    // if rowValues has not been completely populated yet, use pendingRowValues instead
-    if (this.pushMoreRowsPending) {
-      if (this.pendingRowValues[valIndex] === undefined) {
-        this.pendingRowValues[valIndex] = {};
-      }
-      this.pendingRowValues[valIndex][obj.index] = displayValue;
-    } else {
-      this.rowValues[valIndex][obj.index] = displayValue;
+      // if rowValues has not been completely populated yet, use pendingRowValues instead
+      if (this.pushMoreRowsPending) {
+        if (this.pendingRowValues[valIndex] === undefined) {
+          this.pendingRowValues[valIndex] = {};
+        }
+        this.pendingRowValues[valIndex][obj.index] = displayValue;
+      } else {
+        this.rowValues[valIndex][obj.index] = displayValue;
       // emit aggregates loaded event for [row][column]
       // TODO how to signal that the aggregate is loaded
       // $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + valIndex, obj.index);
-    }
-  });
-}
+      }
+    });
+  }
 
   /**
    * Given the tableModel object, will get the values for main entity and
@@ -432,7 +454,7 @@ export class RecordsetViewModel {
    */
   public updateMainEntity(updatePageCB: Function, hideSpinner: boolean, notTerminal?: boolean, cb?: Function) {
     if (!this.dirtyResult || !this._haveFreeSlot()) {
-      $log.debug("counter", this.flowControlObject.counter, ": break out of update main");
+      $log.debug('counter', this.flowControlObject.counter, ': break out of update main');
       return;
     }
 
@@ -440,16 +462,16 @@ export class RecordsetViewModel {
     this.dirtyResult = false;
 
     (function (self, currentCounter) {
-      $log.debug("counter", currentCounter, ": updating result");
+      $log.debug('counter', currentCounter, ': updating result');
       self._readMainEntity(hideSpinner, currentCounter).then((res: any) => {
         self._afterUpdateMainEntity(res, currentCounter);
         self.tableError = false;
-        $log.debug("counter", currentCounter, ": read is done. just before update page (to update the rest of the page)");
+        $log.debug('counter', currentCounter, ': read is done. just before update page (to update the rest of the page)');
         if (cb) cb(res);
         // TODO remember last successful main request
         // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
         updatePageCB();
-      }).catch(function (err) {
+      }).catch((err) => {
         self._afterUpdateMainEntity(true, currentCounter);
         if (cb) cb(self, true);
 
@@ -461,7 +483,7 @@ export class RecordsetViewModel {
 
           if (!notTerminal) {
             err.subMessage = err.message;
-            err.message = "The result set cannot be retrieved. Try the following to reduce the query time:\n" + MESSAGE_MAP.queryTimeoutList;
+            err.message = `The result set cannot be retrieved. Try the following to reduce the query time:\n${MESSAGE_MAP.queryTimeoutList}`;
             $log.warn(err);
             // TODO dispatch the error
             // ErrorService.handleException(err, true);
@@ -471,7 +493,7 @@ export class RecordsetViewModel {
           throw err;
         }
       });
-    })(this, this.flowControlObject.counter);
+    }(this, this.flowControlObject.counter));
   }
 
   /**
@@ -495,7 +517,7 @@ export class RecordsetViewModel {
       // scrollToTop();
     }
 
-    $log.debug("counter", counter, ": after result update: " + (res ? "successful." : "unsuccessful."));
+    $log.debug('counter', counter, `: after result update: ${res ? 'successful.' : 'unsuccessful.'}`);
   }
 
   /**
@@ -506,8 +528,8 @@ export class RecordsetViewModel {
    */
   private _mergeRowValuesAfterPushMoreRows() {
     if (this.pendingRowValues) {
-      for (var rowIndex in this.pendingRowValues) {
-        for (var colIndex in this.pendingRowValues[rowIndex]) {
+      for (const rowIndex in this.pendingRowValues) {
+        for (const colIndex in this.pendingRowValues[rowIndex]) {
           this.rowValues[rowIndex][colIndex] = this.pendingRowValues[rowIndex][colIndex];
           // emit aggregates loaded event for [row][column] after push more rows
 
@@ -521,24 +543,24 @@ export class RecordsetViewModel {
 
   // comment $timeout why
   private pushMoreTimeout : any = null;
+
   /**
    * @private
    * Does the actual read for the main entity. Returns a promise that will
    * be resolved with `true` if the request was successful.
    */
   private _readMainEntity(hideSpinner: boolean, counterer: number) {
-
     // cancel timeout loop that may still be running and hide the spinner and "Loading ..."
     clearTimeout(this.pushMoreTimeout);
     this.pushMoreRowsPending = false;
     this.dirtyResult = false;
     this.hasLoaded = false;
-    var defer = Q.defer();
+    const defer = Q.defer();
 
-    var logParams : any = this.logObject ? this.logObject : {};
+    const logParams : any = this.logObject ? this.logObject : {};
 
-    var hasCauses = Array.isArray(this.reloadCauses) && this.reloadCauses.length > 0;
-    var act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
+    const hasCauses = Array.isArray(this.reloadCauses) && this.reloadCauses.length > 0;
+    let act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
 
     // if getDisabledTuples exists, then this read will load everything (domain values) and the
     // getDisabledTuples is the actual load/reload
@@ -560,13 +582,13 @@ export class RecordsetViewModel {
       // the places that we want to show edit or delete button, we should also ask for trs
       // NOTE technically this should be based on passed config options but we're passing editable
       //      to mean both edit and create, so it's not really useful here
-      var getTRS = self.config.displayMode.indexOf(RecordSetDisplayMode.RELATED) === 0 ||
-                   self.config.displayMode === RecordSetDisplayMode.FULLSCREEN;
+      const getTRS = self.config.displayMode.indexOf(RecordSetDisplayMode.RELATED) === 0
+                   || self.config.displayMode === RecordSetDisplayMode.FULLSCREEN;
 
       // if it's in related entity section, we should fetch the
       // unlink trs (acl) of association tables
-      var getUnlinkTRS = self.config.displayMode.indexOf(RecordSetDisplayMode.RELATED) === 0 &&
-                         self.reference.derivedAssociationReference;
+      const getUnlinkTRS = self.config.displayMode.indexOf(RecordSetDisplayMode.RELATED) === 0
+                         && self.reference.derivedAssociationReference;
 
       self.reference.read(self.pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS).then((page: any) => {
         if (current !== self.flowControlObject.counter) {
@@ -574,13 +596,10 @@ export class RecordsetViewModel {
           return defer.promise;
         }
 
-        $log.debug("counter", current, ": read main successful.");
+        $log.debug('counter', current, ': read main successful.');
 
-
-        return self.getFavorites ? self.getFavorites(page) : { page: page };
-      }).then((result: any) => {
-        return self.getDisabledTuples ? self.getDisabledTuples(self, result.page, requestCauses, reloadStartTime) : { page: result.page };
-      }).then( (result: any) => {
+        return self.getFavorites ? self.getFavorites(page) : { page };
+      }).then((result: any) => (self.getDisabledTuples ? self.getDisabledTuples(self, result.page, requestCauses, reloadStartTime) : { page: result.page })).then((result: any) => {
         if (current !== self.flowControlObject.counter) {
           defer.resolve(false);
           return defer.promise;
@@ -600,9 +619,7 @@ export class RecordsetViewModel {
 
         // update the objects based on the new page
         if (Array.isArray(self.page.templateVariables)) {
-          self.templateVariables = self.page.templateVariables.map(function (tv: any) {
-            return tv.values;
-          });
+          self.templateVariables = self.page.templateVariables.map((tv: any) => tv.values);
         } else {
           self.templateVariables = [];
         }
@@ -614,26 +631,26 @@ export class RecordsetViewModel {
           self.disabledRows = result.disabledRows;
         }
 
-        var rowValues = getRowValuesFromPage(self.page);
+        const rowValues = getRowValuesFromPage(self.page);
         // calculate how many rows can be shown based on # of columns
-        var rowLimit = Math.ceil(CELL_LIMIT / self.page.reference.columns.length);
+        const rowLimit = Math.ceil(CELL_LIMIT / self.page.reference.columns.length);
 
         // recursive function for adding more rows to the DOM
         function _pushMoreRows(self: RecordsetViewModel, prevInd: number, limit: number, pushMoreID: string) {
           if (self._pushMoreID === pushMoreID) {
-            var nextLimit = prevInd + limit;
+            const nextLimit = prevInd + limit;
             // combines all of the second array (rowValues) with the first one (vm.rowValues)
             Array.prototype.push.apply(self.rowValues, rowValues.slice(prevInd, nextLimit));
             if (rowValues[nextLimit]) {
-              $log.debug("counter", current, ": recurse with", self.rowValues.length);
+              $log.debug('counter', current, ': recurse with', self.rowValues.length);
               setTimeout(() => {
                 if (self._pushMoreID === pushMoreID) {
                   _pushMoreRows(self, nextLimit, limit, pushMoreID);
                 } else {
-                  $log.debug("current global counter: ", self.flowControlObject.counter);
-                  $log.debug("counter", current, ": break out of timeout inside push more rows");
-                  $log.debug("counter", current, ": with uuid", pushMoreID);
-                  $log.debug("counter", current, ": with global uuid", self._pushMoreID);
+                  $log.debug('current global counter: ', self.flowControlObject.counter);
+                  $log.debug('counter', current, ': break out of timeout inside push more rows');
+                  $log.debug('counter', current, ': with uuid', pushMoreID);
+                  $log.debug('counter', current, ': with global uuid', self._pushMoreID);
                   self.pushMoreRowsPending = false;
                 }
               });
@@ -643,21 +660,21 @@ export class RecordsetViewModel {
               self._mergeRowValuesAfterPushMoreRows();
             }
           } else {
-            $log.debug("current global counter: ", self.flowControlObject.counter);
-            $log.debug("counter", current, ": break out of push more rows");
-            $log.debug("counter", current, ": with uuid", pushMoreID);
-            $log.debug("counter", current, ": with global uuid", self._pushMoreID);
+            $log.debug('current global counter: ', self.flowControlObject.counter);
+            $log.debug('counter', current, ': break out of push more rows');
+            $log.debug('counter', current, ': with uuid', pushMoreID);
+            $log.debug('counter', current, ': with global uuid', self._pushMoreID);
             self.pushMoreRowsPending = false;
             self._mergeRowValuesAfterPushMoreRows();
           }
         }
 
-        $log.debug("counter", current, ": row values length ", rowValues.length);
+        $log.debug('counter', current, ': row values length ', rowValues.length);
         self.rowValues = [];
         if (rowValues.length > rowLimit) {
           self.pushMoreRowsPending = true;
-          var uniqueIdentifier = self._pushMoreID = MathUtils.uuid();
-          $log.debug("counter", current, ": before push more rows with uuid", uniqueIdentifier);
+          const uniqueIdentifier = self._pushMoreID = MathUtils.uuid();
+          $log.debug('counter', current, ': before push more rows with uuid', uniqueIdentifier);
           _pushMoreRows(self, 0, rowLimit, uniqueIdentifier);
         } else {
           self.rowValues = rowValues;
@@ -676,7 +693,6 @@ export class RecordsetViewModel {
             if (!Number.isInteger(agg.reloadStartTime) || agg.reloadStartTime === -1) {
               agg.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
             }
-
           } else {
             agg.processed = true;
 
@@ -687,7 +703,7 @@ export class RecordsetViewModel {
               if (obj.column) {
                 self.columnModels[obj.index].isLoading = false;
               }
-            })
+            });
           }
         });
 
@@ -696,24 +712,25 @@ export class RecordsetViewModel {
         self.reloadStartTime = -1;
 
         defer.resolve(true);
-      }).catch(function (err: any) {
-        if (current !== self.flowControlObject.counter) {
-          return defer.resolve(false);
-        }
+      })
+        .catch((err: any) => {
+          if (current !== self.flowControlObject.counter) {
+            return defer.resolve(false);
+          }
 
-        self.initialized = true;
-        // globally sets when the app state is ready to interact with
-        // TODO is this needed?
-        // $rootScope.displayReady = true;
-        if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
-          err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
-        }
-        defer.reject(err);
-      });
+          self.initialized = true;
+          // globally sets when the app state is ready to interact with
+          // TODO is this needed?
+          // $rootScope.displayReady = true;
+          if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+            err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
+          }
+          defer.reject(err);
+        });
 
       // clear logObject since it was used just for the first request
-      self.logObject = {}
-    })(this, counterer, this.reloadCauses, this.reloadStartTime);
+      self.logObject = {};
+    }(this, counterer, this.reloadCauses, this.reloadStartTime));
     return defer.promise;
   }
 
@@ -737,7 +754,7 @@ export class RecordsetViewModel {
    */
   _updateMainCount(updatePageCB: Function) {
     if (!this.dirtyCount || !this._haveFreeSlot()) {
-      $log.debug("counter", this.flowControlObject.counter, ": break out of updateCount: (not dirty or full)");
+      $log.debug('counter', this.flowControlObject.counter, ': break out of updateCount: (not dirty or full)');
       return;
     }
 
@@ -748,11 +765,11 @@ export class RecordsetViewModel {
       self._getMainRowsCount(curr).then((res: boolean) => {
         self._afterGetMainRowsCount(res, curr);
         updatePageCB(self);
-      }).catch(function (err: any) {
+      }).catch((err: any) => {
         self._afterGetMainRowsCount(true, curr);
         throw err;
       });
-    })(this, this.flowControlObject.counter);
+    }(this, this.flowControlObject.counter));
   }
 
   /**
@@ -761,10 +778,10 @@ export class RecordsetViewModel {
    * Returns a promise. If it's resolved with `true` then it has been successful.
    */
   _getMainRowsCount(current: number) : Q.Promise<boolean> {
-    $log.debug("counter", current, ": getRowsCount.");
-    var defer = Q.defer();
-    var promise = defer.promise as Q.Promise<boolean>;
-    var aggList, hasError;
+    $log.debug('counter', current, ': getRowsCount.');
+    const defer = Q.defer();
+    const promise = defer.promise as Q.Promise<boolean>;
+    let aggList, hasError;
     try {
       // if the table doesn't have any simple key, this might throw error
       aggList = [this.reference.aggregate.countAgg];
@@ -777,15 +794,15 @@ export class RecordsetViewModel {
       return promise;
     }
 
-    var hasCauses = Array.isArray(this._recountCauses) && this._recountCauses.length > 0;
-    var action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
-    var stack = this.getTableLogStack();
+    const hasCauses = Array.isArray(this._recountCauses) && this._recountCauses.length > 0;
+    const action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
+    let stack = this.getTableLogStack();
     if (hasCauses) {
       stack = LogService.addCausesToStack(stack, this._recountCauses, this._recountStartTime);
     }
     this.reference.getAggregates(
       aggList,
-      { action: this.getTableLogAction(action), stack: stack }
+      { action: this.getTableLogAction(action), stack },
     ).then((response: any) => {
       if (current !== this.flowControlObject.counter) {
         defer.resolve(false);
@@ -826,7 +843,7 @@ export class RecordsetViewModel {
   private _afterGetMainRowsCount(res: boolean, current: number) {
     this.flowControlObject.occupiedSlots--;
     this.dirtyCount = !res;
-    $log.debug("counter", current, ": after _getMainRowsCount: " + (res ? "successful." : "unsuccessful."));
+    $log.debug('counter', current, `: after _getMainRowsCount: ${res ? 'successful.' : 'unsuccessful.'}`);
   }
 
   /**
@@ -861,7 +878,7 @@ export class RecordsetViewModel {
    * stale request by looking at the request url.
    */
   update(updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) {
-    $log.debug("counter", this.flowControlObject.counter, "update called with res=" + updateResult + ", cnt=" + updateCount + ", facets=" + updateFacets + ", sameCnt=" + sameCounter + ", cause=" + cause);
+    $log.debug('counter', this.flowControlObject.counter, `update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
     if (updateFacets) {
       this.facetModels.forEach((fm: any, index: number) => {
@@ -915,7 +932,7 @@ export class RecordsetViewModel {
     setTimeout(() => {
       if (!sameCounter) {
         this.flowControlObject.counter++;
-        $log.debug("adding one to counter, new: " + this.flowControlObject.counter);
+        $log.debug(`adding one to counter, new: ${this.flowControlObject.counter}`);
       }
       RecordsetViewModel._updatePage(this);
     }, 0);
@@ -935,7 +952,7 @@ export class RecordsetViewModel {
    * @param  {Object} vm The table view model
    */
   private static _updatePage(vm: RecordsetViewModel) {
-    $log.debug("counter", vm.flowControlObject.counter, ": running update page");
+    $log.debug('counter', vm.flowControlObject.counter, ': running update page');
     if (!vm._haveFreeSlot()) {
       return;
     }
@@ -1016,11 +1033,11 @@ export class RecordsetViewModel {
    * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
    */
   getTableLogAction(actionPath: LogActions, childStackPath?: any) {
-    var stackPath = this.logStackPath;
+    let stackPath = this.logStackPath;
     if (childStackPath) {
       stackPath = LogService.getStackPath(stackPath, childStackPath);
     }
-    var appMode = this.logAppMode ? this.logAppMode : undefined;
+    const appMode = this.logAppMode ? this.logAppMode : undefined;
     return LogService.getActionString(actionPath, stackPath, appMode);
   }
 
@@ -1028,7 +1045,7 @@ export class RecordsetViewModel {
    * Returns the stack object that should be used
    */
   getTableLogStack(childStackElement?: any, extraInfo?: any) {
-    var stack = this.logStack;
+    let stack = this.logStack;
     if (childStackElement) {
       stack = this.logStack.concat(childStackElement);
     }
@@ -1037,5 +1054,4 @@ export class RecordsetViewModel {
     }
     return stack;
   }
-
-};
+}

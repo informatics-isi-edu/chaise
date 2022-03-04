@@ -1,24 +1,30 @@
-import axios from "axios";
-import Q from "q";
-import { windowRef } from "@chaise/utils/window-ref";
+import axios from 'axios';
+import Q from 'q';
+import { windowRef } from '@chaise/utils/window-ref';
 
 // needed for async/await to work
-import "regenerator-runtime";
-import { APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG } from '@chaise/utils/constants';
-import { MathUtils } from "@chaise/utils/utils";
-import { getCatalogId } from "@chaise/legacy/src/utils/uri-utils";
-import { setupHead, setWindowName } from "@chaise/utils/head-injector";
-import AuthnService from "@chaise/services/authn";
+import 'regenerator-runtime';
+import {
+  APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG,
+} from '@chaise/utils/constants';
+import MathUtils from '@chaise/utils/math-utils';
+import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
+import { setupHead, setWindowName } from '@chaise/utils/head-injector';
+import AuthnService from '@chaise/services/authn';
 
 export class ConfigService {
   private static _setupDone = false;
+
   private static _ermrest: any = windowRef.ERMrest;
+
   private static _server: any;
+
   private static _contextHeaderParams: {
     cid: string,
     pid: string,
     wid: string
   };
+
   private static _appSettings: {
     appTitle: string,
     hideNavbar?: boolean,
@@ -27,6 +33,7 @@ export class ConfigService {
     overrideExternalLinkBehavior?: boolean,
     openLinksInTab?: boolean
   };
+
   private static _chaiseConfig: any; // TODO
 
   /**
@@ -43,20 +50,19 @@ export class ConfigService {
     overrideExternalLinkBehavior?: boolean,
     openIframeLinksInTab?: boolean
   }) {
-
     setWindowName();
 
     // trick to verify if this config app is running inside of an iframe as part of another app
-    var inIframe = windowRef.self !== windowRef.parent;
+    const inIframe = windowRef.self !== windowRef.parent;
 
-    var hideNavbarParam;
+    let hideNavbarParam;
 
     // TODO
     // var navbarParam = UriUtils.getQueryParam($window.location.href, "hideNavbar");
-    var navbarParam = "false";
-    if (navbarParam === "true") {
+    let navbarParam = 'false';
+    if (navbarParam === 'true') {
       hideNavbarParam = true;
-    } else if (navbarParam === "false") {
+    } else if (navbarParam === 'false') {
       // matters for when we are inside an iframe
       hideNavbarParam = false;
     } else {
@@ -68,39 +74,38 @@ export class ConfigService {
      * second case: hideNavbar = true
      *      - doesn't matter if in an iframe or not, if true, hide it
      */
-    var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
-    var openLinksInTab = inIframe && settings.openIframeLinksInTab;
-
+    const hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
+    const openLinksInTab = inIframe && settings.openIframeLinksInTab;
 
     ConfigService._contextHeaderParams = {
       cid: settings.appName,
       pid: MathUtils.uuid(),
-      wid: windowRef.name
+      wid: windowRef.name,
     };
 
     ConfigService._appSettings = {
-      hideNavbar: hideNavbar,
+      hideNavbar,
       // the settings constant is not accessible from chaise apps,
       // therefore we're capturing them here so they can be used in chaise
       appTitle: settings.appTitle,
       overrideHeadTitle: settings.overrideHeadTitle,
       overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
       overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
-      openLinksInTab: openLinksInTab
-    }
+      openLinksInTab,
+    };
 
     // set chaise configuration based on what is in `chaise-config.js` first
     ConfigService._setChaiseConfig();
 
     // setup ermrest
-    let ERMrest = windowRef.ERMrest;
+    const ERMrest = windowRef.ERMrest;
 
     ERMrest.configure(axios, Q);
 
     await ERMrest.onload();
-    let cc = ConfigService._setChaiseConfig();
-    let service = cc!.ermrestLocation;
-    let catalogId = getCatalogId();
+    const cc = ConfigService._setChaiseConfig();
+    const service = cc!.ermrestLocation;
+    const catalogId = getCatalogId();
 
     if (catalogId) {
       // the server object that can be used in other places
@@ -146,7 +151,6 @@ export class ConfigService {
     return ConfigService._contextHeaderParams;
   }
 
-
   // -------------------------- private functions: --------------------------- //
 
   /**
@@ -160,10 +164,10 @@ export class ConfigService {
     // TODO
     // ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
 
-    var chaiseConfig = ConfigService.chaiseConfig;
+    const chaiseConfig = ConfigService.chaiseConfig;
     ERMrest.setClientConfig({
-        internalHosts: chaiseConfig.internalHosts,
-        disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+      internalHosts: chaiseConfig.internalHosts,
+      disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
     });
 
     ERMrest.setClientSession(AuthnService.session);
@@ -174,15 +178,15 @@ export class ConfigService {
 
   // TODO proper type
   private static _setChaiseConfig(catalogAnnotation?: any): any {
-    let cc: any = {}; // TODO proper type
-    let chaiseConfig = windowRef.chaiseConfig;
+    const cc: any = {}; // TODO proper type
+    const chaiseConfig = windowRef.chaiseConfig;
     // check to see if global chaise-config (chaise-config.js) is available
-    if (typeof chaiseConfig != 'undefined') {
+    if (typeof chaiseConfig !== 'undefined') {
       // loop through properties and compare to defaultConfig to see if they are valid
       // chaiseConfigPropertyNames is a whitelist of all accepted values
-      for (var key in chaiseConfig) {
+      for (const key in chaiseConfig) {
         // see if returned key is in the list we accept
-        var matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, key);
+        const matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, key);
 
         // if we found a match for the current key in chaiseConfig, use the match from chaiseConfigPropertyNames as the key and set the value
         if (matchedKey.length > 0 && matchedKey[0]) {
@@ -193,11 +197,11 @@ export class ConfigService {
 
     // Loop over default properties (global chaise config (chaise-config.js) may not be defined)
     // Handles case 1 and 2a
-    for (var property in DEFAULT_CHAISE_CONFIG) {
+    for (const property in DEFAULT_CHAISE_CONFIG) {
       // use chaise-config.js property instead of default if defined
-      if (typeof chaiseConfig != 'undefined') {
+      if (typeof chaiseConfig !== 'undefined') {
         // see if "property" matches a key in chaiseConfig
-        var matchedKey = ConfigService._matchKey(Object.keys(chaiseConfig), property);
+        const matchedKey = ConfigService._matchKey(Object.keys(chaiseConfig), property);
 
         // property will be in proper case already since it comes from our config object in JS
         // TODO we have to most probably refactor this code so we don't have to do the following ts-ignore
@@ -216,10 +220,10 @@ export class ConfigService {
     ConfigService._applyHostConfigRules(cc, cc);
 
     // apply catalog annotation configuration on top of the rest of the chaise config properties
-    if (typeof catalogAnnotation == "object") {
+    if (typeof catalogAnnotation === 'object') {
       // case 3a
-      for (var property in catalogAnnotation) {
-        var matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
+      for (const property in catalogAnnotation) {
+        const matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
 
         // if we found a match for the current key in catalogAnnotation, use the match from chaiseConfigPropertyNames as the key and set the value
         if (matchedKey.length > 0 && matchedKey[0]) {
@@ -244,10 +248,9 @@ export class ConfigService {
   }
 
   private static _matchKey(collection: string[], keyToMatch: string) {
-    return collection.filter(function (key) {
+    return collection.filter((key) =>
       // toLowerCase both keys for a case insensitive comparison
-      return keyToMatch.toLowerCase() === key.toLowerCase();
-    });
+      keyToMatch.toLowerCase() === key.toLowerCase());
   }
 
   /**
@@ -257,21 +260,21 @@ export class ConfigService {
   private static _applyHostConfigRules(config: any, resultChaiseConfig: any) {
     if (Array.isArray(config.configRules)) {
       // loop through each config rule and look for a set that matches the current host
-      config.configRules.forEach(function (ruleset: any) {
+      config.configRules.forEach((ruleset: any) => {
         // we have 1 host
-        if (typeof ruleset.host == "string") {
-          var arr = [];
+        if (typeof ruleset.host === 'string') {
+          const arr = [];
           arr.push(ruleset.host);
           ruleset.host = arr;
         }
         if (Array.isArray(ruleset.host)) {
-          for (var i = 0; i < ruleset.host.length; i++) {
+          for (let i = 0; i < ruleset.host.length; i++) {
             // if there is a config rule for the current host, overwrite the properties defined
             // windowRef.location.host refers to the hostname and port (www.something.com:0000)
             // windowRef.location.hostname refers to just the hostname (www.something.com)
-            if (ruleset.host[i] === windowRef.location.hostname && (ruleset.config && typeof ruleset.config === "object")) {
-              for (var property in ruleset.config) {
-                var matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
+            if (ruleset.host[i] === windowRef.location.hostname && (ruleset.config && typeof ruleset.config === 'object')) {
+              for (const property in ruleset.config) {
+                const matchedKey = ConfigService._matchKey(CHAISE_CONFIG_PROPERTY_NAMES, property);
 
                 // if we found a match for the current key in ruleset.config, use the match from chaiseConfigPropertyNames as the key and set the value
                 if (matchedKey.length > 0 && matchedKey[0]) {
@@ -294,15 +297,15 @@ export class ConfigService {
    * @returns
    */
   private static _getValueFromContext(object: any, context: string): string {
-    var partial = context, parts = context.split("/");
-    while (partial !== "") {
+    let partial = context, parts = context.split('/');
+    while (partial !== '') {
       if (partial in object) { // found the context
         return object[partial];
       }
       parts.splice(-1, 1); // remove the last part
-      partial = parts.join("/");
+      partial = parts.join('/');
     }
-    return object["*"];
+    return object['*'];
   }
 
   /**
@@ -314,30 +317,29 @@ export class ConfigService {
    * @returns
    */
   private static _appTagToURL(tag: string, location: any, context: string) {
-
-    var appPath;
+    let appPath;
     if (tag && (tag in APP_TAG_MAPPING)) {
       appPath = APP_TAG_MAPPING[tag as keyof typeof APP_TAG_MAPPING];
     } else {
       appPath = ConfigService._getValueFromContext(APP_CONTEXT_MAPPING, context);
     }
 
-    var url = BUILD_VARIABLES.CHAISE_BASE_PATH + appPath + "/#" + location.catalog + "/" + location.path;
-    var pcontext = [];
+    let url = `${BUILD_VARIABLES.CHAISE_BASE_PATH + appPath}/#${location.catalog}/${location.path}`;
+    const pcontext = [];
 
-    var settingsObj = ConfigService.appSettings;
-    var contextHeaderParams = ConfigService.contextHeaderParams;
-    pcontext.push("pcid=" + contextHeaderParams.cid);
-    pcontext.push("ppid=" + contextHeaderParams.pid);
+    const settingsObj = ConfigService.appSettings;
+    const contextHeaderParams = ConfigService.contextHeaderParams;
+    pcontext.push(`pcid=${contextHeaderParams.cid}`);
+    pcontext.push(`ppid=${contextHeaderParams.pid}`);
     // only add the value to the applink function if it's true
-    if (settingsObj.hideNavbar) pcontext.push("hideNavbar=" + settingsObj.hideNavbar)
+    if (settingsObj.hideNavbar) pcontext.push(`hideNavbar=${settingsObj.hideNavbar}`);
 
     // TODO we might want to allow only certian query parameters
     if (location.queryParamsString) {
-      url = url + "?" + location.queryParamsString;
+      url = `${url}?${location.queryParamsString}`;
     }
     if (pcontext.length > 0) {
-      url = url + (location.queryParamsString ? "&" : "?") + pcontext.join("&");
+      url = url + (location.queryParamsString ? '&' : '?') + pcontext.join('&');
     }
     return url;
   }
@@ -351,9 +353,9 @@ export class ConfigService {
    *                              null - no value defined for the current context
    */
   private static _systemColumnsMode(context: string) {
-    var cc = ConfigService.chaiseConfig;
+    const cc = ConfigService.chaiseConfig;
 
-    var mode = null;
+    let mode = null;
     if (context.indexOf('compact') != -1 && cc.systemColumnsDisplayCompact) {
       mode = cc.systemColumnsDisplayCompact;
     } else if (context == 'detailed' && cc.systemColumnsDisplayDetailed) {
@@ -364,7 +366,6 @@ export class ConfigService {
 
     return mode;
   }
-
 }
 
 // TODO these functions should be moved somewhere else:

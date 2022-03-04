@@ -1,4 +1,4 @@
-import { RowValue } from "@chaise/models/row-value";
+import { RowValue } from '@chaise/models/row-value';
 
 /**
  * given a page object, return array of RowValue types
@@ -7,12 +7,12 @@ import { RowValue } from "@chaise/models/row-value";
  */
 export function getRowValuesFromPage(page: any) {
   return page.tuples.map((tuple: any) => {
-    var row: RowValue[] = [];
-    tuple.values.forEach(function (value: string, index: number) {
+    const row: RowValue[] = [];
+    tuple.values.forEach((value: string, index: number) => {
       row.push({
         isHTML: tuple.isHTML[index],
-        //value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
-        value: value
+        // value: (tuple.isHTML[index]? $sce.trustAsHtml(value) : value)
+        value,
       });
     });
     return row;
@@ -25,12 +25,12 @@ export function getRowValuesFromPage(page: any) {
  * @return [Object] array of row values in the form of {isHTML: boolean, value: v}
  */
 export function getRowValuesFromTuples(tuples: any) {
-  return tuples.map(function (tuple: any) {
-    var row: RowValue[] = [];
-    tuple.values.forEach(function (value: string, index: number) {
+  return tuples.map((tuple: any) => {
+    const row: RowValue[] = [];
+    tuple.values.forEach((value: string, index: number) => {
       row.push({
         isHTML: tuple.isHTML[index],
-        value: value
+        value,
       });
     });
     return row;
@@ -46,7 +46,7 @@ export function getDisplaynameInnerText(displayname: any) {
   if (!displayname.isHTML) {
     return displayname.value;
   }
-  var dummy = document.createElement("div"), res;
+  let dummy = document.createElement('div'), res;
   dummy.innerHTML = displayname.value;
   res = dummy.innerText;
   return res;

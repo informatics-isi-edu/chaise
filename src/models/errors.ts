@@ -1,4 +1,6 @@
-import { errorNames, errorMessages } from "@chaise/utils/constants";
+/* eslint max-classes-per-file: 0 */
+
+import { errorNames, errorMessages } from '@chaise/utils/constants';
 
 interface ChaiseERMrestJSError {
   /**
@@ -34,7 +36,7 @@ class ChaiseError {
    * @type {string}
    * @desc   Error message status; acts as Title text for error dialog
    */
-  status: string = "";
+  status: string = '';
 
   /**
    * @type {string}
@@ -47,6 +49,7 @@ class ChaiseError {
    * @desc URL that redirects users to recordset app
    */
   redirectUrl?: string;
+
   gotoTableDisplayname?: string;
 
   constructor(params: ChaiseErrorParameters) {
@@ -56,7 +59,6 @@ class ChaiseError {
     this.redirectUrl = params.redirectUrl;
     this.gotoTableDisplayname = params.gotoTableDisplayname;
   }
-
 }
 
 /**
@@ -67,8 +69,8 @@ export class MultipleRecordError extends ChaiseError {
     super({
       status: errorNames.multipleRecords,
       message: (message === undefined ? errorMessages.multipleDataMessage : message),
-      redirectUrl: redirectUrl,
-      gotoTableDisplayname: tableDisplayName
+      redirectUrl,
+      gotoTableDisplayname: tableDisplayName,
     });
   }
 }
@@ -80,10 +82,10 @@ export class NoRecordError extends ChaiseError {
   constructor(filters: any, tableDisplayName: string, redirectUrl: string, message: string) {
     let noDataMessage = (message === undefined) ? errorMessages.noDataMessage : message;
     if (filters) {
-      for (var k = 0; k < filters.length; k++) {
+      for (let k = 0; k < filters.length; k++) {
         noDataMessage += filters[k].column + filters[k].operator + filters[k].value;
         if (k != filters.length - 1) {
-          noDataMessage += " or ";
+          noDataMessage += ' or ';
         }
       }
     }
@@ -91,8 +93,8 @@ export class NoRecordError extends ChaiseError {
     super({
       status: errorNames.notFound,
       message: noDataMessage,
-      redirectUrl: redirectUrl,
-      gotoTableDisplayname: tableDisplayName
+      redirectUrl,
+      gotoTableDisplayname: tableDisplayName,
     });
   }
 }

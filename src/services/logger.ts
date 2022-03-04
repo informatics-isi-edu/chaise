@@ -27,7 +27,6 @@ class Logger {
   }
 }
 
-
-var $log = new Logger();
+const $log = new Logger();
 
 export default $log;

@@ -1,5 +1,6 @@
 export default class LocalStorage {
-  static localStorageNotAvailable: boolean = false;
+  static localStorageNotAvailable = false;
+
   static localStorage: any = null;
 
   // TODO: figure out how to initialize this
@@ -7,17 +8,16 @@ export default class LocalStorage {
     // a simple test to ensure localStorage is available
     // (in some cases localStorage might be null)
     try {
-      var test = "test";
+      const test = 'test';
       localStorage = window.localStorage;
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
     } catch (e: unknown) {
       // $log.warn(messageMap.localStorageDisabled);
-      console.log("local storage disabled");
+      console.log('local storage disabled');
       LocalStorage.localStorageNotAvailable = true;
     }
-
-  } 
+  }
 
   /**
    * Deletes all the data in local storage defined under `storageLocation`
@@ -39,7 +39,7 @@ export default class LocalStorage {
   static deleteStorageValue = function (storageLocation: string, keyName: string) {
     if (LocalStorage.localStorageNotAvailable) return;
 
-    var value = LocalStorage.getStorage(storageLocation);
+    const value = LocalStorage.getStorage(storageLocation);
 
     delete value[keyName];
     LocalStorage.setStorage(storageLocation, value);
@@ -65,7 +65,7 @@ export default class LocalStorage {
   static getStorage = function (storageLocation: string) {
     if (LocalStorage.localStorageNotAvailable) return null;
 
-    var value = localStorage.getItem(storageLocation);
+    const value = localStorage.getItem(storageLocation);
     return value ? JSON.parse(value) : null;
   };
 
@@ -78,9 +78,9 @@ export default class LocalStorage {
   static updateStorage = function (storageLocation: string, data: any) {
     if (LocalStorage.localStorageNotAvailable) return;
 
-    var storedData = LocalStorage.getStorage(storageLocation) || {} as any;
+    const storedData = LocalStorage.getStorage(storageLocation) || {} as any;
 
-    Object.keys(data).forEach(function (key) {
+    Object.keys(data).forEach((key) => {
       storedData[key] = data[key];
     });
 

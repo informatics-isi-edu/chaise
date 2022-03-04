@@ -1,13 +1,14 @@
-import { useState } from "react";
-import { Alert, Button, ButtonGroup } from "react-bootstrap";
-import { ErrorBoundary, FallbackProps, useErrorHandler} from 'react-error-boundary';
+import React from 'react';
+import { useState } from 'react';
+import { Alert, Button, ButtonGroup } from 'react-bootstrap';
+import { ErrorBoundary, FallbackProps, useErrorHandler } from 'react-error-boundary';
 import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
-import $log from "@chaise/services/logger";
+import $log from '@chaise/services/logger';
 
 const ExplodeComponent = () : JSX.Element => {
   throw new Error('Something went wrong in the component.');
-}
+};
 
 const ExplodeComponentWithManualHandling = () : JSX.Element => {
   const dispatch = useAppDispatch();
@@ -15,11 +16,11 @@ const ExplodeComponentWithManualHandling = () : JSX.Element => {
     throw new Error('Something went wrong in the component.');
   } catch (exp) {
     if (exp instanceof Error) {
-      dispatch(showError({error: exp}));
+      dispatch(showError({ error: exp }));
     }
   }
   return <></>;
-}
+};
 
 const ErrorComponent = () : JSX.Element => {
   const dispatch = useAppDispatch();
@@ -32,18 +33,17 @@ const ErrorComponent = () : JSX.Element => {
   return (
     <>
       <ButtonGroup>
-        <Button onClick={() => setExplode(e => !e)}>throw error</Button>
+        <Button onClick={() => setExplode((e) => !e)}>throw error</Button>
         <Button onClick={onClickError}>throw error on click</Button>
       </ButtonGroup>
-      {explode ? <ExplodeComponent/> : null}
+      {explode ? <ExplodeComponent /> : null}
     </>
   );
-}
+};
 
 const ErrorComponentWithBoundary = () : JSX.Element => {
   const handleError = useErrorHandler();
   const [explode, setExplode] = useState(false);
-
 
   const onClickError = () => {
     try {
@@ -56,13 +56,18 @@ const ErrorComponentWithBoundary = () : JSX.Element => {
 
   return (
     <ErrorBoundary
-      FallbackComponent={({error}) => <Alert variant="danger">inner: {error.message}</Alert>}
+      FallbackComponent={({ error }) => (
+        <Alert variant="danger">
+          inner:
+          {error.message}
+        </Alert>
+      )}
     >
       <ButtonGroup>
-        <Button onClick={() => setExplode(e => !e)}>throw error</Button>
+        <Button onClick={() => setExplode((e) => !e)}>throw error</Button>
         <Button onClick={onClickError}>throw error on click</Button>
       </ButtonGroup>
-      {explode ? <ExplodeComponent/> : null}
+      {explode ? <ExplodeComponent /> : null}
     </ErrorBoundary>
   );
 };
@@ -71,13 +76,12 @@ const ErrorComponentWithManualHandling = () : JSX.Element => {
   const dispatch = useAppDispatch();
   const [explode, setExplode] = useState(false);
 
-
   const onClickError = () => {
     try {
       throw new Error('Something went wrong in the event handler.');
     } catch (exp) {
       if (exp instanceof Error) {
-        dispatch(showError({error: exp}));
+        dispatch(showError({ error: exp }));
       }
       return null;
     }
@@ -86,21 +90,20 @@ const ErrorComponentWithManualHandling = () : JSX.Element => {
   return (
     <>
       <ButtonGroup>
-        <Button onClick={() => setExplode(e => !e)}>throw error</Button>
+        <Button onClick={() => setExplode((e) => !e)}>throw error</Button>
         <Button onClick={onClickError}>throw error on click</Button>
       </ButtonGroup>
-      {explode ? <ExplodeComponentWithManualHandling/> : null}
+      {explode ? <ExplodeComponentWithManualHandling /> : null}
     </>
   );
 };
 
 const ErrorTest = () : JSX.Element => {
-
   let catchedErrorComponent;
   try {
-    catchedErrorComponent = <ErrorComponent/>;
+    catchedErrorComponent = <ErrorComponent />;
   } catch (exp) {
-    $log.log("caught the error here!");
+    $log.log('caught the error here!');
     catchedErrorComponent = (<div>wow errored!</div>);
   }
 
@@ -108,24 +111,29 @@ const ErrorTest = () : JSX.Element => {
     <div>
       <div>
         <p>General case:</p>
-        <ErrorComponent/>
+        <ErrorComponent />
       </div>
       <div>
         <p>wrapping the component in a try-catch:</p>
         {catchedErrorComponent}
       </div>
-      <br/>
+      <br />
       <div>
         <p>Local error boundary:</p>
         <ErrorBoundary
-          FallbackComponent={({error}) => <Alert variant="danger">outer: {error.message}</Alert>}
+          FallbackComponent={({ error }) => (
+            <Alert variant="danger">
+              outer:
+              {error.message}
+            </Alert>
+          )}
         >
-          <ErrorComponentWithBoundary/>
+          <ErrorComponentWithBoundary />
         </ErrorBoundary>
       </div>
       <div>
         <p>Catching the error and manually calling the handler</p>
-        <ErrorComponentWithManualHandling/>
+        <ErrorComponentWithManualHandling />
       </div>
     </div>
   );

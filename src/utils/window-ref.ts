@@ -25,6 +25,6 @@ interface ICustomWindow extends Window {
   }
 }
 
-declare var window: ICustomWindow;
+declare let window: ICustomWindow;
 
 export const windowRef = window;

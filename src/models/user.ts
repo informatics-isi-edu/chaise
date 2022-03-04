@@ -36,25 +36,30 @@ class ChaiseUser {
    * list of groups and identities the user has
    */
   attributes: Client[];
+
   /**
    * information about the user
    */
   client: Client;
+
   /**
    * when the user's session will expire
    */
   expires: string;
+
   /**
    * how many seconds until user's session expires
    */
   seconds_remaining: number;
+
   /**
    * when the user's session started
    */
   since: string;
-  tracking?: string;
-  vary_headers?: string[];
 
+  tracking?: string;
+
+  vary_headers?: string[];
 
   constructor(params: ChaiseUserParameters) {
     this.attributes = params.attributes;
@@ -65,5 +70,4 @@ class ChaiseUser {
     this.tracking = params.tracking;
     this.vary_headers = params.vary_headers;
   }
-
 }

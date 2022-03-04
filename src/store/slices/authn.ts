@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ClientState {
   display_name: string;
@@ -31,17 +31,17 @@ interface AuthnPayloadAction {
 const initialState: AuthnState = {
   attributes: [],
   client: {
-    display_name: "",
-    email: "",
-    full_name: "",
-    id: "",
-    identities: []
+    display_name: '',
+    email: '',
+    full_name: '',
+    id: '',
+    identities: [],
   },
-  expires: "",
+  expires: '',
   seconds_remaining: 0,
-  since: "",
-  tracking: "",
-  vary_headers: []
+  since: '',
+  tracking: '',
+  vary_headers: [],
 };
 
 export const authnSlice = createSlice({
@@ -54,13 +54,13 @@ export const authnSlice = createSlice({
       }
 
       const {
-        attributes=initialState.attributes,
-        client=initialState.client,
-        expires=initialState.expires,
-        seconds_remaining=initialState.seconds_remaining,
-        since=initialState.since,
-        tracking=initialState.tracking,
-        vary_headers=initialState.vary_headers
+        attributes = initialState.attributes,
+        client = initialState.client,
+        expires = initialState.expires,
+        seconds_remaining = initialState.seconds_remaining,
+        since = initialState.since,
+        tracking = initialState.tracking,
+        vary_headers = initialState.vary_headers,
       } = action.payload;
 
       state.attributes = attributes;
@@ -79,10 +79,9 @@ export const authnSlice = createSlice({
       state.since = initialState.since;
       state.tracking = initialState.tracking;
       state.vary_headers = initialState.vary_headers;
-    }
-  }
+    },
+  },
 });
-
 
 export const { loginUser, logoutUser } = authnSlice.actions;
 

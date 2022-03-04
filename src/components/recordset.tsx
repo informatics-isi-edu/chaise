@@ -1,23 +1,19 @@
-import Button from 'react-bootstrap/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ExampleComponent from '@chaise/components/example';
-import ErrorTest from '@chaise/components/error-test';
+import React from 'react';
 import { RecordsetViewModel } from '@chaise/services/table';
-import Spinner from '@chaise/components/spinner';
 
 type RecordSetProps = {
   vm: RecordsetViewModel
 }
 
 const RecordSet = ({
-  vm
-}: RecordSetProps): JSX.Element => {
-
-  return (
-    <div className='recordset-container app-content-container'>
-      {/* <Spinner/> */}
-      Table name is : {vm.displayname.value}
-      {/* <div className='top-panel-container'>
+  vm,
+}: RecordSetProps): JSX.Element => (
+  <div className="recordset-container app-content-container">
+    {/* <Spinner/> */}
+    Table name is :
+    {' '}
+    {vm.displayname.value}
+    {/* <div className='top-panel-container'>
         <div className='top-flex-panel'>
           <div className='top-left-panel'>
 
@@ -27,9 +23,7 @@ const RecordSet = ({
       <div className='bottom-panel-container'>
 
       </div> */}
-    </div>
-  )
-}
-
+  </div>
+);
 
 export default RecordSet;

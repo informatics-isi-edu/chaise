@@ -5,7 +5,7 @@ import errorReducer from '@chaise/store/slices/error';
 export const store = configureStore({
   reducer: {
     authn: authnReducer,
-    error: errorReducer
+    error: errorReducer,
   },
 });
 

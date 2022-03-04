@@ -1,7 +1,7 @@
 import Q from 'q';
 import { ConfigService } from '@chaise/services/config';
 import { windowRef } from '@chaise/utils/window-ref';
-import { MathUtils } from '@chaise/utils/utils';
+import MathUtils from '@chaise/utils/math-utils';
 import { BODY_CLASS_NAMES } from '@chaise/utils/constants';
 import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@chaise/utils/uri-utils';
 
@@ -13,27 +13,26 @@ import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@chai
 * NOTE: should only be called by config.js (or equivalent configuration app)
 */
 export async function setupHead() {
-  addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
-  addCanonicalTag();                              // controlled by chaise-config value to turn on/off
-  setWindowName();                                // will only update if not already set
+  addBodyClasses(); // doesn't need to be controlled since it relies on .chaise-body class being present
+  addCanonicalTag(); // controlled by chaise-config value to turn on/off
+  setWindowName(); // will only update if not already set
 
-  var settings = ConfigService.appSettings;
+  const settings = ConfigService.appSettings;
   // TODO
   // if (settings.openLinksInTab) openLinksInTab();
   // if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
   // if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
   if (settings.overrideHeadTitle) addTitle(settings.appTitle);
 
-
-  return addCustomCSS();                          // controlled by chaise-config value to attach
+  return addCustomCSS(); // controlled by chaise-config value to attach
 }
 
 // <title> should already be created in <head> and set to default chaiseConfig.headTitle from config app before app loads
 export function updateHeadTitle(contextTitle?: string) {
-  var chaiseConfig = ConfigService.chaiseConfig;
+  const chaiseConfig = ConfigService.chaiseConfig;
 
-  var titleTag = document.head.getElementsByTagName('title')[0];
-  titleTag.innerHTML = (contextTitle ? contextTitle + ' | ' : "") + chaiseConfig.headTitle;
+  const titleTag = document.head.getElementsByTagName('title')[0];
+  titleTag.innerHTML = (contextTitle ? `${contextTitle} | ` : '') + chaiseConfig.headTitle;
 }
 
 /**
@@ -50,22 +49,22 @@ export function setWindowName() {
  * the file is loaded (or if the customCSS property is not defined)
  */
 async function addCustomCSS() {
-  var defer = Q.defer();
-  var chaiseConfig = ConfigService.chaiseConfig;
+  const defer = Q.defer();
+  const chaiseConfig = ConfigService.chaiseConfig;
   if (chaiseConfig.customCSS !== undefined) {
     // if the file is already injected
-    if (document.querySelector('link[href^="' + chaiseConfig.customCSS + '"]')) {
+    if (document.querySelector(`link[href^="${chaiseConfig.customCSS}"]`)) {
       return defer.resolve(), defer.promise;
     }
 
-    var customCSSElement = document.createElement("link");
-    customCSSElement.setAttribute("rel", "stylesheet");
-    customCSSElement.setAttribute("type", "text/css");
-    customCSSElement.setAttribute("href", chaiseConfig.customCSS);
+    const customCSSElement = document.createElement('link');
+    customCSSElement.setAttribute('rel', 'stylesheet');
+    customCSSElement.setAttribute('type', 'text/css');
+    customCSSElement.setAttribute('href', chaiseConfig.customCSS);
     // resolve the promise when the css is loaded
     customCSSElement.onload = defer.resolve;
     customCSSElement.onerror = defer.resolve;
-    document.getElementsByTagName("head")[0].appendChild(customCSSElement);
+    document.getElementsByTagName('head')[0].appendChild(customCSSElement);
   } else {
     defer.resolve();
   }
@@ -79,10 +78,10 @@ async function addCustomCSS() {
 *  - chaise-iframe: if running in an iframe
 */
 function addBodyClasses() {
-  var osClass = (navigator.platform.indexOf("Mac") != -1 ? BODY_CLASS_NAMES.mac : undefined);
-  var browserClass = (navigator.userAgent.indexOf("Firefox") != -1 ? BODY_CLASS_NAMES.firefox: undefined);
+  const osClass = (navigator.platform.indexOf('Mac') != -1 ? BODY_CLASS_NAMES.mac : undefined);
+  const browserClass = (navigator.userAgent.indexOf('Firefox') != -1 ? BODY_CLASS_NAMES.firefox : undefined);
 
-  var bodyElement = document.querySelector("." + BODY_CLASS_NAMES.self);
+  const bodyElement = document.querySelector(`.${BODY_CLASS_NAMES.self}`);
   if (!bodyElement) return;
 
   if (osClass) {
@@ -97,35 +96,35 @@ function addBodyClasses() {
 }
 
 function addTitle(title?: string) {
-  var chaiseConfig = ConfigService.chaiseConfig;
+  const chaiseConfig = ConfigService.chaiseConfig;
 
   let usedTitle : string;
-  if (typeof title !== "string" || title.length === 0) {
+  if (typeof title !== 'string' || title.length === 0) {
     usedTitle = chaiseConfig.headTitle;
   } else {
-    usedTitle = title + " | " + chaiseConfig.headTitle;
+    usedTitle = `${title} | ${chaiseConfig.headTitle}`;
   }
 
   document.title = usedTitle;
 }
 
 function addCanonicalTag() {
-  var chaiseConfig = ConfigService.chaiseConfig;
-  if (chaiseConfig['includeCanonicalTag'] == true) {
-    var canonicalTag = document.createElement("link");
-    canonicalTag.setAttribute("rel", "canonical");
+  const chaiseConfig = ConfigService.chaiseConfig;
+  if (chaiseConfig.includeCanonicalTag == true) {
+    const canonicalTag = document.createElement('link');
+    canonicalTag.setAttribute('rel', 'canonical');
 
     // the hash returned from this function handles the case when '#' is switched with '?'
-    var hash = getURLHashFragment(windowRef.location);
-    var canonicalURL = windowRef.location.origin + windowRef.location.pathname + stripSortAndQueryParams(hash);
-    canonicalTag.setAttribute("href", canonicalURL);
-    document.getElementsByTagName("head")[0].appendChild(canonicalTag);
+    const hash = getURLHashFragment(windowRef.location);
+    const canonicalURL = windowRef.location.origin + windowRef.location.pathname + stripSortAndQueryParams(hash);
+    canonicalTag.setAttribute('href', canonicalURL);
+    document.getElementsByTagName('head')[0].appendChild(canonicalTag);
   }
 }
 
 function clickHref(href: string) {
   // fetch the file for the user
-  var downloadLink = document.createElement('a');
+  const downloadLink = document.createElement('a');
   downloadLink.setAttribute('href', href);
   downloadLink.setAttribute('download', '');
   downloadLink.setAttribute('visibility', 'hidden');

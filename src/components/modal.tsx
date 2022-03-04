@@ -1,5 +1,6 @@
-import Button from "react-bootstrap/Button";
-import Modal from "react-bootstrap/Modal";
+import React from 'react';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 
 interface ChaiseModalProps {
   title: JSX.Element,
@@ -16,29 +17,28 @@ const ChaiseModal = ({
   footer,
   size,
   show,
-  onHide
-}: ChaiseModalProps): JSX.Element => {
-  return (
-    <Modal
-      size={size}
-      show={show}
-      onHide={onHide}
-    >
-      <Modal.Header closeButton>
-        <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
+  onHide,
+}: ChaiseModalProps): JSX.Element => (
+  <Modal
+    size={size}
+    show={show}
+    onHide={onHide}
+  >
+    <Modal.Header closeButton>
+      <Modal.Title>{title}</Modal.Title>
+    </Modal.Header>
 
-      <Modal.Body>
-        {body}
-      </Modal.Body>
+    <Modal.Body>
+      {body}
+    </Modal.Body>
 
-      {footer &&
+    {footer
+        && (
         <Modal.Footer>
           {footer}
         </Modal.Footer>
-      }
-    </Modal>
-  );
-};
+        )}
+  </Modal>
+);
 
 export default ChaiseModal;

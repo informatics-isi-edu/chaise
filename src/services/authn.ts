@@ -1,19 +1,24 @@
-import axios from "axios";
+import axios from 'axios';
 
-import StorageService from "@chaise/utils/storage";
-import { UriUtils } from "@chaise/utils/utils";
+import StorageService from '@chaise/utils/storage';
+import { fixedEncodeURIComponent, queryStringToJSON } from '@chaise/utils/uri-utils';
+import { BUILD_VARIABLES } from '@chaise/utils/constants';
 
 export default class AuthnService {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location
   static serviceURL: string = window.location.origin;
 
-  static LOCAL_STORAGE_KEY: string = 'session';              // name of object session information is stored under
+  static LOCAL_STORAGE_KEY: string = 'session'; // name of object session information is stored under
+
   static PROMPT_EXPIRATION_KEY: string = 'promptExpiration'; // name of key for prompt expiration value
-  static PREVIOUS_SESSION_KEY: string = 'previousSession';   // name of key for previous session boolean
+
+  static PREVIOUS_SESSION_KEY: string = 'previousSession'; // name of key for previous session boolean
 
   // TODO: how to make these as private variables and private functions
-  private static _session: any | null = null;                        // current session object
-  private static _prevSession: any | null = null;                    // previous session object
+  private static _session: any | null = null; // current session object
+
+  private static _prevSession: any | null = null; // previous session object
+
   private static _sameSessionAsPrevious: boolean = false;
 
   private static _changeCbs: any = {};
@@ -21,7 +26,7 @@ export default class AuthnService {
   private static _counter: number = 0;
 
   private static _executeListeners = function () {
-    for (var k in AuthnService._changeCbs) {
+    for (const k in AuthnService._changeCbs) {
       AuthnService._changeCbs[k]();
     }
   };
@@ -34,20 +39,20 @@ export default class AuthnService {
   // returns data stored in loacal storage for `keyName`
   private static _getKeyFromStorage = function (keyName: string) {
     return StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY)[keyName];
-  }
+  };
 
   // create value in storage with `keyName` and `value`
   private static _setKeyInStorage = function (keyName: string, value: string | boolean) {
-    var data = {} as any;
+    const data = {} as any;
 
     data[keyName] = value;
 
     StorageService.updateStorage(AuthnService.LOCAL_STORAGE_KEY, data);
-  }
+  };
 
   // verifies value exists for `keyName`
   private static _keyExistsInStorage = function (keyName: string) {
-    var sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
+    const sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
 
     return (sessionStorage && sessionStorage[keyName]);
   };
@@ -61,8 +66,8 @@ export default class AuthnService {
 
   // creates an expiration token with `keyName`
   private static _createToken = function (keyName: string) {
-    var data = {} as any;
-    var hourFromNow = new Date();
+    const data = {} as any;
+    const hourFromNow = new Date();
     hourFromNow.setHours(hourFromNow.getHours() + 1);
 
     data[keyName] = hourFromNow.getTime();
@@ -72,7 +77,7 @@ export default class AuthnService {
 
   // checks if the expiration token with `keyName` has expired
   private static _expiredToken = function (keyName: string) {
-    var sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
+    const sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
 
     return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
   };
@@ -86,7 +91,7 @@ export default class AuthnService {
 
   static get session() {
     return AuthnService._session;
-  };
+  }
 
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
@@ -103,40 +108,40 @@ export default class AuthnService {
     if (!postLoginCB) {
       postLoginCB = function () {
         // if (!AuthnService.shouldReloadPageAfterLogin()) {
-          // fetches the session of the user that just logged in
-          AuthnService.getSession("").then(function (response) {
-            // if (modalInstance) modalInstance.close();
-            alert(response.client.full_name + " logged in")
-          });
+        // fetches the session of the user that just logged in
+        AuthnService.getSession('').then((response) => {
+          // if (modalInstance) modalInstance.close();
+          alert(`${response.client.full_name} logged in`);
+        });
         // } else {
         //   // window.location.reload();
         // }
       };
     }
 
-    var x = window.innerWidth / 2 - 800 / 2;
-    var y = window.innerHeight / 2 - 600 / 2;
+    const x = window.innerWidth / 2 - 800 / 2;
+    const y = window.innerHeight / 2 - 600 / 2;
 
-    var win = window.open("", '_blank', 'width=800,height=600,left=' + x + ',top=' + y);
+    const win = window.open('', '_blank', `width=800,height=600,left=${x},top=${y}`);
 
     AuthnService.logInHelper(AuthnService.loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };
 
   static logInHelper = function (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) {
-    var referrerId = (new Date().getTime());
+    const referrerId = (new Date().getTime());
 
     // var chaiseConfig = ConfigUtils.getConfigJSON();
-    var loginApp = "login";
+    const loginApp = 'login';
     // TODO: ConfigUtils
     // var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
 
-    var url = AuthnService.serviceURL + '/authn/preauth?referrer=' + UriUtils.fixedEncodeURIComponent(window.location.origin + "/~jchudy/chaise/" + loginApp + "/?referrerid=" + referrerId);
-    var config = {
+    const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(`${window.location.origin}/${BUILD_VARIABLES.CHAISE_BASE_PATH}/${loginApp}/?referrerid=${referrerId}`)}`;
+    const config = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'Accept': 'application/json'
+        Accept: 'application/json',
       },
-      skipHTTP401Handling: true
+      skipHTTP401Handling: true,
     };
 
     // TODO in the case of loginInAModal, we're not doing the actual login,
@@ -149,45 +154,45 @@ export default class AuthnService {
     //     action: logService.getActionString(logAction, "", "")
     //   }
     // }
-    axios.get(url, config).then(function (response) {
+    axios.get(url, config).then((response) => {
     // ConfigUtils.getHTTPService().get(url, config).then(function (response) {
-      var data = response.data;
+      const data = response.data;
 
-      var login_url = "";
-      if (data['redirect_url'] !== undefined) {
-        login_url = data['redirect_url'];
-      } else if (data['login_form'] !== undefined) {
+      let login_url = '';
+      if (data.redirect_url !== undefined) {
+        login_url = data.redirect_url;
+      } else if (data.login_form !== undefined) {
         // we want to use the old login flow to login
         // (login in the same window so when login does occur, it changes the same page instead of the page in the window that pops up)
         win = window;
         // prevents the dialog from popping up shortly before the page redirects to login
-        type = "";
-        var referrer = window.location.href;
-        var login_form = data['login_form'];
-        login_url = '../login?referrer=' + UriUtils.fixedEncodeURIComponent(referrer);
-        var method = login_form['method'];
-        var action = UriUtils.fixedEncodeURIComponent(login_form['action']);
-        var text = '';
-        var hidden = '';
-        for (var i = 0; i < login_form['input_fields'].length; i++) {
-          var field = login_form['input_fields'][i];
+        type = '';
+        const referrer = window.location.href;
+        const login_form = data.login_form;
+        login_url = `../login?referrer=${fixedEncodeURIComponent(referrer)}`;
+        const method = login_form.method;
+        const action = fixedEncodeURIComponent(login_form.action);
+        let text = '';
+        let hidden = '';
+        for (let i = 0; i < login_form.input_fields.length; i++) {
+          const field = login_form.input_fields[i];
           if (field.type === 'text') {
-            text = UriUtils.fixedEncodeURIComponent(field.name);
+            text = fixedEncodeURIComponent(field.name);
           } else {
-            hidden = UriUtils.fixedEncodeURIComponent(field.name);
+            hidden = fixedEncodeURIComponent(field.name);
           }
         }
-        login_url += '&method=' + method + '&action=' + action + '&text=' + text + '&hidden=' + hidden + '&?referrerid=' + referrerId;
+        login_url += `&method=${method}&action=${action}&text=${text}&hidden=${hidden}&?referrerid=${referrerId}`;
       }
 
-      var params = {
-        login_url: login_url
+      const params = {
+        login_url,
       };
       if (win) {
         win.location = params.login_url;
       }
       logInTypeCb(params, referrerId, cb, type, rejectCb);
-    }, function (error) {
+    }, (error) => {
       // throw ERMrest.responseToError(error);
     });
   };
@@ -201,26 +206,26 @@ export default class AuthnService {
       // } else {
       //   params.title = messageMap.noSession.title;
       // }
-      params.title = "temporary title";
-      var closed = false;
+      params.title = 'temporary title';
+      let closed = false;
 
       // var cleanupModal = function (message) {
       //   $interval.cancel(intervalId);
       //   $cookies.remove("chaise-" + referrerId, { path: "/" });
       //   closed = true;
       // }
-      var onModalCloseSuccess = function () {
+      const onModalCloseSuccess = function () {
         // cleanupModal("login refreshed");
         closed = true;
         cb();
-      }
+      };
 
-      var onModalClose = function (response: any) {
+      const onModalClose = function (response: any) {
         // cleanupModal("no login");
         closed = true;
         if (rejectCb) {
           //  ermrestJS throws error if 'response' is not formatted as an Error
-          if (typeof response == "string") {
+          if (typeof response === 'string') {
             response = new Error(response);
           }
           rejectCb(response);
@@ -241,7 +246,6 @@ export default class AuthnService {
       //   keyboard: false
       // }, onModalCloseSuccess, onModalClose, false);
     }
-
 
     /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
      * variable
@@ -267,13 +271,13 @@ export default class AuthnService {
       //   }
       // }
     } else {
-      window.addEventListener('message', function (args) {
-        if (args && args.data && (typeof args.data == 'string')) {
-          console.log("do local storage things");
+      window.addEventListener('message', (args) => {
+        if (args && args.data && (typeof args.data === 'string')) {
+          console.log('do local storage things');
           AuthnService._setKeyInStorage(AuthnService.PREVIOUS_SESSION_KEY, true);
           AuthnService._removeKeyFromStorage(AuthnService.PROMPT_EXPIRATION_KEY);
-          var obj = UriUtils.queryStringToJSON(args.data);
-          if (obj.referrerid == referrerId && (typeof cb == 'function')) {
+          const obj = queryStringToJSON(args.data);
+          if (obj.referrerid == referrerId && (typeof cb === 'function')) {
             if (type.indexOf('modal') !== -1) {
               // modalInstance.close("Done");
               cb();
@@ -295,9 +299,9 @@ export default class AuthnService {
    * @param  {string=} context undefined or "401"
    */
   static getSession = function (context: string) {
-    var config = {
+    const config = {
       skipHTTP401Handling: true,
-      headers: {} as any
+      headers: {} as any,
     };
 
     // config.headers[ERMrest.contextHeaderName] = {
@@ -323,10 +327,10 @@ export default class AuthnService {
      * no webauthn
      * if there's a cookieFromStorage user was here before, see if it is expired
      *  - if expired
-     **/
+     * */
 
-    return axios.get(AuthnService.serviceURL + "/authn/session", config).then(function (response) {
-      if (context === "401" && AuthnService.shouldReloadPageAfterLogin()) {
+    return axios.get(`${AuthnService.serviceURL}/authn/session`, config).then((response) => {
+      if (context === '401' && AuthnService.shouldReloadPageAfterLogin()) {
         // window.location.reload();
         return response.data;
       }
@@ -336,7 +340,7 @@ export default class AuthnService {
       if (AuthnService._prevSession) {
         AuthnService._sameSessionAsPrevious = AuthnService._prevSession.client.id == response.data.client.id;
       } else {
-        AuthnService._prevSession = response.data
+        AuthnService._prevSession = response.data;
       }
 
       if (!AuthnService._session) {
@@ -346,34 +350,31 @@ export default class AuthnService {
 
       AuthnService._executeListeners();
       return AuthnService._session;
-    }).catch(function (err) {
+    }).catch((err) => {
       // $log.warn(ERMrest.responseToError(err));
 
       AuthnService._session = null;
       AuthnService._executeListeners();
       return AuthnService._session;
     });
-  }
+  };
 
   //   // groupArray should be the array of globus group
   static isGroupIncluded = (groupArray: string[]) => {
     // if no array, assume it wasn't defined and default hasn't been set yet
-    if (!groupArray || groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
+    if (!groupArray || groupArray.indexOf('*') > -1) return true; // if "*" acl, show the option
     if (!AuthnService._session) return false; // no "*" exists and no session, hide the option
 
-    for (var i = 0; i < groupArray.length; i++) {
-      var attribute = groupArray[i];
+    for (let i = 0; i < groupArray.length; i++) {
+      let attribute = groupArray[i];
 
-      var match = AuthnService._session.attributes.some(function (attr: any) {
-        return attr.id === attribute;
-      });
+      const match = AuthnService._session.attributes.some((attr: any) => attr.id === attribute);
 
       if (match) return true;
-    };
+    }
 
     return false;
-  }
-
+  };
 } // end class
 
 // // variable so the modal can be passed to another function outside of this scope to close it when appropriate
@@ -510,7 +511,6 @@ export default class AuthnService {
 //   extendPromptExpirationToken: function () {
 //     _extendToken(PROMPT_EXPIRATION_KEY);
 //   },
-
 
 //   /**
 //    * TODO technically this function should even ask for preauthn in logInHelper
@@ -656,7 +656,6 @@ export default class AuthnService {
 
 //         return defer.promise;
 //       });
-
 
 //     }]);
 

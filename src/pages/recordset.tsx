@@ -4,7 +4,7 @@ import '@chaise/assets/scss/app.scss';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { ErrorBoundary, FallbackProps } from 'react-error-boundary'
+import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 import { store } from '@chaise/store/store';
 import { useAppDispatch } from '@chaise/store/hooks';
@@ -20,22 +20,22 @@ import RecordSet from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
 import AuthnService from '@chaise/services/authn';
 import { loginUser } from '@chaise/store/slices/authn';
-import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '../utils/uri-utils';
-import { windowRef } from '../utils/window-ref';
-import { TypeUtils } from '../utils/utils';
-import { updateHeadTitle } from '../utils/head-injector';
-import { getDisplaynameInnerText } from '../utils/data-utils';
-import { LogService } from '../services/log';
-import { LogStackTypes } from '../models/log';
-import { RecordSetDisplayMode, RecordsetSelectMode, RecordsetViewModel } from '../services/table';
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
+import { windowRef } from '@chaise/utils/window-ref';
+import TypeUtils from '@chaise/utils/type-utils';
+import { updateHeadTitle } from '@chaise/utils/head-injector';
+import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
+import { LogService } from '@chaise/services/log';
+import { LogStackTypes } from '@chaise/models/log';
+import { RecordSetDisplayMode, RecordsetSelectMode, RecordsetViewModel } from '@chaise/services/table';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
-    appName: "recordset",
-    appTitle: "Record Set",
+    appName: 'recordset',
+    appTitle: 'Record Set',
     overrideHeadTitle: true,
     overrideDownloadClickBehavior: true,
-    overrideExternalLinkBehavior: true
+    overrideExternalLinkBehavior: true,
   };
 
   const dispatch = useAppDispatch();
@@ -51,12 +51,12 @@ const RecordSetApp = (): JSX.Element => {
     /**
      * global error handler for uncaught errors
      */
-    window.addEventListener("error", (event) => {
-      $log.log("got the error in catch-all");
+    window.addEventListener('error', (event) => {
+      $log.log('got the error in catch-all');
       dispatch(showError({ error: event.error, isGlobal: true }));
     });
-    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-      $log.log("got the error in catch-all (unhandled rejection)");
+    window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+      $log.log('got the error in catch-all (unhandled rejection)');
       dispatch(showError({ error: event.reason, isGlobal: true }));
     });
 
@@ -65,8 +65,8 @@ const RecordSetApp = (): JSX.Element => {
      * - Setup the app (chaise-config, etc)
      * - setup ermrestjs
      */
-    let logObject : any = {};
-    AuthnService.getSession("").then((response) => {
+    const logObject : any = {};
+    AuthnService.getSession('').then((response) => {
       if (response) {
         dispatch(loginUser(response));
       }
@@ -75,18 +75,16 @@ const RecordSetApp = (): JSX.Element => {
       console.dir(ConfigService.chaiseConfig);
 
       // we should ge the reference
-      let res = chaiseURItoErmrestURI(windowRef.location);
+      const res = chaiseURItoErmrestURI(windowRef.location);
       if (res.pcid) logObject.pcid = res.pcid;
       if (res.ppid) logObject.ppid = res.ppid;
       if (res.paction) logObject.paction = res.paction; // currently only captures the "applyQuery" action from the show saved query popup
-      if (res.queryParams && "savedQueryRid" in res.queryParams) logObject.sq_rid = res.queryParams.savedQueryRid;
+      if (res.queryParams && 'savedQueryRid' in res.queryParams) logObject.sq_rid = res.queryParams.savedQueryRid;
       if (res.isQueryParameter) logObject.cqp = 1;
 
-
       return ConfigService.ERMrest.resolve(res.ermrestUri);
-
     }).then((response: any) => {
-      let reference = response.contextualize.compact;
+      const reference = response.contextualize.compact;
 
       updateHeadTitle(getDisplaynameInnerText(reference.displayname));
 
@@ -101,10 +99,10 @@ const RecordSetApp = (): JSX.Element => {
         LogService.getStackNode(
           LogStackTypes.SET,
           reference.table,
-          reference.filterLogInfo
-        )
+          reference.filterLogInfo,
+        ),
       ];
-      const logStackPath = LogStackTypes.SET
+      const logStackPath = LogStackTypes.SET;
 
       // set the global log stack and log stack path
       LogService.config(logStack, logStackPath);
@@ -112,15 +110,15 @@ const RecordSetApp = (): JSX.Element => {
       // TODO properly get t
       let pageLimit = 25;
       if (reference.location.queryParams.limit) {
-        pageLimit = parseInt(reference.location.queryParams.limit);
-    } else if (reference.display.defaultPageSize) {
+        pageLimit = parseInt(reference.location.queryParams.limit, 10);
+      } else if (reference.display.defaultPageSize) {
         pageLimit = reference.display.defaultPageSize;
-    }
+      }
 
-      let chaiseConfig = ConfigService.chaiseConfig;
-      let modifyEnabled = chaiseConfig.editRecord === false ? false : true;
-      let deleteEnabled = chaiseConfig.deleteRecord === true ? true : false;
-      let showFaceting = chaiseConfig.showFaceting === true ? true : false;
+      const chaiseConfig = ConfigService.chaiseConfig;
+      const modifyEnabled = chaiseConfig.editRecord !== false;
+      const deleteEnabled = chaiseConfig.deleteRecord === true;
+      const showFaceting = chaiseConfig.showFaceting === true;
       setRecordsetViewModel(
         new RecordsetViewModel(
           reference,
@@ -130,49 +128,49 @@ const RecordSetApp = (): JSX.Element => {
             editable: modifyEnabled,
             deletable: modifyEnabled && deleteEnabled,
             selectMode: RecordsetSelectMode.NO_SELECT,
-            showFaceting: showFaceting,
+            showFaceting,
             facetPanelOpen: showFaceting,
-            displayMode: RecordSetDisplayMode.FULLSCREEN
+            displayMode: RecordSetDisplayMode.FULLSCREEN,
             // enableFavorites
           },
           {
-            logObject: logObject,
+            logObject,
             logStack: [
               LogService.getStackNode(
                 LogStackTypes.SET,
                 reference.table,
-                reference.filterLogInfo
-              )
+                reference.filterLogInfo,
+              ),
             ],
-            logStackPath:logStackPath
-          }
-        )
+            logStackPath,
+          },
+        ),
       );
 
       setConfigDone(true);
-
-    }).catch((err) => {
-      if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
-        err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
-      }
-      dispatch(showError({ error: err, isGlobal: true }));
-    });
+    })
+      .catch((err) => {
+        if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+          err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
+        }
+        dispatch(showError({ error: err, isGlobal: true }));
+      });
   });
 
   const errorFallback = ({ error }: FallbackProps) => {
-    $log.log("error fallback of the main error boundary");
+    $log.log('error fallback of the main error boundary');
 
     // TODO context header params
-    //ErrorHandler.logTerminalError(error);
-    dispatch(showError({ error: error, isGlobal: true }));
+    // ErrorHandler.logTerminalError(error);
+    dispatch(showError({ error, isGlobal: true }));
 
     // the error modal will be displayed so there's no need for the fallback
     return null;
-  }
+  };
 
   const recordsetContent = () => {
     if (!configDone || !recordsetViewModel) {
-      return <Spinner />
+      return <Spinner />;
     }
 
     return (
@@ -180,9 +178,8 @@ const RecordSetApp = (): JSX.Element => {
         <ChaiseNavbar />
         <RecordSet vm={recordsetViewModel} />
       </div>
-    )
-
-  }
+    );
+  };
 
   return (
     <>
@@ -202,5 +199,5 @@ ReactDOM.render(
       <RecordSetApp />
     </React.StrictMode>
   </Provider>,
-  document.getElementById("chaise-app-root")
+  document.getElementById('chaise-app-root'),
 );

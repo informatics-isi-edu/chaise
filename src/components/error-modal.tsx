@@ -1,3 +1,4 @@
+import React from 'react';
 import ChaiseModal from '@chaise/components/modal';
 import { useAppSelector, useAppDispatch } from '@chaise/store/hooks';
 import { RootState } from '@chaise/store/store';
@@ -16,11 +17,15 @@ const ErrorModal = () : JSX.Element | null => {
   );
 
   const errorBody = (
-    <div>{error.error?.message} {error.isGlobal ? "(caught by global catch-all)" : ""}</div>
+    <div>
+      {error.error?.message}
+      {' '}
+      {error.isGlobal ? '(caught by global catch-all)' : ''}
+    </div>
   );
 
   const errorFooter = (
-    <div></div>
+    <div />
   );
 
   if (!error.error || !error.isDisplayed) {
