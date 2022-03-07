@@ -143,6 +143,10 @@ describe('Recordset add record,', function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         // browser.close();
         browser.switchTo().window(allWindows[0]).then(function() {
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function () {
+            return browser.switchTo().window(allWindows[0]);
+        }).then(function () {
             return chaisePage.waitForElementInverse(element(by.id("spinner")));
         }).then(function() {
             return chaisePage.recordsetPage.getPageTitleElement().click();
