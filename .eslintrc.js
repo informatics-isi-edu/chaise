@@ -20,25 +20,30 @@ module.exports = {
     '@typescript-eslint',
   ],
   rules: {
+    // ------------------ general ------------------
     'max-len': ['warn', { code: 110, ignoreComments: true }],
     'max-classes-per-file': ['warn', 1],
     'no-underscore-dangle': 0,
     'prefer-destructuring': 0,
     'no-plusplus': 0,
-    'react/function-component-definition': 0,
     'import/no-unresolved': 0, // webpack will handle this
     'import/extensions': 0, // webpack will handle this
-    'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
     'no-param-reassign': 0,
     'one-var': 0,
     'one-var-declaration-per-line': 0,
     'no-restricted-syntax': 'warn',
     'no-continue': 0,
     eqeqeq: 'warn',
+    'prefer-const': 'warn',
+
+    // ------------------ react ------------------
+    'react/function-component-definition': 0,
+    'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
+
+    // ------------------ typescript ------------------
     '@typescript-eslint/ban-types': 'warn',
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-inferrable-types': 'warn',
-    'prefer-const': 'warn'
   },
   settings: {
     'import/resolver': 'webpack',

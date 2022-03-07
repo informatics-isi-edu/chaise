@@ -1,3 +1,5 @@
+/* eslint max-classes-per-file: 0 */
+
 import { Displayname } from '@chaise/models/displayname';
 import { LogActions, LogStackPaths, LogStackTypes } from '@chaise/models/log';
 import { LogService } from '@chaise/services/log';
@@ -212,7 +214,11 @@ export class RecordsetViewModel {
         const pcolStackNode = LogService.getStackNode(
           LogStackTypes.PSEUDO_COLUMN,
           activeListModel.column.table,
-          { source: activeListModel.column.compressedDataSource, entity: activeListModel.column.isEntityMode, agg: activeListModel.column.aggregateFn },
+          {
+            source: activeListModel.column.compressedDataSource,
+            entity: activeListModel.column.isEntityMode,
+            agg: activeListModel.column.aggregateFn
+          },
         );
         this.aggregateModels.push({
           activeListModel, // the api that ermrestjs returns (has .objects and .column)
@@ -300,8 +306,8 @@ export class RecordsetViewModel {
    * A rejected promise should be displayed as an error.
    */
   private _updateColumnAggregate(aggModel: any, current: number, hideSpinner?: boolean) {
-    const defer = Q.defer();
-    const activeListModel = aggModel.activeListModel;
+    const defer = Q.defer(),
+          activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
     activeListModel.objects.forEach((obj: any) => {

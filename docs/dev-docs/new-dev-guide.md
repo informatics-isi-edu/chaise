@@ -66,3 +66,28 @@ This document should be organized later, I just wanted to make sure the things t
 
 
 
+# Lint
+
+- Make sure the `ESLint` extension is installed for Visual Studio Code.
+
+- Makefile commands:
+
+  ```
+  make lint
+  make lint-w-warn
+  ```
+
+- You can ask linter to escape a file or line, but you should not use this unless
+  you're 100% sure what you're doing is correct:
+
+  ```
+  // to ignore the rule for the next line:
+  // eslint-disable-next-line NAME_OF_THE_RULE
+
+  // to ignore the rule for the whole file:
+  /* eslint NAME_OF_THE_RULE: 0 */ 
+  ```
+
+- Using the previously described method you can also change rules locally, but 
+  we recommend against.
+
