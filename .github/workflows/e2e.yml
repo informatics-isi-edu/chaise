@@ -1,7 +1,13 @@
 
 name: Chaise end-to-end tests
 
-on: [push]
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
 
 concurrency: chaise_env
 
@@ -129,46 +135,42 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run recordset add spec
+      - name: Run full features confirmation test spec
+        id: test-full-features-confirmation
+        continue-on-error: true
         run: |
           cd chaise
-          ./node_modules/.bin/protractor test/e2e/specs/default-config/recordset/add.conf.js
-      # - name: Run full features confirmation test spec
-      #   id: test-full-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testfullfeaturesconfirmation
-      # - name: Run default config test spec
-      #   id: test-default-config
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdefaultconfig
-      # - name: Run full features test spec
-      #   id: test-full-features
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testfullfeatures
-      # - name: Run delete prohibited test spec
-      #   id: test-delete-prohibited
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
-      # - name: Check on full features confirmation test spec
-      #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on default config test spec
-      #   if: always() && steps.test-default-config.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on full features test spec
-      #   if: always() && steps.test-full-features.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on delete prohibited test spec
-      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
-      #   run: exit 1
+          make testfullfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run full features test spec
+        id: test-full-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfullfeatures
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
+      - name: Check on full features confirmation test spec
+        if: always() && steps.test-full-features-confirmation.outcome != 'success'
+        run: exit 1
+      - name: Check on default config test spec
+        if: always() && steps.test-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on full features test spec
+        if: always() && steps.test-full-features.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
