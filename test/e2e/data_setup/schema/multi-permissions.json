@@ -798,7 +798,9 @@
                     "annotations": {}
                 }
             ],
-            "annotations": {}
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
         },
         "other_delete_table": {
             "table_name": "other_delete_table",
