@@ -14,7 +14,6 @@ import FontAwesome from '@chaise/services/fontawesome';
 import ChaiseNavbar from '@chaise/components/navbar';
 
 const NavbarApp = (): JSX.Element => {
-  FontAwesome.addRecordsetFonts();
 
   return (
     <div>

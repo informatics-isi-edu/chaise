@@ -230,6 +230,8 @@ export class RecordsetViewModel {
       });
     }
 
+    this.facetModels = [];
+
     // only allowing single column sort here
     const location = this.reference.location;
     if (location.sortObject) {

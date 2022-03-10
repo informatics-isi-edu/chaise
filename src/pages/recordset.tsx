@@ -9,8 +9,6 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { store } from '@chaise/store/store';
 import { useAppDispatch } from '@chaise/store/hooks';
 import { showError } from '@chaise/store/slices/error';
-
-import FontAwesome from '@chaise/services/fontawesome';
 import { ConfigService } from '@chaise/services/config';
 
 import ChaiseNavbar from '@chaise/components/navbar';
@@ -42,10 +40,9 @@ const RecordSetApp = (): JSX.Element => {
   const [configDone, setConfigDone] = useState(false);
   const [recordsetViewModel, setRecordsetViewModel] = useState<RecordsetViewModel|undefined>(undefined);
 
-  // add all the font awesomes that are used
-  FontAwesome.addRecordsetFonts();
 
   useEffect(() => {
+    $log.log('recordset page effect');
     if (configDone) return;
 
     /**
@@ -131,6 +128,7 @@ const RecordSetApp = (): JSX.Element => {
             showFaceting,
             facetPanelOpen: showFaceting,
             displayMode: RecordSetDisplayMode.FULLSCREEN,
+            // TODO
             // enableFavorites
           },
           {
@@ -160,13 +158,15 @@ const RecordSetApp = (): JSX.Element => {
   const errorFallback = ({ error }: FallbackProps) => {
     $log.log('error fallback of the main error boundary');
 
-    // TODO context header params
-    // ErrorHandler.logTerminalError(error);
+    // TODO uncomment
+    // ErrorService.logTerminalError(error);
     dispatch(showError({ error, isGlobal: true }));
 
     // the error modal will be displayed so there's no need for the fallback
     return null;
   };
+
+  $log.log('recordset page');
 
   const recordsetContent = () => {
     if (!configDone || !recordsetViewModel) {
