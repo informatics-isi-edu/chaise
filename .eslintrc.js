@@ -21,6 +21,7 @@ module.exports = {
   ],
   rules: {
     // ------------------ general ------------------
+    'quotes': ['error', 'single'],
     'max-len': ['warn', { code: 110, ignoreComments: true }],
     'max-classes-per-file': ['warn', 1],
     'no-underscore-dangle': 0,

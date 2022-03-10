@@ -32,15 +32,15 @@ export enum RecordSetDisplayMode {
   SAVED_QUERY_POPUP = 'popup/savedquery'
 }
 
-// const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
-// const MAX_CONCURENT_REQUEST = 4;
-// const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
+const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
+const MAX_CONCURENT_REQUEST = 4;
+const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 // const FACET_PAGE_SIZE = 10;
 // const AUTO_SEARCH_TIMEOUT = 2000;
 const CELL_LIMIT = 500;
 
 class FlowControlObject {
-  maxRequests = 4;
+  maxRequests = MAX_CONCURENT_REQUEST;
 
   occupiedSlots = 0;
 
@@ -143,7 +143,7 @@ export class RecordsetViewModel {
   sortOrder: any;
 
   // search term
-  search: string | null;
+  search?: string;
 
   // the count that should be displayed
   totalRowsCnt: number | null = null;
@@ -151,15 +151,15 @@ export class RecordsetViewModel {
   // TODO why?
   internalID: string;
 
-  private reloadCauses : string[] = [];
+  private reloadCauses: string[] = [];
 
-  private _recountCauses : string[] = [];
+  private _recountCauses: string[] = [];
 
   private reloadStartTime = -1;
 
   private _recountStartTime = -1;
 
-  private flowControlObject: FlowControlObject;
+  flowControlObject: FlowControlObject;
 
   // flow control
   dirtyResult = false;
@@ -307,7 +307,7 @@ export class RecordsetViewModel {
    */
   private _updateColumnAggregate(aggModel: any, current: number, hideSpinner?: boolean) {
     const defer = Q.defer(),
-          activeListModel = aggModel.activeListModel;
+      activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
     activeListModel.objects.forEach((obj: any) => {
@@ -417,7 +417,7 @@ export class RecordsetViewModel {
    */
   private _attachPseudoColumnValue(activeListModel: any, valIndex: number) {
     activeListModel.objects.forEach((obj: any) => {
-    // this is only called in recordset so it won't be any other type
+      // this is only called in recordset so it won't be any other type
       if (!obj.column) return;
 
       const model = this.columnModels[obj.index];
@@ -442,9 +442,9 @@ export class RecordsetViewModel {
         this.pendingRowValues[valIndex][obj.index] = displayValue;
       } else {
         this.rowValues[valIndex][obj.index] = displayValue;
-      // emit aggregates loaded event for [row][column]
-      // TODO how to signal that the aggregate is loaded
-      // $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + valIndex, obj.index);
+        // emit aggregates loaded event for [row][column]
+        // TODO how to signal that the aggregate is loaded
+        // $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + valIndex, obj.index);
       }
     });
   }
@@ -548,7 +548,7 @@ export class RecordsetViewModel {
   }
 
   // comment $timeout why
-  private pushMoreTimeout : any = null;
+  private pushMoreTimeout: any = null;
 
   /**
    * @private
@@ -563,7 +563,7 @@ export class RecordsetViewModel {
     this.hasLoaded = false;
     const defer = Q.defer();
 
-    const logParams : any = this.logObject ? this.logObject : {};
+    const logParams: any = this.logObject ? this.logObject : {};
 
     const hasCauses = Array.isArray(this.reloadCauses) && this.reloadCauses.length > 0;
     let act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
@@ -649,7 +649,7 @@ export class RecordsetViewModel {
             Array.prototype.push.apply(self.rowValues, rowValues.slice(prevInd, nextLimit));
             if (rowValues[nextLimit]) {
               $log.debug('counter', current, ': recurse with', self.rowValues.length);
-              setTimeout(() => {
+              self.pushMoreTimeout = setTimeout(() => {
                 if (self._pushMoreID === pushMoreID) {
                   _pushMoreRows(self, nextLimit, limit, pushMoreID);
                 } else {
@@ -783,7 +783,7 @@ export class RecordsetViewModel {
    * This will generate the request for getting the count.
    * Returns a promise. If it's resolved with `true` then it has been successful.
    */
-  _getMainRowsCount(current: number) : Q.Promise<boolean> {
+  _getMainRowsCount(current: number): Q.Promise<boolean> {
     $log.debug('counter', current, ': getRowsCount.');
     const defer = Q.defer();
     const promise = defer.promise as Q.Promise<boolean>;
@@ -1059,5 +1059,26 @@ export class RecordsetViewModel {
       return LogService.addExtraInfoToStack(stack, extraInfo);
     }
     return stack;
+  }
+
+  static checkReferenceURL(ref: any): boolean {
+    const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
+    if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
+
+      $log.warn('url length limit will be reached!');
+
+      // show the alert (the function will handle just showing one alert)
+      // AlertsService.addURLLimitAlert();
+
+      // scroll to top of the container so users can see the alert
+      // scrollToTop();
+
+      // signal the caller that we reached the URL limit.
+      return false;
+    }
+
+    // remove the alert if it's present since we don't need it anymore
+    // AlertsService.deleteURLLimitAlert();
+    return true;
   }
 }

@@ -36,7 +36,7 @@ class ChaiseError {
    * @type {string}
    * @desc   Error message status; acts as Title text for error dialog
    */
-  status: string = '';
+  status = '';
 
   /**
    * @type {string}

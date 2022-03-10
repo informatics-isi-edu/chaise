@@ -7,23 +7,43 @@
 
 class Logger {
   info(message?: any, ...optionalParams: any[]): void {
-    console.info(message, optionalParams);
+    if (optionalParams.length > 0) {
+      console.info(message, optionalParams);
+    } else {
+      console.info(message);
+    }
   }
 
   log(message?: any, ...optionalParams: any[]): void {
-    console.log(message, optionalParams);
+    if (optionalParams.length > 0) {
+      console.log(message, optionalParams);
+    } else {
+      console.log(message);
+    }
   }
 
   warn(message?: any, ...optionalParams: any[]): void {
-    console.warn(message, optionalParams);
+    if (optionalParams.length > 0) {
+      console.warn(message, optionalParams);
+    } else {
+      console.warn(message);
+    }
   }
 
   error(message?: any, ...optionalParams: any[]): void {
-    console.error(message, optionalParams);
+    if (optionalParams.length > 0) {
+      console.error(message, optionalParams);
+    } else {
+      console.error(message);
+    }
   }
 
   debug(message?: any, ...optionalParams: any[]): void {
-    console.debug(message, optionalParams);
+    if (optionalParams.length > 0) {
+      console.debug(message, optionalParams);
+    } else {
+      console.debug(message);
+    }
   }
 }
 

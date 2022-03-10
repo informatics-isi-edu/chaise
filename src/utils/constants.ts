@@ -88,8 +88,8 @@ export const errorMessages = {
   differentUserConflict2: '. However, you are currently logged in as ',
   anonUserConflict: 'Your session has expired. Continuing on this page requires that you be logged in as ',
   systemAdminMessage: 'An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.',
-  viewerOSDFailed: "Couldn't process the image. <br> If you continue to face this issue, please contact the system administrator.",
-  viewerScreenshotFailed: "Couldn't process the screenshot.",
+  viewerOSDFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
+  viewerScreenshotFailed: 'Couldn\'t process the screenshot.',
 };
 
 export const BODY_CLASS_NAMES = {
@@ -98,6 +98,12 @@ export const BODY_CLASS_NAMES = {
   firefox: 'chaise-firefox',
   iframe: 'chaise-iframe',
 };
+
+export const DEFAULT_DISPLAYNAME = {
+  null: '<i>No value </i>',
+  empty: '<i>Empty</i>',
+  notNull: '<i>All records with value </i>'
+}
 
 // NOTE: this global variable is defined in webpack,
 //       but we have to declare it here so typescript doesn't complain about it

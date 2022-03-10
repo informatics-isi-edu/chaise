@@ -1,18 +1,19 @@
 import { windowRef } from '@chaise/utils/window-ref';
 import $log from '@chaise/services/logger';
+import { ConfigService } from '@chaise/services/config';
 
 // TODO not used for now
 
-export class ErrorHandler {
+export class ErrorService {
   static mapErrorToStateObject = (
     error: Error,
-    isDismissible: boolean = false,
-    skipLogging: boolean = false,
+    isDismissible = false,
+    skipLogging = false,
     // TODO we cannot pass the callback to the state
     //      because we only want serializable stuff in the state
   ) => {
     // TODO should be updated when we properly handle chaiseConfig
-    const chaiseConfig = windowRef.chaiseConfig;
+    const chaiseConfig = ConfigService.chaiseConfig;
   };
 
   /**
@@ -21,19 +22,14 @@ export class ErrorHandler {
    * @param contextHeaderParams
    * @returns
    */
-  static logTerminalError = (error: Error, contextHeaderParams?: object) => {
+  static logTerminalError = (error: Error) => {
     if (!windowRef.ERMrest) return;
-    const ermrestUri = (typeof windowRef.chaiseConfig !== 'undefined' && windowRef.chaiseConfig.ermrestLocation ? windowRef.chaiseConfig.ermrestLocation : `${windowRef.location.origin}/ermrest`);
-
-    if (!contextHeaderParams || typeof contextHeaderParams !== 'object'
-      && typeof windowRef.dcctx === 'object' && typeof windowRef.dcctx.contextHeaderParams === 'object') {
-      contextHeaderParams = windowRef.dcctx.contextHeaderParams;
-    }
-
-    windowRef.ERMrest.logError(error, ermrestUri, contextHeaderParams).then(() => {
+    const ermrestUri = ConfigService.chaiseConfig.ermrestLocation;
+    windowRef.ERMrest.logError(error, ermrestUri, ConfigService.contextHeaderParams).then(() => {
       $log.log('logged the error');
-    }).catch((err: Error) => {
-      $log.log("couldn't log the error.");
+    }).catch((err: any) => {
+      $log.log('couldn\'t log the error.');
+      $log.info(err);
     });
   };
 }
