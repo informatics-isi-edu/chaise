@@ -1,12 +1,17 @@
+import '@chaise/assets/scss/_recordset.scss';
+
 import React, { useState } from 'react';
 import { RecordSetDisplayMode, RecordsetViewModel } from '@chaise/services/table';
 import $log from '@chaise/services/logger';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { MESSAGE_MAP } from '../utils/message-map';
-import SearchInput from './search-input';
-import { LogActions, LogReloadCauses } from '../models/log';
-import { LogService } from '../services/log';
-import Title from './title';
+import { MESSAGE_MAP } from '@chaise/utils/message-map';
+import SearchInput from '@chaise/components/search-input';
+import { LogActions, LogReloadCauses } from '@chaise/models/log';
+import { LogService } from '@chaise/services/log';
+import Title from '@chaise/components/title';
+import Export from '@chaise/components/export';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import FontAwesome from '../services/fontawesome';
 
 type RecordSetProps = {
   vm: RecordsetViewModel
@@ -15,6 +20,7 @@ type RecordSetProps = {
 const RecordSet = ({
   vm,
 }: RecordSetProps): JSX.Element => {
+  FontAwesome.addRecordSetFonts();
 
   /**
    * TODO
@@ -68,7 +74,7 @@ const RecordSet = ({
     }
     return (
       <button className="show-filter-panel-btn chaise-btn chaise-btn-tertiary" onClick={() => changeFacetPanelOpen()}>
-        <span className="chaise-icon-btn chaise-icon chaise-sidebar-open"></span>
+        <span className="chaise-btn-icon chaise-icon chaise-sidebar-open"></span>
         <span>Show filter panel</span>
       </button>
     )
@@ -100,22 +106,13 @@ const RecordSet = ({
             {vm.config.displayMode === RecordSetDisplayMode.FULLSCREEN &&
             <div className="recordset-title-container title-container">
               <div className="recordset-title-buttons title-buttons">
-                {/* <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export> */}
-                <OverlayTrigger placement='bottom' overlay={
-                  <Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>
-                }
-                >
-                  <a id="permalink" className="chaise-btn chaise-btn-primary">
-                    <span className="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
-                    <span>Export</span>
-                  </a>
-                </OverlayTrigger>
+                <Export reference={vm.reference} disabled={!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0} />
                 <OverlayTrigger placement='bottom' overlay={
                   <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
                 }
                 >
                   <a id="permalink" className="chaise-btn chaise-btn-primary">
-                    <span className="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
+                    <FontAwesomeIcon className="chaise-btn-icon" icon="bookmark" />
                     <span>Permalink</span>
                   </a>
                 </OverlayTrigger>

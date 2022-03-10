@@ -357,6 +357,17 @@ html {
         .title-buttons {
             float: right;
             text-align: right;
+
+            // make sure the buttons show in the same line
+            & > * {
+              display: inline-block;
+              margin-left: 10px;
+            }
+
+            // make sure the buttons that are link, are not showing any underline
+            & a.chaise-btn {
+              text-decoration: none;
+            }
         }
     }
 

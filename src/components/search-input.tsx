@@ -3,6 +3,7 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
 import FontAwesome from '../services/fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type SearchInputProps = {
   searchCallback: Function,
@@ -21,6 +22,8 @@ const SearchInput = ({
   focus,
   disabled
 }: SearchInputProps): JSX.Element => {
+
+  FontAwesome.addSearchInputFonts();
 
   const inputEl = useRef<HTMLInputElement>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
@@ -55,6 +58,8 @@ const SearchInput = ({
 
   const handleInputChange = (event: any) => {
     if (disabled) return;
+
+
 
     // Cancel previous promise for background search that was queued to be called
     if (inputChangedTimeout) {
@@ -106,7 +111,7 @@ const SearchInput = ({
           onKeyDown={handleEnterPress}
           autoFocus={focus === true}
         />
-        {searchTerm && renderPlaceHolder()}
+        {!inputEl?.current?.value && renderPlaceHolder()}
         {/* <chaise-clear-input btn-className="remove-search-btn" click-callback="::clearSearch()" show="searchTerm && !disabled"></chaise-clear-input> */}
       </div>
       <div className='chaise-input-group-append'>
@@ -125,7 +130,7 @@ const SearchInput = ({
             className='chaise-search-btn chaise-btn chaise-btn-primary'
             disabled={disabled} onClick={() => triggerSearch(true)} role='button'
           >
-            <span className='fa-solid fa-search'></span>
+            <FontAwesomeIcon className="chaise-btn-icon" icon="search" />
           </button>
         </OverlayTrigger>
       </div>
