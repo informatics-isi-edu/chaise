@@ -201,12 +201,23 @@
         };
 
         vm.noVisibleRelatedTables = function () {
+            var noneVisible = true;
             if ($rootScope.relatedTableModels) {
-                return !$rootScope.relatedTableModels.some(function (tm, index) {
+                // sets noneVisible to false if at least one related table can be shown
+                noneVisible = !$rootScope.relatedTableModels.some(function (tm, index) {
                     return vm.showRelatedTable(index);
                 });
             }
-            return true;
+
+            // only check the coumn models if one of them is an inline related table
+            // if noneVisible is already false, no need to iterate the columns too
+            if ($rootScope.hasInline && noneVisible) {
+                // sets noneVisible to false if at least one inline table can be shown
+                noneVisible = !$rootScope.columnModels.some(function (cm, index) {
+                    return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0))
+                });
+            }
+            return noneVisible;
         };
 
         vm.toggleDisplayMode = function(dataModel) {
