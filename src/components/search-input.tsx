@@ -2,8 +2,6 @@ import React, { useRef } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
-import FontAwesome from '../services/fontawesome';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type SearchInputProps = {
   searchCallback: Function,
@@ -23,7 +21,6 @@ const SearchInput = ({
   disabled
 }: SearchInputProps): JSX.Element => {
 
-  FontAwesome.addSearchInputFonts();
 
   const inputEl = useRef<HTMLInputElement>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
@@ -130,7 +127,7 @@ const SearchInput = ({
             className='chaise-search-btn chaise-btn chaise-btn-primary'
             disabled={disabled} onClick={() => triggerSearch(true)} role='button'
           >
-            <FontAwesomeIcon className="chaise-btn-icon" icon="search" />
+            <span className="chaise-btn-icon fa-solid fa-search" />
           </button>
         </OverlayTrigger>
       </div>

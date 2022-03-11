@@ -12,9 +12,6 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 
-import FontAwesome from '@chaise/services/fontawesome';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { ConfigService } from '@chaise/services/config';
 import { windowRef } from '@chaise/utils/window-ref';
 import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
@@ -34,8 +31,6 @@ const ChaiseNavbar = (): JSX.Element => {
   const catalogId = getCatalogId();
 
   const ERMrest = ConfigService.ERMrest;
-
-  FontAwesome.addNavbarFonts();
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -213,9 +208,9 @@ const ChaiseNavbar = (): JSX.Element => {
   };
 
   const renderRidSearchIcon = () => {
-    if (showRidSpinner) return (<FontAwesomeIcon className="chaise-btn-icon fa-spin" icon="sync-alt" />);
+    if (showRidSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
 
-    return (<FontAwesomeIcon className="chaise-btn-icon" icon="share" />);
+    return (<span className='chaise-btn-icon fa-solid fa-share' />);
   };
 
   const handleRidSearchEnter = (e: any) => {

@@ -1,4 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@chaise/assets/scss/app.scss';
 
 import React, { useEffect, useState } from 'react';

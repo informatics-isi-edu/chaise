@@ -1,10 +1,8 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
-import FontAwesome from '../services/fontawesome';
 
 type ExportProps = {
   reference: any,
@@ -16,7 +14,6 @@ const Export = ({
   reference,
   disabled
 }: ExportProps): JSX.Element => {
-  FontAwesome.addExportFonts();
 
   // TODO implement
 
@@ -25,9 +22,9 @@ const Export = ({
 
 
   const renderExportIcon = () => {
-    if (showSpinner) return (<FontAwesomeIcon className="chaise-btn-icon fa-spin" icon="sync-alt" />);
+    if (showSpinner) return (<span className="chaise-btn-icon fa-solid fa-rotate fa-spin" />);
 
-    return <FontAwesomeIcon className="chaise-btn-icon" icon="file-export" />;
+    return <span className="chaise-btn-icon fa-solid fa-file-export" />;
   }
 
   return (

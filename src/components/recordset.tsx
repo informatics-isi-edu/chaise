@@ -10,8 +10,6 @@ import { LogActions, LogReloadCauses } from '@chaise/models/log';
 import { LogService } from '@chaise/services/log';
 import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import FontAwesome from '../services/fontawesome';
 
 type RecordSetProps = {
   vm: RecordsetViewModel
@@ -20,7 +18,6 @@ type RecordSetProps = {
 const RecordSet = ({
   vm,
 }: RecordSetProps): JSX.Element => {
-  FontAwesome.addRecordSetFonts();
 
   /**
    * TODO
@@ -112,7 +109,7 @@ const RecordSet = ({
                 }
                 >
                   <a id="permalink" className="chaise-btn chaise-btn-primary">
-                    <FontAwesomeIcon className="chaise-btn-icon" icon="bookmark" />
+                    <span className="chaise-btn-icon fa-solid fa-bookmark" />
                     <span>Permalink</span>
                   </a>
                 </OverlayTrigger>
