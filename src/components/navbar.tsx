@@ -1,109 +1,115 @@
 import '@chaise/assets/scss/_navbar.scss';
 
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+// components
 import Container from 'react-bootstrap/Container';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
-import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
-import Button from 'react-bootstrap/Button';
+import ChaiseLogin from '@chaise/components/login';
+import ChaiseNavDropdown from '@chaise/components/nav-dropdown';
 
+// services
 import { ConfigService } from '@chaise/services/config';
 import { windowRef } from '@chaise/utils/window-ref';
-import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
 import { NoRecordError } from '@chaise/models/errors';
 
-import ChaiseLogin from '@chaise/components/login';
+// utilities
+import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
 import MenuUtils from '@chaise/utils/menu-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
-  const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
-  const [showRidSpinner, setShowRidSpinner] = useState(false);
-
+  const catalogId = getCatalogId();
   const cc = ConfigService.chaiseConfig;
+  const ERMrest = ConfigService.ERMrest;
   const settings = ConfigService.appSettings;
 
-  const root = cc.navbarMenu || {};
-  const catalogId = getCatalogId();
-
-  const ERMrest = ConfigService.ERMrest;
+  const [configInitialized, setConfigInitialized] = useState<boolean>(false);
+  const [formModel, setFormModel]                 = useState({ ridSearchTerm: '' });
+  const [menu, setMenu]                           = useState<any>(null); // TODO: type is null or an array of menuOptions
+  const [showRidSpinner, setShowRidSpinner]       = useState<boolean>(false);
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
   }
 
-  // if in iframe and we want to force links to open in new tab,
-  const forceNewTab = settings.openLinksInTab === true;
+  useEffect(() => {
+    if (configInitialized) return;
 
-  // Set default newTab property at root node
-  if (!root.hasOwnProperty('newTab') || forceNewTab) {
-    root.newTab = true;
-  }
+    const root = cc.navbarMenu || {};
+    
+    // if in iframe and we want to force links to open in new tab,
+    const forceNewTab = settings.openLinksInTab === true;
 
-  // Set default ACLs property at root node
-  if (!root.hasOwnProperty('acls')) {
-    root.acls = {
-      show: ['*'],
-      enable: ['*'],
-    };
-  }
+    // Set default newTab property at root node
+    if (!root.hasOwnProperty('newTab') || forceNewTab) {
+      root.newTab = true;
+    }
 
-  const q = [root];
-  while (q.length > 0) {
-    let obj = q.shift();
-    let parentNewTab = obj.newTab;
-    let parentAcls = obj.acls;
-    let parentNames = obj.names;
-    // template the url
-    if (obj.url && isValueDefined(catalogId)) {
-      obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, { id: catalogId });
+    // Set default ACLs property at root node
+    if (!root.hasOwnProperty('acls')) {
+      root.acls = {
+        show: ['*'],
+        enable: ['*'],
+      };
+    }
 
-      // only append pcid/ppid if link is to a chaise url
-      if (MenuUtils.isChaise(obj.url, ConfigService.chaiseConfig)) {
-        obj.url = MenuUtils.addLogParams(obj.url, ConfigService.contextHeaderParams);
+    const q = [root];
+    while (q.length > 0) {
+      let obj = q.shift();
+      let parentNewTab = obj.newTab;
+      let parentAcls = obj.acls;
+      let parentNames = obj.names;
+      // template the url
+      if (obj.url && isValueDefined(catalogId)) {
+        obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, { id: catalogId });
+
+        // only append pcid/ppid if link is to a chaise url
+        if (MenuUtils.isChaise(obj.url, ConfigService.chaiseConfig)) {
+          obj.url = MenuUtils.addLogParams(obj.url, ConfigService.contextHeaderParams);
+        }
+      }
+      // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
+      // used to set ACLs for each child as well
+      if (Array.isArray(obj.children)) {
+        obj.children.forEach((child: any) => {
+          // get newTab from the parent
+          if (child.newTab === undefined) child.newTab = parentNewTab;
+
+          // if we have to open in newtab
+          if (forceNewTab) child.newTab = true;
+
+          // get acls settings from the parent
+          if (child.acls === undefined) {
+            child.acls = parentAcls;
+          } else {
+            // acls could be defined with nothing in it, or with only show or only enable
+            if (child.acls.show === undefined) child.acls.show = parentAcls.show;
+            if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
+          }
+
+          // create the names array that will be used for logging
+          if (!Array.isArray(parentNames)) {
+            if (!obj.name) {
+              parentNames = [];
+            } else {
+              parentNames = obj.name;
+            }
+          }
+          child.names = parentNames.concat(child.name);
+
+          q.push(child);
+        });
       }
     }
-    // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
-    // used to set ACLs for each child as well
-    if (Array.isArray(obj.children)) {
-      obj.children.forEach((child: any) => {
-        // get newTab from the parent
-        if (child.newTab === undefined) child.newTab = parentNewTab;
 
-        // if we have to open in newtab
-        if (forceNewTab) child.newTab = true;
-
-        // get acls settings from the parent
-        if (child.acls === undefined) {
-          child.acls = parentAcls;
-        } else {
-          // acls could be defined with nothing in it, or with only show or only enable
-          if (child.acls.show === undefined) child.acls.show = parentAcls.show;
-          if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
-        }
-
-        // create the names array that will be used for logging
-        if (!Array.isArray(parentNames)) {
-          if (!obj.name) {
-            parentNames = [];
-          } else {
-            parentNames = obj.name;
-          }
-        }
-        child.names = parentNames.concat(child.name);
-
-        q.push(child);
-      });
-    }
-  }
-
-  // relies on navbarMenu processing to finish, setting this updates the DOM
-  const menu = cc.navbarMenu ? cc.navbarMenu.children : [];
-  console.log(menu);
+    // root is an object with acls, newTab, and children (optional) as key value pairs
+    setMenu(root.children || []);
+    setConfigInitialized(true);
+  });
 
   const isVersioned = () => (!!catalogId.split('@')[1]);
 
@@ -127,86 +133,43 @@ const ChaiseNavbar = (): JSX.Element => {
 
   const renderDropdownName = (item: any) => (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }} />);
 
-  const renderMenuChildren = (children: any) => children.map((child: any, index: number) => {
-    if (!MenuUtils.canShow(child)) return;
-
-    // create an unclickable header
-    if (child.header == true && !child.children && !child.url) {
-      return (<NavDropdown.Header key={index} className="chaise-dropdown-header">{child.name}</NavDropdown.Header>);
-    }
-
-    // TODO: onClick logging
-    if ((!child.children && child.url) || !MenuUtils.canEnable(child)) {
-      return (
-        <NavDropdown.Item
-          key={index}
-          href={child.url}
-          target={child.newTab ? '_blank' : '_self'}
-          className={MenuUtils.menuItemClasses(child, true)}
-          dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}
-        />
-      );
-    }
-
-    if (child.children && MenuUtils.canEnable(child)) {
-      return (
-        <Dropdown key={index} drop="end" className="dropdown-submenu">
-          <Dropdown.Toggle as="a" variant="dark" className={MenuUtils.menuItemClasses(child, true)} dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }} />
-          <Dropdown.Menu>
-            {renderMenuChildren(child.children)}
-          </Dropdown.Menu>
-        </Dropdown>
-      );
-      // TODO: navbar-header-container
-    }
-
-    return (<></>);
-  });
-
   // TODO: onClick logging
-  const renderMenuItem = (item: any, idx: number) => {
-    if (!item.children || !MenuUtils.canEnable(item)) {
-      return (
-        <Nav.Link
-          key={idx}
-          href={item.url}
-          target={item.newTab ? '_blank' : '_self'}
-          className={MenuUtils.menuItemClasses(item, false)}
-          dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
-        />
-      );
-    }
-
-    // NOTE: this conditional might be unnecessary
-    if (item.children) {
-      return (
-        <NavDropdown
-          key={idx}
-          title={renderDropdownName(item)}
-        >
-          {renderMenuChildren(item.children)}
-        </NavDropdown>
-      );
-    }
-
-    // NOTE: I don't it should reach this case
-    return (<></>);
-  };
-
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
 
     return menu.map((item: any, index: number) => {
       if (!MenuUtils.canShow(item)) return;
 
-      return (
-        <>
-          {renderMenuItem(item, index)}
-        </>
-      );
+      if (!item.children || !MenuUtils.canEnable(item)) {
+        return (
+          <Nav.Link
+            key={index}
+            href={item.url}
+            target={item.newTab ? '_blank' : '_self'}
+            className={MenuUtils.menuItemClasses(item, false)}
+            dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+          />
+        );
+      }
+
+      // NOTE: this conditional might be unnecessary
+      if (item.children) {
+        return (
+          <NavDropdown
+            key={index}
+            title={renderDropdownName(item)}
+          >
+            <ChaiseNavDropdown menu={item.children}></ChaiseNavDropdown>
+          </NavDropdown>
+        );
+      }
+
+      // NOTE: I don't it should reach this case
+      return (<></>);
     });
   };
 
+  // RID search
   const renderRidSearchIcon = () => {
     if (showRidSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
 
@@ -220,9 +183,9 @@ const ChaiseNavbar = (): JSX.Element => {
   const handleRidSearch = () => {
     const resolverId = cc.resolverImplicitCatalog;
     let splitId = {
-        catalog: '',
-        version: '',
-      },
+      catalog: '',
+      version: '',
+    },
       url = '/id/', catId;
 
     setShowRidSpinner(true);

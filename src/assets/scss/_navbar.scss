@@ -114,25 +114,19 @@ body > .container {
     flex-wrap: nowrap;
 }
 
-.navbar-nav {
-    flex-direction: row;
-
-    li>a {
-        padding-top: 10px;
-        padding-bottom: 10px;
-        line-height: 20px;
-    }
-}
-
-.nav>li {
+// div replaces li, a is the case with no dropdown
+.navbar-menu-options>div,
+.navbar-menu-options>a {
     position: relative;
     display: block;
+}
 
-    a {
-        position: relative;
-        display: block;
-        padding: 10px 15px;
-    }
+.navbar .nav-link {
+    position: relative;
+    display: block;
+    padding: 10px 15px !important; // so the property overrides a more specific rule from bootstrap
+    line-height: 20px;
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .chaise-navbar-banner-container {
@@ -176,6 +170,10 @@ nav.navbar {
         font-size: $font-size;
         color: $black-color;
         font-weight: 600;
+    }
+
+    .navbar-nav .chaise-dropdown-header {
+        color: $border-color;
     }
 
     .dropdown-submenu {
@@ -253,6 +251,10 @@ nav.navbar {
         text-decoration: none;
     }
 
+    // bootstrap adds css "borders" before element with .dropstart
+    .dropstart .dropdown-toggle::before {
+        content: none;
+    }
     // .dropdown .dropdown-toggle::after {
     //     border-top: 5px solid;
     //     border-right: 5px solid transparent;
