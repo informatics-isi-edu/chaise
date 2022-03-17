@@ -210,21 +210,21 @@ const ChaiseLogin = (): JSX.Element => {
       return (
         <>
           {showSignupLink()}
-          <Nav.Link id="login-link" className="navbar-nav" onClick={handleLoginClick}>Log In</Nav.Link>
+          <Nav.Link id='login-link' className='navbar-nav' onClick={handleLoginClick}>Log In</Nav.Link>
         </>
       );
     }
   
     if (replaceDropdown && oneOption) {
       switch (oneOption.type) {
-        case "header":
+        case 'header':
           return (
             <Nav.Item 
-              className="chaise-dropdown-header"
+              className='chaise-dropdown-header'
               dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
             />
           );
-        case "url":
+        case 'url':
           return (
             <Nav.Link 
               href={oneOption.url}
@@ -232,18 +232,18 @@ const ChaiseLogin = (): JSX.Element => {
               dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
             />
           );
-        case "my_profile":
+        case 'my_profile':
           return (
             <Nav.Link
-              id="profile-link"
+              id='profile-link'
               onClick={openProfile}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'My Profile' }}
             />
           )
-        case "logout":
+        case 'logout':
           return (
             <Nav.Link
-              id="logout-link"
+              id='logout-link'
               onClick={handeLogoutClick}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'Log Out' }}
             />
@@ -254,7 +254,7 @@ const ChaiseLogin = (): JSX.Element => {
     }
 
     return (
-      <NavDropdown title={displayName} className="navbar-nav username-display" style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
+      <NavDropdown title={displayName} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
         {renderMenuChildren()}
       </NavDropdown>
     );
@@ -263,7 +263,7 @@ const ChaiseLogin = (): JSX.Element => {
   // TODO: fix onClick={logDropdownOpen}
   // TODO: add logged in user tooltip
   return (
-    <Nav className="login-menu-options">
+    <Nav className='login-menu-options'>
       {renderLoginMenu()}
     </Nav>
   );

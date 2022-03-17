@@ -119,14 +119,14 @@ const ChaiseNavbar = (): JSX.Element => {
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
 
-    return (<img id="brand-image" alt="" src={cc.navbarBrandImage} />);
+    return (<img id='brand-image' alt='' src={cc.navbarBrandImage} />);
   };
 
   const renderBrandingHTML = () => {
     if (!cc.navbarBrandText) return;
 
     return (
-      <span id="brand-text">{cc.navbarBrandText}</span>
+      <span id='brand-text'>{cc.navbarBrandText}</span>
     );
   };
 
@@ -238,18 +238,18 @@ const ChaiseNavbar = (): JSX.Element => {
     if (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) return;
 
     return (
-      <span className="rid-search">
-        <div className="chaise-search-box chaise-input-group">
+      <span className='rid-search'>
+        <div className='chaise-search-box chaise-input-group'>
           <input
-            id="rid-search-input"
-            className="chaise-input-control chaise-input-control-sm has-feedback"
-            type="text"
-            placeholder="Go to RID"
+            id='rid-search-input'
+            className='chaise-input-control chaise-input-control-sm has-feedback'
+            type='text'
+            placeholder='Go to RID'
             onChange={handleRidSearchChange}
             onKeyDown={handleRidSearchEnter}
           />
-          <div className="chaise-input-group-append">
-            <button className="chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary" onClick={handleRidSearch} role="button">
+          <div className='chaise-input-group-append'>
+            <button className='chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary' onClick={handleRidSearch} role='button'>
               {renderRidSearchIcon()}
             </button>
           </div>
@@ -262,16 +262,16 @@ const ChaiseNavbar = (): JSX.Element => {
   // TODO: navbar toggle button when it shrinks
   // TODO: log branding
   return (
-    <Navbar variant="dark" bg="dark" expand="lg">
+    <Navbar variant='dark' bg='dark' expand='lg'>
       <Container fluid>
         <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')}>
           {renderBrandImage()}
           {' '}
           {renderBrandingHTML()}
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls="navbar-dark-example" />
-        <Navbar.Collapse id="navbar-dark-example">
-          <Nav className="navbar-menu-options">
+        <Navbar.Toggle aria-controls='navbar-dark-example' />
+        <Navbar.Collapse id='navbar-dark-example'>
+          <Nav className='navbar-menu-options'>
             {renderNavbarMenuDropdowns()}
           </Nav>
           {renderRidSearch()}

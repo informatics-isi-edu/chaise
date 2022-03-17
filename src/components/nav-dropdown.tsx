@@ -16,7 +16,7 @@ const ChaiseNavDropdown = ({
     return (
       <NavDropdown.Header 
         key={index} 
-        className="chaise-dropdown-header"
+        className='chaise-dropdown-header'
         dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}
       />
     );
@@ -38,10 +38,10 @@ const ChaiseNavDropdown = ({
   if (child.children && MenuUtils.canEnable(child)) {
     // TODO: calculate position and set drop="start" for 
     return (
-      <Dropdown key={index} drop="end" className="dropdown-submenu">
+      <Dropdown key={index} drop='end' className='dropdown-submenu'>
         <Dropdown.Toggle 
-          as="a" 
-          variant="dark" 
+          as='a'
+          variant='dark' 
           className={MenuUtils.menuItemClasses(child, true)} 
           dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }} 
         />
