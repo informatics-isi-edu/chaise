@@ -1,6 +1,6 @@
 import '@chaise/assets/scss/_recordset.scss';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RecordSetDisplayMode, RecordsetViewModel } from '@chaise/services/table';
 import $log from '@chaise/services/logger';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -10,14 +10,47 @@ import { LogActions, LogReloadCauses } from '@chaise/models/log';
 import { LogService } from '@chaise/services/log';
 import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
+import ChaiseSpinner from '@chaise/components/spinner';
+import RecordSetTable from './recordset-table';
 
-type RecordSetProps = {
-  vm: RecordsetViewModel
+export type RecordSetProps = {
+  reference: any,
+  config: any,
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  },
+  pageLimit?: number
 };
 
 const RecordSet = ({
-  vm,
+  reference, config, logInfo, pageLimit
 }: RecordSetProps): JSX.Element => {
+
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  $log.log('recordset comp');
+
+  let vm = new RecordsetViewModel(
+    reference,
+    pageLimit ? pageLimit : 25,
+    config,
+    logInfo,
+  );
+
+  useEffect(() => {
+    if (isInitialized) return;
+
+    // TODO validate facetFilters
+
+    // TODO save query stuff
+
+    // initialize the data
+    vm.initialize();
+    setIsInitialized(true);
+  }, [isInitialized]);
 
   /**
    * TODO
@@ -39,7 +72,7 @@ const RecordSet = ({
 
     const ref = vm.reference.search(term); // this will clear previous search first
     if (RecordsetViewModel.checkReferenceURL(ref)) {
-      vm.search = term;
+      vm.searchTerm = term;
       vm.reference = ref;
       vm.lastActiveFacet = -1;
       $log.debug('counter', vm.flowControlObject.counter, ': new search term=' + term);
@@ -79,7 +112,11 @@ const RecordSet = ({
 
   return (
     <div className="recordset-container app-content-container">
-      {/* <Spinner/> */}
+      {/* TODO what about $root.error and $root.showSpinner */}
+      {
+        (!vm.initialized || !vm.hasLoaded) &&
+        <ChaiseSpinner/>
+      }
       <div className='top-panel-container'>
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`}>
@@ -101,19 +138,19 @@ const RecordSet = ({
 
           <div className="top-right-panel">
             {vm.config.displayMode === RecordSetDisplayMode.FULLSCREEN &&
-            <div className="recordset-title-container title-container">
-              <div className="recordset-title-buttons title-buttons">
-                <Export reference={vm.reference} disabled={!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0} />
-                <OverlayTrigger placement='bottom' overlay={
-                  <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
-                }
-                >
-                  <a id="permalink" className="chaise-btn chaise-btn-primary">
-                    <span className="chaise-btn-icon fa-solid fa-bookmark" />
-                    <span>Permalink</span>
-                  </a>
-                </OverlayTrigger>
-                {/* <div ng-if="showSavedQueryUI && vm.savedQueryReference" className="chaise-btn-group" uib-dropdown>
+              <div className="recordset-title-container title-container">
+                <div className="recordset-title-buttons title-buttons">
+                  <Export reference={vm.reference} disabled={!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0} />
+                  <OverlayTrigger placement='bottom' overlay={
+                    <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
+                  }
+                  >
+                    <a id="permalink" className="chaise-btn chaise-btn-primary">
+                      <span className="chaise-btn-icon fa-solid fa-bookmark" />
+                      <span>Permalink</span>
+                    </a>
+                  </OverlayTrigger>
+                  {/* <div ng-if="showSavedQueryUI && vm.savedQueryReference" className="chaise-btn-group" uib-dropdown>
                             <div tooltip-placement="top-right" uib-tooltip="{{tooltip.saveQuery}}">
                                 <button id="save-query" className="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" ng-click="logSavedQueryDropdownOpened()" uib-dropdown-toggle ng-style="{'pointer-events': disableSavedQueryButton() ? 'none' : ''}">
                                     <span className="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
@@ -129,21 +166,21 @@ const RecordSet = ({
                             </ul>
                         </div> */}
 
+                </div>
+                <h1 id="page-title">
+                  <Title addLink={false} reference={vm.reference} />
+                  {/* TODO */}
+                  {/* <small ng-if="vm.reference && vm.reference.location.version" className="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small> */}
+                  {/* <span ng-if="vm.reference.commentDisplay == 'inline' && vm.reference.comment" className="inline-tooltip">{{vm.reference.comment}}</span> */}
+                </h1>
               </div>
-              <h1 id="page-title">
-                <Title addLink={false} reference={vm.reference}/>
-                {/* TODO */}
-                {/* <small ng-if="vm.reference && vm.reference.location.version" className="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small> */}
-                {/* <span ng-if="vm.reference.commentDisplay == 'inline' && vm.reference.comment" className="inline-tooltip">{{vm.reference.comment}}</span> */}
-              </h1>
-            </div>
             }
             <div className="recordset-controls-container">
               {selectedRows()}
               <div className="row">
                 <div className="recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6">
                   <SearchInput
-                    searchTerm={vm.search}
+                    searchTerm={vm.searchTerm}
                     searchCallback={search}
                     inputClass={'main-search-input'}
                     searchColumns={vm.reference.searchColumns}
@@ -161,7 +198,14 @@ const RecordSet = ({
         </div>
       </div>
       <div className='bottom-panel-container'>
-
+        <div className='side-panel-resizable'>
+          {/* TODO faceting */}
+        </div>
+        <div className='main-container dynamic-padding'>
+          <div className='main-body'>
+              <RecordSetTable vm={vm}></RecordSetTable>
+          </div>
+        </div>
       </div>
     </div>
   )

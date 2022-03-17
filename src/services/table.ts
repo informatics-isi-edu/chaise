@@ -143,7 +143,7 @@ export class RecordsetViewModel {
   sortOrder: any;
 
   // search term
-  search?: string;
+  searchTerm?: string;
 
   // the count that should be displayed
   totalRowsCnt: number | null = null;
@@ -193,7 +193,7 @@ export class RecordsetViewModel {
 
     this.columns = reference.columns;
 
-    this.search = reference.location.searchTerm;
+    this.searchTerm = reference.location.searchTerm;
 
     this.displayname = displayname || reference.displayname;
 

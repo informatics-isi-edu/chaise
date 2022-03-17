@@ -14,8 +14,8 @@ import { ConfigService } from '@chaise/services/config';
 
 import ChaiseNavbar from '@chaise/components/navbar';
 import ErrorModal from '@chaise/components/error-modal';
-import Spinner from '@chaise/components/spinner';
-import RecordSet from '@chaise/components/recordset';
+import ChaiseSpinner from '@chaise/components/spinner';
+import RecordSet, { RecordSetProps } from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
 import AuthnService from '@chaise/services/authn';
 import { loginUser } from '@chaise/store/slices/authn';
@@ -39,8 +39,7 @@ const RecordSetApp = (): JSX.Element => {
 
   const dispatch = useAppDispatch();
   const [configDone, setConfigDone] = useState(false);
-  const [recordsetViewModel, setRecordsetViewModel] = useState<RecordsetViewModel|undefined>(undefined);
-
+  const [recordSetProps, setRecordSetProps] = useState<RecordSetProps|null>(null);
 
   useEffect(() => {
     $log.log('recordset page effect');
@@ -63,16 +62,14 @@ const RecordSetApp = (): JSX.Element => {
      * - Setup the app (chaise-config, etc)
      * - setup ermrestjs
      */
-    const logObject : any = {};
+    let logObject: any = {};
     AuthnService.getSession('').then((response) => {
       if (response) {
         dispatch(loginUser(response));
       }
       return ConfigService.configure(recordsetSettings);
     }).then(() => {
-      console.dir(ConfigService.chaiseConfig);
 
-      // we should ge the reference
       const res = chaiseURItoErmrestURI(windowRef.location);
       if (res.pcid) logObject.pcid = res.pcid;
       if (res.ppid) logObject.ppid = res.ppid;
@@ -105,7 +102,6 @@ const RecordSetApp = (): JSX.Element => {
       // set the global log stack and log stack path
       LogService.config(logStack, logStackPath);
 
-      // TODO properly get t
       let pageLimit = 25;
       if (reference.location.queryParams.limit) {
         pageLimit = parseInt(reference.location.queryParams.limit, 10);
@@ -117,44 +113,46 @@ const RecordSetApp = (): JSX.Element => {
       const modifyEnabled = chaiseConfig.editRecord !== false;
       const deleteEnabled = chaiseConfig.deleteRecord === true;
       const showFaceting = chaiseConfig.showFaceting === true;
-      setRecordsetViewModel(
-        new RecordsetViewModel(
-          reference,
-          pageLimit,
-          {
-            viewable: true,
-            editable: modifyEnabled,
-            deletable: modifyEnabled && deleteEnabled,
-            selectMode: RecordsetSelectMode.NO_SELECT,
-            showFaceting,
-            facetPanelOpen: showFaceting,
-            displayMode: RecordSetDisplayMode.FULLSCREEN,
-            // TODO
-            // enableFavorites
-          },
-          {
-            logObject,
-            logStack: [
-              LogService.getStackNode(
-                LogStackTypes.SET,
-                reference.table,
-                reference.filterLogInfo,
-              ),
-            ],
-            logStackPath,
-          },
-        ),
-      );
+
+      const recordsetConfig = {
+        viewable: true,
+        editable: modifyEnabled,
+        deletable: modifyEnabled && deleteEnabled,
+        selectMode: RecordsetSelectMode.NO_SELECT,
+        showFaceting,
+        facetPanelOpen: showFaceting,
+        displayMode: RecordSetDisplayMode.FULLSCREEN,
+        // TODO
+        // enableFavorites
+      };
+
+      const logInfo = {
+        logObject,
+        logStack: [
+          LogService.getStackNode(
+            LogStackTypes.SET,
+            reference.table,
+            reference.filterLogInfo,
+          ),
+        ],
+        logStackPath,
+      };
 
       setConfigDone(true);
-    })
-      .catch((err) => {
-        if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
-          err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
-        }
-        dispatch(showError({ error: err, isGlobal: true }));
-      });
-  });
+
+      setRecordSetProps({
+        reference: reference,
+        pageLimit: pageLimit,
+        config: recordsetConfig,
+        logInfo: logInfo
+      })
+    }).catch((err) => {
+      if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+        err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
+      }
+      dispatch(showError({ error: err, isGlobal: true }));
+    });
+  }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {
     $log.log('error fallback of the main error boundary');
@@ -170,14 +168,19 @@ const RecordSetApp = (): JSX.Element => {
   $log.log('recordset page');
 
   const recordsetContent = () => {
-    if (!configDone || !recordsetViewModel) {
-      return <Spinner />;
+    if (!configDone || !recordSetProps) {
+      return <ChaiseSpinner />;
     }
 
     return (
       <div className="app-container">
         <ChaiseNavbar />
-        <RecordSet vm={recordsetViewModel} />
+        <RecordSet
+          reference={recordSetProps.reference}
+          config={recordSetProps.config}
+          logInfo={recordSetProps.logInfo}
+          pageLimit={recordSetProps.pageLimit}
+        />
       </div>
     );
   };
