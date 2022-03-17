@@ -707,13 +707,13 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 # rsync the build files to the location
 rsync-chaise:
 	$(info - deploying the package)
-	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -avz --exclude='src' --exclude='webpack' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
 	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # rsync the build and config files to the location
 rsync-chaise-w-config:
 	$(info - deploying the package with the existing default config files)
-	@rsync -avz --exclude='src' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+	@rsync -avz --exclude='src' --exclude='webpack' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 print-variables:
