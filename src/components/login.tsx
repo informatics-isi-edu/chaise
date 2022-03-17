@@ -28,12 +28,12 @@ const ChaiseLogin = (): JSX.Element => {
   const authnRes = useAppSelector((state: RootState) => state.authn);
 
   const [configInitialized, setConfigInitialized] = useState<boolean>(false);
-  const [displayName, setDisplayName] = useState<string>("");
+  const [displayName, setDisplayName] = useState<string>('');
   const [loggedInMenu, setLoggedInMenu] = useState(cc.loggedInMenu);
   const [oneOption, setOneOption] = useState<any>(null);
   const [replaceDropdown, setReplaceDropdown] = useState<boolean>(false);
   const [user, setUser] = useState<ClientState | null>(null);
-  const [userTooltip, setUserTooltip] = useState("");
+  const [userTooltip, setUserTooltip] = useState('');
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -47,11 +47,11 @@ const ChaiseLogin = (): JSX.Element => {
       setDisplayName(authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id);
 
       if (loggedInMenu) {
-        var menuConfig = loggedInMenu;
+        let menuConfig = loggedInMenu;
         if (menuConfig.displayNameMarkdownPattern) setDisplayName(ConfigService.ERMrest.renderHandlebarsTemplate(menuConfig.displayNameMarkdownPattern, null, { id: catalogId }));
 
         // if in iframe and we want to force links to open in new tab,
-        var forceNewTab = settings.openLinksInTab === true;
+        const forceNewTab = settings.openLinksInTab === true;
 
         // Set default newTab property at root node
         if (!menuConfig.hasOwnProperty('newTab') || forceNewTab) {
@@ -61,19 +61,19 @@ const ChaiseLogin = (): JSX.Element => {
         // Set default ACLs property at root node
         if (!menuConfig.hasOwnProperty('acls')) {
           menuConfig.acls = {
-            "show": ["*"],
-            "enable": ["*"]
+            'show': ['*'],
+            'enable': ['*']
           };
         }
 
         if (menuConfig.menuOptions && Array.isArray(menuConfig.menuOptions)) {
           // iterate over menuOptions and check to see if profile and logout need to be replaced
-          var q = [menuConfig];
+          let q = [menuConfig];
           while (q.length > 0) {
-            var option = q.shift();
+            let option = q.shift();
 
-            var parentNewTab = option.newTab;
-            var parentAcls = option.acls;
+            const parentNewTab = option.newTab;
+            const parentAcls = option.acls;
 
             // template the url
             // NOTE: Like in navbar.js, this is done here to prevent writing a recursive function (again) in `setConfigJSON()`
@@ -90,7 +90,7 @@ const ChaiseLogin = (): JSX.Element => {
             // used to set ACLs for each child as well
             // check for isArray still since this iterates over menuOptions too
             if (Array.isArray(option.menuOptions) || Array.isArray(option.children)) {
-              var arr = option.menuOptions || option.children;
+              let arr = option.menuOptions || option.children;
               arr.forEach(function (child: any) {
                 // get newTab from the parent
                 if (child.newTab === undefined) child.newTab = parentNewTab;
@@ -113,10 +113,10 @@ const ChaiseLogin = (): JSX.Element => {
           }
         } else if (menuConfig.menuOptions) {
           // menuOptions is defined but not an array
-          var option = menuConfig.menuOptions;
+          let option = menuConfig.menuOptions;
           // valid if the "option" is an object that represents type my_profile, logout, header, url
           // check for menu type or children being set, if so ignore the option
-          if (option.type === "menu" || option.children) {
+          if (option.type === 'menu' || option.children) {
             option.isValid = false;
           } else {
             // might be valid, set all default values on the option assuming it is then verify validity
@@ -159,9 +159,9 @@ const ChaiseLogin = (): JSX.Element => {
       //   having display_name included in tooltip can help differentiate which user is logged in at a glance
       // - display_name should always be defined
       if (user && user.full_name) {
-        setUserTooltip(user.full_name + "\n" + user.display_name);
+        setUserTooltip(user.full_name + '\n' + user.display_name);
         const showUserTooltip = function () {
-          var dropdownEl = document.querySelector("login .navbar-nav.navbar-right li.dropdown.open");
+          let dropdownEl = document.querySelector('login .navbar-nav.navbar-right li.dropdown.open');
           return !dropdownEl;
         }
       }
@@ -191,7 +191,7 @@ const ChaiseLogin = (): JSX.Element => {
   const showSignupLink = () => {
     if (!cc.signUpURL) return;
 
-    return (<Nav.Link id="signup-link" className="navbar-nav" href={cc.signUpUrl}>Sign Up</Nav.Link>);
+    return (<Nav.Link id='signup-link' className='navbar-nav' href={cc.signUpUrl}>Sign Up</Nav.Link>);
   };
 
   const renderMenuChildren = () => {
@@ -199,8 +199,8 @@ const ChaiseLogin = (): JSX.Element => {
 
     return (
       <>
-        <NavDropdown.Item id="profile-link" onClick={openProfile}>My Profile</NavDropdown.Item>
-        <NavDropdown.Item id="logout-link" onClick={handeLogoutClick}>Log Out</NavDropdown.Item>
+        <NavDropdown.Item id='profile-link' onClick={openProfile}>My Profile</NavDropdown.Item>
+        <NavDropdown.Item id='logout-link' onClick={handeLogoutClick}>Log Out</NavDropdown.Item>
       </>
     );
   }
