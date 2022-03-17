@@ -40,6 +40,8 @@ module.exports = {
     // ------------------ react ------------------
     'react/function-component-definition': 0,
     'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
+    'react/jsx-uses-react': 0,
+    'react/react-in-jsx-scope': 0,
 
     // ------------------ typescript ------------------
     '@typescript-eslint/ban-types': 'warn',
