@@ -26,7 +26,7 @@ import { updateHeadTitle } from '@chaise/utils/head-injector';
 import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
 import { LogService } from '@chaise/services/log';
 import { LogStackTypes } from '@chaise/models/log';
-import { RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/services/table';
+import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
@@ -42,7 +42,7 @@ const RecordSetApp = (): JSX.Element => {
   const [recordSetProps, setRecordSetProps] = useState<RecordSetProps|null>(null);
 
   useEffect(() => {
-    $log.log('recordset page effect');
+    $log.debug('recordset page: useEffect');
     if (configDone) return;
 
     /**
@@ -114,10 +114,11 @@ const RecordSetApp = (): JSX.Element => {
       const deleteEnabled = chaiseConfig.deleteRecord === true;
       const showFaceting = chaiseConfig.showFaceting === true;
 
-      const recordsetConfig = {
+      const recordsetConfig : RecordSetConfig = {
         viewable: true,
         editable: modifyEnabled,
         deletable: modifyEnabled && deleteEnabled,
+        sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting,
         facetPanelOpen: showFaceting,
@@ -165,7 +166,7 @@ const RecordSetApp = (): JSX.Element => {
     return null;
   };
 
-  $log.log('recordset page');
+  $log.debug('recordset page: render');
 
   const recordsetContent = () => {
     if (!configDone || !recordSetProps) {

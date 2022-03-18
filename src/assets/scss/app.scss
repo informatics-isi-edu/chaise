@@ -87,8 +87,9 @@ html {
         &::after {
             display: inline-block;
             font-size: .85rem;
-            font-family: 'Glyphicons Halflings';
-            content: "\e164"; // glyphicon-new-window
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            content: "\f35d"; // fa-solid fa-up-right-from-square
             padding-left: 2px;
         }
     }

@@ -102,7 +102,10 @@ export const DEFAULT_DISPLAYNAME = {
   null: '<i>No value </i>',
   empty: '<i>Empty</i>',
   notNull: '<i>All records with value </i>'
-}
+};
+
+const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
+export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
 // NOTE: this global variable is defined in webpack,
 //       but we have to declare it here so typescript doesn't complain about it

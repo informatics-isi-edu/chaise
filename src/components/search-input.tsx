@@ -1,19 +1,21 @@
-import React, { useRef, useState } from 'react';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { useRef, useState } from 'react';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
+import $log from '@chaise/services/logger';
 
 type SearchInputProps = {
   searchCallback: Function,
   searchColumns: any,
-  searchTerm: string,
+  initialSearchTerm: string,
   inputClass?: string,
   focus?: boolean,
   disabled?: boolean
 }
 
 const SearchInput = ({
-  searchTerm,
+  initialSearchTerm,
   searchCallback,
   inputClass,
   searchColumns,
@@ -22,9 +24,11 @@ const SearchInput = ({
 }: SearchInputProps): JSX.Element => {
 
   const inputEl = useRef<HTMLInputElement>(null);
-  const [showPlaceHolder, setShowPlaceHolder] = useState(inputEl?.current?.value ? true: false);
+  const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
+  const [inputChangedTimeout, setInputChangedTimeout] = useState<any>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
-  let inputChangedTimeout : any;
+
+  $log.debug('search-input: render');
 
   const changeFocus = () => {
     if (disabled) return;
@@ -37,10 +41,8 @@ const SearchInput = ({
     // cancel the timeout
     if (inputChangedTimeout) {
       clearTimeout(inputChangedTimeout);
+      setInputChangedTimeout(null);
     }
-
-    // remove it from scope
-    inputChangedTimeout = null;
 
     searchCallback(searchTerm, isButton ? LogActions.SEARCH_BOX_CLICK : LogActions.SEARCH_BOX_ENTER);
   }
@@ -57,22 +59,20 @@ const SearchInput = ({
     if (disabled) return;
 
     const value = event.target.value;
-    if (!value) {
-      setShowPlaceHolder(false);
-    }
+    setSearchTerm(value);
 
     // Cancel previous promise for background search that was queued to be called
     if (inputChangedTimeout) {
       clearTimeout(inputChangedTimeout);
     }
 
-    inputChangedTimeout = setTimeout(
+    setInputChangedTimeout(setTimeout(
       () => {
-        inputChangedTimeout = null;
+        setInputChangedTimeout(null);
         searchCallback(value, LogActions.SEARCH_BOX_AUTO);
       },
       AUTO_SEARCH_TIMEOUT
-    );
+    ));
   };
 
   const renderPlaceHolder = () => {
@@ -104,14 +104,14 @@ const SearchInput = ({
         <input
           type='text'
           ref={inputEl}
-          defaultValue={searchTerm}
+          value={searchTerm ? searchTerm : ''}
           className={inputClass}
           disabled={disabled}
           onChange={handleInputChange}
           onKeyDown={handleEnterPress}
           autoFocus={focus === true}
         />
-        {showPlaceHolder && renderPlaceHolder()}
+        {!searchTerm && renderPlaceHolder()}
         {/* <chaise-clear-input btn-className='remove-search-btn' click-callback='::clearSearch()' show='searchTerm && !disabled'></chaise-clear-input> */}
       </div>
       <div className='chaise-input-group-append'>

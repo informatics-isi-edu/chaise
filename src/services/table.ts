@@ -1,46 +1,19 @@
 /* eslint max-classes-per-file: 0 */
 
-import { Displayname } from '@chaise/models/displayname';
-import { LogActions, LogStackPaths, LogStackTypes } from '@chaise/models/log';
+import { LogActions, LogStackTypes } from '@chaise/models/log';
 import { LogService } from '@chaise/services/log';
 import MathUtils from '@chaise/utils/math-utils';
 import TypeUtils from '@chaise/utils/type-utils';
 import Q from 'q';
-import { getRowValuesFromPage } from '../utils/data-utils';
-import { MESSAGE_MAP } from '../utils/message-map';
-import { createRedirectLinkFromPath } from '../utils/uri-utils';
-import { ConfigService } from './config';
-import $log from './logger';
+import { RecordSetDisplayMode } from '@chaise/models/recordset';
+import { createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
+import { ConfigService } from '@chaise/services/config';
+import $log from '@chaise/services/logger';
+import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
 
-export enum RecordsetSelectMode {
-  NO_SELECT,
-  SINGLE_SELECT,
-  MULTI_SELECT
-}
 
-export enum RecordSetDisplayMode {
-  FULLSCREEN = 'fullscreen',
-  TABLE = 'table',
-  RELATED = 'related',
-  INLINE = 'related/inline',
-  POPUP = 'popup',
-  FK_POPUP = 'popup/foreignkey',
-  FK_POPUP_CREATE = 'popup/foreignkey/create',
-  FK_POPUP_EDIT = 'popup/foreignkey/edit',
-  PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
-  PURE_BINARY_POPUP_UNLINK = 'popup/facet',
-  SAVED_QUERY_POPUP = 'popup/savedquery'
-}
-
-const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
-const MAX_CONCURENT_REQUEST = 4;
-const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
-// const FACET_PAGE_SIZE = 10;
-// const AUTO_SEARCH_TIMEOUT = 2000;
-const CELL_LIMIT = 500;
-
-class FlowControlObject {
-  maxRequests = MAX_CONCURENT_REQUEST;
+class FlowControlDetails {
+  maxRequests = 4;
 
   occupiedSlots = 0;
 
@@ -59,7 +32,7 @@ export class RecordsetFlowControl {
   private _recountCauses: any;
   private _reloadStartTime: number;
   private _recountStartTime: number;
-  private _flowControlObject: FlowControlObject;
+  flowControlDetails: FlowControlDetails;
   private _internalID: string;
   dirtyCount = false;
   dirtyResult = false;
@@ -125,7 +98,7 @@ export class RecordsetFlowControl {
     // can be used to refer to this current instance of table
     this._internalID = MathUtils.uuid();
 
-    this._flowControlObject = new FlowControlObject();
+    this.flowControlDetails = new FlowControlDetails();
 
     this.logStack = logInfo.logStack;
     this.logStackPath = logInfo.logStackPath;
@@ -138,7 +111,7 @@ export class RecordsetFlowControl {
    * @return {boolean}
    */
   private _haveFreeSlot() {
-    const res = this._flowControlObject.occupiedSlots < this._flowControlObject.maxRequests;
+    const res = this.flowControlDetails.occupiedSlots < this.flowControlDetails.maxRequests;
     if (!res) {
       $log.debug('No free slot available.');
     }
@@ -161,7 +134,7 @@ export class RecordsetFlowControl {
     this.dirtyResult = true;
     this.dirtyCount = true;
 
-    this._flowControlObject.counter = 0;
+    this.flowControlDetails.counter = 0;
 
     this.update(false, false, false, false);
   }
@@ -217,10 +190,13 @@ export class RecordsetFlowControl {
     this.dirtyCount = updateCount || this.dirtyCount;
 
     if (!sameCounter) {
-      this._flowControlObject.counter++;
-      $log.debug(`adding one to counter, new: ${this._flowControlObject.counter}`);
+      this.flowControlDetails.counter++;
+      $log.debug(`adding one to counter, new: ${this.flowControlDetails.counter}`);
     }
-    RecordsetFlowControl._updatePage(this);
+    // setTimeout(() => {
+      RecordsetFlowControl._updatePage(this);
+    // }, 5000);
+
   }
 
   /**
@@ -234,7 +210,7 @@ export class RecordsetFlowControl {
       // TODO update the url
       // $rootScope.$emit('reference-modified');
     }
-    this._flowControlObject.occupiedSlots--;
+    this.flowControlDetails.occupiedSlots--;
     this.dirtyResult = !res;
     this.setIsLoading(false);
 
@@ -281,7 +257,7 @@ export class RecordsetFlowControl {
 
       const read = self.reference.read(self.pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS);
       read.then((page: any) => {
-        if (current !== self._flowControlObject.counter) {
+        if (current !== self.flowControlDetails.counter) {
           defer.resolve(false);
           return defer.promise;
         }
@@ -296,7 +272,7 @@ export class RecordsetFlowControl {
           return { page: result.page };
         }
       }).then((result: any) => {
-        if (current !== self._flowControlObject.counter) {
+        if (current !== self.flowControlDetails.counter) {
           defer.resolve(false);
           return defer.promise;
         }
@@ -351,7 +327,7 @@ export class RecordsetFlowControl {
 
         defer.resolve(true);
       }).catch((err: any) => {
-        if (current !== self._flowControlObject.counter) {
+        if (current !== self.flowControlDetails.counter) {
           return defer.resolve(false);
         }
 
@@ -382,11 +358,11 @@ export class RecordsetFlowControl {
    */
   public updateMainEntity(updatePageCB: Function, hideSpinner: boolean, notTerminal?: boolean, cb?: Function) {
     if (!this.dirtyResult || !this._haveFreeSlot()) {
-      $log.debug('counter', this._flowControlObject.counter, ': break out of update main');
+      $log.debug('counter', this.flowControlDetails.counter, ': break out of update main');
       return;
     }
 
-    this._flowControlObject.occupiedSlots++;
+    this.flowControlDetails.occupiedSlots++;
     this.dirtyResult = false;
 
     (function (self, currentCounter) {
@@ -424,7 +400,7 @@ export class RecordsetFlowControl {
         // throw err;
         // }
       });
-    }(this, this._flowControlObject.counter));
+    }(this, this.flowControlDetails.counter));
   }
 
   private static _updatePage(vm: RecordsetFlowControl) {
@@ -494,7 +470,7 @@ export class RecordsetFlowControl {
 
   private printDebugMessage(message: string) {
     $log.debug(
-      `counter ${this._flowControlObject.counter}: ` +
+      `counter ${this.flowControlDetails.counter}: ` +
       message
     );
   }
