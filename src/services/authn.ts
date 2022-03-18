@@ -1,12 +1,19 @@
 import axios from 'axios';
 
 import StorageService from '@chaise/utils/storage';
+import { ConfigService } from '@chaise/services/config';
+import { LogActions, LogReloadCauses } from '@chaise/models/log';
+import { LogService } from '@chaise/services/log';
+
+import { MESSAGE_MAP } from '@chaise/utils/message-map';
+import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
 import { fixedEncodeURIComponent, queryStringToJSON } from '@chaise/utils/uri-utils';
+import { windowRef } from '@chaise/utils/window-ref';
 import { BUILD_VARIABLES } from '@chaise/utils/constants';
 
 export default class AuthnService {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location
-  static serviceURL: string = window.location.origin;
+  static serviceURL: string = windowRef.location.origin;
 
   static LOCAL_STORAGE_KEY: string = 'session'; // name of object session information is stored under
 
@@ -107,15 +114,15 @@ export default class AuthnService {
   static popupLogin = function (logAction: string | null, postLoginCB: Function | null) {
     if (!postLoginCB) {
       postLoginCB = function () {
-        // if (!AuthnService.shouldReloadPageAfterLogin()) {
-        // fetches the session of the user that just logged in
-        AuthnService.getSession('').then((response) => {
-          // if (modalInstance) modalInstance.close();
-          alert(`${response.client.full_name} logged in`);
-        });
-        // } else {
-        //   // window.location.reload();
-        // }
+        if (!AuthnService.shouldReloadPageAfterLogin()) {
+          // fetches the session of the user that just logged in
+          AuthnService.getSession('').then((response) => {
+            // if (modalInstance) modalInstance.close();
+            alert(`${response.client.full_name} logged in`);
+          });
+        } else {
+          windowRef.location.reload();
+        }
       };
     }
 
@@ -130,13 +137,11 @@ export default class AuthnService {
   static logInHelper = function (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) {
     const referrerId = (new Date().getTime());
 
-    // var chaiseConfig = ConfigUtils.getConfigJSON();
-    const loginApp = 'login';
-    // TODO: ConfigUtils
-    // var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
+    const cc = ConfigService.chaiseConfig;
+    const loginApp = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig) ? 'login2' : 'login';
 
     const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(`${window.location.origin}/${BUILD_VARIABLES.CHAISE_BASE_PATH}/${loginApp}/?referrerid=${referrerId}`)}`;
-    const config = {
+    const config: any = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
         Accept: 'application/json',
@@ -148,14 +153,12 @@ export default class AuthnService {
     // but we're still sending the request. Since we need to change this anyways,
     // I decided to not add any log action in that case and instead we should just
     // fix that function.
-    // TODO: fix this
-    // if (logAction) {
-    //   config.headers[ERMrest.contextHeaderName] = {
-    //     action: logService.getActionString(logAction, "", "")
-    //   }
-    // }
-    axios.get(url, config).then((response) => {
-    // ConfigUtils.getHTTPService().get(url, config).then(function (response) {
+    if (logAction) {
+      config.headers[ConfigService.ERMrest.contextHeaderName] = {
+        action: LogService.getActionString(logAction, '', '')
+      }
+    }
+    ConfigService.http.get(url, config).then((response: any) => {
       const data = response.data;
 
       let login_url = '';
@@ -192,21 +195,19 @@ export default class AuthnService {
         win.location = params.login_url;
       }
       logInTypeCb(params, referrerId, cb, type, rejectCb);
-    }, (error) => {
-      // throw ERMrest.responseToError(error);
+    }, (error: any) => {
+      throw ConfigService.ERMrest.responseToError(error);
     });
   };
 
   // post login callback function
   static loginWindowCb = function (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) {
     if (type.indexOf('modal') !== -1) {
-      // TODO: messageMap
-      // if (AuthnService._session) {
-      //   params.title = messageMap.sessionExpired.title;
-      // } else {
-      //   params.title = messageMap.noSession.title;
-      // }
-      params.title = 'temporary title';
+      if (AuthnService._session) {
+        params.title = MESSAGE_MAP.sessionExpired.title;
+      } else {
+        params.title = MESSAGE_MAP.noSession.title;
+      }
       let closed = false;
 
       // var cleanupModal = function (message) {
@@ -251,7 +252,7 @@ export default class AuthnService {
      * variable
      */
     if (false) {
-    // if (UriUtils.isBrowserIE()) {
+      // if (UriUtils.isBrowserIE()) {
       // $cookies.put("chaise-" + referrerId, true, { path: "/" });
       // var intervalId;
       // var watchChangeInReferrerId = function () {
@@ -358,6 +359,31 @@ export default class AuthnService {
       return AuthnService._session;
     });
   };
+
+  static logout = (action: string) => {
+    const cc = ConfigService.chaiseConfig;
+    const logoutURL = cc['logoutURL'] ? cc['logoutURL'] : '/';
+
+    let url = AuthnService.serviceURL + '/authn/session';
+    url += '?logout_url=' + fixedEncodeURIComponent(logoutURL);
+
+    let config: any = {
+      skipHTTP401Handling: true,
+      headers: {}
+    };
+
+    config.headers[ConfigService.ERMrest.contextHeaderName] = {
+      action: LogService.getActionString(action, '', '')
+    }
+
+    ConfigService.http.delete(url, config).then(function (response: any) {
+      StorageService.deleteStorageNamespace(AuthnService.LOCAL_STORAGE_KEY);
+      windowRef.location = response.data.logout_url;
+    }, function (error: any) {
+      // if the logout fails for some reason, send the user to the logout url as defined above
+      windowRef.location = logoutURL;
+    });
+  }
 
   //   // groupArray should be the array of globus group
   static isGroupIncluded = (groupArray: string[]) => {
@@ -522,29 +548,6 @@ export default class AuthnService {
 //    */
 //   loginInAModal: function (notifyErmrestCB, notifyErmrestRejectCB, logAction) {
 //     logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
-//   },
-
-//   logout: function (action) {
-//     var chaiseConfig = ConfigUtils.getConfigJSON();
-//     var logoutURL = chaiseConfig['logoutURL'] ? chaiseConfig['logoutURL'] : '/';
-//     var url = serviceURL + "/authn/session";
-
-//     url += '?logout_url=' + UriUtils.fixedEncodeURIComponent(logoutURL);
-
-//     var config = {
-//       skipHTTP401Handling: true,
-//       headers: {}
-//     };
-//     config.headers[ERMrest.contextHeaderName] = {
-//       action: logService.getActionString(action, "", "")
-//     }
-//     ConfigUtils.getHTTPService().delete(url, config).then(function (response) {
-//       StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
-//       $window.location = response.data.logout_url;
-//     }, function (error) {
-//       // if the logout fails for some reason, send the user to the logout url as defined above
-//       $window.location = logoutURL;
-//     });
 //   },
 
 //   logoutWithoutRedirect: function (action) {

@@ -26,7 +26,7 @@ export class LogService {
    * @params {Object} logObj - object of key/value pairs that are specific to this action
    * @params {Object} commonLogInfo - object of key/value pairs that are common to all action requests
    */
-  static logClientAction(logObj : any, commonLogInfo : any) {
+  static logClientAction(logObj : any, commonLogInfo? : any) {
     const cc = ConfigService.chaiseConfig;
     const contextHeaderParams = ConfigService.contextHeaderParams;
 

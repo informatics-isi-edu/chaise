@@ -1,6 +1,11 @@
+// constants
 import { BUILD_VARIABLES } from '@chaise/utils/constants';
-import AuthnService from '../services/authn';
-import { ConfigService } from '../services/config';
+import { LogActions } from '@chaise/models/log';
+
+// services
+import AuthnService from '@chaise/services/authn';
+import { ConfigService } from '@chaise/services/config';
+import { LogService } from '@chaise/services/log';
 
 export default class MenuUtils {
   //   /* ===== Private Functions and variables ===== */
@@ -309,9 +314,12 @@ export default class MenuUtils {
   // TODO: implement modal popup for profile view
   static openProfileModal = () => {
     console.log('open profile modal');
-    // logService.logClientAction({
-    //   action: logService.logActions.NAVBAR_PROFILE_OPEN
-    // });
+    LogService.logClientAction({
+      action: LogActions.NAVBAR_PROFILE_OPEN
+    });
+
+    // TODO: attach modal somewhere (or show it?)
+
 
     // modalUtils.showModal({
     //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
@@ -323,8 +331,6 @@ export default class MenuUtils {
 
   // NOTE: hard coded action
   static logout = () => {
-    console.log('logout');
-    // AuthnService.logout(logService.logActions.LOGOUT_NAVBAR);
-    // AuthnService.logout("");
+    AuthnService.logout(LogActions.LOGOUT_NAVBAR);
   };
 }
