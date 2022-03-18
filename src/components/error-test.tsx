@@ -1,4 +1,3 @@
-import React from 'react';
 import { useState } from 'react';
 import { Alert, Button, ButtonGroup } from 'react-bootstrap';
 import { ErrorBoundary, FallbackProps, useErrorHandler } from 'react-error-boundary';
@@ -57,7 +56,7 @@ const ErrorComponentWithBoundary = () : JSX.Element => {
   return (
     <ErrorBoundary
       FallbackComponent={({ error }) => (
-        <Alert variant="danger">
+        <Alert variant='danger'>
           inner:
           {error.message}
         </Alert>
@@ -122,7 +121,7 @@ const ErrorTest = () : JSX.Element => {
         <p>Local error boundary:</p>
         <ErrorBoundary
           FallbackComponent={({ error }) => (
-            <Alert variant="danger">
+            <Alert variant='danger'>
               outer:
               {error.message}
             </Alert>

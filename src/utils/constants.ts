@@ -1,20 +1,19 @@
 import { windowRef } from '@chaise/utils/window-ref';
 
 export const APP_TAG_MAPPING = {
-  'tag:isrd.isi.edu,2016:chaise:record': '/record',
-  'tag:isrd.isi.edu,2016:chaise:detailed': '/detailed',
-  'tag:isrd.isi.edu,2016:chaise:viewer': '/viewer',
-  'tag:isrd.isi.edu,2016:chaise:search': '/search',
-  'tag:isrd.isi.edu,2016:chaise:recordset': '/recordset',
-  'tag:isrd.isi.edu,2016:chaise:recordedit': '/recordedit',
+  'tag:isrd.isi.edu,2016:chaise:record': 'record',
+  'tag:isrd.isi.edu,2016:chaise:detailed': 'detailed',
+  'tag:isrd.isi.edu,2016:chaise:viewer': 'viewer',
+  'tag:isrd.isi.edu,2016:chaise:recordset': 'recordset',
+  'tag:isrd.isi.edu,2016:chaise:recordedit': 'recordedit',
 };
 
 export const APP_CONTEXT_MAPPING = {
-  detailed: '/record',
-  compact: '/recordset',
-  edit: '/recordedit',
-  entry: '/recordedit',
-  '*': '/record',
+  detailed: 'record',
+  compact: 'recordset',
+  edit: 'recordedit',
+  entry: 'recordedit',
+  '*': 'record',
 };
 
 export const CHAISE_CONFIG_PROPERTY_NAMES = [

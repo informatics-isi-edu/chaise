@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
@@ -6,7 +6,7 @@ import DisplayValue from '@chaise/components/display-value';
 type SearchInputProps = {
   searchCallback: Function,
   searchColumns: any,
-  searchTerm?: string,
+  searchTerm: string,
   inputClass?: string,
   focus?: boolean,
   disabled?: boolean
@@ -21,8 +21,8 @@ const SearchInput = ({
   disabled
 }: SearchInputProps): JSX.Element => {
 
-
   const inputEl = useRef<HTMLInputElement>(null);
+  const [showPlaceHolder, setShowPlaceHolder] = useState(inputEl?.current?.value ? true: false);
   const AUTO_SEARCH_TIMEOUT = 2000;
   let inputChangedTimeout : any;
 
@@ -56,7 +56,10 @@ const SearchInput = ({
   const handleInputChange = (event: any) => {
     if (disabled) return;
 
-
+    const value = event.target.value;
+    if (!value) {
+      setShowPlaceHolder(false);
+    }
 
     // Cancel previous promise for background search that was queued to be called
     if (inputChangedTimeout) {
@@ -66,7 +69,7 @@ const SearchInput = ({
     inputChangedTimeout = setTimeout(
       () => {
         inputChangedTimeout = null;
-        searchCallback(event.target.value, LogActions.SEARCH_BOX_AUTO);
+        searchCallback(value, LogActions.SEARCH_BOX_AUTO);
       },
       AUTO_SEARCH_TIMEOUT
     );
@@ -87,7 +90,7 @@ const SearchInput = ({
 
     return (
       <span
-        className="chaise-input-placeholder"
+        className='chaise-input-placeholder'
         onClick={() => changeFocus()}
       >
         {inner}
@@ -108,8 +111,8 @@ const SearchInput = ({
           onKeyDown={handleEnterPress}
           autoFocus={focus === true}
         />
-        {!inputEl?.current?.value && renderPlaceHolder()}
-        {/* <chaise-clear-input btn-className="remove-search-btn" click-callback="::clearSearch()" show="searchTerm && !disabled"></chaise-clear-input> */}
+        {showPlaceHolder && renderPlaceHolder()}
+        {/* <chaise-clear-input btn-className='remove-search-btn' click-callback='::clearSearch()' show='searchTerm && !disabled'></chaise-clear-input> */}
       </div>
       <div className='chaise-input-group-append'>
         <OverlayTrigger
@@ -127,7 +130,7 @@ const SearchInput = ({
             className='chaise-search-btn chaise-btn chaise-btn-primary'
             disabled={disabled} onClick={() => triggerSearch(true)} role='button'
           >
-            <span className="chaise-btn-icon fa-solid fa-search" />
+            <span className='chaise-btn-icon fa-solid fa-search' />
           </button>
         </OverlayTrigger>
       </div>

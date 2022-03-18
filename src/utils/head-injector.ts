@@ -53,7 +53,7 @@ async function addCustomCSS() {
   const chaiseConfig = ConfigService.chaiseConfig;
   if (chaiseConfig.customCSS !== undefined) {
     // if the file is already injected
-    if (document.querySelector(`link[href^="${chaiseConfig.customCSS}"]`)) {
+    if (document.querySelector(`link[href^='${chaiseConfig.customCSS}']`)) {
       return defer.resolve(), defer.promise;
     }
 
@@ -138,7 +138,7 @@ function clickHref(href: string) {
 
 // TODO requires proper error handler and modal
 // function overrideDownloadClickBehavior() {
-//   addClickListener("a.asset-permission", function (e, element) {
+//   addClickListener('a.asset-permission', function (e, element) {
 
 //     function hideSpinner() {
 //       element.innerHTML = element.innerHTML.slice(0, element.innerHTML.indexOf(spinnerHTML));
@@ -146,7 +146,7 @@ function clickHref(href: string) {
 
 //     e.preventDefault();
 
-//     var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
+//     var spinnerHTML = ' <span class='glyphicon glyphicon-refresh glyphicon-refresh-animate'></span>';
 //     //show spinner
 //     element.innerHTML += spinnerHTML;
 
@@ -185,14 +185,14 @@ function clickHref(href: string) {
 //     // asset-permission will be appended via display annotation or by heuristic if no annotation
 //     // this else case should only occur if display annotation contains asset-permission and asset is not the same host
 //     var modalProperties = {
-//       windowClass: "modal-redirect",
-//       templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/externalLink.modal.html",
+//       windowClass: 'modal-redirect',
+//       templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/externalLink.modal.html',
 //       controller: 'RedirectController',
 //       controllerAs: 'ctrl',
 //       animation: false,
-//       size: "sm",
+//       size: 'sm',
 //     }
-//     // show modal dialog with countdown before redirecting to "asset"
+//     // show modal dialog with countdown before redirecting to 'asset'
 //     modalUtils.showModal(modalProperties, function () {
 //       clickHref(element.href);
 //     }, false);
@@ -204,7 +204,7 @@ function clickHref(href: string) {
 // */
 // function openLinksInTab() {
 //   addClickListener('a[href]', function (e : Event, element) {
-//     element.target = "_blank";
+//     element.target = '_blank';
 //   });
 // }
 
@@ -221,7 +221,7 @@ function clickHref(href: string) {
 // * the image as the value of e.target and not the link
 // */
 // function addClickListener(selector: string, handler: Function) {
-//   document.querySelector("body")!.addEventListener("click", function (e) {
+//   document.querySelector('body')!.addEventListener('click', function (e) {
 //     const target = e.target as HTMLElement;
 //     if (target.closest(selector)) {
 //       handler(e, target.closest(selector));

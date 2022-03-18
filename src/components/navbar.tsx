@@ -39,7 +39,7 @@ const ChaiseNavbar = (): JSX.Element => {
     if (configInitialized) return;
 
     const root = cc.navbarMenu || {};
-    
+
     // if in iframe and we want to force links to open in new tab,
     const forceNewTab = settings.openLinksInTab === true;
 
@@ -262,7 +262,7 @@ const ChaiseNavbar = (): JSX.Element => {
   // TODO: navbar toggle button when it shrinks
   // TODO: log branding
   return (
-    <Navbar variant='dark' bg='dark' expand='lg'>
+    <Navbar id='navheader' variant='dark' bg='dark' expand='lg'>
       <Container fluid>
         <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')}>
           {renderBrandImage()}

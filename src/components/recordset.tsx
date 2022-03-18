@@ -1,198 +1,272 @@
 import '@chaise/assets/scss/_recordset.scss';
 
 import React, { useEffect, useState } from 'react';
-import { RecordSetDisplayMode, RecordsetViewModel } from '@chaise/services/table';
+import { RecordSetDisplayMode, RecordsetFlowControl, RecordsetSelectMode } from '@chaise/services/table';
 import $log from '@chaise/services/logger';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
 import SearchInput from '@chaise/components/search-input';
 import { LogActions, LogReloadCauses } from '@chaise/models/log';
-import { LogService } from '@chaise/services/log';
 import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
 import ChaiseSpinner from '@chaise/components/spinner';
-import RecordSetTable from './recordset-table';
+import RecordSetTable from '@chaise/components/recordset-table';
+import { attachContainerHeightSensors } from '@chaise/utils/ui-utils';
 
 export type RecordSetProps = {
-  reference: any,
-  config: any,
+  initialReference: any,
+  config: {
+    viewable: boolean,
+    editable: boolean,
+    deletable: boolean,
+    selectMode: RecordsetSelectMode,
+    showFaceting: boolean,
+    facetPanelOpen: boolean,
+    displayMode: RecordSetDisplayMode,
+    // TODO
+    // enableFavorites
+  },
   logInfo: {
     logObject?: any,
     logStack: any,
     logStackPath: string,
     logAppMode?: string
   },
-  pageLimit?: number
+  initialPageLimit?: number
 };
 
 const RecordSet = ({
-  reference, config, logInfo, pageLimit
+  initialReference, config, logInfo, initialPageLimit
 }: RecordSetProps): JSX.Element => {
-
-  const [isInitialized, setIsInitialized] = useState(false);
-
   $log.log('recordset comp');
 
-  let vm = new RecordsetViewModel(
-    reference,
-    pageLimit ? pageLimit : 25,
-    config,
-    logInfo,
+  // TODO this doesn't work at it will be undefined after the first render
+  let flowControlObject : RecordsetFlowControl;
+
+  const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : 25);
+
+  /**
+   * The reference that might be updated
+   */
+  const [reference, setStateReference] = useState(initialReference);
+  const setReference = (ref: any) => {
+    flowControlObject.setReference(ref);
+    setStateReference(ref);
+  };
+
+  /**
+   * the columns used for search,
+   * this list stays the same even when filter, etc changes
+   */
+  const searchColumns = initialReference.searchColumns;
+
+  /**
+   * The displayed search term
+   */
+  const [searchTerm, setSearchTerm] = useState<string>(initialReference.location.searchTerm);
+
+  /**
+   * The columns that should be displayed in the result table
+   */
+  const [columnModels, setColumnModels] = useState(
+    initialReference.columns.map((col: any) => {
+      return {
+        column: col,
+        isLoading: col.hasWaitFor === true || col.isUnique === false,
+        hasError: false
+      };
+    })
   );
+
+  /**
+   * whether the component has initialized or not
+   */
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  /**
+   * whether the data has been loaded or not
+   */
+  const [isLoading, setIsLoading] = useState(true);
+
+  /**
+   * the page of data that should be displayed
+   */
+  const [page, setPage] = useState(null);
+
+  /**
+   * whether the facet panel should be open or closed
+   */
+  const [facetPanelOpen, setFacetPanelOpen] = useState(config.facetPanelOpen);
 
   useEffect(() => {
     if (isInitialized) return;
+
+    // TODO pass the proper values
+    attachContainerHeightSensors();
+
+    flowControlObject = new RecordsetFlowControl(
+      reference,
+      pageLimit,
+      setIsLoading,
+      page,
+      setPage,
+      setIsInitialized,
+      logInfo,
+      config.displayMode
+    );
 
     // TODO validate facetFilters
 
     // TODO save query stuff
 
     // initialize the data
-    vm.initialize();
-    setIsInitialized(true);
+    flowControlObject.initialize();
   }, [isInitialized]);
 
+
   /**
-   * TODO
-   * we cannot just change the vm and expect a change...
-   * if something is bound to change, it should be either properly
-   * spelled out (passed into this separately) or add a state variable based on it
-   *
+   * change the state of facet panel
+   * @param value if given, it will force the state
    */
-  const [facetPanelOpen, setFacetPanelOpen] = useState(vm.config.facetPanelOpen);
   const changeFacetPanelOpen = (value?: boolean) => {
-    const val = typeof value === 'boolean' ? value : !vm.config.facetPanelOpen;
-    vm.config.facetPanelOpen = val;
+    const val = typeof value === 'boolean' ? value : !facetPanelOpen;
     setFacetPanelOpen(val);
   };
 
-
-  const search = (term: string | undefined, action: LogActions) => {
+  /**
+   * Change the search term and trigger search
+   * @param term string the search term
+   * @param action string the log action
+   */
+  const search = (term: string | null, action: LogActions) => {
     if (term) term = term.trim();
 
-    const ref = vm.reference.search(term); // this will clear previous search first
-    if (RecordsetViewModel.checkReferenceURL(ref)) {
-      vm.searchTerm = term;
-      vm.reference = ref;
-      vm.lastActiveFacet = -1;
-      $log.debug('counter', vm.flowControlObject.counter, ': new search term=' + term);
+    $log.log('doing search');
+
+    const ref = reference.search(term); // this will clear previous search first
+    if (RecordsetFlowControl.checkReferenceURL(ref)) {
+      setSearchTerm(term ? term : '');
+      setReference(ref);
+      // vm.lastActiveFacet = -1;
+      // $log.debug('counter', vm.flowControlObject.counter, ': new search term=' + term);
 
       // log the client action
       const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
-      LogService.logClientAction({
-        action: vm.getTableLogAction(action),
-        stack: vm.getTableLogStack(null, extraInfo)
-      }, vm.reference.defaultLogInfo);
 
-      vm.update(true, true, true, false, LogReloadCauses.SEARCH_BOX);
+      // LogService.logClientAction({
+      //   action: vm.getTableLogAction(action),
+      //   stack: vm.getTableLogStack(null, extraInfo)
+      // }, ref.defaultLogInfo);
+
+      flowControlObject.update(true, true, true, false, LogReloadCauses.SEARCH_BOX);
     }
   }
 
-  const panelClassName = vm.config.facetPanelOpen ? 'open-panel' : 'close-panel';
+  const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
-  const selectedRows = () => {
+  const renderSelectedRows = () => {
     return <></>
   };
 
-  const selectedFacetFilters = () => {
+  const renderSelectedFacetFilters = () => {
     return <></>
   }
 
-  const showFilterPanelBtn = () => {
+  const renderShowFilterPanelBtn = () => {
     if (facetPanelOpen) {
       return;
     }
     return (
-      <button className="show-filter-panel-btn chaise-btn chaise-btn-tertiary" onClick={() => changeFacetPanelOpen()}>
-        <span className="chaise-btn-icon chaise-icon chaise-sidebar-open"></span>
+      <button className='show-filter-panel-btn chaise-btn chaise-btn-tertiary' onClick={() => changeFacetPanelOpen()}>
+        <span className='chaise-btn-icon chaise-icon chaise-sidebar-open'></span>
         <span>Show filter panel</span>
       </button>
     )
   }
 
   return (
-    <div className="recordset-container app-content-container">
+    <div className='recordset-container app-content-container'>
       {/* TODO what about $root.error and $root.showSpinner */}
       {
-        (!vm.initialized || !vm.hasLoaded) &&
-        <ChaiseSpinner/>
+        (!isInitialized || isLoading) &&
+        <ChaiseSpinner />
       }
       <div className='top-panel-container'>
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`}>
-            <div className="panel-header">
-              <div className="pull-left">
+            <div className='panel-header'>
+              <div className='pull-left'>
                 <h3>Refine search</h3>
               </div>
-              <div className="pull-right">
+              <div className='pull-right'>
                 <button
-                  className="hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right"
+                  className='hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right'
                   onClick={() => changeFacetPanelOpen()}
                 >
-                  <span className="chaise-icon chaise-sidebar-close"></span>
+                  <span className='chaise-icon chaise-sidebar-close'></span>
                   <span>Hide panel</span>
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="top-right-panel">
-            {vm.config.displayMode === RecordSetDisplayMode.FULLSCREEN &&
-              <div className="recordset-title-container title-container">
-                <div className="recordset-title-buttons title-buttons">
-                  <Export reference={vm.reference} disabled={!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0} />
+          <div className='top-right-panel'>
+            {config.displayMode === RecordSetDisplayMode.FULLSCREEN &&
+              <div className='recordset-title-container title-container'>
+                <div className='recordset-title-buttons title-buttons'>
+                  <Export reference={reference} disabled={!isLoading || !isInitialized || rowValues.length == 0} />
                   <OverlayTrigger placement='bottom' overlay={
                     <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
                   }
                   >
-                    <a id="permalink" className="chaise-btn chaise-btn-primary">
-                      <span className="chaise-btn-icon fa-solid fa-bookmark" />
+                    <a id='permalink' className='chaise-btn chaise-btn-primary'>
+                      <span className='chaise-btn-icon fa-solid fa-bookmark' />
                       <span>Permalink</span>
                     </a>
                   </OverlayTrigger>
-                  {/* <div ng-if="showSavedQueryUI && vm.savedQueryReference" className="chaise-btn-group" uib-dropdown>
-                            <div tooltip-placement="top-right" uib-tooltip="{{tooltip.saveQuery}}">
-                                <button id="save-query" className="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" ng-click="logSavedQueryDropdownOpened()" uib-dropdown-toggle ng-style="{'pointer-events': disableSavedQueryButton() ? 'none' : ''}">
-                                    <span className="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
+                  {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
+                            <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
+                                <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
+                                    <span className='chaise-btn-icon glyphicon glyphicon-floppy-save'></span>
                                     <span>Saved searches</span>
-                                    <span className="caret "></span>
+                                    <span className='caret '></span>
                                 </button>
                             </div>
-                            <ul className="dropdown-menu dropdown-menu-right" style="min-width:unset; top:20px;">
+                            <ul className='dropdown-menu dropdown-menu-right' style='min-width:unset; top:20px;'>
                                 <li>
-                                    <a ng-click="::saveQuery()">Save current search criteria</a>
-                                    <a ng-click="::showSavedQueries()">Show saved search criteria</a>
+                                    <a ng-click='::saveQuery()'>Save current search criteria</a>
+                                    <a ng-click='::showSavedQueries()'>Show saved search criteria</a>
                                 </li>
                             </ul>
                         </div> */}
 
                 </div>
-                <h1 id="page-title">
-                  <Title addLink={false} reference={vm.reference} />
+                <h1 id='page-title'>
+                  <Title addLink={false} reference={initialReference} />
                   {/* TODO */}
-                  {/* <small ng-if="vm.reference && vm.reference.location.version" className="h3-class" tooltip-placement="bottom-left" uib-tooltip="{{::tooltip.versionTime}} {{versionDate()}}">({{versionDisplay()}})</small> */}
-                  {/* <span ng-if="vm.reference.commentDisplay == 'inline' && vm.reference.comment" className="inline-tooltip">{{vm.reference.comment}}</span> */}
+                  {/* <small ng-if='vm.reference && vm.reference.location.version' className='h3-class' tooltip-placement='bottom-left' uib-tooltip='{{::tooltip.versionTime}} {{versionDate()}}'>({{versionDisplay()}})</small> */}
+                  {/* <span ng-if='vm.reference.commentDisplay == 'inline' && vm.reference.comment' className='inline-tooltip'>{{vm.reference.comment}}</span> */}
                 </h1>
               </div>
             }
-            <div className="recordset-controls-container">
-              {selectedRows()}
-              <div className="row">
-                <div className="recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6">
+            <div className='recordset-controls-container'>
+              {renderSelectedRows()}
+              <div className='row'>
+                <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
                   <SearchInput
-                    searchTerm={vm.searchTerm}
+                    searchTerm={searchTerm}
                     searchCallback={search}
                     inputClass={'main-search-input'}
-                    searchColumns={vm.reference.searchColumns}
+                    searchColumns={searchColumns}
                     disabled={false}
                     focus={true}
                   />
                 </div>
               </div>
             </div>
-            {selectedFacetFilters()}
-            {showFilterPanelBtn()}
-            {/* <table-header vm="vm"></table-header> */}
+            {renderSelectedFacetFilters()}
+            {renderShowFilterPanelBtn()}
+            {/* <table-header vm='vm'></table-header> */}
           </div>
 
         </div>
@@ -203,7 +277,7 @@ const RecordSet = ({
         </div>
         <div className='main-container dynamic-padding'>
           <div className='main-body'>
-              <RecordSetTable vm={vm}></RecordSetTable>
+            <RecordSetTable page={page} columnModels={columnModels}></RecordSetTable>
           </div>
         </div>
       </div>
@@ -212,3 +286,4 @@ const RecordSet = ({
 };
 
 export default RecordSet;
+

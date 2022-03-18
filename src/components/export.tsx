@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
@@ -22,9 +22,9 @@ const Export = ({
 
 
   const renderExportIcon = () => {
-    if (showSpinner) return (<span className="chaise-btn-icon fa-solid fa-rotate fa-spin" />);
+    if (showSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
 
-    return <span className="chaise-btn-icon fa-solid fa-file-export" />;
+    return <span className='chaise-btn-icon fa-solid fa-file-export' />;
   }
 
   return (
@@ -33,7 +33,7 @@ const Export = ({
     }
     >
       <Dropdown>
-        <Dropdown.Toggle disabled={disabled} variant="success" className='chaise-btn chaise-btn-primary'>
+        <Dropdown.Toggle disabled={disabled} variant='success' className='chaise-btn chaise-btn-primary'>
           {renderExportIcon()}
           Export
         </Dropdown.Toggle>

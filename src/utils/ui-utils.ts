@@ -1,3 +1,133 @@
 /**
  * Utility functions related to dom manipulation
  */
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import $log from '@chaise/services/logger';
+
+import { windowRef } from '@chaise/utils/window-ref';
+
+/**
+ * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
+ * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#navheader` will be used.
+ * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
+ * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
+ * If you don't pass any parentContainer, it will use the body
+ * It will assume the following structure in the given parentContainer:
+ *  - .app-content-container
+ *    - .top-panel-container
+ *    - .bottom-panel-container
+ * Three ResizeSensors will be created for app-content, top-panel and bottom-panel to watch their size change.
+ */
+export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
+  try {
+    // get the parentContainer and its usable height
+    if (parentContainer == null || parentContainer === document.querySelector('body')) {
+      useDocHeight = true;
+      parentContainer = document;
+    }
+
+    // get the parent sticky
+    if (parentContainerSticky == null) {
+      parentContainerSticky = document.querySelector('#navheader');
+    }
+
+    let parentUsableHeight: number;
+    // the container that we might set height for if container height is too small
+    // the content that we should make scrollable if the content height is too small
+    const appContent = parentContainer.querySelector('.app-content-container');
+
+    // the container that we want to set the height for
+    const container = appContent.querySelector('.bottom-panel-container');
+
+    // the sticky part of the container (top-panel-container)
+    const containerSticky = appContent.querySelector('.top-panel-container');
+
+    // if the size of content is way too small, make the whole app-content-container scrollable
+    const resetHeight = function () {
+      appContent.style.overflowY = 'auto';
+      appContent.style.height = ((parentUsableHeight / $window.innerHeight) * 100) + 'vh';
+      container.style.height = 'unset';
+    }
+
+    let tm: any;
+    // used to ensure we're not calling the setContainerHeightFn multiple times
+    const setContainerHeight = function () {
+      if (tm) clearTimeout(tm);
+
+      tm = setTimeout(function () {
+        setContainerHeightFn();
+      }, 200);
+    }
+
+    // the actual function that will change the container height.
+    const setContainerHeightFn = function () {
+      parentUsableHeight = useDocHeight ? windowRef.innerHeight : parentContainer.offsetHeight;
+
+      // subtract the parent sticky from usable height
+      parentUsableHeight -= parentContainerSticky.offsetHeight;
+
+      // the sticky part of the container
+      let stickyHeight = 0;
+      if (containerSticky) {
+        stickyHeight = containerSticky.offsetHeight;
+      }
+
+      const containerHeight = ((parentUsableHeight - stickyHeight) / windowRef.innerHeight) * 100;
+      if (containerHeight < 15) {
+        resetHeight();
+      } else {
+        //remove the styles that might have been added to appContent
+        appContent.style.overflowY = 'unset';
+        appContent.style.height = 'unset';
+
+        // set the container's height
+        container.style.height = containerHeight + 'vh';
+
+        // now check based on actual pixel size
+        if (container.offsetHeight < 300) {
+          resetHeight();
+        }
+      }
+    }
+
+
+    // used to capture the old values of height
+    let cache: any;
+
+    // make sure the main-container has initial height
+    setContainerHeightFn();
+    cache = {
+      appContentHeight: appContent.offsetHeight,
+      parentContainerStickyHeight: parentContainerSticky.offsetHeight,
+      containerStickyHeight: containerSticky.offsetHeight
+    };
+
+    //watch for the parent container height (this act as resize event)
+    new ResizeSensor(appContent, function (dimension) {
+      if (appContent.offsetHeight != cache.appContentHeight) {
+        cache.appContentHeight = appContent.offsetHeight;
+        setContainerHeight();
+      }
+    });
+
+    // watch for size of the parent sticky section
+    new ResizeSensor(parentContainerSticky, function (dimension) {
+      if (parentContainerSticky.offsetHeight != cache.parentContainerStickyHeight) {
+        cache.parentContainerStickyHeight = parentContainerSticky.offsetHeight;
+        setContainerHeight();
+      }
+    });
+
+    // watch for size of the sticky section
+    new ResizeSensor(containerSticky, function (dimension) {
+      if (containerSticky.offsetHeight != cache.containerStickyHeight) {
+        cache.containerStickyHeight = containerSticky.offsetHeight;
+        setContainerHeight();
+      }
+    });
+
+
+  } catch (err) {
+    $log.warn(err);
+  }
+}

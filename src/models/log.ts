@@ -119,8 +119,8 @@ export enum LogActions {
   VIEWER_ZOOM_RESET= 'toolbar' + ';zoom-reset',
   VIEWER_ZOOM_IN= 'toolbar' + ';zoom-in',
   VIEWER_ZOOM_OUT= 'toolbar' + ';zoom-out',
-  // VIEWER_ZOOM_IN_MOUSE= "mouse" + ";zoom-in",
-  // VIEWER_ZOOM_OUT_MOUSE= "mouse" + ";zoom-out",
+  // VIEWER_ZOOM_IN_MOUSE= 'mouse' + ';zoom-in',
+  // VIEWER_ZOOM_OUT_MOUSE= 'mouse' + ';zoom-out',
 
   VIEWER_ANNOT_LINE_THICKNESS= 'line-thickness' + ';adjust',
   VIEWER_ANNOT_DISPLAY_ALL= ';display-all',
@@ -213,10 +213,10 @@ export enum LogAppModes {
 }
 
 export enum LogParentActions {
-  // APPLY_COLLECTION= "apply-co", // proposed for applying a personal collection
+  // APPLY_COLLECTION= 'apply-co', // proposed for applying a personal collection
   APPLY_SAVED_QUERY= 'apply-sq',
   EXPLORE= 'explore',
-  // TITLE= "title", // proposed for title for record app
+  // TITLE= 'title', // proposed for title for record app
   VIEW= 'view'
 }
 

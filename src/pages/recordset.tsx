@@ -26,7 +26,7 @@ import { updateHeadTitle } from '@chaise/utils/head-injector';
 import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
 import { LogService } from '@chaise/services/log';
 import { LogStackTypes } from '@chaise/models/log';
-import { RecordSetDisplayMode, RecordsetSelectMode, RecordsetViewModel } from '@chaise/services/table';
+import { RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/services/table';
 
 const RecordSetApp = (): JSX.Element => {
   const recordsetSettings = {
@@ -102,11 +102,11 @@ const RecordSetApp = (): JSX.Element => {
       // set the global log stack and log stack path
       LogService.config(logStack, logStackPath);
 
-      let pageLimit = 25;
+      let initialPageLimit = 25;
       if (reference.location.queryParams.limit) {
-        pageLimit = parseInt(reference.location.queryParams.limit, 10);
+        initialPageLimit = parseInt(reference.location.queryParams.limit, 10);
       } else if (reference.display.defaultPageSize) {
-        pageLimit = reference.display.defaultPageSize;
+        initialPageLimit = reference.display.defaultPageSize;
       }
 
       const chaiseConfig = ConfigService.chaiseConfig;
@@ -141,10 +141,10 @@ const RecordSetApp = (): JSX.Element => {
       setConfigDone(true);
 
       setRecordSetProps({
-        reference: reference,
-        pageLimit: pageLimit,
+        initialReference: reference,
+        initialPageLimit,
         config: recordsetConfig,
-        logInfo: logInfo
+        logInfo,
       })
     }).catch((err) => {
       if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
@@ -173,13 +173,13 @@ const RecordSetApp = (): JSX.Element => {
     }
 
     return (
-      <div className="app-container">
+      <div className='app-container'>
         <ChaiseNavbar />
         <RecordSet
-          reference={recordSetProps.reference}
+          initialReference={recordSetProps.initialReference}
           config={recordSetProps.config}
           logInfo={recordSetProps.logInfo}
-          pageLimit={recordSetProps.pageLimit}
+          initialPageLimit={recordSetProps.initialPageLimit}
         />
       </div>
     );
