@@ -2,7 +2,7 @@ import '@chaise/assets/scss/_recordset-table.scss';
 import { RecordSetConfig } from '@chaise/models/recordset';
 import $log from '@chaise/services/logger';
 import DisplayValue from '@chaise/components/display-value';
-import { makeSafeIdAttr } from '@chaise/utils/data-utils';
+import { makeSafeIdAttr } from '@chaise/utils/string-utils';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
