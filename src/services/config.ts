@@ -199,7 +199,7 @@ export class ConfigService {
     for (const property in DEFAULT_CHAISE_CONFIG) {
       // use chaise-config.js property instead of default if defined
       if (typeof chaiseConfig !== 'undefined') {
-        // see if "property" matches a key in chaiseConfig
+        // see if 'property' matches a key in chaiseConfig
         const matchedKey = ConfigService._matchKey(Object.keys(chaiseConfig), property);
 
         // property will be in proper case already since it comes from our config object in JS
@@ -235,7 +235,7 @@ export class ConfigService {
     }
 
     // shareCiteAcls is a nested object, user could define shareCiteAcls:
-    //     { show: ["*"] }
+    //     { show: ['*'] }
     // with no enable array defined
     // make sure the object has both defined and apply the default if one or the other is missing
     if (!cc.shareCiteAcls.show) cc.shareCiteAcls.show = DEFAULT_CHAISE_CONFIG.shareCiteAcls.show;
@@ -378,15 +378,15 @@ export class ConfigService {
 //   }
 
 //   // NOTE: if this is not set, saved query UI should probably be turned off
-//   if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
+//   if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == 'object') {
 //       var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
 
 //       var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
 
 //       // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
 //       if (validMapping) {
-//           savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
-//           savedQuery.ermrestAGPath = "/ermrest/catalog/" + mapping.catalog + "/attributegroup/" + mapping.schema + ":" + mapping.table
+//           savedQuery.ermrestTablePath = '/ermrest/catalog/' + mapping.catalog + '/entity/' + mapping.schema + ':' + mapping.table
+//           savedQuery.ermrestAGPath = '/ermrest/catalog/' + mapping.catalog + '/attributegroup/' + mapping.schema + ':' + mapping.table
 
 //           // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
 //           if (queryParams && queryParams.savedQueryRid) savedQuery.rid = queryParams.savedQueryRid;
@@ -408,13 +408,13 @@ export class ConfigService {
 // * @return {boolean} boolean - value to use the terms and conditions config requiring a specific globus group for access
 // *
 // * termsAndConditionsConfig: {
-// *     "groupId": "https://auth.globus.org/123a4bcd-ef5a-67bc-8912-d34e5fa67b89",
-// *     "joinUrl": "https://app.globus.org/groups/123a4bcd-ef5a-67bc-8912-d34e5fa67b89/join",
-// *     "groupName": "Globus group name"
+// *     'groupId': 'https://auth.globus.org/123a4bcd-ef5a-67bc-8912-d34e5fa67b89',
+// *     'joinUrl': 'https://app.globus.org/groups/123a4bcd-ef5a-67bc-8912-d34e5fa67b89/join',
+// *     'groupName': 'Globus group name'
 // * },
 // */
 // function validateTermsAndConditionsConfig(obj) {
-//   if (!obj || typeof obj !== "object") return false;
+//   if (!obj || typeof obj !== 'object') return false;
 //   var tacConfig = getConfigJSON().termsAndConditionsConfig;
 
 //   // all 3 properties must be defined for this to function, if not the old login app will be used
