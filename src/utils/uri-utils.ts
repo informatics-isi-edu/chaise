@@ -225,7 +225,7 @@ export function queryStringToJSON(queryString: string): any {
   const result: any = {};
   pairs.forEach((pair) => {
     const pairArr = pair.split('=');
-    result[pair[0]] = decodeURIComponent(pairArr[1] || '');
+    result[pairArr[0]] = decodeURIComponent(pairArr[1] || '');
   });
   return result;
 }

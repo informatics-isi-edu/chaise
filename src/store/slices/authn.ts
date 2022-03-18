@@ -6,6 +6,7 @@ export interface ClientState {
   full_name: string;
   id: string;
   identities: string[];
+  truncated_id?: string;
 }
 
 interface AuthnState {

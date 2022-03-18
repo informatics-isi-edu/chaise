@@ -1,25 +1,29 @@
 import { useEffect, useState } from 'react';
 
-import { useAppSelector } from '@chaise/store/hooks';
+import { useAppDispatch, useAppSelector } from '@chaise/store/hooks';
 import { RootState } from '@chaise/store/store';
-import { ClientState } from '@chaise/store/slices/authn';
+import { ClientState, loginUser } from '@chaise/store/slices/authn';
 
 // components
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import ChaiseNavDropdown from '@chaise/components/nav-dropdown';
+import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
 
 // services
 import { ConfigService } from '@chaise/services/config';
 import AuthnService from '@chaise/services/authn';
 
 // utilities
+import { LogActions } from '@chaise/models/log';
 import TypeUtils from '@chaise/utils/type-utils';
 import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
 import MenuUtils from '@chaise/utils/menu-utils';
+import { windowRef } from '@chaise/utils/window-ref';
 import { render } from 'sass';
 
+
 const ChaiseLogin = (): JSX.Element => {
+  const dispatch = useAppDispatch();
   const catalogId = getCatalogId();
   const cc = ConfigService.chaiseConfig;
   const settings = ConfigService.appSettings;
@@ -40,12 +44,24 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   useEffect(() => {
-    if (configInitialized) return;
-
     if (TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
       setUser(authnRes.client);
-      setDisplayName(authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id);
+      let userName = authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id
+      setDisplayName(userName);
+      ConfigService.user = userName;
+      setUserTooltip(authnRes.client.full_name + '\n' + authnRes.client.display_name);
 
+      // - some users could have the same full_name for multiple globus identities
+      //   having display_name included in tooltip can help differentiate which user is logged in at a glance
+      // - display_name should always be defined
+      if (authnRes.client && authnRes.client.full_name) {
+        const showUserTooltip = function () {
+          let dropdownEl = document.querySelector('login .navbar-nav.navbar-right li.dropdown.open');
+          return !dropdownEl;
+        }
+      }
+
+      if (configInitialized) return;
       if (loggedInMenu) {
         let menuConfig = loggedInMenu;
         if (menuConfig.displayNameMarkdownPattern) setDisplayName(ConfigService.ERMrest.renderHandlebarsTemplate(menuConfig.displayNameMarkdownPattern, null, { id: catalogId }));
@@ -154,33 +170,23 @@ const ChaiseLogin = (): JSX.Element => {
         }
         setLoggedInMenu(menuConfig);
       }
-
-      // - some users could have the same full_name for multiple globus identities
-      //   having display_name included in tooltip can help differentiate which user is logged in at a glance
-      // - display_name should always be defined
-      if (user && user.full_name) {
-        setUserTooltip(user.full_name + '\n' + user.display_name);
-        const showUserTooltip = function () {
-          let dropdownEl = document.querySelector('login .navbar-nav.navbar-right li.dropdown.open');
-          return !dropdownEl;
-        }
-      }
       setConfigInitialized(true);
     }
   });
 
-
   const handleLoginClick = () => {
-    AuthnService.popupLogin(null, null);
-  };
-
-  const handeLogoutClick = () => {
-    // TODO: implement logout
-    console.log('logout');
-  };
-
-  const openProfile = () => {
-    console.log('open profile');
+    AuthnService.popupLogin(LogActions.LOGIN_NAVBAR, () => {
+      if (!AuthnService.shouldReloadPageAfterLogin()) {
+        // fetches the session of the user that just logged in
+        AuthnService.getSession('').then((response: any) => {
+          // if (modalInstance) modalInstance.close();
+          // update the user without reloading
+          if (response) dispatch(loginUser(response));
+        });
+      } else {
+        windowRef.location.reload();
+      }
+    });
   };
 
   const logDropdownOpen = () => {
@@ -195,12 +201,12 @@ const ChaiseLogin = (): JSX.Element => {
   };
 
   const renderMenuChildren = () => {
-    if (loggedInMenu) return (<ChaiseNavDropdown menu={loggedInMenu.menuOptions}></ChaiseNavDropdown>)
+    if (loggedInMenu) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions}></ChaiseLoginDropdown>)
 
     return (
       <>
-        <NavDropdown.Item id='profile-link' onClick={openProfile}>My Profile</NavDropdown.Item>
-        <NavDropdown.Item id='logout-link' onClick={handeLogoutClick}>Log Out</NavDropdown.Item>
+        <NavDropdown.Item id='profile-link' onClick={MenuUtils.openProfileModal}>My Profile</NavDropdown.Item>
+        <NavDropdown.Item id='logout-link' onClick={MenuUtils.logout}>Log Out</NavDropdown.Item>
       </>
     );
   }
@@ -236,7 +242,7 @@ const ChaiseLogin = (): JSX.Element => {
           return (
             <Nav.Link
               id='profile-link'
-              onClick={openProfile}
+              onClick={MenuUtils.openProfileModal}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'My Profile' }}
             />
           )
@@ -244,12 +250,12 @@ const ChaiseLogin = (): JSX.Element => {
           return (
             <Nav.Link
               id='logout-link'
-              onClick={handeLogoutClick}
+              onClick={MenuUtils.logout}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'Log Out' }}
             />
           )
         default:
-          return (<></>);
+          return;
       }
     }
 
