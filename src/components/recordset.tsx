@@ -14,15 +14,16 @@ import RecordSetTable from '@chaise/components/recordset-table';
 import { attachContainerHeightSensors, copyToClipboard } from '@chaise/utils/ui-utils';
 import { LogService } from '@chaise/services/log';
 import { SortColumn, RecordSetConfig, RecordSetDisplayMode } from '@chaise/models/recordset';
-import { URL_PATH_LENGTH_LIMIT } from '../utils/constants';
-import { ConfigService } from '../services/config';
+import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
+import { ConfigService } from '@chaise/services/config';
 import Q from 'q';
-import TypeUtils from '../utils/type-utils';
-import { createRedirectLinkFromPath, getRecordsetLink } from '../utils/uri-utils';
-import { getRowValuesFromPage } from '../utils/data-utils';
-import { showError } from '../store/slices/error';
-import { useAppDispatch } from '../store/hooks';
-import { windowRef } from '../utils/window-ref';
+import TypeUtils from '@chaise/utils/type-utils';
+import { createRedirectLinkFromPath, getRecordsetLink } from '@chaise/utils/uri-utils';
+import { getRowValuesFromPage } from '@chaise/utils/data-utils';
+import { showError } from '@chaise/store/slices/error';
+import { useAppDispatch } from '@chaise/store/hooks';
+import { windowRef } from '@chaise/utils/window-ref';
+import Footer from '@chaise/components/footer';
 
 export type RecordSetProps = {
   initialReference: any,
@@ -46,7 +47,7 @@ const RecordSet = ({
   getFavorites,
   getDisabledTuples,
 }: RecordSetProps): JSX.Element => {
-  $log.debug('recordset comp: render');
+  // $log.debug('recordset comp: render');
 
   const dispatch = useAppDispatch();
 
@@ -127,12 +128,12 @@ const RecordSet = ({
     // capture and log the right click event on the permalink button
     const permalink = document.getElementById('permalink');
     if (permalink) {
-        permalink.addEventListener('contextmenu',  () => {
-            LogService.logClientAction({
-                action: flowControl.current.getTableLogAction(LogActions.PERMALINK_RIGHT),
-                stack: flowControl.current.getTableLogStack()
-            }, reference.defaultLogInfo);
-        });
+      permalink.addEventListener('contextmenu', () => {
+        LogService.logClientAction({
+          action: flowControl.current.getTableLogAction(LogActions.PERMALINK_RIGHT),
+          stack: flowControl.current.getTableLogStack()
+        }, reference.defaultLogInfo);
+      });
     }
 
     // TODO validate facetFilters
@@ -149,16 +150,22 @@ const RecordSet = ({
   }, [reference]);
 
   //-------------------  flow-control functions:   --------------------//
+  const scrollMainContainerToTop = () => {
+    if (!mainContainer.current) return;
+
+    mainContainer.current.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   const updateLocation = (scrollToTop: boolean) => {
     // if we're showing an error popup, don't change the location
     // TODO
     // if ($rootScope.error) return;
 
-    if (scrollToTop && mainContainer.current) {
-      mainContainer.current.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+    if (scrollToTop) {
+      scrollMainContainerToTop();
     }
     windowRef.history.replaceState({}, '', getRecordsetLink(reference));
   }
@@ -328,7 +335,9 @@ const RecordSet = ({
     }
     flowControl.current.queue.occupiedSlots--;
     flowControl.current.dirtyResult = !res;
-    setIsLoading(false);
+    if (res) {
+      setIsLoading(false);
+    }
 
     printDebugMessage(`after result update: ${res ? 'successful.' : 'unsuccessful.'}`, counter);
   }
@@ -678,11 +687,12 @@ const RecordSet = ({
 
       $log.warn('url length limit will be reached!');
 
+      // TODO
       // show the alert (the function will handle just showing one alert)
       // AlertsService.addURLLimitAlert();
 
       // scroll to top of the container so users can see the alert
-      // scrollToTop();
+      scrollMainContainerToTop();
 
       // signal the caller that we reached the URL limit.
       return false;
@@ -763,6 +773,8 @@ const RecordSet = ({
 
   const nextPreviousCallback = (isNext: boolean) => {
     const ref = isNext ? page.next : page.previous;
+    const action = isNext ? LogActions.PAGE_NEXT : LogActions.PAGE_PREV;
+    const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
     if (ref && checkReferenceURL(ref)) {
 
       setReference(ref);
@@ -770,13 +782,13 @@ const RecordSet = ({
 
       LogService.logClientAction(
         {
-          action: flowControl.current.getTableLogAction(LogActions.PAGE_PREV),
+          action: flowControl.current.getTableLogAction(action),
           stack: flowControl.current.getTableLogStack()
         },
         reference.defaultLogInfo
       );
 
-      update(true, false, false, false, LogReloadCauses.PAGE_PREV);
+      update(true, false, false, false, cause);
     }
   }
 
@@ -914,6 +926,7 @@ const RecordSet = ({
               nextPreviousCallback={nextPreviousCallback}
             />
           </div>
+          {isInitialized && config.displayMode === RecordSetDisplayMode.FULLSCREEN && <Footer />}
         </div>
       </div>
     </div>

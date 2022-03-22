@@ -301,7 +301,7 @@ html {
     }
 
     // footer
-    footer {
+    .footer-container {
         position: absolute;
         bottom: 0;
         right: 0;
@@ -315,7 +315,7 @@ html {
 
         margin-right: -$viewport-margin;
 
-        .footer-container {
+        .footer-content {
             height: 30px;
             background-color: #ededed;
             padding-right: 5px;
