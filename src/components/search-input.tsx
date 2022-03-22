@@ -4,6 +4,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
 import $log from '@chaise/services/logger';
+import { ClearInputBtn } from './clear-input-btn';
 
 type SearchInputProps = {
   searchCallback: Function,
@@ -35,8 +36,18 @@ const SearchInput = ({
     inputEl?.current?.focus();
   };
 
+  const clearSearch = () => {
+    if (disabled) return;
+    if (searchTerm) {
+        searchCallback(null, LogActions.SEARCH_BOX_CLEAR);
+    }
+    setSearchTerm('');
+}
+
   const triggerSearch = (isButton: boolean) => {
     if (disabled) return;
+
+    $log.debug(`search term: ${searchTerm}`);
 
     // cancel the timeout
     if (inputChangedTimeout) {
@@ -112,7 +123,11 @@ const SearchInput = ({
           autoFocus={focus === true}
         />
         {!searchTerm && renderPlaceHolder()}
-        {/* <chaise-clear-input btn-className='remove-search-btn' click-callback='::clearSearch()' show='searchTerm && !disabled'></chaise-clear-input> */}
+        <ClearInputBtn
+          btnClassName='remove-search-btn'
+          clickCallback={clearSearch}
+          show={searchTerm && !disabled ? true : false}
+        />
       </div>
       <div className='chaise-input-group-append'>
         <OverlayTrigger
