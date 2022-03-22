@@ -14,7 +14,9 @@ import { ConfigService } from '@chaise/services/config';
 // utilities
 import { toTitlecase, underscoreToSpace } from '@chaise/utils/string-utils';
 
-const ProfileModal = (): JSX.Element | null => {
+const ProfileModal = ({
+  showProfile, setShowProfile,
+}: any): JSX.Element | null => {
   const userDisplay = ConfigService.user;
   const user = useAppSelector((state: RootState) => state.authn);
   // const dispatch = useAppDispatch();
@@ -36,7 +38,7 @@ const ProfileModal = (): JSX.Element | null => {
     let tempGlobusGroupList = [],
       tempOtherGroups = [];
     for (let i = 0; i < user.attributes.length; i++) {
-      let tempUserAttr = user.attributes[i];
+      let tempUserAttr = JSON.parse(JSON.stringify(user.attributes[i]));
       if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplay && tempIdentities.indexOf(tempUserAttr.id) == -1) {
         if (tempUserAttr.id.indexOf('https://auth.globus.org/') === 0) {
           tempUserAttr.truncated_id = tempUserAttr.id.substring(24);
@@ -54,7 +56,7 @@ const ProfileModal = (): JSX.Element | null => {
 
 
   const handleClose = () => {
-    // dispatch(hideError());
+    setShowProfile(false);
   };
 
   const renderClientInfo = () => Object.entries(user.client).map(([key, value], index) => {
@@ -126,7 +128,7 @@ const ProfileModal = (): JSX.Element | null => {
     <div />
   );
 
-  if (true) {
+  if (!showProfile) {
     return null;
   }
 
@@ -135,7 +137,7 @@ const ProfileModal = (): JSX.Element | null => {
       title={profileTitle}
       body={profileBody}
       footer={profileFooter}
-      show={false}
+      show={showProfile}
       onHide={handleClose}
     />
   );
