@@ -8,6 +8,7 @@ import { ClientState, loginUser } from '@chaise/store/slices/authn';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
+import ProfileModal from '@chaise/components/profile-modal';
 
 // services
 import { ConfigService } from '@chaise/services/config';
@@ -36,6 +37,7 @@ const ChaiseLogin = (): JSX.Element => {
   const [loggedInMenu, setLoggedInMenu] = useState(cc.loggedInMenu);
   const [oneOption, setOneOption] = useState<any>(null);
   const [replaceDropdown, setReplaceDropdown] = useState<boolean>(false);
+  const [showProfile, setShowProfile] = useState<boolean>(false);
   const [user, setUser] = useState<ClientState | null>(null);
   const [userTooltip, setUserTooltip] = useState('');
 
@@ -61,7 +63,6 @@ const ChaiseLogin = (): JSX.Element => {
         }
       }
 
-      if (configInitialized) return;
       if (loggedInMenu) {
         let menuConfig = loggedInMenu;
         if (menuConfig.displayNameMarkdownPattern) setDisplayName(ConfigService.ERMrest.renderHandlebarsTemplate(menuConfig.displayNameMarkdownPattern, null, { id: catalogId }));
@@ -172,7 +173,7 @@ const ChaiseLogin = (): JSX.Element => {
       }
       setConfigInitialized(true);
     }
-  });
+  }, []);
 
   const handleLoginClick = () => {
     AuthnService.popupLogin(LogActions.LOGIN_NAVBAR, () => {
@@ -189,6 +190,11 @@ const ChaiseLogin = (): JSX.Element => {
     });
   };
 
+  const handleOpenProfileClick = () => {
+    setShowProfile(true);
+    MenuUtils.openProfileModal();
+  }
+
   const logDropdownOpen = () => {
     // TODO: log dropdown opened
     console.log('dropdown opened');
@@ -201,11 +207,11 @@ const ChaiseLogin = (): JSX.Element => {
   };
 
   const renderMenuChildren = () => {
-    if (loggedInMenu) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions}></ChaiseLoginDropdown>)
+    if (loggedInMenu) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions} openProfileCb={handleOpenProfileClick}></ChaiseLoginDropdown>)
 
     return (
       <>
-        <NavDropdown.Item id='profile-link' onClick={MenuUtils.openProfileModal}>My Profile</NavDropdown.Item>
+        <NavDropdown.Item id='profile-link' onClick={handleOpenProfileClick}>My Profile</NavDropdown.Item>
         <NavDropdown.Item id='logout-link' onClick={MenuUtils.logout}>Log Out</NavDropdown.Item>
       </>
     );
@@ -242,7 +248,7 @@ const ChaiseLogin = (): JSX.Element => {
           return (
             <Nav.Link
               id='profile-link'
-              onClick={MenuUtils.openProfileModal}
+              onClick={handleOpenProfileClick}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'My Profile' }}
             />
           )
@@ -271,6 +277,7 @@ const ChaiseLogin = (): JSX.Element => {
   return (
     <Nav className='login-menu-options'>
       {renderLoginMenu()}
+      <ProfileModal showProfile={showProfile} setShowProfile={setShowProfile}></ProfileModal>
     </Nav>
   );
 };

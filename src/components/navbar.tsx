@@ -36,8 +36,6 @@ const ChaiseNavbar = (): JSX.Element => {
   }
 
   useEffect(() => {
-    if (configInitialized) return;
-
     const root = cc.navbarMenu || {};
 
     // if in iframe and we want to force links to open in new tab,
@@ -108,7 +106,7 @@ const ChaiseNavbar = (): JSX.Element => {
     // root is an object with acls, newTab, and children (optional) as key value pairs
     setMenu(root.children || []);
     setConfigInitialized(true);
-  });
+  }, []);
 
   const isVersioned = () => (!!catalogId.split('@')[1]);
 

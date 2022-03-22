@@ -9,7 +9,7 @@ import MenuUtils from '@chaise/utils/menu-utils';
 // NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax 
 //       hasn't been updated to use the "types" or set default types on menu ingest
 const ChaiseLoginDropdown = ({
-  menu,
+  menu, openProfileCb,
 }: any): JSX.Element => menu.map((child: any, index: number) => {
   if (!MenuUtils.canShow(child) || !child.isValid) return;
 
@@ -51,7 +51,7 @@ const ChaiseLoginDropdown = ({
         <NavDropdown.Item
           id='profile-link'
           key={index}
-          onClick={MenuUtils.openProfileModal}
+          onClick={openProfileCb}
           dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? MenuUtils.renderName(child) : 'My Profile' }}
         />
       )
