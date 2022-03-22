@@ -47,6 +47,8 @@ This document should be organized later, I just wanted to make sure the things t
 
 - Take a look at `example.tsx` for a sample react component.
 
+- Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues we should make asure that will always using production mode.
+
 ### Parent/child component communication
 
 - Parents pass data as `props` to children

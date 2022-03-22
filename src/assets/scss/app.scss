@@ -727,6 +727,11 @@ html {
         line-height: 1.2;
     }
 
+
+    .chaise-hr-scrollable {
+      overflow-x: auto;
+    }
+
     .chaise-table-top-scroll-wrapper {
         overflow-x: auto;
         overflow-y: hidden;

@@ -93,6 +93,7 @@
 
   > thead > tr > th {
     border-bottom: 1px solid $table-border-color;
+    white-space: nowrap;
   }
 
   > thead > tr > th,

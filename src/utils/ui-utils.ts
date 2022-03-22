@@ -131,3 +131,61 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     $log.warn(err);
   }
 }
+
+
+/**
+ * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
+ * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+ * @param {DOMElement} parent - the parent element
+ */
+export function addTopHorizontalScroll(parent: HTMLElement) {
+  if (!parent) return;
+
+  const topScrollElementWrapper = parent.querySelector<HTMLElement>('.chaise-table-top-scroll-wrapper'),
+    topScrollElement = parent.querySelector<HTMLElement>('.chaise-table-top-scroll'),
+    scrollableContent = parent.querySelector<HTMLElement>('.chaise-hr-scrollable');
+
+  if (!topScrollElementWrapper || !topScrollElement || !scrollableContent) {
+    return;
+  }
+
+  // these 2 flags help us prevent cascading scroll changes back and forth across the 2 elements
+  let isSyncingTopScroll = false;
+  let isSyncingTableScroll = false;
+  // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+  topScrollElementWrapper.addEventListener('scroll', function () {
+    if (!isSyncingTopScroll) {
+      isSyncingTableScroll = true;
+      scrollableContent!.scrollLeft = topScrollElementWrapper!.scrollLeft;
+    }
+    isSyncingTopScroll = false;
+  });
+
+  scrollableContent.addEventListener('scroll', function () {
+    if (!isSyncingTableScroll) {
+      isSyncingTopScroll = true;
+      topScrollElementWrapper!.scrollLeft = scrollableContent!.scrollLeft;
+    }
+    isSyncingTableScroll = false;
+  });
+
+  // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+  new ResizeSensor(scrollableContent, function () {
+    // there is no need of a scrollbar, content is not overflowing
+    if (scrollableContent!.scrollWidth == scrollableContent!.clientWidth) {
+      topScrollElement!.style.width = '0';
+      topScrollElementWrapper!.style.height = '0';
+    }
+    else {
+      topScrollElementWrapper!.style.height = '15px';
+      topScrollElement!.style.width = scrollableContent!.scrollWidth + 'px';
+    }
+  });
+
+  // make top scroll visible after adding the handlers to ensure its visible only when working
+  topScrollElementWrapper.style.display = 'block';
+  // show only if content is overflowing
+  if (scrollableContent.scrollWidth == scrollableContent.clientWidth) {
+    topScrollElementWrapper.style.height = '15px';
+  }
+}

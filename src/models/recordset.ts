@@ -29,3 +29,8 @@ export type RecordSetConfig = {
   displayMode: RecordSetDisplayMode,
   // TODO enable favorites
 }
+
+export type SortColumn = {
+  column: string,
+  descending?: boolean
+}
