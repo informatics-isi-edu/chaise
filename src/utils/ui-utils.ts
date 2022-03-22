@@ -189,3 +189,25 @@ export function addTopHorizontalScroll(parent: HTMLElement) {
     topScrollElementWrapper.style.height = '15px';
   }
 }
+
+export function copyToClipboard(text: string) {
+  if (document.execCommand) {
+    const dummy = document.createElement('input');
+    dummy.setAttribute('visibility', 'hidden');
+    dummy.setAttribute('display', 'none');
+
+    document.body.appendChild(dummy);
+    dummy.setAttribute('id', 'permalink_copy');
+    dummy.value = text;
+    dummy.select();
+    document.execCommand('copy');
+
+    document.body.removeChild(dummy);
+  }
+  else if (navigator && navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch((err) => {
+      $log.error('failed to copy with the following error:')
+      $log.error(err);
+    });
+  }
+}

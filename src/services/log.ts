@@ -39,8 +39,7 @@ export class LogService {
     }
 
     const headers : any = {};
-
-    // in the case of static websites, the getHTTPService might return $http,
+    // in the case of static websites, the getHTTPService might return axios http,
     // which doesn't have the contextHeaderParams, so we should add them here just in case
     for (const key in contextHeaderParams) {
       if (!contextHeaderParams.hasOwnProperty(key) || (key in logObj)) continue;
@@ -48,9 +47,8 @@ export class LogService {
       logObj[key] = contextHeaderParams[key];
     }
     headers[ConfigService.ERMrest.contextHeaderName] = logObj;
-    ConfigService.http.head(`${cc.ermrestLocation}/client_action`, { headers }).catch((err: any) => {
-      $log.debug('An error may have occured when logging: ', logObj);
-      $log.debug(err);
+    ConfigService.http.head(`${cc.ermrestLocation}/client_action`, {headers}).catch(() => {
+      // we expect to get a server error, so just catch it her
     });
   }
 

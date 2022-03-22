@@ -11,7 +11,7 @@ import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
 import ChaiseSpinner from '@chaise/components/spinner';
 import RecordSetTable from '@chaise/components/recordset-table';
-import { attachContainerHeightSensors } from '@chaise/utils/ui-utils';
+import { attachContainerHeightSensors, copyToClipboard } from '@chaise/utils/ui-utils';
 import { LogService } from '@chaise/services/log';
 import { SortColumn, RecordSetConfig, RecordSetDisplayMode } from '@chaise/models/recordset';
 import { URL_PATH_LENGTH_LIMIT } from '../utils/constants';
@@ -123,6 +123,17 @@ const RecordSet = ({
 
     // TODO pass the proper values
     attachContainerHeightSensors();
+
+    // capture and log the right click event on the permalink button
+    const permalink = document.getElementById('permalink');
+    if (permalink) {
+        permalink.addEventListener('contextmenu',  () => {
+            LogService.logClientAction({
+                action: flowControl.current.getTableLogAction(LogActions.PERMALINK_RIGHT),
+                stack: flowControl.current.getTableLogStack()
+            }, reference.defaultLogInfo);
+        });
+    }
 
     // TODO validate facetFilters
 
@@ -680,6 +691,20 @@ const RecordSet = ({
     // remove the alert if it's present since we don't need it anymore
     // AlertsService.deleteURLLimitAlert();
     return true;
+  };
+
+  const recordsetLink = getRecordsetLink();
+
+  const copyPermalink = () => {
+    LogService.logClientAction(
+      {
+        action: flowControl.current.getTableLogAction(LogActions.PERMALINK_LEFT),
+        stack: flowControl.current.getTableLogStack()
+      },
+      reference.defaultLogInfo
+    );
+
+    copyToClipboard(recordsetLink);
   }
 
   /**
@@ -815,7 +840,12 @@ const RecordSet = ({
                     <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
                   }
                   >
-                    <a id='permalink' className='chaise-btn chaise-btn-primary'>
+                    <a
+                      id='permalink'
+                      className='chaise-btn chaise-btn-primary'
+                      href={recordsetLink}
+                      onClick={copyPermalink}
+                    >
                       <span className='chaise-btn-icon fa-solid fa-bookmark' />
                       <span>Permalink</span>
                     </a>
