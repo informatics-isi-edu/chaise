@@ -1,3 +1,4 @@
+import '@chaise/utils/wdyr';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@chaise/assets/scss/app.scss';
@@ -28,15 +29,15 @@ import { LogService } from '@chaise/services/log';
 import { LogStackTypes } from '@chaise/models/log';
 import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
 
-const RecordSetApp = (): JSX.Element => {
-  const recordsetSettings = {
-    appName: 'recordset',
-    appTitle: 'Record Set',
-    overrideHeadTitle: true,
-    overrideDownloadClickBehavior: true,
-    overrideExternalLinkBehavior: true,
-  };
+const recordsetSettings = {
+  appName: 'recordset',
+  appTitle: 'Record Set',
+  overrideHeadTitle: true,
+  overrideDownloadClickBehavior: true,
+  overrideExternalLinkBehavior: true,
+};
 
+const RecordSetApp = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const [configDone, setConfigDone] = useState(false);
   const [recordSetProps, setRecordSetProps] = useState<RecordSetProps|null>(null);
@@ -139,21 +140,21 @@ const RecordSetApp = (): JSX.Element => {
         logStackPath,
       };
 
-      setConfigDone(true);
 
       setRecordSetProps({
         initialReference: reference,
         initialPageLimit,
         config: recordsetConfig,
         logInfo,
-      })
+      });
+      setConfigDone(true);
     }).catch((err) => {
       if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
       dispatch(showError({ error: err, isGlobal: true }));
     });
-  }, [configDone]);
+  }, [configDone] );
 
   const errorFallback = ({ error }: FallbackProps) => {
     $log.log('error fallback of the main error boundary');
@@ -197,6 +198,10 @@ const RecordSetApp = (): JSX.Element => {
     </>
   );
 };
+
+if (process.env.NODE_ENV === 'development') {
+  RecordSetApp.whyDidYouRender = true;
+}
 
 ReactDOM.render(
   <Provider store={store}>

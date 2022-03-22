@@ -130,7 +130,7 @@ const RecordSet = ({
 
     // initialize the data
     initialize();
-  }, [isInitialized]);
+  }, []);
 
   useEffect(() => {
     // call the flow-control after each reference object
@@ -138,12 +138,12 @@ const RecordSet = ({
   }, [reference]);
 
   //-------------------  flow-control functions:   --------------------//
-  const updateLocation = () => {
+  const updateLocation = (scrollToTop: boolean) => {
     // if we're showing an error popup, don't change the location
     // TODO
     // if ($rootScope.error) return;
 
-    if (mainContainer.current) {
+    if (scrollToTop && mainContainer.current) {
       mainContainer.current.scrollTo({
         top: 0,
         behavior: 'smooth',
@@ -312,19 +312,12 @@ const RecordSet = ({
   const afterUpdateMainEntity = (res: boolean, counter: number) => {
     if (res) {
       // we got the results, let's just update the url
-      // TODO update the url
-      // $rootScope.$emit('reference-modified');
-      updateLocation();
+      // scroll to top of the page so user can see the result
+      updateLocation(config.displayMode.indexOf(RecordSetDisplayMode.RELATED) !== 0);
     }
     flowControl.current.queue.occupiedSlots--;
     flowControl.current.dirtyResult = !res;
     setIsLoading(false);
-
-    // scroll to top of the page so user can see the result
-    if (config.displayMode.indexOf(RecordSetDisplayMode.RELATED) !== 0) {
-      // TODO scroll to top
-      // scrollToTop();
-    }
 
     printDebugMessage(`after result update: ${res ? 'successful.' : 'unsuccessful.'}`, counter);
   }
@@ -896,6 +889,10 @@ const RecordSet = ({
     </div>
   )
 };
+
+if (process.env.NODE_ENV === 'development') {
+  RecordSet.whyDidYouRender = true;
+}
 
 export default RecordSet;
 
