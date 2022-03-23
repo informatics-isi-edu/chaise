@@ -35,7 +35,7 @@ const Export = ({
       <Dropdown>
         <Dropdown.Toggle disabled={disabled} variant='success' className='chaise-btn chaise-btn-primary'>
           {renderExportIcon()}
-          Export
+          <span>Export</span>
         </Dropdown.Toggle>
 
         <Dropdown.Menu>
