@@ -6,6 +6,8 @@ import { ClientState, loginUser } from '@chaise/store/slices/authn';
 
 // components
 import Nav from 'react-bootstrap/Nav';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
 import ProfileModal from '@chaise/components/profile-modal';
@@ -20,7 +22,6 @@ import TypeUtils from '@chaise/utils/type-utils';
 import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
 import MenuUtils from '@chaise/utils/menu-utils';
 import { windowRef } from '@chaise/utils/window-ref';
-import { render } from 'sass';
 
 
 const ChaiseLogin = (): JSX.Element => {
@@ -32,14 +33,13 @@ const ChaiseLogin = (): JSX.Element => {
   // get the user from the store
   const authnRes = useAppSelector((state: RootState) => state.authn);
 
-  const [configInitialized, setConfigInitialized] = useState<boolean>(false);
   const [displayName, setDisplayName] = useState<string>('');
   const [loggedInMenu, setLoggedInMenu] = useState(cc.loggedInMenu);
   const [oneOption, setOneOption] = useState<any>(null);
   const [replaceDropdown, setReplaceDropdown] = useState<boolean>(false);
   const [showProfile, setShowProfile] = useState<boolean>(false);
-  const [user, setUser] = useState<ClientState | null>(null);
   const [userTooltip, setUserTooltip] = useState('');
+  const [showUserTooltip, setShowUserTooltip] = useState<boolean>(false);
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -47,20 +47,20 @@ const ChaiseLogin = (): JSX.Element => {
 
   useEffect(() => {
     if (TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
-      setUser(authnRes.client);
       let userName = authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id
       setDisplayName(userName);
       ConfigService.user = userName;
-      setUserTooltip(authnRes.client.full_name + '\n' + authnRes.client.display_name);
-
-      // - some users could have the same full_name for multiple globus identities
-      //   having display_name included in tooltip can help differentiate which user is logged in at a glance
-      // - display_name should always be defined
-      if (authnRes.client && authnRes.client.full_name) {
-        const showUserTooltip = function () {
-          let dropdownEl = document.querySelector('login .navbar-nav.navbar-right li.dropdown.open');
-          return !dropdownEl;
-        }
+      if (authnRes.client.full_name) {
+        // - some users could have the same full_name for multiple globus identities
+        //   having display_name included in tooltip can help differentiate which user is logged in at a glance
+        // - display_name should always be defined
+        // if no dropdown, show tooltip
+        // TODO: function = () => {
+        //   let dropdownEl = document.querySelector('.navbar-nav.login-menu-options .username-display.dropdown.show');
+        //   return !dropdownEl;
+        // }
+        setShowUserTooltip(true);
+        setUserTooltip(authnRes.client.full_name + '\n' + authnRes.client.display_name);
       }
 
       if (loggedInMenu) {
@@ -171,7 +171,6 @@ const ChaiseLogin = (): JSX.Element => {
         }
         setLoggedInMenu(menuConfig);
       }
-      setConfigInitialized(true);
     }
   }, []);
 
@@ -265,6 +264,21 @@ const ChaiseLogin = (): JSX.Element => {
       }
     }
 
+    // if (showUserTooltip) {
+    // TODO: read into disable tooltip in certain conditions
+    //        maybe "Overlay" instead?
+    //   return (
+    //     <OverlayTrigger 
+    //       placement='bottom-end' 
+    //       overlay={<Tooltip>{userTooltip}</Tooltip>}
+    //     >
+    //       <NavDropdown title={displayName} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
+    //         {renderMenuChildren()}
+    //       </NavDropdown>
+    //     </OverlayTrigger>
+    //   );
+    // }
+
     return (
       <NavDropdown title={displayName} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
         {renderMenuChildren()}
@@ -273,7 +287,6 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   // TODO: fix onClick={logDropdownOpen}
-  // TODO: add logged in user tooltip
   return (
     <Nav className='login-menu-options'>
       {renderLoginMenu()}

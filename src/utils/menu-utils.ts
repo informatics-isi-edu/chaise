@@ -311,22 +311,10 @@ export default class MenuUtils {
   static canEnable = (option: any) => option.acls && AuthnService.isGroupIncluded(option.acls.enable);
 
   // NOTE: hard coded action
-  // TODO: implement modal popup for profile view
   static openProfileModal = () => {
-    console.log('open profile modal');
     LogService.logClientAction({
       action: LogActions.NAVBAR_PROFILE_OPEN
     });
-
-    // TODO: attach modal somewhere (or show it?)
-
-
-    // modalUtils.showModal({
-    //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
-    //   controller: "profileModalDialogController",
-    //   controllerAs: "ctrl",
-    //   windowClass: "profile-popup"
-    // }, false, false, false);
   };
 
   // NOTE: hard coded action

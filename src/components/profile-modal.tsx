@@ -1,3 +1,5 @@
+import '@chaise/assets/scss/_modal.scss';
+
 import { useEffect, useState } from 'react';
 
 // components
@@ -6,7 +8,6 @@ import ChaiseModal from '@chaise/components/modal';
 import { useAppSelector, useAppDispatch } from '@chaise/store/hooks';
 import { RootState } from '@chaise/store/store';
 import { ClientState } from '@chaise/store/slices/authn';
-// import { hideError } from '@chaise/store/slices/error';
 
 // services
 import { ConfigService } from '@chaise/services/config';
@@ -19,7 +20,6 @@ const ProfileModal = ({
 }: any): JSX.Element | null => {
   const userDisplay = ConfigService.user;
   const user = useAppSelector((state: RootState) => state.authn);
-  // const dispatch = useAppDispatch();
 
   const [initialized, setInitialzed]          = useState<boolean>(false);
   const [identities, setIdentities]           = useState<string[]>([]);
@@ -109,9 +109,9 @@ const ProfileModal = ({
     )
   }
 
-  const profileTitle = (
-    <div className='modal-title text-center'>{userDisplay}</div>
-
+  const profileTitle = (<>
+      {userDisplay}
+    </>
   );
 
   const profileBody = (
@@ -134,11 +134,12 @@ const ProfileModal = ({
 
   return (
     <ChaiseModal
-      title={profileTitle}
       body={profileBody}
+      contentClassName='profile-popup'
       footer={profileFooter}
-      show={showProfile}
       onHide={handleClose}
+      show={showProfile}
+      title={profileTitle}
     />
   );
 };

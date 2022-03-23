@@ -45,7 +45,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     // if the size of content is way too small, make the whole app-content-container scrollable
     const resetHeight = function () {
       appContent.style.overflowY = 'auto';
-      appContent.style.height = ((parentUsableHeight / $window.innerHeight) * 100) + 'vh';
+      appContent.style.height = ((parentUsableHeight / windowRef.innerHeight) * 100) + 'vh';
       container.style.height = 'unset';
     }
 
