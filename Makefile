@@ -630,8 +630,8 @@ $(BUILD_VERSION):
 update-webdriver:
 	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
 
-# install packages needed for production
-.PHONY: npm-install-prod-modules
+# install packages (honors NOD_ENV)
+.PHONY: npm-install-modules
 npm-install-modules:
 	npm install
 
