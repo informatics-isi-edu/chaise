@@ -146,7 +146,7 @@ export function attachFooterResizeSensor(index?: number) {
     const mainBody = mainContainer.querySelector<HTMLElement>('.main-body');
     if (!mainBody) return;
 
-    let setFooterTimeout : any;
+    let setFooterTimeout: any;
     return new ResizeSensor(mainBody, function () {
       if (setFooterTimeout) clearTimeout(setFooterTimeout);
       setFooterTimeout = setTimeout(function () {
@@ -167,6 +167,35 @@ export function attachFooterResizeSensor(index?: number) {
   } catch (err) {
     $log.warn(err);
   }
+}
+
+/**
+ * @param   {DOMElement} parentContainer - the container that we want the alignment for
+ * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
+ *
+ * Make sure the `.top-right-panel` and `.main-container` are aligned.
+ * They can be missaligned if the scrollbar is visible and takes space.
+ */
+export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) {
+  const container = parentContainer ? parentContainer : document.querySelector('body') as HTMLElement;
+  const mainContainer = container.querySelector('.main-container') as HTMLElement;
+  const topRightPanel = container.querySelector('.top-right-panel') as HTMLElement;
+  let mainContainerPaddingTimeout: any;
+
+  // timeout makes sure we're not calling this more than we should
+  const setPadding = () => {
+    if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
+    mainContainerPaddingTimeout = setTimeout(function () {
+      try {
+        const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+        mainContainer.style.paddingRight = padding + 'px';
+      } catch (exp) { }
+    }, 10);
+  }
+
+  // watch the size of mainContainer
+  // (if width of topRightPanel changes, the mainContainer changes too, so just watching mainContainer is enough)
+  return new ResizeSensor(mainContainer, setPadding);
 }
 
 /**

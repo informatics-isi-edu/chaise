@@ -1,7 +1,6 @@
 import { ConfigService } from '@chaise/services/config';
 import React from 'react';
 import { attachFooterResizeSensor } from '@chaise/utils/ui-utils';
-import $log from '@chaise/services/logger';
 
 class Footer extends React.PureComponent {
 

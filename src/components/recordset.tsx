@@ -11,7 +11,7 @@ import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
 import ChaiseSpinner from '@chaise/components/spinner';
 import RecordSetTable from '@chaise/components/recordset-table';
-import { attachContainerHeightSensors, copyToClipboard } from '@chaise/utils/ui-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@chaise/utils/ui-utils';
 import { LogService } from '@chaise/services/log';
 import { SortColumn, RecordSetConfig, RecordSetDisplayMode } from '@chaise/models/recordset';
 import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
@@ -24,6 +24,8 @@ import { showError } from '@chaise/store/slices/error';
 import { useAppDispatch } from '@chaise/store/hooks';
 import { windowRef } from '@chaise/utils/window-ref';
 import Footer from '@chaise/components/footer';
+import Faceting from './faceting';
+import TableHeader from './table-header';
 
 export type RecordSetProps = {
   initialReference: any,
@@ -108,6 +110,8 @@ const RecordSet = ({
    */
   const [facetPanelOpen, setFacetPanelOpen] = useState(config.facetPanelOpen);
 
+  const [facetColumnsReady, setFacetColumnsReady] = useState(false);
+
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
   const mainContainer = useRef<any>(null);
@@ -120,7 +124,10 @@ const RecordSet = ({
 
 
   useEffect(() => {
-    if (isInitialized) return;
+    if (isInitialized) {
+      attachMainContainerPaddingSensor();
+      return;
+    }
 
     // TODO pass the proper values
     attachContainerHeightSensors();
@@ -136,13 +143,52 @@ const RecordSet = ({
       });
     }
 
-    // TODO validate facetFilters
+    if (config.disableFaceting) {
+      initialize();
+      return;
+    }
 
-    // TODO save query stuff
+    // NOTE this will affect the reference uri so it must be
+    //      done before initializing recordset
+    reference.generateFacetColumns().then((res: any) => {
 
-    // initialize the data
-    initialize();
-  }, []);
+      setFacetColumnsReady(true);
+
+      // initialize the data
+      initialize();
+
+      /**
+       * When there are issues in the given facet,
+       * - recordset should just load the data based on the remaining
+       *  facets that had no issue
+       * - we should show an error and let users know that there were some
+       *   issues.
+       * - we should keep the browser location like original to allow users to
+       *   refresh and try again. Also the issue might be happening because they
+       *   are not logged in. So we should keep the location like original so after
+       *   logging in they can get back to the page.
+       * - Dismissing the error should change the browser location.
+       */
+      if (res.issues) {
+        // TODO change the
+        // var cb = function () {
+        //   $rootScope.$emit('reference-modified');
+        // };
+        // ErrorService.handleException(res.issues, false, false, cb, cb);
+      } else {
+        // TODO save query should just return a promise
+      }
+
+    }).catch((exception: any) => {
+      $log.warn(exception);
+      setIsLoading(false);
+      if (TypeUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+        exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
+      }
+      dispatch(showError({ error: exception }));
+    });
+
+  }, [isInitialized]);
 
   useEffect(() => {
     // call the flow-control after each reference object
@@ -262,7 +308,7 @@ const RecordSet = ({
     updateMainEntity(updatePage, false);
 
     // get the aggregate values only if main page is loaded
-    fetchSecondaryRequests(updatePage);
+    // fetchSecondaryRequests(updatePage);
 
     // TODO the rest
   }
@@ -803,7 +849,7 @@ const RecordSet = ({
   }
 
   const renderShowFilterPanelBtn = () => {
-    if (facetPanelOpen) {
+    if (facetPanelOpen || !config.showFaceting) {
       return;
     }
     return (
@@ -825,15 +871,15 @@ const RecordSet = ({
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`}>
             <div className='panel-header'>
-              <div className='pull-left'>
+              <div>
                 <h3>Refine search</h3>
               </div>
-              <div className='pull-right'>
+              <div>
                 <button
                   className='hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right'
                   onClick={() => changeFacetPanelOpen()}
                 >
-                  <span className='chaise-icon chaise-sidebar-close'></span>
+                  <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
                   <span>Hide panel</span>
                 </button>
               </div>
@@ -904,15 +950,23 @@ const RecordSet = ({
             </div>
             {renderSelectedFacetFilters()}
             {renderShowFilterPanelBtn()}
-            {/* <table-header vm='vm'></table-header> */}
+            <TableHeader />
           </div>
 
         </div>
       </div>
       <div className='bottom-panel-container'>
-        <div className='side-panel-resizable'>
-          {/* TODO faceting */}
-        </div>
+        {
+          facetColumnsReady &&
+          <div
+            className={'side-panel-resizable ' + panelClassName}
+            style={{visibility: config.showFaceting ? 'visible': 'hidden'}}
+          >
+            <div className='side-panel-container'>
+              <Faceting reference={reference} />
+            </div>
+          </div>
+        }
         <div className='main-container dynamic-padding' ref={mainContainer}>
           <div className='main-body'>
             <RecordSetTable

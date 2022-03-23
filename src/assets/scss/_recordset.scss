@@ -153,4 +153,12 @@
       }
     }
   }
+
+  .side-panel-container {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    -webkit-transition: all 1s;
+    transition: all 1s;
+  }
 }
