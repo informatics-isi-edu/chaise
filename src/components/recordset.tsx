@@ -11,18 +11,21 @@ import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
 import ChaiseSpinner from '@chaise/components/spinner';
 import RecordSetTable from '@chaise/components/recordset-table';
-import { attachContainerHeightSensors } from '@chaise/utils/ui-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@chaise/utils/ui-utils';
 import { LogService } from '@chaise/services/log';
 import { SortColumn, RecordSetConfig, RecordSetDisplayMode } from '@chaise/models/recordset';
-import { URL_PATH_LENGTH_LIMIT } from '../utils/constants';
-import { ConfigService } from '../services/config';
+import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
+import { ConfigService } from '@chaise/services/config';
 import Q from 'q';
-import TypeUtils from '../utils/type-utils';
-import { createRedirectLinkFromPath, getRecordsetLink } from '../utils/uri-utils';
-import { getRowValuesFromPage } from '../utils/data-utils';
-import { showError } from '../store/slices/error';
-import { useAppDispatch } from '../store/hooks';
-import { windowRef } from '../utils/window-ref';
+import TypeUtils from '@chaise/utils/type-utils';
+import { createRedirectLinkFromPath, getRecordsetLink } from '@chaise/utils/uri-utils';
+import { getRowValuesFromPage } from '@chaise/utils/data-utils';
+import { showError } from '@chaise/store/slices/error';
+import { useAppDispatch } from '@chaise/store/hooks';
+import { windowRef } from '@chaise/utils/window-ref';
+import Footer from '@chaise/components/footer';
+import Faceting from './faceting';
+import TableHeader from './table-header';
 
 export type RecordSetProps = {
   initialReference: any,
@@ -46,7 +49,7 @@ const RecordSet = ({
   getFavorites,
   getDisabledTuples,
 }: RecordSetProps): JSX.Element => {
-  $log.debug('recordset comp: render');
+  // $log.debug('recordset comp: render');
 
   const dispatch = useAppDispatch();
 
@@ -107,6 +110,8 @@ const RecordSet = ({
    */
   const [facetPanelOpen, setFacetPanelOpen] = useState(config.facetPanelOpen);
 
+  const [facetColumnsReady, setFacetColumnsReady] = useState(false);
+
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
   const mainContainer = useRef<any>(null);
@@ -119,18 +124,71 @@ const RecordSet = ({
 
 
   useEffect(() => {
-    if (isInitialized) return;
+    if (isInitialized) {
+      attachMainContainerPaddingSensor();
+      return;
+    }
 
     // TODO pass the proper values
     attachContainerHeightSensors();
 
-    // TODO validate facetFilters
+    // capture and log the right click event on the permalink button
+    const permalink = document.getElementById('permalink');
+    if (permalink) {
+      permalink.addEventListener('contextmenu', () => {
+        LogService.logClientAction({
+          action: flowControl.current.getTableLogAction(LogActions.PERMALINK_RIGHT),
+          stack: flowControl.current.getTableLogStack()
+        }, reference.defaultLogInfo);
+      });
+    }
 
-    // TODO save query stuff
+    if (config.disableFaceting) {
+      initialize();
+      return;
+    }
 
-    // initialize the data
-    initialize();
-  }, []);
+    // NOTE this will affect the reference uri so it must be
+    //      done before initializing recordset
+    reference.generateFacetColumns().then((res: any) => {
+
+      setFacetColumnsReady(true);
+
+      // initialize the data
+      initialize();
+
+      /**
+       * When there are issues in the given facet,
+       * - recordset should just load the data based on the remaining
+       *  facets that had no issue
+       * - we should show an error and let users know that there were some
+       *   issues.
+       * - we should keep the browser location like original to allow users to
+       *   refresh and try again. Also the issue might be happening because they
+       *   are not logged in. So we should keep the location like original so after
+       *   logging in they can get back to the page.
+       * - Dismissing the error should change the browser location.
+       */
+      if (res.issues) {
+        // TODO change the
+        // var cb = function () {
+        //   $rootScope.$emit('reference-modified');
+        // };
+        // ErrorService.handleException(res.issues, false, false, cb, cb);
+      } else {
+        // TODO save query should just return a promise
+      }
+
+    }).catch((exception: any) => {
+      $log.warn(exception);
+      setIsLoading(false);
+      if (TypeUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+        exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
+      }
+      dispatch(showError({ error: exception }));
+    });
+
+  }, [isInitialized]);
 
   useEffect(() => {
     // call the flow-control after each reference object
@@ -138,16 +196,22 @@ const RecordSet = ({
   }, [reference]);
 
   //-------------------  flow-control functions:   --------------------//
+  const scrollMainContainerToTop = () => {
+    if (!mainContainer.current) return;
+
+    mainContainer.current.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   const updateLocation = (scrollToTop: boolean) => {
     // if we're showing an error popup, don't change the location
     // TODO
     // if ($rootScope.error) return;
 
-    if (scrollToTop && mainContainer.current) {
-      mainContainer.current.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      });
+    if (scrollToTop) {
+      scrollMainContainerToTop();
     }
     windowRef.history.replaceState({}, '', getRecordsetLink(reference));
   }
@@ -244,7 +308,7 @@ const RecordSet = ({
     updateMainEntity(updatePage, false);
 
     // get the aggregate values only if main page is loaded
-    fetchSecondaryRequests(updatePage);
+    // fetchSecondaryRequests(updatePage);
 
     // TODO the rest
   }
@@ -317,7 +381,9 @@ const RecordSet = ({
     }
     flowControl.current.queue.occupiedSlots--;
     flowControl.current.dirtyResult = !res;
-    setIsLoading(false);
+    if (res) {
+      setIsLoading(false);
+    }
 
     printDebugMessage(`after result update: ${res ? 'successful.' : 'unsuccessful.'}`, counter);
   }
@@ -667,11 +733,12 @@ const RecordSet = ({
 
       $log.warn('url length limit will be reached!');
 
+      // TODO
       // show the alert (the function will handle just showing one alert)
       // AlertsService.addURLLimitAlert();
 
       // scroll to top of the container so users can see the alert
-      // scrollToTop();
+      scrollMainContainerToTop();
 
       // signal the caller that we reached the URL limit.
       return false;
@@ -680,6 +747,20 @@ const RecordSet = ({
     // remove the alert if it's present since we don't need it anymore
     // AlertsService.deleteURLLimitAlert();
     return true;
+  };
+
+  const recordsetLink = getRecordsetLink();
+
+  const copyPermalink = () => {
+    LogService.logClientAction(
+      {
+        action: flowControl.current.getTableLogAction(LogActions.PERMALINK_LEFT),
+        stack: flowControl.current.getTableLogStack()
+      },
+      reference.defaultLogInfo
+    );
+
+    copyToClipboard(recordsetLink);
   }
 
   /**
@@ -738,6 +819,8 @@ const RecordSet = ({
 
   const nextPreviousCallback = (isNext: boolean) => {
     const ref = isNext ? page.next : page.previous;
+    const action = isNext ? LogActions.PAGE_NEXT : LogActions.PAGE_PREV;
+    const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
     if (ref && checkReferenceURL(ref)) {
 
       setReference(ref);
@@ -745,13 +828,13 @@ const RecordSet = ({
 
       LogService.logClientAction(
         {
-          action: flowControl.current.getTableLogAction(LogActions.PAGE_PREV),
+          action: flowControl.current.getTableLogAction(action),
           stack: flowControl.current.getTableLogStack()
         },
         reference.defaultLogInfo
       );
 
-      update(true, false, false, false, LogReloadCauses.PAGE_PREV);
+      update(true, false, false, false, cause);
     }
   }
 
@@ -766,7 +849,7 @@ const RecordSet = ({
   }
 
   const renderShowFilterPanelBtn = () => {
-    if (facetPanelOpen) {
+    if (facetPanelOpen || !config.showFaceting) {
       return;
     }
     return (
@@ -788,15 +871,15 @@ const RecordSet = ({
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`}>
             <div className='panel-header'>
-              <div className='pull-left'>
+              <div>
                 <h3>Refine search</h3>
               </div>
-              <div className='pull-right'>
+              <div>
                 <button
                   className='hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right'
                   onClick={() => changeFacetPanelOpen()}
                 >
-                  <span className='chaise-icon chaise-sidebar-close'></span>
+                  <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
                   <span>Hide panel</span>
                 </button>
               </div>
@@ -815,7 +898,12 @@ const RecordSet = ({
                     <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
                   }
                   >
-                    <a id='permalink' className='chaise-btn chaise-btn-primary'>
+                    <a
+                      id='permalink'
+                      className='chaise-btn chaise-btn-primary'
+                      href={recordsetLink}
+                      onClick={copyPermalink}
+                    >
                       <span className='chaise-btn-icon fa-solid fa-bookmark' />
                       <span>Permalink</span>
                     </a>
@@ -862,15 +950,23 @@ const RecordSet = ({
             </div>
             {renderSelectedFacetFilters()}
             {renderShowFilterPanelBtn()}
-            {/* <table-header vm='vm'></table-header> */}
+            <TableHeader />
           </div>
 
         </div>
       </div>
       <div className='bottom-panel-container'>
-        <div className='side-panel-resizable'>
-          {/* TODO faceting */}
-        </div>
+        {
+          facetColumnsReady &&
+          <div
+            className={'side-panel-resizable ' + panelClassName}
+            style={{visibility: config.showFaceting ? 'visible': 'hidden'}}
+          >
+            <div className='side-panel-container'>
+              <Faceting reference={reference} />
+            </div>
+          </div>
+        }
         <div className='main-container dynamic-padding' ref={mainContainer}>
           <div className='main-body'>
             <RecordSetTable
@@ -884,6 +980,7 @@ const RecordSet = ({
               nextPreviousCallback={nextPreviousCallback}
             />
           </div>
+          {isInitialized && config.displayMode === RecordSetDisplayMode.FULLSCREEN && <Footer />}
         </div>
       </div>
     </div>

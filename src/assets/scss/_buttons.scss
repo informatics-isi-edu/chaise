@@ -5,8 +5,8 @@
         @include chaise-btn-sm();
     }
 
-    > .chaise-btn-icon {
-        margin-right: 2px;
+    > .chaise-btn-icon + * {
+        margin-left: 4px;
     }
 
     &.icon-btn {

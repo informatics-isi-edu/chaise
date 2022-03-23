@@ -7,7 +7,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { addTopHorizontalScroll } from '../utils/ui-utils';
+import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
 
 type RecordSetTableProps = {
   columnModels: any,

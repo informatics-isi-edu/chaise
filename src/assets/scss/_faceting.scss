@@ -1,0 +1,70 @@
+@import "variables";
+
+.faceting-columns-container {
+  .panel-group {
+    margin-bottom: 20px;
+
+    // each facet panel
+    .facet-panel {
+      border-radius: 0;
+      border: 1px solid $border-color;
+
+      // active style
+      &.active,
+      &:hover {
+        border-color: rgb(51, 122, 183) !important;
+        animation-duration: 4s;
+        + .facet-panel {
+          margin-top: 0;
+          border-top: 0;
+        }
+      }
+      :focus {
+        outline: none;
+      }
+      // override bootstrap default
+      + .facet-panel {
+        margin-top: -1px;
+        // border-top: 0;
+      }
+
+      .accordion-button {
+        // override bootstrap default
+        height: 40px;
+        border: 0;
+        border-radius: 0;
+        padding: 10px 5px;
+        text-transform: none;
+        position: relative;
+
+        background-color: $table-header-background-color;
+        color: $black-color;
+
+        &:focus {
+          box-shadow: none;
+          // border-color: rgba(0,0,0,.125);
+        }
+
+        .toggle-icon {
+          &.fa-chevron-right {
+            margin-right: 3.4px;
+            margin-left: 4px;
+          }
+
+          &.fa-chevron-down {
+            margin-right: 3px;
+          }
+        }
+
+        .facet-header-icon {
+          position: absolute;
+          right: 5px;
+        }
+      }
+
+      .accordion-body {
+        padding: 10px;
+      }
+    }
+  }
+}

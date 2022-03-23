@@ -132,6 +132,71 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
   }
 }
 
+/**
+ * sets the style of domElements.footer
+ * @param {number?} index - index pertaining to which dom element to select
+ * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
+ **/
+export function attachFooterResizeSensor(index?: number) {
+  try {
+    const usedIndex = typeof index === 'number' ? index : 0;
+    const mainContainer = document.querySelectorAll('.main-container')[usedIndex] as HTMLElement;
+    if (!mainContainer) return;
+
+    const mainBody = mainContainer.querySelector<HTMLElement>('.main-body');
+    if (!mainBody) return;
+
+    let setFooterTimeout: any;
+    return new ResizeSensor(mainBody, function () {
+      if (setFooterTimeout) clearTimeout(setFooterTimeout);
+      setFooterTimeout = setTimeout(function () {
+        // the footer definition has to be here.
+        // if we move it outside, it will not use the correct footer element
+        const footer = mainContainer.querySelector<HTMLElement>('.footer-container');
+        if (!footer) return;
+
+        // calculate the inner height of the app content (height of children in main-body + footer)
+        if ((mainBody.offsetHeight + footer.offsetHeight + 10) < mainContainer.offsetHeight) {
+          footer.classList.remove('position-relative');
+        } else {
+          footer.classList.add('position-relative');
+        }
+      }, 50);
+    });
+
+  } catch (err) {
+    $log.warn(err);
+  }
+}
+
+/**
+ * @param   {DOMElement} parentContainer - the container that we want the alignment for
+ * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
+ *
+ * Make sure the `.top-right-panel` and `.main-container` are aligned.
+ * They can be missaligned if the scrollbar is visible and takes space.
+ */
+export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) {
+  const container = parentContainer ? parentContainer : document.querySelector('body') as HTMLElement;
+  const mainContainer = container.querySelector('.main-container') as HTMLElement;
+  const topRightPanel = container.querySelector('.top-right-panel') as HTMLElement;
+  let mainContainerPaddingTimeout: any;
+
+  // timeout makes sure we're not calling this more than we should
+  const setPadding = () => {
+    if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
+    mainContainerPaddingTimeout = setTimeout(function () {
+      try {
+        const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+        mainContainer.style.paddingRight = padding + 'px';
+      } catch (exp) { }
+    }, 10);
+  }
+
+  // watch the size of mainContainer
+  // (if width of topRightPanel changes, the mainContainer changes too, so just watching mainContainer is enough)
+  return new ResizeSensor(mainContainer, setPadding);
+}
 
 /**
  * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
@@ -187,5 +252,27 @@ export function addTopHorizontalScroll(parent: HTMLElement) {
   // show only if content is overflowing
   if (scrollableContent.scrollWidth == scrollableContent.clientWidth) {
     topScrollElementWrapper.style.height = '15px';
+  }
+}
+
+export function copyToClipboard(text: string) {
+  if (document.execCommand) {
+    const dummy = document.createElement('input');
+    dummy.setAttribute('visibility', 'hidden');
+    dummy.setAttribute('display', 'none');
+
+    document.body.appendChild(dummy);
+    dummy.setAttribute('id', 'permalink_copy');
+    dummy.value = text;
+    dummy.select();
+    document.execCommand('copy');
+
+    document.body.removeChild(dummy);
+  }
+  else if (navigator && navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch((err) => {
+      $log.error('failed to copy with the following error:')
+      $log.error(err);
+    });
   }
 }

@@ -450,7 +450,7 @@ export function isSameOrigin(url: string): boolean {
 * @param {ERMrest.reference} reference
 * @returns {string} url to recordset app
 */
-export function getRecordsetLink(reference: any) {
+export function getRecordsetLink(reference?: any) {
   // before run, use window location
   if (!reference) {
     return windowRef.location.href;

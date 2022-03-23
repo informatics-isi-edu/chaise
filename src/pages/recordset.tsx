@@ -123,6 +123,7 @@ const RecordSetApp = (): JSX.Element => {
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting,
         facetPanelOpen: showFaceting,
+        disableFaceting: false,
         displayMode: RecordSetDisplayMode.FULLSCREEN,
         // TODO
         // enableFavorites
