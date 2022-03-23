@@ -6,6 +6,11 @@
 # set the default target to install
 .DEFAULT_GOAL:=install
 
+# make sure NOD_ENV is defined (use production if not defined or invalid)
+ifneq ($(NODE_ENV),development)
+NODE_ENV:=production
+endif
+
 # env variables needed for installation
 WEB_URL_ROOT?=/
 WEB_INSTALL_ROOT?=/var/www/html/
@@ -627,8 +632,8 @@ update-webdriver:
 
 # install packages needed for production
 .PHONY: npm-install-prod-modules
-npm-install-prod-modules:
-	npm install --production
+npm-install-modules:
+	npm install
 
 # install packages needed for production and development (including testing)
 # --production=false makes sure to ignore NODE_ENV and install everything
@@ -643,7 +648,7 @@ deps-test: npm-install-all-modules update-webdriver
 
 # install all the dependencies
 .PHONY: deps
-deps: npm-install-prod-modules
+deps: npm-install-modules
 
 .PHONY: updeps
 updeps:
@@ -719,6 +724,7 @@ rsync-chaise-w-config:
 print-variables:
 	@mkdir -p $(DIST)
 	$(info =================)
+	$(info NODE_ENV:=$(NODE_ENV))
 	$(info BUILD_VERSION=$(BUILD_VERSION))
 	$(info building and deploying to: $(CHAISEDIR))
 	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
