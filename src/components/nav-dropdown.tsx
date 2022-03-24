@@ -1,15 +1,20 @@
+import { useRef } from 'react';
+
 // components
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // utilities
 import MenuUtils from '@chaise/utils/menu-utils';
+import { windowRef } from '@chaise/utils/window-ref';
 
 // TODO: make a menu object interface
 const ChaiseNavDropdown = ({
-  menu,
+  menu, parentDropdown
 }: any): JSX.Element => menu.map((child: any, index: number) => {
   if (!MenuUtils.canShow(child)) return;
+
+  const dropdownWrapper = useRef<any>(null);
 
   // create an unclickable header
   if (child.header == true && !child.children && !child.url) {
@@ -36,9 +41,16 @@ const ChaiseNavDropdown = ({
   }
 
   if (child.children && MenuUtils.canEnable(child)) {
-    // TODO: calculate position and set drop="start" for 
+    let dropEnd = true;
+    const winWidth = windowRef.innerWidth;
+
+    // parentDropdown.current is the parent menu option that toggles open the menu below
+    // this menu is generated when the parent dropdown is opened so we don't know how wide the child will be on open
+    // check if opening the menu twice would push off the screen to have the next dropdowns open left instead
+    if (parentDropdown && (Math.round(winWidth - parentDropdown.current.getBoundingClientRect().right) < parentDropdown.current.offsetWidth*2) ) dropEnd = false;
+
     return (
-      <Dropdown key={index} drop='end' className='dropdown-submenu'>
+      <Dropdown key={index} drop={dropEnd ? 'end' : 'start'} className='dropdown-submenu' ref={dropdownWrapper}>
         <Dropdown.Toggle 
           as='a'
           variant='dark' 
@@ -46,7 +58,7 @@ const ChaiseNavDropdown = ({
           dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }} 
         />
         <Dropdown.Menu>
-          <ChaiseNavDropdown menu={child.children}></ChaiseNavDropdown>
+          <ChaiseNavDropdown menu={child.children} parentDropdown={dropdownWrapper}></ChaiseNavDropdown>
         </Dropdown.Menu>
       </Dropdown>
     );

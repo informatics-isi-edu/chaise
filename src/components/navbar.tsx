@@ -1,6 +1,6 @@
 import '@chaise/assets/scss/_navbar.scss';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // components
 import Container from 'react-bootstrap/Container';
@@ -27,9 +27,11 @@ const ChaiseNavbar = (): JSX.Element => {
   const settings = ConfigService.appSettings;
 
   const [configInitialized, setConfigInitialized] = useState<boolean>(false);
-  const [formModel, setFormModel]                 = useState({ ridSearchTerm: '' });
-  const [menu, setMenu]                           = useState<any>(null); // TODO: type is null or an array of menuOptions
-  const [showRidSpinner, setShowRidSpinner]       = useState<boolean>(false);
+  const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
+  const [menu, setMenu] = useState<any>(null); // TODO: type is null or an array of menuOptions
+  const [showRidSpinner, setShowRidSpinner] = useState<boolean>(false);
+
+  const dropdownWrapper = useRef<any>(null);
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -154,9 +156,10 @@ const ChaiseNavbar = (): JSX.Element => {
         return (
           <NavDropdown
             key={index}
+            ref={dropdownWrapper}
             title={renderDropdownName(item)}
           >
-            <ChaiseNavDropdown menu={item.children}></ChaiseNavDropdown>
+            <ChaiseNavDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseNavDropdown>
           </NavDropdown>
         );
       }
@@ -261,21 +264,19 @@ const ChaiseNavbar = (): JSX.Element => {
   // TODO: log branding
   return (
     <Navbar id='navheader' variant='dark' bg='dark' expand='lg'>
-      <Container fluid>
-        <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')}>
-          {renderBrandImage()}
-          {' '}
-          {renderBrandingHTML()}
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls='navbar-dark-example' />
-        <Navbar.Collapse id='navbar-dark-example'>
-          <Nav className='navbar-menu-options'>
-            {renderNavbarMenuDropdowns()}
-          </Nav>
-          {renderRidSearch()}
-          <ChaiseLogin />
-        </Navbar.Collapse>
-      </Container>
+      <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')}>
+        {renderBrandImage()}
+        {' '}
+        {renderBrandingHTML()}
+      </Navbar.Brand>
+      <Navbar.Toggle aria-controls='navbar-dark-example' />
+      <Navbar.Collapse id='navbar-dark-example'>
+        <Nav className='navbar-menu-options'>
+          {renderNavbarMenuDropdowns()}
+        </Nav>
+        {renderRidSearch()}
+        <ChaiseLogin />
+      </Navbar.Collapse>
     </Navbar>
   );
 };

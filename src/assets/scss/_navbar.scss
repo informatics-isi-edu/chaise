@@ -109,7 +109,7 @@ body > .container {
 
 .navbar {
     margin-bottom: 0;
-    padding: 0px 20px;
+    padding: 0px 5px 0px 20px;
     min-height: 50px;
     flex-wrap: nowrap;
 }
@@ -297,6 +297,23 @@ nav.navbar {
     .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>a,
     .dropdown-menu>li.dropdown-header-container ~ li:not(.dropdown-header-container)>div>div>a {
         padding-left: 22px;
+    }
+
+    // override bootstrap rule that didn't include '>' so dropstart alway overrode dropend if both present on different elements
+    .dropstart>.dropdown-menu[data-bs-popper] {
+        top: 0;
+        right: 100%;
+        left: auto;
+        margin-top: 0;
+        margin-right: 0.125rem;
+    }
+
+    .dropend>.dropdown-menu[data-bs-popper] {
+        top: 0;
+        right: auto;
+        left: 100%;
+        margin-top: 0;
+        margin-left: 0.125rem;
     }
 
     // Vertical navbar

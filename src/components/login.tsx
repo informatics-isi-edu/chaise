@@ -208,7 +208,7 @@ const ChaiseLogin = (): JSX.Element => {
   };
 
   const renderMenuChildren = () => {
-    if (loggedInMenu) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions} openProfileCb={handleOpenProfileClick} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>)
+    if (loggedInMenu.menuOptions) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions} openProfileCb={handleOpenProfileClick} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>)
 
     return (
       <>

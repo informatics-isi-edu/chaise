@@ -31,28 +31,10 @@ const ChaiseLoginDropdown = ({
       let dropEnd = true;
       const winWidth = windowRef.innerWidth;
 
-      console.log(parentDropdown);
-
-      // [].forEach.call(openDropdowns, (el: any) => {
-      //   // MenuUtils.checkHeight(el, window.innerHeight);
-
-      //   console.log(el.getBoundingClientRect())
-      //   console.log(winWidth)
-      //   // If dropdown is spilling over
-      //   if (Math.round(el.getBoundingClientRect().right) < winWidth) {
-      //     console.log("first if")
-      //     el.style.width = 'max-content';
-      //   } else {
-      //     const visibleContent = winWidth - el.getBoundingClientRect().left;
-      //     console.log("2nd if: ", visibleContent);
-      //     // hard-coded limit of width for opening on the left hand side
-      //     if (Math.round(visibleContent) < 200) {
-      //       el.classList.add('dropdown-menu-right');
-      //     } else {
-      //       dropEnd = false;
-      //     }
-      //   }
-      // });
+      // parentDropdown.current is the parent menu option that toggles open the menu below
+      // this menu is generated when the parent dropdown is opened so we don't know how wide the child will be on open
+      // 
+      if (parentDropdown && (Math.round(winWidth - parentDropdown.current.getBoundingClientRect().right) < parentDropdown.current.clientWidth*2) ) dropEnd = false;
 
       return (
         <Dropdown key={index} drop={dropEnd ? 'end' : 'start'} className='dropdown-submenu' ref={dropdownWrapper}>
