@@ -124,7 +124,7 @@ body > .container {
 .navbar .nav-link {
     position: relative;
     display: block;
-    padding: 10px 15px !important; // so the property overrides a more specific rule from bootstrap
+    padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
     line-height: 20px;
     color: rgba(255, 255, 255, 0.55);
 }

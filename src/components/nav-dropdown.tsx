@@ -1,3 +1,4 @@
+// NOTE: this component should be eventually deprecated in favor of ChaiseLoginDropdown
 import { useRef } from 'react';
 
 // components

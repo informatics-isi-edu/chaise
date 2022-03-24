@@ -209,7 +209,13 @@ const ChaiseLogin = (): JSX.Element => {
   };
 
   const renderMenuChildren = () => {
-    if (loggedInMenu.menuOptions) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions} openProfileCb={handleOpenProfileClick} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>)
+    if (loggedInMenu.menuOptions) {
+      return (<ChaiseLoginDropdown
+        menu={loggedInMenu.menuOptions}
+        openProfileCb={handleOpenProfileClick}
+        parentDropdown={dropdownWrapper}
+      />)
+    }
 
     return (
       <>
@@ -217,6 +223,27 @@ const ChaiseLogin = (): JSX.Element => {
         <NavDropdown.Item id='logout-link' onClick={MenuUtils.logout}>Log Out</NavDropdown.Item>
       </>
     );
+  }
+
+  const renderDropdownToggle = () => {
+    const dropdownToggleComponent = <Dropdown.Toggle className='nav-link' as='a'>{displayName}</Dropdown.Toggle>;
+
+    if (showUserTooltip) {
+      return (<OverlayTrigger
+        placement='bottom-end'
+        overlay={<Tooltip>{userTooltip}</Tooltip>}
+      >
+        {dropdownToggleComponent}
+      </OverlayTrigger>)
+    }
+
+    return (dropdownToggleComponent);
+  }
+
+  const handleLoginDropdownToggle = (isOpen: boolean, event: any)=> {
+    setShowUserTooltip(!isOpen);
+    
+    if (event.originalEvent.persist) event.originalEvent.persist();
   }
 
   const renderLoginMenu = () => {
@@ -228,19 +255,19 @@ const ChaiseLogin = (): JSX.Element => {
         </>
       );
     }
-  
+
     if (replaceDropdown && oneOption) {
       switch (oneOption.type) {
         case 'header':
           return (
-            <Nav.Item 
+            <Nav.Item
               className='chaise-dropdown-header'
               dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
             />
           );
         case 'url':
           return (
-            <Nav.Link 
+            <Nav.Link
               href={oneOption.url}
               target={oneOption.newTab ? '_blank' : '_self'}
               dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
@@ -267,29 +294,16 @@ const ChaiseLogin = (): JSX.Element => {
       }
     }
 
-    if (showUserTooltip) {
-      // TODO: read into disable tooltip in certain conditions
-      //       maybe "Overlay" instead?
-      return (
-        <OverlayTrigger 
-          placement='bottom-end' 
-          overlay={<Tooltip>{userTooltip}</Tooltip>}
-        >
-          <Dropdown ref={dropdownWrapper} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
-            <Dropdown.Toggle as='a'variant='dark'>{displayName}</Dropdown.Toggle>
-            <Dropdown.Menu>
-              {renderMenuChildren()}
-            </Dropdown.Menu>
-            
-          </Dropdown>
-        </OverlayTrigger>
-      );
-    }
-
     return (
-      <NavDropdown title={displayName} ref={dropdownWrapper} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
-        {renderMenuChildren()}
-      </NavDropdown>
+      <Dropdown
+        ref={dropdownWrapper}
+        className='username-display nav-item'
+        onToggle={handleLoginDropdownToggle}
+        style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}
+      >
+        {renderDropdownToggle()}
+        <Dropdown.Menu>{renderMenuChildren()}</Dropdown.Menu>
+      </Dropdown>
     );
   }
 
