@@ -12,7 +12,7 @@ import { windowRef } from '@chaise/utils/window-ref';
 // NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax 
 //       hasn't been updated to use the "types" or set default types on menu ingest
 const ChaiseLoginDropdown = ({
-  menu, openProfileCb,
+  menu, openProfileCb, parentDropdown
 }: any): JSX.Element => menu.map((child: any, index: number) => {
   if (!MenuUtils.canShow(child) || !child.isValid) return;
 
@@ -29,11 +29,9 @@ const ChaiseLoginDropdown = ({
       );
     case 'menu':
       let dropEnd = true;
-      const openDropdowns = document.querySelectorAll('.dropdown.show .dropdown-menu');
       const winWidth = windowRef.innerWidth;
-      console.log(openDropdowns);
 
-      console.log(dropdownWrapper);
+      console.log(parentDropdown);
 
       // [].forEach.call(openDropdowns, (el: any) => {
       //   // MenuUtils.checkHeight(el, window.innerHeight);
@@ -57,15 +55,15 @@ const ChaiseLoginDropdown = ({
       // });
 
       return (
-        <Dropdown key={index} drop={dropEnd ? 'end' : 'start'} className='dropdown-submenu'>
+        <Dropdown key={index} drop={dropEnd ? 'end' : 'start'} className='dropdown-submenu' ref={dropdownWrapper}>
           <Dropdown.Toggle
             as='a'
             variant='dark'
             className={MenuUtils.menuItemClasses(child, true)}
             dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(child) }}
           />
-          <Dropdown.Menu ref={dropdownWrapper}>
-            <ChaiseLoginDropdown menu={child.children}></ChaiseLoginDropdown>
+          <Dropdown.Menu>
+            <ChaiseLoginDropdown menu={child.children} openProfileCb={openProfileCb} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>
           </Dropdown.Menu>
         </Dropdown>
       );

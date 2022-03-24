@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '@chaise/store/hooks';
 import { RootState } from '@chaise/store/store';
@@ -40,6 +40,8 @@ const ChaiseLogin = (): JSX.Element => {
   const [showProfile, setShowProfile] = useState<boolean>(false);
   const [userTooltip, setUserTooltip] = useState('');
   const [showUserTooltip, setShowUserTooltip] = useState<boolean>(false);
+
+  const dropdownWrapper = useRef<any>(null);
 
   function isValueDefined(val: any) {
     return val != undefined && val != null;
@@ -206,7 +208,7 @@ const ChaiseLogin = (): JSX.Element => {
   };
 
   const renderMenuChildren = () => {
-    if (loggedInMenu) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions} openProfileCb={handleOpenProfileClick}></ChaiseLoginDropdown>)
+    if (loggedInMenu) return (<ChaiseLoginDropdown menu={loggedInMenu.menuOptions} openProfileCb={handleOpenProfileClick} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>)
 
     return (
       <>
@@ -280,7 +282,7 @@ const ChaiseLogin = (): JSX.Element => {
     // }
 
     return (
-      <NavDropdown title={displayName} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
+      <NavDropdown title={displayName} ref={dropdownWrapper} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
         {renderMenuChildren()}
       </NavDropdown>
     );
