@@ -6,14 +6,14 @@
     .controller('AnnotationsController', [
         'AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations',
         'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService',
-        'ConfigUtils', 'DataUtils', 'errorMessages', 'InputUtils', 'UriUtils', 'modalUtils',
+        'ConfigUtils', 'DataUtils', 'errorMessages', 'ErrorService', 'InputUtils', 'UriUtils', 'modalUtils',
         'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels',
         'viewerConfig', 'viewerConstant', 'viewerAppUtils',
         '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
         function AnnotationsController(
             AlertsService, annotationCreateForm, annotationEditForm, annotations,
             AnnotationsService, AuthService, comments, context, CommentsService,
-            ConfigUtils, DataUtils, errorMessages, InputUtils, UriUtils, modalUtils ,
+            ConfigUtils, DataUtils, errorMessages, ErrorService, InputUtils, UriUtils, modalUtils ,
             modalBox, recordsetDisplayModes, recordCreate, logService, annotationModels,
             viewerConfig, viewerConstant, viewerAppUtils,
             $q, $rootScope, $scope, $timeout, $uibModal, $window) {
@@ -1177,7 +1177,8 @@
                         vm.closeAnnotationForm();
                     }
                 }).catch(function (err) {
-                    console.log("error while deleteing:", err);
+                    vm.submissionButtonDisabled = false;
+                    ErrorService.handleException(err, true);
                 });
             }, function () {
                 // log cancel
