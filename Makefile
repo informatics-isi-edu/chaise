@@ -678,7 +678,7 @@ lint-w-warn: $(SOURCE)
 
 # Rule to build chaise
 .PHONY: all
-all: $(DIST)
+all: deps $(DIST)
 
 # Rule for installing for normal deployment (build chaise and deploy)
 .PHONY: install dont_install_in_root
