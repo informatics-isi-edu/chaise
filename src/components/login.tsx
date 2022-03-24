@@ -6,11 +6,12 @@ import { ClientState, loginUser } from '@chaise/store/slices/authn';
 
 // components
 import Nav from 'react-bootstrap/Nav';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import Dropdown from 'react-bootstrap/Dropdown';
 import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
 import ProfileModal from '@chaise/components/profile-modal';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 // services
 import { ConfigService } from '@chaise/services/config';
@@ -266,20 +267,24 @@ const ChaiseLogin = (): JSX.Element => {
       }
     }
 
-    // if (showUserTooltip) {
-    // TODO: read into disable tooltip in certain conditions
-    //        maybe "Overlay" instead?
-    //   return (
-    //     <OverlayTrigger 
-    //       placement='bottom-end' 
-    //       overlay={<Tooltip>{userTooltip}</Tooltip>}
-    //     >
-    //       <NavDropdown title={displayName} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
-    //         {renderMenuChildren()}
-    //       </NavDropdown>
-    //     </OverlayTrigger>
-    //   );
-    // }
+    if (showUserTooltip) {
+      // TODO: read into disable tooltip in certain conditions
+      //       maybe "Overlay" instead?
+      return (
+        <OverlayTrigger 
+          placement='bottom-end' 
+          overlay={<Tooltip>{userTooltip}</Tooltip>}
+        >
+          <Dropdown ref={dropdownWrapper} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
+            <Dropdown.Toggle as='a'variant='dark'>{displayName}</Dropdown.Toggle>
+            <Dropdown.Menu>
+              {renderMenuChildren()}
+            </Dropdown.Menu>
+            
+          </Dropdown>
+        </OverlayTrigger>
+      );
+    }
 
     return (
       <NavDropdown title={displayName} ref={dropdownWrapper} className='navbar-nav username-display' style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}>
