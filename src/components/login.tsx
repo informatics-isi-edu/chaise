@@ -40,6 +40,7 @@ const ChaiseLogin = (): JSX.Element => {
   const [replaceDropdown, setReplaceDropdown] = useState<boolean>(false);
   const [showProfile, setShowProfile] = useState<boolean>(false);
   const [userTooltip, setUserTooltip] = useState('');
+  const [enableUserTooltip, setEnableUserTooltip] = useState<boolean>(false);
   const [showUserTooltip, setShowUserTooltip] = useState<boolean>(false);
 
   const dropdownWrapper = useRef<any>(null);
@@ -57,11 +58,8 @@ const ChaiseLogin = (): JSX.Element => {
         // - some users could have the same full_name for multiple globus identities
         //   having display_name included in tooltip can help differentiate which user is logged in at a glance
         // - display_name should always be defined
-        // if no dropdown, show tooltip
-        // TODO: function = () => {
-        //   let dropdownEl = document.querySelector('.navbar-nav.login-menu-options .username-display.dropdown.show');
-        //   return !dropdownEl;
-        // }
+        setEnableUserTooltip(true);
+        // dropdown isn't open on page load so show
         setShowUserTooltip(true);
         setUserTooltip(authnRes.client.full_name + '\n' + authnRes.client.display_name);
       }
@@ -228,7 +226,7 @@ const ChaiseLogin = (): JSX.Element => {
   const renderDropdownToggle = () => {
     const dropdownToggleComponent = <Dropdown.Toggle className='nav-link' as='a'>{displayName}</Dropdown.Toggle>;
 
-    if (showUserTooltip) {
+    if (enableUserTooltip && showUserTooltip) {
       return (<OverlayTrigger
         placement='bottom-end'
         overlay={<Tooltip>{userTooltip}</Tooltip>}
