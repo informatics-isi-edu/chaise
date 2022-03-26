@@ -163,6 +163,7 @@ const ChaiseNavbar = (): JSX.Element => {
 
   const handleToLiveClick = () => {
     windowRef.location = MenuUtils.addLogParams(windowRef.location.href.replace(catalogId, catalogId.split('@')[0]), ConfigService.contextHeaderParams);
+    windowRef.location.reload();
   };
 
   const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: any) => {
