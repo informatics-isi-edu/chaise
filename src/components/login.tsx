@@ -16,6 +16,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 // services
 import { ConfigService } from '@chaise/services/config';
 import AuthnService from '@chaise/services/authn';
+import { LogService } from '@chaise/services/log';
 
 // utilities
 import { LogActions } from '@chaise/models/log';
@@ -175,6 +176,7 @@ const ChaiseLogin = (): JSX.Element => {
     }
   }, []);
 
+  // click handlers
   const handleLoginClick = () => {
     AuthnService.popupLogin(LogActions.LOGIN_NAVBAR, () => {
       if (!AuthnService.shouldReloadPageAfterLogin()) {
@@ -195,12 +197,17 @@ const ChaiseLogin = (): JSX.Element => {
     MenuUtils.openProfileModal();
   }
 
-  const logDropdownOpen = () => {
-    // TODO: log dropdown opened
-    console.log('dropdown opened');
-  };
+  const handleLoginDropdownToggle = (isOpen: boolean, event: any) => {
+    setShowUserTooltip(!isOpen);
+    MenuUtils.onDropdownToggle(isOpen, event, null, LogActions.NAVBAR_ACCOUNT_DROPDOWN);
+  }
 
-  const showSignupLink = () => {
+  const handleOnLinkClick = (event: any, item: any) => {
+    MenuUtils.onLinkClick(event, item);
+  }
+
+  // render functions
+  const renderSignupLink = () => {
     if (!cc.signUpURL) return;
 
     return (<Nav.Link id='signup-link' className='navbar-nav' href={cc.signUpUrl}>Sign Up</Nav.Link>);
@@ -238,17 +245,11 @@ const ChaiseLogin = (): JSX.Element => {
     return (dropdownToggleComponent);
   }
 
-  const handleLoginDropdownToggle = (isOpen: boolean, event: any)=> {
-    setShowUserTooltip(!isOpen);
-    
-    if (event.originalEvent.persist) event.originalEvent.persist();
-  }
-
   const renderLoginMenu = () => {
     if (!TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
       return (
         <>
-          {showSignupLink()}
+          {renderSignupLink()}
           <Nav.Link id='login-link' className='navbar-nav' onClick={handleLoginClick}>Log In</Nav.Link>
         </>
       );
@@ -268,6 +269,7 @@ const ChaiseLogin = (): JSX.Element => {
             <Nav.Link
               href={oneOption.url}
               target={oneOption.newTab ? '_blank' : '_self'}
+              onClick={(event) => handleOnLinkClick(event, oneOption)}
               dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
             />
           );
@@ -305,7 +307,6 @@ const ChaiseLogin = (): JSX.Element => {
     );
   }
 
-  // TODO: fix onClick={logDropdownOpen}
   return (
     <Nav className='login-menu-options'>
       {renderLoginMenu()}

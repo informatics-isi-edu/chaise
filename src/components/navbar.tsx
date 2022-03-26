@@ -13,10 +13,12 @@ import ChaiseNavDropdown from '@chaise/components/nav-dropdown';
 
 // services
 import { ConfigService } from '@chaise/services/config';
+import { LogService } from '@chaise/services/log';
 import { windowRef } from '@chaise/utils/window-ref';
 import { NoRecordError } from '@chaise/models/errors';
 
 // utilities
+import { LogActions } from '@chaise/models/log';
 import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
 import MenuUtils from '@chaise/utils/menu-utils';
 
@@ -26,7 +28,6 @@ const ChaiseNavbar = (): JSX.Element => {
   const ERMrest = ConfigService.ERMrest;
   const settings = ConfigService.appSettings;
 
-  const [configInitialized, setConfigInitialized] = useState<boolean>(false);
   const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
   const [menu, setMenu] = useState<any>(null); // TODO: type is null or an array of menuOptions
   const [showRidSpinner, setShowRidSpinner] = useState<boolean>(false);
@@ -36,6 +37,8 @@ const ChaiseNavbar = (): JSX.Element => {
   function isValueDefined(val: any) {
     return val != undefined && val != null;
   }
+
+  const isVersioned = () => (!!catalogId.split('@')[1]);
 
   useEffect(() => {
     const root = cc.navbarMenu || {};
@@ -107,74 +110,26 @@ const ChaiseNavbar = (): JSX.Element => {
 
     // root is an object with acls, newTab, and children (optional) as key value pairs
     setMenu(root.children || []);
-    setConfigInitialized(true);
   }, []);
 
-  const isVersioned = () => (!!catalogId.split('@')[1]);
-
+  // TODO to live button
   const toLive = () => {
-    // windowRef.location = MenuUtils.addLogParams(windowRef.location.href.replace(catalogId, catalogId.split("@")[0]), ConfigService.getContextHeaderParams());
+    windowRef.location = MenuUtils.addLogParams(windowRef.location.href.replace(catalogId, catalogId.split('@')[0]), ConfigService.contextHeaderParams);
   };
 
-  const renderBrandImage = () => {
-    if (!cc.navbarBrandImage) return;
+  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: any) => {
+    MenuUtils.onDropdownToggle(isOpen, event, item, LogActions.NAVBAR_MENU_OPEN);
+  }
 
-    return (<img id='brand-image' alt='' src={cc.navbarBrandImage} />);
-  };
+  const handleOnLinkClick = (event: any, item: any) => {
+    MenuUtils.onLinkClick(event, item);
+  }
 
-  const renderBrandingHTML = () => {
-    if (!cc.navbarBrandText) return;
-
-    return (
-      <span id='brand-text'>{cc.navbarBrandText}</span>
-    );
-  };
-
-  const renderDropdownName = (item: any) => (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }} />);
-
-  // TODO: onClick logging
-  const renderNavbarMenuDropdowns = () => {
-    if (!menu) return;
-
-    return menu.map((item: any, index: number) => {
-      if (!MenuUtils.canShow(item)) return;
-
-      if (!item.children || !MenuUtils.canEnable(item)) {
-        return (
-          <Nav.Link
-            key={index}
-            href={item.url}
-            target={item.newTab ? '_blank' : '_self'}
-            className={MenuUtils.menuItemClasses(item, false)}
-            dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
-          />
-        );
-      }
-
-      // NOTE: this conditional might be unnecessary
-      if (item.children) {
-        return (
-          <NavDropdown
-            key={index}
-            ref={dropdownWrapper}
-            title={renderDropdownName(item)}
-          >
-            <ChaiseNavDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseNavDropdown>
-          </NavDropdown>
-        );
-      }
-
-      // NOTE: I don't it should reach this case
-      return (<></>);
+  const handleOnBrandingClick = (event: any) => {
+    LogService.logClientAction({
+      action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', '')
     });
-  };
-
-  // RID search
-  const renderRidSearchIcon = () => {
-    if (showRidSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
-
-    return (<span className='chaise-btn-icon fa-solid fa-share' />);
-  };
+  }
 
   const handleRidSearchEnter = (e: any) => {
     if (e.key === 'Enter') handleRidSearch();
@@ -205,16 +160,16 @@ const ChaiseNavbar = (): JSX.Element => {
     // implicitly does the isValueDefined(catalogId) check with how function returns true/false
     if (isValueDefined(catalogId) && isVersioned()) url += `@${splitId.version}`;
 
-    // TODO: RID button logging
-    // var logObj = ConfigUtils.getContextHeaderParams(), headers = {};
+    let logObj: any = ConfigService.contextHeaderParams, 
+      headers: any = {};
 
-    // logObj.action = logService.getActionString(logService.logActions.NAVBAR_RID_SEARCH, "", "");
-    // logObj.rid = scope.ridSearchTerm;
+    logObj.action = LogService.getActionString(LogActions.NAVBAR_RID_SEARCH, '', '');
+    logObj.rid = formModel.ridSearchTerm;
 
-    // headers[ERMrest.contextHeaderName] = logObj;
+    headers[windowRef.ERMrest.contextHeaderName] = logObj;
 
     // try to fetch the resolver link to see if the path resolves before sending the user
-    ConfigService.http.get(url, { headers: {} }).then(() => {
+    ConfigService.http.get(url, { headers: headers }).then(() => {
       setShowRidSpinner(false);
       windowRef.open(url, '_blank');
     }).catch((err: any) => {
@@ -233,6 +188,26 @@ const ChaiseNavbar = (): JSX.Element => {
       ...formModel,
       ridSearchTerm: event.target.value,
     }));
+  };
+
+  const renderBrandImage = () => {
+    if (!cc.navbarBrandImage) return;
+
+    return (<img id='brand-image' alt='' src={cc.navbarBrandImage} />);
+  };
+
+  const renderBrandingHTML = () => {
+    if (!cc.navbarBrandText) return;
+
+    return (
+      <span id='brand-text'>{cc.navbarBrandText}</span>
+    );
+  };
+
+  const renderRidSearchIcon = () => {
+    if (showRidSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
+
+    return (<span className='chaise-btn-icon fa-solid fa-share' />);
   };
 
   const renderRidSearch = () => {
@@ -259,12 +234,50 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
+  const renderDropdownName = (item: any) => (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }} />);
+
+  const renderNavbarMenuDropdowns = () => {
+    if (!menu) return;
+
+    return menu.map((item: any, index: number) => {
+      if (!MenuUtils.canShow(item)) return;
+
+      if (!item.children || !MenuUtils.canEnable(item)) {
+        return (
+          <Nav.Link
+            key={index}
+            href={item.url}
+            target={item.newTab ? '_blank' : '_self'}
+            onClick={(event) => handleOnLinkClick(event, item)}
+            className={MenuUtils.menuItemClasses(item, false)}
+            dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+          />
+        );
+      }
+
+      // NOTE: this conditional might be unnecessary
+      if (item.children) {
+        return (
+          <NavDropdown
+            key={index}
+            ref={dropdownWrapper}
+            title={renderDropdownName(item)}
+            onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
+          >
+            <ChaiseNavDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseNavDropdown>
+          </NavDropdown>
+        );
+      }
+
+      // NOTE: I don't think it should reach this case
+      return (<></>);
+    });
+  };
+
   // TODO: add banner above <nav>
-  // TODO: navbar toggle button when it shrinks
-  // TODO: log branding
   return (
     <Navbar id='navheader' variant='dark' bg='dark' expand='lg'>
-      <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')}>
+      <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
         {renderBrandImage()}
         {' '}
         {renderBrandingHTML()}
