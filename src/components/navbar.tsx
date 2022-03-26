@@ -10,8 +10,10 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 
 import ChaiseLogin from '@chaise/components/login';
 import ChaiseNavDropdown from '@chaise/components/nav-dropdown';
+import ChaiseBanner from '@chaise/components/banner';
 
 // services
+import AuthnService from '@chaise/services/authn';
 import { ConfigService } from '@chaise/services/config';
 import { LogService } from '@chaise/services/log';
 import { windowRef } from '@chaise/utils/window-ref';
@@ -21,6 +23,7 @@ import { NoRecordError } from '@chaise/models/errors';
 import { LogActions } from '@chaise/models/log';
 import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
 import MenuUtils from '@chaise/utils/menu-utils';
+import TypeUtils from '@chaise/utils/type-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId = getCatalogId();
@@ -31,6 +34,8 @@ const ChaiseNavbar = (): JSX.Element => {
   const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
   const [menu, setMenu] = useState<any>(null); // TODO: type is null or an array of menuOptions
   const [showRidSpinner, setShowRidSpinner] = useState<boolean>(false);
+  const [topBanners, setTopBanners] = useState<any[]>([]);
+  const [bottomBanners, setBottomBanners] = useState<any[]>([]);
 
   const dropdownWrapper = useRef<any>(null);
 
@@ -110,10 +115,53 @@ const ChaiseNavbar = (): JSX.Element => {
 
     // root is an object with acls, newTab, and children (optional) as key value pairs
     setMenu(root.children || []);
+
+    // navbarBanner can be an object or array
+    let bannerConfig = Array.isArray(cc.navbarBanner) ? cc.navbarBanner : [cc.navbarBanner];
+
+    // TODO: banner model
+    let tempTopBanners: any[] = [],
+      tempBottomBanners: any[] = [];
+
+    bannerConfig.forEach((conf: any) => {
+      if (!TypeUtils.isObjectAndNotNull(conf)) return;
+      if (!TypeUtils.isStringAndNotEmpty(conf.markdownPattern)) return;
+
+      var html = ERMrest.renderHandlebarsTemplate(conf.markdownPattern, null, { id: catalogId });
+      html = ERMrest.renderMarkdown(html, false);
+
+      if (!TypeUtils.isStringAndNotEmpty(html)) {
+        // invalid html, so we shounldn't add it.
+        return;
+      }
+
+      // if acls.show is defined, process it
+      if (TypeUtils.isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
+        if (!AuthnService.isGroupIncluded(conf.acls.show)) {
+          // don't add the banner because of acls
+          return;
+        }
+      }
+
+      var banner = {
+        html: html,
+        dismissible: (conf.dismissible === true),
+        key: TypeUtils.isStringAndNotEmpty(conf.key) ? conf.key : ''
+      };
+
+      // add the banner to top or bottom based on given position
+      if ((conf.position !== 'bottom')) {
+        tempTopBanners.push(banner);
+      } else {
+        tempBottomBanners.push(banner);
+      }
+    });
+
+    setTopBanners(tempTopBanners);
+    setBottomBanners(tempBottomBanners);
   }, []);
 
-  // TODO to live button
-  const toLive = () => {
+  const handleToLiveClick = () => {
     windowRef.location = MenuUtils.addLogParams(windowRef.location.href.replace(catalogId, catalogId.split('@')[0]), ConfigService.contextHeaderParams);
   };
 
@@ -160,7 +208,7 @@ const ChaiseNavbar = (): JSX.Element => {
     // implicitly does the isValueDefined(catalogId) check with how function returns true/false
     if (isValueDefined(catalogId) && isVersioned()) url += `@${splitId.version}`;
 
-    let logObj: any = ConfigService.contextHeaderParams, 
+    let logObj: any = ConfigService.contextHeaderParams,
       headers: any = {};
 
     logObj.action = LogService.getActionString(LogActions.NAVBAR_RID_SEARCH, '', '');
@@ -190,6 +238,11 @@ const ChaiseNavbar = (): JSX.Element => {
     }));
   };
 
+  // TODO: banner model
+  const renderBanners = (banners: any[]) => {
+    return banners.map((banner: any, index: number) => (<ChaiseBanner key={index} banner={banner}></ChaiseBanner>));
+  }
+
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
 
@@ -203,6 +256,17 @@ const ChaiseNavbar = (): JSX.Element => {
       <span id='brand-text'>{cc.navbarBrandText}</span>
     );
   };
+
+  const renderLiveButton = () => {
+    if (!isVersioned()) return;
+
+    return(<a 
+      id='live-btn'
+      className='nav navbar-nav navbar-right' 
+      onClick={handleToLiveClick} 
+      // uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom"
+    >View Live Data</a>)
+  }
 
   const renderRidSearchIcon = () => {
     if (showRidSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
@@ -274,23 +338,27 @@ const ChaiseNavbar = (): JSX.Element => {
     });
   };
 
-  // TODO: add banner above <nav>
   return (
-    <Navbar id='navheader' variant='dark' bg='dark' expand='lg'>
-      <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
-        {renderBrandImage()}
-        {' '}
-        {renderBrandingHTML()}
-      </Navbar.Brand>
-      <Navbar.Toggle aria-controls='navbar-dark-example' />
-      <Navbar.Collapse id='navbar-dark-example'>
-        <Nav className='navbar-menu-options'>
-          {renderNavbarMenuDropdowns()}
-        </Nav>
-        {renderRidSearch()}
-        <ChaiseLogin />
-      </Navbar.Collapse>
-    </Navbar>
+    <header id='navheader'>
+      {renderBanners(topBanners)}
+      <Navbar variant='dark' expand='lg' className='navbar-inverse'>
+        <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
+          {renderBrandImage()}
+          {' '}
+          {renderBrandingHTML()}
+        </Navbar.Brand>
+        <Navbar.Toggle aria-controls='navbar-dark-example' />
+        <Navbar.Collapse id='navbar-dark-example'>
+          <Nav className='navbar-menu-options'>
+            {renderNavbarMenuDropdowns()}
+          </Nav>
+          {renderRidSearch()}
+          {renderLiveButton()}
+          <ChaiseLogin />
+        </Navbar.Collapse>
+      </Navbar>
+      {renderBanners(bottomBanners)}
+    </header>
   );
 };
 

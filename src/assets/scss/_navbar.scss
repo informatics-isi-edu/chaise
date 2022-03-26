@@ -30,11 +30,11 @@ body > .container {
     border-color: #000;
 }
 
-.navbar-inverse .navbar-nav > li > a {
+.navbar-inverse .navbar-nav > div > a {
    color: #C1C1C1;
 }
 
-.navbar-inverse .navbar-nav.navbar-right > li > a{
+.navbar-inverse .navbar-nav.navbar-right > div > a{
    color: #59C4FF;
 }
 
@@ -51,9 +51,14 @@ body > .container {
     margin-right: 0px; // offset marging-right: -15px from navbar-right
     color: #59C4FF;
     padding: 15px;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
-.navbar-inverse .navbar-nav.navbar-right > li > a:hover{
+.navbar-inverse .navbar-nav.navbar-right > div > a:hover{
    color: #FFF;
 }
 
@@ -61,7 +66,9 @@ body > .container {
 	border-color: #4D4D4D;
 }
 
-.navbar-inverse .navbar-nav > .active > a, .navbar-inverse .navbar-nav > .active > a:hover, .navbar-inverse .navbar-nav > .active > a:focus {
+.navbar-inverse .navbar-nav > .active > a, 
+.navbar-inverse .navbar-nav > .active > a:hover, 
+.navbar-inverse .navbar-nav > .active > a:focus {
 	background-color: #4D4D4D;
 }
 
@@ -71,7 +78,7 @@ body > .container {
 
 .navbar-inverse .navbar-toggle {
     border-color: #fff;
-		color: #fff;
+	color: #fff;
 }
 
 .navbar .navbar-nav .disable-link {
@@ -121,12 +128,12 @@ body > .container {
     display: block;
 }
 
-.navbar .nav-link {
+.navbar .navbar-nav .nav-link {
     position: relative;
     display: block;
     padding: 15px 15px !important; // so the property overrides a more specific rule from bootstrap
     line-height: 20px;
-    color: rgba(255, 255, 255, 0.55);
+    color: #C1C1C1;
 }
 
 .chaise-navbar-banner-container {
@@ -143,6 +150,23 @@ body > .container {
 
     .close {
         padding-right: 15px;
+
+        // button.close from close.less:32
+        -webkit-appearance: none;
+        padding: 0;
+        cursor: pointer;
+        background: 0 0;
+        border: 0;
+    
+        // close from close.less:11
+        float: right;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1;
+        color: #000;
+        text-shadow: 0 1px 0 #fff;
+        filter: alpha(opacity=20);
+        opacity: .2;
     }
 }
 
