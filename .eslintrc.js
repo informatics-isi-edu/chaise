@@ -39,6 +39,9 @@ module.exports = {
     eqeqeq: 'warn',
     'prefer-const': 'warn',
     'jsx-quotes': ['warn', 'prefer-single'],
+    'no-restricted-imports': ['error', {
+      'patterns': ['.*']
+    }],
 
     // ------------------ react ------------------
     'react/function-component-definition': 0,

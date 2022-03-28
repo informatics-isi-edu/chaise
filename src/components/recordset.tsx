@@ -24,8 +24,8 @@ import { showError } from '@chaise/store/slices/error';
 import { useAppDispatch } from '@chaise/store/hooks';
 import { windowRef } from '@chaise/utils/window-ref';
 import Footer from '@chaise/components/footer';
-import Faceting from './faceting';
-import TableHeader from './table-header';
+import Faceting from '@chaise/components/faceting';
+import TableHeader from '@chaise/components/table-header';
 
 export type RecordSetProps = {
   initialReference: any,
