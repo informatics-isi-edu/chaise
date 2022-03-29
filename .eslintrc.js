@@ -63,4 +63,12 @@ module.exports = {
   globals: {
     JSX: true,
   },
+  // ignore the old code
+  ignorePatterns: [
+    'common/**/*', 'recordest/**/*', 'record/**/*', 'recordedit/**/*',
+    'viewer/**/*', 'login2/**/*', 'login/**/*', 'help/**/*', 'lib/**/*',
+    'styles/**/*', 'views/**/*',
+    // we might want to remove the following later:
+    'test/**/*'
+  ]
 };
