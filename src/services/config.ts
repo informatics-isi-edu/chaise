@@ -12,6 +12,22 @@ import { getCatalogId, getQueryParam } from '@chaise/legacy/src/utils/uri-utils'
 import { setupHead, setWindowName } from '@chaise/utils/head-injector';
 import AuthnService from '@chaise/services/authn';
 
+export interface AppSettings {
+  appName: string,
+  appTitle: string,
+  hideNavbar?: boolean,
+  openLinksInTab?: boolean,
+  overrideDownloadClickBehavior?: boolean,
+  overrideExternalLinkBehavior?: boolean,
+  overrideHeadTitle?: boolean
+}
+
+export interface ContextHeaderParams {
+  cid: string,
+  pid: string,
+  wid: string
+}
+
 export class ConfigService {
   private static _setupDone = false;
 
@@ -19,20 +35,9 @@ export class ConfigService {
 
   private static _server: any;
 
-  private static _contextHeaderParams: {
-    cid: string,
-    pid: string,
-    wid: string
-  };
+  private static _contextHeaderParams: ContextHeaderParams;
 
-  private static _appSettings: {
-    appTitle: string,
-    hideNavbar?: boolean,
-    overrideHeadTitle?: boolean,
-    overrideDownloadClickBehavior?: boolean,
-    overrideExternalLinkBehavior?: boolean,
-    openLinksInTab?: boolean
-  };
+  private static _appSettings: AppSettings;
 
   private static _chaiseConfig: any; // TODO
 
@@ -81,18 +86,19 @@ export class ConfigService {
     ConfigService._contextHeaderParams = {
       cid: settings.appName,
       pid: MathUtils.uuid(),
-      wid: windowRef.name,
+      wid: windowRef.name
     };
 
     ConfigService._appSettings = {
       hideNavbar,
       // the settings constant is not accessible from chaise apps,
       // therefore we're capturing them here so they can be used in chaise
+      appName: settings.appName,
       appTitle: settings.appTitle,
       overrideHeadTitle: settings.overrideHeadTitle,
       overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
       overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
-      openLinksInTab,
+      openLinksInTab
     };
 
     // set chaise configuration based on what is in `chaise-config.js` first

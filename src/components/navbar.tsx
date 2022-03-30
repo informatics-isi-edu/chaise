@@ -1,15 +1,14 @@
 import '@chaise/assets/scss/_navbar.scss';
 
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 
 // components
-import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 import ChaiseLogin from '@chaise/components/login';
-import ChaiseNavDropdown from '@chaise/components/nav-dropdown';
+import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
 import ChaiseBanner from '@chaise/components/banner';
 
 // services
@@ -22,112 +21,56 @@ import { NoRecordError } from '@chaise/models/errors';
 // utilities
 import { LogActions } from '@chaise/models/log';
 import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
-import MenuUtils from '@chaise/utils/menu-utils';
+import MenuUtils, { MenuOption, NavbarBanner } from '@chaise/utils/menu-utils';
 import TypeUtils from '@chaise/utils/type-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
-  const catalogId = getCatalogId();
-  const cc = ConfigService.chaiseConfig;
-  const ERMrest = ConfigService.ERMrest;
+  const catalogId: string = getCatalogId();
+  const cc = ConfigService.chaiseConfig; // TODO: chaise-config typing
+  const ERMrest = ConfigService.ERMrest; // TODO: ERMrestJS typing
   const settings = ConfigService.appSettings;
 
-  const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
-  const [menu, setMenu] = useState<any>(null); // TODO: type is null or an array of menuOptions
-  const [showRidSpinner, setShowRidSpinner] = useState<boolean>(false);
-  const [topBanners, setTopBanners] = useState<any[]>([]);
-  const [bottomBanners, setBottomBanners] = useState<any[]>([]);
+  const [formModel, setFormModel]           = useState({ ridSearchTerm: '' });
+  const [menu, setMenu]                     = useState<MenuOption[] | null>(null);
+  const [showRidSpinner, setShowRidSpinner] = useState(false);
+  const [topBanners, setTopBanners]         = useState<NavbarBanner[]>([]);
+  const [bottomBanners, setBottomBanners]   = useState<NavbarBanner[]>([]);
 
   const dropdownWrapper = useRef<any>(null);
 
-  function isValueDefined(val: any) {
-    return val != undefined && val != null;
-  }
+  const isValueDefined = (val: any): boolean => (val !== undefined && val !== null);
 
-  const isVersioned = () => (!!catalogId.split('@')[1]);
+  const isVersioned = (): boolean => (!!catalogId.split('@')[1]);
 
   useEffect(() => {
-    const root = cc.navbarMenu || {};
+    const root = { ...cc.navbarMenu } || {};
 
     // if in iframe and we want to force links to open in new tab,
     const forceNewTab = settings.openLinksInTab === true;
 
-    // Set default newTab property at root node
-    if (!root.hasOwnProperty('newTab') || forceNewTab) {
-      root.newTab = true;
+    // use newTab property if defined and forceNewTab is false
+    const parentNewTab = (root.hasOwnProperty('newTab') && !forceNewTab) ? root.newTab : true;
+    const parentAcls = root.hasOwnProperty('acls') ? root.acls : { 'show': ['*'], 'enable': ['*'] };
+
+    let menuOptions: MenuOption[] = [];
+    if (Array.isArray(root.children)) {
+      menuOptions = MenuUtils.createMenuList(root.children, parentNewTab, parentAcls, forceNewTab, catalogId);
     }
 
-    // Set default ACLs property at root node
-    if (!root.hasOwnProperty('acls')) {
-      root.acls = {
-        show: ['*'],
-        enable: ['*'],
-      };
-    }
-
-    const q = [root];
-    while (q.length > 0) {
-      let obj = q.shift();
-      let parentNewTab = obj.newTab;
-      let parentAcls = obj.acls;
-      let parentNames = obj.names;
-      // template the url
-      if (obj.url && isValueDefined(catalogId)) {
-        obj.url = ERMrest.renderHandlebarsTemplate(obj.url, null, { id: catalogId });
-
-        // only append pcid/ppid if link is to a chaise url
-        if (MenuUtils.isChaise(obj.url, ConfigService.chaiseConfig)) {
-          obj.url = MenuUtils.addLogParams(obj.url, ConfigService.contextHeaderParams);
-        }
-      }
-      // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
-      // used to set ACLs for each child as well
-      if (Array.isArray(obj.children)) {
-        obj.children.forEach((child: any) => {
-          // get newTab from the parent
-          if (child.newTab === undefined) child.newTab = parentNewTab;
-
-          // if we have to open in newtab
-          if (forceNewTab) child.newTab = true;
-
-          // get acls settings from the parent
-          if (child.acls === undefined) {
-            child.acls = parentAcls;
-          } else {
-            // acls could be defined with nothing in it, or with only show or only enable
-            if (child.acls.show === undefined) child.acls.show = parentAcls.show;
-            if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
-          }
-
-          // create the names array that will be used for logging
-          if (!Array.isArray(parentNames)) {
-            if (!obj.name) {
-              parentNames = [];
-            } else {
-              parentNames = obj.name;
-            }
-          }
-          child.names = parentNames.concat(child.name);
-
-          q.push(child);
-        });
-      }
-    }
-
-    // root is an object with acls, newTab, and children (optional) as key value pairs
-    setMenu(root.children || []);
+    setMenu(menuOptions);
 
     // navbarBanner can be an object or array
-    let bannerConfig = Array.isArray(cc.navbarBanner) ? cc.navbarBanner : [cc.navbarBanner];
+    const bannerConfig = Array.isArray(cc.navbarBanner) ? cc.navbarBanner : [cc.navbarBanner];
 
-    // TODO: banner model
-    let tempTopBanners: any[] = [],
-      tempBottomBanners: any[] = [];
+    const tempTopBanners: NavbarBanner[] = [],
+      tempBottomBanners: NavbarBanner[] = [];
 
+    // NOTE: any type until chaise config is typed
     bannerConfig.forEach((conf: any) => {
       if (!TypeUtils.isObjectAndNotNull(conf)) return;
       if (!TypeUtils.isStringAndNotEmpty(conf.markdownPattern)) return;
 
-      var html = ERMrest.renderHandlebarsTemplate(conf.markdownPattern, null, { id: catalogId });
+      let html = ERMrest.renderHandlebarsTemplate(conf.markdownPattern, null, { id: catalogId });
       html = ERMrest.renderMarkdown(html, false);
 
       if (!TypeUtils.isStringAndNotEmpty(html)) {
@@ -143,9 +86,10 @@ const ChaiseNavbar = (): JSX.Element => {
         }
       }
 
-      var banner = {
-        html: html,
+      const banner: NavbarBanner = {
         dismissible: (conf.dismissible === true),
+        hide: false,
+        html: html,
         key: TypeUtils.isStringAndNotEmpty(conf.key) ? conf.key : ''
       };
 
@@ -162,25 +106,24 @@ const ChaiseNavbar = (): JSX.Element => {
   }, []);
 
   const handleToLiveClick = () => {
-    windowRef.location = MenuUtils.addLogParams(windowRef.location.href.replace(catalogId, catalogId.split('@')[0]), ConfigService.contextHeaderParams);
+    const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
+    windowRef.location = MenuUtils.addLogParams(url, ConfigService.contextHeaderParams);
     windowRef.location.reload();
   };
 
-  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: any) => {
-    MenuUtils.onDropdownToggle(isOpen, event, item, LogActions.NAVBAR_MENU_OPEN);
+  // TODO: onToggle event type
+  const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption) => {
+    MenuUtils.onDropdownToggle(isOpen, event, LogActions.NAVBAR_MENU_OPEN, item);
   }
 
-  const handleOnLinkClick = (event: any, item: any) => {
-    MenuUtils.onLinkClick(event, item);
-  }
+  const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => MenuUtils.onLinkClick(event, item);
 
-  const handleOnBrandingClick = (event: any) => {
-    LogService.logClientAction({
+  const handleOnBrandingClick = () => LogService.logClientAction({
       action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', '')
     });
-  }
 
-  const handleRidSearchEnter = (e: any) => {
+
+  const handleRidSearchEnter = (e: KeyboardEvent) => {
     if (e.key === 'Enter') handleRidSearch();
   };
 
@@ -190,7 +133,7 @@ const ChaiseNavbar = (): JSX.Element => {
       catalog: '',
       version: '',
     },
-      url = '/id/', catId;
+      url = '/id/';
 
     setShowRidSpinner(true);
 
@@ -200,7 +143,7 @@ const ChaiseNavbar = (): JSX.Element => {
       // use `/id/catalog/ridSearchTerm` format if:
       //   - resolver id is NaN and !null
       //   - resolver id is a different catalog id than current page
-      if (isNaN(resolverId) || resolverId != catalogId) {
+      if (isNaN(resolverId) || resolverId !== catalogId) {
         url += `${splitId.catalog}/`;
       }
     }
@@ -209,13 +152,15 @@ const ChaiseNavbar = (): JSX.Element => {
     // implicitly does the isValueDefined(catalogId) check with how function returns true/false
     if (isValueDefined(catalogId) && isVersioned()) url += `@${splitId.version}`;
 
-    let logObj: any = ConfigService.contextHeaderParams,
+    // TODO: LogObject type
+    // TODO: headers type?
+    const logObj: any = ConfigService.contextHeaderParams,
       headers: any = {};
 
     logObj.action = LogService.getActionString(LogActions.NAVBAR_RID_SEARCH, '', '');
     logObj.rid = formModel.ridSearchTerm;
 
-    headers[windowRef.ERMrest.contextHeaderName] = logObj;
+    headers[ConfigService.ERMrest.contextHeaderName] = logObj;
 
     // try to fetch the resolver link to see if the path resolves before sending the user
     ConfigService.http.get(url, { headers: headers }).then(() => {
@@ -223,7 +168,7 @@ const ChaiseNavbar = (): JSX.Element => {
       windowRef.open(url, '_blank');
     }).catch((err: any) => {
       setShowRidSpinner(false);
-      if (err.status == 404) {
+      if (err.status === 404) {
         err = new NoRecordError({
           filters: [{ column: 'RID', operator: '=', value: formModel.ridSearchTerm }],
         }, '', '', '');
@@ -232,17 +177,14 @@ const ChaiseNavbar = (): JSX.Element => {
     });
   };
 
-  const handleRidSearchChange = (event: any) => {
+  const handleRidSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFormModel((formModel) => ({
       ...formModel,
       ridSearchTerm: event.target.value,
     }));
   };
 
-  // TODO: banner model
-  const renderBanners = (banners: any[]) => {
-    return banners.map((banner: any, index: number) => (<ChaiseBanner key={index} banner={banner}></ChaiseBanner>));
-  }
+  const renderBanners = (banners: NavbarBanner[]) => banners.map((banner: NavbarBanner, index: number) => (<ChaiseBanner key={index} banner={banner}></ChaiseBanner>));
 
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
@@ -261,11 +203,11 @@ const ChaiseNavbar = (): JSX.Element => {
   const renderLiveButton = () => {
     if (!isVersioned()) return;
 
-    return(<a 
+    return (<a
       id='live-btn'
-      className='nav navbar-nav navbar-right' 
-      onClick={handleToLiveClick} 
-      // uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom"
+      className='nav navbar-nav navbar-right'
+      onClick={handleToLiveClick}
+    // uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom"
     >View Live Data</a>)
   }
 
@@ -299,12 +241,12 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
-  const renderDropdownName = (item: any) => (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }} />);
+  const renderDropdownName = (item: MenuOption) => (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }} />);
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
 
-    return menu.map((item: any, index: number) => {
+    return menu.map((item: MenuOption, index: number) => {
       if (!MenuUtils.canShow(item)) return;
 
       if (!item.children || !MenuUtils.canEnable(item)) {
@@ -329,7 +271,7 @@ const ChaiseNavbar = (): JSX.Element => {
             title={renderDropdownName(item)}
             onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
           >
-            <ChaiseNavDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseNavDropdown>
+            <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>
           </NavDropdown>
         );
       }

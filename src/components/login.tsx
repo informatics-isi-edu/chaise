@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { MouseEvent, useEffect, useRef, useState } from 'react';
 
 import { useAppDispatch, useAppSelector } from '@chaise/store/hooks';
 import { RootState } from '@chaise/store/store';
-import { ClientState, loginUser } from '@chaise/store/slices/authn';
+import { loginUser } from '@chaise/store/slices/authn';
 
 // components
 import Nav from 'react-bootstrap/Nav';
@@ -16,13 +16,12 @@ import Tooltip from 'react-bootstrap/Tooltip';
 // services
 import { ConfigService } from '@chaise/services/config';
 import AuthnService from '@chaise/services/authn';
-import { LogService } from '@chaise/services/log';
 
 // utilities
 import { LogActions } from '@chaise/models/log';
 import TypeUtils from '@chaise/utils/type-utils';
 import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
-import MenuUtils from '@chaise/utils/menu-utils';
+import MenuUtils, { MenuOption } from '@chaise/utils/menu-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 
 
@@ -35,24 +34,24 @@ const ChaiseLogin = (): JSX.Element => {
   // get the user from the store
   const authnRes = useAppSelector((state: RootState) => state.authn);
 
-  const [displayName, setDisplayName] = useState<string>('');
-  const [loggedInMenu, setLoggedInMenu] = useState(cc.loggedInMenu);
-  const [oneOption, setOneOption] = useState<any>(null);
-  const [replaceDropdown, setReplaceDropdown] = useState<boolean>(false);
-  const [showProfile, setShowProfile] = useState<boolean>(false);
-  const [userTooltip, setUserTooltip] = useState('');
-  const [enableUserTooltip, setEnableUserTooltip] = useState<boolean>(false);
-  const [showUserTooltip, setShowUserTooltip] = useState<boolean>(false);
+  const [displayName, setDisplayName]             = useState('');
+  const [loggedInMenu, setLoggedInMenu]           = useState(cc.loggedInMenu);
+  const [oneOption, setOneOption]                 = useState<MenuOption | null>(null);
+  const [replaceDropdown, setReplaceDropdown]     = useState(false);
+  const [showProfile, setShowProfile]             = useState(false);
+  const [userTooltip, setUserTooltip]             = useState('');
+  const [enableUserTooltip, setEnableUserTooltip] = useState(false);
+  const [showUserTooltip, setShowUserTooltip]     = useState(false);
 
   const dropdownWrapper = useRef<any>(null);
 
   function isValueDefined(val: any) {
-    return val != undefined && val != null;
+    return val !== undefined && val !== null;
   }
 
   useEffect(() => {
     if (TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
-      let userName = authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id
+      const userName = authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id
       setDisplayName(userName);
       ConfigService.user = userName;
       if (authnRes.client.full_name) {
@@ -66,111 +65,75 @@ const ChaiseLogin = (): JSX.Element => {
       }
 
       if (loggedInMenu) {
-        let menuConfig = loggedInMenu;
-        if (menuConfig.displayNameMarkdownPattern) setDisplayName(ConfigService.ERMrest.renderHandlebarsTemplate(menuConfig.displayNameMarkdownPattern, null, { id: catalogId }));
+        if (loggedInMenu.displayNameMarkdownPattern) {
+          setDisplayName(ConfigService.ERMrest.renderHandlebarsTemplate(loggedInMenu.displayNameMarkdownPattern, null, { id: catalogId }));
+        }
 
         // if in iframe and we want to force links to open in new tab,
         const forceNewTab = settings.openLinksInTab === true;
 
-        // Set default newTab property at root node
-        if (!menuConfig.hasOwnProperty('newTab') || forceNewTab) {
-          menuConfig.newTab = true;
-        }
+        // use newTab property if defined and forceNewTab is false
+        const parentNewTab = (loggedInMenu.hasOwnProperty('newTab') && !forceNewTab) ? loggedInMenu.newTab : true;
+        const parentAcls = loggedInMenu.hasOwnProperty('acls') ? loggedInMenu.acls : { 'show': ['*'], 'enable': ['*'] };
 
-        // Set default ACLs property at root node
-        if (!menuConfig.hasOwnProperty('acls')) {
-          menuConfig.acls = {
-            'show': ['*'],
-            'enable': ['*']
-          };
-        }
-
-        if (menuConfig.menuOptions && Array.isArray(menuConfig.menuOptions)) {
-          // iterate over menuOptions and check to see if profile and logout need to be replaced
-          let q = [menuConfig];
-          while (q.length > 0) {
-            let option = q.shift();
-
-            const parentNewTab = option.newTab;
-            const parentAcls = option.acls;
-
-            // template the url
-            // NOTE: Like in navbar.js, this is done here to prevent writing a recursive function (again) in `setConfigJSON()`
-            if (option.urlPattern && isValueDefined(catalogId)) {
-              option.url = ConfigService.ERMrest.renderHandlebarsTemplate(option.urlPattern, null, { id: catalogId });
-
-              // only append pcid/ppid if link is to a chaise url
-              if (MenuUtils.isChaise(option.url, cc)) {
-                option.url = MenuUtils.addLogParams(option.url, ConfigService.contextHeaderParams);
-              }
-            }
-
-            // If current node has children, set each child's newTab to its own existing newTab or parent's newTab
-            // used to set ACLs for each child as well
-            // check for isArray still since this iterates over menuOptions too
-            if (Array.isArray(option.menuOptions) || Array.isArray(option.children)) {
-              let arr = option.menuOptions || option.children;
-              arr.forEach(function (child: any) {
-                // get newTab from the parent
-                if (child.newTab === undefined) child.newTab = parentNewTab;
-                // if we have to open in newtab
-                if (forceNewTab) child.newTab = true;
-
-                // get acls settings from the parent
-                if (child.acls === undefined) {
-                  child.acls = parentAcls;
-                } else {
-                  // acls could be defined with nothing in it, or with only show or only enable
-                  if (child.acls.show === undefined) child.acls.show = parentAcls.show;
-                  if (child.acls.enable === undefined) child.acls.enable = parentAcls.enable;
-                }
-
-                q.push(child);
-              });
-            }
-            option.isValid = MenuUtils.isOptionValid(option);
-          }
-        } else if (menuConfig.menuOptions) {
+        const menuConfig: {menuOptions?: MenuOption[] | MenuOption} = {};
+        if (loggedInMenu.menuOptions && Array.isArray(loggedInMenu.menuOptions)) {
+          menuConfig.menuOptions = MenuUtils.createMenuList(loggedInMenu.menuOptions, parentNewTab, parentAcls, forceNewTab, catalogId);
+        } else if (loggedInMenu.menuOptions) {
           // menuOptions is defined but not an array
-          let option = menuConfig.menuOptions;
+          const option = loggedInMenu.menuOptions;
+          const optionCopy: any = {...option};
+
           // valid if the "option" is an object that represents type my_profile, logout, header, url
           // check for menu type or children being set, if so ignore the option
           if (option.type === 'menu' || option.children) {
-            option.isValid = false;
+            optionCopy.isValid = false;
           } else {
+            
             // might be valid, set all default values on the option assuming it is then verify validity
             if (option.urlPattern && isValueDefined(catalogId)) {
-              option.url = ConfigService.ERMrest.renderHandlebarsTemplate(option.urlPattern, null, { id: catalogId });
+              let url = ConfigService.ERMrest.renderHandlebarsTemplate(option.urlPattern, null, { id: catalogId });
 
               // only append pcid/ppid if link is to a chaise url
-              if (MenuUtils.isChaise(option.url, cc)) {
-                option.url = MenuUtils.addLogParams(option.url, ConfigService.contextHeaderParams);
+              if (MenuUtils.isChaise(url, cc)) {
+                url = MenuUtils.addLogParams(url, ConfigService.contextHeaderParams);
               }
+              optionCopy.url = url
             }
+            
 
-            option.isValid = MenuUtils.isOptionValid(option);
+            optionCopy.isValid = MenuUtils.isOptionValid(optionCopy);
             // no point in setting this if invalid
-            if (option.isValid) {
-              // TODO: refactor to a function so it can be reused
+            if (optionCopy.isValid) {
               // get newTab from the parent
-              if (option.newTab === undefined) option.newTab = menuConfig.newTab;
+              if (option.newTab === undefined) optionCopy.newTab = parentNewTab;
               // if we have to open in newtab
-              if (forceNewTab) option.newTab = true;
+              if (forceNewTab) optionCopy.newTab = true;
 
               // get acls settings from the parent
               if (option.acls === undefined) {
-                option.acls = menuConfig.acls;
+                optionCopy.acls = parentAcls;
               } else {
                 // acls could be defined with nothing in it, or with only show or only enable
-                if (option.acls.show === undefined) option.acls.show = menuConfig.acls.show;
-                if (option.acls.enable === undefined) option.acls.enable = menuConfig.acls.enable;
+                if (option.acls.show === undefined) optionCopy.acls.show = parentAcls.show;
+                if (option.acls.enable === undefined) optionCopy.acls.enable = parentAcls.enable;
               }
             }
           }
+          const newOption: MenuOption = {
+            acls: optionCopy.acls,
+            isValid: optionCopy.isValid,
+            nameMarkdownPattern: optionCopy.nameMarkdownPattern,
+            newTab: optionCopy.newTab,
+            type: optionCopy.type,
+            url: optionCopy.url
+          }
 
-          setOneOption(option);
-          setReplaceDropdown(option.isValid);
+          menuConfig.menuOptions = newOption;
+          setOneOption(newOption);
+          setReplaceDropdown(newOption.isValid);
         }
+
         setLoggedInMenu(menuConfig);
       }
     }
@@ -197,12 +160,13 @@ const ChaiseLogin = (): JSX.Element => {
     MenuUtils.openProfileModal();
   }
 
+  // TODO: onToggle event type
   const handleLoginDropdownToggle = (isOpen: boolean, event: any) => {
     setShowUserTooltip(!isOpen);
-    MenuUtils.onDropdownToggle(isOpen, event, null, LogActions.NAVBAR_ACCOUNT_DROPDOWN);
+    MenuUtils.onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN);
   }
 
-  const handleOnLinkClick = (event: any, item: any) => {
+  const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => {
     MenuUtils.onLinkClick(event, item);
   }
 
@@ -230,6 +194,7 @@ const ChaiseLogin = (): JSX.Element => {
     );
   }
 
+  // For rendering the tooltip based on the value being set and the dropdown being closed
   const renderDropdownToggle = () => {
     const dropdownToggleComponent = <Dropdown.Toggle className='nav-link' as='a'>{displayName}</Dropdown.Toggle>;
 
