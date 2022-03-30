@@ -18,14 +18,14 @@ The following is how error handling should work in Chaise using React:
 ### Error service
 
 - To make sure we can call the error handler from anywhere in the page structure, we will use `redux`. This will allow us to store the state of errors. This way,
-  - We can `dispatch` a message to show the error.
+  - We can `dispatchError` a message to show the error.
   - The logic to show a proper error message or UX behavior based on the error object will be part of the error reducer.
   - The error modal component can use the `error` in the redux store to determine whether it should show any errors or not.
 
 ### Global handler (catch-all)
 
 - The whole app should be wrapped in an error boundary. This will ensure that even if there's an unexpected error, we can show the error modal to users (and also log the error).
-- `error` and `unhandledrejection` event listeners must be defined in the app component, so we can `dispatch` the unhandled errors.
+- `error` and `unhandledrejection` event listeners must be defined in the app component, so we can `dispatchError` the unhandled errors.
 
 Based on this, the following is how each app should roughly look like:
 ```tsx
@@ -37,10 +37,10 @@ const RecordSetApp = () : JSX.Element => {
      * global error handler for uncaught errors
     */
     window.addEventListener("error", (event) => {
-      dispatch(...);
+      dispatchError(...);
     });
     window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-      dispatch(...);
+      dispatchError(...);
     });
 
     ...
@@ -52,8 +52,8 @@ const RecordSetApp = () : JSX.Element => {
     // log the error
     ...
 
-    // dispatch the error
-    dispatch(...);
+    // dispatchError the error
+    dispatchError(...);
 
     // the error modal will be displayed so there's no need for the fallback
     return null;
@@ -71,7 +71,7 @@ const RecordSetApp = () : JSX.Element => {
 ### Local handler
 
 - We should not let any error be unhandled. All errors should be caught.
-  - If we don't want to do anything specific for the error, we should dispatch the caught error.
+  - If we don't want to do anything specific for the error, we should dispatchError the caught error.
     ```tsx
     // async errors:
     reference.read(pageSize, logObject).then(function (page) {
@@ -80,8 +80,8 @@ const RecordSetApp = () : JSX.Element => {
       // do the local handling if we have to
       ...
 
-      // dispatch the error
-      dispatch(...);
+      // dispatchError the error
+      dispatchError(...);
     });
 
     // sync errors:
@@ -92,8 +92,8 @@ const RecordSetApp = () : JSX.Element => {
       // do the local handling if we have to
       ...
 
-      // dispatch the error
-      dispatch(...);
+      // dispatchError the error
+      dispatchError(...);
     }
     ```
 
@@ -103,7 +103,7 @@ const RecordSetApp = () : JSX.Element => {
 
 #### Multiple errors on the page
 
-Since our apps are complicated and can have multiple components that behave somewhat independently (and in an asynchronous fashion), there might be a case that the page throws multiple errors. As soon as an error is thrown, we're dispatching it to the error service and the error service will display it right away. If in this state (while we're showing the error) another error is dispatched, the error handler is going to act differently depending on the type of the error. In general, we can categorize errors in the following categories:
+Since our apps are complicated and can have multiple components that behave somewhat independently (and in an asynchronous fashion), there might be a case that the page throws multiple errors. As soon as an error is thrown, we're dispatchErroring it to the error service and the error service will display it right away. If in this state (while we're showing the error) another error is dispatchErrored, the error handler is going to act differently depending on the type of the error. In general, we can categorize errors in the following categories:
 
 1. Blocking errors: When we encounter such errors, we cannot simply recover the app state. In this case, the error popup is supposed to block the user from interacting with the page and offer a way to get out of the broken state. The actions in this type of error are usually redirecting the user to a completely different location, or the same page with different settings.
 
@@ -149,7 +149,7 @@ Therefore, if we want uniform error handling for a component, we should use `rea
 const ParentComponent = () : JSX.Element => {
 
   const fallbackComp = ({error}: FallbackProps) => {
-    // dispatch the error message
+    // dispatchError the error message
     // return a fallback component
   }
 
@@ -190,7 +190,7 @@ function ChildComponent = (): JSX.Element => {
 
 The general guidelines for handling errors in promises are:
 - do not let your handlers "silence" any unhandled errors, _always_ throw an unhandled error so that later catch blocks may handle it;
-- when you do not have any (or any _more_) catch blocks, dispatch the unhandled error so that the general exception handler service can handle it.
+- when you do not have any (or any _more_) catch blocks, dispatchError the unhandled error so that the general exception handler service can handle it.
 - reject is a callback function that gets carried out after the promise is rejected, whereas throw cannot be used asynchronously. If you chose to use reject, your code will continue to run normally in an asynchronous fashion whereas throw will prioritize completing the resolver function (this function will run immediately).
 
 #### Promise with success, reject, and catch handlers
@@ -217,8 +217,8 @@ promise.then(
     // this can be useful for adding some common error handling logic
     // for errors that could be raised by either of the previous handlers
     ...
-    // again as a general practice, conclude by dispatching unhandled error
-    dispatch(...);
+    // again as a general practice, conclude by dispatchErroring unhandled error
+    dispatchError(...);
   }
 );
 ```
@@ -252,8 +252,8 @@ promise.then(
     //  - the original promise was rejected, OR...
     //  - the success handler threw an exception
     ...
-    // as a general practice, conclude by dispatching unhandled error
-    dispatch(...);
+    // as a general practice, conclude by dispatchErroring unhandled error
+    dispatchError(...);
   }
 );
 ```
@@ -297,8 +297,8 @@ promise.then(
       return; // if you resolved the error, return
     }
     // if none of the above error handling blocks resolved the error.
-    // then make sure to dispatch the error again, as usual.
-    dispatch(...);
+    // then make sure to dispatchError the error again, as usual.
+    dispatchError(...);
   }
 );
 ```
@@ -346,8 +346,8 @@ promise.then(
     // handle any upstream errors that were not previously recovered from.
     ...
 
-    // as usual, if the error could not be handled in this block, dispatch it
-    dispatch(...);
+    // as usual, if the error could not be handled in this block, dispatchError it
+    dispatchError(...);
   }
 );
 ```

@@ -20,12 +20,11 @@ import Q from 'q';
 import TypeUtils from '@chaise/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink } from '@chaise/utils/uri-utils';
 import { getRowValuesFromPage } from '@chaise/utils/data-utils';
-import { showError } from '@chaise/store/slices/error';
-import { useAppDispatch } from '@chaise/store/hooks';
 import { windowRef } from '@chaise/utils/window-ref';
 import Footer from '@chaise/components/footer';
 import Faceting from '@chaise/components/faceting';
 import TableHeader from '@chaise/components/table-header';
+import useError from '@chaise/hooks/error';
 
 export type RecordSetProps = {
   initialReference: any,
@@ -51,7 +50,7 @@ const RecordSet = ({
 }: RecordSetProps): JSX.Element => {
   // $log.debug('recordset comp: render');
 
-  const dispatch = useAppDispatch();
+  const { dispatchError } = useError();
 
   const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : 25);
 
@@ -129,6 +128,7 @@ const RecordSet = ({
       return;
     }
 
+
     // TODO pass the proper values
     attachContainerHeightSensors();
 
@@ -185,7 +185,7 @@ const RecordSet = ({
       if (TypeUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
         exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
       }
-      dispatch(showError({ error: exception }));
+      dispatchError({ error: exception });
     });
 
   }, [isInitialized]);
@@ -362,7 +362,7 @@ const RecordSet = ({
         // }
         // } else {
         // TODO dispatch the error
-        dispatch(showError({ error: err }));
+        dispatchError({ error: err });
         // }
       });
     }(flowControl.current.queue.counter));
@@ -543,7 +543,7 @@ const RecordSet = ({
 
         updatePageCB(this);
       }).catch((err: any) => {
-        dispatch(showError({ error: err }));
+        dispatchError({ error: err });
       });
     });
   };

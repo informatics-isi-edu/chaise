@@ -1,28 +1,27 @@
 import { useState } from 'react';
 import { Alert, Button, ButtonGroup } from 'react-bootstrap';
 import { ErrorBoundary, FallbackProps, useErrorHandler } from 'react-error-boundary';
-import { useAppDispatch } from '@chaise/store/hooks';
-import { showError } from '@chaise/store/slices/error';
 import $log from '@chaise/services/logger';
+import useError from '@chaise/hooks/error';
 
 const ExplodeComponent = () : JSX.Element => {
   throw new Error('Something went wrong in the component.');
 };
 
 const ExplodeComponentWithManualHandling = () : JSX.Element => {
-  const dispatch = useAppDispatch();
+  const { dispatchError } = useError();
+
   try {
     throw new Error('Something went wrong in the component.');
   } catch (exp) {
     if (exp instanceof Error) {
-      dispatch(showError({ error: exp }));
+      dispatchError({ error: exp });
     }
   }
   return <></>;
 };
 
 const ErrorComponent = () : JSX.Element => {
-  const dispatch = useAppDispatch();
   const [explode, setExplode] = useState(false);
 
   const onClickError = () => {
@@ -72,7 +71,7 @@ const ErrorComponentWithBoundary = () : JSX.Element => {
 };
 
 const ErrorComponentWithManualHandling = () : JSX.Element => {
-  const dispatch = useAppDispatch();
+  const { dispatchError } = useError();
   const [explode, setExplode] = useState(false);
 
   const onClickError = () => {
@@ -80,7 +79,7 @@ const ErrorComponentWithManualHandling = () : JSX.Element => {
       throw new Error('Something went wrong in the event handler.');
     } catch (exp) {
       if (exp instanceof Error) {
-        dispatch(showError({ error: exp }));
+        dispatchError({error: exp});
       }
       return null;
     }

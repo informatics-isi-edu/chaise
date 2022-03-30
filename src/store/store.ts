@@ -1,11 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authnReducer from '@chaise/store/slices/authn';
-import errorReducer from '@chaise/store/slices/error';
 
 export const store = configureStore({
   reducer: {
-    authn: authnReducer,
-    error: errorReducer,
+    authn: authnReducer
   },
 });
 

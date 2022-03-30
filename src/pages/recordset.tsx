@@ -10,7 +10,6 @@ import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 import { store } from '@chaise/store/store';
 import { useAppDispatch } from '@chaise/store/hooks';
-import { showError } from '@chaise/store/slices/error';
 import { ConfigService } from '@chaise/services/config';
 
 import ChaiseNavbar from '@chaise/components/navbar';
@@ -28,6 +27,9 @@ import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
 import { LogService } from '@chaise/services/log';
 import { LogStackTypes } from '@chaise/models/log';
 import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
+import ErrorPorvider from '@chaise/providers/error';
+import useError from '@chaise/hooks/error';
+import ErrorTest from '@chaise/components/error-test';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -39,6 +41,7 @@ const recordsetSettings = {
 
 const RecordSetApp = (): JSX.Element => {
   const dispatch = useAppDispatch();
+  const { dispatchError } = useError();
   const [configDone, setConfigDone] = useState(false);
   const [recordSetProps, setRecordSetProps] = useState<RecordSetProps|null>(null);
 
@@ -51,11 +54,11 @@ const RecordSetApp = (): JSX.Element => {
      */
     window.addEventListener('error', (event) => {
       $log.log('got the error in catch-all');
-      dispatch(showError({ error: event.error, isGlobal: true }));
+      dispatchError({error: event.error, isGlobal: true});
     });
     window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
       $log.log('got the error in catch-all (unhandled rejection)');
-      dispatch(showError({ error: event.reason, isGlobal: true }));
+      dispatchError({error: event.reason, isGlobal: true});
     });
 
     /**
@@ -153,7 +156,7 @@ const RecordSetApp = (): JSX.Element => {
       if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
-      dispatch(showError({ error: err, isGlobal: true }));
+      dispatchError({error: err, isGlobal: true});
     });
   }, [configDone] );
 
@@ -162,7 +165,7 @@ const RecordSetApp = (): JSX.Element => {
 
     // TODO uncomment
     // ErrorService.logTerminalError(error);
-    dispatch(showError({ error, isGlobal: true }));
+    dispatchError({error: error, isGlobal: true});
 
     // the error modal will be displayed so there's no need for the fallback
     return null;
@@ -206,9 +209,11 @@ if (process.env.NODE_ENV === 'development') {
 
 ReactDOM.render(
   <Provider store={store}>
-    <React.StrictMode>
-      <RecordSetApp />
-    </React.StrictMode>
+    <ErrorPorvider>
+      <React.StrictMode>
+        <RecordSetApp />
+      </React.StrictMode>
+    </ErrorPorvider>
   </Provider>,
   document.getElementById('chaise-app-root'),
 );
