@@ -21,7 +21,12 @@ import AuthnService from '@chaise/services/authn';
 import { LogActions } from '@chaise/models/log';
 import TypeUtils from '@chaise/utils/type-utils';
 import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
-import MenuUtils, { MenuOption } from '@chaise/utils/menu-utils';
+import { 
+  MenuOption, addLogParams, createMenuList, 
+  isChaise, isOptionValid, logout, 
+  onDropdownToggle, onLinkClick, openProfileModal,
+  renderName
+} from '@chaise/utils/menu-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 
 
@@ -78,7 +83,7 @@ const ChaiseLogin = (): JSX.Element => {
 
         const menuConfig: {menuOptions?: MenuOption[] | MenuOption} = {};
         if (loggedInMenu.menuOptions && Array.isArray(loggedInMenu.menuOptions)) {
-          menuConfig.menuOptions = MenuUtils.createMenuList(loggedInMenu.menuOptions, parentNewTab, parentAcls, forceNewTab, catalogId);
+          menuConfig.menuOptions = createMenuList(loggedInMenu.menuOptions, parentNewTab, parentAcls, forceNewTab, catalogId);
         } else if (loggedInMenu.menuOptions) {
           // menuOptions is defined but not an array
           const option = loggedInMenu.menuOptions;
@@ -95,14 +100,14 @@ const ChaiseLogin = (): JSX.Element => {
               let url = ConfigService.ERMrest.renderHandlebarsTemplate(option.urlPattern, null, { id: catalogId });
 
               // only append pcid/ppid if link is to a chaise url
-              if (MenuUtils.isChaise(url, cc)) {
-                url = MenuUtils.addLogParams(url, ConfigService.contextHeaderParams);
+              if (isChaise(url, cc)) {
+                url = addLogParams(url, ConfigService.contextHeaderParams);
               }
               optionCopy.url = url
             }
             
 
-            optionCopy.isValid = MenuUtils.isOptionValid(optionCopy);
+            optionCopy.isValid = isOptionValid(optionCopy);
             // no point in setting this if invalid
             if (optionCopy.isValid) {
               // get newTab from the parent
@@ -157,17 +162,17 @@ const ChaiseLogin = (): JSX.Element => {
 
   const handleOpenProfileClick = () => {
     setShowProfile(true);
-    MenuUtils.openProfileModal();
+    openProfileModal();
   }
 
   // TODO: onToggle event type
   const handleLoginDropdownToggle = (isOpen: boolean, event: any) => {
     setShowUserTooltip(!isOpen);
-    MenuUtils.onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN);
+    onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN);
   }
 
   const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => {
-    MenuUtils.onLinkClick(event, item);
+    onLinkClick(event, item);
   }
 
   // render functions
@@ -189,7 +194,7 @@ const ChaiseLogin = (): JSX.Element => {
     return (
       <>
         <NavDropdown.Item id='profile-link' onClick={handleOpenProfileClick}>My Profile</NavDropdown.Item>
-        <NavDropdown.Item id='logout-link' onClick={MenuUtils.logout}>Log Out</NavDropdown.Item>
+        <NavDropdown.Item id='logout-link' onClick={logout}>Log Out</NavDropdown.Item>
       </>
     );
   }
@@ -226,7 +231,7 @@ const ChaiseLogin = (): JSX.Element => {
           return (
             <Nav.Item
               className='chaise-dropdown-header'
-              dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
+              dangerouslySetInnerHTML={{ __html: renderName(oneOption) }}
             />
           );
         case 'url':
@@ -235,7 +240,7 @@ const ChaiseLogin = (): JSX.Element => {
               href={oneOption.url}
               target={oneOption.newTab ? '_blank' : '_self'}
               onClick={(event) => handleOnLinkClick(event, oneOption)}
-              dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(oneOption) }}
+              dangerouslySetInnerHTML={{ __html: renderName(oneOption) }}
             />
           );
         case 'my_profile':
@@ -243,15 +248,15 @@ const ChaiseLogin = (): JSX.Element => {
             <Nav.Link
               id='profile-link'
               onClick={handleOpenProfileClick}
-              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'My Profile' }}
+              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'My Profile' }}
             />
           )
         case 'logout':
           return (
             <Nav.Link
               id='logout-link'
-              onClick={MenuUtils.logout}
-              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? MenuUtils.renderName(oneOption) : 'Log Out' }}
+              onClick={logout}
+              dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out' }}
             />
           )
         default:

@@ -21,7 +21,11 @@ import { NoRecordError } from '@chaise/models/errors';
 // utilities
 import { LogActions } from '@chaise/models/log';
 import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
-import MenuUtils, { MenuOption, NavbarBanner } from '@chaise/utils/menu-utils';
+import { 
+  MenuOption, NavbarBanner, addLogParams,
+  canEnable, canShow, createMenuList, menuItemClasses,
+  onDropdownToggle, onLinkClick, renderName
+} from '@chaise/utils/menu-utils';
 import TypeUtils from '@chaise/utils/type-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
@@ -54,7 +58,7 @@ const ChaiseNavbar = (): JSX.Element => {
 
     let menuOptions: MenuOption[] = [];
     if (Array.isArray(root.children)) {
-      menuOptions = MenuUtils.createMenuList(root.children, parentNewTab, parentAcls, forceNewTab, catalogId);
+      menuOptions = createMenuList(root.children, parentNewTab, parentAcls, forceNewTab, catalogId);
     }
 
     setMenu(menuOptions);
@@ -107,16 +111,16 @@ const ChaiseNavbar = (): JSX.Element => {
 
   const handleToLiveClick = () => {
     const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
-    windowRef.location = MenuUtils.addLogParams(url, ConfigService.contextHeaderParams);
+    windowRef.location = addLogParams(url, ConfigService.contextHeaderParams);
     windowRef.location.reload();
   };
 
   // TODO: onToggle event type
   const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption) => {
-    MenuUtils.onDropdownToggle(isOpen, event, LogActions.NAVBAR_MENU_OPEN, item);
+    onDropdownToggle(isOpen, event, LogActions.NAVBAR_MENU_OPEN, item);
   }
 
-  const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => MenuUtils.onLinkClick(event, item);
+  const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => onLinkClick(event, item);
 
   const handleOnBrandingClick = () => LogService.logClientAction({
       action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', '')
@@ -184,7 +188,9 @@ const ChaiseNavbar = (): JSX.Element => {
     }));
   };
 
-  const renderBanners = (banners: NavbarBanner[]) => banners.map((banner: NavbarBanner, index: number) => (<ChaiseBanner key={index} banner={banner}></ChaiseBanner>));
+  const renderBanners = (banners: NavbarBanner[]) => banners.map(
+    (banner: NavbarBanner, index: number) => (<ChaiseBanner key={index} banner={banner}></ChaiseBanner>)
+  );
 
   const renderBrandImage = () => {
     if (!cc.navbarBrandImage) return;
@@ -241,23 +247,23 @@ const ChaiseNavbar = (): JSX.Element => {
     );
   };
 
-  const renderDropdownName = (item: MenuOption) => (<span dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }} />);
+  const renderDropdownName = (item: MenuOption) => (<span dangerouslySetInnerHTML={{ __html: renderName(item) }} />);
 
   const renderNavbarMenuDropdowns = () => {
     if (!menu) return;
 
     return menu.map((item: MenuOption, index: number) => {
-      if (!MenuUtils.canShow(item)) return;
+      if (!canShow(item)) return;
 
-      if (!item.children || !MenuUtils.canEnable(item)) {
+      if (!item.children || !canEnable(item)) {
         return (
           <Nav.Link
             key={index}
             href={item.url}
             target={item.newTab ? '_blank' : '_self'}
             onClick={(event) => handleOnLinkClick(event, item)}
-            className={MenuUtils.menuItemClasses(item, false)}
-            dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+            className={menuItemClasses(item, false)}
+            dangerouslySetInnerHTML={{ __html: renderName(item) }}
           />
         );
       }

@@ -6,7 +6,11 @@ import Dropdown from 'react-bootstrap/Dropdown';
 
 // utilities
 import { LogActions } from '@chaise/models/log';
-import MenuUtils, { MenuOption } from '@chaise/utils/menu-utils';
+import { 
+  MenuOption, canEnable, canShow, 
+  logout, menuItemClasses, onDropdownToggle, 
+  onLinkClick, renderName 
+} from '@chaise/utils/menu-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 
 interface ChaiseLoginDropdownProps {
@@ -23,18 +27,18 @@ const ChaiseLoginDropdown = ({
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
   const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => {
-    MenuUtils.onLinkClick(event, item);
+    onLinkClick(event, item);
   }
 
   // TODO: onToggle event type
   const handleNavbarDropdownToggle = (isOpen: boolean, event: any, item: MenuOption) => {
-    MenuUtils.onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN, item);
+    onDropdownToggle(isOpen, event, LogActions.NAVBAR_ACCOUNT_DROPDOWN, item);
   }
 
   const renderHeader = (item: MenuOption, index: number) => <NavDropdown.Header
     key={index}
     className='chaise-dropdown-header'
-    dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+    dangerouslySetInnerHTML={{ __html: renderName(item) }}
   />
 
   const renderDropdownMenu = (item: MenuOption, index: number) => {
@@ -64,8 +68,8 @@ const ChaiseLoginDropdown = ({
         <Dropdown.Toggle
           as='a'
           variant='dark'
-          className={MenuUtils.menuItemClasses(item, true)}
-          dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+          className={menuItemClasses(item, true)}
+          dangerouslySetInnerHTML={{ __html: renderName(item) }}
         />
         <Dropdown.Menu>
           <ChaiseLoginDropdown
@@ -82,12 +86,12 @@ const ChaiseLoginDropdown = ({
     href={item.url}
     target={item.newTab ? '_blank' : '_self'}
     onClick={(event) => handleOnLinkClick(event, item)}
-    className={MenuUtils.menuItemClasses(item, true)}
-    dangerouslySetInnerHTML={{ __html: MenuUtils.renderName(item) }}
+    className={menuItemClasses(item, true)}
+    dangerouslySetInnerHTML={{ __html: renderName(item) }}
   />
 
   const renderDropdownOptions = () => menu.map((child: MenuOption, index: number) => {
-    if (!MenuUtils.canShow(child) || !child.isValid) return;
+    if (!canShow(child) || !child.isValid) return;
 
     switch (child.type) {
       case 'header':
@@ -102,7 +106,7 @@ const ChaiseLoginDropdown = ({
             id='profile-link'
             key={index}
             onClick={openProfileCb}
-            dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? MenuUtils.renderName(child) : 'My Profile' }}
+            dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? renderName(child) : 'My Profile' }}
           />
         )
       case 'logout':
@@ -110,8 +114,8 @@ const ChaiseLoginDropdown = ({
           <NavDropdown.Item
             id='logout-link'
             key={index}
-            onClick={MenuUtils.logout}
-            dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? MenuUtils.renderName(child) : 'Log Out' }}
+            onClick={logout}
+            dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? renderName(child) : 'Log Out' }}
           />
         )
       default:
@@ -120,11 +124,11 @@ const ChaiseLoginDropdown = ({
           return (renderHeader(child, index));
         }
 
-        if ((!child.children && child.url) || !MenuUtils.canEnable(child)) {
+        if ((!child.children && child.url) || !canEnable(child)) {
           return (renderDropdownMenu(child, index));
         }
 
-        if (child.children && MenuUtils.canEnable(child)) {
+        if (child.children && canEnable(child)) {
           return (renderDropdownMenu(child, index));
         }
 
