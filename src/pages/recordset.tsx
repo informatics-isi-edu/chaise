@@ -1,4 +1,3 @@
-import '@chaise/utils/wdyr';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@chaise/assets/scss/app.scss';
@@ -202,10 +201,6 @@ const RecordSetApp = (): JSX.Element => {
     </>
   );
 };
-
-if (process.env.NODE_ENV === 'development') {
-  RecordSetApp.whyDidYouRender = true;
-}
 
 ReactDOM.render(
   <Provider store={store}>

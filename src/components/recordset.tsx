@@ -987,9 +987,5 @@ const RecordSet = ({
   )
 };
 
-if (process.env.NODE_ENV === 'development') {
-  RecordSet.whyDidYouRender = true;
-}
-
 export default RecordSet;
 

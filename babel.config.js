@@ -10,8 +10,7 @@ module.exports = {
       '@babel/env',
       ['@babel/preset-react', {
         runtime: 'automatic',
-        development: mode === 'development',
-        importSource: (mode === 'development') ? '@welldone-software/why-did-you-render' : 'react',
+        development: mode === 'development'
       }],
       '@babel/preset-typescript',
   ],

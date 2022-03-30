@@ -202,8 +202,4 @@ const RecordSetTable = ({
   )
 }
 
-if (process.env.NODE_ENV === 'development') {
-  RecordSetTable.whyDidYouRender = true;
-}
-
 export default RecordSetTable;
