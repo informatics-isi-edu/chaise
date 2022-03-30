@@ -1,7 +1,7 @@
 import '@chaise/assets/scss/_faceting.scss';
 
 import Accordion from 'react-bootstrap/Accordion';
-import DisplayValue from './display-value';
+import DisplayValue from '@chaise/components/display-value';
 
 // TODO subject to change
 type FacetingProps = {

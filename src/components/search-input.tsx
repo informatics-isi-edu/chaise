@@ -4,7 +4,7 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
 import $log from '@chaise/services/logger';
-import { ClearInputBtn } from './clear-input-btn';
+import { ClearInputBtn } from '@chaise/components/clear-input-btn';
 
 type SearchInputProps = {
   searchCallback: Function,
