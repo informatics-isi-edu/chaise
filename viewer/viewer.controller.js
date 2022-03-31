@@ -3,14 +3,13 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'image', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
-        function OSDController(AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, image, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
+    .controller('ViewerController',
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function (AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
-        vm.image = image;
         vm.downloadView = downloadView;
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;

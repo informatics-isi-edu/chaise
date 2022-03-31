@@ -4,9 +4,6 @@
 
     angular.module('chaise.viewer')
 
-    // TODO not used
-    .value('annotations', [])
-
     /**
      * TODO should be a prototype
      * each annotation has the following:

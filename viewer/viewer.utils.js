@@ -134,6 +134,7 @@
                   logService, Session, recordCreate, UriUtils, viewerConfig, viewerConstant,
                   $q, $rootScope) {
 
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         var annotConfig = viewerConfig.getAnnotationConfig(),
             imageConfig = viewerConfig.getImageConfig(),
             pImageConfig = viewerConfig.getProcesssedImageConfig(),
@@ -348,7 +349,7 @@
             var defer = $q.defer(), channelList = [], channelURLs = [];
 
             // TODO should be done in ermrestjs
-            var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+            var imageChannelURL = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/";
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.schema_name) + ":";
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name);
@@ -556,7 +557,7 @@
             var defer = $q.defer();
 
             // TODO should be done in ermrestjs
-            var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+            var imageAnnotationURL = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/";
             imageAnnotationURL += encode(annotConfig.schema_name) + ":";
             imageAnnotationURL += encode(annotConfig.table_name) + "/";
             imageAnnotationURL += encode(annotConfig.reference_image_column_name);
@@ -669,7 +670,7 @@
             path += encode(pImageConfig.table_name) + "/";
             path += encode(pImageConfig.reference_image_column_name);
             path += "=" + encode(context.imageID);
-            var url = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + path;
+            var url = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/" + path;
 
             ERMrest.resolve(url, ConfigUtils.getContextHeaderParams()).then(function (res) {
                 if (!res) {
@@ -1103,7 +1104,7 @@
         function updateChannelConfig(data) {
             var url, payload = [], defer = $q.defer();
 
-            url = context.serviceURL + "/catalog/" + context.catalogID + "/attributegroup/";
+            url = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/attributegroup/";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.schema_name) + ":";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name) + ",";

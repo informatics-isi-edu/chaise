@@ -10,7 +10,7 @@
     <div class="configure-container" ng-app="chaise.configure-viewer">
         <loading-spinner></loading-spinner>
     </div>
-    <div class="app-container" ng-controller="OSDController as osd">
+    <div class="app-container" ng-controller="ViewerController as osd">
         <navbar></navbar>
         <loading-spinner ng-show="!displayReady"></loading-spinner>
         <div class="viewer-container app-content-container" ng-show="displayReady" id="viewer-container" ng-controller="AnnotationsController as anno">
