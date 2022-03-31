@@ -1,9 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authnReducer from '@chaise/store/slices/authn';
 
 export const store = configureStore({
   reducer: {
-    authn: authnReducer
   },
 });
 

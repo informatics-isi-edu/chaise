@@ -1,4 +1,14 @@
-interface Client {
+export interface Session {
+  attributes: Client[];
+  client: Client;
+  expires: string;
+  seconds_remaining: number;
+  since: string;
+  tracking: string;
+  vary_headers: string[];
+}
+
+export interface Client {
   /**
    * user's display name
    */
@@ -19,8 +29,11 @@ interface Client {
    * list of alternative identities for the user (Client.id values)
    */
   identities: string[];
+
+  truncated_id?: string;
 }
 
+// TODO is the following needed?
 interface ChaiseUserParameters {
   attributes: Client[];
   client: Client;

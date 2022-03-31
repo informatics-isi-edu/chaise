@@ -17,7 +17,6 @@ import ChaiseSpinner from '@chaise/components/spinner';
 import RecordSet, { RecordSetProps } from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
 import AuthnService from '@chaise/services/authn';
-import { loginUser } from '@chaise/store/slices/authn';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 import TypeUtils from '@chaise/utils/type-utils';
@@ -28,7 +27,6 @@ import { LogStackTypes } from '@chaise/models/log';
 import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
 import ErrorPorvider from '@chaise/providers/error';
 import useError from '@chaise/hooks/error';
-import ErrorTest from '@chaise/components/error-test';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -66,10 +64,7 @@ const RecordSetApp = (): JSX.Element => {
      * - setup ermrestjs
      */
     let logObject: any = {};
-    AuthnService.getSession('').then((response) => {
-      if (response) {
-        dispatch(loginUser(response));
-      }
+    AuthnService.getSession('').then(() => {
       return ConfigService.configure(recordsetSettings);
     }).then(() => {
 

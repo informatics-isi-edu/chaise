@@ -1,9 +1,5 @@
 import { MouseEvent, useEffect, useRef, useState } from 'react';
 
-import { useAppDispatch, useAppSelector } from '@chaise/store/hooks';
-import { RootState } from '@chaise/store/store';
-import { loginUser } from '@chaise/store/slices/authn';
-
 // components
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -21,23 +17,21 @@ import AuthnService from '@chaise/services/authn';
 import { LogActions } from '@chaise/models/log';
 import TypeUtils from '@chaise/utils/type-utils';
 import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
-import { 
-  MenuOption, addLogParams, createMenuList, 
-  isChaise, isOptionValid, logout, 
+import {
+  MenuOption, addLogParams, createMenuList,
+  isChaise, isOptionValid, logout,
   onDropdownToggle, onLinkClick, openProfileModal,
   renderName
 } from '@chaise/utils/menu-utils';
-import { windowRef } from '@chaise/utils/window-ref';
 
 
 const ChaiseLogin = (): JSX.Element => {
-  const dispatch = useAppDispatch();
   const catalogId = getCatalogId();
   const cc = ConfigService.chaiseConfig;
   const settings = ConfigService.appSettings;
 
-  // get the user from the store
-  const authnRes = useAppSelector((state: RootState) => state.authn);
+  // get the user from the store (assumption: it's populated by the app wrapper)
+  const authnRes = AuthnService.session;
 
   const [displayName, setDisplayName]             = useState('');
   const [loggedInMenu, setLoggedInMenu]           = useState(cc.loggedInMenu);
@@ -55,10 +49,9 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   useEffect(() => {
-    if (TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
+    if (authnRes) {
       const userName = authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id
       setDisplayName(userName);
-      ConfigService.user = userName;
       if (authnRes.client.full_name) {
         // - some users could have the same full_name for multiple globus identities
         //   having display_name included in tooltip can help differentiate which user is logged in at a glance
@@ -94,7 +87,7 @@ const ChaiseLogin = (): JSX.Element => {
           if (option.type === 'menu' || option.children) {
             optionCopy.isValid = false;
           } else {
-            
+
             // might be valid, set all default values on the option assuming it is then verify validity
             if (option.urlPattern && isValueDefined(catalogId)) {
               let url = ConfigService.ERMrest.renderHandlebarsTemplate(option.urlPattern, null, { id: catalogId });
@@ -105,7 +98,7 @@ const ChaiseLogin = (): JSX.Element => {
               }
               optionCopy.url = url
             }
-            
+
 
             optionCopy.isValid = isOptionValid(optionCopy);
             // no point in setting this if invalid
@@ -146,18 +139,7 @@ const ChaiseLogin = (): JSX.Element => {
 
   // click handlers
   const handleLoginClick = () => {
-    AuthnService.popupLogin(LogActions.LOGIN_NAVBAR, () => {
-      if (!AuthnService.shouldReloadPageAfterLogin()) {
-        // fetches the session of the user that just logged in
-        AuthnService.getSession('').then((response: any) => {
-          // if (modalInstance) modalInstance.close();
-          // update the user without reloading
-          if (response) dispatch(loginUser(response));
-        });
-      } else {
-        windowRef.location.reload();
-      }
-    });
+    AuthnService.popupLogin(LogActions.LOGIN_NAVBAR);
   };
 
   const handleOpenProfileClick = () => {
@@ -216,7 +198,7 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   const renderLoginMenu = () => {
-    if (!TypeUtils.isStringAndNotEmpty(authnRes.client.id)) {
+    if (!authnRes) {
       return (
         <>
           {renderSignupLink()}

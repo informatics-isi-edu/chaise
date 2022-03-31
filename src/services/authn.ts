@@ -10,6 +10,7 @@ import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
 import { fixedEncodeURIComponent, queryStringToJSON } from '@chaise/utils/uri-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 import { BUILD_VARIABLES } from '@chaise/utils/constants';
+import { Session } from '@chaise/models/user';
 
 export default class AuthnService {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location
@@ -22,7 +23,7 @@ export default class AuthnService {
   static PREVIOUS_SESSION_KEY: string = 'previousSession'; // name of key for previous session boolean
 
   // TODO: how to make these as private variables and private functions
-  private static _session: any | null = null; // current session object
+  private static _session: Session | null = null; // current session object
 
   private static _prevSession: any | null = null; // previous session object
 
@@ -111,7 +112,7 @@ export default class AuthnService {
   /**
    * opens a window dialog for logging in
    */
-  static popupLogin = function (logAction: string | null, postLoginCB: Function | null) {
+  static popupLogin = function (logAction: string | null, postLoginCB?: Function) {
     if (!postLoginCB) {
       postLoginCB = function () {
         if (!AuthnService.shouldReloadPageAfterLogin()) {
@@ -346,7 +347,7 @@ export default class AuthnService {
 
       if (!AuthnService._session) {
         // only update _session if no session is set
-        AuthnService._session = response.data;
+        AuthnService._setSession(response.data);
       }
 
       AuthnService._executeListeners();
@@ -354,7 +355,7 @@ export default class AuthnService {
     }).catch((err) => {
       // $log.warn(ERMrest.responseToError(err));
 
-      AuthnService._session = null;
+      AuthnService._setSession(null);
       AuthnService._executeListeners();
       return AuthnService._session;
     });
@@ -401,6 +402,17 @@ export default class AuthnService {
 
     return false;
   };
+
+  private static _setSession (inp: any) {
+    if (!inp) {
+      AuthnService._session = null;
+      return;
+    }
+    // TODO we have to ensure that the given input follows the same type..
+    // so the app doesn't blow up
+    // (if authn backend service changes its response, chaise should still work)
+    AuthnService._session = inp;
+  }
 } // end class
 
 // // variable so the modal can be passed to another function outside of this scope to close it when appropriate

@@ -5,26 +5,27 @@ import { useEffect, useState } from 'react';
 // components
 import ChaiseModal from '@chaise/components/modal';
 
-import { useAppSelector, useAppDispatch } from '@chaise/store/hooks';
-import { RootState } from '@chaise/store/store';
-import { ClientState } from '@chaise/store/slices/authn';
+// models
+import { Client } from '@chaise/models/user';
 
 // services
 import { ConfigService } from '@chaise/services/config';
 
 // utilities
 import { toTitlecase, underscoreToSpace } from '@chaise/utils/string-utils';
+import AuthnService from '@chaise/services/authn';
+
 
 const ProfileModal = ({
   showProfile, setShowProfile,
 }: any): JSX.Element | null => {
-  const userDisplay = ConfigService.user;
-  const user = useAppSelector((state: RootState) => state.authn);
+  const user = AuthnService.session;
+  const userDisplay = user ? (user.client.full_name || user.client.display_name || user.client.email || user.client.id) : '';
 
   const [initialized, setInitialzed]          = useState<boolean>(false);
   const [identities, setIdentities]           = useState<string[]>([]);
-  const [globusGroupList, setGlobusGroupList] = useState<ClientState[]>([]);
-  const [otherGroups, setOtherGroups]         = useState<ClientState[]>([]);
+  const [globusGroupList, setGlobusGroupList] = useState<Client[]>([]);
+  const [otherGroups, setOtherGroups]         = useState<Client[]>([]);
 
   useEffect(() => {
     if (!user || initialized) return;
@@ -52,8 +53,12 @@ const ProfileModal = ({
     setGlobusGroupList(tempGlobusGroupList);
     setOtherGroups(tempOtherGroups);
     setInitialzed(true);
-  })
+  });
 
+  // the profile modal only makes sense when we have a user
+  if (!user) {
+    return null;
+  }
 
   const handleClose = () => {
     setShowProfile(false);
@@ -96,12 +101,12 @@ const ProfileModal = ({
             {globusGroupList.map((gGroup, index) => (
               <li key={index}>
                 <a href={'https://app.globus.org/groups/' + gGroup.truncated_id + '/about'} target='_blank' rel='noreferrer'>{gGroup.display_name}</a>
-              </li>) 
+              </li>)
             )}
             {otherGroups.map((oGroup, index) => (
               <li key={index}>
                 <span>{oGroup.display_name}</span>
-              </li>) 
+              </li>)
             )}
           </ul>
         </td>

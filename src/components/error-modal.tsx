@@ -1,8 +1,3 @@
-import React from 'react';
-import ChaiseModal from '@chaise/components/modal';
-import { useAppSelector, useAppDispatch } from '@chaise/store/hooks';
-import { RootState } from '@chaise/store/store';
-import { hideError } from '@chaise/store/slices/error';
 import useError from '@chaise/hooks/error';
 import Modal from 'react-bootstrap/Modal';
 
