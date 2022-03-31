@@ -4,7 +4,6 @@ import '@chaise/assets/scss/app.scss';
 
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 import { ConfigService } from '@chaise/services/config';
