@@ -6,7 +6,6 @@ import '@chaise/assets/scss/app.scss';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import { store } from '@chaise/store/store';
 
 import ChaiseNavbar from '@chaise/components/navbar';
 
@@ -20,10 +19,8 @@ const NavbarApp = (): JSX.Element => {
 };
 
 ReactDOM.render(
-  <Provider store={store}>
-    <React.StrictMode>
-      <NavbarApp />
-    </React.StrictMode>
-  </Provider>,
+  <React.StrictMode>
+    <NavbarApp />
+  </React.StrictMode>,
   document.getElementById('chaise-navbar-app-root'),
 );

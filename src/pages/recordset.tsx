@@ -7,8 +7,6 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
-import { store } from '@chaise/store/store';
-import { useAppDispatch } from '@chaise/store/hooks';
 import { ConfigService } from '@chaise/services/config';
 
 import ChaiseNavbar from '@chaise/components/navbar';
@@ -37,7 +35,6 @@ const recordsetSettings = {
 };
 
 const RecordSetApp = (): JSX.Element => {
-  const dispatch = useAppDispatch();
   const { dispatchError } = useError();
   const [configDone, setConfigDone] = useState(false);
   const [recordSetProps, setRecordSetProps] = useState<RecordSetProps|null>(null);
@@ -198,12 +195,10 @@ const RecordSetApp = (): JSX.Element => {
 };
 
 ReactDOM.render(
-  <Provider store={store}>
-    <ErrorPorvider>
-      <React.StrictMode>
-        <RecordSetApp />
-      </React.StrictMode>
-    </ErrorPorvider>
-  </Provider>,
+  <ErrorPorvider>
+    <React.StrictMode>
+      <RecordSetApp />
+    </React.StrictMode>
+  </ErrorPorvider>,
   document.getElementById('chaise-app-root'),
 );

@@ -30,7 +30,7 @@ const ChaiseLogin = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
   const settings = ConfigService.appSettings;
 
-  // get the user from the store (assumption: it's populated by the app wrapper)
+  // get the user from the session service (assumption: it's populated by the app wrapper)
   const authnRes = AuthnService.session;
 
   const [displayName, setDisplayName]             = useState('');
