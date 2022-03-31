@@ -129,16 +129,6 @@ export class ConfigService {
     return setupHead();
   }
 
-  static set user(newUser: string) {
-    if (!ConfigService._user) {
-      ConfigService._user = newUser;
-    }
-  }
-
-  static get user() {
-    return ConfigService._user; 
-  }
-
   /**
    * ermrestjs instance that can be used for talking with ermrest
    */
