@@ -1048,27 +1048,45 @@
          * @param {Integer} zIndex -  the new default_z value
          */
         function updateDefaultZIndex(zIndex) {
-            var defer = $q.defer();
+            var url, payload = {}, defer = $q.defer();
 
             Session.validateSessionBeforeMutation(function () {
+                var tableName = $rootScope.reference.table.name,
+                    schemaName = $rootScope.reference.table.schema.name;
 
-                var ref = $rootScope.reference.contextualize.entryEdit;
+                url = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/attributegroup/";
+                url += UriUtils.fixedEncodeURIComponent(schemaName) + ":";
+                url += UriUtils.fixedEncodeURIComponent(tableName) + "/RID;";
+                url += UriUtils.fixedEncodeURIComponent(imageConfig.default_z_index_column_name);
 
-                // NOTE using a private API
-                var page = ERMrest._createPage(ref, null, [$rootScope.tuple.data],false, false);
-                page.tuples[0].data[imageConfig.default_z_index_column_name] = zIndex;
+                payload.RID = context.imageID;
+                payload[imageConfig.default_z_index_column_name] = zIndex;
 
+                var headers = {};
                 var stack = logService.addExtraInfoToStack(null, {
+                    "num_updated": 1,
+                    "updated_keys": {
+                        "cols": ["RID"],
+                        "vals": [[context.imageID]]
+                    },
                     "updated_vals": {
                         "cols": [imageConfig.default_z_index_column_name],
                         "vals": [[zIndex]]
                     }
                 });
-                var logObj = {
+                headers[ERMrest.contextHeaderName] = {
+                    catalog: context.catalogID,
+                    schema_table: schemaName + ":" + tableName,
                     action: logService.getActionString(logService.logActions.UPDATE),
                     stack: stack
                 };
-                ref.update(page.tuples, logObj).then(function () {
+
+                /**
+                 * NOTE: The update function only works for visible columns,
+                 * we cannot assume that default_z is visible, that's why
+                 * we're sending a direct put request.
+                 */
+                ConfigUtils.getHTTPService().put(url, [payload], {headers: headers}).then(function () {
                     AlertsService.addAlert("Default Z index value has been updated.", "success");
                     defer.resolve();
                 }).catch(function (exception) {
@@ -1098,7 +1116,9 @@
         /**
          * The expected input format: [{channelNumber: , settings: }]]
          * TODO this function is not using ermrestjs and directly sending a request
-         * to ermrest. we should be able to improve this later.
+         * to ermrest. This is because we cannot assume the config column is visible,
+         * while the Reference.update only allows updating of the visible columns.
+         * we should be able to improve this later.
          *
          */
         function updateChannelConfig(data) {
