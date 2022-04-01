@@ -1153,8 +1153,10 @@
                 };
 
                 // read the currently saved data, so we can capture the tuple in correct context
-                // dontCorrectpage, getTRS
-                resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, true).then(function (page) {
+                // arguments that are true:
+                //  - dontCorrect page
+                //  - getTCRS: since we're using this tuple for getting the update/delete permissions and also populating edit form
+                resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, false, true).then(function (page) {
                     if (page.length != 1) {
                         console.log("the currently added row was not visible.");
                     }

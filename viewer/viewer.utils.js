@@ -567,8 +567,7 @@
                 imageAnnotationURL += "=" + encode(context.defaultZIndex);
             }
 
-            // dontCorrectpage, getTRS
-            ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams(), false, true, true).then(function (ref) {
+            ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
 
                 if (!ref) {
                     // TODO should be changed to say annotation
@@ -643,7 +642,8 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                // since we want to check the ACL for allowing edit/delete of annotations we have to has for TCRS
+                // we need dynamic acls for: update/delete of each row, update of columns in edit mode
+                // that's why we're asking for tcrs
                 return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, true, cb);
             }).then(function (res) {
                 defer.resolve(res);
