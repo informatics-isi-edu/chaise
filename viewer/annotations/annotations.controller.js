@@ -4,21 +4,21 @@
     angular.module('chaise.viewer')
 
     .controller('AnnotationsController', [
-        'AlertsService', 'annotationCreateForm', 'annotationEditForm', 'annotations',
-        'AnnotationsService', 'AuthService', 'comments', 'context', 'CommentsService',
-        'ConfigUtils', 'DataUtils', 'errorMessages', 'ErrorService', 'InputUtils', 'UriUtils', 'modalUtils',
-        'modalBox', 'recordsetDisplayModes', 'recordCreate', 'logService', 'annotationModels',
+        'AlertsService', 'annotationCreateForm', 'annotationEditForm',
+        'AnnotationsService', 'context',
+        'ConfigUtils', 'errorMessages', 'ErrorService', 'UriUtils', 'modalUtils',
+        'recordCreate', 'logService', 'annotationModels',
         'viewerConfig', 'viewerConstant', 'viewerAppUtils',
-        '$q', '$rootScope','$scope', '$timeout', '$uibModal', '$window',
+        '$q', '$rootScope','$scope', '$timeout', '$window',
         function AnnotationsController(
-            AlertsService, annotationCreateForm, annotationEditForm, annotations,
-            AnnotationsService, AuthService, comments, context, CommentsService,
-            ConfigUtils, DataUtils, errorMessages, ErrorService, InputUtils, UriUtils, modalUtils ,
-            modalBox, recordsetDisplayModes, recordCreate, logService, annotationModels,
+            AlertsService, annotationCreateForm, annotationEditForm,
+            AnnotationsService, context,
+            ConfigUtils, errorMessages, ErrorService, UriUtils, modalUtils ,
+            recordCreate, logService, annotationModels,
             viewerConfig, viewerConstant, viewerAppUtils,
-            $q, $rootScope, $scope, $timeout, $uibModal, $window) {
+            $q, $rootScope, $scope, $timeout, $window) {
 
-        var chaiseConfig = Object.assign({}, ConfigUtils.getConfigJSON());
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         var annotConfig = viewerConfig.getAnnotationConfig();
         var idColName = annotConfig.annotated_term_id_column_name,
             nameColName = annotConfig.annotated_term_name_column_name;
@@ -26,39 +26,6 @@
 
         vm.annotationCreateForm = annotationCreateForm;
         vm.annotationEditForm = annotationEditForm;
-        vm.annotations = annotations;
-        vm.colors = ['red', 'orange', 'gold', 'green', 'blue', 'purple'];
-        vm.defaultColor = chaiseConfig.defaultAnnotationColor || 'red';
-        vm.annotationTypes = ['rectangle', 'arrow']; // 'section' excluded b/c once you set an annotation as a section, it can't be changed to other types
-        vm.filterByType = {section: true, rectangle: true, arrow: true}; // show all annotation types by default
-
-        vm.filterAnnotations = filterAnnotations;
-        vm.getNumVisibleAnnotations = getNumVisibleAnnotations;
-        vm.closeAnnotations = closeAnnotations;
-        vm.numVisibleAnnotations = 0;
-        vm.updateAnnotationVisibility = updateAnnotationVisibility;
-
-        vm.createMode = false; // TODO not used
-        vm.newAnnotation = {config:{color: vm.defaultColor, visible: true}}; // TODO not used
-        // vm.drawAnnotation = drawAnnotation;
-        vm.createAnnotation = createAnnotation; // TODO not used
-        vm.cancelNewAnnotation = cancelNewAnnotation; // TODO not used
-
-        var originalAnnotation; // Holds the original contents of annotation in the event that a user cancels an edit
-        resetEditedValues();
-        vm.editAnnotation = editAnnotation;
-        vm.cancelEdit = cancelEdit;
-        vm.updateAnnotation = updateAnnotation;
-        vm.deleteAnnotation = deleteAnnotation;
-        vm.highlightedAnnotation = null;
-        vm.centerAnnotation = centerAnnotation;
-        vm.scrollIntoView = scrollIntoView;
-        vm.getNumComments = getNumComments;
-        vm.authorName = authorName;
-        vm.allowCreate = AuthService.createAnnotation;
-        vm.allowEdit = AuthService.editAnnotation;
-        vm.allowDelete = AuthService.deleteAnnotation;
-
         /**
          * features added to support new annotation features
          * **/
@@ -83,7 +50,6 @@
         vm.changeStrokeScale = changeStrokeScale;
         vm.changeStrokeScaleStart = changeStrokeScaleStart;
         vm.changeStrokeScaleStop = changeStrokeScaleStop;
-        vm.changeSelectingAnnotation = changeSelectingAnnotation;
         vm.clearSearch = clearSearch;
         vm.closeAnnotationForm = closeAnnotationForm;
         vm.drawAnnotation = drawAnnotation;
@@ -91,10 +57,8 @@
         vm.highlightGroup = highlightGroup;
         vm.removeAnnotationEntry = removeAnnotationEntry;
         vm.search = search;
-        vm.saveAnatomySVGFile = saveAnatomySVGFile;
         vm.saveAnnotationRecord = saveAnnotationRecord;
         vm.toggleDisplay = toggleDisplay;
-        vm.updateDisplayNum = updateDisplayNum;
 
         // we have to make sure the main image is loaded before
         // asking osd to update the annotations,
@@ -141,7 +105,7 @@
                             // remove the existing annotations
                             annotationModels = [];
                             vm.annotationModels = annotationModels;
-                            vm.updateDisplayNum();
+                            updateDisplayNum();
 
                             mainImageLoaded = false;
                             annotationsRecieved = false;
@@ -191,25 +155,6 @@
                             $rootScope.loadingAnnotations = false;
                         });
                         break;
-                    case 'annotationDrawn':
-                        vm.newAnnotation.shape = data.content.shape;
-                        $scope.$apply(function() {
-                            vm.createMode = true;
-                        });
-                        break;
-                    case 'onClickAnnotation':
-                        var content = JSON.parse(data.content);
-                        //TODO check data object
-                        var annotation = findAnnotation(content.shapes[0].geometry);
-                        if (annotation) {
-                            var annotationId = annotation.table + '-' + annotation.id;
-                            $scope.$apply(function() {
-                                // Highlight the annotation in the sidebar
-                                vm.highlightedAnnotation = annotationId;
-                            });
-                            vm.scrollIntoView(annotationId);
-                        }
-                        break;
                     case "onClickChangeSelectingAnnotation":
                         $scope.$apply(function(){
                             var svgID = data.content.svgID,
@@ -223,8 +168,8 @@
                             })
                             // if user clicks on a drawing during annotation
                             if (!item) return;
-                            vm.scrollIntoView(item.svgID + item.groupID);
-                            vm.changeSelectingAnnotation(item);
+                            scrollIntoView(item.svgID + item.groupID);
+                            changeSelectingAnnotation(item);
 
                         })
                         break;
@@ -236,12 +181,12 @@
                     case "updateAnnotationList":
                         $scope.$apply(function(){
                             _addAnnotationToList(data.content);
-                            vm.updateDisplayNum();
+                            updateDisplayNum();
                         })
                         break;
                     case "saveGroupSVGContent":
                         $scope.$apply(function(){
-                            vm.saveAnatomySVGFile(data);
+                            saveAnatomySVGFile(data);
                         });
                         break;
                     case 'errorAnnotation':
@@ -253,136 +198,6 @@
                 console.log('Invalid event origin. Event origin: ', event.origin, '. Expected origin: ', window.location.origin);
             }
         });
-
-        function updateAnnotationVisibility(annotation) {
-            if (vm.filterByType[annotation.type]) {
-                annotation.config.visible = true;
-                AnnotationsService.syncVisibility();
-                vm.getNumVisibleAnnotations();
-            }
-        }
-
-        // TODO not used
-        function createAnnotation() {
-            vm.createMode = false;
-            AnnotationsService.createAnnotation(vm.newAnnotation).then(function success(annotation) {
-                $timeout(function scrollToNewAnnotation() {
-                    var annotationId = annotation.table + '-' + annotation.id;
-                    vm.highlightedAnnotation = annotationId;
-                    vm.scrollIntoView(annotationId);
-                }, 200);
-            });
-            vm.newAnnotation = {config:{color: vm.defaultColor}};
-        }
-
-        // TODO not used
-        function cancelNewAnnotation() {
-            vm.createMode = false;
-            return AnnotationsService.cancelNewAnnotation();
-        }
-
-        function editAnnotation(annotation) {
-            // Must make a copy instead of assigning to remove original annotation's
-            // references. Otherwise, changing something in editedAnnotation will
-            // also change the original annotation.
-
-            // This isn't a big deal except when editing the anatomy. When the anatomy
-            // is edited it reorders the list of annotations before the user clicks save.
-            vm.editedAnnotation = angular.copy(annotation);
-
-            vm.editedAnnotationDomId = annotation.table + '-' + annotation.id;
-            setHighlightedAnnotation(annotation);
-            originalAnnotation = {
-                description: annotation.description,
-                anatomy: annotation.anatomy,
-                config: annotation.config,
-                type: annotation.type
-            };
-        }
-
-        function cancelEdit(annotation) {
-            annotation.description = originalAnnotation.description;
-            annotation.anatomy = originalAnnotation.anatomy;
-            annotation.config = originalAnnotation.config;
-            annotation.type = originalAnnotation.type;
-            resetEditedValues();
-        }
-
-        function updateAnnotation(annotation) {
-            annotation = vm.editedAnnotation;
-            AnnotationsService.updateAnnotation(annotation);
-            var index = annotations.findIndex(function (_annotation){
-                return _annotation.id == annotation.id;
-            });
-            annotations[index] = vm.editedAnnotation;
-            resetEditedValues();
-        }
-
-        function resetEditedValues() {
-            originalAnnotation = null;
-            vm.editedAnnotation = null; // Track which annotation is being edited right now
-            vm.editedAnnotationDomId = null; // Tracks the currently edited annotation's id for the dom for showing/hiding forms
-        }
-
-        function deleteAnnotation(annotation) {
-            // if annotation has comments, allow it to be deleted
-            if (!hasComments(annotation)) {
-                if (chaiseConfig.confirmDelete == undefined || chaiseConfig.confirmDelete){
-                    var modalInstance = $uibModal.open({
-                        templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/delete-link/confirm_delete.modal.html',
-                        controller: 'ConfirmDeleteController',
-                        controllerAs: 'ctrl',
-                        resolve: {
-                            params: { count: 1 }
-                        },
-                        size: 'sm'
-                    });
-
-                    modalInstance.result.then(function () {
-                        AnnotationsService.deleteAnnotation(annotation);
-                        console.log('annotation deleted');
-                    }, function () {
-                        console.log('Modal dismissed');
-                    });
-                } else {
-                    AnnotationsService.deleteAnnotation(annotation);
-                    console.log('annotation deleted')
-                }
-            } else {
-                AlertsService.addAlert('Sorry, this annotation cannot be deleted because there is at least 1 comment on it. Please delete the comments before trying to delete the annotation.', 'error');
-            }
-        };
-
-        function setHighlightedAnnotation(annotation) {
-            vm.highlightedAnnotation = annotation.table + '-' + annotation.id;
-        }
-
-        // Centers and zooms to the annotation inside Annotorious
-        function centerAnnotation(annotation) {
-            setHighlightedAnnotation(annotation);
-            return AnnotationsService.centerAnnotation(annotation);
-        }
-
-        // Returns boolean
-        function hasComments(annotation) {
-            // if there are comments return true
-            return getNumComments(annotation) > 0 ? true : false;
-        }
-
-        function getNumComments(annotation) {
-            return CommentsService.getNumComments(annotation.id);
-        }
-
-        // Return an annotation/section that matches an object of coordinates
-        function findAnnotation(coordinates) {
-            var length = vm.annotations.length;
-            for (var i = 0; i < length; i++) {
-                var annotationCoords = vm.annotations[i].coords;
-                if (coordinates.x == annotationCoords[0] && coordinates.y == annotationCoords[1] && coordinates.width == annotationCoords[2] && coordinates.height == annotationCoords[3]) {
-                    return vm.annotations[i];
-                }
-            }
-        }
 
         // Scroll a DOM element into visible part of the browser
         function scrollIntoView(elementId) {
@@ -398,27 +213,6 @@
                 //it will be rejected only if scroll is cancelled
                 //we don't need to handle the rejection, so we can fail silently.
             });
-        }
-
-        // Used to set the author based on the info object from the user object (user.info) that is set on every annotation
-        // The info object is the session.client object and may contain a combination of display_name, full_name, and email
-        function authorName(client) {
-            return (client.display_name ? client.display_name : (client.full_name ? client.full_name : client.email ));
-        }
-
-        function getNumVisibleAnnotations() {
-            var counter = 0;
-            var annotations = vm.annotations;
-            for (var i = 0, len = annotations.length; i < len; i++) {
-                if (annotations[i].config.visible) {
-                    counter++;
-                }
-            }
-            return vm.numVisibleAnnotations = counter;
-        }
-
-        function closeAnnotations() {
-            $rootScope.$emit("dismissEvent");
         }
 
         /**
@@ -479,10 +273,11 @@
                 }
 
                 // TOOD should be more systematic
+                var contextHeaderParams = ConfigUtils.getContextHeaderParams();
                 var url = "/chaise/record/#" + context.catalogID;
                 url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_schema_name) + ":" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_name);
                 url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_id_column_name) + "=" + UriUtils.fixedEncodeURIComponent(id);
-                url += "?pcid=" + context.cid + "&ppid=" + context.pid;
+                url += "?pcid=" + contextHeaderParams.cid + "&ppid=" + contextHeaderParams.pid;
 
                 // default values for new anatomy's annotation
                 obj = {
@@ -683,10 +478,11 @@
             });
 
             // TODO should be part of a prototype (this is done twice)
+            var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             var url = "/chaise/record/#" + context.catalogID;
             url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_schema_name) + ":" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_name);
             url += "/" + UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_id_column_name) + "=" + UriUtils.fixedEncodeURIComponent(data[idColName]);
-            url += "?pcid=" + context.cid + "&ppid=" + context.pid;
+            url += "?pcid=" + contextHeaderParams.cid + "&ppid=" + contextHeaderParams.pid;
 
             item["anatomy"] = data[nameColName] + " (" + data[idColName] + ")";
             item["groupID"] = data[idColName] + "," + data[nameColName];
@@ -729,7 +525,7 @@
                 }
 
                 // TODO should be done in ermrestjs
-                var existingRefURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+                var existingRefURL = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/";
                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_schema_name) + ":";
                 existingRefURL += UriUtils.fixedEncodeURIComponent(annotConfig.annotated_term_table_name) + "/";
 
@@ -1103,7 +899,7 @@
          * @param {object} event : click event object
          */
         function highlightGroup(item, event){
-            vm.changeSelectingAnnotation(item);
+            changeSelectingAnnotation(item);
             // Unhide the annotation if it's hidden
             if(!item.isDisplay){
                 vm.toggleDisplay(item);
@@ -1166,7 +962,7 @@
                         vm.annotationModels.splice(i, 1);
 
                         // update the total number of annotations
-                        vm.updateDisplayNum();
+                        updateDisplayNum();
 
                         // remove svg object from openseadragon
                         if(item.svgID){
@@ -1189,7 +985,7 @@
         // Search based on the keyword
         var searchPromise = null;
         function search(){
-            vm.updateDisplayNum();
+            updateDisplayNum();
 
             // if a log promise is already fired, remove it
             if (searchPromise) {
@@ -1322,7 +1118,7 @@
                         vm.annotationModels.push(savedItem);
                     }
 
-                    vm.updateDisplayNum();
+                    updateDisplayNum();
                     vm.closeAnnotationForm();
                     vm.submissionButtonDisabled = false;
 
@@ -1420,7 +1216,7 @@
             for(var i = 0; i < vm.annotationModels.length; i++){
                 item = vm.annotationModels[i];
                 totalCount = item.svgID && item.groupID ? totalCount + 1 : totalCount;
-                if(vm.filterAnnotations(item)){
+                if(filterAnnotations(item)){
                     matchCount += 1;
                     item.isShow = true;
                 }

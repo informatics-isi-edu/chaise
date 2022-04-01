@@ -419,22 +419,12 @@ $(VIEWER_CONFIG): $(VIEWER_ROOT)/viewer-config-sample.js
 	touch $(VIEWER_CONFIG)
 
 VIEWER_JS_SOURCE=$(VIEWER_ROOT)/viewer.app.js \
+	$(VIEWER_ROOT)/viewer.controller.js \
 	$(VIEWER_ROOT)/viewer.utils.js \
-	$(VIEWER_ROOT)/common/providers/context.js \
-	$(VIEWER_ROOT)/common/providers/image.js \
-	$(VIEWER_ROOT)/common/providers/user.js \
-	$(VIEWER_ROOT)/common/providers/auth.service.js \
-	$(VIEWER_ROOT)/sidebar/sidebar.controller.js \
+	$(VIEWER_ROOT)/context.js \
 	$(VIEWER_ROOT)/annotations/annotations.js \
-	$(VIEWER_ROOT)/annotations/comments.js \
 	$(VIEWER_ROOT)/annotations/annotations.service.js \
-	$(VIEWER_ROOT)/annotations/comments.service.js \
-	$(VIEWER_ROOT)/annotations/annotations.controller.js \
-	$(VIEWER_ROOT)/annotations/comments.controller.js \
-	$(VIEWER_ROOT)/osd/osd.controller.js \
-	$(VIEWER_ROOT)/image-metadata/vocabs.js \
-	$(VIEWER_ROOT)/image-metadata/statuses.js \
-	$(VIEWER_ROOT)/image-metadata/metadata.controller.js
+	$(VIEWER_ROOT)/annotations/annotations.controller.js
 
 VIEWER_JS_SOURCE_MIN=viewer.min.js
 $(DIST)/$(VIEWER_JS_SOURCE_MIN): $(VIEWER_JS_SOURCE)
