@@ -306,6 +306,8 @@
                 if(row){
                     obj.isStoredInDB = true;
                     obj.tuple = row;
+                    obj.canUpdate = row.canUpdate;
+                    obj.canDelete = row.canDelete;
 
                     obj.logStackNode = logService.getStackNode(
                         logService.logStackTypes.ANNOTATION,
@@ -1104,6 +1106,8 @@
 
                     // update the tuple
                     savedItem.tuple = tuple;
+                    savedItem.canUpdate = tuple.canUpdate;
+                    savedItem.canDelete = tuple.canDelete;
                     savedItem.isStoredInDB = true;
                     savedItem.isNew = false;
 
@@ -1149,7 +1153,8 @@
                 };
 
                 // read the currently saved data, so we can capture the tuple in correct context
-                resultTuple.reference.contextualize.entryEdit.read(1, logObj).then(function (page) {
+                // dontCorrectpage, getTRS
+                resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, true).then(function (page) {
                     if (page.length != 1) {
                         console.log("the currently added row was not visible.");
                     }
@@ -1229,4 +1234,4 @@
             vm.matchCount = matchCount;
         }
     }]);
-})();
+  })();

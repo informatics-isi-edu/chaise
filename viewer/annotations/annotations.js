@@ -20,6 +20,8 @@
      *  - id
      *  - url
      *  - tuple
+     *  - canUpdate
+     *  - canDelete
      */
     .value('annotationModels', [])
 
@@ -50,4 +52,4 @@
         submissionRows: [{}], // rows of data converted to raw data for submission
         foreignKeyData: [{}]
     });
-})();
+  })();

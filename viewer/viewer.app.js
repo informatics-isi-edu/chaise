@@ -307,7 +307,7 @@
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
-                // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
+                // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreateAnnotation && !hasAnnotationQueryParam) {
                 //     $rootScope.disableAnnotationSidebar = true;
                 // }
 
@@ -362,4 +362,4 @@
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
         UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
-})();
+  })();

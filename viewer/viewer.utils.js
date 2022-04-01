@@ -567,13 +567,12 @@
                 imageAnnotationURL += "=" + encode(context.defaultZIndex);
             }
 
-            ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams()).then(function (ref) {
+            // dontCorrectpage, getTRS
+            ERMrest.resolve(imageAnnotationURL, ConfigUtils.getContextHeaderParams(), false, true, true).then(function (ref) {
 
                 if (!ref) {
                     // TODO should be changed to say annotation
-                    $rootScope.canCreate = false;
-                    $rootScope.canUpdate = false;
-                    $rootScope.canDelete = false;
+                    $rootScope.canCreateAnnotation = false;
                     return false;
                 }
 
@@ -584,9 +583,7 @@
                 // attach to the $rootScope so it can be used in annotations.controller
                 $rootScope.annotationEditReference = ref;
 
-                $rootScope.canCreate = ref.canCreate || false;
-                $rootScope.canUpdate = ref.canUpdate || false;
-                $rootScope.canDelete = ref.canDelete || false;
+                $rootScope.canCreateAnnotation = ref.canCreate;
 
                 // TODO create and edit should be refactored to reuse the same code
                 // create the edit and create forms
@@ -596,7 +593,7 @@
                     annotConfig.z_index_column_name,
                     annotConfig.channels_column_name
                 ];
-                if ($rootScope.canCreate) {
+                if (ref.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
                     annotationCreateForm.columnModels = [];
                     annotationCreateForm.reference.columns.forEach(function (column) {
@@ -607,7 +604,7 @@
                     });
                 }
 
-                if ($rootScope.canUpdate) {
+                if (ref.canUpdate) {
                     annotationEditForm.reference = ref;
                     annotationEditForm.columnModels = [];
                     annotationEditForm.reference.columns.forEach(function (column) {
@@ -654,7 +651,6 @@
                 // just log the error and resolve with empty array
                 console.error("error while getting annotations: ", err);
                 $rootScope.annotationTuples = [];
-                $rootScope.canCreate = false;
                 defer.resolve(false);
             });
 
@@ -1228,4 +1224,4 @@
 
     }]);
 
-})();
+  })();

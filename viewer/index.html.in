@@ -161,7 +161,7 @@
                                                 <span>Save</span>
                                             </button>
                                         </div>
-                                        <div class='annotationRowValue' ng-disabled="!canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
+                                        <div class='annotationRowValue' ng-disabled="!anno.editingAnatomy.canDelete" ng-show="!anno.editingAnatomy.isNew && anno.editingAnatomy.isStoredInDB" data-toggle='tooltip' tooltip-placement="bottom">
                                             <button class="btn chaise-btn chaise-btn-danger" ng-click="anno.removeAnnotationEntry(anno.editingAnatomy)">
                                                 <span class="chaise-btn-icon far fa-trash-alt"></span>
                                                 <span>Delete</span>
@@ -196,7 +196,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <button ng-show="canCreate" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
+                                    <button ng-show="canCreateAnnotation" class='btn chaise-btn chaise-btn-primary newAnnoBtn' ng-click="anno.addNewTerm()" tooltip-placement="bottom" uib-tooltip="Create new annotation">New</button>
                                 </div>
                                 <span class='resultCount'>
                                     <span>Displaying {{ anno.matchCount }} <span ng-if="!loadingAnnotations"> of {{ anno.totalCount }} </span>{{anno.searchKeyword ? "matching annotations": "annotations"}}</span>
@@ -221,7 +221,7 @@
                                                     <button class='editBtn' ng-click="anno.toggleDisplay(item, $event)" data-type='toggleDisplay' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="{{ item.isDisplay ? 'Hide annotation' : 'Show annotation'}}">
                                                         <i ng-class="item.isDisplay ? 'glyphicon glyphicon-eye-open' : 'glyphicon glyphicon-eye-close'"></i>
                                                     </button>
-                                                    <button ng-show="canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
+                                                    <button ng-show="item.canUpdate" class="editBtn" ng-click="anno.editAnatomyAnnotations(item, $index, $event)" data-type='editingAnatomy' data-toggle='tooltip' tooltip-placement="bottom" uib-tooltip="Edit Annotation">
                                                         <i class="glyphicon glyphicon-pencil"></i>
                                                     </button>
                                                     <button ng-if="item.tuple" class="editBtn" tooltip-placement="bottom" uib-tooltip="Share Annotation" ng-click="anno.shareAnnotation(item, $index, $event)" ng-disabled="anno.waitingForSharePopup">
