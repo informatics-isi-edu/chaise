@@ -306,6 +306,8 @@
                 if(row){
                     obj.isStoredInDB = true;
                     obj.tuple = row;
+                    obj.canUpdate = row.canUpdate;
+                    obj.canDelete = row.canDelete;
 
                     obj.logStackNode = logService.getStackNode(
                         logService.logStackTypes.ANNOTATION,
@@ -587,7 +589,11 @@
         function closeAnnotationForm(confirm){
             var item = vm.editingAnatomy;
 
+            if (!item || !vm.annoForm) return;
+
             var close = function () {
+                if (!item || !vm.annoForm) return;
+
                 vm.annoForm.$setPristine();
                 vm.annoForm.$setUntouched();
 
@@ -926,10 +932,14 @@
          * show delete modal to let user confirm whether to delete it
          * @param {object} item : the anatomy's annotations object
          */
-        function removeAnnotationEntry(item){
+        function removeAnnotationEntry(item, event){
             var i = 0,
                 row = null,
                 isFound = false;
+
+            if (event) {
+                event.stopPropagation();
+            }
 
             // log intend
             AnnotationsService.logAnnotationClientAction(logService.logActions.DELETE_INTEND, item);
@@ -1104,6 +1114,8 @@
 
                     // update the tuple
                     savedItem.tuple = tuple;
+                    savedItem.canUpdate = tuple.canUpdate;
+                    savedItem.canDelete = tuple.canDelete;
                     savedItem.isStoredInDB = true;
                     savedItem.isNew = false;
 
@@ -1149,7 +1161,10 @@
                 };
 
                 // read the currently saved data, so we can capture the tuple in correct context
-                resultTuple.reference.contextualize.entryEdit.read(1, logObj).then(function (page) {
+                // arguments that are true:
+                //  - dontCorrect page
+                //  - getTCRS: since we're using this tuple for getting the update/delete permissions and also populating edit form
+                resultTuple.reference.contextualize.entryEdit.read(1, logObj, false, true, false, true).then(function (page) {
                     if (page.length != 1) {
                         console.log("the currently added row was not visible.");
                     }
@@ -1229,4 +1244,4 @@
             vm.matchCount = matchCount;
         }
     }]);
-})();
+  })();

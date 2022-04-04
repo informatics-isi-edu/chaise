@@ -16,7 +16,6 @@ var chaiseConfig = {
         enable: ["*"] // [] <- disable
     },
     maxColumns: 6,
-    defaultAnnotationColor: 'red',
     feedbackURL: 'http://goo.gl/forms/f30sfheh4H',
     helpURL: '/help/using-the-data-browser/',
     editRecord: true,

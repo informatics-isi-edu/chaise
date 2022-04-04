@@ -45,9 +45,6 @@ If a property appears in the same configuration twice, the property defined late
    * [hideTableOfContents](#hidetableofcontents)
    * [disableExternalLinkModal](#disableexternallinkmodal)
    * [hideGoToRID](#hidegotorid)
- * [Viewer Configuration:](#viewer-configuration)
-   * [defaultAnnotationColor](#defaultannotationcolor)
-   * [userGroups](#usergroups)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
    * [exportSerivePath](#exportservicepath)
@@ -434,7 +431,7 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### showWriterEmptyRelatedOnLoad
- This property only applies to users with write permission to the main record being viewed. Set to `false` to hide all empty related tables on record page load ignoring the heuristics defined for writers. Set to `true` to show all empty related tables on record page load ignoring the heuristics. 
+ This property only applies to users with write permission to the main record being viewed. Set to `false` to hide all empty related tables on record page load ignoring the heuristics defined for writers. Set to `true` to show all empty related tables on record page load ignoring the heuristics.
    - Type: Boolean
    - Default behavior: the heuristics to show empty related tables based on the user being able to write to at least one of them will be used
    - Sample syntax:
@@ -476,29 +473,6 @@ If a property appears in the same configuration twice, the property defined late
    - Sample syntax:
      ```
      hideGoToRID: true
-     ```
-
-### Viewer Configuration:
- #### defaultAnnotationColor
- In `/chaise/viewer`, annotations' borders and colors will default to this value.
-   - Type: String - red|orange|gold|green|blue|purple
-   - Default behavior: red will be used
-   - Sample syntax:
-     ```
-     defaultAnnotationColor: purple
-     ```
-
- #### userGroups
- For Viewer app only. The Viewer app assigns an authenticated user one of three permission levels depending on the user's Globus memberships. The permission levels, from highest to lowest, are `curator`, `annotator`, then `user`. The default Globus group IDs that determine who's a `curator`, `annotator`, or `user` are set by [RBK](https://github.com/informatics-isi-edu/rbk-project). To override these default group IDs for each permission level, you may specify your own via this `userGroups` setting.
-   - Type: Object
-   - Default behavior: The default Globus group IDs are set by RBK
-   - Sample syntax:
-     ```
-     userGroups: {
-       curators: "https://auth.globus.org/962d5add-ff9a-11eb-8932-d71f8cc57c67",
-       annotators: "https://auth.globus.org/962d5add-ff9a-11eb-8932-d71f8cc57c67",
-       user: "https://auth.globus.org/962d5add-ff9a-11eb-8932-d71f8cc57c67"
-     }
      ```
 
 ### Export Configuration:

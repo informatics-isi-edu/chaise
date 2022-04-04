@@ -12,6 +12,9 @@ This document contains deprecated chaise-config parameters.
    * [sidebarPosition](#sidebarPosition)
    * [attributesSidebarHeading](#attributesSidebarHeading)
    * [hideSearchTextFacet](hidesearchtextfacet)
+* [Viewer Configuration:](#viewer-configuration)
+   * [defaultAnnotationColor](#defaultannotationcolor)
+   * [userGroups](#usergroups)
 
 
 ### Login Configuration:
@@ -44,7 +47,7 @@ This document contains deprecated chaise-config parameters.
      ```
      "attributesSidebarHeading": "Attributes"
      ```
-     
+
  #### hideSearchTextFacet
  Whether the search box for attributes names and values should be hidden
    - Type: Boolean
@@ -52,4 +55,28 @@ This document contains deprecated chaise-config parameters.
    - Sample syntax:
      ```
      hideSearchTextFacet: true
+     ```
+
+
+### Viewer Configuration:
+ #### defaultAnnotationColor
+ In `/chaise/viewer`, annotations' borders and colors will default to this value.
+   - Type: String - red|orange|gold|green|blue|purple
+   - Default behavior: red will be used
+   - Sample syntax:
+     ```
+     defaultAnnotationColor: purple
+     ```
+
+ #### userGroups
+ For Viewer app only. The Viewer app assigns an authenticated user one of three permission levels depending on the user's Globus memberships. The permission levels, from highest to lowest, are `curator`, `annotator`, then `user`. The default Globus group IDs that determine who's a `curator`, `annotator`, or `user` are set by [RBK](https://github.com/informatics-isi-edu/rbk-project). To override these default group IDs for each permission level, you may specify your own via this `userGroups` setting.
+   - Type: Object
+   - Default behavior: The default Globus group IDs are set by RBK
+   - Sample syntax:
+     ```
+     userGroups: {
+       curators: "https://auth.globus.org/962d5add-ff9a-11eb-8932-d71f8cc57c67",
+       annotators: "https://auth.globus.org/962d5add-ff9a-11eb-8932-d71f8cc57c67",
+       user: "https://auth.globus.org/962d5add-ff9a-11eb-8932-d71f8cc57c67"
+     }
      ```
