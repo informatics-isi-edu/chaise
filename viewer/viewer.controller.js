@@ -18,9 +18,6 @@
         vm.showChannelList = false;
         vm.toggleChannelList = toggleChannelList;
 
-        vm.annotationsAreHidden = false;
-        vm.toggleAnnotations = toggleAnnotations;
-
         // the top-left-panel that needs to be resizable with toc
         vm.resizePartners = document.querySelector(".top-left-panel");
 
@@ -182,11 +179,6 @@
                 action: logService.getActionString(logService.logActions.VIEWER_ZOOM_RESET, null, ""),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
-        }
-
-        function toggleAnnotations() {
-            var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
-            vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
         function openAnnotations() {

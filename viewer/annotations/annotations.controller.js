@@ -589,7 +589,11 @@
         function closeAnnotationForm(confirm){
             var item = vm.editingAnatomy;
 
+            if (!item || !vm.annoForm) return;
+
             var close = function () {
+                if (!item || !vm.annoForm) return;
+
                 vm.annoForm.$setPristine();
                 vm.annoForm.$setUntouched();
 
@@ -928,10 +932,14 @@
          * show delete modal to let user confirm whether to delete it
          * @param {object} item : the anatomy's annotations object
          */
-        function removeAnnotationEntry(item){
+        function removeAnnotationEntry(item, event){
             var i = 0,
                 row = null,
                 isFound = false;
+
+            if (event) {
+                event.stopPropagation();
+            }
 
             // log intend
             AnnotationsService.logAnnotationClientAction(logService.logActions.DELETE_INTEND, item);
