@@ -388,7 +388,7 @@
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
                 showFaceting:       showFaceting,
-                facetPanelOpen:     params.facetPanelOpen,
+                facetPanelOpen:     showFaceting && params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
