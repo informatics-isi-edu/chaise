@@ -12,7 +12,7 @@
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -41,6 +41,9 @@
           "showWriterEmptyRelatedOnLoad": null,
           "savedQueryConfig": null,
           "loggedInMenu": {},
+          "facetPanelDisplay": {
+              "open": []
+          },
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]

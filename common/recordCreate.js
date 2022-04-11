@@ -343,11 +343,13 @@
                 });
             });
 
-            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelect;
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelectAssociation;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
-            params.facetPanelOpen = false;
+
+            var cc = ConfigUtils.getConfigJSON();
+            params.facetPanelOpen = cc.facetPanelDisplay.open.indexOf("compact/select/association") > -1;
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackNode(
