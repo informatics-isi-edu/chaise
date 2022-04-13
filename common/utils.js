@@ -1537,7 +1537,8 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             ERMrest.setClientConfig({
                 internalHosts: chaiseConfig.internalHosts,
-                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
+                facetPanelDisplay: chaiseConfig.facetPanelDisplay
             });
         }
 

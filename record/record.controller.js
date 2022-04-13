@@ -484,7 +484,7 @@
             params.selectMode = modalBox.multiSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
-            params.facetPanelOpen = chaiseConfig.facetPanelDisplay.open.indexOf("compact/select/association") > -1;
+            params.facetPanelOpen = params.reference.display.facetPanelOpen;
 
             var stackElement = logService.getStackNode(
                 logService.logStackTypes.RELATED,
