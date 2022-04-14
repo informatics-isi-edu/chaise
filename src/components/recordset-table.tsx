@@ -12,8 +12,8 @@ import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
 type RecordSetTableProps = {
   columnModels: any,
   page: any,
-  rowValues: any,
-  isInitialized: boolean,
+  // rowValues: any,
+  colValues: any,
   config: RecordSetConfig,
   sortCallback?: (sortColumn: SortColumn) => any,
   currSortColumn: SortColumn | null,
@@ -23,8 +23,8 @@ type RecordSetTableProps = {
 const RecordSetTable = ({
   columnModels,
   page,
-  rowValues,
-  isInitialized,
+  // rowValues,
+  colValues,
   config,
   sortCallback,
   currSortColumn,
@@ -108,9 +108,10 @@ const RecordSetTable = ({
   }
 
   const renderRows = () => {
+    // we need to check colValues since they might be set in different times
     if (!page) return;
 
-    if (page.length == 0) {
+    if (page.length === 0) {
       return (
         <tr>
           <td colSpan={columnModels.length + 1} style={{ textAlign: 'center' }}>
@@ -119,6 +120,8 @@ const RecordSetTable = ({
         </tr>
       )
     }
+
+    if (colValues.length === 0) return;
 
     return page.tuples.map((tuple: any, index: number) => {
       return (
@@ -134,34 +137,60 @@ const RecordSetTable = ({
               </a>
             </div>
           </td>
-          {renderCells(rowValues[index])}
+          {renderCells(index)}
         </tr>
 
       )
     })
   }
 
-  const renderCells = (rowValue: any) => {
-    if (!rowValue || rowValue.length == 0) return;
-    return rowValue.map((val: any, index: number) => {
+  // const renderCells = (tuple: any) => {
+  //   return tuple.values.map((val: any, index: number) => {
+  //     return (
+  //       <td key={tuple.uniqueId + '-' + index}>
+  //         <div className='showContent'>
+  //           <DisplayValue addClass={true} value={{value: val, isHTML: tuple.isHTML[index]}} />
+  //         </div>
+  //       </td>
+  //     )
+  //   })
+  // };
+
+  // const renderCells = (rowValue: any) => {
+  //   if (!rowValue || rowValue.length == 0) return;
+  //   return rowValue.map((val: any, index: number) => {
+  //     return (
+  //       <td key={index}>
+  //         <div className='showContent'>
+  //           <DisplayValue addClass={true} value={val} />
+  //         </div>
+  //       </td>
+  //     )
+  //   })
+  // };
+
+  const renderCells = (rowIndex: number) => {
+    return colValues.map( (colVal: any, colIndex: number) => {
       return (
-        <td key={index}>
+        <td key={rowIndex + '-' + colIndex}>
+          {/* TODO ellipsis logic */}
           <div className='showContent'>
-            <DisplayValue addClass={true} value={val} />
+            <DisplayValue addClass={true} value={colVal[rowIndex]} />
           </div>
         </td>
       )
-    })
-  };
+    });
+  }
 
   const renderNextPreviousBtn = () => {
+    if (!page) return;
     return (
       <div className='chaise-table-pagination'>
         <button
           type='button'
           className='chaise-table-previous-btn chaise-btn chaise-btn-primary'
           onClick={() => nextPreviousCallback(false)}
-          disabled={!page || !page.hasPrevious}
+          disabled={!page.hasPrevious}
         >
           <span>Previous</span>
         </button>
@@ -169,7 +198,7 @@ const RecordSetTable = ({
           type='button'
           className='chaise-table-next-btn chaise-btn chaise-btn-primary'
           onClick={() => nextPreviousCallback(true)}
-          disabled={!page || !page.hasNext}
+          disabled={!page.hasNext}
         >
           <span>Next</span>
         </button>
@@ -197,7 +226,7 @@ const RecordSetTable = ({
           </tbody>
         </table>
       </div>
-      {isInitialized && renderNextPreviousBtn()}
+      {renderNextPreviousBtn()}
     </div>
   )
 }

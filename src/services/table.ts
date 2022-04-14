@@ -29,6 +29,7 @@ class FlowControlQueueInfo {
 export class RecordsetFlowControl {
   dirtyResult = false;
   dirtyCount = false;
+  dirtyFacets = false;
   requestModels: any = [];
   reloadCauses: any;
   recountCauses: any;
@@ -42,6 +43,10 @@ export class RecordsetFlowControl {
 
   aggregateResults: any;
   templateVariables: any;
+
+  isLoading = false;
+  page : any = null;
+  colValues: any = [];
 
   private internalID: string;
 

@@ -19,7 +19,7 @@ import { ConfigService } from '@chaise/services/config';
 import Q from 'q';
 import TypeUtils from '@chaise/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink } from '@chaise/utils/uri-utils';
-import { getRowValuesFromPage } from '@chaise/utils/data-utils';
+import { getColumnValuesFromPage, getRowValuesFromPage } from '@chaise/utils/data-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 import Footer from '@chaise/components/footer';
 import Faceting from '@chaise/components/faceting';
@@ -78,6 +78,7 @@ const RecordSet = ({
     })
   );
   const setColumnModelSpinners = (indexes: any, value: boolean) => {
+    // TODO fix this
     setColumnModels(
       columnModels.map((cm: any, index: number) => {
         return (index in indexes) ? { ...cm, isLoading: value } : cm;
@@ -93,14 +94,26 @@ const RecordSet = ({
   /**
    * whether the data has been loaded or not
    */
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setStateIsLoading] = useState(true);
+  const setIsLoading = (bool: boolean) => {
+    setStateIsLoading(bool);
+    flowControl.current.isLoading = bool;
+  }
 
   /**
    * the page of data that should be displayed
    */
-  const [page, setPage] = useState<any>(null);
+  const [page, setStatePage] = useState<any>(null);
+  const setPage = (page: any) => {
+    flowControl.current.page = page;
+    setStatePage(page);
+  }
 
-  const [rowValues, setRowValues] = useState<any>([]);
+  const [colValues, setStateColValues] = useState<any>([]);
+  const setColValues = (colVals: any) => {
+    setStateColValues(colVals);
+    flowControl.current.colValues = colVals;
+  }
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
 
@@ -109,7 +122,12 @@ const RecordSet = ({
    */
   const [facetPanelOpen, setFacetPanelOpen] = useState(config.facetPanelOpen);
 
+  /**
+   * We have to validate the facets first, and then we can show them.
+   */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
+
+  // const [facetRefresh, setFacetReferesh] = useState(0);
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
@@ -127,7 +145,6 @@ const RecordSet = ({
       attachMainContainerPaddingSensor();
       return;
     }
-
 
     // TODO pass the proper values
     attachContainerHeightSensors();
@@ -172,7 +189,7 @@ const RecordSet = ({
       if (res.issues) {
         // TODO change the
         // var cb = function () {
-        //   $rootScope.$emit('reference-modified');
+        // updateLocation();
         // };
         // ErrorService.handleException(res.issues, false, false, cb, cb);
       } else {
@@ -291,6 +308,8 @@ const RecordSet = ({
       $log.debug(`adding one to counter, new: ${flowControl.current.queue.counter}`);
     }
 
+    // updatePage is called as a result of updating the reference
+    // we cannot ensure that the reference is latest, so we cannot call updatePage
     // updatePage();
   }
 
@@ -308,9 +327,10 @@ const RecordSet = ({
     updateMainEntity(updatePage, false);
 
     // get the aggregate values only if main page is loaded
-    // fetchSecondaryRequests(updatePage);
+    fetchSecondaryRequests(updatePage);
 
     // TODO the rest
+    // setFacetReferesh(facetRefresh+1);
   }
 
   /**
@@ -341,7 +361,9 @@ const RecordSet = ({
         if (cb) cb(res);
         // TODO remember last successful main request
         // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
-        updatePageCB();
+        setTimeout(() => {
+          updatePageCB();
+        });
       }).catch((err: any) => {
         afterUpdateMainEntity(true, currentCounter);
         if (cb) cb(self, true);
@@ -445,7 +467,7 @@ const RecordSet = ({
 
         setIsInitialized(true);
         setPage(result.page);
-        setRowValues(getRowValuesFromPage(result.page));
+        setColValues(getColumnValuesFromPage(result.page));
 
         // update the objects based on the new page
         if (Array.isArray(result.page.templateVariables)) {
@@ -524,7 +546,7 @@ const RecordSet = ({
    * @param  {boolean} hideSpinner?  Indicates whether we should show spinner for columns or not
    */
   const fetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => {
-    if (isLoading || !isInitialized) return;
+    if (flowControl.current.isLoading) return;
     flowControl.current.requestModels.forEach((aggModel: any, index: number) => {
       if (!flowControl.current.haveFreeSlot() || aggModel.processed) {
         return;
@@ -541,7 +563,7 @@ const RecordSet = ({
 
         printDebugMessage(`: after aggregated value for column (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
 
-        updatePageCB(this);
+        updatePageCB();
       }).catch((err: any) => {
         dispatchError({ error: err });
       });
@@ -578,7 +600,7 @@ const RecordSet = ({
       action: flowControl.current.getTableLogAction(action, LogStackPaths.PSEUDO_COLUMN),
       stack,
     };
-    activeListModel.column.getAggregatedValue(page, logObj).then((values: any) => {
+    activeListModel.column.getAggregatedValue(flowControl.current.page, logObj).then((values: any) => {
       if (flowControl.current.queue.counter !== current) {
         return defer.resolve(false), defer.promise;
       }
@@ -596,6 +618,8 @@ const RecordSet = ({
       //  - update the aggregateResults
       //  - attach the values to the appropriate columnModel if we have all the data.
       const sourceDefinitions = reference.table.sourceDefinitions;
+
+      let newColValues: any = [];
       values.forEach((val: any, valIndex: number) => {
         // update the templateVariables
         if (activeListModel.objects.length > 0 && Array.isArray(sourceDefinitions.sourceMapping[activeListModel.column.name])) {
@@ -625,8 +649,23 @@ const RecordSet = ({
         flowControl.current.aggregateResults[valIndex][activeListModel.column.name] = val;
 
         // attach the values to the appropriate objects
-        attachPseudoColumnValue(activeListModel, valIndex);
+        attachPseudoColumnValue(activeListModel, valIndex, newColValues);
       });
+
+      let indexes: any = {};
+      setColValues(
+        flowControl.current.colValues.map((colVal: any, index: number) => {
+          if (Array.isArray(newColValues[index])) {
+            indexes[index] = true;
+            return newColValues[index];
+          }
+          return colVal;
+        })
+      );
+
+      // TODO this is not working as expected because what's in the state
+      // is outdated...
+      setColumnModelSpinners(indexes, false);
 
       // clear the causes
       aggModel.reloadCauses = [];
@@ -668,7 +707,7 @@ const RecordSet = ({
        * @param {Object} activeListModel - the model that ermrestjs returns
        * @param {Integer} valIndex - the row index
        */
-  const attachPseudoColumnValue = (activeListModel: any, valIndex: number) => {
+  const attachPseudoColumnValue = (activeListModel: any, valIndex: number, newColValues: any) => {
     activeListModel.objects.forEach((obj: any) => {
       // this is only called in recordset so it won't be any other type
       if (!obj.column) return;
@@ -689,40 +728,13 @@ const RecordSet = ({
       const displayValue = model.column.sourceFormatPresentation(
         flowControl.current.templateVariables[valIndex],
         flowControl.current.aggregateResults[valIndex][model.column.name],
-        page.tuples[valIndex],
+        flowControl.current.page.tuples[valIndex],
       );
 
-      let indexes: any = {};
-      indexes[obj.index] = true;
-      setColumnModelSpinners(indexes, false);
-
-      // setRowValues(
-      //   rowValues.map((rowVal:any, index: number) => {
-      //     if (index !== valIndex) {
-      //       return rowVal;
-      //     }
-
-      //     let copy = [...rowVal];
-      //     copy[obj.index] = displayValue;
-      //     return copy;
-      //   })
-      // );
-
-      // model.isLoading = false;
-
-
-      // if rowValues has not been completely populated yet, use pendingRowValues instead
-      // if (this.pushMoreRowsPending) {
-      //   if (this.pendingRowValues[valIndex] === undefined) {
-      //     this.pendingRowValues[valIndex] = {};
-      //   }
-      //   this.pendingRowValues[valIndex][obj.index] = displayValue;
-      // } else {
-      // this.rowValues[valIndex][obj.index] = displayValue;
-      // emit aggregates loaded event for [row][column]
-      // TODO how to signal that the aggregate is loaded
-      // $rootScope.$emit("aggregate-loaded-" + vm.internalID + "-" + valIndex, obj.index);
-      // }
+      if (!Array.isArray(newColValues[obj.index])) {
+        newColValues[obj.index] = [];
+      }
+      newColValues[obj.index][valIndex] = displayValue;
     });
   }
 
@@ -864,7 +876,7 @@ const RecordSet = ({
     <div className='recordset-container app-content-container'>
       {/* TODO what about $root.error and $root.showSpinner */}
       {
-        (!isInitialized || isLoading) &&
+        isLoading &&
         <ChaiseSpinner />
       }
       <div className='top-panel-container'>
@@ -892,7 +904,7 @@ const RecordSet = ({
                 <div className='recordset-title-buttons title-buttons'>
                   <Export
                     reference={reference}
-                    disabled={isLoading || !isInitialized || !page || page.length === 0}
+                    disabled={isLoading || !page || page.length === 0}
                   />
                   <OverlayTrigger placement='bottom' overlay={
                     <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
@@ -963,7 +975,10 @@ const RecordSet = ({
             style={{visibility: config.showFaceting ? 'visible': 'hidden'}}
           >
             <div className='side-panel-container'>
-              <Faceting reference={reference} />
+              <Faceting
+                // refresh={facetRefresh}
+                reference={reference}
+              />
             </div>
           </div>
         }
@@ -971,16 +986,15 @@ const RecordSet = ({
           <div className='main-body'>
             <RecordSetTable
               page={page}
-              rowValues={rowValues}
+              colValues={colValues}
               columnModels={columnModels}
-              isInitialized={isInitialized}
               config={config}
               sortCallback={changeSort}
               currSortColumn={currSortColumn}
               nextPreviousCallback={nextPreviousCallback}
             />
           </div>
-          {isInitialized && config.displayMode === RecordSetDisplayMode.FULLSCREEN && <Footer />}
+          {config.displayMode === RecordSetDisplayMode.FULLSCREEN && <Footer />}
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-import { RowValue } from '@chaise/models/row-value';
 
 /**
  * given a page object, return array of RowValue types
@@ -7,7 +6,7 @@ import { RowValue } from '@chaise/models/row-value';
  */
 export function getRowValuesFromPage(page: any) {
   return page.tuples.map((tuple: any) => {
-    const row: RowValue[] = [];
+    const row: {isHTML: boolean, value: string}[] = [];
     tuple.values.forEach((value: string, index: number) => {
       row.push({
         isHTML: tuple.isHTML[index],
@@ -20,13 +19,36 @@ export function getRowValuesFromPage(page: any) {
 }
 
 /**
+ * given an array of tuples, return array of cell values
+ * arranged based on their columns and then rows
+ * @param {ERMrest.Page} Tuples
+ * @return [Object] array of row values in the form of {isHTML: boolean, value: v}
+ */
+export function getColumnValuesFromPage(page: any) {
+  const result : any = [];
+  page.tuples.forEach((tuple: any, tupleIndex: number) => {
+    tuple.values.forEach( (value: string, colIndex: number) => {
+      if (!Array.isArray(result[colIndex])) {
+        result[colIndex] =  Array(page.length);
+      }
+      result[colIndex][tupleIndex] = {
+        isHTML: tuple.isHTML[colIndex],
+        value
+      }
+    });
+  });
+  return result;
+}
+
+/**
  * given an array of tuples, return array of RowValue types
+ * arranged based on rows and then columns
  * @param {ERMrest.Page} Tuples
  * @return [Object] array of row values in the form of {isHTML: boolean, value: v}
  */
 export function getRowValuesFromTuples(tuples: any) {
   return tuples.map((tuple: any) => {
-    const row: RowValue[] = [];
+    const row: {isHTML: boolean, value: string}[] = [];
     tuple.values.forEach((value: string, index: number) => {
       row.push({
         isHTML: tuple.isHTML[index],

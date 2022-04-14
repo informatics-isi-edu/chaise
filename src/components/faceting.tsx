@@ -2,15 +2,24 @@ import '@chaise/assets/scss/_faceting.scss';
 
 import Accordion from 'react-bootstrap/Accordion';
 import DisplayValue from '@chaise/components/display-value';
+import { useEffect } from 'react';
+import $log from '@chaise/services/logger';
 
 // TODO subject to change
 type FacetingProps = {
-  reference: any
+  reference: any,
+  // refresh?: number
 }
 
 const Faceting = ({
-  reference
+  reference,
+  // refresh,
 }: FacetingProps) => {
+
+  // useEffect(()=> {
+  //   $log.log('refreshing the faceting!');
+  //   // $log.log(test.current);
+  // }, [refresh]);
 
   const renderFacets = () => {
     return reference.facetColumns.map((fc: any, index: number) => {
