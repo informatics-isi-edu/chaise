@@ -5,7 +5,7 @@ The file contains changes made to chaise-config parameters.
 #### 04/08/2022 ####
 
 ###### PR Link
-  - [chaise]()
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2168)
   - [ermrestJS](https://github.com/informatics-isi-edu/ermrestjs/pull/943)
 
 #### 10/20/2021 ####
