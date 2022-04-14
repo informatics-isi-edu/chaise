@@ -577,11 +577,10 @@
                     });
 
                     // add not null filters for key information
-                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).addFacets(andFilters).contextualize.compactSelect;
+                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).addFacets(andFilters).contextualize.compactSelectForeignKey;
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
-                    params.facetPanelOpen = false;
 
                     if (vm.searchPopupGetDisabledTuples) {
                         params.getDisabledTuples = vm.searchPopupGetDisabledTuples()(vm.columnModel);

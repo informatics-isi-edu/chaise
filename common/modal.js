@@ -388,7 +388,7 @@
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
                 showFaceting:       showFaceting,
-                facetPanelOpen:     showFaceting && params.facetPanelOpen,
+                facetPanelOpen:     showFaceting && params.reference.display.facetPanelOpen, // set by ermrestJS based on defined chaise-config
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,

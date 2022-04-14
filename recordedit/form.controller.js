@@ -324,12 +324,11 @@
             });
 
             // add not null filters for key information
-            params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).addFacets(andFilters).contextualize.compactSelect;
+            params.reference = column.filteredRef(submissionRow, vm.recordEditModel.foreignKeyData[rowIndex]).addFacets(andFilters).contextualize.compactSelectForeignKey;
 
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
             params.showFaceting = true;
-            params.facetPanelOpen = false;
 
             var columnModel = vm.recordEditModel.columnModels[columnIndex];
             params.logStack = recordCreate.getColumnModelLogStack(columnModel);

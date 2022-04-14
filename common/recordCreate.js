@@ -343,11 +343,10 @@
                 });
             });
 
-            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelectAssociation;
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelectAssociationLink;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
-            params.facetPanelOpen = params.reference.display.facetPanelOpen;
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackNode(
@@ -582,7 +581,7 @@
          * @param  {Object} logObj the object will be passed to read as contextHeaderParams
          */
         function _getForeignKeyData (model, rowIndex, colNames, fkRef, logObj) {
-            fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
+            fkRef.contextualize.compactSelectForeignKey.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
                     // default value is validated
                     if (page.tuples.length > 0) {

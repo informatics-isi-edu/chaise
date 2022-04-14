@@ -1541,7 +1541,6 @@
                         params.reference = scope.reference;
                         params.selectMode = "multi-select";
                         params.faceting = false;
-                        params.facetPanelOpen = false;
 
                         // callback on each selected change (incldues the url limitation logic)
                         params.onSelectedRowsChanged = modalDataChanged(scope, false);

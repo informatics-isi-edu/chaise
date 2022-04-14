@@ -145,8 +145,8 @@
                     context.catalogID = reference.table.schema.catalog.id;
                     context.tableName = reference.table.name;
 
-
                     recordsetModel.reference = reference.contextualize.compact;
+                    recordsetModel.config.facetPanelOpen = showFaceting && recordsetModel.reference.display.facetPanelOpen;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,

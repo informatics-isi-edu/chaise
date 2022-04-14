@@ -42,7 +42,8 @@
           "savedQueryConfig": null,
           "loggedInMenu": {},
           "facetPanelDisplay": {
-              "open": []
+              "open": ["compact"],
+              "closed": ["compact/select"]
           },
           "shareCiteAcls": {
               "show": ["*"],
