@@ -26,6 +26,52 @@
             }
         };
 
+        var _decorateSession = function(session) {
+            var attributes = [];
+            session.attributes.forEach(function (attr) {
+                // NOTE: the current assumption is that everything in session.attributes is a globus group or an identity
+                // a globus group if:
+                //   - display_name is defined
+                //   - display_name is not the same as the user's display_name
+                //   - current id is not in the identities array
+                if (attr.display_name && attr.display_name !== session.client.display_name && session.client.identities.indexOf(attr.id) == -1) {
+                    if (attr.id.indexOf("https://auth.globus.org/") === 0) {
+                        // assume id is always "https://auth.globus.org/ff766864-a03f-11e5-b097-22000aef184d"
+                        attr.webpage = "https://app.globus.org/groups/" + attr.id.substring(24) + "/about";
+                        attr.type = "globus_group";
+                    } else {
+                        // attributes without a type (!globus_group and !identity) are assumed to be "other groups"
+                        attr.type = "other_group";
+                    }
+                }
+
+                if (session.client.identities.includes(attr.id)) {
+                    attr.type = "identity";
+                }
+
+                var matchIdx = null;
+                // determine if 'attr' exists in $session.attributes
+                matchIdx = attributes.findIndex(function (targetAttr) {
+                    return targetAttr.id === attr.id;
+                });
+
+                // merge if the attribute already exists, push otherwise
+                if (matchIdx !== -1) {
+                    Object.assign(attributes[matchIdx], attr);
+                } else {
+                    attributes.push(attr);
+                }
+            });
+
+            // sort the newly created atrtibutes array by display_name
+            attributes.sort(function(a, b) {
+                if (a.display_name && b.display_name) return a.display_name.localeCompare(b.display_name);
+            });
+
+            session.attributes = attributes;
+            return session;
+        }
+
         /**
          * Functions that interact with the StorageService tokens
          * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
@@ -332,7 +378,7 @@
 
                 if (!_session) {
                     // only update _session if no session is set
-                    _session = response.data;
+                    _session = _decorateSession(response.data);
                 }
 
                 _executeListeners();
@@ -364,7 +410,7 @@
                 return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                     if (!_session) {
                         // only update _session if no session is set
-                        _session = response.data;
+                        _session = _decorateSession(response.data);
                     }
                     return _session;
                 }).catch(function(err) {
