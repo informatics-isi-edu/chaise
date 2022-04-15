@@ -78,11 +78,12 @@ const RecordSet = ({
     })
   );
   const setColumnModelSpinners = (indexes: any, value: boolean) => {
-    // TODO fix this
     setColumnModels(
-      columnModels.map((cm: any, index: number) => {
-        return (index in indexes) ? { ...cm, isLoading: value } : cm;
-      })
+      (prevColumnModels: any) => {
+        return prevColumnModels.map((cm: any, index: number) => {
+          return (index in indexes) ? { ...cm, isLoading: value } : cm;
+        });
+      }
     )
   };
 
@@ -94,26 +95,14 @@ const RecordSet = ({
   /**
    * whether the data has been loaded or not
    */
-  const [isLoading, setStateIsLoading] = useState(true);
-  const setIsLoading = (bool: boolean) => {
-    setStateIsLoading(bool);
-    flowControl.current.isLoading = bool;
-  }
+  const [isLoading, setIsLoading] = useState(true);
 
   /**
    * the page of data that should be displayed
    */
-  const [page, setStatePage] = useState<any>(null);
-  const setPage = (page: any) => {
-    flowControl.current.page = page;
-    setStatePage(page);
-  }
+  const [page, setPage] = useState<any>(null);
 
-  const [colValues, setStateColValues] = useState<any>([]);
-  const setColValues = (colVals: any) => {
-    setStateColValues(colVals);
-    flowControl.current.colValues = colVals;
-  }
+  const [colValues, setColValues] = useState<any>([]);
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
 
@@ -140,6 +129,7 @@ const RecordSet = ({
   const searchColumns = initialReference.searchColumns;
 
 
+  // initialize the recordset if it has not been done yet.
   useEffect(() => {
     if (isInitialized) {
       attachMainContainerPaddingSensor();
@@ -207,10 +197,17 @@ const RecordSet = ({
 
   }, [isInitialized]);
 
+  // call the flow-control after each reference object
   useEffect(() => {
-    // call the flow-control after each reference object
     updatePage();
   }, [reference]);
+
+  // after the main data has loaded, we can get the data
+  useEffect(() => {
+    if (isInitialized && !isLoading && page && page.length > 0) {
+      fetchSecondaryRequests(updatePage);
+    }
+  }, [isLoading, page]);
 
   //-------------------  flow-control functions:   --------------------//
   const scrollMainContainerToTop = () => {
@@ -325,9 +322,6 @@ const RecordSet = ({
 
     // update the resultset
     updateMainEntity(updatePage, false);
-
-    // get the aggregate values only if main page is loaded
-    fetchSecondaryRequests(updatePage);
 
     // TODO the rest
     // setFacetReferesh(facetRefresh+1);
@@ -546,7 +540,7 @@ const RecordSet = ({
    * @param  {boolean} hideSpinner?  Indicates whether we should show spinner for columns or not
    */
   const fetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => {
-    if (flowControl.current.isLoading) return;
+    if (isLoading) return;
     flowControl.current.requestModels.forEach((aggModel: any, index: number) => {
       if (!flowControl.current.haveFreeSlot() || aggModel.processed) {
         return;
@@ -600,7 +594,7 @@ const RecordSet = ({
       action: flowControl.current.getTableLogAction(action, LogStackPaths.PSEUDO_COLUMN),
       stack,
     };
-    activeListModel.column.getAggregatedValue(flowControl.current.page, logObj).then((values: any) => {
+    activeListModel.column.getAggregatedValue(page, logObj).then((values: any) => {
       if (flowControl.current.queue.counter !== current) {
         return defer.resolve(false), defer.promise;
       }
@@ -654,13 +648,15 @@ const RecordSet = ({
 
       let indexes: any = {};
       setColValues(
-        flowControl.current.colValues.map((colVal: any, index: number) => {
-          if (Array.isArray(newColValues[index])) {
-            indexes[index] = true;
-            return newColValues[index];
-          }
-          return colVal;
-        })
+        (prevColValues: any) => {
+          return prevColValues.map((colVal: any, index: number) => {
+            if (Array.isArray(newColValues[index])) {
+              indexes[index] = true;
+              return newColValues[index];
+            }
+            return colVal;
+          })
+        }
       );
 
       // TODO this is not working as expected because what's in the state
@@ -728,7 +724,7 @@ const RecordSet = ({
       const displayValue = model.column.sourceFormatPresentation(
         flowControl.current.templateVariables[valIndex],
         flowControl.current.aggregateResults[valIndex][model.column.name],
-        flowControl.current.page.tuples[valIndex],
+        page.tuples[valIndex],
       );
 
       if (!Array.isArray(newColValues[obj.index])) {

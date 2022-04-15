@@ -44,10 +44,6 @@ export class RecordsetFlowControl {
   aggregateResults: any;
   templateVariables: any;
 
-  isLoading = false;
-  page : any = null;
-  colValues: any = [];
-
   private internalID: string;
 
   constructor(
