@@ -497,7 +497,7 @@
         for(var i = 0; i<session.attributes.length; i++){
             var attr = session.attributes[i];
             if (attr.type !== 'identity') {
-                (attr.type = "globus_group") ? vm.globusGroupList.push(attr) : vm.otherGroups.push(attr);
+                (attr.type == "globus_group") ? vm.globusGroupList.push(attr) : vm.otherGroups.push(attr);
             }
         }
     }])
