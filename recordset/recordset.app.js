@@ -147,7 +147,7 @@
 
                     recordsetModel.reference = reference.contextualize.compact;
                     // if display.facetPanelOpen is null, don't change the value since it was set prior based on showFaceting
-                    if (showFaceting && params.reference.display.facetPanelOpen !== null) recordsetModel.config.facetPanelOpen = params.reference.display.facetPanelOpen;
+                    if (showFaceting && recordsetModel.reference.display.facetPanelOpen !== null) recordsetModel.config.facetPanelOpen = recordsetModel.reference.display.facetPanelOpen;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,
