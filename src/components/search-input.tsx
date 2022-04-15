@@ -93,7 +93,7 @@ const SearchInput = ({
         return (
           <span key={i}>
             <DisplayValue value={col.displayname} />
-            {i === arr.length && <span style={{ marginLeft: '-4px' }}>, </span>}
+            {i < arr.length-1 && <span>, </span>}
           </span>
         )
       })
@@ -104,6 +104,7 @@ const SearchInput = ({
         className='chaise-input-placeholder'
         onClick={() => changeFocus()}
       >
+        <span style={{ marginRight: '3px' }}>Search</span>
         {inner}
       </span>
     );
