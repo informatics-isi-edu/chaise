@@ -480,11 +480,11 @@
             params.parentReference = tableModel.parentReference;
             params.displayMode = recordsetDisplayModes.unlinkPureBinaryPopup;
 
-            params.reference = ref.hideFacets().contextualize.compactSelect; // column reference
+            params.reference = ref.hideFacets().contextualize.compactSelectAssociationUnlink; // column reference
             params.selectMode = modalBox.multiSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
-            params.facetPanelOpen = false;
+            params.facetPanelOpen =  params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
             var stackElement = logService.getStackNode(
                 logService.logStackTypes.RELATED,
