@@ -477,8 +477,8 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### facetPanelDisplay
- Use this property to change the visibility of the facet panel on load. Currently the only supporting `open` and `closed`. This property expects an array of
- contexts and subcontexts associated with `compact` displays. `*` may be used but will be treated the same as `compact`. If a context is present in both open and closed, open will take priority. If the current context is not mentioned in either `open` or `closed`, it will try to inherit its value from a parent context. Defining only one array, `open` or `closed`, will assume the other undefined property is equal to `[]`.
+ Use this property to change the visibility of the facet panel on load. Currently the supported properties are `open` and `closed`. Both properties expect an array of
+ contexts and subcontexts associated with `compact` displays. `*` may be used but will be treated the same as `compact`. If a context is present in both open and closed, open will take priority. If the current context is not mentioned in either `open` or `closed`, it will try to inherit its value from a parent context. Defining only one array, `open` or `closed`, will assume the other property is equal to `[]`.
    - Type: Object
    - Default behavior: The facet panel will be open in the `compact` display and closed in all others.
    - General syntax:
@@ -494,8 +494,7 @@ If a property appears in the same configuration twice, the property defined late
    - Sample syntax:
      ```
      facetPanelDisplay: {
-         open: ["compact", "compact/select/association"],
-         closed: ["compact/select"]
+         open: ["compact/select/association"]
      }
      ```
 

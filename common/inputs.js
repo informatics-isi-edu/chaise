@@ -581,6 +581,7 @@
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
+                    params.facetPanelOpen = params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
                     if (vm.searchPopupGetDisabledTuples) {
                         params.getDisabledTuples = vm.searchPopupGetDisabledTuples()(vm.columnModel);

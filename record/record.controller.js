@@ -484,6 +484,7 @@
             params.selectMode = modalBox.multiSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
+            params.facetPanelOpen =  params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
             var stackElement = logService.getStackNode(
                 logService.logStackTypes.RELATED,

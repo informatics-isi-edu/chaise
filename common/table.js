@@ -1733,6 +1733,9 @@
                         params.selectedRows = [];
                         params.showFaceting = false;
                         params.allowDelete = true;
+                        // NOTE: when supporting faceting in saved_queries popup
+                        //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
+                        params.facetPanelOpen = false;
 
                         // TODO: fix logging stuff
                         var stackElement = logService.getStackNode(

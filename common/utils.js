@@ -41,10 +41,7 @@
           "showWriterEmptyRelatedOnLoad": null,
           "savedQueryConfig": null,
           "loggedInMenu": {},
-          "facetPanelDisplay": {
-              "open": ["compact"],
-              "closed": ["compact/select"]
-          },
+          "facetPanelDisplay": {},
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]

@@ -329,6 +329,7 @@
             params.selectedRows = [];
             params.selectMode = modalBox.singleSelectMode;
             params.showFaceting = true;
+            params.facetPanelOpen =  params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
             var columnModel = vm.recordEditModel.columnModels[columnIndex];
             params.logStack = recordCreate.getColumnModelLogStack(columnModel);

@@ -18,8 +18,7 @@ var chaiseConfig = {
     showWriterEmptyRelatedOnLoad: false,
     showFaceting: true,
     facetPanelDisplay: {
-        open: ["compact", "compact/select/association"],
-        closed: ["compact/select"]
+        open: ["compact/select/association"]
     },
     logClientActions: false,
     navbarMenu: {

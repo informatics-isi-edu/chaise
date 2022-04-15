@@ -347,6 +347,7 @@
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
+            params.facetPanelOpen =  params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackNode(
