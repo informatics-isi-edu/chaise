@@ -78,9 +78,9 @@ In the following, we're going to summarize what are the attributes that are bein
 
 The following are the default attributes that you can find on all the requests:
 
-- `cid`: The app name (record, recordset, recordedit).
-- `wid`: The window id (randomly generated).
-- `pid`: The page id (randomly generated).
+- `cid`: The app name (record, recordset, recordedit, etc).
+- `wid`: The window id (randomly generated). This value is stable across page loads to allow tracking of chaise app flows within one window.
+- `pid`: The page id. Randomly generated on each page load.
 - `catalog`: The catalog id.
 - `schema_table`: The `schema:table` combination. This captures the table that the current action is performed on.
 - `action`: A pre-defined string that implies what the request was for. Please refer to [Action definition](#action-definition) section for more information.
