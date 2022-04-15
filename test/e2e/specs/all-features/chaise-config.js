@@ -16,6 +16,10 @@ var chaiseConfig = {
     disableDefaultExport: true,
     disableExternalLinkModal: true,
     showWriterEmptyRelatedOnLoad: false,
+    showFaceting: true,
+    facetPanelDisplay: {
+        open: ["compact/select/association"]
+    },
     logClientActions: false,
     navbarMenu: {
         children: [

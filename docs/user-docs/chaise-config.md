@@ -45,6 +45,7 @@ If a property appears in the same configuration twice, the property defined late
    * [hideTableOfContents](#hidetableofcontents)
    * [disableExternalLinkModal](#disableexternallinkmodal)
    * [hideGoToRID](#hidegotorid)
+   * [facetPanelDisplay](#facetpaneldisplay)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
    * [exportSerivePath](#exportservicepath)
@@ -473,6 +474,28 @@ If a property appears in the same configuration twice, the property defined late
    - Sample syntax:
      ```
      hideGoToRID: true
+     ```
+
+ #### facetPanelDisplay
+ Use this property to change the visibility of the facet panel on load. Currently the supported properties are `open` and `closed`. Both properties expect an array of
+ contexts and subcontexts associated with `compact` displays. `*` may be used but will be treated the same as `compact`. If a context is present in both open and closed, open will take priority. If the current context is not mentioned in either `open` or `closed`, it will try to inherit its value from a parent context. Defining only one array, `open` or `closed`, will assume the other property is equal to `[]`.
+   - Type: Object
+   - Default behavior: The facet panel will be open in the `compact` display and closed in all others.
+   - General syntax:
+     ```
+     facetPanelDisplay: {
+         open: [_context_],
+         closed: [_context_]
+     }
+     ```
+   - `facetPanelDisplay` attributes:
+     - `open`: An array of contexts that the facet panel should be open for on page load.
+     - `closed`: An array of contexts that the facet panel should be closed for on page load.
+   - Sample syntax:
+     ```
+     facetPanelDisplay: {
+         open: ["compact/select/association"]
+     }
      ```
 
 ### Export Configuration:

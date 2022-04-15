@@ -1028,6 +1028,9 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
                 expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
 
+                // check the state of the facet panel
+                expect(chaisePage.recordPage.getModalSidePanel().isDisplayed()).toBeTruthy("Side panel is not visible on load");
+
                 done();
             }).catch(function(error) {
                 console.log(error);
@@ -1157,6 +1160,9 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
 
                 var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
                 expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+
+                // check the state of the facet panel
+                expect(chaisePage.recordPage.getModalSidePanel().isDisplayed()).toBeTruthy("Side panel is not visible on load");
 
                 done();
             }).catch(function(error) {

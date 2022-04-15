@@ -1541,6 +1541,8 @@
                         params.reference = scope.reference;
                         params.selectMode = "multi-select";
                         params.faceting = false;
+                        // NOTE: when supporting faceting in show_more popup
+                        //   contextualize params.reference to compact/select/show_more and check reference.display.facetPanelOpen before setting false
                         params.facetPanelOpen = false;
 
                         // callback on each selected change (incldues the url limitation logic)
