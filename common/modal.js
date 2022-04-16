@@ -495,13 +495,9 @@
         }
 
         for(var i = 0; i<session.attributes.length; i++){
-            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name && vm.identities.indexOf(session.attributes[i].id) == -1){
-                if (session.attributes[i].id.indexOf("https://auth.globus.org/") === 0) {
-                    session.attributes[i].truncatedId = session.attributes[i].id.substring(24);
-                    vm.globusGroupList.push(session.attributes[i]);
-                } else {
-                    vm.otherGroups.push(session.attributes[i]);
-                }
+            var attr = session.attributes[i];
+            if (attr.type !== 'identity') {
+                (attr.type == "globus_group") ? vm.globusGroupList.push(attr) : vm.otherGroups.push(attr);
             }
         }
     }])
