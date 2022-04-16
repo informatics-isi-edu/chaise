@@ -39,15 +39,12 @@
                         // assume id is always "https://auth.globus.org/ff766864-a03f-11e5-b097-22000aef184d"
                         attr.webpage = "https://app.globus.org/groups/" + attr.id.substring(24) + "/about";
                         attr.type = "globus_group";
-                    } else {
-                        // attributes without a type (!globus_group and !identity) are assumed to be "other groups"
-                        attr.type = "other_group";
                     }
+
                 }
 
-                if (session.client.identities.includes(attr.id)) {
-                    attr.type = "identity";
-                }
+                if (session.client.identities.includes(attr.id)) attr.type = "identity";
+                // attributes without a type (!globus_group and !identity) are not expected and won't be given a type
 
                 var matchIdx = null;
                 // determine if 'attr' exists in $session.attributes
