@@ -6,7 +6,19 @@
  */
 
 class Logger {
+  private _enabled = true;
+
+  public enable () {
+    this._enabled = true;
+  }
+
+  public disable () {
+    this._enabled = false;
+  }
+
   info(message?: any, ...optionalParams: any[]): void {
+    if (!this._enabled) return;
+
     if (optionalParams.length > 0) {
       console.info(message, optionalParams);
     } else {
@@ -15,6 +27,8 @@ class Logger {
   }
 
   log(message?: any, ...optionalParams: any[]): void {
+    if (!this._enabled) return;
+
     if (optionalParams.length > 0) {
       console.log(message, optionalParams);
     } else {
@@ -23,6 +37,8 @@ class Logger {
   }
 
   warn(message?: any, ...optionalParams: any[]): void {
+    if (!this._enabled) return;
+
     if (optionalParams.length > 0) {
       console.warn(message, optionalParams);
     } else {
@@ -39,6 +55,8 @@ class Logger {
   }
 
   debug(message?: any, ...optionalParams: any[]): void {
+    if (!this._enabled) return;
+
     if (optionalParams.length > 0) {
       console.debug(message, optionalParams);
     } else {
@@ -48,5 +66,8 @@ class Logger {
 }
 
 const $log = new Logger();
+
+// TODO should this be bsased on NOD_ENV? or some other settings?
+$log.disable();
 
 export default $log;

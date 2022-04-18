@@ -52,6 +52,19 @@ const RecordSet = ({
 
   const { dispatchError } = useError();
 
+  const setStateVariable = (setFn: Function, cb: Function) => {
+    const current = flowControl.current.queue.counter;
+    setFn(
+      (prev: any) => {
+        if (current !== flowControl.current.queue.counter) {
+          $log.debug('HERE!!!!!!!!!!!!!!!!!!!!!!!! wrapper');
+          return prev;
+        }
+        return cb(prev);
+      }
+    )
+  }
+
   const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : 25);
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(

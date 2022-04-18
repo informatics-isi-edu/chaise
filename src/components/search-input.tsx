@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions } from '@chaise/models/log';
 import DisplayValue from '@chaise/components/display-value';
 import $log from '@chaise/services/logger';
 import { ClearInputBtn } from '@chaise/components/clear-input-btn';
+import { ConditionalWrapper } from '@chaise/components/cond-wrapper';
+import { ResizeSensor } from 'css-element-queries';
 
 type SearchInputProps = {
   searchCallback: Function,
@@ -27,9 +29,29 @@ const SearchInput = ({
   const inputEl = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [inputChangedTimeout, setInputChangedTimeout] = useState<any>(null);
+  const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(true);
+  const inputContainer = useRef<HTMLDivElement>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
 
   $log.debug('search-input: render');
+
+  // conditionally add tooltip for the placeholder
+  // TODO can we improve this?
+  useLayoutEffect(()=> {
+    if (!inputContainer.current) return;
+    new ResizeSensor(
+      inputContainer.current,
+      () => {
+        if (!inputContainer.current) return;
+        const el = inputContainer.current.querySelector('.chaise-input-placeholder') as HTMLElement;
+        if (!el) return;
+
+        // placeholder should be displayed if we're showing ellipsis
+        const show = el.scrollWidth > el.offsetWidth;
+        setShowPlaceholderTooltip(show);
+      }
+    )
+  }, []);
 
   const changeFocus = () => {
     if (disabled) return;
@@ -39,10 +61,10 @@ const SearchInput = ({
   const clearSearch = () => {
     if (disabled) return;
     if (searchTerm) {
-        searchCallback(null, LogActions.SEARCH_BOX_CLEAR);
+      searchCallback(null, LogActions.SEARCH_BOX_CLEAR);
     }
     setSearchTerm('');
-}
+  };
 
   const triggerSearch = (isButton: boolean) => {
     if (disabled) return;
@@ -88,31 +110,46 @@ const SearchInput = ({
 
   const renderPlaceHolder = () => {
     let inner: string | JSX.Element[] = `Search ${(searchColumns === false ? ' all columns' : '')}`;
+
+    // create a placeholder in the format of 'Search <col1>, <col2>'
     if (Array.isArray(searchColumns)) {
-      inner = searchColumns.map((col, i, arr) => {
+      inner = [<span key={0} style={{ marginRight: '3px' }}>Search</span>];
+
+      // list all the column displaynames
+      inner.push(...searchColumns.map((col, i, arr) => {
         return (
-          <span key={i}>
+          <span key={i + 1}>
             <DisplayValue value={col.displayname} />
-            {i < arr.length-1 && <span>, </span>}
+            {i < arr.length - 1 && <span>, </span>}
           </span>
         )
-      })
+      }));
     }
 
     return (
-      <span
-        className='chaise-input-placeholder'
-        onClick={() => changeFocus()}
+      <ConditionalWrapper
+        condition={showPlaceholderTooltip}
+        wrapper={children => (
+          <OverlayTrigger
+            placement='bottom-start'
+            overlay={<Tooltip>{inner}</Tooltip>}
+          >
+            {children}
+          </OverlayTrigger>
+        )}
       >
-        <span style={{ marginRight: '3px' }}>Search</span>
-        {inner}
-      </span>
+        <span
+          className='chaise-input-placeholder'
+          onClick={() => changeFocus()}
+        >
+          {inner}
+        </span>
+      </ConditionalWrapper>
     );
   }
-
   return (
     <div className={'chaise-search-box chaise-input-group ' + (disabled ? 'disabled-element' : '')}>
-      <div className='chaise-input-control has-feedback'>
+      <div className='chaise-input-control has-feedback' ref={inputContainer}>
         <input
           type='text'
           ref={inputEl}
