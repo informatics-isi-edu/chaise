@@ -226,14 +226,14 @@
                             {
                                 "source": [
                                     {"filter": "int_col", "operand_pattern": "-3", "operator": "::gt::"},
-                                    {"inbound": ["faceting", "main_f5_fk1"]}, 
+                                    {"inbound": ["faceting", "main_f5_fk1"]},
                                     {"inbound": ["faceting", "f5_fk1"]},
                                     {"and": [
                                         {"filter": "term", "operand_pattern": "one", "negate": true},
-                                        {"filter": "RCB", "operand_pattern": "{{{$session.id}}}"}
+                                        {"filter": "RCB", "operand_pattern": "{{{$session.client.id}}}"}
                                     ]},
                                     "id"
-                                ], 
+                                ],
                                 "markdown_name": "F5 with filter",
                                 "comment": "has filters"
                             },

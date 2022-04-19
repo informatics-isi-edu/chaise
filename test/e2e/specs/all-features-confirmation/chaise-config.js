@@ -35,12 +35,12 @@ var chaiseConfig = {
             { nameMarkdownPattern: "More Links (broken)", type: "menu", children: []},
             { nameMarkdownPattern: "More Links", type: "menu", children: [
                 { nameMarkdownPattern: "Nested Profile (broken)", type: "url" },
-                { nameMarkdownPattern: "Nested Profile Link", urlPattern: "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}", type: "url" },
+                { nameMarkdownPattern: "Nested Profile Link", urlPattern: "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.client.id}}{{/encode}}", type: "url" },
             ]},
-            { nameMarkdownPattern: "Disabled Link", acls: { enable: []}, urlPattern: "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.id}}{{/encode}}", type: "url" },
+            { nameMarkdownPattern: "Disabled Link", acls: { enable: []}, urlPattern: "/chaise/record/#registry/CFDE:user_profile/id={{#encode $session.client.id}}{{/encode}}", type: "url" },
             { nameMarkdownPattern: "Logout", type: "logout" }
         ],
-        displayNameMarkdownPattern: "{{{$session.display_name}}}"
+        displayNameMarkdownPattern: "{{{$session.client.display_name}}}"
     },
     // configuration for navbar spec with no logo or brand text
     headTitle: 'show me on the navbar!',
