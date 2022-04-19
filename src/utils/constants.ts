@@ -25,7 +25,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
-  'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'configRules',
+  'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
@@ -54,6 +54,7 @@ export const DEFAULT_CHAISE_CONFIG = {
   showWriterEmptyRelatedOnLoad: null,
   savedQueryConfig: null,
   loggedInMenu: {},
+  facetPanelDisplay: {},
   shareCiteAcls: {
     show: ['*'],
     enable: ['*'],

@@ -8,11 +8,7 @@ import ChaiseModal from '@chaise/components/modal';
 // models
 import { Client } from '@chaise/models/user';
 
-// services
-import { ConfigService } from '@chaise/services/config';
-
 // utilities
-import { toTitlecase, underscoreToSpace } from '@chaise/utils/string-utils';
 import AuthnService from '@chaise/services/authn';
 
 
@@ -30,17 +26,17 @@ const ProfileModal = ({
   useEffect(() => {
     if (!user || initialized) return;
 
-    let tempIdentities = [];
+    const tempIdentities = [];
     for (let i = 0; i < user.client.identities.length; i++) {
       tempIdentities.push(user.client.identities[i]);
     }
     setIdentities(tempIdentities);
 
-    let tempGlobusGroupList = [],
+    const tempGlobusGroupList = [],
       tempOtherGroups = [];
     for (let i = 0; i < user.attributes.length; i++) {
-      let tempUserAttr = JSON.parse(JSON.stringify(user.attributes[i]));
-      if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplay && tempIdentities.indexOf(tempUserAttr.id) == -1) {
+      const tempUserAttr = JSON.parse(JSON.stringify(user.attributes[i]));
+      if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplay && tempIdentities.indexOf(tempUserAttr.id) === -1) {
         if (tempUserAttr.id.indexOf('https://auth.globus.org/') === 0) {
           tempUserAttr.truncated_id = tempUserAttr.id.substring(24);
           tempGlobusGroupList.push(tempUserAttr);
@@ -64,19 +60,30 @@ const ProfileModal = ({
     setShowProfile(false);
   };
 
-  const renderClientInfo = () => Object.entries(user.client).map(([key, value], index) => {
-    if (key != 'identities') {
-      return (<tr key={index}>
-        <td className='text-left'>{toTitlecase(underscoreToSpace(key))}</td>
-        <td className='text-left profileValue'>{value}</td>
-      </tr>)
-    }
-
-    return;
-  });
+  // keys in client to display: ['id', 'display_name', 'full_name', 'email']
+  const renderClientInfo = () => {
+    return (<>
+      <tr>
+        <td className='text-left'>Id</td>
+        <td className='text-left profileValue'>{user.client.id}</td>
+      </tr>
+      <tr>
+        <td className='text-left'>Display Name</td>
+        <td className='text-left profileValue'>{user.client.display_name}</td>
+      </tr>
+      <tr>
+        <td className='text-left'>Full Name</td>
+        <td className='text-left profileValue'>{user.client.full_name}</td>
+      </tr>
+      <tr>
+        <td className='text-left'>Email</td>
+        <td className='text-left profileValue'>{user.client.email}</td>
+      </tr>
+    </>)
+  };
 
   const renderIdentities = () => {
-    if (identities.length == 0) return;
+    if (identities.length === 0) return;
 
     return(
       <tr>
@@ -91,7 +98,7 @@ const ProfileModal = ({
   }
 
   const renderGroups = () => {
-    if (globusGroupList.length == 0 && otherGroups.length == 0) return;
+    if (globusGroupList.length === 0 && otherGroups.length === 0) return;
 
     return(
       <tr>

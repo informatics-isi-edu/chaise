@@ -403,11 +403,53 @@ export default class AuthnService {
     return false;
   };
 
-  private static _setSession (inp: any) {
+  private static _setSession(inp: any) {
     if (!inp) {
       AuthnService._session = null;
       return;
     }
+
+    // decorate the session
+    const attributes: any[] = [];
+    inp.attributes.forEach(function (attr: any) {
+      // NOTE: the current assumption is that everything in session.attributes is a globus group or an identity
+      // a globus group if:
+      //   - display_name is defined
+      //   - display_name is not the same as the user's display_name
+      //   - current id is not in the identities array
+      if (attr.display_name && attr.display_name !== inp.client.display_name && inp.client.identities.indexOf(attr.id) === -1) {
+        if (attr.id.indexOf('https://auth.globus.org/') === 0) {
+          // assume id is always "https://auth.globus.org/ff766864-a03f-11e5-b097-22000aef184d"
+          attr.webpage = 'https://app.globus.org/groups/' + attr.id.substring(24) + '/about';
+          attr.type = 'globus_group';
+        }
+
+      }
+
+      if (inp.client.identities.includes(attr.id)) attr.type = 'identity';
+      // attributes without a type (!globus_group and !identity) are not expected and won't be given a type
+
+      let matchIdx = null;
+      // determine if 'attr' exists in $session.attributes
+      matchIdx = attributes.findIndex(function (targetAttr) {
+        return targetAttr.id === attr.id;
+      });
+
+      // merge if the attribute already exists, push otherwise
+      if (matchIdx !== -1) {
+        Object.assign(attributes[matchIdx], attr);
+      } else {
+        attributes.push(attr);
+      }
+    });
+
+    // sort the newly created atrtibutes array by display_name
+    attributes.sort(function (a, b) {
+      if (a.display_name && b.display_name) return a.display_name.localeCompare(b.display_name);
+    });
+
+    inp.attributes = attributes;
+
     // TODO we have to ensure that the given input follows the same type..
     // so the app doesn't blow up
     // (if authn backend service changes its response, chaise should still work)

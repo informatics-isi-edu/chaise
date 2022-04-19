@@ -18,6 +18,10 @@ export interface Client {
    */
   email: string;
   /**
+   * 
+   */
+  extensions: any;
+  /**
    * user's full name
    */
   full_name: string;
