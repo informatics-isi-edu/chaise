@@ -134,6 +134,7 @@
                   logService, Session, recordCreate, UriUtils, viewerConfig, viewerConstant,
                   $q, $rootScope) {
 
+        var chaiseConfig = ConfigUtils.getConfigJSON();
         var annotConfig = viewerConfig.getAnnotationConfig(),
             imageConfig = viewerConfig.getImageConfig(),
             pImageConfig = viewerConfig.getProcesssedImageConfig(),
@@ -348,7 +349,7 @@
             var defer = $q.defer(), channelList = [], channelURLs = [];
 
             // TODO should be done in ermrestjs
-            var imageChannelURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+            var imageChannelURL = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/";
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.schema_name) + ":";
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
             imageChannelURL += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name);
@@ -556,7 +557,7 @@
             var defer = $q.defer();
 
             // TODO should be done in ermrestjs
-            var imageAnnotationURL = context.serviceURL + "/catalog/" + context.catalogID + "/entity/";
+            var imageAnnotationURL = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/";
             imageAnnotationURL += encode(annotConfig.schema_name) + ":";
             imageAnnotationURL += encode(annotConfig.table_name) + "/";
             imageAnnotationURL += encode(annotConfig.reference_image_column_name);
@@ -570,9 +571,7 @@
 
                 if (!ref) {
                     // TODO should be changed to say annotation
-                    $rootScope.canCreate = false;
-                    $rootScope.canUpdate = false;
-                    $rootScope.canDelete = false;
+                    $rootScope.canCreateAnnotation = false;
                     return false;
                 }
 
@@ -583,9 +582,7 @@
                 // attach to the $rootScope so it can be used in annotations.controller
                 $rootScope.annotationEditReference = ref;
 
-                $rootScope.canCreate = ref.canCreate || false;
-                $rootScope.canUpdate = ref.canUpdate || false;
-                $rootScope.canDelete = ref.canDelete || false;
+                $rootScope.canCreateAnnotation = ref.canCreate;
 
                 // TODO create and edit should be refactored to reuse the same code
                 // create the edit and create forms
@@ -595,7 +592,7 @@
                     annotConfig.z_index_column_name,
                     annotConfig.channels_column_name
                 ];
-                if ($rootScope.canCreate) {
+                if (ref.canCreate) {
                     annotationCreateForm.reference = ref.contextualize.entryCreate;
                     annotationCreateForm.columnModels = [];
                     annotationCreateForm.reference.columns.forEach(function (column) {
@@ -606,7 +603,7 @@
                     });
                 }
 
-                if ($rootScope.canUpdate) {
+                if (ref.canUpdate) {
                     annotationEditForm.reference = ref;
                     annotationEditForm.columnModels = [];
                     annotationEditForm.reference.columns.forEach(function (column) {
@@ -645,7 +642,8 @@
                 }
 
                 // using edit, because the tuples are used in edit context (for populating edit form)
-                // since we want to check the ACL for allowing edit/delete of annotations we have to has for TCRS
+                // we need dynamic acls for: update/delete of each row, update of columns in edit mode
+                // that's why we're asking for tcrs
                 return _readPageByPage(ref, viewerConstant.DEFAULT_PAGE_SIZE, logObj, false, true, cb);
             }).then(function (res) {
                 defer.resolve(res);
@@ -653,7 +651,6 @@
                 // just log the error and resolve with empty array
                 console.error("error while getting annotations: ", err);
                 $rootScope.annotationTuples = [];
-                $rootScope.canCreate = false;
                 defer.resolve(false);
             });
 
@@ -669,7 +666,7 @@
             path += encode(pImageConfig.table_name) + "/";
             path += encode(pImageConfig.reference_image_column_name);
             path += "=" + encode(context.imageID);
-            var url = context.serviceURL + "/catalog/" + context.catalogID + "/entity/" + path;
+            var url = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/entity/" + path;
 
             ERMrest.resolve(url, ConfigUtils.getContextHeaderParams()).then(function (res) {
                 if (!res) {
@@ -1047,27 +1044,45 @@
          * @param {Integer} zIndex -  the new default_z value
          */
         function updateDefaultZIndex(zIndex) {
-            var defer = $q.defer();
+            var url, payload = {}, defer = $q.defer();
 
             Session.validateSessionBeforeMutation(function () {
+                var tableName = $rootScope.reference.table.name,
+                    schemaName = $rootScope.reference.table.schema.name;
 
-                var ref = $rootScope.reference.contextualize.entryEdit;
+                url = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/attributegroup/";
+                url += UriUtils.fixedEncodeURIComponent(schemaName) + ":";
+                url += UriUtils.fixedEncodeURIComponent(tableName) + "/RID;";
+                url += UriUtils.fixedEncodeURIComponent(imageConfig.default_z_index_column_name);
 
-                // NOTE using a private API
-                var page = ERMrest._createPage(ref, null, [$rootScope.tuple.data],false, false);
-                page.tuples[0].data[imageConfig.default_z_index_column_name] = zIndex;
+                payload.RID = context.imageID;
+                payload[imageConfig.default_z_index_column_name] = zIndex;
 
+                var headers = {};
                 var stack = logService.addExtraInfoToStack(null, {
+                    "num_updated": 1,
+                    "updated_keys": {
+                        "cols": ["RID"],
+                        "vals": [[context.imageID]]
+                    },
                     "updated_vals": {
                         "cols": [imageConfig.default_z_index_column_name],
                         "vals": [[zIndex]]
                     }
                 });
-                var logObj = {
+                headers[ERMrest.contextHeaderName] = {
+                    catalog: context.catalogID,
+                    schema_table: schemaName + ":" + tableName,
                     action: logService.getActionString(logService.logActions.UPDATE),
                     stack: stack
                 };
-                ref.update(page.tuples, logObj).then(function () {
+
+                /**
+                 * NOTE: The update function only works for visible columns,
+                 * we cannot assume that default_z is visible, that's why
+                 * we're sending a direct put request.
+                 */
+                ConfigUtils.getHTTPService().put(url, [payload], {headers: headers}).then(function () {
                     AlertsService.addAlert("Default Z index value has been updated.", "success");
                     defer.resolve();
                 }).catch(function (exception) {
@@ -1097,13 +1112,15 @@
         /**
          * The expected input format: [{channelNumber: , settings: }]]
          * TODO this function is not using ermrestjs and directly sending a request
-         * to ermrest. we should be able to improve this later.
+         * to ermrest. This is because we cannot assume the config column is visible,
+         * while the Reference.update only allows updating of the visible columns.
+         * we should be able to improve this later.
          *
          */
         function updateChannelConfig(data) {
             var url, payload = [], defer = $q.defer();
 
-            url = context.serviceURL + "/catalog/" + context.catalogID + "/attributegroup/";
+            url = chaiseConfig.ermrestLocation + "/catalog/" + context.catalogID + "/attributegroup/";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.schema_name) + ":";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name) + ",";
@@ -1207,4 +1224,4 @@
 
     }]);
 
-})();
+  })();

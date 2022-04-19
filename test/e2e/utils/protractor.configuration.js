@@ -40,6 +40,18 @@ exports.getConfig = function(options) {
         // Sauce Labs wil end the a session if it hasn't received a command from
         // test script in 90 seconds.
         defaultTimeout: 15000
+    },
+    onPrepare: function() {
+        /* global angular: false, browser: false, jasmine: false */
+
+        // Disable animations so e2e tests run more quickly
+        var disableNgAnimate = function() {
+            angular.module('disableNgAnimate', []).run(['$animate', function($animate) {
+                $animate.enabled(false);
+            }]);
+        };
+
+        browser.addMockModule('disableNgAnimate', disableNgAnimate);
     }
   };
 

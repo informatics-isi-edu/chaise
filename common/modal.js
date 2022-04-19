@@ -150,13 +150,13 @@
         vm.deleteBtn = "Delete";
 
         if (params.batchUnlink) {
-            vm.title = "Confirm Remove";
+            vm.title = "Confirm Unlink";
 
             var multiple = '';
             if (params.count > 1) multiple += 's';
-            vm.message = "Are you sure you want to remove " + params.count + " record" + multiple + '?';
+            vm.message = "Are you sure you want to unlink " + params.count + " record" + multiple + '?';
 
-            vm.deleteBtn = "Remove";
+            vm.deleteBtn = "Unlink";
         }
 
         function ok() {
@@ -351,9 +351,10 @@
         }
 
         if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
-            vm.submitText = "Remove";
+            vm.submitText = "Unlink";
             vm.submitTooltip = "Disconnect the selected records from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
+            vm.submitText = "Link";
             vm.submitTooltip = "Connect the selected records to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
         } else {
             vm.submitTooltip = "Apply the selected records";
@@ -387,7 +388,7 @@
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
                 showFaceting:       showFaceting,
-                facetPanelOpen:     params.facetPanelOpen,
+                facetPanelOpen:     showFaceting && params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
@@ -494,13 +495,9 @@
         }
 
         for(var i = 0; i<session.attributes.length; i++){
-            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name && vm.identities.indexOf(session.attributes[i].id) == -1){
-                if (session.attributes[i].id.indexOf("https://auth.globus.org/") === 0) {
-                    session.attributes[i].truncatedId = session.attributes[i].id.substring(24);
-                    vm.globusGroupList.push(session.attributes[i]);
-                } else {
-                    vm.otherGroups.push(session.attributes[i]);
-                }
+            var attr = session.attributes[i];
+            if (attr.type !== 'identity') {
+                (attr.type == "globus_group") ? vm.globusGroupList.push(attr) : vm.otherGroups.push(attr);
             }
         }
     }])

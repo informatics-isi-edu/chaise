@@ -142,7 +142,7 @@
                 "tag:isrd.isi.edu,2016:table-display": {
                     "detailed": {
                         "collapse_toc_panel": true,
-                        "hide_column_headers": true
+                        "hide_column_header": true
                     }
                 }
             }

@@ -208,7 +208,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         add: {
             relatedDisplayname: "association_table",
             tableDisplayname: "related_table",
-            modalTitle: "Add related_table to Accommodations: Super 8 North Hollywood Motel",
+            modalTitle: "Link related_table to Accommodations: Super 8 North Hollywood Motel",
             totalCount: 5,
             existingCount: 1,
             disabledRows: ["1"],
@@ -229,18 +229,18 @@ describe ("Viewing exisiting record with related entities, ", function () {
             // we unlink rows 2 and 4 ("Air Conditioning" and "UHD TV")
             catalogId: browser.params.catalogId,
             relatedDisplayname: "association_table",
-            modalTitle: "Remove association_table from Accommodations : Super 8 North Hollywood Motel",
+            modalTitle: "Unlink association_table from Accommodations : Super 8 North Hollywood Motel",
             totalCount: 5,
-            postDeleteMessage: "2 records successfully removed.\n\nClick OK to dismiss this dialog.",
+            postDeleteMessage: "2 records successfully unlinked.\n\nClick OK to dismiss this dialog.",
             countAfterUnlink: 3,
             rowValuesAfter: [
                 ["Television"],
                 ["Coffee Maker"],
                 ["Space Heater"]
             ],
-            failedPostDeleteMessage: "2 records could not be removed. Check the error details below to see more information.\n\nClick OK to dismiss this dialog.\nShow Error Details",
+            failedPostDeleteMessage: "2 records could not be unlinked. Check the error details below to see more information.\n\nClick OK to dismiss this dialog.\nShow Error Details",
             // we unlink row 5 ("Space Heater")
-            aclPostDeleteMessage: "1 record successfully removed.\n\nClick OK to dismiss this dialog.",
+            aclPostDeleteMessage: "1 record successfully unlinked.\n\nClick OK to dismiss this dialog.",
             countAfterAclUnlink: 2,
             rowValuesAfterAclRemove: [
                 ["Television"],
@@ -285,13 +285,13 @@ describe ("Viewing exisiting record with related entities, ", function () {
     describe("for a pure and binary association with page_size and hide_row_count, ", function () {
         recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
 
-        it ("Opened modal by `Add` button should honor the page_size and hide_row_count.", function () {
+        it ("Opened modal by `Link` button should honor the page_size and hide_row_count.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
             addRelatedRecordLink.click().then(function(){
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Add file to Accommodations: Super 8 North Hollywood Motel", "title missmatch.");
+                expect(title).toBe("Link file to Accommodations: Super 8 North Hollywood Motel", "title missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
@@ -493,7 +493,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         describe("for a pure and binary association with filter on related table", function () {
             recordHelpers.testRelatedTable(assoc_w_filter_on_related, pageReadyCondition);
 
-            it ("add button should not be available", function () {
+            it ("link button should not be available", function () {
                 var btn = chaisePage.recordPage.getAddRecordLink(assoc_w_filter_on_related.displayname);
                 expect(btn.isPresent()).toBeFalsy();
             });
@@ -543,13 +543,13 @@ describe ("Viewing exisiting record with related entities, ", function () {
             });
         });
 
-        it("should disable the add record button", function () {
+        it("should disable the link record button", function () {
             expect(addBtn.isEnabled()).toBeFalsy();
         });
 
         it("should have the proper tooltip", function () {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe("'Adding to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+                expect(comment).toBe("'Linking to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
             });
         });
     });

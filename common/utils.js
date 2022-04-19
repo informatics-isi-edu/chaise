@@ -5,14 +5,14 @@
 
     .constant("chaiseConfigPropertyNames", [
         "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
-        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
+        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser",
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
-        "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+        "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading",
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -41,6 +41,7 @@
           "showWriterEmptyRelatedOnLoad": null,
           "savedQueryConfig": null,
           "loggedInMenu": {},
+          "facetPanelDisplay": {},
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -1534,7 +1535,8 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             ERMrest.setClientConfig({
                 internalHosts: chaiseConfig.internalHosts,
-                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
+                facetPanelDisplay: chaiseConfig.facetPanelDisplay
             });
         }
 

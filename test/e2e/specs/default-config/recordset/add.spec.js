@@ -141,10 +141,20 @@ describe('Recordset add record,', function() {
 
     it("go back to recordset should refresh the table with the new record", function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
-        browser.close();
+        /**
+         * we noticed this test case started failing on saucelabs,
+         * that's why we're switching tabs twice to ensure the onfocus is getting called.
+         */
         browser.switchTo().window(allWindows[0]).then(function() {
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function () {
+            return browser.switchTo().window(allWindows[0]);
+        }).then(function () {
             return chaisePage.waitForElementInverse(element(by.id("spinner")));
         }).then(function() {
+            return chaisePage.recordsetPage.getPageTitleElement().click();
+        }).then(function () {
+
             browser.wait(function() {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                     return (ct == rowCount+1);

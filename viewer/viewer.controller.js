@@ -3,14 +3,13 @@
 
     angular.module('chaise.viewer')
 
-    .controller('OSDController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'image', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
-        function OSDController(AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, image, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
+    .controller('ViewerController',
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function (AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
         var origin = $window.location.origin;
-        vm.image = image;
         vm.downloadView = downloadView;
         vm.zoomInView = zoomInView;
         vm.zoomOutView = zoomOutView;
@@ -18,9 +17,6 @@
         vm.alerts = AlertsService.alerts;
         vm.showChannelList = false;
         vm.toggleChannelList = toggleChannelList;
-
-        vm.annotationsAreHidden = false;
-        vm.toggleAnnotations = toggleAnnotations;
 
         // the top-left-panel that needs to be resizable with toc
         vm.resizePartners = document.querySelector(".top-left-panel");
@@ -183,11 +179,6 @@
                 action: logService.getActionString(logService.logActions.VIEWER_ZOOM_RESET, null, ""),
                 stack: logService.getStackObject()
             }, $rootScope.reference.defaultLogInfo);
-        }
-
-        function toggleAnnotations() {
-            var messageType = vm.annotationsAreHidden ? 'showAllAnnotations' : 'hideAllAnnotations';
-            vm.annotationsAreHidden = !vm.annotationsAreHidden;
         }
 
         function openAnnotations() {

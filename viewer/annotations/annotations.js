@@ -4,9 +4,6 @@
 
     angular.module('chaise.viewer')
 
-    // TODO not used
-    .value('annotations', [])
-
     /**
      * TODO should be a prototype
      * each annotation has the following:
@@ -23,6 +20,8 @@
      *  - id
      *  - url
      *  - tuple
+     *  - canUpdate
+     *  - canDelete
      */
     .value('annotationModels', [])
 
@@ -53,4 +52,4 @@
         submissionRows: [{}], // rows of data converted to raw data for submission
         foreignKeyData: [{}]
     });
-})();
+  })();

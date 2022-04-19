@@ -243,6 +243,13 @@
                             tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
+
+                        // check if user can create related or associations that are inline to set showEmptyRelatedTables on load
+                        // user can modify the current record page and can modify at least 1 of the related tables
+                        var canCreateRelation = reference.derivedAssociationReference ? reference.derivedAssociationReference.canCreate : reference.canCreate;
+                        if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && canCreateRelation) {
+                            $rootScope.showEmptyRelatedTables = true;
+                        }
                     }
                     // columns that are relying on aggregates or are aggregate themselves
                     else if (col.hasWaitFor || !col.isUnique) {
@@ -264,8 +271,9 @@
                 $rootScope.lastRendered = null;
                 related.forEach(function (ref, index) {
                     ref = ref.contextualize.compactBrief;
-                    // user can modify the current record page and can modify at least 1 of the related tables
-                    if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && ref.canCreate) {
+                    // user can modify the current record page and can modify at least 1 of the related tables in visible-foreignkeys
+                    var canCreateRelation = ref.derivedAssociationReference ? ref.derivedAssociationReference.canCreate : ref.canCreate;
+                    if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && canCreateRelation) {
                         $rootScope.showEmptyRelatedTables = true;
                     }
 

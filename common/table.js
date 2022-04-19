@@ -1721,7 +1721,7 @@
 
                     ERMrest.resolve(scope.vm.savedQueryReference.uri + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
                         // we don't want to allow faceting in the popup
-                        savedQueryReference = savedQueryReference.contextualize.compactSelect.hideFacets();
+                        savedQueryReference = savedQueryReference.contextualize.compactSelectSavedQueries.hideFacets();
 
                         var params = {};
 
@@ -1732,9 +1732,10 @@
                         params.reference = savedQueryReference;
                         params.selectedRows = [];
                         params.showFaceting = false;
-                        // faceting not allowed, make sure panel is collapsed too just in case
-                        params.facetPanelOpen = false;
                         params.allowDelete = true;
+                        // NOTE: when supporting faceting in saved_queries popup
+                        //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
+                        params.facetPanelOpen = false;
 
                         // TODO: fix logging stuff
                         var stackElement = logService.getStackNode(

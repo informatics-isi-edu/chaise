@@ -92,6 +92,7 @@
                     canDelete: '=',
                     canEdit: '=',
                     isInline: "=",
+                    isPureAndBinary: '=',
                     isTableDisplay: '=', // is the table in table display mode or other custom mode ('markdown' display)
                     showToggleDisplayBtn: "=",
                     // strings
@@ -126,7 +127,7 @@
                     if (idx+1 != $scope.keyset.length) keysetString += ", "
                 });
 
-                $scope.tooltip.createButton = "Adding to " + displayname + " is disabled until " + keysetString + " in " + tablename + " is set.";
+                $scope.tooltip.createButton = ($scope.isPureAndBinary ? "Linking" : "Adding") + " to " + displayname + " is disabled until " + keysetString + " in " + tablename + " is set.";
             }
 
             if ($scope.canEdit) {
