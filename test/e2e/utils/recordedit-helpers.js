@@ -1561,15 +1561,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // clear the value
                                 return chaisePage.recordEditPage.clearInput(colorInput);
                             }).then(function () {
+                                // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then(function () {
-                                // if required, it will use the previous value
-                                if (c.nullok == false) {
-                                    expect(colorInput.getAttribute('value')).toBeTruthy(colError(c.name, "Was able to clear the input."));
-                                }
-
                                 return colorInput.sendKeys(invalidValue);
                             }).then (function () {
+                                // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then (function () {
                                 expect(colorInput.getAttribute('value')).not.toBe(invalidValue);
@@ -1608,9 +1605,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // make sure popup is displayed
                                 chaisePage.waitForElement(popup);
 
-                                // make sure nullok is offered or not
+                                // make sure clear btn is offered regardless of null/not-null (just like any other  input)
                                 var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
-                                expect(clearBtn.isDisplayed()).toEqual(c.nullok != false, colError(c.name, "color popup: clear btn invalid state"));
+                                expect(clearBtn.isDisplayed()).toEqual(true, colError(c.name, "color popup: clear btn invalid state"));
 
                                 // write a color and submit
                                 popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
@@ -1650,6 +1647,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(colorInput).then(function () {
                                 return colorInput.sendKeys(text);
                             }).then(function () {
+                                // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then(function () {
 
