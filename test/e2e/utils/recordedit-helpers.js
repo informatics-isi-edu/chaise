@@ -1554,7 +1554,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 return;
                             }
 
-                            var prevValue, invalidValue = "invalidColor";
+                            var prevValue, invalidValue = "invalidColor", testRequired = false;
+                            // c.nullok === false;
                             getExistingValue(c.name, colorInput).then(function (val) {
                                 prevValue = val;
 
@@ -1564,12 +1565,30 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then(function () {
+                                // // if testing required, submit the form so we can see the error
+                                if (testRequired) {
+                                    chaisePage.recordEditPage.submitForm();
+                                    return chaisePage.recordEditPage.getColorInputErrorMessage(colorInput, 'required');
+                                }
+                                return true;
+                            }).then(function (resp) {
+                                if (testRequired) {
+                                    expect(resp.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
+                                }
                                 return colorInput.sendKeys(invalidValue);
                             }).then (function () {
                                 // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then (function () {
-                                expect(colorInput.getAttribute('value')).not.toBe(invalidValue);
+                                // I had to turn this from a simple get attribute to wait
+                                // since it was throwing a terminal error
+                                browser.wait(function () {
+                                    return colorInput.getAttribute('value').then((function (val) {
+                                        return val == "";
+                                    })).catch(function (err) {
+                                        done.fail(err);
+                                    })
+                                });
 
                                 //Restore the value to the original one
                                 if (tableParams.primary_keys.indexOf(c.name) != -1) {
@@ -1580,9 +1599,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             }).then (function () {
                                 isDone(done);
                             }).catch(function (err) {
+                                console.log(err);
                                 done.fail(err);
                             })
-
                         });
                     });
 
