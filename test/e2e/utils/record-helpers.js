@@ -92,7 +92,7 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    exports.testSharePopup(tableParams.citationParams);
+    exports.testSharePopup(tableParams.sharePopupParams);
 
     it("should have '2' options in the dropdown menu.", function (done) {
         var exportButton = chaisePage.recordsetPage.getExportDropdown();
@@ -464,12 +464,13 @@ exports.testPresentation = function (tableParams) {
  * opens the share and cite popup and test the content. The acceptable input:
  * {
  *   permalink: "the permalink", // required
+ *   hasVersionedLink: boolean, // whether versioned link is present or not
  *   verifyVersionedLink: boolean, // if true, we will test the versioned link too.
  *   citation: string, // (optional) pass null if citation should not be displayed.
  *   bintextFile: string, // (optional) the location of the bibtext file so we can delete it after downloading it
  * }
  */
-exports.testSharePopup = function (citationParams) {
+exports.testSharePopup = function (sharePopupParams) {
     describe("for share & citation dialog,", function () {
 
         beforeAll(function (done) {
@@ -497,11 +498,11 @@ exports.testSharePopup = function (citationParams) {
             chaisePage.waitForElement(modalTitle);
             chaisePage.recordPage.waitForCitation();
             // make sure the loader is not displayed
-            expect(modalTitle.getText()).toBe(citationParams.title, "Share citation modal title is incorrect");
+            expect(modalTitle.getText()).toBe(sharePopupParams.title, "Share citation modal title is incorrect");
 
             // share link
             var num = 1;
-            if (citationParams.citation) {
+            if (sharePopupParams.citation) {
                 // share link + citation + bibtext
                 num = 3;
             }
@@ -512,22 +513,39 @@ exports.testSharePopup = function (citationParams) {
             expect(chaisePage.recordPage.getShareLinkHeader().getText()).toBe("Share Link", "Share Link (permalink) header is incorrect");
         });
 
-        it("should have a versioned link and permalink present.", function () {
+
+        var testMessage = "should only have a permalink present (no versioned link).";
+        if (sharePopupParams.hasVersionedLink) {
+            testMessage = "should have a versioned link and permalink present."
+        }
+        it(testMessage, function (done) {
             chaisePage.recordPage.getShareLinkSubHeaders().then(function (subheaders) {
-                // verify versioned link
-                if (citationParams.verifyVersionedLink) {
+                expect(subheaders.length).toBe(sharePopupParams.hasVersionedLink ? 2 : 1, "version link state missmatch");
+
+                if (sharePopupParams.hasVersionedLink) {
+                    // just make sure the link is defined
                     expect(subheaders[0].getText()).toContain("Versioned Link", "versioned link header is incorrect");
-                    expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(citationParams.permalink, "versioned link url does not contain the permalink");
+
+                    // verify versioned link
+                    // NOTE this is conditional because in some cases the version link is not based on resolver and is not easy to test
+                    if (sharePopupParams.verifyVersionedLink) {
+                        expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(sharePopupParams.permalink, "versioned link url does not contain the permalink");
+                    }
                 }
 
                 // verify permalink
-                expect(subheaders[1].getText()).toContain("Live Link", "versioned link header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(citationParams.permalink, "permalink url is incorrect");
+                expect(subheaders[sharePopupParams.hasVersionedLink ? 1 : 0].getText()).toContain("Live Link", "versioned link header is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(sharePopupParams.permalink, "permalink url is incorrect");
+
+                done();
+            }).catch(function (err) {
+                done.fail(err);
             })
         });
 
-        it("should have 2 copy to clipboard icons visible.", function () {
-            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(2, "wrong number of copy to clipboard icons");
+        var numCopyIcons = sharePopupParams.hasVersionedLink ? 2 : 1;
+        it("should have " + numCopyIcons + " copy to clipboard icons visible.", function () {
+            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
         });
 
         // NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
@@ -562,11 +580,11 @@ exports.testSharePopup = function (citationParams) {
             });
         }).pend("Test case feels hacky to test a feature of the OS that can't be tested by just verifying the value was copied.");
 
-        if (citationParams.citation) {
+        if (sharePopupParams.citation) {
             it("should have a citation present,", function () {
                 // verify citation
                 expect(chaisePage.recordPage.getCitationHeader().getText()).toBe("Data Citation", "Citation header is incorrect");
-                expect(chaisePage.recordPage.getCitationText().getText()).toBe(citationParams.citation, "citation text is incorrect");
+                expect(chaisePage.recordPage.getCitationText().getText()).toBe(sharePopupParams.citation, "citation text is incorrect");
 
                 // verify download citation
                 expect(chaisePage.recordPage.getDownloadCitationHeader().getText()).toBe("Download Data Citation:", "Download citation header is incorrect");
@@ -574,15 +592,15 @@ exports.testSharePopup = function (citationParams) {
             });
         }
 
-        if (!process.env.CI && citationParams.bibtextFile) {
+        if (!process.env.CI && sharePopupParams.bibtextFile) {
             it("should download the citation in BibTex format.", function (done) {
                 chaisePage.recordPage.getBibtex().click().then(function () {
                     browser.wait(function() {
-                        return fs.existsSync(process.env.PWD + "/test/e2e/" + citationParams.bibtextFile);
+                        return fs.existsSync(process.env.PWD + "/test/e2e/" + sharePopupParams.bibtextFile);
                     }, browser.params.defaultTimeout).then(function () {
                         done();
                     }, function () {
-                        expect(false).toBeTruthy(citationParams.bibtextFile + " was not downloaded");
+                        expect(false).toBeTruthy(sharePopupParams.bibtextFile + " was not downloaded");
                         done.fail();
                     });
                 });
