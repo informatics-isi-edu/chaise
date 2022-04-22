@@ -389,6 +389,7 @@
                 }
             ],
             "annotations": {
+                "tag:isrd.isi.edu:2020,history-capture": false,
                 "comment": [
                     "default"
                 ],
