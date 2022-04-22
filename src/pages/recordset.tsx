@@ -108,6 +108,15 @@ const RecordSetApp = (): JSX.Element => {
       const deleteEnabled = chaiseConfig.deleteRecord === true;
       const showFaceting = chaiseConfig.showFaceting === true;
 
+      /**
+       * based on,
+       * - reference.display.facetPanelOpen returns null if the annotation is not
+       * defined
+       * - by default we want the facet panel to be open
+       * therefore we should only close it if the chaise-config is defined and is false
+       */
+      const facetPanelOpen = showFaceting && reference.display.facetPanelOpen !== false;
+
       const recordsetConfig : RecordSetConfig = {
         viewable: true,
         editable: modifyEnabled,
@@ -115,7 +124,7 @@ const RecordSetApp = (): JSX.Element => {
         sortable: true,
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting,
-        facetPanelOpen: showFaceting,
+        facetPanelOpen,
         disableFaceting: false,
         displayMode: RecordSetDisplayMode.FULLSCREEN,
         // TODO
