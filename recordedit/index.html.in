@@ -235,7 +235,7 @@
                                                             <!-- color input -->
                                                             <div ng-switch-when="color" class="chaise-input-group">
                                                                 <div class="chaise-input-control chaise-color-picker">
-                                                                    <input color-picker toggle-callback="form.toggleColorPickerCallbacks[rowIndex][columnIndex]" is-required="form.isRequired(columnIndex)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" empty-to-null>
+                                                                    <input color-picker toggle-callback="form.toggleColorPickerCallbacks[rowIndex][columnIndex]" ng-required="form.isRequired(columnIndex)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" name="{{::column.name}}" type="text" empty-to-null>
                                                                     <chaise-clear-input btn-class="text-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name)"></chaise-clear-input>
                                                                 </div>
                                                                 <span class="chaise-input-group-append">
