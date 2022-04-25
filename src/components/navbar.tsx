@@ -20,8 +20,8 @@ import { NoRecordError } from '@chaise/models/errors';
 
 // utilities
 import { LogActions } from '@chaise/models/log';
-import { getCatalogId, splitVersionFromCatalog } from '@chaise/legacy/src/utils/uri-utils';
-import { 
+import { getCatalogId, splitVersionFromCatalog } from '@chaise/utils/uri-utils';
+import {
   MenuOption, NavbarBanner, addLogParams,
   canEnable, canShow, createMenuList, menuItemClasses,
   onDropdownToggle, onLinkClick, renderName

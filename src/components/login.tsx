@@ -16,7 +16,7 @@ import AuthnService from '@chaise/services/authn';
 // utilities
 import { LogActions } from '@chaise/models/log';
 import TypeUtils from '@chaise/utils/type-utils';
-import { getCatalogId } from '@chaise/legacy/src/utils/uri-utils';
+import { getCatalogId } from '@chaise/utils/uri-utils';
 import {
   MenuOption, addLogParams, createMenuList,
   isChaise, isOptionValid, logout,

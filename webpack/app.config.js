@@ -30,7 +30,6 @@ module.exports = (appName, title, mode, env) => {
         '@chaise/assets': path.resolve(__dirname, '..', 'src', 'assets'),
         '@chaise/components': path.resolve(__dirname, '..', 'src', 'components'),
         '@chaise/hooks': path.resolve(__dirname, '..', 'src', 'hooks'),
-        '@chaise/legacy': path.resolve(__dirname, '..'),
         '@chaise/models': path.resolve(__dirname, '..', 'src', 'models'),
         '@chaise/providers': path.resolve(__dirname, '..', 'src', 'providers'),
         '@chaise/services': path.resolve(__dirname, '..', 'src', 'services'),

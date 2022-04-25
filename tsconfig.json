@@ -53,7 +53,6 @@
       "@chaise/assets/*": ["./src/assets/*"],
       "@chaise/components/*": ["./src/components/*"],
       "@chaise/hooks/*": ["./src/hooks/*"],
-      "@chaise/legacy/*": ["./*"],
       "@chaise/models/*": ["./src/models/*"],
       "@chaise/providers/*": ["./src/providers/*"],
       "@chaise/services/*": ["./src/services/*"],

@@ -8,7 +8,7 @@ import {
   APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG,
 } from '@chaise/utils/constants';
 import MathUtils from '@chaise/utils/math-utils';
-import { getCatalogId, getQueryParam } from '@chaise/legacy/src/utils/uri-utils';
+import { getCatalogId, getQueryParam } from '@chaise/utils/uri-utils';
 import { setupHead, setWindowName } from '@chaise/utils/head-injector';
 import AuthnService from '@chaise/services/authn';
 
