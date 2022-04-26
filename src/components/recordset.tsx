@@ -215,8 +215,12 @@ const RecordSet = ({
     updatePage();
   }, [reference]);
 
-  // after the main data has loaded, we can get the data
+  // after the main data has loaded, we can get the secondary data
   useEffect(() => {
+    if (!isLoading) {
+      updateLocation(config.displayMode.indexOf(RecordSetDisplayMode.RELATED) !== 0);
+    }
+
     if (isInitialized && !isLoading && page && page.length > 0) {
       fetchSecondaryRequests(updatePage);
     }
@@ -406,7 +410,7 @@ const RecordSet = ({
     if (res) {
       // we got the results, let's just update the url
       // scroll to top of the page so user can see the result
-      updateLocation(config.displayMode.indexOf(RecordSetDisplayMode.RELATED) !== 0);
+      // updateLocation(config.displayMode.indexOf(RecordSetDisplayMode.RELATED) !== 0);
     }
     flowControl.current.queue.occupiedSlots--;
     flowControl.current.dirtyResult = !res;

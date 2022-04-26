@@ -17,5 +17,6 @@ module.exports = (env) => [
   getAppConfig('recordset', 'Recordset', mode, env),
 
   // chaise libs:
-  getLibConfig('navbar', mode, env),
+  // TODO should be updated and tested before adding it back:
+  // getLibConfig('navbar', mode, env),
 ];
