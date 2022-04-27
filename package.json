@@ -1,11 +1,16 @@
 {
-  "name": "chaise",
+  "name": "@isrd-isi-edu/chaise",
   "description": "An adaptive User Interface for ERMrest data sources",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "Apache-2.0",
-  "private": true,
+  "files": [
+    "src",
+    "webpack",
+    "tsconfig.json",
+    "babel.config.js"
+  ],
   "scripts": {
-    "build": "make install",
+    "build": "make all",
     "pretest": "make install",
     "test": "make test"
   },
