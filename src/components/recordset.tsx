@@ -68,7 +68,7 @@ const RecordSet = ({
   const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : 25);
 
   const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
-    initialReference.sortObject ? initialReference.sortObject[0] : null
+    Array.isArray(initialReference.location.sortObject) ? initialReference.location.sortObject[0] : null
   );
 
   const [reference, setReference] = useState<any>(initialReference);
