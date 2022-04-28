@@ -48,7 +48,6 @@ const RecordSet = ({
   getFavorites,
   getDisabledTuples,
 }: RecordSetProps): JSX.Element => {
-  // $log.debug('recordset comp: render');
 
   const { dispatchError } = useError();
 
@@ -57,7 +56,7 @@ const RecordSet = ({
     $log.log('setColVals: ' + current);
     setFn(
       (prev: any) => {
-        $log.log('setColVals: ' + flowControl.current.queue.counter);
+        $log.log(`setColVals inner. before: ${current}, current:${flowControl.current.queue.counter}`);
         if (current !== flowControl.current.queue.counter) {
           $log.debug('HERE!!!!!!!!!!!!!!!!!!!!!!!! wrapper');
           return prev;
@@ -344,6 +343,8 @@ const RecordSet = ({
     // update the resultset
     updateMainEntity(updatePage, false);
 
+    // the aggregates are updated when the main entity request is done
+
     // TODO the rest
     // setFacetReferesh(facetRefresh+1);
   }
@@ -366,13 +367,13 @@ const RecordSet = ({
     flowControl.current.dirtyResult = false;
 
     (function (currentCounter) {
-      $log.debug('counter', currentCounter, ': updating result');
+      printDebugMessage('updating result', currentCounter);
       readMainEntity(hideSpinner, currentCounter).then((res: any) => {
         afterUpdateMainEntity(res, currentCounter);
 
         // TODO
         // self.tableError = false;
-        $log.debug('counter', currentCounter, ': read is done. just before update page (to update the rest of the page)');
+        printDebugMessage('read is done. just before update page (to update the rest of the page)', currentCounter);
         if (cb) cb(res);
         // TODO remember last successful main request
         // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
@@ -465,7 +466,7 @@ const RecordSet = ({
           return defer.promise;
         }
 
-        $log.debug('counter', current, ': read main successful.');
+        printDebugMessage('read main successful.', current);
 
         return getFavorites ? getFavorites(page) : { page };
       }).then((result: any) => {
@@ -816,7 +817,7 @@ const RecordSet = ({
     const ref = reference.search(term); // this will clear previous search first
     if (checkReferenceURL(ref)) {
       // vm.lastActiveFacet = -1;
-      $log.debug('counter', flowControl.current.queue.counter, ': new search term=' + term);
+      printDebugMessage(`new search term=${term}`);
 
       // log the client action
       const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
@@ -834,7 +835,7 @@ const RecordSet = ({
     const ref = reference.sort([sortColumn]);
     if (checkReferenceURL(ref)) {
 
-      $log.debug('counter', flowControl.current.queue.counter, ': change sort');
+      printDebugMessage('change sort');
 
       LogService.logClientAction({
         action: flowControl.current.getTableLogAction(LogActions.SORT),

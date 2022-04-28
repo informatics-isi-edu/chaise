@@ -8,60 +8,37 @@
 class Logger {
   private _enabled = true;
 
-  public enable () {
+  public enable() {
     this._enabled = true;
   }
 
-  public disable () {
+  public disable() {
     this._enabled = false;
   }
 
-  info(message?: any, ...optionalParams: any[]): void {
+  info(...args: any[]): void {
     if (!this._enabled) return;
-
-    if (optionalParams.length > 0) {
-      console.info(message, optionalParams);
-    } else {
-      console.info(message);
-    }
+    console.info(...args);
   }
 
-  log(message?: any, ...optionalParams: any[]): void {
+  log(...args: any[]): void {
     if (!this._enabled) return;
-
-    if (optionalParams.length > 0) {
-      console.log(message, optionalParams);
-    } else {
-      console.log(message);
-    }
+    console.log(...args);
   }
 
-  warn(message?: any, ...optionalParams: any[]): void {
+  warn(...args: any[]): void {
     if (!this._enabled) return;
-
-    if (optionalParams.length > 0) {
-      console.warn(message, optionalParams);
-    } else {
-      console.warn(message);
-    }
+    console.warn(...args);
   }
 
-  error(message?: any, ...optionalParams: any[]): void {
-    if (optionalParams.length > 0) {
-      console.error(message, optionalParams);
-    } else {
-      console.error(message);
-    }
+  error(...args: any[]): void {
+    if (!this._enabled) return;
+    console.error(...args);
   }
 
-  debug(message?: any, ...optionalParams: any[]): void {
+  debug(...args: any[]): void {
     if (!this._enabled) return;
-
-    if (optionalParams.length > 0) {
-      console.debug(message, optionalParams);
-    } else {
-      console.debug(message);
-    }
+    console.debug(...args);
   }
 }
 
