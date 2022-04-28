@@ -25,7 +25,6 @@ export type RecordSetConfig = {
   sortable: boolean,
   selectMode: RecordsetSelectMode,
   showFaceting: boolean,
-  facetPanelOpen: boolean,
   disableFaceting: boolean,
   displayMode: RecordSetDisplayMode,
   // TODO enable favorites

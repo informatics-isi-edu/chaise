@@ -68,6 +68,6 @@ class Logger {
 const $log = new Logger();
 
 // TODO should this be bsased on NOD_ENV? or some other settings?
-$log.disable();
+// $log.disable();
 
 export default $log;

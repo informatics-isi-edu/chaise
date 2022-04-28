@@ -7,6 +7,7 @@ import $log from '@chaise/services/logger';
 import { ClearInputBtn } from '@chaise/components/clear-input-btn';
 import { ConditionalWrapper } from '@chaise/components/cond-wrapper';
 import { ResizeSensor } from 'css-element-queries';
+import { windowRef } from '@chaise/utils/window-ref';
 
 type SearchInputProps = {
   searchCallback: Function,
@@ -28,12 +29,10 @@ const SearchInput = ({
 
   const inputEl = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [inputChangedTimeout, setInputChangedTimeout] = useState<any>(null);
   const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(true);
   const inputContainer = useRef<HTMLDivElement>(null);
+  const inputChangedTimeout = useRef<number|null>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
-
-  $log.debug('search-input: render');
 
   // conditionally add tooltip for the placeholder
   // TODO can we improve this?
@@ -72,20 +71,18 @@ const SearchInput = ({
     $log.debug(`search term: ${searchTerm}`);
 
     // cancel the timeout
-    if (inputChangedTimeout) {
-      clearTimeout(inputChangedTimeout);
-      setInputChangedTimeout(null);
+    if (inputChangedTimeout.current) {
+      clearTimeout(inputChangedTimeout.current);
+      inputChangedTimeout.current = null;
     }
 
     searchCallback(searchTerm, isButton ? LogActions.SEARCH_BOX_CLICK : LogActions.SEARCH_BOX_ENTER);
   }
 
   const handleEnterPress = (event: any) => {
-    if (disabled) return;
+    if (disabled || event.key !== 'Enter') return;
 
-    if (event.key === 'Enter') {
-      triggerSearch(false);
-    }
+    triggerSearch(false);
   };
 
   const handleInputChange = (event: any) => {
@@ -95,17 +92,17 @@ const SearchInput = ({
     setSearchTerm(value);
 
     // Cancel previous promise for background search that was queued to be called
-    if (inputChangedTimeout) {
-      clearTimeout(inputChangedTimeout);
+    if (inputChangedTimeout.current) {
+      clearTimeout(inputChangedTimeout.current);
     }
 
-    setInputChangedTimeout(setTimeout(
+    inputChangedTimeout.current = windowRef.setTimeout(
       () => {
-        setInputChangedTimeout(null);
+        inputChangedTimeout.current = null;
         searchCallback(value, LogActions.SEARCH_BOX_AUTO);
       },
       AUTO_SEARCH_TIMEOUT
-    ));
+    );
   };
 
   const renderPlaceHolder = () => {

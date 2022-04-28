@@ -54,8 +54,10 @@ const RecordSet = ({
 
   const setStateVariable = (setFn: Function, cb: Function) => {
     const current = flowControl.current.queue.counter;
+    $log.log('setColVals: ' + current);
     setFn(
       (prev: any) => {
+        $log.log('setColVals: ' + flowControl.current.queue.counter);
         if (current !== flowControl.current.queue.counter) {
           $log.debug('HERE!!!!!!!!!!!!!!!!!!!!!!!! wrapper');
           return prev;
@@ -67,16 +69,7 @@ const RecordSet = ({
 
   const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : 25);
 
-  const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
-    Array.isArray(initialReference.location.sortObject) ? initialReference.location.sortObject[0] : null
-  );
-
   const [reference, setReference] = useState<any>(initialReference);
-
-  /**
-   * The displayed search term
-   */
-  const [searchTerm, setSearchTerm] = useState<string>(initialReference.location.searchTerm);
 
   /**
    * The columns that should be displayed in the result table
@@ -121,8 +114,21 @@ const RecordSet = ({
 
   /**
    * whether the facet panel should be open or closed
+   * NOTE: will return false if faceting is disabled
+   * default value is based on reference.display.facetPanelOpen
+   * and if it's not defined, it will be:
+   * - true: in fullscreen mode
+   * - false: in any other modes
    */
-  const [facetPanelOpen, setFacetPanelOpen] = useState(config.facetPanelOpen);
+  const [facetPanelOpen, setFacetPanelOpen] = useState<boolean>(() => {
+    if (config.disableFaceting) return false;
+
+    let res = initialReference.display.facetPanelOpen;
+    if (typeof res !== 'boolean') {
+      res = config.displayMode === RecordSetDisplayMode.FULLSCREEN;
+    }
+    return res;
+  });
 
   /**
    * We have to validate the facets first, and then we can show them.
@@ -134,12 +140,6 @@ const RecordSet = ({
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
   const mainContainer = useRef<any>(null);
-
-  /**
-   * the columns used for search,
-   * this list stays the same even when filter, etc changes
-   */
-  const searchColumns = initialReference.searchColumns;
 
 
   // initialize the recordset if it has not been done yet.
@@ -163,6 +163,7 @@ const RecordSet = ({
       });
     }
 
+    // if the faceting feature is disabled, then we don't need to generate facets
     if (config.disableFaceting) {
       initialize();
       return;
@@ -261,29 +262,27 @@ const RecordSet = ({
     flowControl.current.dirtyCount = true;
     flowControl.current.queue.counter = 0;
 
-    update(false, false, false, false);
-
-    // call the flow-control
-    updatePage();
+    update(null, false, false, false, false);
   };
 
   /**
    * Based on the given inputs, it will set the state of different parts
    * of recordset directive to be updated.
    *
+   * @param  {ERMrest.Reference} newRef if we want to also update the reference
    * @param  {boolean} updateResult if it's true we will update the table.
    * @param  {boolean} updateCount  if it's true we will update the displayed total count.
    * @param  {boolean} updateFacets if it's true we will udpate the opened facets.
    * @param  {boolean} sameCounter if it's true, the flow-control counter won't be updated.
    * @param  {string?} cause why we're calling this function (optional)
-   *
+   * NOTE: we're passing newRef here to ensure the reference and flowControl object are updated together
    * NOTE: sameCounter=true is used just to signal that we want to get results of the current
    * page status. For example when a facet opens or when users add a search term to a single facet.
    * we don't want to update the whole page in that case, just the facet itself.
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  const update = (updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
+  const update = (newRef: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
@@ -324,7 +323,12 @@ const RecordSet = ({
 
     // updatePage is called as a result of updating the reference
     // we cannot ensure that the reference is latest, so we cannot call updatePage
-    // updatePage();
+    if (newRef) {
+      // after react sets the reference, the useEffect will trigger updatePage
+      setReference(newRef);
+    } else {
+      updatePage();
+    }
   }
 
   const updatePage = () => {
@@ -478,7 +482,10 @@ const RecordSet = ({
 
         setIsInitialized(true);
         setPage(result.page);
-        setColValues(getColumnValuesFromPage(result.page));
+        const tempVals = getColumnValuesFromPage(result.page);
+        setStateVariable(setColValues, () => {
+          return tempVals;
+        });
 
         // update the objects based on the new page
         if (Array.isArray(result.page.templateVariables)) {
@@ -803,12 +810,11 @@ const RecordSet = ({
    * @param action string the log action
    */
   const changeSearch = (term: string | null, action: LogActions) => {
+    $log.log(`search with term: ${term}, action : ${action}`);
     if (term) term = term.trim();
 
     const ref = reference.search(term); // this will clear previous search first
     if (checkReferenceURL(ref)) {
-      setSearchTerm(term ? term : '');
-      setReference(ref);
       // vm.lastActiveFacet = -1;
       $log.debug('counter', flowControl.current.queue.counter, ': new search term=' + term);
 
@@ -820,16 +826,13 @@ const RecordSet = ({
         stack: flowControl.current.getTableLogStack(null, extraInfo)
       }, ref.defaultLogInfo);
 
-      update(true, true, true, false, LogReloadCauses.SEARCH_BOX);
+      update(ref, true, true, true, false, LogReloadCauses.SEARCH_BOX);
     }
   };
 
   const changeSort = (sortColumn: SortColumn) => {
     const ref = reference.sort([sortColumn]);
     if (checkReferenceURL(ref)) {
-
-      setCurrSortColumn(sortColumn);
-      setReference(ref);
 
       $log.debug('counter', flowControl.current.queue.counter, ': change sort');
 
@@ -838,7 +841,7 @@ const RecordSet = ({
         stack: flowControl.current.getTableLogStack()
       }, ref.defaultLogInfo);
 
-      update(true, false, false, false, LogReloadCauses.SORT);
+      update(ref, true, false, false, false, LogReloadCauses.SORT);
     }
   }
 
@@ -848,7 +851,6 @@ const RecordSet = ({
     const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
     if (ref && checkReferenceURL(ref)) {
 
-      setReference(ref);
       printDebugMessage('request for previous page');
 
       LogService.logClientAction(
@@ -859,7 +861,7 @@ const RecordSet = ({
         reference.defaultLogInfo
       );
 
-      update(true, false, false, false, cause);
+      update(ref, true, false, false, false, cause);
     }
   }
 
@@ -874,7 +876,7 @@ const RecordSet = ({
   }
 
   const renderShowFilterPanelBtn = () => {
-    if (facetPanelOpen || !config.showFaceting) {
+    if (facetPanelOpen || !config.showFaceting || config.disableFaceting) {
       return;
     }
     return (
@@ -963,10 +965,10 @@ const RecordSet = ({
               <div className='row'>
                 <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
                   <SearchInput
-                    initialSearchTerm={searchTerm}
+                    initialSearchTerm={initialReference.location.searchTerm}
                     searchCallback={changeSearch}
                     inputClass={'main-search-input'}
-                    searchColumns={searchColumns}
+                    searchColumns={initialReference.searchColumns}
                     disabled={false}
                     focus={true}
                   />
@@ -1003,7 +1005,7 @@ const RecordSet = ({
               columnModels={columnModels}
               config={config}
               sortCallback={changeSort}
-              currSortColumn={currSortColumn}
+              initialSortObject={initialReference.location.sortObject}
               nextPreviousCallback={nextPreviousCallback}
             />
           </div>

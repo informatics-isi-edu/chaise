@@ -6,7 +6,7 @@ import { makeSafeIdAttr } from '@chaise/utils/string-utils';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
 
 type RecordSetTableProps = {
@@ -15,8 +15,8 @@ type RecordSetTableProps = {
   // rowValues: any,
   colValues: any,
   config: RecordSetConfig,
+  initialSortObject: any,
   sortCallback?: (sortColumn: SortColumn) => any,
-  currSortColumn: SortColumn | null,
   nextPreviousCallback: (isNext: boolean) => any
 }
 
@@ -26,30 +26,37 @@ const RecordSetTable = ({
   // rowValues,
   colValues,
   config,
+  initialSortObject,
   sortCallback,
-  currSortColumn,
   nextPreviousCallback
 }: RecordSetTableProps): JSX.Element => {
-
-  $log.debug('recordset-table: render');
 
   // TODO needs to be updated to use ellipsis and have all the functionalities,
   // I only did this to test the overall structure and flow-control logic
 
   const tableContainer = useRef<any>(null);
+
+  const [currSortColumn, setCurrSortColumn] = useState<SortColumn|null>(
+    Array.isArray(initialSortObject) ? initialSortObject[0] : null
+  );
   const [initialized, setInitialized] = useState(false);
+
   useLayoutEffect(()=> {
     if (tableContainer.current) {
       addTopHorizontalScroll(tableContainer.current);
     }
     setInitialized(true);
-  }, [initialized])
+  }, [initialized]);
+
+  // when sort column has changed, call the callback
+  useEffect( () => {
+    if (typeof sortCallback !== 'function' || !initialized || !currSortColumn) return;
+
+    sortCallback(currSortColumn);
+  }, [currSortColumn]);
 
   const changeSort = (col: any) => {
     if (typeof sortCallback !== 'function') return;
-
-    // TODO properly check if sorted by this column or not
-    $log.debug('change sort');
 
     /**
      * if the sort is based on current column and is ascending, then
@@ -57,7 +64,7 @@ const RecordSetTable = ({
      * otherwise sort ascending
      */
     const desc = currSortColumn?.column === col.column.name && !currSortColumn?.descending;
-    sortCallback({'column':col.column.name, 'descending':desc});
+    setCurrSortColumn({'column':col.column.name, 'descending':desc});
   }
 
   const renderColumnError = () => {
