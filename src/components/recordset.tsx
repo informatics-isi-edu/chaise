@@ -26,6 +26,9 @@ import Faceting from '@chaise/components/faceting';
 import TableHeader from '@chaise/components/table-header';
 import useError from '@chaise/hooks/error';
 import useRecordset from '@chaise/hooks/recordset';
+import useAlert from '@chaise/hooks/alerts';
+import { ChaiseAlertType } from '@chaise/providers/alerts';
+import Alerts from '@chaise/components/alerts';
 
 /**
  * TODO
@@ -65,12 +68,14 @@ const Recordset = ({
     reference,
     isLoading,
     page,
-    colValues,
-    columnModels,
     isInitialized,
     initialize,
     update
   } = useRecordset();
+
+  const {
+    addAlert
+  } = useAlert();
 
   /**
    * whether the facet panel should be open or closed
@@ -171,7 +176,7 @@ const Recordset = ({
 
   }, [isInitialized]);
 
-  useEffect(()=> {
+  useEffect(() => {
     if (isLoading) return;
 
     // scroll to top after load
@@ -248,6 +253,11 @@ const Recordset = ({
    * @param action string the log action
    */
   const changeSearch = (term: string | null, action: LogActions) => {
+    // TODO added for test, should be removed
+    $log.info('adding alert!!');
+    addAlert('Search initiated', ChaiseAlertType.INFO, () => {
+      $log.info('removed!');
+    });
     $log.log(`search with term: ${term}, action : ${action}`);
     if (term) term = term.trim();
 
@@ -336,6 +346,8 @@ const Recordset = ({
         <ChaiseSpinner />
       }
       <div className='top-panel-container'>
+        {/* recordset level alerts */}
+        <Alerts />
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`}>
             <div className='panel-header'>
@@ -437,7 +449,7 @@ const Recordset = ({
           facetColumnsReady &&
           <div
             className={'side-panel-resizable ' + panelClassName}
-            style={{visibility: config.showFaceting ? 'visible': 'hidden'}}
+            style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
             <div className='side-panel-container'>
               <Faceting
@@ -450,9 +462,6 @@ const Recordset = ({
         <div className='main-container dynamic-padding' ref={mainContainer}>
           <div className='main-body'>
             <RecordsetTable
-              page={page}
-              colValues={colValues}
-              columnModels={columnModels}
               config={config}
               sortCallback={changeSort}
               initialSortObject={initialReference.location.sortObject}

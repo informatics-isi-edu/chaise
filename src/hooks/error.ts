@@ -9,8 +9,11 @@ import { ErrorContext } from '@chaise/providers/error';
  * - hideError: can be used to hide the currently displayed error.
  */
 function useError() {
-  const { error, dispatchError, hideError } = useContext(ErrorContext);
-  return { error, dispatchError, hideError };
+  const context = useContext(ErrorContext);
+  if (!context) {
+    throw new Error('No ErrorProvider found when calling RecordsetContext');
+  }
+  return context;
 }
 
 export default useError;

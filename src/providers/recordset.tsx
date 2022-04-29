@@ -11,6 +11,8 @@ import { createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 
+// TODO more comments and proper types
+
 export const RecordsetContext = createContext<{
   reference: any,
   isLoading: boolean,
@@ -22,7 +24,10 @@ export const RecordsetContext = createContext<{
   page: any,
   colValues: any,
   columnModels: any
-} | null>(null);
+}
+  // NOTE: since it can be null, to make sure the context is used properly with
+  //       a provider, the useRecordset hook will throw an error if it's null.
+  | null>(null);
 
 type RecordsetProviderProps = {
   children: JSX.Element,
@@ -42,7 +47,7 @@ export default function RecordsetProvider({
   logInfo,
   getFavorites,
   getDisabledTuples
-}: any): JSX.Element {
+}: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const [reference, setReference] = useState<any>(initialReference);
   /**

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Modal } from 'react-bootstrap';
 import Recordset, { RecordsetProps } from '@chaise/components/recordset';
 import RecordsetProvider from '@chaise/providers/recordset';
+import AlertsProvider from '@chaise/providers/alerts';
 
 type RecordestModalProps = {
   recordsetProps: RecordsetProps,
@@ -27,19 +28,22 @@ const RecordsetModal = ({
         <Modal.Title>Recordet modal test</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <RecordsetProvider
-          initialReference={recordsetProps.initialReference}
-          config={recordsetProps.config}
-          logInfo={recordsetProps.logInfo}
-          initialPageLimit={recordsetProps.initialPageLimit}
-        >
-        <Recordset
-          initialReference={recordsetProps.initialReference}
-          config={recordsetProps.config}
-          logInfo={recordsetProps.logInfo}
-          initialPageLimit={recordsetProps.initialPageLimit}
-        />
-        </RecordsetProvider>
+        {/* for popup level alerts */}
+        <AlertsProvider>
+          <RecordsetProvider
+            initialReference={recordsetProps.initialReference}
+            config={recordsetProps.config}
+            logInfo={recordsetProps.logInfo}
+            initialPageLimit={recordsetProps.initialPageLimit}
+          >
+            <Recordset
+              initialReference={recordsetProps.initialReference}
+              config={recordsetProps.config}
+              logInfo={recordsetProps.logInfo}
+              initialPageLimit={recordsetProps.initialPageLimit}
+            />
+          </RecordsetProvider>
+        </AlertsProvider>
       </Modal.Body>
     </Modal>
   )

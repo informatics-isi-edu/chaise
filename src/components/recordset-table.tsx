@@ -8,12 +8,9 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
+import useRecordset from '@chaise/hooks/recordset';
 
 type RecordsetTableProps = {
-  columnModels: any,
-  page: any,
-  // rowValues: any,
-  colValues: any,
   config: RecordsetConfig,
   initialSortObject: any,
   sortCallback?: (sortColumn: SortColumn) => any,
@@ -21,36 +18,38 @@ type RecordsetTableProps = {
 }
 
 const RecordsetTable = ({
-  columnModels,
-  page,
-  // rowValues,
-  colValues,
   config,
   initialSortObject,
   sortCallback,
   nextPreviousCallback
 }: RecordsetTableProps): JSX.Element => {
 
+  const {
+    isInitialized,
+    page,
+    columnModels,
+    colValues
+  } = useRecordset();
+
   // TODO needs to be updated to use ellipsis and have all the functionalities,
   // I only did this to test the overall structure and flow-control logic
 
   const tableContainer = useRef<any>(null);
 
-  const [currSortColumn, setCurrSortColumn] = useState<SortColumn|null>(
+  const [currSortColumn, setCurrSortColumn] = useState<SortColumn | null>(
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
   );
-  const [initialized, setInitialized] = useState(false);
 
-  useLayoutEffect(()=> {
+  useLayoutEffect(() => {
     if (tableContainer.current) {
       addTopHorizontalScroll(tableContainer.current);
     }
-    setInitialized(true);
-  }, [initialized]);
+  }, []);
 
   // when sort column has changed, call the callback
-  useEffect( () => {
-    if (typeof sortCallback !== 'function' || !initialized || !currSortColumn) return;
+  useEffect(() => {
+    // TODO why isInitialized is needed? (removing it triggers two updates)
+    if (typeof sortCallback !== 'function' || !currSortColumn || !isInitialized) return;
 
     sortCallback(currSortColumn);
   }, [currSortColumn]);
@@ -64,7 +63,7 @@ const RecordsetTable = ({
      * otherwise sort ascending
      */
     const desc = currSortColumn?.column === col.column.name && !currSortColumn?.descending;
-    setCurrSortColumn({'column':col.column.name, 'descending':desc});
+    setCurrSortColumn({ 'column': col.column.name, 'descending': desc });
   }
 
   const renderColumnError = () => {
@@ -74,7 +73,7 @@ const RecordsetTable = ({
         <Tooltip>{MESSAGE_MAP.queryTimeoutTooltip}</Tooltip>
       }
     >
-      <span className='fa-solid fa-triangle-exclamation'/>
+      <span className='fa-solid fa-triangle-exclamation' />
     </OverlayTrigger>
   };
 
@@ -182,7 +181,7 @@ const RecordsetTable = ({
   // };
 
   const renderCells = (rowIndex: number) => {
-    return colValues.map( (colVal: any, colIndex: number) => {
+    return colValues.map((colVal: any, colIndex: number) => {
       return (
         <td key={rowIndex + '-' + colIndex}>
           {/* TODO ellipsis logic */}

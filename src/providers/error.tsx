@@ -26,11 +26,10 @@ export const ErrorContext = createContext<{
   error: ChaiseError | null;
   dispatchError: (payload: DispatchErrorPayload) => void;
   hideError: () => void;
-}>({
-  error: null,
-  dispatchError: () => {/* */},
-  hideError: () => {/* */}
-});
+} |
+  // NOTE: since it can be null, to make sure the context is used properly with
+  //       a provider, the useRecordset hook will throw an error if it's null.
+  null>(null);
 
 type ErrorProviderProps = {
   children: JSX.Element

@@ -25,6 +25,8 @@ import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@cha
 import ErrorPorvider from '@chaise/providers/error';
 import useError from '@chaise/hooks/error';
 import RecordsetProvider from '@chaise/providers/recordset';
+import AlertsProvider from '@chaise/providers/alerts';
+import Alerts from '@chaise/components/alerts';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -37,7 +39,7 @@ const recordsetSettings = {
 const RecordsetApp = (): JSX.Element => {
   const { dispatchError } = useError();
   const [configDone, setConfigDone] = useState(false);
-  const [recordsetProps, setRecordsetProps] = useState<RecordsetProps|null>(null);
+  const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
   useEffect(() => {
     $log.debug('recordset page: useEffect');
@@ -48,11 +50,11 @@ const RecordsetApp = (): JSX.Element => {
      */
     window.addEventListener('error', (event) => {
       $log.log('got the error in catch-all');
-      dispatchError({error: event.error, isGlobal: true});
+      dispatchError({ error: event.error, isGlobal: true });
     });
     window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
       $log.log('got the error in catch-all (unhandled rejection)');
-      dispatchError({error: event.reason, isGlobal: true});
+      dispatchError({ error: event.reason, isGlobal: true });
     });
 
     /**
@@ -109,7 +111,7 @@ const RecordsetApp = (): JSX.Element => {
       const deleteEnabled = chaiseConfig.deleteRecord === true;
       const showFaceting = chaiseConfig.showFaceting === true;
 
-      const recordsetConfig : RecordsetConfig = {
+      const recordsetConfig: RecordsetConfig = {
         viewable: true,
         editable: modifyEnabled,
         deletable: modifyEnabled && deleteEnabled,
@@ -146,16 +148,16 @@ const RecordsetApp = (): JSX.Element => {
       if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
-      dispatchError({error: err, isGlobal: true});
+      dispatchError({ error: err, isGlobal: true });
     });
-  }, [configDone] );
+  }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {
     $log.log('error fallback of the main error boundary');
 
     // TODO uncomment
     // ErrorService.logTerminalError(error);
-    dispatchError({error: error, isGlobal: true});
+    dispatchError({ error: error, isGlobal: true });
 
     // the error modal will be displayed so there's no need for the fallback
     return null;
@@ -171,19 +173,24 @@ const RecordsetApp = (): JSX.Element => {
     return (
       <div className='app-container'>
         <ChaiseNavbar />
-        <RecordsetProvider
-          initialReference={recordsetProps.initialReference}
-          config={recordsetProps.config}
-          logInfo={recordsetProps.logInfo}
-          initialPageLimit={recordsetProps.initialPageLimit}
-        >
-        <Recordset
-          initialReference={recordsetProps.initialReference}
-          config={recordsetProps.config}
-          logInfo={recordsetProps.logInfo}
-          initialPageLimit={recordsetProps.initialPageLimit}
-        />
-        </RecordsetProvider>
+        {/* app level alerts */}
+        <Alerts />
+        {/* for recordset level alerts */}
+        <AlertsProvider>
+          <RecordsetProvider
+            initialReference={recordsetProps.initialReference}
+            config={recordsetProps.config}
+            logInfo={recordsetProps.logInfo}
+            initialPageLimit={recordsetProps.initialPageLimit}
+          >
+            <Recordset
+              initialReference={recordsetProps.initialReference}
+              config={recordsetProps.config}
+              logInfo={recordsetProps.logInfo}
+              initialPageLimit={recordsetProps.initialPageLimit}
+            />
+          </RecordsetProvider>
+        </AlertsProvider>
       </div>
     );
   };
@@ -193,7 +200,10 @@ const RecordsetApp = (): JSX.Element => {
       <ErrorBoundary
         FallbackComponent={errorFallback}
       >
-        {recordsetContent()}
+        {/* app level alerts */}
+        <AlertsProvider>
+          {recordsetContent()}
+        </AlertsProvider>
       </ErrorBoundary>
       <ErrorModal />
     </>
