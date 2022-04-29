@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { RecordsetContext } from '@chaise/providers/recordset';
 
 
-function useRecordSet() {
+function useRecordset() {
   const context = useContext(RecordsetContext);
   if (!context) {
     throw new Error('No Recordset.Provider found when calling RecordsetContext');
@@ -10,4 +10,4 @@ function useRecordSet() {
   return context;
 }
 
-export default useRecordSet;
+export default useRecordset;

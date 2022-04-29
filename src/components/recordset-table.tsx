@@ -1,5 +1,5 @@
 import '@chaise/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordSetConfig } from '@chaise/models/recordset';
+import { SortColumn, RecordsetConfig } from '@chaise/models/recordset';
 import $log from '@chaise/services/logger';
 import DisplayValue from '@chaise/components/display-value';
 import { makeSafeIdAttr } from '@chaise/utils/string-utils';
@@ -9,18 +9,18 @@ import { MESSAGE_MAP } from '@chaise/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
 
-type RecordSetTableProps = {
+type RecordsetTableProps = {
   columnModels: any,
   page: any,
   // rowValues: any,
   colValues: any,
-  config: RecordSetConfig,
+  config: RecordsetConfig,
   initialSortObject: any,
   sortCallback?: (sortColumn: SortColumn) => any,
   nextPreviousCallback: (isNext: boolean) => any
 }
 
-const RecordSetTable = ({
+const RecordsetTable = ({
   columnModels,
   page,
   // rowValues,
@@ -29,7 +29,7 @@ const RecordSetTable = ({
   initialSortObject,
   sortCallback,
   nextPreviousCallback
-}: RecordSetTableProps): JSX.Element => {
+}: RecordsetTableProps): JSX.Element => {
 
   // TODO needs to be updated to use ellipsis and have all the functionalities,
   // I only did this to test the overall structure and flow-control logic
@@ -243,4 +243,4 @@ const RecordSetTable = ({
   )
 }
 
-export default RecordSetTable;
+export default RecordsetTable;

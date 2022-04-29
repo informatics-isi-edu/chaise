@@ -11,7 +11,7 @@ import { ConfigService } from '@chaise/services/config';
 import ChaiseNavbar from '@chaise/components/navbar';
 import ErrorModal from '@chaise/components/error-modal';
 import ChaiseSpinner from '@chaise/components/spinner';
-import RecordSet, { RecordSetProps } from '@chaise/components/recordset';
+import Recordset, { RecordsetProps } from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
 import AuthnService from '@chaise/services/authn';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
@@ -21,7 +21,7 @@ import { updateHeadTitle } from '@chaise/utils/head-injector';
 import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
 import { LogService } from '@chaise/services/log';
 import { LogStackTypes } from '@chaise/models/log';
-import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
 import ErrorPorvider from '@chaise/providers/error';
 import useError from '@chaise/hooks/error';
 import RecordsetProvider from '@chaise/providers/recordset';
@@ -34,10 +34,10 @@ const recordsetSettings = {
   overrideExternalLinkBehavior: true,
 };
 
-const RecordSetApp = (): JSX.Element => {
+const RecordsetApp = (): JSX.Element => {
   const { dispatchError } = useError();
   const [configDone, setConfigDone] = useState(false);
-  const [recordSetProps, setRecordSetProps] = useState<RecordSetProps|null>(null);
+  const [recordsetProps, setRecordsetProps] = useState<RecordsetProps|null>(null);
 
   useEffect(() => {
     $log.debug('recordset page: useEffect');
@@ -109,7 +109,7 @@ const RecordSetApp = (): JSX.Element => {
       const deleteEnabled = chaiseConfig.deleteRecord === true;
       const showFaceting = chaiseConfig.showFaceting === true;
 
-      const recordsetConfig : RecordSetConfig = {
+      const recordsetConfig : RecordsetConfig = {
         viewable: true,
         editable: modifyEnabled,
         deletable: modifyEnabled && deleteEnabled,
@@ -117,7 +117,7 @@ const RecordSetApp = (): JSX.Element => {
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting,
         disableFaceting: false,
-        displayMode: RecordSetDisplayMode.FULLSCREEN,
+        displayMode: RecordsetDisplayMode.FULLSCREEN,
         // TODO
         // enableFavorites
       };
@@ -135,7 +135,7 @@ const RecordSetApp = (): JSX.Element => {
       };
 
 
-      setRecordSetProps({
+      setRecordsetProps({
         initialReference: reference,
         initialPageLimit,
         config: recordsetConfig,
@@ -164,7 +164,7 @@ const RecordSetApp = (): JSX.Element => {
   $log.debug('recordset page: render');
 
   const recordsetContent = () => {
-    if (!configDone || !recordSetProps) {
+    if (!configDone || !recordsetProps) {
       return <ChaiseSpinner />;
     }
 
@@ -172,16 +172,16 @@ const RecordSetApp = (): JSX.Element => {
       <div className='app-container'>
         <ChaiseNavbar />
         <RecordsetProvider
-          initialReference={recordSetProps.initialReference}
-          config={recordSetProps.config}
-          logInfo={recordSetProps.logInfo}
-          initialPageLimit={recordSetProps.initialPageLimit}
+          initialReference={recordsetProps.initialReference}
+          config={recordsetProps.config}
+          logInfo={recordsetProps.logInfo}
+          initialPageLimit={recordsetProps.initialPageLimit}
         >
-        <RecordSet
-          initialReference={recordSetProps.initialReference}
-          config={recordSetProps.config}
-          logInfo={recordSetProps.logInfo}
-          initialPageLimit={recordSetProps.initialPageLimit}
+        <Recordset
+          initialReference={recordsetProps.initialReference}
+          config={recordsetProps.config}
+          logInfo={recordsetProps.logInfo}
+          initialPageLimit={recordsetProps.initialPageLimit}
         />
         </RecordsetProvider>
       </div>
@@ -203,7 +203,7 @@ const RecordSetApp = (): JSX.Element => {
 ReactDOM.render(
   <ErrorPorvider>
     <React.StrictMode>
-      <RecordSetApp />
+      <RecordsetApp />
     </React.StrictMode>
   </ErrorPorvider>,
   document.getElementById('chaise-app-root'),

@@ -1,6 +1,6 @@
 import useError from '@chaise/hooks/error';
 import { LogActions, LogStackPaths } from '@chaise/models/log';
-import { RecordSetDisplayMode } from '@chaise/models/recordset';
+import { RecordsetDisplayMode } from '@chaise/models/recordset';
 import { ConfigService } from '@chaise/services/config';
 import { LogService } from '@chaise/services/log';
 import $log from '@chaise/services/logger';
@@ -292,12 +292,12 @@ export default function RecordsetProvider({
       // the places that we want to show edit or delete button, we should also ask for trs
       // NOTE technically this should be based on passed config options but we're passing editable
       //      to mean both edit and create, so it's not really useful here
-      const getTRS = config.displayMode.indexOf(RecordSetDisplayMode.RELATED) === 0
-        || config.displayMode === RecordSetDisplayMode.FULLSCREEN;
+      const getTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
+        || config.displayMode === RecordsetDisplayMode.FULLSCREEN;
 
       // if it's in related entity section, we should fetch the
       // unlink trs (acl) of association tables
-      const getUnlinkTRS = config.displayMode.indexOf(RecordSetDisplayMode.RELATED) === 0
+      const getUnlinkTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
         && reference.derivedAssociationReference;
 
       const read = reference.read(pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS);

@@ -1,9 +1,9 @@
 import { LogStackTypes } from '@chaise/models/log';
-import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
 import { LogService } from '@chaise/services/log';
 import $log from '@chaise/services/logger';
 import { useState } from 'react';
-import { RecordSetProps } from '@chaise/components/recordset';
+import { RecordsetProps } from '@chaise/components/recordset';
 import RecordsetModal from '@chaise/components/recordset-modal';
 import SearchInput from '@chaise/components/search-input';
 
@@ -16,14 +16,14 @@ const FacetChoicePicker = ({
   facetColumn,
   index
 }: FacetChoicePickerProps): JSX.Element => {
-  const [recordsetModalProps, setRecordsetModalProps] = useState<RecordSetProps|null>(null);
+  const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps|null>(null);
 
   const searchCallback = (searchTerm: any, action: any) => {
     $log.log(`search for ${searchTerm} in facet index=${index}`);
   }
 
   const openRecordsetModal = () => {
-    const recordsetConfig : RecordSetConfig = {
+    const recordsetConfig : RecordsetConfig = {
       viewable: false,
       editable: false,
       deletable: false,
@@ -31,7 +31,7 @@ const FacetChoicePicker = ({
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       showFaceting: false,
       disableFaceting: true,
-      displayMode: RecordSetDisplayMode.FACET_POPUP,
+      displayMode: RecordsetDisplayMode.FACET_POPUP,
       // TODO
       // enableFavorites
     };

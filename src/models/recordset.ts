@@ -4,7 +4,7 @@ export enum RecordsetSelectMode {
   MULTI_SELECT
 }
 
-export enum RecordSetDisplayMode {
+export enum RecordsetDisplayMode {
   FULLSCREEN = 'fullscreen',
   TABLE = 'table',
   RELATED = 'related',
@@ -19,7 +19,7 @@ export enum RecordSetDisplayMode {
   SAVED_QUERY_POPUP = 'popup/savedquery'
 }
 
-export type RecordSetConfig = {
+export type RecordsetConfig = {
   viewable: boolean,
   editable: boolean,
   deletable: boolean,
@@ -27,7 +27,7 @@ export type RecordSetConfig = {
   selectMode: RecordsetSelectMode,
   showFaceting: boolean,
   disableFaceting: boolean,
-  displayMode: RecordSetDisplayMode,
+  displayMode: RecordsetDisplayMode,
   // TODO enable favorites
 }
 

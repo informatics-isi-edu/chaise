@@ -10,10 +10,10 @@ import { LogActions, LogReloadCauses, LogStackPaths } from '@chaise/models/log';
 import Title from '@chaise/components/title';
 import Export from '@chaise/components/export';
 import ChaiseSpinner from '@chaise/components/spinner';
-import RecordSetTable from '@chaise/components/recordset-table';
+import RecordsetTable from '@chaise/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@chaise/utils/ui-utils';
 import { LogService } from '@chaise/services/log';
-import { SortColumn, RecordSetConfig, RecordSetDisplayMode } from '@chaise/models/recordset';
+import { SortColumn, RecordsetConfig, RecordsetDisplayMode } from '@chaise/models/recordset';
 import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
 import { ConfigService } from '@chaise/services/config';
 import Q from 'q';
@@ -36,9 +36,9 @@ import useRecordset from '@chaise/hooks/recordset';
  */
 
 
-export type RecordSetProps = {
+export type RecordsetProps = {
   initialReference: any,
-  config: RecordSetConfig,
+  config: RecordsetConfig,
   logInfo: {
     logObject?: any,
     logStack: any,
@@ -50,14 +50,14 @@ export type RecordSetProps = {
   getDisabledTuples?: Function,
 };
 
-const RecordSet = ({
+const Recordset = ({
   initialReference,
   config,
   logInfo,
   initialPageLimit,
   getFavorites,
   getDisabledTuples,
-}: RecordSetProps): JSX.Element => {
+}: RecordsetProps): JSX.Element => {
 
   const { dispatchError } = useError();
 
@@ -85,7 +85,7 @@ const RecordSet = ({
 
     let res = initialReference.display.facetPanelOpen;
     if (typeof res !== 'boolean') {
-      res = config.displayMode === RecordSetDisplayMode.FULLSCREEN;
+      res = config.displayMode === RecordsetDisplayMode.FULLSCREEN;
     }
     return res;
   });
@@ -175,12 +175,12 @@ const RecordSet = ({
     if (isLoading) return;
 
     // scroll to top after load
-    if (config.displayMode.indexOf(RecordSetDisplayMode.RELATED) !== 0) {
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
       scrollMainContainerToTop();
     }
 
     // change the url location in fullscreen mode
-    if (config.displayMode.indexOf(RecordSetDisplayMode.FULLSCREEN) === 0) {
+    if (config.displayMode.indexOf(RecordsetDisplayMode.FULLSCREEN) === 0) {
       windowRef.history.replaceState({}, '', getRecordsetLink(reference));
     }
 
@@ -355,7 +355,7 @@ const RecordSet = ({
           </div>
 
           <div className='top-right-panel'>
-            {config.displayMode === RecordSetDisplayMode.FULLSCREEN &&
+            {config.displayMode === RecordsetDisplayMode.FULLSCREEN &&
               <div className='recordset-title-container title-container'>
                 <div className='recordset-title-buttons title-buttons'>
                   <Export
@@ -449,7 +449,7 @@ const RecordSet = ({
         }
         <div className='main-container dynamic-padding' ref={mainContainer}>
           <div className='main-body'>
-            <RecordSetTable
+            <RecordsetTable
               page={page}
               colValues={colValues}
               columnModels={columnModels}
@@ -459,12 +459,12 @@ const RecordSet = ({
               nextPreviousCallback={nextPreviousCallback}
             />
           </div>
-          {config.displayMode === RecordSetDisplayMode.FULLSCREEN && <Footer />}
+          {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
         </div>
       </div>
     </div>
   )
 };
 
-export default RecordSet;
+export default Recordset;
 

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Modal } from 'react-bootstrap';
-import RecordSet, { RecordSetProps } from '@chaise/components/recordset';
+import Recordset, { RecordsetProps } from '@chaise/components/recordset';
 import RecordsetProvider from '@chaise/providers/recordset';
 
 type RecordestModalProps = {
-  recordsetProps: RecordSetProps,
+  recordsetProps: RecordsetProps,
   contentClassName?: string,
   onHide?: () => void,
 }
@@ -33,7 +33,7 @@ const RecordsetModal = ({
           logInfo={recordsetProps.logInfo}
           initialPageLimit={recordsetProps.initialPageLimit}
         >
-        <RecordSet
+        <Recordset
           initialReference={recordsetProps.initialReference}
           config={recordsetProps.config}
           logInfo={recordsetProps.logInfo}

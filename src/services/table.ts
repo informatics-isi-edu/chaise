@@ -5,7 +5,7 @@ import { LogService } from '@chaise/services/log';
 import MathUtils from '@chaise/utils/math-utils';
 import TypeUtils from '@chaise/utils/type-utils';
 import Q from 'q';
-import { RecordSetDisplayMode } from '@chaise/models/recordset';
+import { RecordsetDisplayMode } from '@chaise/models/recordset';
 import { createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
 import { ConfigService } from '@chaise/services/config';
 import $log from '@chaise/services/logger';
