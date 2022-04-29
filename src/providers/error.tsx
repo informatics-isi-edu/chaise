@@ -68,7 +68,7 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
    * has callbacks in it which will change.
    * This will ensure to update the object only when the "error" object has changed.
    */
-  const contextValue = useMemo(() => {
+  const providerValue = useMemo(() => {
     return {
       error,
       dispatchError,
@@ -77,7 +77,7 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
   }, [error])
 
   return (
-    <ErrorContext.Provider value={contextValue} >
+    <ErrorContext.Provider value={providerValue} >
       {children}
     </ErrorContext.Provider>
   );

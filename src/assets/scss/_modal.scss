@@ -121,6 +121,7 @@ body.error-open loading-spinner {
 }
 /*Sets the maximum height of the entire modal to 95% of the screen height*/
 .modal-content {
+    margin: auto;
     max-height: 95vh;
     overflow: hidden;
     max-width: 95vw;
@@ -155,7 +156,7 @@ body.error-open loading-spinner {
     }
     ul li {
         list-style-type: disc;
-        
+
         a {
             text-decoration: none;
         }

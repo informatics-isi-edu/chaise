@@ -2,8 +2,8 @@ import '@chaise/assets/scss/_faceting.scss';
 
 import Accordion from 'react-bootstrap/Accordion';
 import DisplayValue from '@chaise/components/display-value';
-import { useEffect } from 'react';
-import $log from '@chaise/services/logger';
+import { useEffect, useState } from 'react';
+import FacetChoicePicker from '@chaise/components/facet-choice-picker';
 
 // TODO subject to change
 type FacetingProps = {
@@ -16,10 +16,27 @@ const Faceting = ({
   // refresh,
 }: FacetingProps) => {
 
+  const [showFacetModal, setShowFacetModal] = useState(false);
+
   // useEffect(()=> {
   //   $log.log('refreshing the faceting!');
   //   // $log.log(test.current);
   // }, [refresh]);
+
+  const openRecordsetPopup = () => {
+    setShowFacetModal(true);
+  }
+
+  const renderFacet = (fc: any, index: number) => {
+    switch (fc.preferredMode) {
+      case 'ranges':
+        return <>Range picker!</>;
+      case 'check_presence':
+        return <>Check presence!</>;
+      default:
+        return <FacetChoicePicker facetColumn={fc} index={index}></FacetChoicePicker>
+    }
+  };
 
   const renderFacets = () => {
     return reference.facetColumns.map((fc: any, index: number) => {
@@ -32,7 +49,7 @@ const Faceting = ({
             </div>
           </Accordion.Header>
           <Accordion.Body>
-            Facet choices
+            {renderFacet(fc, index)}
           </Accordion.Body>
         </Accordion.Item>
       )

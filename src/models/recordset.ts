@@ -10,11 +10,12 @@ export enum RecordSetDisplayMode {
   RELATED = 'related',
   INLINE = 'related/inline',
   POPUP = 'popup',
+  FACET_POPUP = 'popup/facet',
   FK_POPUP = 'popup/foreignkey',
   FK_POPUP_CREATE = 'popup/foreignkey/create',
   FK_POPUP_EDIT = 'popup/foreignkey/edit',
   PURE_BINARY_POPUP_ADD = 'popup/purebinary/add',
-  PURE_BINARY_POPUP_UNLINK = 'popup/facet',
+  PURE_BINARY_POPUP_UNLINK = 'popup/purebinary/unlink',
   SAVED_QUERY_POPUP = 'popup/savedquery'
 }
 

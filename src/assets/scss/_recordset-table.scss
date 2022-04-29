@@ -1,6 +1,10 @@
 @import "helpers";
 @import "variables";
 
+.recordset-table {
+  overflow-y: hidden;
+}
+
 .chaise-table.table {
   border-top: 1px solid $table-border-color;
   border-bottom: 1px solid $table-border-color;

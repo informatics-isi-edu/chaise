@@ -135,13 +135,18 @@ const RecordSetTable = ({
         <tr key={tuple.uniqueId} className='chaise-table-row' style={{ 'position': 'relative' }}>
           <td className='block action-btns'>
             <div className='chaise-btn-group'>
-              <a
-                type='button'
-                className='view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                href={tuple.reference.contextualize.detailed.appLink}
-              >
-                <span className='chaise-btn-icon chaise-icon chaise-view-details'></span>
-              </a>
+              {config.viewable &&
+                <a
+                  type='button'
+                  className='view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
+                  href={tuple.reference.contextualize.detailed.appLink}
+                >
+                  <span className='chaise-btn-icon chaise-icon chaise-view-details'></span>
+                </a>
+              }
+              {/* TODO edit */}
+              {/* TODO delete */}
+              {/* TODO select */}
             </div>
           </td>
           {renderCells(index)}

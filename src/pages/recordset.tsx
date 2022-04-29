@@ -24,6 +24,7 @@ import { LogStackTypes } from '@chaise/models/log';
 import { RecordSetConfig, RecordSetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
 import ErrorPorvider from '@chaise/providers/error';
 import useError from '@chaise/hooks/error';
+import RecordsetProvider from '@chaise/providers/recordset';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -170,12 +171,19 @@ const RecordSetApp = (): JSX.Element => {
     return (
       <div className='app-container'>
         <ChaiseNavbar />
+        <RecordsetProvider
+          initialReference={recordSetProps.initialReference}
+          config={recordSetProps.config}
+          logInfo={recordSetProps.logInfo}
+          initialPageLimit={recordSetProps.initialPageLimit}
+        >
         <RecordSet
           initialReference={recordSetProps.initialReference}
           config={recordSetProps.config}
           logInfo={recordSetProps.logInfo}
           initialPageLimit={recordSetProps.initialPageLimit}
         />
+        </RecordsetProvider>
       </div>
     );
   };
