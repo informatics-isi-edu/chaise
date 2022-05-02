@@ -1,1 +1,1 @@
-// Login app
+// Login lib

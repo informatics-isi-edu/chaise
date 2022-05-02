@@ -19,7 +19,7 @@ import AppWrapper from '@chaise/components/app-wrapper';
 
 const recordsetSettings = {
   appName: 'recordset',
-  appTitle: 'Record Set',
+  appTitle: 'Recordset',
   overrideHeadTitle: true,
   overrideDownloadClickBehavior: true,
   overrideExternalLinkBehavior: true
@@ -135,7 +135,12 @@ const RecordsetApp = (): JSX.Element => {
 };
 
 ReactDOM.render(
-  <AppWrapper appSettings={recordsetSettings}>
+  <AppWrapper
+    appSettings={recordsetSettings}
+    includeAlerts={true}
+    includeNavbar={true}
+    displaySpinner={true}
+  >
     <RecordsetApp />
   </AppWrapper>,
   document.getElementById('chaise-app-root'),

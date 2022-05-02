@@ -9,7 +9,7 @@ import ChaiseNavbar from '@chaise/components/navbar';
 
 // TODO should use the appwrapper
 
-const NavbarApp = (): JSX.Element => {
+const NavbarLib = (): JSX.Element => {
 
   return (
     <div>
@@ -20,7 +20,7 @@ const NavbarApp = (): JSX.Element => {
 
 ReactDOM.render(
   <React.StrictMode>
-    <NavbarApp />
+    <NavbarLib />
   </React.StrictMode>,
   document.getElementById('chaise-navbar-app-root'),
 );

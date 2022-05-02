@@ -14,22 +14,24 @@ import AuthnService from '@chaise/services/authn';
 import Alerts from '@chaise/components/alerts';
 import ChaiseNavbar from '@chaise/components/navbar';
 import useError from '@chaise/hooks/error';
-import { ConditionalWrapper } from './cond-wrapper';
+import { ConditionalWrapper } from '@chaise/components/cond-wrapper';
 
 
 type AppWrapperProps = {
   children: React.ReactNode,
   appSettings: ConfigServiceSettings,
-  /**
-   * whether this is a library or not. if library,
-   *   - alerts provider and comp will not be added
-   *   - navbar will not be added
-   *   - spinner will not be displayed while loading
-   */
-  isLibrary?: boolean
+  includeAlerts?: boolean,
+  includeNavbar?: boolean,
+  displaySpinner?: boolean
 }
 
-const AppWrapperInner = ({ children, appSettings, isLibrary }: AppWrapperProps): JSX.Element => {
+const AppWrapperInner = ({
+  children,
+  appSettings,
+  includeAlerts,
+  includeNavbar,
+  displaySpinner
+}: AppWrapperProps): JSX.Element => {
   const { dispatchError, error } = useError();
   const [configDone, setConfigDone] = useState(false);
 
@@ -69,7 +71,7 @@ const AppWrapperInner = ({ children, appSettings, isLibrary }: AppWrapperProps):
 
   // if there was an error during configuration, hide the spinner
   // if it's a library, we don't want any spinners
-  if (!configDone && (error || isLibrary)) {
+  if (!configDone && (error || !displaySpinner)) {
     return <></>
   }
 
@@ -83,12 +85,8 @@ const AppWrapperInner = ({ children, appSettings, isLibrary }: AppWrapperProps):
         FallbackComponent={errorFallback}
       >
         <div className='app-container'>
-          {!isLibrary &&
-            <>
-              <ChaiseNavbar />
-              <Alerts />
-            </>
-          }
+          {includeNavbar && <ChaiseNavbar />}
+          {includeAlerts && <Alerts />}
           {children}
         </div>
       </ErrorBoundary>
@@ -106,18 +104,29 @@ const AppWrapperInner = ({ children, appSettings, isLibrary }: AppWrapperProps):
  * @param appSettings
  * @returns
  */
-const AppWrapper = ({ children, appSettings, isLibrary }: AppWrapperProps): JSX.Element => {
+const AppWrapper = ({
+  children,
+  appSettings,
+  includeNavbar,
+  includeAlerts,
+  displaySpinner
+}: AppWrapperProps): JSX.Element => {
   return (
     <ErrorPorvider>
       <ConditionalWrapper
-        condition={!isLibrary}
+        condition={includeAlerts === true}
         wrapper={children => (
           <AlertsProvider>
             {children}
           </AlertsProvider>
         )}
       >
-        <AppWrapperInner appSettings={appSettings}>
+        <AppWrapperInner
+          appSettings={appSettings}
+          includeAlerts={includeAlerts}
+          includeNavbar={includeNavbar}
+          displaySpinner={displaySpinner}
+        >
           {children}
         </AppWrapperInner>
       </ConditionalWrapper>
