@@ -14,6 +14,7 @@ import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 // TODO more comments and proper types
 
 export const RecordsetContext = createContext<{
+  logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any) => void,
   reference: any,
   isLoading: boolean,
   isInitialized: boolean,
@@ -96,7 +97,12 @@ export default function RecordsetProvider({
     }
   }, [isLoading, page]);
 
-
+  const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any) => {
+    LogService.logClientAction({
+      action: flowControl.current.getTableLogAction(action),
+      stack: flowControl.current.getTableLogStack(childStackElement, extraInfo)
+    }, reference.defaultLogInfo)
+  }
 
   const printDebugMessage = (message: string, counter?: number) => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
@@ -610,6 +616,7 @@ export default function RecordsetProvider({
 
   const providerValue = useMemo(() => {
     return {
+      logRecordsetClientAction,
       reference,
       isLoading,
       isInitialized,

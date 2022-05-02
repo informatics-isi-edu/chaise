@@ -1,19 +1,11 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
-import '@chaise/assets/scss/app.scss';
-
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 
 import { ConfigService } from '@chaise/services/config';
 
-import ChaiseNavbar from '@chaise/components/navbar';
-import ErrorModal from '@chaise/components/error-modal';
 import ChaiseSpinner from '@chaise/components/spinner';
 import Recordset, { RecordsetProps } from '@chaise/components/recordset';
 import $log from '@chaise/services/logger';
-import AuthnService from '@chaise/services/authn';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 import TypeUtils from '@chaise/utils/type-utils';
@@ -22,60 +14,32 @@ import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
 import { LogService } from '@chaise/services/log';
 import { LogStackTypes } from '@chaise/models/log';
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
-import ErrorPorvider from '@chaise/providers/error';
 import useError from '@chaise/hooks/error';
-import RecordsetProvider from '@chaise/providers/recordset';
-import AlertsProvider from '@chaise/providers/alerts';
-import Alerts from '@chaise/components/alerts';
+import AppWrapper from '@chaise/components/app-wrapper';
 
 const recordsetSettings = {
   appName: 'recordset',
-  appTitle: 'Record Set',
+  appTitle: 'Recordset',
   overrideHeadTitle: true,
   overrideDownloadClickBehavior: true,
-  overrideExternalLinkBehavior: true,
+  overrideExternalLinkBehavior: true
 };
 
 const RecordsetApp = (): JSX.Element => {
-  const { dispatchError } = useError();
-  const [configDone, setConfigDone] = useState(false);
+  const { dispatchError, error } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
   useEffect(() => {
     $log.debug('recordset page: useEffect');
-    if (configDone) return;
-
-    /**
-     * global error handler for uncaught errors
-     */
-    window.addEventListener('error', (event) => {
-      $log.log('got the error in catch-all');
-      dispatchError({ error: event.error, isGlobal: true });
-    });
-    window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-      $log.log('got the error in catch-all (unhandled rejection)');
-      dispatchError({ error: event.reason, isGlobal: true });
-    });
-
-    /**
-     * - get session
-     * - Setup the app (chaise-config, etc)
-     * - setup ermrestjs
-     */
     let logObject: any = {};
-    AuthnService.getSession('').then(() => {
-      return ConfigService.configure(recordsetSettings);
-    }).then(() => {
+    const res = chaiseURItoErmrestURI(windowRef.location);
+    if (res.pcid) logObject.pcid = res.pcid;
+    if (res.ppid) logObject.ppid = res.ppid;
+    if (res.paction) logObject.paction = res.paction; // currently only captures the "applyQuery" action from the show saved query popup
+    if (res.queryParams && 'savedQueryRid' in res.queryParams) logObject.sq_rid = res.queryParams.savedQueryRid;
+    if (res.isQueryParameter) logObject.cqp = 1;
 
-      const res = chaiseURItoErmrestURI(windowRef.location);
-      if (res.pcid) logObject.pcid = res.pcid;
-      if (res.ppid) logObject.ppid = res.ppid;
-      if (res.paction) logObject.paction = res.paction; // currently only captures the "applyQuery" action from the show saved query popup
-      if (res.queryParams && 'savedQueryRid' in res.queryParams) logObject.sq_rid = res.queryParams.savedQueryRid;
-      if (res.isQueryParameter) logObject.cqp = 1;
-
-      return ConfigService.ERMrest.resolve(res.ermrestUri);
-    }).then((response: any) => {
+    ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
       const reference = response.contextualize.compact;
 
       updateHeadTitle(getDisplaynameInnerText(reference.displayname));
@@ -136,85 +100,48 @@ const RecordsetApp = (): JSX.Element => {
         logStackPath,
       };
 
-
       setRecordsetProps({
         initialReference: reference,
         initialPageLimit,
         config: recordsetConfig,
         logInfo,
       });
-      setConfigDone(true);
     }).catch((err: any) => {
       if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
       dispatchError({ error: err, isGlobal: true });
     });
-  }, [configDone]);
+  }, []);
 
-  const errorFallback = ({ error }: FallbackProps) => {
-    $log.log('error fallback of the main error boundary');
+  // if there was an error during setup, hide the spinner
+  if (!recordsetProps && error) {
+    return <></>;
+  }
 
-    // TODO uncomment
-    // ErrorService.logTerminalError(error);
-    dispatchError({ error: error, isGlobal: true });
-
-    // the error modal will be displayed so there's no need for the fallback
-    return null;
-  };
-
-  $log.debug('recordset page: render');
-
-  const recordsetContent = () => {
-    if (!configDone || !recordsetProps) {
-      return <ChaiseSpinner />;
-    }
-
-    return (
-      <div className='app-container'>
-        <ChaiseNavbar />
-        {/* app level alerts */}
-        <Alerts />
-        {/* for recordset level alerts */}
-        <AlertsProvider>
-          <RecordsetProvider
-            initialReference={recordsetProps.initialReference}
-            config={recordsetProps.config}
-            logInfo={recordsetProps.logInfo}
-            initialPageLimit={recordsetProps.initialPageLimit}
-          >
-            <Recordset
-              initialReference={recordsetProps.initialReference}
-              config={recordsetProps.config}
-              logInfo={recordsetProps.logInfo}
-              initialPageLimit={recordsetProps.initialPageLimit}
-            />
-          </RecordsetProvider>
-        </AlertsProvider>
-      </div>
-    );
-  };
+  // const recordsetContent = () => {
+  if (!recordsetProps) {
+    return <ChaiseSpinner />;
+  }
 
   return (
-    <>
-      <ErrorBoundary
-        FallbackComponent={errorFallback}
-      >
-        {/* app level alerts */}
-        <AlertsProvider>
-          {recordsetContent()}
-        </AlertsProvider>
-      </ErrorBoundary>
-      <ErrorModal />
-    </>
+    <Recordset
+      initialReference={recordsetProps.initialReference}
+      config={recordsetProps.config}
+      logInfo={recordsetProps.logInfo}
+      initialPageLimit={recordsetProps.initialPageLimit}
+    />
   );
 };
 
 ReactDOM.render(
-  <ErrorPorvider>
-    <React.StrictMode>
-      <RecordsetApp />
-    </React.StrictMode>
-  </ErrorPorvider>,
+  <AppWrapper
+    appSettings={recordsetSettings}
+    includeAlerts={true}
+    includeNavbar={true}
+    displaySpinner={true}
+  >
+    <RecordsetApp />
+  </AppWrapper>,
   document.getElementById('chaise-app-root'),
 );

@@ -28,22 +28,12 @@ const RecordsetModal = ({
         <Modal.Title>Recordet modal test</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {/* for popup level alerts */}
-        <AlertsProvider>
-          <RecordsetProvider
-            initialReference={recordsetProps.initialReference}
-            config={recordsetProps.config}
-            logInfo={recordsetProps.logInfo}
-            initialPageLimit={recordsetProps.initialPageLimit}
-          >
-            <Recordset
-              initialReference={recordsetProps.initialReference}
-              config={recordsetProps.config}
-              logInfo={recordsetProps.logInfo}
-              initialPageLimit={recordsetProps.initialPageLimit}
-            />
-          </RecordsetProvider>
-        </AlertsProvider>
+        <Recordset
+          initialReference={recordsetProps.initialReference}
+          config={recordsetProps.config}
+          logInfo={recordsetProps.logInfo}
+          initialPageLimit={recordsetProps.initialPageLimit}
+        />
       </Modal.Body>
     </Modal>
   )

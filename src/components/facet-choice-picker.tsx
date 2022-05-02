@@ -96,7 +96,7 @@ const FacetChoicePicker = ({
             contentClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
             recordsetProps={recordsetModalProps}
             onHide={hideRecordsetModal}
-          ></RecordsetModal>
+          />
         }
       </div>
       {/* <div ng-show='facetModel.facetError'>

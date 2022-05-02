@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ChaiseSpinner from '@chaise/components/spinner';
-import ErrorPorvider from '@chaise/providers/error';
+import AppWrapper from '@chaise/components/app-wrapper';
 
 // services
 import AuthnService from '@chaise/services/authn';
@@ -16,23 +16,28 @@ import { ConfigService } from '@chaise/services/config';
 import $log from '@chaise/services/logger';
 import { LogActions } from '@chaise/models/log';
 
+// utilities
 import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
 import { queryStringToJSON } from '@chaise/utils/uri-utils';
 
 import useError from '@chaise/hooks/error';
 
+const loginSettings = {
+  appName: 'login2',
+  appTitle: 'Login',
+  overrideHeadTitle: false,
+  overrideDownloadClickBehavior: false,
+  overrideExternalLinkBehavior: false
+};
+
 const LoginPopupApp = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
 
   const { dispatchError } = useError();
-  const [configDone, setConfigDone] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
-    // $log.debug('recordset page: useEffect');
-    if (configDone) return;
-
     // /**
     //  * global error handler for uncaught errors
     //  */
@@ -119,11 +124,10 @@ const LoginPopupApp = (): JSX.Element => {
         // log the user out if they don't have the group
         AuthnService.logoutWithoutRedirect(LogActions.VERIFY_GLOBUS_GROUP_LOGOUT);
       }
-      setConfigDone(true);
     }).catch((err: any) => {
       dispatchError({ error: err, isGlobal: true });
     });
-  }, [configDone]);
+  }, []);
 
   const reLogin = () => {
     setShowSpinner(true);
@@ -141,7 +145,6 @@ const LoginPopupApp = (): JSX.Element => {
   }
 
   const renderConfig = () => {
-    if (!configDone) return (<span>Config not done</span>)
     if (!cc.termsAndConditionsConfig) return (<span>Not set</span>)
     return (<span>{cc.termsAndConditionsConfig}</span>)
   }
@@ -192,10 +195,13 @@ const LoginPopupApp = (): JSX.Element => {
 };
 
 ReactDOM.render(
-  <ErrorPorvider>
-    <React.StrictMode>
-      <LoginPopupApp />
-    </React.StrictMode>
-  </ErrorPorvider>,
+  <AppWrapper
+    appSettings={loginSettings}
+    includeAlerts={false}
+    includeNavbar={false}
+    displaySpinner={true}
+  >
+    <LoginPopupApp />
+  </AppWrapper>,
   document.getElementById('chaise-app-root'),
 );
