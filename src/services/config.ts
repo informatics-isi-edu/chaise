@@ -22,6 +22,19 @@ export interface AppSettings {
   overrideHeadTitle?: boolean
 }
 
+/**
+ * input to the ConfigService.configure
+ */
+export interface ConfigServiceSettings {
+  appName: string,
+  appTitle: string,
+  hideNavbar?: boolean,
+  overrideHeadTitle?: boolean,
+  overrideDownloadClickBehavior?: boolean,
+  overrideExternalLinkBehavior?: boolean,
+  openIframeLinksInTab?: boolean
+}
+
 export interface ContextHeaderParams {
   cid: string,
   pid: string,
@@ -48,15 +61,7 @@ export class ConfigService {
    * configurations are done before any other components are running.
    * @param settings
    */
-  static async configure(settings: {
-    appName: string,
-    appTitle: string,
-    hideNavbar?: boolean,
-    overrideHeadTitle?: boolean,
-    overrideDownloadClickBehavior?: boolean,
-    overrideExternalLinkBehavior?: boolean,
-    openIframeLinksInTab?: boolean
-  }) {
+  static async configure(settings: ConfigServiceSettings) {
     setWindowName();
 
     // trick to verify if this config app is running inside of an iframe as part of another app

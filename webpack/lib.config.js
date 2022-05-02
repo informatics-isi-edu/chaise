@@ -13,7 +13,7 @@ module.exports = function (libName, mode) {
     name: libName,
     devtool: (mode === 'development') ? 'inline-source-map' : false,
     mode,
-    entry: path.join(__dirname, '..', 'src', 'pages', `${libName}.tsx`),
+    entry: path.join(__dirname, '..', 'src', 'libs', `${libName}.tsx`),
     output: {
       path: path.resolve(__dirname, '..', 'dist', 'react', libName),
       filename: 'navbar.bundle.js',

@@ -172,7 +172,7 @@ html {
     }
 
     // spinner
-    #spinner {
+    .spinner-container {
         background: $white-color;
         width: 130px;
         margin: 0 auto;
@@ -187,38 +187,6 @@ html {
         margin-top: -75px;
         margin-left: -75px;
         z-index: 10;
-    }
-
-    .spinner-container-sm {
-        position: relative;
-    }
-
-    #spinner-sm {
-        background: $white-color;
-        border: 1px solid $border-color;
-        border-radius: 7px;
-        color: #828282;
-        left: 40%;
-        padding: 5px;
-        position: absolute;
-        text-align: center;
-        z-index: 10;
-    }
-
-    img.spinner {
-        display: block;
-        margin: 0 auto;
-        width: 32px;
-        height: 32px;
-        opacity: 0.8;
-    }
-
-    img.spinner-sm {
-        display: inline-block;
-        margin: 0 auto;
-        width: 17px;
-        height: 17px;
-        opacity: 0.8;
     }
 
     /****************** HEADER ******************/

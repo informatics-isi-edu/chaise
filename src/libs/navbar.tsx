@@ -7,6 +7,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ChaiseNavbar from '@chaise/components/navbar';
 
+// TODO should use the appwrapper
+
 const NavbarApp = (): JSX.Element => {
 
   return (
