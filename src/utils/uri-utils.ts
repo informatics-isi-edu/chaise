@@ -260,7 +260,7 @@ export function createRedirectLinkFromPath(path: string): string {
 * TODO we might want to find a better way instead of this.
 * @return {String}
 */
-export function chaiseBaseURL() : string {
+export function chaiseBaseURL(): string {
   const res = windowRef.location.origin + BUILD_VARIABLES.CHAISE_BASE_PATH;
   if (res.endsWith('/')) {
     return res.slice(0, -1);
@@ -425,6 +425,23 @@ export function queryParamsToString(queryParams: any, dontEncodeQueryParams?: bo
     }
   }
   return res.join('&');
+}
+
+/**
+ * Gives the path of the chaise deployment directory.
+ *   - It returns the chaise path mentioned in the context (based on chaiseBasePath meta tag)
+ *   - otherwise, returns the default value '/chaise/'
+ * Assume this function will return a value with a leading and trailing `/`
+ */
+export function chaiseDeploymentPath(): string {
+  if (typeof BUILD_VARIABLES === 'object' && typeof BUILD_VARIABLES.CHAISE_BASE_PATH === 'string') {
+    let path = BUILD_VARIABLES.CHAISE_BASE_PATH;
+    if (path[path.length - 1] !== '/')
+      path = path + '/';
+    return path;
+  } else {
+    return '/chaise/';
+  }
 }
 
 /**

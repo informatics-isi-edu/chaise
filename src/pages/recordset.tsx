@@ -144,7 +144,7 @@ const RecordsetApp = (): JSX.Element => {
         logInfo,
       });
       setConfigDone(true);
-    }).catch((err) => {
+    }).catch((err: any) => {
       if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }

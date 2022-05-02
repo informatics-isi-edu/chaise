@@ -7,7 +7,7 @@ import { LogService } from '@chaise/services/log';
 
 import { MESSAGE_MAP } from '@chaise/utils/message-map';
 import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
-import { fixedEncodeURIComponent, queryStringToJSON } from '@chaise/utils/uri-utils';
+import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from '@chaise/utils/uri-utils';
 import { windowRef } from '@chaise/utils/window-ref';
 import { BUILD_VARIABLES } from '@chaise/utils/constants';
 import { Session } from '@chaise/models/user';
@@ -16,22 +16,22 @@ export default class AuthnService {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location
   static serviceURL: string = windowRef.location.origin;
 
-  static LOCAL_STORAGE_KEY: string = 'session'; // name of object session information is stored under
+  static LOCAL_STORAGE_KEY = 'session'; // name of object session information is stored under
 
-  static PROMPT_EXPIRATION_KEY: string = 'promptExpiration'; // name of key for prompt expiration value
+  static PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
 
-  static PREVIOUS_SESSION_KEY: string = 'previousSession'; // name of key for previous session boolean
+  static PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
   // TODO: how to make these as private variables and private functions
   private static _session: Session | null = null; // current session object
 
   private static _prevSession: any | null = null; // previous session object
 
-  private static _sameSessionAsPrevious: boolean = false;
+  private static _sameSessionAsPrevious = false;
 
   private static _changeCbs: any = {};
 
-  private static _counter: number = 0;
+  private static _counter = 0;
 
   private static _executeListeners = function () {
     for (const k in AuthnService._changeCbs) {
@@ -105,7 +105,7 @@ export default class AuthnService {
   // the page will reload after login when the page started with no user
   // _session can become null if getSession is called and the session has timed out or the user logged out
   static shouldReloadPageAfterLogin = function () {
-    if (AuthnService._session === null && AuthnService._prevSession == null) return true;
+    if (AuthnService._session === null && AuthnService._prevSession === null) return true;
     return false;
   };
 
@@ -117,7 +117,7 @@ export default class AuthnService {
       postLoginCB = function () {
         if (!AuthnService.shouldReloadPageAfterLogin()) {
           // fetches the session of the user that just logged in
-          AuthnService.getSession('').then((response) => {
+          AuthnService.getSession('').then((response: any) => {
             // if (modalInstance) modalInstance.close();
             alert(`${response.client.full_name} logged in`);
           });
@@ -331,7 +331,7 @@ export default class AuthnService {
      *  - if expired
      * */
 
-    return axios.get(`${AuthnService.serviceURL}/authn/session`, config).then((response) => {
+    return ConfigService.http.get(`${AuthnService.serviceURL}/authn/session`, config).then((response: any) => {
       if (context === '401' && AuthnService.shouldReloadPageAfterLogin()) {
         // window.location.reload();
         return response.data;
@@ -352,7 +352,7 @@ export default class AuthnService {
 
       AuthnService._executeListeners();
       return AuthnService._session;
-    }).catch((err) => {
+    }).catch((err: any) => {
       // $log.warn(ERMrest.responseToError(err));
 
       AuthnService._setSession(null);
@@ -386,6 +386,27 @@ export default class AuthnService {
     });
   }
 
+  static logoutWithoutRedirect = (action: string) => {
+    const logoutConfig: any = {
+      skipHTTP401Handling: true,
+      headers: {}
+    };
+
+    logoutConfig.headers[windowRef.ERMrest.contextHeaderName] = {
+      action: LogService.getActionString(action, '', '')
+    };
+
+    // logout without redirecting the user
+    ConfigService.http.delete(AuthnService.serviceURL + '/authn/session/', logoutConfig).then((response: any) => {
+      StorageService.deleteStorageNamespace(AuthnService.LOCAL_STORAGE_KEY);
+
+    }).catch((error: any) => {
+      // this is a 404 error when session doesn't exist and the user tries to logout
+      // don't throw the error since this means the user is already logged out
+      console.log(error);
+    });
+  }
+
   //   // groupArray should be the array of globus group
   static isGroupIncluded = (groupArray: string[]) => {
     // if no array, assume it wasn't defined and default hasn't been set yet
@@ -402,6 +423,44 @@ export default class AuthnService {
 
     return false;
   };
+
+  static refreshLogin = (action: string) => {
+    // TODO: show spinner here
+    // NOTE: maybe show spinner in previous function and return to that function after reference is resolved
+    // $rootScope.showSpinner = true;
+
+    // get referrerid from browser url
+    const referrerId = queryStringToJSON(window.location.search).referrerid,
+      preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login2/?referrerid=' + referrerId,
+      redirectUrl = AuthnService.serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
+
+    const loginConfig: any = {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'Accept': 'application/json'
+      },
+      skipHTTP401Handling: true
+    };
+
+    loginConfig.headers[windowRef.ERMrest.contextHeaderName] = {
+      action: LogService.getActionString(action, '', '')
+    }
+
+    return ConfigService.http.get(redirectUrl, loginConfig).then((response: any) => {
+      const data = response.data;
+
+      // redirect_url is supposed to be the same as preauthReferrer
+      if (data.redirect_url === undefined) {
+        data.redirect_url = preauthReferrer;
+      }
+
+      return data.redirect_url;
+    }).catch((error: any) => {
+
+      return error;
+    });
+
+  }
 
   private static _setSession(inp: any) {
     if (!inp) {
@@ -603,63 +662,6 @@ export default class AuthnService {
 //   loginInAModal: function (notifyErmrestCB, notifyErmrestRejectCB, logAction) {
 //     logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
 //   },
-
-//   logoutWithoutRedirect: function (action) {
-//     var logoutConfig = {
-//       skipHTTP401Handling: true,
-//       headers: {}
-//     };
-
-//     logoutConfig.headers[ERMrest.contextHeaderName] = {
-//       action: logService.getActionString(action, "", "")
-//     };
-
-//     // logout without redirecting the user
-//     ConfigUtils.getHTTPService().delete(serviceURL + "/authn/session/", logoutConfig).then(function (response) {
-//       StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
-
-//     }).catch(function (error) {
-//       // this is a 404 error when session doesn't exist and the user tries to logout
-//       // don't throw the error since this means the user is lready logged out
-//       console.log(error);
-//     });
-//   },
-
-//   refreshLogin: function (action) {
-//     $rootScope.showSpinner = true;
-
-//     // get referrerid from browser url
-//     var referrerId = UriUtils.queryStringToJSON($window.location.search).referrerid,
-//       preauthReferrer = $window.location.origin + UriUtils.chaiseDeploymentPath() + "login2/?referrerid=" + referrerId,
-//       redirectUrl = serviceURL + '/authn/preauth/?referrer=' + UriUtils.fixedEncodeURIComponent(preauthReferrer);
-
-//     var loginConfig = {
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-//         'Accept': 'application/json'
-//       },
-//       skipHTTP401Handling: true
-//     };
-
-//     loginConfig.headers[ERMrest.contextHeaderName] = {
-//       action: logService.getActionString(action, "", "")
-//     }
-
-//     ConfigUtils.getHTTPService().get(redirectUrl, loginConfig).then(function (response) {
-//       var data = response.data;
-
-//       // redirect_url is supposed to be the same as preauthReferrer
-//       if (data.redirect_url === undefined) {
-//         data.redirect_url = preauthReferrer;
-//       }
-
-//       $rootScope.showSpinner = false;
-//       $window.location = data.redirect_url;
-//     }).catch(function (error) {
-//       $rootScope.showSpinner = false;
-//     });
-
-//   }
 // }
 //     }])
 
