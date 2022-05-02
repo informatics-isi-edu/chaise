@@ -175,22 +175,12 @@ const RecordsetApp = (): JSX.Element => {
         <ChaiseNavbar />
         {/* app level alerts */}
         <Alerts />
-        {/* for recordset level alerts */}
-        <AlertsProvider>
-          <RecordsetProvider
-            initialReference={recordsetProps.initialReference}
-            config={recordsetProps.config}
-            logInfo={recordsetProps.logInfo}
-            initialPageLimit={recordsetProps.initialPageLimit}
-          >
-            <Recordset
-              initialReference={recordsetProps.initialReference}
-              config={recordsetProps.config}
-              logInfo={recordsetProps.logInfo}
-              initialPageLimit={recordsetProps.initialPageLimit}
-            />
-          </RecordsetProvider>
-        </AlertsProvider>
+        <Recordset
+          initialReference={recordsetProps.initialReference}
+          config={recordsetProps.config}
+          logInfo={recordsetProps.logInfo}
+          initialPageLimit={recordsetProps.initialPageLimit}
+        />
       </div>
     );
   };

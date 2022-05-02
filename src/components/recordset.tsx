@@ -27,15 +27,14 @@ import TableHeader from '@chaise/components/table-header';
 import useError from '@chaise/hooks/error';
 import useRecordset from '@chaise/hooks/recordset';
 import useAlert from '@chaise/hooks/alerts';
-import { ChaiseAlertType } from '@chaise/providers/alerts';
+import AlertsProvider, { ChaiseAlertType } from '@chaise/providers/alerts';
 import Alerts from '@chaise/components/alerts';
+import RecordsetProvider from '@chaise/providers/recordset';
 
 /**
  * TODO
  * how should I do the client log stuff now?
  * can the provider be inside the comp?
- * what's the point of setting all the variables both in the provider and recordset
- * now that there's a context, there's no need to pass reference and other stuff around
  */
 
 
@@ -61,10 +60,39 @@ const Recordset = ({
   getFavorites,
   getDisabledTuples,
 }: RecordsetProps): JSX.Element => {
+  return (
+    <AlertsProvider>
+      <RecordsetProvider
+        initialReference={initialReference}
+        config={config}
+        logInfo={logInfo}
+        initialPageLimit={initialPageLimit}
+        getDisabledTuples={getDisabledTuples}
+        getFavorites={getFavorites}
+      >
+        <RecordsetInner
+          initialReference={initialReference}
+          config={config}
+        />
+      </RecordsetProvider>
+    </AlertsProvider>
+  );
+};
+
+/**
+ * based on my understanding provider and the usage of context cannot be on the
+ * same level, that's why the Recordset comp is just a wrapper that has all the
+ * providers that we need.
+ */
+const RecordsetInner = ({
+  initialReference,
+  config
+}: any): JSX.Element => {
 
   const { dispatchError } = useError();
 
   const {
+    logRecordsetClientAction,
     reference,
     isLoading,
     page,
@@ -117,15 +145,12 @@ const Recordset = ({
 
     // capture and log the right click event on the permalink button
     // TODO
-    // const permalink = document.getElementById('permalink');
-    // if (permalink) {
-    //   permalink.addEventListener('contextmenu', () => {
-    //     LogService.logClientAction({
-    //       action: flowControl.current.getTableLogAction(LogActions.PERMALINK_RIGHT),
-    //       stack: flowControl.current.getTableLogStack()
-    //     }, reference.defaultLogInfo);
-    //   });
-    // }
+    const permalink = document.getElementById('permalink');
+    if (permalink) {
+      permalink.addEventListener('contextmenu', () => {
+        logRecordsetClientAction(LogActions.PERMALINK_RIGHT);
+      });
+    }
 
     // if the faceting feature is disabled, then we don't need to generate facets
     if (config.disableFaceting) {
@@ -226,14 +251,7 @@ const Recordset = ({
   const recordsetLink = getRecordsetLink();
 
   const copyPermalink = () => {
-    // TODO
-    // LogService.logClientAction(
-    //   {
-    //     action: flowControl.current.getTableLogAction(LogActions.PERMALINK_LEFT),
-    //     stack: flowControl.current.getTableLogStack()
-    //   },
-    //   reference.defaultLogInfo
-    // );
+    logRecordsetClientAction(LogActions.PERMALINK_LEFT);
 
     copyToClipboard(recordsetLink);
   }
