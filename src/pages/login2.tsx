@@ -1,8 +1,10 @@
+import '@chaise/assets/scss/_login-app.scss';
+
 // Login Popup App
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@chaise/assets/scss/app.scss';
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 // components

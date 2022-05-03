@@ -141,7 +141,7 @@ export default class AuthnService {
     const cc = ConfigService.chaiseConfig;
     const loginApp = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig) ? 'login2' : 'login';
 
-    const referrerUrl = `${window.location.origin}/${BUILD_VARIABLES.CHAISE_BASE_PATH}/${loginApp}/?referrerid=${referrerId}`;
+    const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}${loginApp}/?referrerid=${referrerId}`;
     const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
     const config: any = {
       headers: {
