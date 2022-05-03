@@ -145,7 +145,7 @@ export class ConfigService {
    * The http service
    */
   static get http() {
-    return ConfigService._setupDone ? ConfigService._server.http : axios;
+    return ConfigService._setupDone && ConfigService._server ? ConfigService._server.http : axios;
   }
 
   /**

@@ -141,7 +141,8 @@ export default class AuthnService {
     const cc = ConfigService.chaiseConfig;
     const loginApp = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig) ? 'login2' : 'login';
 
-    const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(`${window.location.origin}/${BUILD_VARIABLES.CHAISE_BASE_PATH}/${loginApp}/?referrerid=${referrerId}`)}`;
+    const referrerUrl = `${window.location.origin}/${BUILD_VARIABLES.CHAISE_BASE_PATH}/${loginApp}/?referrerid=${referrerId}`;
+    const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
     const config: any = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -425,10 +426,6 @@ export default class AuthnService {
   };
 
   static refreshLogin = (action: string) => {
-    // TODO: show spinner here
-    // NOTE: maybe show spinner in previous function and return to that function after reference is resolved
-    // $rootScope.showSpinner = true;
-
     // get referrerid from browser url
     const referrerId = queryStringToJSON(window.location.search).referrerid,
       preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login2/?referrerid=' + referrerId,
