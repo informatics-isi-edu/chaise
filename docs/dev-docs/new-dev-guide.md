@@ -1,4 +1,4 @@
-This document should be organized later, I just wanted to make sure the things that comes up during migration are documented:
+This document should be organized later, I just wanted to make sure the things that comes up during migration are documented.
 
 # Reading Material
 
@@ -87,9 +87,35 @@ This document should be organized later, I just wanted to make sure the things t
   // eslint-disable-next-line NAME_OF_THE_RULE
 
   // to ignore the rule for the whole file:
-  /* eslint NAME_OF_THE_RULE: 0 */ 
+  /* eslint NAME_OF_THE_RULE: 0 */
   ```
 
-- Using the previously described method you can also change rules locally, but 
+- Using the previously described method you can also change rules locally, but
   we recommend against.
+
+# Installation
+
+This section will focus on more advanced details related to installation. Please refer to the installation guide in the `user-docs` folder for general information.
+
+## Make targets
+The following are all the Makefile targets related to installation:
+
+- `install`:  This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
+- `install-wo-deps`: Designed for development purposes, will only build and install Chaise.
+- `install-w-config`: The same as `install`, but will also `rsync` the configuration files.
+- `install-wo-deps-w-config`: The same as `install-wo-deps`, but will also `rsync` the configuration files.
+
+## NPM
+
+This section will go over how we think the NPM modules should be managed.
+
+- Ensure the latest stable node and npm versions are used.
+- Only use `make install` when the `package-lock.json` has been changed (or when doing a clean install).
+- Use `make install-wo-deps` while developing.
+- Avoid using `npm install`.
+- `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
+- Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
+  - Ensure the used node and npm versions are updated and the latest stable.
+  - Run `npm install` to sync `package-lock.json` with `package.json`
+  - Double-check the changes to `pacakge-lock.json`
 

@@ -621,15 +621,16 @@ update-webdriver:
 	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
 
 # install packages (honors NOD_ENV)
+# using clean-install instead of install to ensure usage of pacakge-lock.json
 .PHONY: npm-install-modules
 npm-install-modules:
-	npm install
+	npm clean-install
 
 # install packages needed for production and development (including testing)
 # --production=false makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
-	npm install --production=false
+	npm clean-install --production=false
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
