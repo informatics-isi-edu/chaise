@@ -38,7 +38,6 @@
     "moment": "^2.29.3",
     "moment-timezone": "x",
     "protractor": "5.4.4",
-    "q": "^1.5.1",
     "request": "x",
     "request-q": "x",
     "set-cookie-parser": "x",
