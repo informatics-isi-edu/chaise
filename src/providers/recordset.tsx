@@ -5,6 +5,7 @@ import { ConfigService } from '@chaise/services/config';
 import { LogService } from '@chaise/services/log';
 import $log from '@chaise/services/logger';
 import { RecordsetFlowControl } from '@chaise/services/table';
+import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
 import { getColumnValuesFromPage } from '@chaise/utils/data-utils';
 import TypeUtils from '@chaise/utils/type-utils';
 import { createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
@@ -19,7 +20,7 @@ export const RecordsetContext = createContext<{
   isLoading: boolean,
   isInitialized: boolean,
   initialize: () => void,
-  update: (newRef: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => void,
+  update: (newRef: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => boolean,
   pageLimit: any,
   setPageLimit: any,
   page: any,
@@ -102,7 +103,30 @@ export default function RecordsetProvider({
       action: flowControl.current.getTableLogAction(action),
       stack: flowControl.current.getTableLogStack(childStackElement, extraInfo)
     }, reference.defaultLogInfo)
-  }
+  };
+
+  const checkReferenceURL = (ref: any) => {
+    const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
+    if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
+
+      $log.warn('url length limit will be reached!');
+
+      // TODO
+      // show the alert (the function will handle just showing one alert)
+      // AlertsService.addURLLimitAlert();
+
+      // TODO
+      // // scroll to top of the container so users can see the alert
+      // scrollMainContainerToTop();
+
+      // signal the caller that we reached the URL limit.
+      return false;
+    }
+
+    // remove the alert if it's present since we don't need it anymore
+    // AlertsService.deleteURLLimitAlert();
+    return true;
+  };
 
   const printDebugMessage = (message: string, counter?: number) => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
@@ -141,6 +165,10 @@ export default function RecordsetProvider({
   const update = (newRef: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
+
+    if (newRef && !checkReferenceURL(newRef)) {
+      return false;
+    }
 
     if (updateFacets) {
       // TODO
@@ -185,6 +213,8 @@ export default function RecordsetProvider({
     } else {
       updatePage();
     }
+
+    return true;
   };
 
   const updatePage = () => {
