@@ -7,25 +7,12 @@ import FacetChoicePicker from '@chaise/components/facet-choice-picker';
 
 // TODO subject to change
 type FacetingProps = {
-  reference: any,
-  // refresh?: number
+  reference: any
 }
 
 const Faceting = ({
-  reference,
-  // refresh,
+  reference
 }: FacetingProps) => {
-
-  const [showFacetModal, setShowFacetModal] = useState(false);
-
-  // useEffect(()=> {
-  //   $log.log('refreshing the faceting!');
-  //   // $log.log(test.current);
-  // }, [refresh]);
-
-  const openRecordsetPopup = () => {
-    setShowFacetModal(true);
-  }
 
   const renderFacet = (fc: any, index: number) => {
     switch (fc.preferredMode) {

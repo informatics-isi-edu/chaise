@@ -34,7 +34,7 @@ import RecordsetProvider from '@chaise/providers/recordset';
 /**
  * TODO
  * how should I do the client log stuff now?
- * can the provider be inside the comp?
+ * what about the url length limitation.. it should scroll to top but I cannot do it in provider
  */
 
 
@@ -226,27 +226,6 @@ const RecordsetInner = ({
   };
 
   //-------------------  UI related functions:   --------------------//
-  const checkReferenceURL = (ref: any) => {
-    const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
-    if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
-
-      $log.warn('url length limit will be reached!');
-
-      // TODO
-      // show the alert (the function will handle just showing one alert)
-      // AlertsService.addURLLimitAlert();
-
-      // scroll to top of the container so users can see the alert
-      scrollMainContainerToTop();
-
-      // signal the caller that we reached the URL limit.
-      return false;
-    }
-
-    // remove the alert if it's present since we don't need it anymore
-    // AlertsService.deleteURLLimitAlert();
-    return true;
-  };
 
   const recordsetLink = getRecordsetLink();
 
@@ -280,12 +259,14 @@ const RecordsetInner = ({
     if (term) term = term.trim();
 
     const ref = reference.search(term); // this will clear previous search first
-    if (checkReferenceURL(ref)) {
+    // TODO
+    // if (checkReferenceURL(ref)) {
       // vm.lastActiveFacet = -1;
       // printDebugMessage(`new search term=${term}`);
 
+      // TODO
       // log the client action
-      const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
+      // const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
 
       // TODO
       // LogService.logClientAction({
@@ -294,45 +275,8 @@ const RecordsetInner = ({
       // }, ref.defaultLogInfo);
 
       update(ref, true, true, true, false, LogReloadCauses.SEARCH_BOX);
-    }
+    // }
   };
-
-  const changeSort = (sortColumn: SortColumn) => {
-    const ref = reference.sort([sortColumn]);
-    if (checkReferenceURL(ref)) {
-
-      //  TODO
-      // printDebugMessage('change sort');
-
-      // LogService.logClientAction({
-      //   action: flowControl.current.getTableLogAction(LogActions.SORT),
-      //   stack: flowControl.current.getTableLogStack()
-      // }, ref.defaultLogInfo);
-
-      update(ref, true, false, false, false, LogReloadCauses.SORT);
-    }
-  }
-
-  const nextPreviousCallback = (isNext: boolean) => {
-    const ref = isNext ? page.next : page.previous;
-    const action = isNext ? LogActions.PAGE_NEXT : LogActions.PAGE_PREV;
-    const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
-    if (ref && checkReferenceURL(ref)) {
-
-      //  TODO
-      // printDebugMessage('request for previous page');
-
-      // LogService.logClientAction(
-      //   {
-      //     action: flowControl.current.getTableLogAction(action),
-      //     stack: flowControl.current.getTableLogStack()
-      //   },
-      //   reference.defaultLogInfo
-      // );
-
-      update(ref, true, false, false, false, cause);
-    }
-  }
 
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
@@ -470,10 +414,7 @@ const RecordsetInner = ({
             style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
             <div className='side-panel-container'>
-              <Faceting
-                // refresh={facetRefresh}
-                reference={reference}
-              />
+              <Faceting reference={reference} />
             </div>
           </div>
         }
@@ -481,9 +422,7 @@ const RecordsetInner = ({
           <div className='main-body'>
             <RecordsetTable
               config={config}
-              sortCallback={changeSort}
               initialSortObject={initialReference.location.sortObject}
-              nextPreviousCallback={nextPreviousCallback}
             />
           </div>
           {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}

@@ -9,26 +9,26 @@ import { MESSAGE_MAP } from '@chaise/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
 import useRecordset from '@chaise/hooks/recordset';
+import { LogActions, LogReloadCauses } from '@chaise/models/log';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
   initialSortObject: any,
-  sortCallback?: (sortColumn: SortColumn) => any,
-  nextPreviousCallback: (isNext: boolean) => any
+  sortCallback?: (sortColumn: SortColumn) => any
 }
 
 const RecordsetTable = ({
   config,
-  initialSortObject,
-  sortCallback,
-  nextPreviousCallback
+  initialSortObject
 }: RecordsetTableProps): JSX.Element => {
 
   const {
+    reference,
     isInitialized,
     page,
     columnModels,
-    colValues
+    colValues,
+    update
   } = useRecordset();
 
   // TODO needs to be updated to use ellipsis and have all the functionalities,
@@ -48,15 +48,25 @@ const RecordsetTable = ({
 
   // when sort column has changed, call the callback
   useEffect(() => {
-    // TODO why isInitialized is needed? (removing it triggers two updates)
-    if (typeof sortCallback !== 'function' || !currSortColumn || !isInitialized) return;
+    // TODO why isInitialized is needed? (removing it triggers two updates on load)
+    if (!currSortColumn || !isInitialized) return;
 
-    sortCallback(currSortColumn);
+    const ref = reference.sort([currSortColumn]);
+    // if (checkReferenceURL(ref)) {
+
+      //  TODO
+      // printDebugMessage('change sort');
+
+      // LogService.logClientAction({
+      //   action: flowControl.current.getTableLogAction(LogActions.SORT),
+      //   stack: flowControl.current.getTableLogStack()
+      // }, ref.defaultLogInfo);
+
+      update(ref, true, false, false, false, LogReloadCauses.SORT);
+    // }
   }, [currSortColumn]);
 
   const changeSort = (col: any) => {
-    if (typeof sortCallback !== 'function') return;
-
     /**
      * if the sort is based on current column and is ascending, then
      * toggle to descending.
@@ -64,6 +74,28 @@ const RecordsetTable = ({
      */
     const desc = currSortColumn?.column === col.column.name && !currSortColumn?.descending;
     setCurrSortColumn({ 'column': col.column.name, 'descending': desc });
+  }
+
+  const changePage = (isNext: boolean) => {
+    const ref = isNext ? page.next : page.previous;
+    const action = isNext ? LogActions.PAGE_NEXT : LogActions.PAGE_PREV;
+    const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
+    // TODO
+    // if (ref && checkReferenceURL(ref)) {
+
+      //  TODO
+      // printDebugMessage('request for previous page');
+
+      // LogService.logClientAction(
+      //   {
+      //     action: flowControl.current.getTableLogAction(action),
+      //     stack: flowControl.current.getTableLogStack()
+      //   },
+      //   reference.defaultLogInfo
+      // );
+
+      update(ref, true, false, false, false, cause);
+    // }
   }
 
   const renderColumnError = () => {
@@ -88,8 +120,7 @@ const RecordsetTable = ({
 
   const renderColumnHeaders = () => {
     return columnModels.map((col: any, index: number) => {
-      const canSort = typeof sortCallback === 'function' && config.sortable
-        && col.column.sortable && !col.hasError && !col.isLoading;
+      const canSort = config.sortable && col.column.sortable && !col.hasError && !col.isLoading;
 
       return (
         <th
@@ -200,7 +231,7 @@ const RecordsetTable = ({
         <button
           type='button'
           className='chaise-table-previous-btn chaise-btn chaise-btn-primary'
-          onClick={() => nextPreviousCallback(false)}
+          onClick={() => changePage(false)}
           disabled={!page.hasPrevious}
         >
           <span>Previous</span>
@@ -208,7 +239,7 @@ const RecordsetTable = ({
         <button
           type='button'
           className='chaise-table-next-btn chaise-btn chaise-btn-primary'
-          onClick={() => nextPreviousCallback(true)}
+          onClick={() => changePage(true)}
           disabled={!page.hasNext}
         >
           <span>Next</span>
