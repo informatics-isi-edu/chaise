@@ -6,17 +6,18 @@
 
 Chaise depends on the following server- and client-side software.
 
-- **Relational data resources**: Chaise is intended to be deployed in an
-  environment that includes the [ERMrest] service for exposing tabular (relational) data as Web resources.
+- **Relational data resources**: Chaise is intended to be deployed in an environment that includes the [ERMrest] service for exposing tabular (relational) data as Web resources.
 - **Web server**: Chaise can be hosted on any HTTP web server. Most likely you
   will want to deploy the app on the same host as [ERMrest]. If it is deployed
   on a separate host, you will need to enable [CORS] on the web server on which
   ERMrest is deployed.
 - **ERMrestJS**: [ERMrestJS] is a client library for [ERMrest]. This library must be properly installed before installing Chaise. For more information about installing ermrestjs please refer to its installation document.
+- **openseadragon-viewer**: Chaise uses [openseadragon-viewer] as part of the viewer app. If viewer app is not useful to your deployment, you don't need this. For more information about viewer app please refer to [this document](../viewer/viewer-app.md).
 
 [ERMrest]: https://github.com/informatics-isi-edu/ermrest
 [ERMrestJS]: https://github.com/informatics-isi-edu/ermrestjs
 [CORS]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing "Cross-origin resource sharing"
+[openseadragon-viewer]: https://github.com/informatics-isi-edu/openseadragon-viewer
 
 ### Development Dependencies
 
@@ -27,7 +28,7 @@ Development dependencies include:
 * [Node](https://nodejs.org/): Mac users, we recommend downloading
 direct from the node site as we have seen problems with the version installed
 by Homebrew.
-* Additional dependencies specified in [package.json](./package.json) will be
+* Additional dependencies specified in `package.json` will be
 automatically retrieved by NPM.
 
 ### Stop! Before going forward read this!
