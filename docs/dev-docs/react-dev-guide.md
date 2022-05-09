@@ -1,42 +1,48 @@
 # React Developer Guide
-This is a guide for people who develop Chaise using ReactJS.
+This is a guide for people who develop Chaise using ReactJS/TypeScript.
 
-
-## Table of Contents
+## Table of contents
 - [Reading Material](#reading-material)
-- [React Practices](#react-practices)
-  - [Parent/child component communication](#parentchild-component-communication)
-  - [Building and Installing](#building-and-installing)
-    - [Make Targets](#make-targets)
-    - [NPM](#npm)
-  - [Lint](#lint)
-  - [Code Style](#code-style)
-  - [CSS and Styles](#css-and-styles)
-  - [Importing Dependencies](#importing-dependencies)
-  - [Immutability of Objects](#immutability-of-objects)
+- [Idioms](#idioms)
+  * [General](#general)
+  * [React/TypeScript](#react-typescript)
+  * [Lint](#lint)
+  * [CSS/SCSS](#css-scss)
+- [Folder structure](#folder-structure)
+- [Building and installation](#building-and-installation)
+    + [Make targets](#make-targets)
+    + [NPM](#npm)
 - [Structure of an App](#structure-of-an-app)
-  - [Main HTML](#main-html)
-  - [App Wrapper](#app-wrapper)
-  - [Context](#context)
-  - [Error Provider](#error-provider)
-  - [Alerts Provider](#alerts-provider)
-  - [Chaise Navbar](#chaise-navbar)
-- [Common Functionality](#common-functionality)
-  - [Components](#components)
-  - [Providers](#providers)
-  - [Services](#services)
-  - [Utilities](#utilities)
-- [Typescript](#typescript)
-  - [Models](#models)
-  
+  * [Main HTML](#main-html)
+  * [App Wrapper](#app-wrapper)
+  * [Context](#context)
+  * [Error Provider](#error-provider)
+  * [Alerts Provider](#alerts-provider)
+  * [Chaise Navbar](#chaise-navbar)
+
 
 ## Reading Material
 - [Intro to React, Redux, and TypeScript](https://blog.isquaredsoftware.com/presentations/react-redux-ts-intro-2020-12)
 - [Code style](https://github.com/typescript-cheatsheets/react)
 
 
-## React Practices
-(NOTE: this section needs to be reorganized, maybe combine with react development practices?)
+## Idioms
+
+### General
+- Use semilicon everywhere. Eventhough it's not needed, for consistency, use semicolon after each line.
+- Stick with the indentation size of 2. If a file is not using size 2, just change the whole file.
+- File names should be all lower case and use kebab case (`-` should be used to break words).
+
+### React/TypeScript
+
+- Use functional components in most cases (class component should only be considered for special cases.)
+- Use PascalCase for type names, class names, and enum values.
+- Use camelCase for function names.
+- Use camelCase for property names and local variables.
+- Use `_` as a prefix for private properties and functions.
+- Use whole words in names when possible.
+- Avoid using `any` type as much as you can.
+- Part of the build process defines an alias, called `@chaise`, to reference the `src` folder in the Chaise repo. This alias should be used instead of doing relative imports.
 - Create a `type` for `props` of components.
 
 - Regarding [Render logic](https://blog.isquaredsoftware.com/presentations/react-redux-ts-intro-2020-12/#/36),
@@ -78,34 +84,6 @@ This is a guide for people who develop Chaise using ReactJS.
 
 - Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues we should make asure that will always using production mode.
 
-### Parent/child component communication
-- Parents pass data as `props` to children
-- Parents pass callbacks to children as props, children communicate to parent by running `props.somethingHappened(data)`
-
-### Building and Installing
-This section will focus on more advanced details related to installation. Please refer to the installation guide in the `user-docs` folder for general information. The build process uses Makefile to simplify what needs to be called from the command line to get started. `Make` will manage dependency installation (through `npm`) and the react build process (using `webpack`).
-
-#### Make targets
-The following are all the Makefile targets related to installation:
-
-- `install`:  This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
-- `install-wo-deps`: Designed for development purposes, will only build and install Chaise.
-- `install-w-config`: The same as `install`, but will also `rsync` the configuration files.
-- `install-wo-deps-w-config`: The same as `install-wo-deps`, but will also `rsync` the configuration files.
-
-#### NPM
-This section will go over how we think the NPM modules should be managed.
-
-- Ensure the latest stable node and npm versions are used.
-- Only use `make install` when the `package-lock.json` has been changed (or when doing a clean install).
-- Use `make install-wo-deps` while developing.
-- Avoid using `npm install`.
-- `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
-- Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
-  - Ensure the used node and npm versions are updated and the latest stable.
-  - Run `npm install` to sync `package-lock.json` with `package.json`
-  - Double-check the changes to `pacakge-lock.json`
-
 ### Lint
 - Make sure the `ESLint` extension is installed for Visual Studio Code.
 
@@ -130,25 +108,93 @@ This section will go over how we think the NPM modules should be managed.
 - Using the previously described method you can also change rules locally, but
   we recommend against.
 
-### Code style
-1. Use semilicon everywhere. Eventhough it's not needed, for consistency, use semicolon after each line.
-2. Stick with the indentation size of 2. If a file is not using size 2, just change the whole file.
-3. Only use functional components (no class component)
-4. Use PascalCase for type names, class names, and enum values.
-5. Use camelCase for function names.
-6. Use camelCase for property names and local variables.
-7. Use `_` as a prefix for private properties and functions.
-8. Use whole words in names when possible.
 
-### CSS and Styles
-General styles should be included as part of the build process in the <head> tag. More specific styles that are meant to be reused for a specific component should be imported at the top of the component file. Styles used only once for a specific element should be inline or factored out into that component's specific CSS document.
+### CSS/SCSS
 
-### Importing dependencies
-Part of the build process defines an alias, called `@chaise`, to reference the `src` folder in the Chaise repo. This alias should be used instead of doing relative imports.
+- General purpose styles should be part of the `app.scss` (or included as part of `app.scss`.)
+- Styles specific to a components should be inlcuded in a separate file and imported in the component tsx file.
+- It's better if you use classes instead of ids for writing css rules.
+- Use `-` to break the words in your name. Avoid using camelCase or `_`.
+- Use names that are meaningful and can be easily understood without knowing the whole page. Try to convey what an ID or class is about while being as brief as possible.
+- Avoid adding duplicated rules. If there's a rule in a file that is applied to the element that you're trying to add a new style to, add it there.
+- Avoid using `!important` as much as you can (Unless there's a bootstrap rule that you're trying to override.)
+- Comment your rule to make it easier for others to figure out why a rule was added.
+- If you're doing some calculations don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
+- Use variables if you're using the same value more than once and these values should be the same all the times (Just because you're using value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
 
-### Immutability of Objects
-TODO
-  
+
+## Folder structure
+
+The following is the overall structure of the project:
+
+```
+.
+├── src
+│   ├── assets
+│   │   └── scss
+│   │       ├── app.scss
+│   │       └── _<comp>.scss
+│   ├── components
+│   │   └── <comp>.tsx
+│   ├── hooks
+│   │   └── <feature>.ts
+│   ├── libs
+│   │   └── <library>.tsx
+│   ├── models
+│   │   └── <feature>.ts
+│   ├── pages
+│   │   ├── <app>.tsx
+│   │   └── main.html
+│   ├── providers
+│   │   └── <feeature>.tsx
+│   ├── services
+│   │   └── <feature>.ts
+│   ├── utils
+│   │   └── <function>.ts
+│   └── vendor
+├── webpack
+│   ├── app.config.js
+│   ├── lib.config.js
+│   └── main.configjs
+├── Makefile
+└── package.json
+```
+
+- `assets`: This folder is used to house all the fonts, images, and SCSS files. The component specific SCSS files should have the same name as their component file.
+- `components`: Each app will rely on similar components for functionality and display purposes. If there is a need to reuse code, even if that's in only 2 places, a common component should be extracted and placed in the components folder.
+- `libs`: Independent applications that may be used in non-React environments outside of Chaise.
+- `models`: The models or types that are
+- `providers`: Providers are a way to have a consistent state that can be accessed by any component at any level of the parent/child component hierarchy. Providers make use of React hooks to manage the app state.
+- `services`: Services are used for common functionality like interacting with the server, configuring the application, managing the user session, and more. These functional services provide a scope that is shared throughout the service that each function can interact with.
+- `utils`: Utilities are intended to be collections of functions exported individually that are then imported as needed in other places.
+
+
+## Building and installation
+
+This section will focus on more advanced details related to installation. Please refer to the installation guide in the `user-docs` folder for general information. The build process uses Makefile to simplify what needs to be called from the command line to get started. `Make` will manage dependency installation (through `npm`) and the react build process (using `webpack`).
+
+#### Make targets
+The following are all the Makefile targets related to installation:
+
+- `install`:  This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
+- `install-wo-deps`: Designed for development purposes, will only build and install Chaise.
+- `install-w-config`: The same as `install`, but will also `rsync` the configuration files.
+- `install-wo-deps-w-config`: The same as `install-wo-deps`, but will also `rsync` the configuration files.
+
+#### NPM
+This section will go over how we think the NPM modules should be managed.
+
+- Ensure the latest stable node and npm versions are used.
+- Only use `make install` when the `package-lock.json` has been changed (or when doing a clean install).
+- Use `make install-wo-deps` while developing.
+- Avoid using `npm install`.
+- `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
+- Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
+  - Ensure the used node and npm versions are updated and the latest stable.
+  - Run `npm install` to sync `package-lock.json` with `package.json`
+  - Double-check the changes to `pacakge-lock.json`
+
+
 
 ## Structure of an App
 Since Chaise is a collection of multiple single page apps (`recordset`, `record`, `recordedit`, etc.), app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into difrerent bits described below.
@@ -171,25 +217,3 @@ Alerts also has it's own provider created to have consistent state at the app le
 ### Chaise Navbar
 The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
 
-
-## Common Functionality
-There are different folders in the project for where to define new functionality based on what purpose that functionality is trying to provide.
-
-### Components
-Each app will rely on similar components for functionality and display purposes. If there is a need to reuse code, even if that's in only 2 places, a common component should be extracted and placed in the components folder.
-
-### Providers
-Providers are a way to have a consistent state that can be accessed by any component at any level of the parent/child component hierarchy. Providers make use of React hooks to manage the app state.
-
-### Services
-Services are used for common functionality like interacting with the server, configuring the application, managing the user session, and more. These functional services provide a scope that is shared throughout the service that each function can interact with.
-
-### Utilities
-Utilities are intended to be collections of functions exported individually that are then imported as needed in other places.
-
-
-## Typescript
-The application is written with typescript to have better control over the way code is used. More about typescript can be found in the [documentation](www.insert.hyperlink.here.com)
-
-### Models
-To manaage more complex objects in typescript (instead of blindly using `any` type), models for different common objects are defined in the `models` folder.
