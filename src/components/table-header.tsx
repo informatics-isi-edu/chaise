@@ -1,17 +1,18 @@
 import '@chaise/assets/scss/_table-header.scss';
-
-type TableHeaderProps = {
-
-};
+import useRecordset from '@chaise/hooks/recordset';
 
 const TableHeader = () => {
+  const { totalRowCount, pageLimit } = useRecordset();
+
+  // TODO
+
   return (
     <div className='chaise-table-header row'>
       <div className='chaise-table-header-total-count col-xs-12 col-sm-6'>
         {/* ng-className='{with-page-size-dropdown': vm.rowValues.length > 0}' */}
         <span className='displaying-text'>Displaying </span>
         <span className='total-count-text'>
-          25 rows
+          {pageLimit.toLocaleString()} {typeof totalRowCount == 'number' ? `of ${totalRowCount.toLocaleString()} records` : ''}
           {/* <span className='prepended-label'>{{prependLabel()}}</span>
             <span ng-if='vm.rowValues.length > 0' uib-dropdown on-toggle='::pageSizeDropdownToggle(open)'>
                 <button className='page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle' type='button' uib-dropdown-toggle ng-disabled='!vm.hasLoaded || !vm.initialized || vm.pushMoreRowsPending'>

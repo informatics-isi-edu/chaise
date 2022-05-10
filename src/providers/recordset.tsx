@@ -25,7 +25,8 @@ export const RecordsetContext = createContext<{
   setPageLimit: any,
   page: any,
   colValues: any,
-  columnModels: any
+  columnModels: any,
+  totalRowCount: number|null
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -81,6 +82,8 @@ export default function RecordsetProvider({
       }
     )
   };
+
+  const [totalRowCount, setTotalRowCount] = useState<number|null>(null);
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
 
@@ -232,6 +235,13 @@ export default function RecordsetProvider({
 
     // the aggregates are updated when the main entity request is done
 
+    // do not fetch table count if hideRowCount is set in the annotation for the table
+    // this is because the query takes too long sometimes
+    if (!reference.display || !reference.display.hideRowCount) {
+      // update the count
+      updateTotalRowCount(updatePage);
+    }
+
     // TODO the rest
     // setFacetReferesh(facetRefresh+1);
   };
@@ -246,7 +256,6 @@ export default function RecordsetProvider({
  */
   const updateMainEntity = (updatePageCB: Function, hideSpinner: boolean, notTerminal?: boolean, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
-      printDebugMessage('break out of update main');
       return;
     }
 
@@ -439,6 +448,99 @@ export default function RecordsetProvider({
       flowControl.current.logObject = {};
     }(counterer, flowControl.current.reloadCauses, flowControl.current.reloadStartTime));
     return defer.promise;
+  }
+
+
+  const updateTotalRowCount = (updatePageCB: Function) => {
+    if (!flowControl.current.dirtyCount || !flowControl.current.haveFreeSlot()) {
+      return;
+    }
+
+    flowControl.current.queue.occupiedSlots++;
+    flowControl.current.dirtyCount = false;
+
+    (function (curr) {
+      fetchTotalRowCount(curr).then((res: any) => {
+        afterUpdateTotalRowCount(res, curr);
+        updatePageCB();
+      }).catch(function (err: any) {
+        afterUpdateTotalRowCount(true, curr);
+        dispatchError({ error: err });
+      });
+    })(flowControl.current.queue.counter);
+  }
+
+  /**
+   * This will generate the request for getting the count.
+   * Returns a promise. If it's resolved with `true` then it has been successful.
+   */
+  const fetchTotalRowCount = (current: number) => {
+    printDebugMessage('fetching the main count');
+    var defer = Q.defer();
+    var aggList, hasError;
+    try {
+      // if the table doesn't have any simple key, this might throw error
+      aggList = [reference.aggregate.countAgg];
+    } catch (exp) {
+      hasError = true;
+    }
+    if (hasError) {
+      setTotalRowCount(null);
+      defer.resolve(true);
+      return defer.promise;
+    }
+
+    var hasCauses = Array.isArray(flowControl.current.recountCauses) && flowControl.current.recountCauses.length > 0;
+    var action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
+    var stack = flowControl.current.getTableLogStack();
+    if (hasCauses) {
+      stack = LogService.addCausesToStack(stack, flowControl.current.recountCauses, flowControl.current.recountStartTime);
+    }
+    reference.getAggregates(
+      aggList,
+      { action: flowControl.current.getTableLogAction(action), stack: stack }
+    ).then(function getAggregateCount(response: any) {
+      if (current !== flowControl.current.queue.counter) {
+        defer.resolve(false);
+        return defer.promise;
+      }
+
+      // TODO
+      // vm.countError = false;
+      setTotalRowCount(response[0]);
+
+
+      flowControl.current.recountCauses = [];
+      flowControl.current.recountStartTime = -1;
+
+      defer.resolve(true);
+    }).catch(function (err: any) {
+      if (current !== flowControl.current.queue.counter) {
+        defer.resolve(false);
+        return defer.promise;
+      }
+
+      // TODO
+      // if (err instanceof ERMrest.QueryTimeoutError) {
+      //   // separate from hasError above
+      //   vm.countError = true;
+      // }
+
+      // fail silently
+      setTotalRowCount(null);
+      return defer.resolve(true), defer.promise;
+    });
+
+    return defer.promise;
+  }
+
+  /**
+   * will be called after getting data for count to set the flags.
+   */
+  const afterUpdateTotalRowCount = (res: boolean, current: number) => {
+    flowControl.current.queue.occupiedSlots--;
+    flowControl.current.dirtyCount = !res;
+    printDebugMessage(`after update total row count: ${res ? 'successful.' : 'unsuccessful.'}`);
   }
 
   /**
@@ -656,9 +758,10 @@ export default function RecordsetProvider({
       setPageLimit,
       page,
       colValues,
-      columnModels
+      columnModels,
+      totalRowCount
     };
-  }, [reference, isLoading, isInitialized, page, colValues, columnModels]);
+  }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);
 
   return (
     <RecordsetContext.Provider value={providerValue}>
