@@ -1035,12 +1035,6 @@ describe('View recordset,', function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
                 // pageId should change when the window changes page
                 expect(chaisePage.getPageId()).not.toBe(pageId);
-                return browser.navigate().back();
-            }).then(function () {
-                chaisePage.recordsetPage.waitForInverseMainSpinner();
-                expect(chaisePage.getWindowName()).toBe(windowId);
-                // pageId should change when navigating back
-                expect(chaisePage.getPageId()).not.toBe(pageId);
                 done();
             }).catch(function (err) {
                 done.fail(err);
