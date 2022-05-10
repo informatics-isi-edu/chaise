@@ -19,5 +19,5 @@ module.exports = (env) => [
   // chaise libs:
   // TODO should be updated and tested before adding it back:
   // getLibConfig('navbar', mode, env),
-  getAppConfig('login2', 'Login', mode, env),
+  getAppConfig('login', 'Login', mode, env),
 ];

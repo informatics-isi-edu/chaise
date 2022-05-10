@@ -139,9 +139,8 @@ export default class AuthnService {
     const referrerId = (new Date().getTime());
 
     const cc = ConfigService.chaiseConfig;
-    const loginApp = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig) ? 'login2' : 'login';
 
-    const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}${loginApp}/?referrerid=${referrerId}`;
+    const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
     const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
     const config: any = {
       headers: {
@@ -428,7 +427,7 @@ export default class AuthnService {
   static refreshLogin = (action: string) => {
     // get referrerid from browser url
     const referrerId = queryStringToJSON(window.location.search).referrerid,
-      preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login2/?referrerid=' + referrerId,
+      preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
       redirectUrl = AuthnService.serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
 
     const loginConfig: any = {

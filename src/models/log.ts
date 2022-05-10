@@ -145,7 +145,7 @@ export enum LogActions {
   SWITCH_USER_ACCOUNTS_WIKI_LOGIN= 'switch-accounts-wiki' + ';login',
   SWITCH_USER_ACCOUNTS_LOGOUT= 'switch-accounts' + ';logout',
 
-  // - login2=
+  // - login=
   VERIFY_GLOBUS_GROUP_LOGIN= 'verify-globus-group' + ';login',
   VERIFY_GLOBUS_GROUP_LOGOUT= 'verify-globus-group' + ';logout',
 

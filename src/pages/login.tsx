@@ -4,7 +4,7 @@ import '@chaise/assets/scss/_login-app.scss';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@chaise/assets/scss/app.scss';
 
-import { useEffect, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 // components
@@ -19,25 +19,38 @@ import { LogActions } from '@chaise/models/log';
 
 // utilities
 import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
-import { queryStringToJSON } from '@chaise/utils/uri-utils';
+import { chaiseBaseURL, queryStringToJSON } from '@chaise/utils/uri-utils';
 
 
 const loginSettings = {
-  appName: 'login2',
+  appName: 'login',
   appTitle: 'Login',
-  overrideHeadTitle: false,
+  overrideHeadTitle: true,
   overrideDownloadClickBehavior: false,
   overrideExternalLinkBehavior: false
 };
 
+export type loginForm = {
+  username: string, 
+  password: string
+}
+
 const LoginPopupApp = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
 
+  const [loginModel, setLoginModel] = useState<loginForm>({username: '', password: ''})
+  const [queryString, setQueryString] = useState<any>({});
+  const [showLoginForm, setShowLoginForm] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
     const authnRes = AuthnService.session;
+    setQueryString(queryStringToJSON(window.location.search));
+
+    if (queryString.referrerid === undefined || queryString.referrerid === null) {
+      setShowLoginForm(true);
+    }
 
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
     let hasGroup = false;
@@ -52,7 +65,6 @@ const LoginPopupApp = (): JSX.Element => {
 
     // if the config is invalid, don't require group membership to continue automatically
     if (!validConfig || hasGroup) {
-      const queryString = queryStringToJSON(window.location.search);
       if (queryString.referrerid && (typeof queryString.action === 'undefined') && window.opener) {
         //For child window
         window.opener.postMessage(window.location.search, window.opener.location.href);
@@ -86,7 +98,7 @@ const LoginPopupApp = (): JSX.Element => {
             // NOTE: this should almost never happen
             // I think this shouldn't "close the window" automatically
             // if a user reports this hanging around, we need to identify what error caused it
-            // should be easy since the error will be logged with context pointing to login2 i believe
+            // should be easy since the error will be logged with context pointing to login i believe
             console.log(error);
             console.log('error creating user');
           });
@@ -103,6 +115,89 @@ const LoginPopupApp = (): JSX.Element => {
     }
   }, []);
 
+  const getParameters = () => {
+    const result: any = {};
+
+    let query = window.location.search;
+    if (query.length > 0) query = query.substring(1);
+
+    const parameters = query.split('&');
+    parameters.forEach((param) => {
+      const paramKey = param.split('=')[0],
+        paramValue = param.split('=')[0];
+
+      switch (paramKey) {
+        case 'referrer':
+          result['referrer'] = decodeURIComponent(paramValue);
+          break;
+        case 'method':
+          result['method'] = paramValue;
+          break;
+        case 'action':
+          result['action'] = decodeURIComponent(paramValue);
+          break;
+        case 'text':
+          result['text'] = decodeURIComponent(paramValue);
+          break;
+        case 'hidden':
+          result['hidden'] = decodeURIComponent(paramValue);
+          break;
+        default:
+          break;
+      }
+    });
+
+    return result;
+  }
+
+  const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setLoginModel((loginModel) => ({
+      ...loginModel,
+      username: event.target.value,
+    }));
+}
+
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+      setLoginModel((loginModel) => ({
+        ...loginModel,
+        password: event.target.value,
+      }));
+  }
+
+  const handleLoginEnter = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' && loginModel.username.length > 0 && loginModel.password.length > 0) localLogin();
+  }
+
+  const localLogin = () => {
+    const obj:any = {};
+    const params = getParameters();
+    const url = chaiseBaseURL() + (params.action ? params.action : '/authn/session');
+
+    console.log(params);
+    if (params.text) {
+      obj[params.text] = loginModel.username;
+    } else {
+      obj['username'] = loginModel.username;
+    }
+
+    if (params.password) {
+      obj[params.password] = loginModel.password;
+    } else {
+      obj['password'] = loginModel.password;
+    }
+
+    console.log(url);
+    console.log(obj);
+    // NOTE: Do we need to specify content-type?
+    //    was specified as 'application/x-www-form-urlencoded; charset=UTF-8' in old login
+    ConfigService.http.post(url, obj).then((response: any) => {
+      // do something?
+    }).catch((error: any) => {
+      throw error;
+    })
+    // ERMREST.POST(url, , true, true, obj, successSubmitLogin, errorCallback, param);
+  }
+
   const reLogin = () => {
     setShowSpinner(true);
     AuthnService.refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
@@ -113,11 +208,46 @@ const LoginPopupApp = (): JSX.Element => {
   }
 
   const renderInstructions = () => {
+    if (showLoginForm) {
+      return (<div style={{'marginLeft': '210px', 'marginTop': '40px'}}>
+        <table>
+          <tbody>
+            <tr><td>
+              <label><b>Username: &nbsp; </b></label>
+              <input 
+                id='username'
+                type='text'
+                onChange={handleUsernameChange}
+                onKeyDown={handleLoginEnter}
+              />
+            </td></tr>
+            <tr><td>
+              <label><b>Password: &nbsp; </b></label>
+              <input
+                id='password' 
+                type='password'
+                onChange={handlePasswordChange}
+                onKeyDown={handleLoginEnter}
+              />
+            </td></tr>
+            <tr><td>
+              <button className='chaise-btn chaise-btn-primary' onClick={localLogin} disabled={false}>Login</button>
+            </td></tr>
+          </tbody>
+        </table>
+        <footer className='row footer'>
+          <div className='container'>
+            <p className='footer-text'>© 2014-2022 University of Southern California</p>
+          </div>
+        </footer>
+      </div>)
+    }
+
     if (!showInstructions) return;
 
     const groupName = '"' + cc.termsAndConditionsConfig.groupName + '"';
     return (
-      <div className='login2-container main-container'>
+      <div className='login-container main-container'>
         <h2>Sign up for personalized dashboard features</h2>
         <p>To access the personalized dashboard features, membership in the {groupName} group is required. Click the <b>Sign Up </b>
           button to join the group. Using the <b>Sign Up</b> button will open a Globus group enrollment page in a separate tab or window.
