@@ -49,6 +49,7 @@ const LoginPopupApp = (): JSX.Element => {
 
     if (qString.referrerid === undefined || qString.referrerid === null) {
       setShowLoginForm(true);
+      return;
     }
 
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
