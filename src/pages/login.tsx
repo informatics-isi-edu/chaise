@@ -39,16 +39,15 @@ const LoginPopupApp = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
 
   const [loginModel, setLoginModel] = useState<loginForm>({username: '', password: ''})
-  const [queryString, setQueryString] = useState<any>({});
   const [showLoginForm, setShowLoginForm] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
     const authnRes = AuthnService.session;
-    setQueryString(queryStringToJSON(window.location.search));
+    const qString = queryStringToJSON(window.location.search)
 
-    if (queryString.referrerid === undefined || queryString.referrerid === null) {
+    if (qString.referrerid === undefined || qString.referrerid === null) {
       setShowLoginForm(true);
     }
 
@@ -65,7 +64,7 @@ const LoginPopupApp = (): JSX.Element => {
 
     // if the config is invalid, don't require group membership to continue automatically
     if (!validConfig || hasGroup) {
-      if (queryString.referrerid && (typeof queryString.action === 'undefined') && window.opener) {
+      if (qString.referrerid && (typeof qString.action === 'undefined') && window.opener) {
         //For child window
         window.opener.postMessage(window.location.search, window.opener.location.href);
 
