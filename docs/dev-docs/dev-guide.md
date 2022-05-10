@@ -9,7 +9,7 @@ This is a guide for people who develop Chaise.
   * [General](#general-1)
   * [React/TypeScript](#reacttypescript-1)
   * [Lint](#lint)
-  * [CSS/SCSS](#css-scss-1)
+  * [CSS/SCSS](#cssscss-1)
   * [Font Awesome](#font-awesome)
 - [Folder structure](#folder-structure)
 - [Building and installation](#building-and-installation)
