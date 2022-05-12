@@ -274,7 +274,7 @@ const RecordsetInner = ({
       //   stack: flowControl.current.getTableLogStack(null, extraInfo)
       // }, ref.defaultLogInfo);
 
-      update(ref, true, true, true, false, LogReloadCauses.SEARCH_BOX);
+      update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
     // }
   };
 

@@ -20,9 +20,8 @@ export const RecordsetContext = createContext<{
   isLoading: boolean,
   isInitialized: boolean,
   initialize: () => void,
-  update: (newRef: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => boolean,
+  update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => boolean,
   pageLimit: any,
-  setPageLimit: any,
   page: any,
   colValues: any,
   columnModels: any,
@@ -94,12 +93,6 @@ export default function RecordsetProvider({
     updatePage();
   }, [pageLimit, reference]);
 
-  useEffect(() => {
-    console.log(pageLimit);
-    flowControl.current.dirtyResult = true;
-    updatePage();
-  }, [pageLimit]);
-
   // after the main data has loaded, we can get the secondary data
   useEffect(() => {
     if (!isLoading && page && page.length > 0) {
@@ -151,7 +144,7 @@ export default function RecordsetProvider({
     flowControl.current.dirtyCount = true;
     flowControl.current.queue.counter = 0;
 
-    update(null, false, false, false, false);
+    update(null, null, false, false, false, false);
   };
 
   /**
@@ -171,7 +164,7 @@ export default function RecordsetProvider({
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  const update = (newRef: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
+  const update = (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
@@ -220,7 +213,11 @@ export default function RecordsetProvider({
       // after react sets the reference, the useEffect will trigger updatePage
       setReference(newRef);
     } else {
-      updatePage();
+      if (limit && typeof limit === 'number') {
+        setPageLimit(limit);
+      } else {
+        updatePage();
+      }
     }
 
     return true;
@@ -761,7 +758,6 @@ export default function RecordsetProvider({
       initialize,
       update,
       pageLimit,
-      setPageLimit,
       page,
       colValues,
       columnModels,

@@ -6,7 +6,7 @@ import { LogActions, LogReloadCauses } from '@chaise/models/log';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 const TableHeader = () => {
-  const { totalRowCount, page, pageLimit, setPageLimit, update } = useRecordset();
+  const { totalRowCount, page, pageLimit, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
 
@@ -26,16 +26,10 @@ const TableHeader = () => {
   });
 
   const handlePageLimitChange: any = (value: any) => {
-    // NOTE: 2 options, we can call `setPageLimit` and do some other changes in recordset provider to handle page size update
-    //    other option is calling update(), but that doesn't take into account a potential change in pageLimit
-    //      if I use update() after setPageLimit(), the page limit change isn't honored on first page limit change
-    //      next page limit change honors the previous page limit change in this case
-    setPageLimit(value);
-    // const ref = page.reference;
     // const action = LogActions.PAGE_SIZE_SELECT;
-    // const cause = LogReloadCauses.PAGE_LIMIT;
+    const cause = LogReloadCauses.PAGE_LIMIT;
     
-    // update(null, true, false, false, false, cause);
+    update(null, value, true, false, false, false, cause);
   }
 
   const renderPageSizeDropdown = () => {
