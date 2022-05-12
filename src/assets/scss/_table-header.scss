@@ -11,8 +11,12 @@
     display: flex;
     align-items: center;
     height: $btn-height;
-    .displaying-text, &:not(.with-page-size-dropdown) .total-count-text {
-      margin-top: -4px;
+    
+    &:not(.with-page-size-dropdown) {
+      .displaying-text,
+      .total-count-text {
+        margin-top: -4px;
+      }
     }
 
     .displaying-text {
@@ -22,5 +26,6 @@
   .page-size-dropdown {
     padding: 0 10px;
     padding-bottom: 2px;
+    margin-right: 4px;
   }
 }

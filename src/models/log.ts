@@ -41,7 +41,7 @@ export enum LogActions {
   //   - client=
   PERMALINK_LEFT= 'permalink' + ';click-left',
   PERMALINK_RIGHT= 'permalink' + ';click-right',
-  PAGE_SIZE_OEPN= 'page-size' + ';open',
+  PAGE_SIZE_OPEN= 'page-size' + ';open',
   PAGE_SIZE_SELECT= 'page-size' + ';select',
   FACET_PANEL_SHOW= 'panel' + ';show',
   FACET_PANEL_HIDE= 'panel' + ';hide',

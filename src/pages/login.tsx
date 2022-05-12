@@ -45,7 +45,7 @@ const LoginPopupApp = (): JSX.Element => {
 
   useEffect(() => {
     const authnRes = AuthnService.session;
-    const qString = queryStringToJSON(window.location.search)
+    const qString = queryStringToJSON(window.location.search);
 
     if (qString.referrerid === undefined || qString.referrerid === null) {
       setShowLoginForm(true);
@@ -76,7 +76,6 @@ const LoginPopupApp = (): JSX.Element => {
         // [
         //     {"id": "...", "display_name": "...", "full_name": "..."}
         // ]
-        // TODO: 
         const userProfilePath = '/ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip';
 
         // if hasGroup is true, then authnRes has to be defined
@@ -173,7 +172,6 @@ const LoginPopupApp = (): JSX.Element => {
     const params = getParameters();
     const url = chaiseBaseURL() + (params.action ? params.action : '/authn/session');
 
-    console.log(params);
     if (params.text) {
       obj[params.text] = loginModel.username;
     } else {
@@ -186,16 +184,11 @@ const LoginPopupApp = (): JSX.Element => {
       obj['password'] = loginModel.password;
     }
 
-    console.log(url);
-    console.log(obj);
-    // NOTE: Do we need to specify content-type?
-    //    was specified as 'application/x-www-form-urlencoded; charset=UTF-8' in old login
     ConfigService.http.post(url, obj).then((response: any) => {
       // do something?
     }).catch((error: any) => {
       throw error;
     })
-    // ERMREST.POST(url, , true, true, obj, successSubmitLogin, errorCallback, param);
   }
 
   const reLogin = () => {

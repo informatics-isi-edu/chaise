@@ -92,7 +92,13 @@ export default function RecordsetProvider({
   // call the flow-control after each reference object
   useEffect(() => {
     updatePage();
-  }, [reference]);
+  }, [pageLimit, reference]);
+
+  useEffect(() => {
+    console.log(pageLimit);
+    flowControl.current.dirtyResult = true;
+    updatePage();
+  }, [pageLimit]);
 
   // after the main data has loaded, we can get the secondary data
   useEffect(() => {
@@ -476,8 +482,8 @@ export default function RecordsetProvider({
    */
   const fetchTotalRowCount = (current: number) => {
     printDebugMessage('fetching the main count');
-    var defer = Q.defer();
-    var aggList, hasError;
+    const defer = Q.defer();
+    let aggList, hasError;
     try {
       // if the table doesn't have any simple key, this might throw error
       aggList = [reference.aggregate.countAgg];
@@ -490,9 +496,9 @@ export default function RecordsetProvider({
       return defer.promise;
     }
 
-    var hasCauses = Array.isArray(flowControl.current.recountCauses) && flowControl.current.recountCauses.length > 0;
-    var action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
-    var stack = flowControl.current.getTableLogStack();
+    const hasCauses = Array.isArray(flowControl.current.recountCauses) && flowControl.current.recountCauses.length > 0;
+    const action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
+    let stack = flowControl.current.getTableLogStack();
     if (hasCauses) {
       stack = LogService.addCausesToStack(stack, flowControl.current.recountCauses, flowControl.current.recountStartTime);
     }
