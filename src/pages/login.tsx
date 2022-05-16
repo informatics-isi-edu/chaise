@@ -38,19 +38,11 @@ export type loginForm = {
 const LoginPopupApp = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
 
-  const [loginModel, setLoginModel] = useState<loginForm>({username: '', password: ''})
-  const [showLoginForm, setShowLoginForm] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
     const authnRes = AuthnService.session;
-    const qString = queryStringToJSON(window.location.search);
-
-    if (qString.referrerid === undefined || qString.referrerid === null) {
-      setShowLoginForm(true);
-      return;
-    }
 
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
     let hasGroup = false;
@@ -65,6 +57,7 @@ const LoginPopupApp = (): JSX.Element => {
 
     // if the config is invalid, don't require group membership to continue automatically
     if (!validConfig || hasGroup) {
+      const qString = queryStringToJSON(window.location.search);
       if (qString.referrerid && (typeof qString.action === 'undefined') && window.opener) {
         //For child window
         window.opener.postMessage(window.location.search, window.opener.location.href);
@@ -114,83 +107,6 @@ const LoginPopupApp = (): JSX.Element => {
     }
   }, []);
 
-  const getParameters = () => {
-    const result: any = {};
-
-    let query = window.location.search;
-    if (query.length > 0) query = query.substring(1);
-
-    const parameters = query.split('&');
-    parameters.forEach((param) => {
-      const paramKey = param.split('=')[0],
-        paramValue = param.split('=')[0];
-
-      switch (paramKey) {
-        case 'referrer':
-          result['referrer'] = decodeURIComponent(paramValue);
-          break;
-        case 'method':
-          result['method'] = paramValue;
-          break;
-        case 'action':
-          result['action'] = decodeURIComponent(paramValue);
-          break;
-        case 'text':
-          result['text'] = decodeURIComponent(paramValue);
-          break;
-        case 'hidden':
-          result['hidden'] = decodeURIComponent(paramValue);
-          break;
-        default:
-          break;
-      }
-    });
-
-    return result;
-  }
-
-  const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setLoginModel((loginModel) => ({
-      ...loginModel,
-      username: event.target.value,
-    }));
-}
-
-  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
-      setLoginModel((loginModel) => ({
-        ...loginModel,
-        password: event.target.value,
-      }));
-  }
-
-  const handleLoginEnter = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && loginModel.username.length > 0 && loginModel.password.length > 0) localLogin();
-  }
-
-  const localLogin = () => {
-    const obj:any = {};
-    const params = getParameters();
-    const url = chaiseBaseURL() + (params.action ? params.action : '/authn/session');
-
-    if (params.text) {
-      obj[params.text] = loginModel.username;
-    } else {
-      obj['username'] = loginModel.username;
-    }
-
-    if (params.password) {
-      obj[params.password] = loginModel.password;
-    } else {
-      obj['password'] = loginModel.password;
-    }
-
-    ConfigService.http.post(url, obj).then((response: any) => {
-      // do something?
-    }).catch((error: any) => {
-      throw error;
-    })
-  }
-
   const reLogin = () => {
     setShowSpinner(true);
     AuthnService.refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
@@ -201,41 +117,6 @@ const LoginPopupApp = (): JSX.Element => {
   }
 
   const renderInstructions = () => {
-    if (showLoginForm) {
-      return (<div style={{'marginLeft': '210px', 'marginTop': '40px'}}>
-        <table>
-          <tbody>
-            <tr><td>
-              <label><b>Username: &nbsp; </b></label>
-              <input 
-                id='username'
-                type='text'
-                onChange={handleUsernameChange}
-                onKeyDown={handleLoginEnter}
-              />
-            </td></tr>
-            <tr><td>
-              <label><b>Password: &nbsp; </b></label>
-              <input
-                id='password' 
-                type='password'
-                onChange={handlePasswordChange}
-                onKeyDown={handleLoginEnter}
-              />
-            </td></tr>
-            <tr><td>
-              <button className='chaise-btn chaise-btn-primary' onClick={localLogin} disabled={false}>Login</button>
-            </td></tr>
-          </tbody>
-        </table>
-        <footer className='row footer'>
-          <div className='container'>
-            <p className='footer-text'>© 2014-2022 University of Southern California</p>
-          </div>
-        </footer>
-      </div>)
-    }
-
     if (!showInstructions) return;
 
     const groupName = '"' + cc.termsAndConditionsConfig.groupName + '"';
