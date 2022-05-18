@@ -107,14 +107,14 @@ const RecordsetInner = ({
 
   /**
    * whether the facet panel should be open or closed
-   * NOTE: will return false if faceting is disabled
+   * NOTE: will return false if faceting is disabled or should be hidden
    * default value is based on reference.display.facetPanelOpen
    * and if it's not defined, it will be:
    * - true: in fullscreen mode
    * - false: in any other modes
    */
   const [facetPanelOpen, setFacetPanelOpen] = useState<boolean>(() => {
-    if (config.disableFaceting) return false;
+    if (config.disableFaceting || !config.showFaceting) return false;
 
     let res = initialReference.display.facetPanelOpen;
     if (typeof res !== 'boolean') {
