@@ -1,4 +1,4 @@
-// import spinner from '@chaise/assets/images/loader.gif';
+// import spinner from '@isrd-isi-edu/chaise/src/assets/images/loader.gif';
 import Spinner from 'react-bootstrap/Spinner';
 
 interface SpinnerProps {

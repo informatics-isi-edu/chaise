@@ -1,4 +1,4 @@
-import { AlertsContext } from '@chaise/providers/alerts';
+import { AlertsContext } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { useContext } from 'react';
 
 

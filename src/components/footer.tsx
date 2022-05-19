@@ -1,6 +1,6 @@
-import { ConfigService } from '@chaise/services/config';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import React from 'react';
-import { attachFooterResizeSensor } from '@chaise/utils/ui-utils';
+import { attachFooterResizeSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 class Footer extends React.PureComponent {
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Displayname as DisplaynameType } from '@chaise/models/displayname';
-import DisplayValue from '@chaise/components/display-value';
+import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 type TitleProps = {

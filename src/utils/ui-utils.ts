@@ -2,9 +2,9 @@
  * Utility functions related to dom manipulation
  */
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
-import $log from '@chaise/services/logger';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
-import { windowRef } from '@chaise/utils/window-ref';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.

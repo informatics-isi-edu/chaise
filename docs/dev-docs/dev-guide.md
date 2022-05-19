@@ -83,7 +83,10 @@ The rules that should be followed while writing code.
 
 - Use functional components in most cases (class component should only be considered for special cases.)
 - Avoid using `any` type as much as you can.
-- Part of the build process defines an alias, called `@chaise`, to reference the `src` folder in the Chaise repo. This alias should be used instead of doing relative imports.
+- Don't use relative paths while importing. Instead, use the `@isrd-isi-edu/chaise` alias which points to the root. For example:
+  ```js
+  import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+  ```
 - Create a `type` for `props` of components.
 
 - Regarding [Render logic](https://blog.isquaredsoftware.com/presentations/react-redux-ts-intro-2020-12/#/36),

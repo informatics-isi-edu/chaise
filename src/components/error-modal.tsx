@@ -1,4 +1,4 @@
-import useError from '@chaise/hooks/error';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import Modal from 'react-bootstrap/Modal';
 
 const ErrorModal = (): JSX.Element | null => {

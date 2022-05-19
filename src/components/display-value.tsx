@@ -1,6 +1,6 @@
 import React from 'react';
-import { Displayname } from '@chaise/models/displayname';
-import { DEFAULT_DISPLAYNAME } from '@chaise/utils/constants';
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type DisplayValueProps = {
   value?: Displayname,

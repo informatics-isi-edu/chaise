@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import TypeUtils from '@chaise/utils/type-utils';
+import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type ExampleComponentProps = {
   app: string;

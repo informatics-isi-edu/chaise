@@ -1,20 +1,20 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import '@chaise/assets/scss/app.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
-import AlertsProvider from '@chaise/providers/alerts';
-import ErrorPorvider from '@chaise/providers/error';
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
+import ErrorPorvider from '@isrd-isi-edu/chaise/src/providers/error';
 import { StrictMode, useEffect, useState } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import ErrorModal from '@chaise/components/error-modal';
-import $log from '@chaise/services/logger';
-import ChaiseSpinner from '@chaise/components/spinner';
-import { ConfigService, ConfigServiceSettings } from '@chaise/services/config';
-import AuthnService from '@chaise/services/authn';
-import Alerts from '@chaise/components/alerts';
-import ChaiseNavbar from '@chaise/components/navbar';
-import useError from '@chaise/hooks/error';
-import { ConditionalWrapper } from '@chaise/components/cond-wrapper';
+import ErrorModal from '@isrd-isi-edu/chaise/src/components/error-modal';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
+import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
+import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 
 
 type AppWrapperProps = {

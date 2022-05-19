@@ -1,4 +1,4 @@
-import '@chaise/assets/scss/_navbar.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_navbar.scss';
 
 import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState } from 'react';
 
@@ -7,26 +7,26 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
-import ChaiseLogin from '@chaise/components/login';
-import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
-import ChaiseBanner from '@chaise/components/banner';
+import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/login';
+import ChaiseLoginDropdown from '@isrd-isi-edu/chaise/src/components/login-dropdown';
+import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/banner';
 
 // services
-import AuthnService from '@chaise/services/authn';
-import { ConfigService } from '@chaise/services/config';
-import { LogService } from '@chaise/services/log';
-import { windowRef } from '@chaise/utils/window-ref';
-import { NoRecordError } from '@chaise/models/errors';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // utilities
-import { LogActions } from '@chaise/models/log';
-import { getCatalogId, splitVersionFromCatalog } from '@chaise/utils/uri-utils';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { getCatalogId, splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, NavbarBanner, addLogParams,
   canEnable, canShow, createMenuList, menuItemClasses,
   onDropdownToggle, onLinkClick, renderName
-} from '@chaise/utils/menu-utils';
-import TypeUtils from '@chaise/utils/type-utils';
+} from '@isrd-isi-edu/chaise/src/utils/menu-utils';
+import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = getCatalogId();

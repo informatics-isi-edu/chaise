@@ -1,11 +1,11 @@
 // Navbar App
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import '@chaise/assets/scss/app.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ChaiseNavbar from '@chaise/components/navbar';
+import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar';
 
 // TODO should use the appwrapper
 

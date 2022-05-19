@@ -1,9 +1,9 @@
 import Q from 'q';
-import { ConfigService } from '@chaise/services/config';
-import { windowRef } from '@chaise/utils/window-ref';
-import MathUtils from '@chaise/utils/math-utils';
-import { BODY_CLASS_NAMES } from '@chaise/utils/constants';
-import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@chaise/utils/uri-utils';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import MathUtils from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 // TODO could be part of another utils
 

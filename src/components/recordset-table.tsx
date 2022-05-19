@@ -1,15 +1,15 @@
-import '@chaise/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig } from '@chaise/models/recordset';
-import $log from '@chaise/services/logger';
-import DisplayValue from '@chaise/components/display-value';
-import { makeSafeIdAttr } from '@chaise/utils/string-utils';
+import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
+import { SortColumn, RecordsetConfig } from '@isrd-isi-edu/chaise/src/models/recordset';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { MESSAGE_MAP } from '@chaise/utils/message-map';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
-import useRecordset from '@chaise/hooks/recordset';
-import { LogActions, LogReloadCauses } from '@chaise/models/log';
+import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,

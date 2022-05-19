@@ -1,6 +1,6 @@
-import '@chaise/assets/scss/_table-header.scss';
-import useRecordset from '@chaise/hooks/recordset';
-import { LogActions, LogReloadCauses } from '@chaise/models/log';
+import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -14,9 +14,9 @@ const TableHeader = () => {
 
   // <span className={"glyphicon pull-right " + this.state.selectedPageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'}></span>
   const renderPageLimits = () => pageLimits.map((limit: number, index: number) => {
-    return (<Dropdown.Item 
-      as='li' 
-      key={index} 
+    return (<Dropdown.Item
+      as='li'
+      key={index}
       className={'page-size-limit-' + limit}
       onClick={() => handlePageLimitChange(limit)}
     >
@@ -28,13 +28,13 @@ const TableHeader = () => {
   const handlePageLimitChange: any = (value: any) => {
     // const action = LogActions.PAGE_SIZE_SELECT;
     const cause = LogReloadCauses.PAGE_LIMIT;
-    
+
     update(null, value, true, false, false, false, cause);
   }
 
   const renderPageSizeDropdown = () => {
     return (
-      <Dropdown 
+      <Dropdown
         as='button'
         className='page-size-dropdown chaise-btn chaise-btn-secondary'
       >

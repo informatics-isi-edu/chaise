@@ -1,16 +1,16 @@
 import axios from 'axios';
 import Q from 'q';
-import { windowRef } from '@chaise/utils/window-ref';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 // needed for async/await to work
 import 'regenerator-runtime';
 import {
   APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG,
-} from '@chaise/utils/constants';
-import MathUtils from '@chaise/utils/math-utils';
-import { getCatalogId, getQueryParam } from '@chaise/utils/uri-utils';
-import { setupHead, setWindowName } from '@chaise/utils/head-injector';
-import AuthnService from '@chaise/services/authn';
+} from '@isrd-isi-edu/chaise/src/utils/constants';
+import MathUtils from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 
 export interface AppSettings {
   appName: string,

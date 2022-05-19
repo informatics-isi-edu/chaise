@@ -1,15 +1,15 @@
-import '@chaise/assets/scss/_modal.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_modal.scss';
 
 import { useEffect, useState } from 'react';
 
 // components
-import ChaiseModal from '@chaise/components/modal';
+import ChaiseModal from '@isrd-isi-edu/chaise/src/components/modal';
 
 // models
-import { Client } from '@chaise/models/user';
+import { Client } from '@isrd-isi-edu/chaise/src/models/user';
 
 // utilities
-import AuthnService from '@chaise/services/authn';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 
 
 const ProfileModal = ({

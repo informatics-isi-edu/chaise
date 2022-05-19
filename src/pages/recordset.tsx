@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { ConfigService } from '@chaise/services/config';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
-import ChaiseSpinner from '@chaise/components/spinner';
-import Recordset, { RecordsetProps } from '@chaise/components/recordset';
-import $log from '@chaise/services/logger';
-import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
-import { windowRef } from '@chaise/utils/window-ref';
-import TypeUtils from '@chaise/utils/type-utils';
-import { updateHeadTitle } from '@chaise/utils/head-injector';
-import { getDisplaynameInnerText } from '@chaise/utils/data-utils';
-import { LogService } from '@chaise/services/log';
-import { LogStackTypes } from '@chaise/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
-import useError from '@chaise/hooks/error';
-import AppWrapper from '@chaise/components/app-wrapper';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
 const recordsetSettings = {
   appName: 'recordset',

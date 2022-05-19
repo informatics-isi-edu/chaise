@@ -1,25 +1,25 @@
-import '@chaise/assets/scss/_login-app.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
 // Login Popup App
 import 'bootstrap/dist/css/bootstrap.min.css';
-import '@chaise/assets/scss/app.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
 import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import ChaiseSpinner from '@chaise/components/spinner';
-import AppWrapper from '@chaise/components/app-wrapper';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
 // services
-import AuthnService from '@chaise/services/authn';
-import { ConfigService } from '@chaise/services/config';
-import { LogActions } from '@chaise/models/log';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utilities
-import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
-import { chaiseBaseURL, queryStringToJSON } from '@chaise/utils/uri-utils';
+import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
+import { chaiseBaseURL, queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 
 const loginSettings = {
@@ -31,7 +31,7 @@ const loginSettings = {
 };
 
 export type loginForm = {
-  username: string, 
+  username: string,
   password: string
 }
 

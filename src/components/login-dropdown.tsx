@@ -5,13 +5,13 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // utilities
-import { LogActions } from '@chaise/models/log';
-import { 
-  MenuOption, canEnable, canShow, 
-  logout, menuItemClasses, onDropdownToggle, 
-  onLinkClick, renderName 
-} from '@chaise/utils/menu-utils';
-import { windowRef } from '@chaise/utils/window-ref';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import {
+  MenuOption, canEnable, canShow,
+  logout, menuItemClasses, onDropdownToggle,
+  onLinkClick, renderName
+} from '@isrd-isi-edu/chaise/src/utils/menu-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 interface ChaiseLoginDropdownProps {
   menu: MenuOption[],
@@ -19,7 +19,7 @@ interface ChaiseLoginDropdownProps {
   parentDropdown: any // TODO: useRef wrapper type
 }
 
-// NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax 
+// NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax
 //       hasn't been updated to use the "types" or set default types on menu ingest
 const ChaiseLoginDropdown = ({
   menu, openProfileCb, parentDropdown
@@ -48,7 +48,7 @@ const ChaiseLoginDropdown = ({
     // parentDropdown.current is the parent menu option that toggles open the menu below
     // this menu is generated when the parent dropdown is opened so we don't know how wide the child will be on open
     // check if opening the menu twice would push off the screen to have the next dropdown open left instead
-    // TODO: toggling 
+    // TODO: toggling
     console.log(parentDropdown)
     console.log(winWidth - parentDropdown.current.getBoundingClientRect().right);
     console.log(parentDropdown.current.getBoundingClientRect());

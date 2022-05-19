@@ -1,6 +1,6 @@
 /* eslint max-classes-per-file: 0 */
 
-import { errorNames, errorMessages } from '@chaise/utils/constants';
+import { errorNames, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 interface ChaiseERMrestJSError {
   /**

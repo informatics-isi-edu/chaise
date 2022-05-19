@@ -1,16 +1,16 @@
 import axios from 'axios';
 
-import StorageService from '@chaise/utils/storage';
-import { ConfigService } from '@chaise/services/config';
-import { LogActions, LogReloadCauses } from '@chaise/models/log';
-import { LogService } from '@chaise/services/log';
+import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
-import { MESSAGE_MAP } from '@chaise/utils/message-map';
-import { validateTermsAndConditionsConfig } from '@chaise/utils/config-utils';
-import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from '@chaise/utils/uri-utils';
-import { windowRef } from '@chaise/utils/window-ref';
-import { BUILD_VARIABLES } from '@chaise/utils/constants';
-import { Session } from '@chaise/models/user';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
+import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 
 export default class AuthnService {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location

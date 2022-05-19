@@ -6,43 +6,54 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = (appName, title, mode, env) => {
+/**
+ *
+ * @param {string} appName the filename of the app
+ * @param {string} title the title that will be appenede to the HTML
+ * @param {string}} mode whether it's in dev mode or production
+ * @param {Object} env the environment variables
+ * @param {Object?} options the customization options
+ * @returns
+ */
+module.exports = (appName, title, mode, env, options) => {
   const ermrestjsPath = env.BUILD_VARIABLES.ERMRESTJS_BASE_PATH;
   const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
   const buildVersion = env.BUILD_VARIABLES.BUILD_VERSION;
+
+  options = options || {};
+  if (typeof options.pathPrefix !== 'string' || options.pathPrefix.length === 0) {
+    options.pathPrefix = path.resolve(__dirname, '..');
+  }
+  if (!options.pathAliases || typeof options.pathAliases !== 'object') {
+    options.pathAliases = {};
+  }
+
+  let app_config = '';
+  if (typeof options.appConfigLocation === 'string' && options.appConfigLocation.length > 0) {
+    app_config = `<script src='${options.appConfigLocation}?v=${buildVersion}'></script>`;
+  }
 
   return {
     name: appName,
     devtool: (mode === 'development') ? 'inline-source-map' : false,
     mode,
-    entry: path.join(__dirname, '..', 'src', 'pages', `${appName}.tsx`),
+    entry: path.join(options.pathPrefix, 'src', 'pages', `${appName}.tsx`),
     output: {
-      path: path.resolve(__dirname, '..', 'dist', 'react', appName),
+      path: path.resolve(options.pathPrefix, 'dist', 'react', appName),
       filename: '[name].bundle.js',
+      clean: true
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
-      modules: [
-        path.resolve(__dirname, '..', 'src'),
-        path.resolve(__dirname, '..', 'node_modules'),
-      ],
       alias: {
-        '@chaise/assets': path.resolve(__dirname, '..', 'src', 'assets'),
-        '@chaise/components': path.resolve(__dirname, '..', 'src', 'components'),
-        '@chaise/hooks': path.resolve(__dirname, '..', 'src', 'hooks'),
-        '@chaise/models': path.resolve(__dirname, '..', 'src', 'models'),
-        '@chaise/providers': path.resolve(__dirname, '..', 'src', 'providers'),
-        '@chaise/services': path.resolve(__dirname, '..', 'src', 'services'),
-        '@chaise/store': path.resolve(__dirname, '..', 'src', 'store'),
-        '@chaise/utils': path.resolve(__dirname, '..', 'src', 'utils'),
-        '@chaise/vendor': path.resolve(__dirname, '..', 'src', 'vendor'),
+        ...options.pathAliases,
+        '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
       },
     },
     module: {
       rules: [
         {
           test: /\.(ts|js)x?$/,
-          exclude: /node_modules/,
           use: ['babel-loader'],
         },
         {
@@ -77,6 +88,7 @@ module.exports = (appName, title, mode, env) => {
           `<script src='${ermrestjsPath}ermrest.min.js?v=${buildVersion}'></script>`,
         ].join('\n'),
         chaise_config: `<script src='${chaisePath}chaise-config.js?v=${buildVersion}'></script>`,
+        app_config
       }),
     ],
     optimization: {

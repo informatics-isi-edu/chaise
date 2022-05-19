@@ -1,10 +1,10 @@
-import AppWrapper from '@chaise/components/app-wrapper';
-import useError from '@chaise/hooks/error';
-import { ConfigService } from '@chaise/services/config';
-import $log from '@chaise/services/logger';
-import TypeUtils from '@chaise/utils/type-utils';
-import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
-import { windowRef } from '@chaise/utils/window-ref';
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 

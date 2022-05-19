@@ -1,5 +1,5 @@
-import { ConfigService } from '@chaise/services/config';
-import TypeUtils from '@chaise/utils/type-utils';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 /**
 * Returns true if the object passed is valid for the terms and conditions feature

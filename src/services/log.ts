@@ -1,6 +1,6 @@
-import { LogAppModes } from '@chaise/models/log';
-import { ConfigService } from '@chaise/services/config';
-import $log from '@chaise/services/logger';
+import { LogAppModes } from '@isrd-isi-edu/chaise/src/models/log';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 const APP_MODE_STACKPATH_SEPARATOR = ':';
 const STACKPATH_CLIENTPATH_SEPARATOR = ',';

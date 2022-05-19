@@ -4,25 +4,25 @@ import { MouseEvent, useEffect, useRef, useState } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
-import ChaiseLoginDropdown from '@chaise/components/login-dropdown';
-import ProfileModal from '@chaise/components/profile-modal';
+import ChaiseLoginDropdown from '@isrd-isi-edu/chaise/src/components/login-dropdown';
+import ProfileModal from '@isrd-isi-edu/chaise/src/components/profile-modal';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
 // services
-import { ConfigService } from '@chaise/services/config';
-import AuthnService from '@chaise/services/authn';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 
 // utilities
-import { LogActions } from '@chaise/models/log';
-import TypeUtils from '@chaise/utils/type-utils';
-import { getCatalogId } from '@chaise/utils/uri-utils';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { getCatalogId } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, addLogParams, createMenuList,
   isChaise, isOptionValid, logout,
   onDropdownToggle, onLinkClick, openProfileModal,
   renderName
-} from '@chaise/utils/menu-utils';
+} from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
 
 const ChaiseLogin = (): JSX.Element => {

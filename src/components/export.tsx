@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Dropdown from 'react-bootstrap/Dropdown';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { MESSAGE_MAP } from '@chaise/utils/message-map';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type ExportProps = {
   reference: any,
