@@ -1,5 +1,5 @@
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 /**
 * Returns true if the object passed is valid for the terms and conditions feature
@@ -17,5 +17,5 @@ export function validateTermsAndConditionsConfig(obj: any) {
   const tacConfig = ConfigService.chaiseConfig.termsAndConditionsConfig;
 
   // all 3 properties must be defined for this to function, if not the old login app will be used
-  return (TypeUtils.isStringAndNotEmpty(tacConfig.groupId) && TypeUtils.isStringAndNotEmpty(tacConfig.joinUrl) && TypeUtils.isStringAndNotEmpty(tacConfig.groupName));
+  return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));
 }

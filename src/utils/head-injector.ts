@@ -1,7 +1,7 @@
 import Q from 'q';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import MathUtils from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
@@ -40,7 +40,7 @@ export function updateHeadTitle(contextTitle?: string) {
  */
 export function setWindowName() {
   if (!windowRef.name) {
-    windowRef.name = MathUtils.uuid();
+    windowRef.name = generateUUID();
   }
 }
 
@@ -98,7 +98,7 @@ function addBodyClasses() {
 function addTitle(title?: string) {
   const chaiseConfig = ConfigService.chaiseConfig;
 
-  let usedTitle : string;
+  let usedTitle: string;
   if (typeof title !== 'string' || title.length === 0) {
     usedTitle = chaiseConfig.headTitle;
   } else {

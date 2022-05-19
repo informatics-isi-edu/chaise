@@ -2,7 +2,7 @@ import React from 'react';
 
 import { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type ExampleComponentProps = {
   app: string;
@@ -29,7 +29,7 @@ const ExampleComponent = ({
 
   // - Render any dependent items into temporary variables,
   //    such as conditional components or lists
-  const conditionalDescription = (TypeUtils.isStringAndNotEmpty(description))
+  const conditionalDescription = (isStringAndNotEmpty(description))
     ? (<Button onClick={onClick}>Show Description</Button>) : null;
 
   // - Use a single JSX structure filled with content

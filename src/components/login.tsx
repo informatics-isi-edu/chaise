@@ -15,7 +15,6 @@ import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 
 // utilities
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { getCatalogId } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, addLogParams, createMenuList,

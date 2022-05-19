@@ -26,7 +26,7 @@ import {
   canEnable, canShow, createMenuList, menuItemClasses,
   onDropdownToggle, onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = getCatalogId();
@@ -71,19 +71,19 @@ const ChaiseNavbar = (): JSX.Element => {
 
     // NOTE: any type until chaise config is typed
     bannerConfig.forEach((conf: any) => {
-      if (!TypeUtils.isObjectAndNotNull(conf)) return;
-      if (!TypeUtils.isStringAndNotEmpty(conf.markdownPattern)) return;
+      if (!isObjectAndNotNull(conf)) return;
+      if (!isStringAndNotEmpty(conf.markdownPattern)) return;
 
       let html = ERMrest.renderHandlebarsTemplate(conf.markdownPattern, null, { id: catalogId });
       html = ERMrest.renderMarkdown(html, false);
 
-      if (!TypeUtils.isStringAndNotEmpty(html)) {
+      if (!isStringAndNotEmpty(html)) {
         // invalid html, so we shounldn't add it.
         return;
       }
 
       // if acls.show is defined, process it
-      if (TypeUtils.isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
+      if (isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
         if (!AuthnService.isGroupIncluded(conf.acls.show)) {
           // don't add the banner because of acls
           return;
@@ -94,7 +94,7 @@ const ChaiseNavbar = (): JSX.Element => {
         dismissible: (conf.dismissible === true),
         hide: false,
         html: html,
-        key: TypeUtils.isStringAndNotEmpty(conf.key) ? conf.key : ''
+        key: isStringAndNotEmpty(conf.key) ? conf.key : ''
       };
 
       // add the banner to top or bottom based on given position

@@ -1,25 +1,20 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
+import React, { useEffect, useRef, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
-import { LogActions, LogReloadCauses, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { SortColumn, RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import Q from 'q';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {isObjectAndKeyDefined} from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { getColumnValuesFromPage, getRowValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting';
@@ -193,7 +188,7 @@ const RecordsetInner = ({
       $log.warn(exception);
       // TODO
       // setIsLoading(false);
-      if (TypeUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+      if (isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
         exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
       }
       dispatchError({ error: exception });

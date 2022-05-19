@@ -7,7 +7,7 @@ import 'regenerator-runtime';
 import {
   APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG,
 } from '@isrd-isi-edu/chaise/src/utils/constants';
-import MathUtils from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
@@ -90,7 +90,7 @@ export class ConfigService {
 
     ConfigService._contextHeaderParams = {
       cid: settings.appName,
-      pid: MathUtils.uuid(),
+      pid: generateUUID(),
       wid: windowRef.name
     };
 

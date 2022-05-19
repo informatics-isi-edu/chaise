@@ -7,7 +7,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -441,7 +441,7 @@ export default function RecordsetProvider({
         // globally sets when the app state is ready to interact with
         // TODO is this needed?
         // $rootScope.displayReady = true;
-        if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+        if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
           err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
         }
         defer.reject(err);

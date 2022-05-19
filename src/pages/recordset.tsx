@@ -8,7 +8,7 @@ import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/r
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import TypeUtils from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -107,7 +107,7 @@ const RecordsetApp = (): JSX.Element => {
         logInfo,
       });
     }).catch((err: any) => {
-      if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+      if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
       dispatchError({ error: err, isGlobal: true });
