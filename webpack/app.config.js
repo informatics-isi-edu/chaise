@@ -7,6 +7,12 @@ const path = require('path');
 const webpack = require('webpack');
 
 /**
+ * This function can be used for configuring webpack for installing chaise-like
+ * applications. This function must be called with the following environment variables:
+ * - BUILD_VARIABLES: An object with the following properties:
+ *   - ERMRESTJS_BASE_PATH: The base path of ermrestjs in the server, e.g. /ermrestjs/
+ *   - CHAISE_BASE_PATH: The base path of chaise in the server, e.g. /chaise/
+ *   - BUILD_VERSION: A randomly generated string signifying the build version.
  *
  * @param {string} appName the filename of the app
  * @param {string} title the title that will be appenede to the HTML
