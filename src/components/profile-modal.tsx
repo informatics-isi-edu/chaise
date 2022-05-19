@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_modal.scss';
 import { useEffect, useState } from 'react';
 
 // components
-import ChaiseModal from '@isrd-isi-edu/chaise/src/components/modal';
+import Modal from 'react-bootstrap/Modal';
 
 // models
 import { Client } from '@isrd-isi-edu/chaise/src/models/user';
@@ -121,38 +121,35 @@ const ProfileModal = ({
     )
   }
 
-  const profileTitle = (<>
-      {userDisplay}
-    </>
-  );
-
-  const profileBody = (
-    <table className='table'>
-      <tbody>
-        {renderClientInfo()}
-        {renderIdentities()}
-        {renderGroups()}
-      </tbody>
-    </table>
-  );
-
-  const profileFooter = (
-    <div />
-  );
-
   if (!showProfile) {
     return null;
   }
 
   return (
-    <ChaiseModal
-      body={profileBody}
+    <Modal
       contentClassName='profile-popup'
-      footer={profileFooter}
-      onHide={handleClose}
       show={showProfile}
-      title={profileTitle}
-    />
+    >
+      <Modal.Header className='center-aligned-title'>
+        <Modal.Title>{userDisplay}</Modal.Title>
+        <button
+          className='chaise-btn chaise-btn-secondary modal-close modal-close-absolute'
+          onClick={() => handleClose()}
+        >
+            <strong className='chaise-btn-icon'>X</strong>
+            <span>Close</span>
+        </button>
+      </Modal.Header>
+      <Modal.Body>
+        <table className='table'>
+          <tbody>
+            {renderClientInfo()}
+            {renderIdentities()}
+            {renderGroups()}
+          </tbody>
+        </table>
+      </Modal.Body>
+    </Modal>
   );
 };
 
