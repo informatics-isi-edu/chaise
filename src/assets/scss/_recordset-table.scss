@@ -114,6 +114,7 @@
 
   > tbody > tr > td {
     padding: 5px;
+    vertical-align: top;
   }
 
   th {
@@ -133,7 +134,9 @@
     }
 
     // preserve space for the icon on the right
-    padding-right: 10px + 15px;
+    // 20 for the "icon space"
+    // 10 for the "right indentation"
+    padding-right: 30px;
     .table-heading-icons {
       position: absolute;
       bottom: 7px;

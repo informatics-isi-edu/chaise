@@ -1,72 +1,103 @@
 import '@chaise/assets/scss/_table-header.scss';
-import useRecordset from '@chaise/hooks/recordset';
-import { LogActions, LogReloadCauses } from '@chaise/models/log';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
 
-const TableHeader = () => {
-  const { totalRowCount, page, pageLimit, update } = useRecordset();
+// models 
+import { RecordsetDisplayMode } from '@chaise/models/recordset';
+
+// providers
+import useRecordset from '@chaise/hooks/recordset';
+
+// utilities
+import { LogActions, LogReloadCauses } from '@chaise/models/log';
+
+const TableHeader = (): JSX.Element => {
+  const { colValues, config, page, pageLimit, reference, totalRowCount, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
 
-  // TODO
-
-  // <span className={"glyphicon pull-right " + this.state.selectedPageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible'}></span>
   const renderPageLimits = () => pageLimits.map((limit: number, index: number) => {
-    return (<Dropdown.Item 
-      as='li' 
-      key={index} 
+    return (<Dropdown.Item
+      as='li'
+      key={index}
       className={'page-size-limit-' + limit}
       onClick={() => handlePageLimitChange(limit)}
     >
       <span>{limit} </span>
-      {limit === pageLimit && <span className='fa-solid fa-check' style={{'float': 'right'}}></span>}
+      {limit === pageLimit && <span className='fa-solid fa-check' style={{ 'float': 'right' }}></span>}
     </Dropdown.Item>)
   });
 
   const handlePageLimitChange: any = (value: any) => {
     // const action = LogActions.PAGE_SIZE_SELECT;
     const cause = LogReloadCauses.PAGE_LIMIT;
-    
+
     update(null, value, true, false, false, false, cause);
+  }
+
+  // the text that we should display before the page-size-dropdown
+  const prependLabel = () => {
+    if (page && page.tuples.length > 0) {
+      // 2 options that are either defined (a reference) or not defined (null or undefined)
+      // 2 options that are true/false gives 4 cases
+      if (page.hasNext && !page.hasPrevious) return 'first';
+      if (!page.hasNext && page.hasPrevious) return 'last';
+      if (!page.hasNext && !page.hasPrevious) return 'all';
+
+      // if page has both hasNext and hasPrevious, return nothing
+      return;
+    }
   }
 
   const renderPageSizeDropdown = () => {
     return (
-      <Dropdown 
-        as='button'
-        className='page-size-dropdown chaise-btn chaise-btn-secondary'
-      >
-        <Dropdown.Toggle as='span'>{pageLimit}</Dropdown.Toggle>
+      <Dropdown>
+        <Dropdown.Toggle className='page-size-dropdown chaise-btn chaise-btn-secondary'>{pageLimit}</Dropdown.Toggle>
         <Dropdown.Menu as='ul'>{renderPageLimits()}</Dropdown.Menu>
       </Dropdown>
     )
   }
 
+  // the text that we should display after the page-size-dropdown
+  const appendLabel = () => {
+    if (!page) return '';
+
+    let recordsText = 'records';
+    if (reference.location.isConstrained && config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+      recordsText = 'matching results';
+    }
+
+    // if no tuples, return 0 count with recordsText
+    if (page.tuples.length === 0) return '0 ' + recordsText;
+
+    let label = '';
+    // TODO: check tableError
+    // if (totalRowCount && !vm.tableError) {
+    if (totalRowCount) {
+      label += 'of ';
+      if (!colValues[0] || totalRowCount > colValues[0].length) {
+        label += totalRowCount.toLocaleString() + ' ';
+      } else {
+        label += colValues[0].length.toLocaleString() + ' ';
+      }
+    }
+
+    // if tuples, return label (counts text) with recordsText
+    return label + recordsText;
+  }
+
   return (
     <div className='chaise-table-header row'>
       <div className={'chaise-table-header-total-count col-xs-12 col-sm-6' + (page && page.tuples.length > 0 ? ' with-page-size-dropdown' : '')}>
-        {/* ng-className='{with-page-size-dropdown': vm.rowValues.length > 0}' */}
-        <span className='displaying-text'>Displaying </span>
+        <span className='displaying-text'>Displaying {prependLabel()}</span>
         {renderPageSizeDropdown()}
         <span className='total-count-text'>
-          {typeof totalRowCount === 'number' ? `of ${totalRowCount.toLocaleString()} records` : ''}
-          {/* <span className='prepended-label'>{{prependLabel()}}</span>
-            <span ng-if='vm.rowValues.length > 0' uib-dropdown on-toggle='::pageSizeDropdownToggle(open)'>
-                <button className='page-size-dropdown chaise-btn chaise-btn-secondary dropdown-toggle' type='button' uib-dropdown-toggle ng-disabled='!vm.hasLoaded || !vm.initialized || vm.pushMoreRowsPending'>
-                    <span>25</span>
-                    <span className='caret'></span>
-                </button>
-                <ul className='dropdown-menu dropdown-menu-left'>
-                    <li ng-repeat='limit in pageLimits'>
-                        <a className='page-size-limit-{{limit}}' href ng-click='setPageLimit(limit)'>{{ limit }}<span className='glyphicon pull-right' ng-className='vm.pageLimit === limit ? 'glyphicon-ok' : 'glyphicon-invisible''></span></a>
-                    </li>
-                </ul>
-            </span>
-            <span className='appended-label'>{{appendLabel()}}</span>
+          {appendLabel()}
+          {/* TODO: error handling for table data. Requests timed out (alert icon) and push more rows pending (loader icon)
             <span ng-if='vm.countError' className='glyphicon glyphicon-alert' uib-tooltip='Request timeout: total count cannot be retrieved. Refresh the page later to try again.' tooltip-placement='bottom'></span>
-            <span ng-show='vm.pushMoreRowsPending || (vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 && !vm.hasLoaded)' className='glyphicon glyphicon-refresh glyphicon-refresh-animate'></span> */}
+            <span ng-show='vm.pushMoreRowsPending || (vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 && !vm.hasLoaded)' className='glyphicon glyphicon-refresh glyphicon-refresh-animate'></span>
+           */}
         </span>
       </div>
       <div className='col-xs-12 col-sm-6'>

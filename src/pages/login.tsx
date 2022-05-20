@@ -62,7 +62,7 @@ const LoginPopupApp = (): JSX.Element => {
         //For child window
         window.opener.postMessage(window.location.search, window.opener.location.href);
 
-
+        // Create the user in 'user_profile" table with `onconflict=skip` if user exists already
         // POST /ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip
         // Content-Type: application/json
         //
@@ -88,9 +88,10 @@ const LoginPopupApp = (): JSX.Element => {
             window.close();
           }).catch((error: any) => {
             // NOTE: this should almost never happen
-            // I think this shouldn't "close the window" automatically
+            //     will happen in any deployment that turns this feature on before we rework the 
+            //      property definition to include the "userProfile Path" as a configuration property
             // if a user reports this hanging around, we need to identify what error caused it
-            // should be easy since the error will be logged with context pointing to login i believe
+            // should be easy since the error will be logged with context pointing to login I believe
             console.log(error);
             console.log('error creating user');
           });

@@ -1,6 +1,6 @@
 import useError from '@chaise/hooks/error';
 import { LogActions, LogStackPaths } from '@chaise/models/log';
-import { RecordsetDisplayMode } from '@chaise/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode } from '@chaise/models/recordset';
 import { ConfigService } from '@chaise/services/config';
 import { LogService } from '@chaise/services/log';
 import $log from '@chaise/services/logger';
@@ -25,6 +25,7 @@ export const RecordsetContext = createContext<{
   page: any,
   colValues: any,
   columnModels: any,
+  config: RecordsetConfig,
   totalRowCount: number|null
 }
   // NOTE: since it can be null, to make sure the context is used properly with
@@ -35,7 +36,7 @@ type RecordsetProviderProps = {
   children: JSX.Element,
   initialReference: any,
   initialPageLimit: any,
-  config: any, // TODO
+  config: RecordsetConfig, // TODO
   logInfo: any, // TODO
   getFavorites?: Function,
   getDisabledTuples?: Function,
@@ -761,6 +762,7 @@ export default function RecordsetProvider({
       page,
       colValues,
       columnModels,
+      config,
       totalRowCount
     };
   }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);

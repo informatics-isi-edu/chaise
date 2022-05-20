@@ -10,6 +10,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@chaise/utils/ui-utils';
 import useRecordset from '@chaise/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@chaise/models/log';
+import TableRow from '@chaise/components/table-row';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -122,18 +123,20 @@ const RecordsetTable = ({
     return columnModels.map((col: any, index: number) => {
       const canSort = config.sortable && col.column.sortable && !col.hasError && !col.isLoading;
 
+      const headerClassName = `table-column-displayname${col.column.comment ? ' chaise-icon-for-tooltip' : ''}`
       return (
         <th
           key={index}
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
-          <span className='table-column-displayname' >
+          <span className={headerClassName} >
             <DisplayValue value={col.column.displayname} />
+            {col.column.comment ? ' ' : ''}
           </span>
           <span className='table-heading-icons'>
             {col.hasError && renderColumnError()}
-            {!col.hasError && col.isLoading && <span className='fa-solid fa-rotate fa-spin' />}
+            {!col.hasError && col.isLoading && <span className='fa-solid fa-rotate fa-spin aggregate-col-loader' />}
             {
               canSort &&
               <span className='column-sort-icon'>{renderColumnSortIcon(col)}</span>
@@ -162,66 +165,12 @@ const RecordsetTable = ({
 
     return page.tuples.map((tuple: any, index: number) => {
       return (
-        <tr key={tuple.uniqueId} className='chaise-table-row' style={{ 'position': 'relative' }}>
-          <td className='block action-btns'>
-            <div className='chaise-btn-group'>
-              {config.viewable &&
-                <a
-                  type='button'
-                  className='view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  href={tuple.reference.contextualize.detailed.appLink}
-                >
-                  <span className='chaise-btn-icon chaise-icon chaise-view-details'></span>
-                </a>
-              }
-              {/* TODO edit */}
-              {/* TODO delete */}
-              {/* TODO select */}
-            </div>
-          </td>
-          {renderCells(index)}
-        </tr>
-
-      )
+        <TableRow 
+          key={tuple.uniqueId}
+          rowIndex={index} 
+          tuple={tuple}
+        />)
     })
-  }
-
-  // const renderCells = (tuple: any) => {
-  //   return tuple.values.map((val: any, index: number) => {
-  //     return (
-  //       <td key={tuple.uniqueId + '-' + index}>
-  //         <div className='showContent'>
-  //           <DisplayValue addClass={true} value={{value: val, isHTML: tuple.isHTML[index]}} />
-  //         </div>
-  //       </td>
-  //     )
-  //   })
-  // };
-
-  // const renderCells = (rowValue: any) => {
-  //   if (!rowValue || rowValue.length == 0) return;
-  //   return rowValue.map((val: any, index: number) => {
-  //     return (
-  //       <td key={index}>
-  //         <div className='showContent'>
-  //           <DisplayValue addClass={true} value={val} />
-  //         </div>
-  //       </td>
-  //     )
-  //   })
-  // };
-
-  const renderCells = (rowIndex: number) => {
-    return colValues.map((colVal: any, colIndex: number) => {
-      return (
-        <td key={rowIndex + '-' + colIndex}>
-          {/* TODO ellipsis logic */}
-          <div className='showContent'>
-            <DisplayValue addClass={true} value={colVal[rowIndex]} />
-          </div>
-        </td>
-      )
-    });
   }
 
   const renderNextPreviousBtn = () => {
@@ -248,12 +197,17 @@ const RecordsetTable = ({
     )
   }
 
+  const outerTableClassname = () => {
+    const classNameString = 'outer-table recordset-table chaise-hr-scrollable'
+    const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
+    return classNameString + ' ' + tableSchemaNames;
+  }
   return (
     <div className='recordset-table-container' ref={tableContainer}>
       <div className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
-      <div className='outer-table recordset-table chaise-hr-scrollable'>
+      <div className={outerTableClassname()}>
         <table className='table chaise-table table-hover'>
           <thead className='table-heading'>
             <tr>
