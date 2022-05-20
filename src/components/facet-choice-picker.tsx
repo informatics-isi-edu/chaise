@@ -1,11 +1,11 @@
-import { LogStackTypes } from '@chaise/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@chaise/models/recordset';
-import { LogService } from '@chaise/services/log';
-import $log from '@chaise/services/logger';
+import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { useState } from 'react';
-import { RecordsetProps } from '@chaise/components/recordset';
-import RecordsetModal from '@chaise/components/recordset-modal';
-import SearchInput from '@chaise/components/search-input';
+import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
+import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 
 type FacetChoicePickerProps = {
   facetColumn: any,

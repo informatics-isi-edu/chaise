@@ -1,9 +1,9 @@
-import '@chaise/assets/scss/_faceting.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
 import Accordion from 'react-bootstrap/Accordion';
-import DisplayValue from '@chaise/components/display-value';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { useEffect, useState } from 'react';
-import FacetChoicePicker from '@chaise/components/facet-choice-picker';
+import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
 
 // TODO subject to change
 type FacetingProps = {

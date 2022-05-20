@@ -1,6 +1,11 @@
 // don't add border to the modal header
 .modal-header {
   border-bottom: none;
+
+  &.center-aligned-title {
+    display: block;
+    text-align: center;
+  }
 }
 
 // uploader

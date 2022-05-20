@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
 // components
-import DisplayValue from '@chaise/components/display-value';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // providers
-import useRecordset from '@chaise/hooks/recordset';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // services
-import { ConfigService } from '@chaise/services/config';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 type TableRowProps = {
   rowIndex: number,

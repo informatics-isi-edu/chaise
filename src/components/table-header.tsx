@@ -1,16 +1,16 @@
-import '@chaise/assets/scss/_table-header.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // models 
-import { RecordsetDisplayMode } from '@chaise/models/recordset';
+import { RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
-import useRecordset from '@chaise/hooks/recordset';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // utilities
-import { LogActions, LogReloadCauses } from '@chaise/models/log';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
 const TableHeader = (): JSX.Element => {
   const { colValues, config, page, pageLimit, reference, totalRowCount, update } = useRecordset();

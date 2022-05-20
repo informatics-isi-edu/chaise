@@ -23,7 +23,7 @@ This is a guide for people who develop Chaise.
 
 
 ## Reading Material
-In this section we've included all the guides and tools that we think are useful
+In this section, we've included all the guides and tools that we think are useful
 for learning different concepts.
 
 ### General
@@ -40,12 +40,11 @@ for learning different concepts.
 - [W3schools CSS tutorial](https://www.w3schools.com/css/): this is a good starting point for refreshing your CSS knowledge.
 - [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS): a very thorough CSS reference that you can use to learn more about different CSS features.
 - [Sass basics](https://sass-lang.com/guide): a very good starting point for learning Sass basics (we're using SCSS syntax.)
-- [Glyph-icons](https://css-tricks.com/snippets/html/glyphs/) : An amazing comprehensive guide to include any glyphs in your css code
 - [CSS Printing Guide - 1](https://www.smashingmagazine.com/2018/05/print-stylesheets-in-2018/) : A-Z about CSS print rules
 - [CSS Printing Guide - 2](https://www.smashingmagazine.com/2015/01/designing-for-print-with-css/) : Essentials for CSS Print rules
   (part - 2)
-- [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority but they
-  too can be overwritten when the element is accessed as shown in the document.
+- [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority, but they
+  too can be overwritten when the element is accessed, as shown in the document.
 - [Important Information on CSS position](https://css-tricks.com/almanac/properties/p/position/) : Adding scrolling to a collapsible navbar can be
   tricky. This link explains how you can add scrolling without affecting any level of dropdown menus.
 - [Calculating position of element](https://javascript.info/size-and-scroll) : This link gives an in-depth understanding of how we can manually
@@ -57,7 +56,7 @@ The rules that should be followed while writing code.
 
 ### Naming convensions
 
-- Use kebab-case for flienames (all lower case with `-` for breaking words).
+- Use kebab-case for filenames (all lower case with `-` for breaking words).
 - Related to React/Typescript,
   - Use PascalCase for type names, class names, and enum values.
   - Use camelCase for function names.
@@ -66,24 +65,27 @@ The rules that should be followed while writing code.
   - Use whole words in names when possible.
 - Related to SASS/SCSS,
   - Use kebab-case (all lower case with `-` for breaking words). Avoid using camelCase or `_`.
-  - Use names that are meaningful and can be easily understood without knowing the whole page. Try to convey what an ID or class is about while being as brief as possible.
+  - Use meaningful names that can be easily understood without knowing the whole page. Try to convey what an ID or class is about while being as brief as possible.
 - Related to annotations,
   - All the keys and properties are case sensitive and written in lower case.
   - Annotation keys are using kebab-case (all lower case with `-` for breaking words).
-  - Annotation properties are using snake case (all lower case with `_` for breaking words).
-  - Properties that are enforcing a boolean state should be defined based on the oposite default value. For example if a button is displayed by default and we want to add a property to force its state, we have to add `hide_button`.
+  - Annotation properties use snake case (all lower case with `_` for breaking words).
+  - Properties that enforce a boolean state should be defined based on the opposite default value. For example, if a button is displayed by default and we want to add a property to force its state, we have to add `hide_button`.
 - Related to markdown and templating,
-  - The helper functions are case sensitive and using came case.
+  - The helper functions are case sensitive and use camelCase.
 
 ### General
-- Use semilicon everywhere. Eventhough it's not needed, for consistency, use semicolon after each line.
+- Use semicolons everywhere. Even though it's unnecessary, use a semicolon after each line for consistency.
 - Stick with the indentation size of 2. If a file is not using size 2, just change the whole file.
 
 ### React/TypeScript
 
-- Use functional components in most cases (class component should only be considered for special cases.)
+- Use functional components in most cases (class components should only be considered for special cases.)
 - Avoid using `any` type as much as you can.
-- Part of the build process defines an alias, called `@chaise`, to reference the `src` folder in the Chaise repo. This alias should be used instead of doing relative imports.
+- Don't use relative paths while importing. Instead, use the `@isrd-isi-edu/chaise` alias, which points to the root. For example:
+  ```js
+  import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+  ```
 - Create a `type` for `props` of components.
 
 - Regarding [Render logic](https://blog.isquaredsoftware.com/presentations/react-redux-ts-intro-2020-12/#/36),
@@ -123,7 +125,7 @@ The rules that should be followed while writing code.
 
 - Take a look at `example.tsx` for a sample react component.
 
-- Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues we should make asure that will always using production mode.
+- Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues, we should make sure that we are always using production mode.
 
 ### Lint
 - Make sure the `ESLint` extension is installed for Visual Studio Code.
@@ -143,28 +145,27 @@ The rules that should be followed while writing code.
   /* eslint NAME_OF_THE_RULE: 0 */
   ```
 
-- Using the previously described method you can also change rules locally, but
-  we recommend against.
+- Using the previously described method, you can also change rules locally, but we generally recommend against it .
 
 ### CSS/SCSS
 
-- General purpose styles should be part of the `app.scss` (or included as part of `app.scss`.)
-- Styles specific to a components should be inlcuded in a separate file and imported in the component tsx file.
-- It's better if you use classes instead of ids for writing css rules.
+- General-purpose styles should be part of the `app.scss` (or included as part of `app.scss`.)
+- Styles specific to a component should be included in a separate file and imported into the component TSX file.
+- It's better if you use classes instead of ids for writing CSS rules.
 - Avoid adding duplicated rules. If there's a rule in a file that is applied to the element that you're trying to add a new style to, add it there.
 - Avoid using `!important` as much as you can (Unless there's a bootstrap rule that you're trying to override.)
 - Comment your rule to make it easier for others to figure out why a rule was added.
-- If you're doing some calculations don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
-- Use variables if you're using the same value more than once and these values should be the same all the times (Just because you're using value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
-- How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc). Hence we need to keep in mind the following while writing print rules in css.
+- If you're doing some calculations, don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
+- Use variables if you're using the same value more than once, and these values should be the same all the time (Just because you're using the value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
+- How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc.). Hence we need to keep in mind the following while writing print rules in CSS.
 
   - If table borders or other line elements are not visible in the print preview or the PDF, check if there exists any overriding
-    bootstrap rules. These bootstrap rules could be a `background-color`, `background-border`, etc. and they always take precedence over the custom css rules that are defined in the @media-print section of the css file.
+    bootstrap rules. These bootstrap rules could be a `background-color`, `background-border`, etc., and they always take precedence over the custom CSS rules that are defined in the @media-print section of the CSS file.
 
-  - If yes, then we must override those rules with `!important` to get the desired effect.
+  - If yes, we must override those rules with `!important` to get the desired effect.
 
-  - A new class has been defined to apply custom styling to the case of Firefox browser in combination with MacOs which can be found [here](../user-docs/custom-css.md).
-  - Use the print mode in the rendering tab to see how the document looks when printed in Chrome browser. On Firefox, this can be achieved
+  - A new class has been defined to apply custom styling to the case of Firefox browser in combination with MacOs, which can be found [here](../user-docs/custom-css.md).
+  - Use the print mode in the rendering tab to see how the document looks when printed in the Chrome browser. On Firefox, this can be achieved
     by clicking on a small page icon in the "Inspect Element mode".
 
   - The print preview that is seen when doing a `Ctrl-P` on Windows or a `Cmd-P` on Mac doesn't necessarily give you the right picture of
@@ -175,10 +176,10 @@ The rules that should be followed while writing code.
 ### Font Awesome
 
 In font-awesome, each font/icon can either be solid, regular, or light. In some cases
-only one version is available in the free open-source version that we're using.
+only one version is available in the free, open-source version that we're using.
 
-While using these types of fonts the font-awesome website directs us to use `fas` for sold,
-`far` for regular, and `fal` for light. `fal` is not available in the free version so
+While using these types of fonts, the font-awesome website directs us to use `fas` for sold,
+`far` for regular, and `fal` for light. `fal` is not available in the free version, so
 we should not use it at all. From the font-awesome source, the only difference between `far` and `fas` is font-weight:
 
 ```css
@@ -195,8 +196,8 @@ we should not use it at all. From the font-awesome source, the only difference b
 }
 ```
 
-This can cause some inconsistencies where `far`/`fas` are used in places that we're
-manually changing the `font-weight`. For example assume the following icon is used
+This can cause some inconsistencies where `far`/`fas` are used in places where we're
+manually changing the `font-weight`. For example, assume the following icon is used.
 
 ```html
 <span class="fas fa-ellipsis-v some-icon"></span>
@@ -209,13 +210,13 @@ And we're using the following CSS rule
 }
 ```
 
-Eventhough by using `fas` we were meant to use the solid version of the font,
+Even though by using `fas` we were meant to use the solid version of the font,
 the CSS rule will make sure we're using the regular version instead. And in this
-case, the regular version of `fa-ellipsis-v` is not available in free version of font-awesome that we're using. So,
+case, the regular version of `fa-ellipsis-v` is not available in the free version of font-awesome that we're using. So,
 - We have to be careful where we're using font-awesome and avoid any manual changing
 of `font-family` or `font-weight` and let font-awesome handle it for us.
-- While changing font-awesome versions we have to make sure the fonts that we're using
-  are available. In some cases we might want to change the font-weight group by
+- While changing font-awesome versions, we have to make sure the fonts that we're using
+  are available. In some cases, we might want to change the font-weight group by
   updating the font-awesome classes that are used.
 
 
@@ -256,7 +257,7 @@ The following is the overall structure of the project:
 └── package.json
 ```
 
-- `assets`: This folder is used to house all the fonts, images, and SCSS files. The component specific SCSS files should have the same name as their component file.
+- `assets`: This folder is used to house all the fonts, images, and SCSS files. The component-specific SCSS files should have the same name as their component file.
 - `components`: Each app will rely on similar components for functionality and display purposes. If there is a need to reuse code, even if that's in only 2 places, a common component should be extracted and placed in the components folder.
 - `libs`: Independent applications that may be used in non-React environments outside of Chaise.
 - `models`: The models or types that are
@@ -292,7 +293,7 @@ This section will go over how we think the NPM modules should be managed.
 
 
 ## Structure of an App
-Since Chaise is a collection of multiple single page apps (`recordset`, `record`, `recordedit`, etc.), app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into difrerent bits described below.
+Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
 
 ### Main HTML
 The instantiation and bundle of dependencies should be almost the same for each app. The build process using webpack will generate the outer HTML based on `pages/main.html`. Each app attaches to the element with `id` equal to `chaise-app-root` defined in `main.html`.
@@ -301,16 +302,16 @@ The instantiation and bundle of dependencies should be almost the same for each 
 Each app in Chaise is instantiated and configured the same way as far as creating the outer HTML and <head> tag, wrapping the app in the proper providers, configuring Chaise and ermrestJS, and fetching the session. To help manage parts of this, we created a component called `AppWrapper` to wrap each app for setup and configuration.
 
 ### Context
-For state sharing between components, Chaise is using the built in useContext hook. Each application has it's own top level context with each component defining it's own context as needed (like alerts and errors).
+For state sharing between components, Chaise is using the built-in `useContext` hook. Each application has its top-level context, with each component defining its own context as needed (like alerts and errors).
 
 ### Error Provider
 To handle global errors, the app wrapper adds an `ErrorProvider` to handle the error state and an `ErrorBoundary` to catch the errors. Each app only needs to throw errors to let the global handler decide what to do with them.
 
 ### Alerts Provider
-Alerts also has it's own provider created to have consistent state at the app level when trying to show alerts from sub components of the app. The provider here acts like a service that handles the functionality surrounding alerts. This provider also allows for showing alerts in multiple places without having duplicate alerts show in the wrong contexts.
+`Alerts` also has its own provider created to have a consistent state at the app level when trying to show alerts from sub-components of the app. The provider here acts like a service that handles the functionality surrounding alerts. This provider also allows for showing alerts in multiple places without having duplicate alerts show in the wrong contexts.
 
 ### Chaise Navbar
-The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
+The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in the app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
 
 
 ## Error handling
@@ -321,9 +322,9 @@ In the AngularJS implementation of Chaise, we rely on `window.onerror` and `$exc
 
 Both of the mentioned methods are working as a "catch-all" where we're calling the `handleException` function in `ErrorService`. This function can handle both expected/known errors (e.g. 403 from a read request), or unexpected/unknown errors (e.g. JavaScript errors because of programmatic mistakes).
 
-Therefore the general guideline regardless of the asynchronous or synchronous nature of the error was:
+Therefore the general guideline, regardless of the asynchronous or synchronous nature of the error, was:
 - If you want a local treatment of errors, catch the errors locally.
-- Otherwise throw the error (which means the "catch-all" logic would handle it properly).
+- Otherwise, throw the error (which means the "catch-all" logic would handle it properly).
 
 This is not fully the case anymore. In React, any synchronous error that happens during the rendering of a component will break the whole app, and to avoid that we need to make some modifications to our error handling logic.
 ### How it works

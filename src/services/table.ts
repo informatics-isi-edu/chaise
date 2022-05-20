@@ -1,16 +1,9 @@
 /* eslint max-classes-per-file: 0 */
 
-import { LogActions, LogStackPaths, LogStackTypes } from '@chaise/models/log';
-import { LogService } from '@chaise/services/log';
-import MathUtils from '@chaise/utils/math-utils';
-import TypeUtils from '@chaise/utils/type-utils';
-import Q from 'q';
-import { RecordsetDisplayMode } from '@chaise/models/recordset';
-import { createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
-import { ConfigService } from '@chaise/services/config';
-import $log from '@chaise/services/logger';
-import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
-
+import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 class FlowControlQueueInfo {
   maxRequests = 4;
@@ -84,7 +77,7 @@ export class RecordsetFlowControl {
     this.recountStartTime = -1;
 
     // can be used to refer to this current instance of table
-    this.internalID = MathUtils.uuid();
+    this.internalID = generateUUID();
 
     this.queue = new FlowControlQueueInfo();
 

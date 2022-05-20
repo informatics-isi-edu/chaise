@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavbarBanner } from '@chaise/utils/menu-utils';
+import { NavbarBanner } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 
 interface BannerProps {
   banner: NavbarBanner

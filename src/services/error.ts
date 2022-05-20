@@ -1,6 +1,6 @@
-import { windowRef } from '@chaise/utils/window-ref';
-import $log from '@chaise/services/logger';
-import { ConfigService } from '@chaise/services/config';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // TODO not used for now
 

@@ -1,5 +1,3 @@
-import { windowRef } from '@chaise/utils/window-ref';
-
 export const APP_TAG_MAPPING = {
   'tag:isrd.isi.edu,2016:chaise:record': 'record',
   'tag:isrd.isi.edu,2016:chaise:detailed': 'detailed',
@@ -108,12 +106,24 @@ export const DEFAULT_DISPLAYNAME = {
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
+// TODO if chaise is not built how we expect, this value will be undefiend.
+//      we might be able to enforce this during the npm install command of chaise
+// if (typeof CHAISE_BUILD_VARIABLES !== 'object') {
+//   CHAISE_BUILD_VARIABLES = {
+//     BUILD_VERSION: '', // TODO is this even needed?
+//     CHAISE_BASE_PATH: '/chaise/',
+//     ERMRESTJS_BASE_PATH: '/ermrestjs/',
+//     OSD_VIEWER_BASE_PATH: '/openseadragon-viewer/'
+//   };
+// }
+
 // NOTE: this global variable is defined in webpack,
 //       but we have to declare it here so typescript doesn't complain about it
 declare let CHAISE_BUILD_VARIABLES: {
   BUILD_VERSION: string,
   CHAISE_BASE_PATH: string,
   ERMRESTJS_BASE_PATH: string,
-  OSD_VIEWER_BASE_PATH: string
+  OSD_VIEWER_BASE_PATH?: string
 };
+
 export const BUILD_VARIABLES = CHAISE_BUILD_VARIABLES;

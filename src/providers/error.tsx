@@ -1,5 +1,5 @@
 import { createContext, useMemo, useState } from 'react';
-import $log from '@chaise/services/logger';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 
 

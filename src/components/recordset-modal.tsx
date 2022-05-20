@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Modal } from 'react-bootstrap';
-import Recordset, { RecordsetProps } from '@chaise/components/recordset';
-import RecordsetProvider from '@chaise/providers/recordset';
-import AlertsProvider from '@chaise/providers/alerts';
+import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 type RecordestModalProps = {
   recordsetProps: RecordsetProps,

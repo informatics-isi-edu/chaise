@@ -1,10 +1,10 @@
-import AppWrapper from '@chaise/components/app-wrapper';
-import useError from '@chaise/hooks/error';
-import { ConfigService } from '@chaise/services/config';
-import $log from '@chaise/services/logger';
-import TypeUtils from '@chaise/utils/type-utils';
-import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
-import { windowRef } from '@chaise/utils/window-ref';
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -31,7 +31,7 @@ const RecordeditApp = () : JSX.Element => {
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
       $log.info('reference resolved');
     }).catch((err: any)=> {
-      if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+      if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
       dispatchError({ error: err, isGlobal: true });

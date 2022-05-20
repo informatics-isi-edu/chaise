@@ -1,14 +1,14 @@
-import useError from '@chaise/hooks/error';
-import { LogActions, LogStackPaths } from '@chaise/models/log';
-import { RecordsetConfig, RecordsetDisplayMode } from '@chaise/models/recordset';
-import { ConfigService } from '@chaise/services/config';
-import { LogService } from '@chaise/services/log';
-import $log from '@chaise/services/logger';
-import { RecordsetFlowControl } from '@chaise/services/table';
-import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
-import { getColumnValuesFromPage } from '@chaise/utils/data-utils';
-import TypeUtils from '@chaise/utils/type-utils';
-import { createRedirectLinkFromPath } from '@chaise/utils/uri-utils';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
+import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -442,7 +442,7 @@ export default function RecordsetProvider({
         // globally sets when the app state is ready to interact with
         // TODO is this needed?
         // $rootScope.displayReady = true;
-        if (TypeUtils.isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
+        if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
           err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
         }
         defer.reject(err);

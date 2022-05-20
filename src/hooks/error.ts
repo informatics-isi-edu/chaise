@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { ErrorContext } from '@chaise/providers/error';
+import { ErrorContext } from '@isrd-isi-edu/chaise/src/providers/error';
 
 /**
  * useError hook to be used for accessing the error context

@@ -2,10 +2,10 @@
  * Utility functions that parse the URL or manipulate it
  */
 
-import { ConfigService } from '@chaise/services/config';
-import { BUILD_VARIABLES } from '@chaise/utils/constants';
-import { MESSAGE_MAP } from '@chaise/utils/message-map';
-import { windowRef } from '@chaise/utils/window-ref';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
 * @function

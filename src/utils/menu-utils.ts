@@ -1,16 +1,16 @@
 import { MouseEvent } from 'react';
 
 // constants
-import { BUILD_VARIABLES } from '@chaise/utils/constants';
-import { LogActions } from '@chaise/models/log';
+import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
-import AuthnService from '@chaise/services/authn';
-import { ConfigService, ContextHeaderParams } from '@chaise/services/config';
-import { LogService } from '@chaise/services/log';
+import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
+import { ConfigService, ContextHeaderParams } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
-import { isSameOrigin } from '@chaise/utils/uri-utils';
+import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 /* ===== Interfaces ===== */
 export interface MenuOption {

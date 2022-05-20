@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Alert, Button, ButtonGroup } from 'react-bootstrap';
 import { ErrorBoundary, FallbackProps, useErrorHandler } from 'react-error-boundary';
-import $log from '@chaise/services/logger';
-import useError from '@chaise/hooks/error';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 const ExplodeComponent = () : JSX.Element => {
   throw new Error('Something went wrong in the component.');

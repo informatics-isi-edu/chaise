@@ -1,35 +1,30 @@
-import '@chaise/assets/scss/_recordset.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { RecordsetFlowControl } from '@chaise/services/table';
-import $log from '@chaise/services/logger';
+import React, { useEffect, useRef, useState } from 'react';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { MESSAGE_MAP } from '@chaise/utils/message-map';
-import SearchInput from '@chaise/components/search-input';
-import { LogActions, LogReloadCauses, LogStackPaths } from '@chaise/models/log';
-import Title from '@chaise/components/title';
-import Export from '@chaise/components/export';
-import ChaiseSpinner from '@chaise/components/spinner';
-import RecordsetTable from '@chaise/components/recordset-table';
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@chaise/utils/ui-utils';
-import { LogService } from '@chaise/services/log';
-import { SortColumn, RecordsetConfig, RecordsetDisplayMode } from '@chaise/models/recordset';
-import { URL_PATH_LENGTH_LIMIT } from '@chaise/utils/constants';
-import { ConfigService } from '@chaise/services/config';
-import Q from 'q';
-import TypeUtils from '@chaise/utils/type-utils';
-import { createRedirectLinkFromPath, getRecordsetLink } from '@chaise/utils/uri-utils';
-import { getColumnValuesFromPage, getRowValuesFromPage } from '@chaise/utils/data-utils';
-import { windowRef } from '@chaise/utils/window-ref';
-import Footer from '@chaise/components/footer';
-import Faceting from '@chaise/components/faceting';
-import TableHeader from '@chaise/components/table-header';
-import useError from '@chaise/hooks/error';
-import useRecordset from '@chaise/hooks/recordset';
-import useAlert from '@chaise/hooks/alerts';
-import AlertsProvider, { ChaiseAlertType } from '@chaise/providers/alerts';
-import Alerts from '@chaise/components/alerts';
-import RecordsetProvider from '@chaise/providers/recordset';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
+import Export from '@isrd-isi-edu/chaise/src/components/export';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {isObjectAndKeyDefined} from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import Faceting from '@isrd-isi-edu/chaise/src/components/faceting';
+import TableHeader from '@isrd-isi-edu/chaise/src/components/table-header';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
+import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 /**
  * TODO
@@ -107,14 +102,14 @@ const RecordsetInner = ({
 
   /**
    * whether the facet panel should be open or closed
-   * NOTE: will return false if faceting is disabled
+   * NOTE: will return false if faceting is disabled or should be hidden
    * default value is based on reference.display.facetPanelOpen
    * and if it's not defined, it will be:
    * - true: in fullscreen mode
    * - false: in any other modes
    */
   const [facetPanelOpen, setFacetPanelOpen] = useState<boolean>(() => {
-    if (config.disableFaceting) return false;
+    if (config.disableFaceting || !config.showFaceting) return false;
 
     let res = initialReference.display.facetPanelOpen;
     if (typeof res !== 'boolean') {
@@ -193,7 +188,7 @@ const RecordsetInner = ({
       $log.warn(exception);
       // TODO
       // setIsLoading(false);
-      if (TypeUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+      if (isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
         exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
       }
       dispatchError({ error: exception });

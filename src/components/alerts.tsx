@@ -1,7 +1,7 @@
-import '@chaise/assets/scss/_alerts.scss';
-import useAlert from '@chaise/hooks/alerts';
-import { ChaiseAlert, CHAISE_ALERT_TYPE_MAPPING } from '@chaise/providers/alerts';
-import { toTitlecase } from '@chaise/utils/string-utils';
+import '@isrd-isi-edu/chaise/src/assets/scss/_alerts.scss';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import { ChaiseAlert, CHAISE_ALERT_TYPE_MAPPING } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { toTitlecase } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { Alert } from 'react-bootstrap';
 import { Variant } from 'react-bootstrap/esm/types';
 

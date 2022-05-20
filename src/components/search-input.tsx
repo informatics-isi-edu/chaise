@@ -1,13 +1,13 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { LogActions } from '@chaise/models/log';
-import DisplayValue from '@chaise/components/display-value';
-import $log from '@chaise/services/logger';
-import { ClearInputBtn } from '@chaise/components/clear-input-btn';
-import { ConditionalWrapper } from '@chaise/components/cond-wrapper';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import { ResizeSensor } from 'css-element-queries';
-import { windowRef } from '@chaise/utils/window-ref';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type SearchInputProps = {
   searchCallback: Function,
