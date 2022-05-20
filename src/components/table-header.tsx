@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // models 
-import { RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
@@ -12,8 +12,12 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 // utilities
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
-const TableHeader = (): JSX.Element => {
-  const { colValues, config, page, pageLimit, reference, totalRowCount, update } = useRecordset();
+type TableHeaderProps = {
+  config: RecordsetConfig
+}
+
+const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
+  const { colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
 

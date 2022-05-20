@@ -25,7 +25,6 @@ export const RecordsetContext = createContext<{
   page: any,
   colValues: any,
   columnModels: any,
-  config: RecordsetConfig,
   totalRowCount: number|null
 }
   // NOTE: since it can be null, to make sure the context is used properly with
@@ -762,7 +761,6 @@ export default function RecordsetProvider({
       page,
       colValues,
       columnModels,
-      config,
       totalRowCount
     };
   }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);

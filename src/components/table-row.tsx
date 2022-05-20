@@ -3,32 +3,38 @@ import { useEffect, useRef, useState } from 'react';
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
-// providers
-import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+// models
+import { RecordsetConfig } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 type TableRowProps = {
+  config: RecordsetConfig,
   rowIndex: number,
+  rowValues: any[],
   tuple: any
 }
 
 const TableRow = ({
+  config, 
   rowIndex,
+  rowValues,
   tuple
 }: TableRowProps): JSX.Element => {
-  const { colValues, config } = useRecordset();
 
   const tdPadding = 10, // +10 to account for padding on TD
     moreButtonHeight = 20,
     maxHeight = ConfigService.chaiseConfig.maxRecordsetRowHeight || 160,
     defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
-  const [hideContent, setHideContent] = useState(true);
-  const [linkText, setLinkText] = useState('more');
-  const [maxHeightStyle, setMaxHeightStyle] = useState<any>(defaultMaxHeightStyle)
   const [overflow, setOverflow] = useState<{ height: number | null, overflow: boolean }[]>([]);
+  const [readMoreObj, setReadMoreObj] = useState<any>({
+    hideContent: true,
+    linkText: 'more',
+    maxHeightStyle: defaultMaxHeightStyle
+  })
+  // TODO: not sure if needed 
   // const [userClicked, setUserClicked] = useState(false);
 
   const rowContainer = useRef<any>(null);
@@ -58,31 +64,33 @@ const TableRow = ({
   }
 
   useEffect(() => {
-    console.log('colValues change');
     calculateOverflows();
-  }, [colValues]);
+  }, [rowValues]);
 
   const readMore = () => {
     // setUserClicked(true); // avoid triggering resize Sensor logic
-    if (hideContent) {
-      setHideContent(false);
-      setLinkText('less');
-      setMaxHeightStyle({});
+    if (readMoreObj.hideContent) {
+      setReadMoreObj({
+        hideContent: false,
+        linkText: 'less',
+        maxHeightStyle: {}
+      });
     } else {
-      setHideContent(true);
-      setLinkText('more');
-      setMaxHeightStyle(defaultMaxHeightStyle);
+      setReadMoreObj({
+        hideContent: true,
+        linkText: 'more',
+        maxHeightStyle: defaultMaxHeightStyle
+      });
     }
   }
 
   const renderCells = () => {
-    // colValues is an array or arrays. Does not include action column
-    // colVal is an array of all values for one column (1 per row)
-    return colValues.map((colVal: any, colIndex: number) => {
+    // rowValues is an array of values for each column. Does not include action column
+    return rowValues.map((value: any, colIndex: number) => {
       return (
         <td key={rowIndex + '-' + colIndex}>
-          <div className={hideContent === true ? 'hideContent' : 'showContent'} style={maxHeightStyle}>
-            <DisplayValue addClass={true} value={colVal[rowIndex]} />
+          <div className={readMoreObj.hideContent === true ? 'hideContent' : 'showContent'} style={readMoreObj.maxHeightStyle}>
+            <DisplayValue addClass={true} value={value} />
           </div>
           {(overflow[colIndex+1] && overflow[colIndex+1].overflow) && <div style={{ 'display': 'inline' }}>
             ...
@@ -91,7 +99,7 @@ const TableRow = ({
               style={{ 'display': 'inline-block', 'textDecoration': 'underline', 'cursor': 'pointer' }}
               onClick={readMore}
             >
-              {linkText}
+              {readMoreObj.linkText}
             </span>
           </div>}
         </td>
