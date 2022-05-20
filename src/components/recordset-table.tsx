@@ -164,10 +164,17 @@ const RecordsetTable = ({
     if (colValues.length === 0) return;
 
     return page.tuples.map((tuple: any, index: number) => {
+      const rowValues: any[] = [];
+      colValues.forEach((valueArr: any[]) => {
+        rowValues.push(valueArr[index]);
+      });
+
       return (
         <TableRow 
           key={tuple.uniqueId}
-          rowIndex={index} 
+          config={config}
+          rowIndex={index}
+          rowValues={rowValues}
           tuple={tuple}
         />)
     })
