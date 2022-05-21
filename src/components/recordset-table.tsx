@@ -119,21 +119,38 @@ const RecordsetTable = ({
     return <span className={'fas fa-long-arrow-alt-' + upOrDown}></span>;
   };
 
+  // handles tooltip class and spacing
+  const renderDisplayValue = (column: any) => {
+    const headerClassName = `table-column-displayname${column.comment ? ' chaise-icon-for-tooltip' : ''}`;
+    return (
+      <span className={headerClassName} >
+        <DisplayValue value={column.displayname} />
+        {column.comment ? ' ' : ''}
+      </span>
+    )
+  }
+
   const renderColumnHeaders = () => {
     return columnModels.map((col: any, index: number) => {
       const canSort = config.sortable && col.column.sortable && !col.hasError && !col.isLoading;
 
-      const headerClassName = `table-column-displayname${col.column.comment ? ' chaise-icon-for-tooltip' : ''}`
       return (
         <th
           key={index}
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
-          <span className={headerClassName} >
-            <DisplayValue value={col.column.displayname} />
-            {col.column.comment ? ' ' : ''}
-          </span>
+          {col.column.comment ? 
+            // if comment, show tooltip
+            <OverlayTrigger
+              placement='bottom'
+              overlay={<Tooltip>{col.column.comment}</Tooltip>}
+            >
+              {renderDisplayValue(col.column)}
+            </OverlayTrigger> : 
+            // no comment, no tooltip
+            renderDisplayValue(col.column)
+          }
           <span className='table-heading-icons'>
             {col.hasError && renderColumnError()}
             {!col.hasError && col.isLoading && <span className='fa-solid fa-rotate fa-spin aggregate-col-loader' />}
