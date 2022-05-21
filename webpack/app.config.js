@@ -88,6 +88,7 @@ module.exports = (appName, title, mode, env, options) => {
       new MiniCssExtractPlugin(),
       new HtmlWebpackPlugin({
         template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
+        app_name: appName,
         title,
         ermrestjs: [
           `<script src='${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}'></script>`,

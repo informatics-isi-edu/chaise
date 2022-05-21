@@ -1,11 +1,3 @@
-/**
- *
- * Created by shuai on 1/14/16.
- *
- * To store reusable elements and functions.
- *
- */
-
 var Q = require('q');
 
 var recordEditPage = function() {
@@ -1348,7 +1340,7 @@ function chaisePage() {
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
             // Visit the default page and set the authorization cookie if required
-            browser.get(url);
+            this.navigate(url);
             browser.sleep(browser.params.defaultTimeout);
             browser.driver.executeScript('document.cookie="' + authCookie + 'path=/;secure;"');
         }
@@ -1492,18 +1484,17 @@ function chaisePage() {
     this.performLogin = function(cookie, isAlertPresent, defer) {
         defer = defer || require('q').defer();
 
-        browser.get(process.env.CHAISE_BASE_URL + "/login/");
+        this.navigate(process.env.CHAISE_BASE_URL + "/login/");
 
         if(isAlertPresent){
             browser.switchTo().alert().accept();
         }
 
-        browser.ignoreSynchronization = true;
 
-        browser.wait(protractor.ExpectedConditions.visibilityOf(element(by.id("loginApp"))), browser.params.defaultTimeout).then(function() {
-            return browser.driver.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"'))
+        browser.wait(protractor.ExpectedConditions.urlContains('/login/'), browser.params.defaultTimeout).then(function() {
+            return browser.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"'))
         }).then(function() {
-            return browser.driver.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
+            return browser.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
         }).then(function () {
             browser.ignoreSynchronization = false;
             defer.resolve();
@@ -1525,6 +1516,17 @@ function chaisePage() {
             });
         }, timeout || browser.params.defaultTimeout);
     };
+
+    /**
+     * the safe way to navigate to a page with or without angular
+     * @param {string} url
+     * @returns
+     */
+    this.navigate = function (url) {
+      browser.waitForAngularEnabled(false);
+      browser.ignoreSynchronization = true;
+      return browser.get(url);
+    }
 };
 
 module.exports = new chaisePage();
