@@ -143,7 +143,7 @@ const RecordsetTable = ({
           {col.column.comment ? 
             // if comment, show tooltip
             <OverlayTrigger
-              placement='bottom'
+              placement='top'
               overlay={<Tooltip>{col.column.comment}</Tooltip>}
             >
               {renderDisplayValue(col.column)}

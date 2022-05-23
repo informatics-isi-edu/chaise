@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -23,52 +23,48 @@ const TableRow = ({
   tuple
 }: TableRowProps): JSX.Element => {
 
-  const tdPadding = 10, // +10 to account for padding on TD
+  const tdPadding = 10, // +10 to account for padding on <td>
     moreButtonHeight = 20,
     maxHeight = ConfigService.chaiseConfig.maxRecordsetRowHeight || 160,
     defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
-  const [overflow, setOverflow] = useState<{ height: number | null, overflow: boolean }[]>([]);
+  const [overflow, setOverflow] = useState<boolean[]>([]);
   const [readMoreObj, setReadMoreObj] = useState<any>({
     hideContent: true,
     linkText: 'more',
     maxHeightStyle: defaultMaxHeightStyle
   })
-  // TODO: not sure if needed 
-  // const [userClicked, setUserClicked] = useState(false);
 
   const rowContainer = useRef<any>(null);
 
-  const calculateOverflows = () => {
+  const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
-    const tempOverflow: { height: number | null, overflow: boolean }[] = [];
+    const tempOverflow: boolean[] = [];
     for (let i = 0; i < rowContainer.current.children.length; i++) {
-      let overflowObj = {height: null, overflow: false}
+      let hasOverflow = overflow[i] || false;
 
       const currentElement = rowContainer.current.children[i].querySelector('.markdown-container');
-      // currentElement must be defined
-      // either the overflow object is not set yet or the previous overflow height is not the same as the current one
-      if (currentElement && (!overflow[i] || overflow[i].height !== currentElement.offsetHeight)) {
-        // store the height value for comparing against later
+
+      // currentElement must be defined and the previous overflow was false so check again to make sure it hasn't changed
+      if (currentElement && !hasOverflow) {
         // overflow is true if the content overflows the cell
-        overflowObj = { 
-          height: currentElement.offsetHeight,
-          overflow: (currentElement.offsetHeight + tdPadding) > maxHeight
-        };
-        
+        hasOverflow = (currentElement.offsetHeight + tdPadding) > maxHeight;
       }
-      tempOverflow[i] = overflowObj;
+      tempOverflow[i] = hasOverflow;
     }
 
     setOverflow(tempOverflow);
   }
 
   useEffect(() => {
-    calculateOverflows();
+    setOverflow([])
+  }, [tuple]);
+
+  useLayoutEffect(() => {
+    initializeOverflows();
   }, [rowValues]);
 
   const readMore = () => {
-    // setUserClicked(true); // avoid triggering resize Sensor logic
     if (readMoreObj.hideContent) {
       setReadMoreObj({
         hideContent: false,
@@ -92,7 +88,7 @@ const TableRow = ({
           <div className={readMoreObj.hideContent === true ? 'hideContent' : 'showContent'} style={readMoreObj.maxHeightStyle}>
             <DisplayValue addClass={true} value={value} />
           </div>
-          {(overflow[colIndex+1] && overflow[colIndex+1].overflow) && <div style={{ 'display': 'inline' }}>
+          {overflow[colIndex+1] && <div style={{ 'display': 'inline' }}>
             ...
             <span
               className='text-primary readmore'
