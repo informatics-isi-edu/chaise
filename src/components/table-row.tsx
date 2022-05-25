@@ -47,6 +47,7 @@ const TableRow = ({
 
       // currentElement must be defined and the previous overflow was false so check again to make sure it hasn't changed
       if (currentElement && !hasOverflow) {
+        // console.log('col index: ' + i + ' height: ', currentElement.offsetHeight);
         // overflow is true if the content overflows the cell
         hasOverflow = (currentElement.offsetHeight + tdPadding) > maxHeight;
       }
@@ -56,6 +57,7 @@ const TableRow = ({
     setOverflow(tempOverflow);
   }
 
+  // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
   useEffect(() => {
     setOverflow([])
   }, [tuple]);
