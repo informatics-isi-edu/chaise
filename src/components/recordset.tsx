@@ -396,7 +396,7 @@ const RecordsetInner = ({
             </div>
             {renderSelectedFacetFilters()}
             {renderShowFilterPanelBtn()}
-            <TableHeader />
+            <TableHeader config={config} />
           </div>
 
         </div>
