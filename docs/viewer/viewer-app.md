@@ -61,22 +61,17 @@ You need to deploy both Chaise and openseadragon-viewer to ensure the viewer app
 
     If that is not the case in your deployment, you should modify the variables accordingly.
 
+2. Make sure Chaise is deployed by following [its own guide](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/installation.md#deploying).
 
-2. Clone the openseadragon-viewer repository,
+3. Clone the openseadragon-viewer repository,
     ```
     $ git clone git@github.com:informatics-isi-edu/openseadragon-viewer.git
     ```
 
-3. Run the following command in the openseadragon-viewer folder
+4. Run the following command in the openseadragon-viewer folder
    (make sure to run this in the openseadragon-viewer folder),
     ```
-    $ make install
-    ```
-
-3. Make sure Chaise is properly installed by calling the following command under Chaise
-  (make sure to run this in the Chaise folder),
-    ```
-    $ make install
+    $ make deploy
     ```
 
 ## How it works

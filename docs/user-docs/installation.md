@@ -41,7 +41,7 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
 
 1. First you need to setup some environment variables to tell Chaise where it should install the package. The following are the variables and their default values:
 
-    ```
+    ```sh
     WEB_URL_ROOT=/
     WEB_INSTALL_ROOT=/var/www/html/
     CHAISE_REL_PATH=chaise/
@@ -51,18 +51,28 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
     Notes:
     - All the variables MUST have a trailing `/`.
 
-    - If you're installing remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
+    - If you're deploying remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
 
-    - A very silly thing to do would be to set your deployment directory to root `/` and run `make install` with `sudo`. This would be very silly indeed, and would probably result in some corruption of your operating system. Surely, no one would ever do this. But, in the off chance that one might attempt such silliness, the `make install` rule specifies a `dont_install_in_root` prerequisite that attempts to put a stop to any such silliness before it goes too far.
+    - A very silly thing to do would be to set your deployment directory to root `/` and run `make deploy` with `sudo`. This would be very silly indeed, and would probably result in some corruption of your operating system. Surely, no one would ever do this. But, in the off chance that one might attempt such silliness, the `make deploy` rule specifies a `dont_deploy_in_root` prerequisite that attempts to put a stop to any such silliness before it goes too far.
 
-2. After making sure the variables are properly set, run the following command:
+2. Build the Chaise bundles by running the following command:
 
-    ```
-    $ make install
+    ```sh
+    make dist
     ```
 
     Notes:
-      - If the given directory does not exist, it will first create it. So you may need to run `make install` with _super user_ privileges depending on the installation directory you choose.
+    - Make sure to run this command with the owner of the current folder. If you attempt to run this with a different user, it will complain.
+
+
+3. To deploy the package, run the following:
+
+    ```sh
+    make deploy
+    ```
+
+    Notes:
+      - If the given directory does not exist, it will first create it. So you may need to run `make deploy` with _super user_ privileges depending on the deployment directory you choose (by default it's `/var/www/html/`).
 
 ## Configuration
 
@@ -76,26 +86,4 @@ Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `
 
 ## Testing
 
-This section assumes you have already installed _and tested_ [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs). If you have not, stop here and do that first, then return this step.
-
-Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, `RESTRICTED_AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](../dev-docs/e2e-test.md#how-to-get-your-auth-cookie).
-
-The example here is based on the assumption that the tests are installed and executed against a deployment to a userdir.
-
-```sh
-export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
-export ERMREST_URL=https://HOST/ermrest
-export AUTH_COOKIE=YOUR_WEBAUTHN_COOKIE
-export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
-export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
-```
-
-Then run the tests (install, if you haven't already).
-
-```sh
-$ make install  # if not already installed
-$ npm install # if npm dependencies not already installed
-$ make test
-```
-
-For more information, see the [E2E tests guide](../dev-docs/e2e-test.md).
+Please refer to he [E2E tests guide](../dev-docs/e2e-test.md).

@@ -87,7 +87,7 @@ When developing new code for Chaise, please make sure you're following these ste
 1. create a new branch and make your updates to the code in the branch (avoid changing master branch directly);
 2. do your own quality assurance;
 4. update the e2e tests (if applicable);
-6. make sure you can deploy your code without any issues (`make install` should not fail);
+6. make sure you can deploy your code without any issues (`make dist && make deploy` should not fail);
 7. make sure that all tests are passing before submitting the pull request (`make test` should be free of errors);
 8. make your pull request, assign it to yourself, and ask someone to review your code.
   - Try to provide as much information as you can on your PR. Explain the issues that the PR is fixing, and the changes that you've done in the PR.
