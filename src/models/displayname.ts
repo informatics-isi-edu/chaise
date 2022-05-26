@@ -1,5 +1,5 @@
 export type Displayname = {
-  value: string,
+  value: string | null,
   isHTML: boolean,
   unformatted?: string
 };

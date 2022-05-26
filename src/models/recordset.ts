@@ -1,3 +1,5 @@
+import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
+
 export enum RecordsetSelectMode {
   NO_SELECT,
   SINGLE_SELECT,
@@ -34,4 +36,13 @@ export type RecordsetConfig = {
 export type SortColumn = {
   column: string,
   descending?: boolean
+}
+
+export type FacetCheckBoxRow = {
+  uniqueId: string,
+  displayname: Displayname,
+  selected?: boolean,
+  disabled?: boolean,
+  isNotNull?: boolean,
+  alwaysShowTooltip?: boolean
 }

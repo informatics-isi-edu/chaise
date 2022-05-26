@@ -1,11 +1,14 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
+
 import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { useState } from 'react';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
+import CheckList from '@isrd-isi-edu/chaise/src/components/check-list';
 
 type FacetChoicePickerProps = {
   facetColumn: any,
@@ -17,6 +20,18 @@ const FacetChoicePicker = ({
   index
 }: FacetChoicePickerProps): JSX.Element => {
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps|null>(null);
+  const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([
+    {
+      uniqueId: 'row-1',
+      selected: false,
+      displayname: {value: 'row-1', isHTML: false}
+    },
+    {
+      uniqueId: 'null',
+      selected: true,
+      displayname: {value: null, isHTML: false}
+    }
+  ]);
 
   const searchCallback = (searchTerm: any, action: any) => {
     $log.log(`search for ${searchTerm} in facet index=${index}`);
@@ -66,7 +81,17 @@ const FacetChoicePicker = ({
 
   const hideRecordsetModal = () => {
     setRecordsetModalProps(null);
-  }
+  };
+
+  const onRowClick = (row: FacetCheckBoxRow, rowIndex: number) => {
+    const checked = !row.selected;
+
+    $log.log(`facet checkbox ${row.uniqueId} has been ${checked ? 'selected' : 'deselected'}`);
+
+    setCheckboxRows((prev: FacetCheckBoxRow[]) => {
+      return prev.map((curr: FacetCheckBoxRow) => curr !== row ? curr : {...curr, selected: checked});
+    });
+  };
 
   return (
     <div className='choice-picker'>
@@ -77,9 +102,7 @@ const FacetChoicePicker = ({
           searchColumns={facetColumn.isEntityMode ? facetColumn.sourceReference.searchColumns : null}
           disabled={facetColumn.hasNotNullFilter}
         />
-        <div>
-          List goes here
-        </div>
+        <CheckList initialized={true} rows={checkboxRows} onRowClick={onRowClick} />
         <button
           id='show-more' className='chaise-btn chaise-btn-sm chaise-btn-tertiary pull-right show-more-btn'
           disabled={facetColumn.hasNotNullFilter}

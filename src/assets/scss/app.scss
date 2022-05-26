@@ -560,13 +560,20 @@ html {
 
       &:disabled {
         cursor: not-allowed;
-        &:after {
+        &:before, &:checked:after {
           color: $disabled-color;
           border-color: $disabled-color;
         }
       }
 
-      &:after {
+      &:before, &:checked:after {
+        color: $primary-color;
+        -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+        -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+        transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+      }
+
+      &:before {
         content: "";
         display: inline-block;
         position: absolute;
@@ -576,17 +583,17 @@ html {
         top: 0;
         border: 1px solid $primary-color;
         border-radius: 3px;
-        color: $primary-color;
         background-color: $white-color;
-        -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-        transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
       }
 
       &:checked:after {
-        font-family: "Glyphicons Halflings";
-        content: "\e013";
-        font-size: 1.21rem;
+        position: absolute;
+        top: -2px;
+        left: 2px;
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        content: "\f00c"; // fa-solid fa-check
+        font-size: 1.3rem;
       }
     }
   }
