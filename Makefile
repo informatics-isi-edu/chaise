@@ -643,7 +643,7 @@ clean:
 
 # Rule to clean the dependencies too
 .PHONY: distclean
-clean-deps: clean
+distclean: clean
 	rm -rf $(MODULES) || true
 
 # Rule to create the package.
@@ -694,8 +694,8 @@ usage:
 	@echo "  dist-wo-deps                   build the chaise bundles"
 	@echo "  deploy                         deploy chaise to the given location"
 	@echo "  deploy-w-config                deploy chaise to the given location with config files"
-	@echo "  clean                          clean the files and folders created during build"
-	@echo "  clean-deps                     clean npm dependencies"
+	@echo "  clean                          remove the files and folders created during build"
+	@echo "  distclean                      the same as clean, and also removes npm dependencies"
 	@echo "  deps                           local install of node dependencies"
 	@echo "  updeps                         local update  of node dependencies"
 	@echo "  update-webdriver               update the protractor's webdriver"
