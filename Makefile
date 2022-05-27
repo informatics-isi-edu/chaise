@@ -3,10 +3,8 @@
 # Disable built-in rules
 .SUFFIXES:
 
-# set the default target to install
-.DEFAULT_GOAL:=install
 
-# env variables needed for installation
+# env variables
 WEB_URL_ROOT?=/
 WEB_INSTALL_ROOT?=/var/www/html/
 ERMRESTJS_REL_PATH?=ermrestjs/
@@ -16,7 +14,7 @@ OSD_VIEWER_REL_PATH?=openseadragon-viewer/
 # version number added to all the assets
 BUILD_VERSION:=$(shell date +%Y%m%d%H%M%S)
 
-# where chaise will be installed
+# where chaise will be deployed
 CHAISEDIR:=$(WEB_INSTALL_ROOT)$(CHAISE_REL_PATH)
 
 #chaise and ermrsetjs paths
@@ -602,10 +600,7 @@ define bundle_js_files
 	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
 endef
 
-# Rule to create the package.
-$(DIST): print-variables $(SASS) $(MIN) $(HTML) gitversion
-
-# build version will change everytime make all or install is called
+# build version will change everytime it's called
 $(BUILD_VERSION):
 
 # make sure the latest webdriver is installed
@@ -651,25 +646,24 @@ clean:
 distclean: clean
 	rm -rf $(MODULES) || true
 
-# Rule to build chaise
-.PHONY: all
-all: $(DIST)
+# Rule to create the package.
+.PHONY: dist-wo-deps
+dist-wo-deps: print-variables $(SASS) $(MIN) $(HTML) gitversion
 
-# Rule for installing for normal deployment (build chaise and deploy)
-.PHONY: install dont_install_in_root
-install: deps $(DIST) dont_install_in_root rsync-chaise
+# Rule to install the dependencies and create the pacakge
+$(DIST): deps dist-wo-deps
 
-# Rule for installing without installing dependencies
-.PHONY: install-wo-deps dont_install_in_root
-install-wo-deps: $(DIST) dont_install_in_root rsync-chaise
+# deploy chaise to the location
+.PHONY: deploy
+deploy: dont_deploy_in_root
+	$(info - deploying the package)
+	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
 
-# Rule for installing during testing (build chaise and deploy with the chaise-config)
-.PHONY: install-w-config dont_install_in_root
-install-w-config: deps $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG) rsync-chaise-w-config
-
-# Rule for installing during testing without updating dependencies (build chaise and deploy with the chaise-config)
-.PHONY: install-w-config dont_install_in_root
-install-wo-deps-w-config: $(DIST) dont_install_in_root $(JS_CONFIG) $(VIEWER_CONFIG) rsync-chaise-w-config
+# rsync the build and config files to the location
+.PHONY: deploy-w-config
+deploy-w-config: dont_deploy_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
+	$(info - deploying the package with the existing default config files)
+	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 
 # Rule to create version.txt
 .PHONY: gitversion
@@ -677,18 +671,8 @@ gitversion:
 	$(info - creating version.txt)
 	@sh ./git_version_info.sh
 
-dont_install_in_root:
+dont_deploy_in_root:
 	@echo "$(CHAISEDIR)" | egrep -vq "^/$$|.*:/$$"
-
-# rsync the build files to the location
-rsync-chaise:
-	$(info - deploying the package)
-	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
-
-# rsync the build and config files to the location
-rsync-chaise-w-config:
-	$(info - deploying the package with the existing default config files)
-	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 
 print-variables:
 	@mkdir -p $(DIST)
@@ -696,8 +680,8 @@ print-variables:
 	$(info BUILD_VERSION=$(BUILD_VERSION))
 	$(info building and deploying to: $(CHAISEDIR))
 	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
-	$(info ERMrestJS must already be installed and accesible using: $(ERMRESTJS_BASE_PATH))
-	$(info If using viewer, OSD viewer must already be installed and accesible using: $(OSD_VIEWER_BASE_PATH))
+	$(info ERMrestJS must already be deployed and accesible using: $(ERMRESTJS_BASE_PATH))
+	$(info If using viewer, OSD viewer must already be deployed and accesible using: $(OSD_VIEWER_BASE_PATH))
 	$(info =================)
 
 # Rules for help/usage
@@ -706,21 +690,20 @@ help: usage
 usage:
 	@echo "Usage: make [target]"
 	@echo "Available targets:"
-	@echo "  install                    local install of node dependencies, build and install the client"
-	@echo "  install-w-config           local install of node dependencies, build and install the client with chaise-config.js file"
-	@echo "  install-wo-deps            build and install the client"
-	@echo "  install-wo-deps-w-config   build and install the client with chaise-config.js file"
-	@echo "  all                        build the client"
-	@echo "  clean                      clean the files and folders created during build"
-	@echo "  distclean                  clean the files and folders created during build and npm dependencies"
-	@echo "  deps                       local install of node dependencies"
-	@echo "  updeps                     local update  of node dependencies"
-	@echo "  update-webdriver           update the protractor's webdriver"
-	@echo "  deps-test                  install dev node dependencies and update protractor's webdriver"
-	@echo "  test                       run e2e tests"
-	@echo "  testrecordadd              run data entry app add e2e tests"
-	@echo "  testrecordedit             run data entry app edit e2e tests"
-	@echo "  testrecord                 run record app e2e tests"
-	@echo "  testrecordset              run recordset app e2e tests"
-	@echo "  testviewer                 run viewer app e2e tests"
-	@echo "  testnavbar                 run navbar e2e tests"
+	@echo "  dist                           local install of node dependencies, build the chaise bundles"
+	@echo "  dist-wo-deps                   build the chaise bundles"
+	@echo "  deploy                         deploy chaise to the given location"
+	@echo "  deploy-w-config                deploy chaise to the given location with config files"
+	@echo "  clean                          remove the files and folders created during build"
+	@echo "  distclean                      the same as clean, and also removes npm dependencies"
+	@echo "  deps                           local install of node dependencies"
+	@echo "  updeps                         local update  of node dependencies"
+	@echo "  update-webdriver               update the protractor's webdriver"
+	@echo "  deps-test                      local install of dev node dependencies and update protractor's webdriver"
+	@echo "  test                           run e2e tests"
+	@echo "  testrecordadd                  run data entry app add e2e tests"
+	@echo "  testrecordedit                 run data entry app edit e2e tests"
+	@echo "  testrecord                     run record app e2e tests"
+	@echo "  testrecordset                  run recordset app e2e tests"
+	@echo "  testviewer                     run viewer app e2e tests"
+	@echo "  testnavbar                     run navbar e2e tests"
