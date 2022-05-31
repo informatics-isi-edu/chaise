@@ -630,13 +630,44 @@
                         }
                     }
 
+                    function initializeRangeMinMax(min, max) {
+                        if (isColumnOfType("timestamp")) {
+                            if (!min) {
+                                scope.rangeOptions.absMin = null;
+                            } else {
+                                // incase of fractional seconds, truncate for min
+                                var m = moment(ts).startOf('second');
+                                scope.rangeOptions.absMin = {
+                                    date: m.format(dataFormats.date),
+                                    time: m.format(dataFormats.time24)
+                                }
+                            }
+
+                            if (!max) {
+                                scope.rangeOptions.absMax = null;
+                            } else {
+                                // incase of fractional seconds, add 1 and truncate for max
+                                var m = moment(ts).add(1, 'second').startOf('second');
+                                scope.rangeOptions.absMax = {
+                                    date: m.format(dataFormats.date),
+                                    time: m.format(dataFormats.time24)
+                                }
+                            }
+                        } else {
+                            var minEps = 0;
+                            var maxEps = 0;
+                            // TODO: add/subtract epsilon
+                            scope.rangeOptions.absMin = min + minEps;
+                            scope.rangeOptions.absMax = max + maxEps;
+                        }
+                    }
+
                     // set the absMin and absMax values
                     // all values are in their database returned format
                     function setRangeMinMax(min, max) {
                         if (isColumnOfType("timestamp")) {
-                            // convert and set the values if they are defined.
                             scope.rangeOptions.absMin = timestampToDateTime(min);
-                            scope.rangeOptions.absMax = timestampToDateTime(max, true);
+                            scope.rangeOptions.absMax = timestampToDateTime(max);
                         } else {
                             scope.rangeOptions.absMin = min;
                             scope.rangeOptions.absMax = max;
@@ -679,10 +710,9 @@
                      * @return {object} an object with `date` and `time` attributes
                      * NOTE might return `null`
                      */
-                    function timestampToDateTime(ts, roundUp) {
+                    function timestampToDateTime(ts) {
                         if (!ts) return null;
                         var m = moment(ts);
-                        if (roundUp && m.millisecond()) m.add(1, 'second').startOf('second');
                         return {
                             date: m.format(dataFormats.date),
                             time: m.format(dataFormats.time24)
@@ -778,7 +808,7 @@
                                         return false;
                                     }
                                     // initiailize the min/max values
-                                    setRangeMinMax(response[0], response[1]);
+                                    setRangeMinMax(response[0], response[1], true);
 
                                     // if - the max/min are null
                                     //    - bar_plot in annotation is 'false'
