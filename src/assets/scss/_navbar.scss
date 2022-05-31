@@ -45,6 +45,7 @@ body > .container {
     padding: 15px 15px;
     font-size: 18px;
     line-height: 20px;
+    margin-right: 0px;
 }
 
 #live-btn {
@@ -268,6 +269,10 @@ nav.navbar {
         // overflow-y: auto;
         width: max-content;
         max-width: 450px;
+        
+        // setting max height for submenus
+        max-height: 80vh;
+        overflow-y: scroll;
     }
 
     .dropdown .dropdown-toggle,
@@ -328,16 +333,18 @@ nav.navbar {
         top: 0;
         right: 100%;
         left: auto;
-        margin-top: 0;
-        margin-right: 0.125rem;
+        // margin-top: 0;
+        // margin-right: 0.125rem;
+        margin: -1px;
     }
 
     .dropend>.dropdown-menu[data-bs-popper] {
         top: 0;
         right: auto;
         left: 100%;
-        margin-top: 0;
-        margin-left: 0.125rem;
+        // margin-top: 0;
+        // margin-left: 0.125rem;
+        margin: -1px;
     }
 
     // Vertical navbar

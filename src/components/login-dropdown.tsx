@@ -1,4 +1,4 @@
-import { MouseEvent, MouseEventHandler, useRef } from 'react';
+import { MouseEvent, MouseEventHandler, useEffect, useRef, useState } from 'react';
 
 // components
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -26,6 +26,31 @@ const ChaiseLoginDropdown = ({
 }: ChaiseLoginDropdownProps): JSX.Element => {
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
+  const [fromTop, setFromTop] = useState<number>();
+  const [fromLeft, setFromLeft] = useState<number>();
+  const [dropEnd, setDropEnd] = useState<boolean>(true);
+
+  const alignDropDown = (event) => {
+    event.preventDefault();
+
+    if (event.currentTarget) {
+      const x = event.currentTarget.getBoundingClientRect().x;
+      const y = event.currentTarget.getBoundingClientRect().y;
+      const width = event.currentTarget.getBoundingClientRect().width;
+      if (event.currentTarget.getElementsByClassName('dropdown-menu')[0] && event.currentTarget.getElementsByClassName('dropdown-menu')[0])
+        event.currentTarget.getElementsByClassName('dropdown-menu')[0].removeAttribute('data-bs-popper');
+      
+        setFromTop(y);
+  
+      if ((x + width) > 0.75 * windowRef.innerWidth) {
+        setDropEnd(false);
+        setFromLeft(x);
+      } else {
+        setFromLeft(x + width);
+      }
+    }
+  }
+
   const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => {
     onLinkClick(event, item);
   }
@@ -42,20 +67,21 @@ const ChaiseLoginDropdown = ({
   />
 
   const renderDropdownMenu = (item: MenuOption, index: number) => {
-    let dropEnd = true;
-    const winWidth = windowRef.innerWidth;
+    // let dropEnd = true;
+    // const winWidth = windowRef.innerWidth;
 
     // parentDropdown.current is the parent menu option that toggles open the menu below
     // this menu is generated when the parent dropdown is opened so we don't know how wide the child will be on open
     // check if opening the menu twice would push off the screen to have the next dropdown open left instead
     // TODO: toggling
-    console.log(parentDropdown)
-    console.log(winWidth - parentDropdown.current.getBoundingClientRect().right);
-    console.log(parentDropdown.current.getBoundingClientRect());
-    console.log(parentDropdown.current.clientWidth);
-    if (parentDropdown && (Math.round(winWidth - parentDropdown.current.getBoundingClientRect().right) < parentDropdown.current.clientWidth * 2)) {
-      dropEnd = false;
-    }
+    // console.log(parentDropdown)
+    // console.log(winWidth - parentDropdown.current.getBoundingClientRect().right);
+    // console.log(parentDropdown.current.getBoundingClientRect());
+    // console.log(parentDropdown.current.clientWidth);
+    // const parentWidth = parentDropdown.current.clientWidth
+    // if (parentDropdown && (Math.round(winWidth - parentDropdown.current.getBoundingClientRect().right) < parentDropdown.current.clientWidth * 2)) {
+    //   dropEnd = false;
+    // }
 
     return (
       <Dropdown
@@ -63,6 +89,7 @@ const ChaiseLoginDropdown = ({
         drop={dropEnd ? 'end' : 'start'}
         className='dropdown-submenu'
         ref={dropdownWrapper}
+        onClick={alignDropDown}
         onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
       >
         <Dropdown.Toggle
@@ -71,7 +98,9 @@ const ChaiseLoginDropdown = ({
           className={menuItemClasses(item, true)}
           dangerouslySetInnerHTML={{ __html: renderName(item) }}
         />
-        <Dropdown.Menu>
+        <Dropdown.Menu 
+          style={{ position: 'fixed', top: fromTop, left: fromLeft, right: 'unset' }}
+        >
           <ChaiseLoginDropdown
             menu={item.children || []}
             openProfileCb={openProfileCb}

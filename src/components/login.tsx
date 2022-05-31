@@ -259,7 +259,7 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   return (
-    <Nav className='login-menu-options navbar-right'>
+    <Nav className='login-menu-options nav navbar-nav navbar-right'>
       {renderLoginMenu()}
       <ProfileModal showProfile={showProfile} setShowProfile={setShowProfile}></ProfileModal>
     </Nav>
