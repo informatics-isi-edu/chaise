@@ -59,6 +59,12 @@ export const DEFAULT_CHAISE_CONFIG = {
   },
 };
 
+export const defaultDisplayname = {
+  null: '<i>No value </i>',
+  empty: '<i>Empty</i>',
+  notNull: '<i>All records with value </i>'
+}
+
 export const errorNames = {
   unauthorized: 'Unauthorized',
   forbidden: 'Forbidden',
