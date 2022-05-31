@@ -761,7 +761,6 @@
                     /**
                      * Given a string representing timestamp will turn it into an object with `date` and `time` attributes
                      * @param  {string} ts timestamp
-                     * @param  {boolean} roundUp should the seconds be rounded up to avoid truncation (should only be the case for max values)
                      * @return {object} an object with `date` and `time` attributes
                      * NOTE might return `null`
                      */
@@ -863,7 +862,7 @@
                                         return false;
                                     }
                                     // initiailize the min/max values
-                                    setRangeMinMax(response[0], response[1], true);
+                                    setRangeMinMax(response[0], response[1]);
 
                                     // if - the max/min are null
                                     //    - bar_plot in annotation is 'false'
