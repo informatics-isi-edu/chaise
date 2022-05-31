@@ -12,7 +12,9 @@ var testParams = {
     file_names: [
         "links-table.csv",
         "links-table_" + chaisePage.getEntityRow("links", "links-table", [{column: "id",value: "1"}]).RID + ".zip"
-    ]
+    ],
+    headers: ["association_table"],
+    tocHeaders: ["Summary", "association_table (0)"]
 };
 
 describe('View existing record,', function() {
@@ -107,6 +109,18 @@ describe('View existing record,', function() {
             });
         });
 
+        it ("should show the empty related association tables and table of contents on page load", function (done) {
+            browser.wait(function() {
+                return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+                    return (ct == testParams.tocHeaders.length);
+                });
+            }, browser.params.defaultTimeout);
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+
+            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+            done();
+        });
+
         it ("The proper permalink (browser url) should appear in the share popup if resolverImplicitCatalog is undefined", function (done) {
             var shareButton = chaisePage.recordPage.getShareButton(),
                 shareModal = chaisePage.recordPage.getShareModal();
@@ -184,5 +198,44 @@ describe('View existing record,', function() {
                 });
             });
         }
+    });
+});
+
+var inlineParams = {
+    table_name: "inline_table",
+    key: {
+        name: "id",
+        value: "1",
+        operator: "="
+    },
+    headers: ["inline_association_table"],
+    tocHeaders: ["Summary", "inline_association_table (0)"],
+}
+describe('View existing record for testing "show empty sections" heuristics,', function() {
+
+    describe("For table " + inlineParams.table_name + ",", function() {
+
+        beforeAll(function () {
+            var keys = [];
+            keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
+            browser.get(url);
+
+            chaisePage.waitForElement(element(by.id('tblRecord')));
+        });
+
+
+        it ("should show the empty related association tables and table of contents on page load", function (done) {
+            browser.wait(function() {
+                return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+                    return (ct == inlineParams.tocHeaders.length);
+                });
+            }, browser.params.defaultTimeout);
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(inlineParams.tocHeaders, "list of related tables in toc is incorrect");
+
+            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(inlineParams.headers, "list of related table accordion headers is incorret");
+            done();
+        });
     });
 });

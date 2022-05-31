@@ -37,6 +37,24 @@ var recordEditPage = function() {
         return element.all(by.css("td.entity-key > span.column-displayname > span"));
     };
 
+    this.getAllColumnPermissionOverlays = function () {
+      return element.all(by.css(".column-permission-overlay"));
+    }
+
+    this.getColumnPermissionOverlay = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));
+    }
+
+    this.getColumnPermissionError = function (rowIndex, displayName) {
+        displayName = makeSafeIdAttr(displayName);
+        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-warn"));
+    };
+
+    this.getDisabledRowIcon = function (rowIndex) {
+        return element.all(by.css('.form-header')).get(rowIndex).all(by.css('.disabled-row-icon'));
+    }
+
     this.getColumnCaptionsWithHtml = function() {
         return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
     };
@@ -354,6 +372,10 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"file\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
+    this.getColorInputErrorMessage = function(el, type) {
+        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"color\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    };
+
     this.clearInput = function(el) {
         return el.getAttribute('value').then(function(value) {
             el.sendKeys(Array(value.length + 1).join(protractor.Key.BACK_SPACE));
@@ -419,10 +441,6 @@ var recordEditPage = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.submissionRows;");
     };
 
-    this.getDeleteRecordButton = function () {
-        return element(by.id("delete-button"));
-    };
-
     this.getSubmitRecordButton = function () {
         return element(by.id("submit-record-button"));
     };
@@ -442,6 +460,22 @@ var recordEditPage = function() {
 
     this.getClearButton = function(el) {
         return browser.executeScript("return $(arguments[0]).parent().parent().find('.glyphicon-remove')[0]", el);
+    };
+
+    this.getDisabledResultSet = function () {
+        return element(by.id("resultset-disabled-table"));
+    };
+
+    this.getDisabledResultSetHeader = function () {
+        return element(by.id("resultset-disabled-table")).element(by.tagName("h3"));
+    };
+
+    this.getDisabledResultSetRows = function () {
+        return element(by.id("resultset-disabled-table")).all(by.css('.chaise-table-row'));
+    };
+
+    this.getRecordSetTable = function() {
+        return element(by.className('recordset-table'));
     };
 };
 
@@ -579,12 +613,12 @@ var recordPage = function() {
 
     this.getRelatedTableRowEdit = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName, isInline);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".edit-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".edit-action-button"));
     };
 
     this.getRelatedTableRowDelete = function (displayName, rowIndex, isInline) {
         var rows = this.getRelatedTableRows(displayName);
-        return rows.get(rowIndex).all(by.tagName("td")).first().all(by.css(".delete-action-button")).first();
+        return rows.get(rowIndex).all(by.tagName("td")).first().element(by.css(".delete-action-button"));
     };
 
     this.getMoreResultsLink = function(displayName, isInline) {
@@ -598,6 +632,12 @@ var recordPage = function() {
         // the link is not a child of the table, rather one of the accordion group
         return el.element(by.css(".add-records-link"));
     };
+
+    this.getUnlinkRecordsLink = function(displayName, isInline) {
+        var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
+        // the link is not a child of the table, rather one of the accordion group
+        return el.element(by.css(".unlink-records-link"));
+    }
 
     this.getToggleDisplayLink = function(displayName, isInline) {
         var el = isInline ? this.getEntityRelatedTable(displayName) : this.getRelatedTableAccordion(displayName);
@@ -1102,6 +1142,10 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
+    this.getModalTotalCount = function () {
+        return element(by.css(".modal-body")).element(by.css('.chaise-table-header-total-count'));
+    };
+
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
@@ -1110,8 +1154,16 @@ var recordsetPage = function() {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
+    this.getModalClearSelection = function () {
+        return element(by.css(".modal-body")).element(by.css(".clear-all-btn"));
+    }
+
     this.getModalSubmit = function () {
         return element(by.id("multi-select-submit-btn"));
+    }
+
+    this.getModalCancel = function () {
+        return element(by.css(".modal-close"));
     }
 
     this.getRangeFacetForm = function (idx) {
@@ -1222,9 +1274,24 @@ var errorModal = function () {
     }
 
     this.getTitle = function () {
-        return element(by.css(".modal-title"));
+        return element(by.css(".modal-error .modal-title"));
     }
 };
+
+var navbar = function () {
+    this.getBanner = function (key) {
+        var selector = ".chaise-navbar-banner-container";
+        if (key) {
+            selector += ".chaise-navbar-banner-container-" + key;
+        }
+        return element(by.css(selector));
+    }
+
+    this.getBannerDismissBtn = function (key) {
+        var banner = this.getBanner(key);
+        return banner.element(by.css(".close"));
+    }
+}
 
 // Makes a string safe and valid for use in an HTML element's id attribute.
 // Commonly used for column displaynames.
@@ -1239,6 +1306,8 @@ function chaisePage() {
     this.recordsetPage = new recordsetPage();
     this.errorModal = new errorModal();
     this.searchPopup = new SearchPopup();
+    this.navbar = new navbar();
+
     this.clickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };
@@ -1272,6 +1341,7 @@ function chaisePage() {
         return this.waitForElement(element(by.css(".recordset-table")));
     }
     this.recordPageReady = function() {
+        this.waitForElement(this.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.id('tblRecord')));
         this.waitForElementInverse(element(by.id('rt-loading')));
     }
@@ -1442,6 +1512,7 @@ function chaisePage() {
             browser.ignoreSynchronization = false;
             defer.resolve();
         }).catch(function (err) {
+            console.dir(err);
             defer.reject(err);
         });
 

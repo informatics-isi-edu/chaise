@@ -78,23 +78,9 @@
             params.reference = reference;
             params.title = (extraParams.title ? extraParams.title : "Share");
 
-            var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
             params.permalink = UriUtils.resolvePermalink(tuple, reference);
-            params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
-            params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-            params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            var stack = params.logStack ? params.logStack : logService.getStackObject();
-            var snaptimeHeader = {
-                action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
-                stack: stack,
-                catalog: reference.defaultLogInfo.catalog,
-                schema_table: reference.defaultLogInfo.schema_table
-            }
-            refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
-                // if current fetched snpatime doesn't match old snaptime, show a warning
-                params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
-            }).finally(function() {
+            var showSharePopup = function () {
                 showModal({
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                     controller: "ShareCitationController",
@@ -106,7 +92,36 @@
                 }, false, false, false); // not defining any extra callbacks
 
                 defer.resolve();
-            });
+            }
+
+            // make sure the table supports history features
+            if (reference.table.supportHistory) {
+                var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
+                params.showVersionLink = true;
+                params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
+                params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+                params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+
+                // see if we need to show the version warning or not
+                var stack = params.logStack ? params.logStack : logService.getStackObject();
+                var snaptimeHeader = {
+                    action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
+                    stack: stack,
+                    catalog: reference.defaultLogInfo.catalog,
+                    schema_table: reference.defaultLogInfo.schema_table
+                }
+                refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
+                    // if current fetched snpatime doesn't match old snaptime, show a warning
+                    params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
+                }).finally(function() {
+                    showSharePopup();
+                });
+            } else {
+                // we're not showing the version link and therefore warning is not needed
+                params.showVersionWarning = false;
+                params.showVersionLink = false;
+                showSharePopup();
+            }
 
             return defer.promise;
         }
@@ -139,11 +154,25 @@
         }
     }])
 
-    .controller('ConfirmDeleteController', ['$uibModalInstance', function ConfirmDeleteController($uibModalInstance) {
+    .controller('ConfirmDeleteController', ['params', '$uibModalInstance', function ConfirmDeleteController(params, $uibModalInstance) {
         var vm = this;
         vm.ok = ok;
         vm.cancel = cancel;
         vm.status = 0;
+
+        vm.title = "Confirm Delete";
+        vm.message = "Are you sure you want to delete this?";
+        vm.deleteBtn = "Delete";
+
+        if (params.batchUnlink) {
+            vm.title = "Confirm Unlink";
+
+            var multiple = '';
+            if (params.count > 1) multiple += 's';
+            vm.message = "Are you sure you want to unlink " + params.count + " record" + multiple + '?';
+
+            vm.deleteBtn = "Unlink";
+        }
 
         function ok() {
             $uibModalInstance.close();
@@ -224,6 +253,10 @@
             vm.clickActionMessage = exception.errorData.clickActionMessage;
         } else if (ERMrest && exception instanceof ERMrest.InvalidFilterOperatorError) {
             vm.clickActionMessage = messageMap.clickActionMessage.noRecordsFound;
+        } else if (ERMrest && exception instanceof ERMrest.UnsupportedFilters) {
+            vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
+        } else if (ERMrest && exception instanceof ERMrest.BatchUnlinkResponse) {
+            vm.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {
@@ -250,12 +283,16 @@
         };
 
         vm.ok = function () {
+            $rootScope.error = false;
+
             // NOTE: Doing this in recordedit allows the user to dismiss the browser reload popup and see the app
             // basically allowing the modal to be dismissed
             $uibModalInstance.close();
         };
 
         vm.cancel = function cancel() {
+            $rootScope.error = false;
+
             $uibModalInstance.dismiss('cancel');
         };
 
@@ -299,12 +336,17 @@
      *  - context {String} - the current context that the directive fetches data for
      *  - selectMode {String} - the select mode the modal uses
      */
-    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'params', 'Session', 'logService', 'modalBox', 'recordsetDisplayModes', '$rootScope', '$timeout', '$uibModalInstance',
-        function SearchPopupController(ConfigUtils, DataUtils, params, Session, logService, modalBox, recordsetDisplayModes, $rootScope, $timeout, $uibModalInstance) {
+    .controller('SearchPopupController', ['ConfigUtils', 'DataUtils', 'logService', 'modalBox', 'params', 'recordCreate', 'recordsetDisplayModes', 'Session', '$rootScope', '$timeout', '$uibModalInstance',
+        function SearchPopupController(ConfigUtils, DataUtils, logService, modalBox, params, recordCreate, recordsetDisplayModes, Session, $rootScope, $timeout, $uibModalInstance) {
         var vm = this;
 
+        // rowOnLoad is used to determine if the submit button should be disabled
+        // if there are selected rows from the facet options when the modal loads, don't disable the submit button when there are 0 rows selected
+        // the submit button can be disabled when there are no selected rows on load and there are none selected
+        vm.rowsOnLoad = params.selectedRows.length > 0;
         vm.params = params;
         vm.onSelectedRowsChanged = onSelectedRowsChanged;
+        vm.onFavoritesChanged = params.onFavoritesChanged;
         vm.cancel = cancel;
         vm.submit = submitMultiSelection;
         vm.mode = params.mode;
@@ -313,8 +355,25 @@
 
         var chaiseConfig = ConfigUtils.getConfigJSON();
         var reference = vm.reference = params.reference;
+        // params.referenceWDisplayname should only be defined when creating association records
+        vm.referenceWDisplayname = params.referenceWDisplayname || params.reference;
         var limit = (!angular.isUndefined(reference) && !angular.isUndefined(reference.display) && reference.display.defaultPageSize) ? reference.display.defaultPageSize : 25;
         var showFaceting = chaiseConfig.showFaceting ? params.showFaceting : false;
+
+        vm.submitText = "Save";
+        if (vm.mode == "selectFaceting") {
+            vm.submitText = "Submit";
+        }
+
+        if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
+            vm.submitText = "Unlink";
+            vm.submitTooltip = "Disconnect the selected records from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+        } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
+            vm.submitText = "Link";
+            vm.submitTooltip = "Connect the selected records to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+        } else {
+            vm.submitTooltip = "Apply the selected records";
+        }
 
         var logStack = {};
         if (params.logStack) {
@@ -326,8 +385,8 @@
             readyToInitialize:  true,
             hasLoaded:          false,
             reference:          reference,
-            displayname:   params.displayname ? params.displayname : null,
-            comment:       (typeof params.comment === "string") ? params.comment: null,
+            displayname:        params.displayname ? params.displayname : null,
+            comment:            (typeof params.comment === "string") ? params.comment: null,
             columns:            reference.columns,
             sortby:             reference.location.sortObject ? reference.location.sortObject[0].column: null,
             sortOrder:          reference.location.sortObject ? (reference.location.sortObject[0].descending ? "desc" : "asc") : null,
@@ -339,14 +398,17 @@
             matchNull:          params.matchNull,
             search:             reference.location.searchTerm,
             config:             {
-                viewable: false, deletable: false,
+                viewable:           false,
+                deletable:          (typeof params.allowDelete === "boolean") ? params.allowDelete : false, // saved query mode we want to allow delete (per row)
                 editable:           (typeof params.editable === "boolean") ? params.editable : true,
                 selectMode:         params.selectMode,
-                showFaceting:       showFaceting, facetPanelOpen: params.facetPanelOpen,
+                showFaceting:       showFaceting,
+                facetPanelOpen:     showFaceting && params.facetPanelOpen,
                 showNull:           params.showNull === true,
                 hideNotNullChoice:  params.hideNotNullChoice,
                 hideNullChoice:     params.hideNullChoice,
                 displayMode:        params.displayMode ? params.displayMode : recordsetDisplayModes.popup,
+                enableFavorites:     params.enableFavorites ? params.enableFavorites : false
             },
             getDisabledTuples:          params.getDisabledTuples,
 
@@ -406,8 +468,9 @@
          * If we had the matchNotNull, then we just need to pass that attribute.
          */
         function submitMultiSelection() {
+            // add and unlink p&b rely on a function being defined to submit the request before closing the modal
             if (vm.params.submitBeforeClose) {
-                vm.params.submitBeforeClose(getMultiSelectionResult());
+                vm.params.submitBeforeClose(getMultiSelectionResult(), vm.tableModel);
             } else {
                 $uibModalInstance.close(getMultiSelectionResult());
             }
@@ -447,13 +510,9 @@
         }
 
         for(var i = 0; i<session.attributes.length; i++){
-            if(session.attributes[i].display_name && session.attributes[i].display_name !== user.display_name && vm.identities.indexOf(session.attributes[i].id) == -1){
-                if (session.attributes[i].id.indexOf("https://auth.globus.org/") === 0) {
-                    session.attributes[i].truncatedId = session.attributes[i].id.substring(24);
-                    vm.globusGroupList.push(session.attributes[i]);
-                } else {
-                    vm.otherGroups.push(session.attributes[i]);
-                }
+            var attr = session.attributes[i];
+            if (attr.type !== 'identity') {
+                (attr.type == "globus_group") ? vm.globusGroupList.push(attr) : vm.otherGroups.push(attr);
             }
         }
     }])
@@ -471,6 +530,7 @@
      * Params object values:
      *   - {String} displayname - used for citation content and filename for bibtex download
      *   - {String} permalink - link to the live catalog
+     *   - {Boolean} showVersionLink - whether we should show the version link
      *   - {String} versionLink - link to the current version of the live catalog
      *   - {String} versionDate - version decoded to it's datetime
      *   - {String} versionDateRelative - version decoded to it's datetime then presented as relative to today's date
@@ -614,6 +674,71 @@
         function ok() {
             $uibModalInstance.close();
         }
+        vm.cancel = function () {
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'logService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, logService, messageMap, params, $scope, $uibModalInstance) {
+        var vm = this;
+        vm.alerts = [];
+        var deleteAlert = function(alert) {
+            var index = vm.alerts.indexOf(alert);
+            DataUtils.verify((index > -1), 'Alert not found.');
+            return vm.alerts.splice(index, 1);
+        }
+
+        vm.columnModels = params.columnModels;
+        vm.parentReference = params.parentReference;
+        vm.savedQueryForm = params.rowData;
+
+        vm.form = params.rowData;
+
+        var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+        var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, params.reference.table);
+
+        vm.submit = function () {
+            if (vm.form.$invalid) {
+                vm.alerts.push(AlertsService.createAlert('Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.', 'error', deleteAlert, true));
+                vm.form.$setSubmitted();
+                return;
+            }
+
+            var logObj = {
+                action: logService.getActionString(logService.logActions.CREATE, stackPath, logService.appModes.CREATE),
+                stack: logService.addExtraInfoToStack(logService.getStackObject(currStackNode), {"num_created": 1})
+            };
+
+            var row = vm.savedQueryForm.rows[0];
+
+            row.last_execution_time = "now";
+            params.reference.create(vm.savedQueryForm.rows, logObj).then(function success(query) {
+                // show success after close
+                $uibModalInstance.close(query.successful);
+            }, function error(error) {
+                // show error without close
+                vm.alerts.push(AlertsService.createAlert(error.message, 'error', deleteAlert, true));
+            });
+        }
+
+        vm.cancel = function () {
+            logService.logClientAction({
+                action: logService.getActionString(logService.logActions.CANCEL, stackPath, logService.appModes.CREATE),
+                stack: logService.getStackObject(currStackNode)
+            }, params.reference.defaultLogInfo);
+
+            $uibModalInstance.dismiss("cancel");
+        }
+    }])
+
+    .controller('DuplicateSavedQueryModalDialogController', ['messageMap', 'params', '$uibModalInstance', '$window', function SavedQueryModalDialogController(messageMap, params, $uibModalInstance, $window) {
+        var vm = this;
+        vm.tuple = params.tuple;
+
+        vm.editAppLink = function () {
+            return params.tuple.reference.contextualize.entryEdit.appLink;
+        }
+
         vm.cancel = function () {
             $uibModalInstance.dismiss("cancel");
         }

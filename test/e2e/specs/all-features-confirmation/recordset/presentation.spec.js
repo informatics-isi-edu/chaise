@@ -268,6 +268,10 @@ describe('View recordset,', function() {
                 chaisePage.waitForAggregates();
             });
 
+            it ("should not show the total count if hide_row_count is true.", function () {
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nall "+ activeListData.length + "\nrecords", "hide_row_count not honored");
+            });
+
             it ("should show correct table rows.", function (done) {
                 chaisePage.recordsetPage.getRows().then(function (rows) {
                     expect(rows.length).toBe(activeListData.length, "row length missmatch.");
@@ -1018,33 +1022,29 @@ describe('View recordset,', function() {
             });
         });
 
-        it("clicking view action should change current window with the same window ID and a new page ID.", function () {
+        it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
             var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
                 return entity.id == accommodationParams.data[0].id;
             });
-            var filter = accommodationParams.shortest_key_filter + dataRow.RID;
 
             chaisePage.recordsetPage.getViewActionButtons().then(function(viewButtons) {
                 return viewButtons[0].click();
             }).then(function() {
                 return chaisePage.recordPageReady();
-            }).finally(function() {
+            }).then(function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
                 // pageId should change when the window changes page
                 expect(chaisePage.getPageId()).not.toBe(pageId);
-                browser.navigate().back();
-                chaisePage.recordsetPage.waitForInverseMainSpinner();
-                expect(chaisePage.getWindowName()).toBe(windowId);
-                // pageId should change when navigating back
-                expect(chaisePage.getPageId()).not.toBe(pageId);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
 
-        it("clicking edit action should open a new window with a new window ID and a new page ID.", function () {
+        it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
             var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
                 return entity.id == accommodationParams.data[0].id;
             });
-            var filter = accommodationParams.shortest_key_filter + dataRow.RID;
             var allWindows;
 
             chaisePage.recordsetPage.getEditActionButtons().then(function(editButtons) {
@@ -1066,7 +1066,10 @@ describe('View recordset,', function() {
                 expect(chaisePage.getWindowName()).toBe(windowId);
                 // pageId should not have changed when a new window was opened
                 expect(chaisePage.getPageId()).toBe(pageId);
-            });
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
         });
     });
 

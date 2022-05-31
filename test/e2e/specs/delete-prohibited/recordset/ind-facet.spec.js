@@ -6,12 +6,14 @@ var testParams = {
     schema_name: "faceting",
     table_name: "main",
     sort: "@sort(id)",
-    totalNumFacets: 21,
-    facetNames: [ "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col",
-                  "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1",
-                  "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text",
-                  "F3 Entity", "F5",
-                  "col_w_column_order_false", "col_w_column_order", "col_w_long_values"],
+    totalNumFacets: 23,
+    facetNames: [ 
+        "id", "int_col", "float_col", "date_col", "timestamp_col", "text_col",
+        "longtext_col", "markdown_col", "boolean_col", "jsonb_col", "F1",
+        "to_name", "f3 (term)", "from_name", "F1 with Term", "Check Presence Text",
+        "F3 Entity", "F5", "F5 with filter", "Outbound1 (using F1)",
+        "col_w_column_order_false", "col_w_column_order", "col_w_long_values"
+    ],
     defaults: {
         openFacetNames: [ "id", "int_col", "to_name" ],
         numFilters: 2,
@@ -243,11 +245,11 @@ var testParams = {
         {
             name: "F1 with Term",
             type: "choice",
-            totalNumOptions: 11,
-            option: 2,
+            totalNumOptions: 10,
+            option: 1,
             filter: "F1 with Term\ntwo",
             numRows: 10,
-            options: [ 'All records with value', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
+            options: [ 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten' ],
             comment: "F1 with Term comment",
             isEntityMode: true,
             searchPlaceholder: "term column"
@@ -279,6 +281,28 @@ var testParams = {
             numRows: 1,
             options: ["All records with value", "No value", "one", "two"],
             isEntityMode: true
+        },
+        {
+            name: "F5 with filter",
+            type: "choice",
+            totalNumOptions: 2,
+            option: 1,
+            filter: "F5 with filter\ntwo",
+            numRows: 1,
+            comment: "has filters",
+            options: ["All records with value", "two"],
+            isEntityMode: true
+        },
+        {
+            name: "Outbound1 (using F1)",
+            type: "choice",
+            totalNumOptions: 10,
+            option: 2,
+            filter: "Outbound1 (using F1)\nfour (o1)",
+            numRows: 1,
+            options: [ 'one (o1)', 'three (o1)', 'four (o1)', 'six (o1)', 'seven (o1)', 'eight (o1)', 'nine (o1)', 'ten (o1)', 'eleven (o1)', 'twelve (o1)' ],
+            isEntityMode: true,
+            comment: "is using another facet sourcekey in source"
         },
         {
             name: "col_w_column_order_false",

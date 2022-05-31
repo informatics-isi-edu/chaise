@@ -1,4 +1,4 @@
-<div ng-switch="vm.columnModel.inputType" ng-form="vm.inputContainer">
+<div ng-switch="vm.inputTypeOrDisabled" ng-form="vm.inputContainer">
 
     <!-- date input-->
     <div ng-switch-when="date">
@@ -118,14 +118,14 @@
 
     <!-- longtext/textarea input -->
     <div ng-switch-when="longtext">
-        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box" ng-required="vm.isRequired" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true ,fullscreen:{ enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box chaise-input-control" style="height: 120px" ng-required="vm.isRequired" empty-to-null markdown-editor="{iconlibrary: 'glyph', addExtraButtons: true, fullscreen: { enable: false, icons: {}}, resize: 'vertical'}"></textarea>
         <a href class="live-preview" markdown-preview textinput="vm.model"></a>
     </div>
 
 
     <!-- File input -->
     <div ng-switch-when="file">
-        <upload reference="::$root.reference" column="::vm.column" placeholder="vm.getDisabledInputValue()" value="vm.model" is-required="vm.isRequired" is-disabled="vm.columnModel.isDisabled"></upload>
+        <upload reference="::$root.reference" column="::vm.column" placeholder="vm.getDisabledInputValue()" value="vm.model" is-required="vm.isRequired" is-disabled="vm.isDisabled"></upload>
     </div>
 
     <!--JSON input -->

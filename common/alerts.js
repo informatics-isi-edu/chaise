@@ -8,7 +8,13 @@
         var ALERT_TYPES = ['success', 'error', 'warning'];
         var urlLimitAlert;
 
-        function Alert(message, type, cb) {
+        // replaceCloseBoolean was added to replace the functionality deleteAlert() call in closeAlert() with the defined cb function
+        // NOTES: alternative approaches:
+        //   - could also be defined as a function instead with the name "deleteAlertFunction"
+        //     - would instead replace the alerts.splice call in deleteAlert with the defined function
+        //   - change alerts to never have it's own "alerts" array
+        //     - would mean that callback would be required to be defined so that it can always be called as the last part of "deleteAlert"
+        function Alert(message, type, cb, replaceCloseBoolean) {
             DataUtils.verify(message, 'Message required to create an alert.');
             if (type === undefined || ALERT_TYPES.indexOf(type) === -1) {
                 type = 'error';
@@ -16,11 +22,13 @@
             this.message = message;
             this.type = type;
             this.callback = cb;
+             // if true, replaces the normal deleteAlert() call in closeAlert() with the callback function
+            this.replaceClose = replaceCloseBoolean || false;
         }
 
-        function addAlert(message, type, closeCallback) {
+        function addAlert(message, type, closeCallback, replaceClose) {
             DataUtils.verify(message, 'Message required to create an alert.');
-            var alert = new Alert(message, type, closeCallback);
+            var alert = new Alert(message, type, closeCallback, replaceClose);
             alerts.push(alert);
             return alert;
         }
@@ -30,6 +38,14 @@
             DataUtils.verify((index > -1), 'Alert not found.');
             if (alert.callback) alert.callback();
             return alerts.splice(index, 1);
+        }
+
+        // creates an alert without adding it to the internal alerts array
+        // allows for managing the array of alerts outside of the scope of the service
+        function createAlert(message, type, closeCallback, replaceClose) {
+            DataUtils.verify(message, 'Message required to create an alert.');
+            var alert = new Alert(message, type, closeCallback, replaceClose);
+            return alert;
         }
 
         /**
@@ -64,6 +80,7 @@
         return {
             alerts: alerts,
             addAlert: addAlert,
+            createAlert: createAlert,
             deleteAlert: deleteAlert,
             deleteAllAlerts: deleteAllAlerts,
             addURLLimitAlert: addURLLimitAlert,
@@ -81,6 +98,7 @@
             },
             link: function (scope, elem, attr) {
                 scope.closeAlert = function(alert) {
+                    if (alert.replaceClose && alert.callback) return alert.callback(alert);
                     AlertsService.deleteAlert(alert);
                 }
 

@@ -798,7 +798,9 @@
                     "annotations": {}
                 }
             ],
-            "annotations": {}
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
         },
         "other_delete_table": {
             "table_name": "other_delete_table",
@@ -830,6 +832,224 @@
             "foreign_keys": [],
             "annotations": {
                 "tag:isrd.isi.edu,2016:generated": null
+            }
+        },
+        "dynamic_acl_main_table": {
+            "table_name": "dynamic_acl_main_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["multi-permissions", "dynamic_acl_main_table_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_col",
+                            "table_name": "dynamic_acl_main_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "main_create_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    },
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:generated": {}
+                    }
+                },
+                {
+                    "name": "name",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk_col",
+                    "type": {
+                        "typename": "int2"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": [
+                        "id", "name", ["multi-permissions", "dynamic_acl_main_table_fk1"]
+                    ]
+                },
+                "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+                    "detailed": [
+                        {
+                            "source": [
+                                {"inbound": ["multi-permissions", "dynamic_acl_related_table_fk1"]},
+                                "RID"
+                            ],
+                            "markdown_name": "related_1"
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["multi-permissions", "dynamic_acl_assoc_table_fk1"]},
+                                {"outbound": ["multi-permissions", "dynamic_acl_assoc_table_fk2"]},
+                                "RID"
+                            ],
+                            "markdown_name": "related_2"
+                        }
+                    ]
+                }
+            }
+        },
+        "dynamic_acl_related_table": {
+            "table_name": "dynamic_acl_related_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["multi-permissions", "dynamic_acl_related_table_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_col",
+                            "table_name": "dynamic_acl_related_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "dynamic_acl_main_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    }
+                },
+                {
+                    "name": "name",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "fk_col",
+                    "type": {
+                        "typename": "int2"
+                    }
+                }
+            ],
+            "annotations": {}
+        },
+        "dynamic_acl_assoc_table": {
+            "table_name": "dynamic_acl_assoc_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id_1", "id_2"]}
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["multi-permissions", "dynamic_acl_assoc_table_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "id_1",
+                            "table_name": "dynamic_acl_assoc_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "dynamic_acl_main_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ]
+                },
+                {
+                    "names": [["multi-permissions", "dynamic_acl_assoc_table_fk2"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "id_2",
+                            "table_name": "dynamic_acl_assoc_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "dynamic_acl_related_assoc_table",
+                            "schema_name": "multi-permissions"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id_1",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    }
+                },
+                {
+                    "name": "id_2",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    }
+                }
+            ],
+            "annotations": {}
+        },
+        "dynamic_acl_related_assoc_table": {
+            "table_name": "dynamic_acl_related_assoc_table",
+            "schema_name": "multi-permissions",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]}
+            ],
+            "foreign_keys": [],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int2"
+                    }
+                },
+                {
+                    "name": "name",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "*": [
+                        "id", "name"
+                    ]
+                }
             }
         }
     },

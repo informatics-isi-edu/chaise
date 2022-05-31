@@ -3,6 +3,10 @@ var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var testParams = {
     table_name: "editable-id-table",
+    tocHeaders: ['Summary', 'accommodation_image (4)', 'booking (2)', 'more-files (1)',
+        'more-media (1)', 'new_media (2)', 'new_media_2 (2)', 'new_media_3 (2)',
+        'new_media_4 (2)', 'new_media_5 (2)', 'new_media_6 (2)',
+        'new_media_7 (2)', 'new_media_8 (2)', 'new_media_9 (2)'],
     table_displayname: "Editable Id Table",
     table_inner_html_display: "<strong>Editable Id Table</strong>",
     entity_title: "1",
@@ -34,13 +38,14 @@ describe('View existing record,', function() {
             keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(chaisePage.recordPage.getEntityTitleElement(), browser.params.defaultTimeout);
-
+            chaisePage.recordPageReady();
         });
 
-        it("should load chaise-config.js and have maxRelatedTablesOpen=11", function() {
+        it("should load chaise-config.js and have correct maxRelatedTablesOpen, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(11);
+                expect(chaiseConfig.maxRelatedTablesOpen).toBe(14);
+                expect(chaiseConfig.disableDefaultExport).toBeTruthy();
+                expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeFalsy();
             });
         });
 
@@ -53,9 +58,13 @@ describe('View existing record,', function() {
             expect(options.count()).toBe(1, "count missmatch");
         });
 
+        it('should hide empty related tables on load',function(){
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        });
+
     });
 
-    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal
+    // tests for subtitle link, resolverImplicitCatalog, and no citation in share modal, and disabled export button
     describe("For table " + testParams.html_table_name + ",", function() {
 
         var currentBrowserUrl;
@@ -78,6 +87,11 @@ describe('View existing record,', function() {
             });
         });
 
+        // we're not using default tempaltes and csv option is disabled
+        it ("export button should be disabled", function () {
+            expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
+        });
+
         it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
             chaisePage.recordPage.getColumns().then(function (cols) {
                 expect(cols[0].isDisplayed()).toBeFalsy("Column names are showing.");
@@ -86,9 +100,11 @@ describe('View existing record,', function() {
         });
 
         // test that no citation appears in share modal when no citation is defined on table
+        // and also version link is not displayed when the table doesn't support history
         recordHelpers.testSharePopup({
             permalink: testParams.html_table_name_record_url,
-            verifyVersionedLink: false,
+
+            hasVersionedLink: true,
             citation: null,
             bibtextFile: null,
             title: "Share"
@@ -142,7 +158,7 @@ describe('View existing record,', function() {
         });
     });
 
-    // below are the tests for the copy button
+    // below are the tests for the copy button, and no csv option
     describe("For table " + testParams.table_name + ",", function() {
 
         var table, record;
@@ -162,6 +178,19 @@ describe('View existing record,', function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.editRecord).toBe(true);
             });
+        });
+
+        it ("should not have the default csv export option and only the defined template should be available", function (done) {
+            var options = chaisePage.recordsetPage.getExportOptions();
+            expect(options.count()).toBe(1, "count missmatch");
+
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+                var csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
+                expect(csvOption.getText()).toBe("Defined template");
+                done();
+            }).catch(function(err) {
+                done.fail(err);
+            })
         });
 
         describe("for the copy record button,", function() {
@@ -249,6 +278,14 @@ describe('View existing record,', function() {
                     expect(text).toBe("Automatically generated");
                 });
             });
+
+            // because of a bug in column permission error,
+            // chaise was showing the column permission overlay and users couldn't
+            // edit the values. This test case is to make sure that logic is correct
+            it ("should not show any permission errors", function () {
+              var colPermissionErrors = chaisePage.recordEditPage.getAllColumnPermissionOverlays();
+              expect(colPermissionErrors.isPresent()).toBeFalsy();
+            })
 
             it("should alert the user if trying to submit data without changing the id.", function() {
                 chaisePage.recordEditPage.submitForm();

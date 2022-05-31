@@ -3,8 +3,8 @@
 
     angular.module('chaise.record')
 
-    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
-        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
+    .controller('RecordController', ['AlertsService', 'ConfigUtils', 'DataUtils', 'ERMrest', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordAppUtils', 'recordCreate', 'recordTableUtils', 'recordsetDisplayModes', 'Session', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$rootScope', '$scope', '$timeout', '$window',
+        function RecordController(AlertsService, ConfigUtils, DataUtils, ERMrest, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordAppUtils, recordCreate, recordTableUtils, recordsetDisplayModes, Session, UiUtils, UriUtils, $cookies, $document, $log, $rootScope, $scope, $timeout, $window) {
         var vm = this;
 
         var initialHref = $window.location.href;
@@ -54,7 +54,7 @@
         };
 
         vm.canEdit = function() {
-            var canEdit = ($rootScope.reference && $rootScope.reference.canUpdate && $rootScope.modifyRecord);
+            var canEdit = ($rootScope.tuple && $rootScope.tuple.canUpdate && $rootScope.modifyRecord);
             // If user can edit this record (canEdit === true), then change showEmptyRelatedTables.
             // Otherwise, canEdit will be undefined, so no need to change anything b/c showEmptyRelatedTables is already false.
 
@@ -79,7 +79,7 @@
         };
 
         vm.canDelete = function() {
-            return ($rootScope.reference && $rootScope.reference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
+            return ($rootScope.tuple && $rootScope.tuple.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton);
         };
 
         vm.deleteRecord = function() {
@@ -134,7 +134,10 @@
             } else {
                 recordSetUrl = appUrl;
             }
-            return $window.location.href = recordSetUrl;
+
+            // append paction=explore
+            var qCharacter = recordSetUrl.indexOf("?") !== -1 ? "&" : "?";
+            return $window.location.href = recordSetUrl + qCharacter + "paction=" + logService.pactions.EXPLORE;
         };
 
         /**
@@ -198,12 +201,23 @@
         };
 
         vm.noVisibleRelatedTables = function () {
+            var noneVisible = true;
             if ($rootScope.relatedTableModels) {
-                return !$rootScope.relatedTableModels.some(function (tm, index) {
+                // sets noneVisible to false if at least one related table can be shown
+                noneVisible = !$rootScope.relatedTableModels.some(function (tm, index) {
                     return vm.showRelatedTable(index);
                 });
             }
-            return true;
+
+            // only check the coumn models if one of them is an inline related table
+            // if noneVisible is already false, no need to iterate the columns too
+            if ($rootScope.hasInline && noneVisible) {
+                // sets noneVisible to false if at least one inline table can be shown
+                noneVisible = !$rootScope.columnModels.some(function (cm, index) {
+                    return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0))
+                });
+            }
+            return noneVisible;
         };
 
         vm.toggleDisplayMode = function(dataModel) {
@@ -252,12 +266,18 @@
            return (ref.canUpdate && $rootScope.modifyRecord);
         };
 
+        // NOTE: currently used for unlink case only
+        vm.canDeleteRelated = function (ref) {
+            if(angular.isUndefined(ref)) return false;
+            return (ref.derivedAssociationReference && ref.derivedAssociationReference.canDelete && $rootScope.modifyRecord && $rootScope.showDeleteButton)
+        }
+
         vm.canCreateRelated = function(relatedRef) {
             if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
                 return false;
             }
 
-            // we are not supporting add in this case
+            // we are not supporting add if it's a free-form related table
             if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
                 return false;
             }
@@ -265,6 +285,30 @@
             var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
             return ref.canCreate;
         };
+
+        vm.canCreateRelatedDisabled = function(relatedRef) {
+            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
+                return false;
+            }
+
+            // we are not supporting disable in this case
+            // NOTE: probably won't be reached since the button won't even be shown
+            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
+                return false;
+            }
+
+            var fkr = relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference.origFKR : relatedRef.origFKR
+            // some checks for whether at least one element in the array passes the test implemented by the provided function
+            // if one column test passes (key data is `null` or `undefined`), the key info is invalid
+            var invalidKeyInfo = fkr.key.colset.columns.some(function (col) {
+                // check if necessary key material is set/valid
+                // checks for equal to null or undefined
+                return $rootScope.tuple.data[col.name] == null
+            });
+
+            // return true to disable button
+            return invalidKeyInfo;
+        }
 
         // Send user to RecordEdit to create a new row in this related table
         function onSuccess (tableModel){
@@ -422,6 +466,154 @@
             // 4. Redirect to the url in a new tab
             $window.open(appLink, '_blank');
         };
+
+        // NOTE: Only supported for pure and binary columns
+        vm.deleteRelatedRecord = function (tableModel) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            var params = {};
+            var ref = tableModel.reference;
+
+            // assumption is that this function is only called for p&b
+            params.parentTuple = tableModel.parentTuple
+            params.parentReference = tableModel.parentReference;
+            params.displayMode = recordsetDisplayModes.unlinkPureBinaryPopup;
+
+            params.reference = ref.hideFacets().contextualize.compactSelectAssociationUnlink; // column reference
+            params.selectMode = modalBox.multiSelectMode;
+            params.selectedRows = [];
+            params.showFaceting = true;
+            params.facetPanelOpen =  params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
+
+            var stackElement = logService.getStackNode(
+                logService.logStackTypes.RELATED,
+                params.reference.table,
+                {source: ref.compressedDataSource, entity: true}
+            );
+
+            var logStack = logService.getStackObject(stackElement),
+                logStackPath = logService.getStackPath("", logService.logStackPaths.UNLINK_PB_POPUP);
+
+            params.logStack = logStack;
+            params.logStackPath = logStackPath;
+
+            params.submitBeforeClose = function dataSelected(res, searchPopupTableModel) {
+                // tuples returned are for leaf table, need to get tuples from assocation table instead
+                // if no rows, nothing to delete
+                if (!res || !Array.isArray(res.rows)) return;
+                var tuples = res.rows;
+
+                var CONFIRM_DELETE = (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
+                // NOTE: This reference has to be filtered so creating the path in the ermrestJS function works properly
+                var leafReference = tuples[0].reference;
+                $rootScope.showSpinner = true;
+
+                // success response function for deleteBatchAssociationTuples
+                // response is an error object with message for both success and error info
+                var deleteResponse = function (response) {
+                    $rootScope.showSpinner = false;
+
+                    // Show modal popup summarizing total # of deletions succeeded and failed
+                    response.clickOkToDismiss = true;
+                    var reloadModalRows = function () {
+                        if (response.failedTupleData.length > 0) {
+                            // iterate over the set of successful ids and find them in selected rows, then remove them
+                            response.successTupleData.forEach(function (data) {
+                                // data is an object of key/value pairs for each piece of key information
+                                // { keycol1: val, keycol2: val2, ... }
+                                var idx = searchPopupTableModel.selectedRows.findIndex(function (tuple) {
+                                    return Object.keys(data).every(function (key) {
+                                        return tuple.data[key] == data[key]
+                                    });
+                                });
+
+                                searchPopupTableModel.selectedRows.splice(idx, 1);
+                            });
+                        } else {
+                            // if everything is successful, empty selected rows
+                            searchPopupTableModel.selectedRows = [];
+                        }
+
+                        recordTableUtils.update(searchPopupTableModel, true, true, true, false, logService.reloadCauses.BATCH_UNLINK);
+                    }
+
+                    // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
+                    //       - some errors could have been because of row level security
+                    ErrorService.handleException(response, false, false, reloadModalRows, reloadModalRows);
+                }
+
+                // error response function for deleteBatchAssociationTuples
+                var deleteError = function (err) {
+                    $rootScope.showSpinner = false;
+                    // errors that land here would be execution of code errors
+                    // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+                    //   as part of the deleteErrors object in the success cb
+                    // NOTE: if one of the identifying values is empty or null, an error is thrown here
+                    $log.warn(err);
+                    throw err;
+                }
+
+                if (!CONFIRM_DELETE) {
+                    return leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(deleteResponse).catch(deleteError);
+                }
+
+                // log the opening of the confirm delete modal
+                logService.logClientAction({
+                    action: logService.getActionString(logService.logActions.UNLINK_INTEND, logStackPath),
+                    stack: logStack
+                }, ref.defaultLogInfo);
+
+                var confirmParams = {
+                    count: tuples.length,
+                    batchUnlink: true // use remove instead of delete
+                };
+
+                modalUtils.showModal({
+                    animation: false,
+                    templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
+                    controller: 'ConfirmDeleteController',
+                    controllerAs: 'ctrl',
+                    resolve: {
+                        params: confirmParams
+                    },
+                    size: 'sm'
+                }, function onSuccess() {
+                    // user accepted prompt to delete
+                    leafReference.deleteBatchAssociationTuples(tableModel.parentTuple, tuples).then(deleteResponse).catch(deleteError);
+                }, function onError() {
+                    $rootScope.showSpinner = false;
+
+                    logService.logClientAction({
+                        action: logService.getActionString(logService.logActions.UNLINK_CANCEL, logStackPath),
+                        stack: logStack
+                    }, ref.defaultLogInfo);
+                }, false);
+            }
+
+            var pbUnlinkModal = modalUtils.showModal({
+                animation: false,
+                controller: "SearchPopupController",
+                windowClass: "search-popup unlink-pure-and-binary-popup",
+                controllerAs: "ctrl",
+                resolve: {
+                    params: params
+                },
+                size: modalUtils.getSearchPopupSize(params),
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+            }, function rowsDeleted() {
+                // code doesn't trigger this case any more since modal doesn't automatically close
+                // recordAppUtils.updateRecordPage(true);
+            }, function () {
+                // cancel
+                var isInline = tableModel.config.displayMode === recordsetDisplayModes.inline;
+                recordAppUtils.updateRecordPage(true, "", [{
+                    cause: isInline ? logService.reloadCauses.RELATED_INLINE_BATCH_UNLINK : logService.reloadCauses.RELATED_BATCH_UNLINK,
+                    isInline: isInline,
+                    index: tableModel.config.containerIndex
+                }]);
+            }, false);
+        }
 
         $scope.$on("edit-request", function(event, args) {
             vm.editRecordRequests[args.id] = {"displayMode": args.displayMode, "containerIndex": args.containerIndex, "finished": false};

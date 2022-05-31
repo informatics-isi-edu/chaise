@@ -25,7 +25,10 @@
                     // functions
                     addRelatedRecord: '&',
                     canCreateRelated: '&',
+                    canCreateRelatedDisabled: '&',
+                    canDeleteRelated: '&',
                     canEditRelated: '&',
+                    deleteRelatedRecord: '&',
                     toggleInlineDisplayMode: '&',
                     toRecordSet: '&',
                     // boolean
@@ -53,7 +56,7 @@
                     // returns true if we should show the column value (as oppose to not showing or showing an inline table)
                     // column is not inline and value is not null or it is a secondary request (has wait for or it's not unique)
                     scope.showColumn = function (i) {
-                        return !isInline(i) && (scope.values[i].value != null || scope.columnModels[i].hasWaitForOrNotUnique);
+                        return !isInline(i) && (scope.values[i].value != null || scope.columnModels[i].requireSecondaryRequest);
                     };
 
                     // returns true if we should show a table (data is non-empty or we can show empty)
@@ -80,17 +83,23 @@
                 scope: {
                     // functions
                     addRelatedRecord: '&', // add a record with RE app or P&B popup
+                    deleteRelatedRecord: '&', // unlink a record with the P&B popup
                     toggleDisplayMode: '&', // toggles the display mode of the RT
                     toRecordset: '&', // redirects the current page to recordset
                     // booleans
                     canCreate: '=',
+                    canCreateDisabled: '=',
+                    canDelete: '=',
                     canEdit: '=',
                     isInline: "=",
+                    isPureAndBinary: '=',
                     isTableDisplay: '=', // is the table in table display mode or other custom mode ('markdown' display)
                     showToggleDisplayBtn: "=",
                     // strings
                     baseTableName: '=',
-                    displayname: '='
+                    displayname: '=',
+                    // set of columns that make up the key info (for tooltip purposes)
+                    keyset: '='
                 },
                 templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/recordAction.html',
                 controller: "RecordActionController",
@@ -106,9 +115,20 @@
             if ($scope.baseTableName.isHTML) tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
 
             $scope.tooltip = {
-                createButton: "Add more " + displayname + " related to this " + tablename + ".",
+                createButton: "Connect " + displayname + " records to this " + tablename + ".",
+                deleteButton: "Disconnect " + displayname + " records from this " + tablename + ".",
                 exploreButton: "Explore more " + displayname + " records related to this " + tablename + "."
             };
+
+            if ($scope.canCreateDisabled) {
+                var keysetString = "";
+                $scope.keyset.forEach(function (col, idx) {
+                    keysetString += col.name;
+                    if (idx+1 != $scope.keyset.length) keysetString += ", "
+                });
+
+                $scope.tooltip.createButton = ($scope.isPureAndBinary ? "Linking" : "Adding") + " to " + displayname + " is disabled until " + keysetString + " in " + tablename + " is set.";
+            }
 
             if ($scope.canEdit) {
                 $scope.tooltip.tableModeButton = "Display edit controls for " + displayname + " related to this " + tablename + ".";

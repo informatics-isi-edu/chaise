@@ -16,6 +16,16 @@
                     "unique_columns": [
                         "id", "extra_id"
                     ]
+                },
+                {
+                    "unique_columns": [
+                        "nullable_assoc_key"
+                    ]
+                },
+                {
+                    "unique_columns": [
+                        "nullable_assoc_key2"
+                    ]
                 }
             ],
             "foreign_keys": [
@@ -358,9 +368,28 @@
                     "type": {
                         "typename": "text"
                     }
+                },
+                {
+                    "name": "nullable_assoc_key",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "nullable_assoc_key2",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "date_col",
+                    "type": {
+                        "typename": "date"
+                    }
                 }
             ],
             "annotations": {
+                "tag:isrd.isi.edu:2020,history-capture": false,
                 "comment": [
                     "default"
                 ],
@@ -372,7 +401,7 @@
                     "top_columns": ["title", "rating", "category", "opened_on"]
                 },
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "detailed" : ["id", "title", "website", ["product-unordered-related-tables-links", "fk_category"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables-links", "fk_cover"], ["product-unordered-related-tables-links", "fk_thumbnail"], "opened_on", "luxurious"]
+                    "detailed" : ["id", "title", "website", ["product-unordered-related-tables-links", "fk_category"], ["product-unordered-related-tables-links", "fk_assoc_accommodation_null_key"], ["product-unordered-related-tables-links", "accommodation_inbound_null_fk"], ["product-unordered-related-tables-links", "fk_assoc_accommodation_null_key2"], "rating", "summary", "description", "no_of_rooms", ["product-unordered-related-tables-links", "fk_cover"], ["product-unordered-related-tables-links", "fk_thumbnail"], "opened_on", "luxurious"]
                 },
                 "tag:isrd.isi.edu,2016:visible-foreign-keys": {
                     "detailed": [
@@ -412,6 +441,46 @@
                                 "wait_for": ["cnt_d_accommodation_inbound2"],
                                 "markdown_pattern": "{{#each $self}}{{{this.rowName}}}{{#unless @last}}, {{/unless}}{{/each}} ({{{cnt_d_accommodation_inbound2}}})"
                             }
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_booking_accommodation"]},
+                                {
+                                  "or": [
+                                    {"filter": "price", "operand_pattern": "90", "operator": "::lt::"},
+                                    {"filter": "booking_date", "operator": "::null::"}
+                                  ]
+                                },
+                                "RID"
+                            ],
+                            "comment": "booking with inline filter 2",
+                            "markdown_name": "inbound related with filter on related table"
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                {"filter": "facility", "operand_pattern": "Television"},
+                                "RID"
+                            ],
+                            "markdown_name": "association with filter on related table"
+                        },
+                        {
+                            "source": [
+                                {"filter": "id", "operand_pattern": "2004"},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {
+                                    "and": [
+                                        {"filter": "RID", "operand_pattern": "::null::"},
+                                        {"filter": "RCB", "operand_pattern": "::null::"}
+                                    ],
+                                    "negate": true
+                                },
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_related_table_2_to_related"]},
+                                "id"
+                            ],
+                            "markdown_name": "path of length 3 with filters"
                         }
                     ]
                 },
@@ -866,6 +935,11 @@
                     "*": {
                         "page_size": 2
                     }
+                },
+                "tag:misd.isi.edu,2015:display": {
+                    "hide_row_count": {
+                        "*": true
+                    }
                 }
             }
         },
@@ -1150,6 +1224,46 @@
                 }
             }
         },
+        "related_table_null_key": {
+            "comment": "Related table with a nullable key value",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id"
+                    ]
+                }
+            ],
+            "foreign_keys": [],
+            "table_name": "related_table_null_key",
+            "schema_name": "product-unordered-related-tables-links",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id"}]
+                    }
+                },
+                "tag:isrd.isi.edu,2016:visible-columns": {
+                    "compact/brief": ["term"]
+                }
+            }
+        },
         "related_table_markdown": {
             "comment":"This is a related table with markdown annotations",
             "kind": "table",
@@ -1333,6 +1447,191 @@
                     }
                 }
             }
+        },
+        "association_table_null_keys": {
+            "comment": "Association where the referenced columns are nullable",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id_related", "id_base"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_related_table_null_key"]],
+                    "foreign_key_columns": [{
+                            "table_name": "association_table_null_keys",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id_related"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "related_table_null_key",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id"
+                    }],
+                    "annotations": {}
+                },
+                {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_accommodation_null_key"]],
+                    "foreign_key_columns": [{
+                            "table_name": "association_table_null_keys",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id_base"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "nullable_assoc_key"
+                    }],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "to_name": "base table association related"
+                        }
+                    }
+                }
+            ],
+            "table_name": "association_table_null_keys",
+            "schema_name": "product-unordered-related-tables-links",
+            "column_definitions": [
+                {
+                    "name": "id_related",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "id_base",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id_base"}]
+                    }
+                }
+            }
+        },
+        "association_table_null_keys2": {
+            "comment": "Association where the referenced columns are nullable",
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id_related", "id_base"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_related_table_null_key2"]],
+                    "foreign_key_columns": [{
+                            "table_name": "association_table_null_keys2",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id_related"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "related_table_null_key",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id"
+                    }],
+                    "annotations": {}
+                },
+                {
+                    "names": [["product-unordered-related-tables-links", "fk_assoc_accommodation_null_key2"]],
+                    "foreign_key_columns": [{
+                            "table_name": "association_table_null_keys2",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "id_base"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links",
+                            "column_name": "nullable_assoc_key2"
+                    }],
+                    "annotations": {
+                        "tag:isrd.isi.edu,2016:foreign-key": {
+                            "to_name": "base table association related"
+                        }
+                    }
+                }
+            ],
+            "table_name": "association_table_null_keys2",
+            "schema_name": "product-unordered-related-tables-links",
+            "column_definitions": [
+                {
+                    "name": "id_related",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "id_base",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:table-display": {
+                    "compact": {
+                        "row_order": [{"column": "id_base"}]
+                    }
+                }
+            }
+        },
+        "inbound_null_key": {
+            "kind": "table",
+            "schema_name": "product-unordered-related-tables-links",
+            "table_name": "inbound_null_key",
+            "keys": [{"unique_columns": ["id"]}],
+            "foreign_keys": [
+                {
+                    "names": [["product-unordered-related-tables-links", "accommodation_inbound_null_fk"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk1_col",
+                            "table_name": "inbound_null_key",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "nullable_assoc_key",
+                            "table_name": "accommodation",
+                            "schema_name": "product-unordered-related-tables-links"
+                        }
+                    ]
+                }
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "name",
+                    "nullok": false,
+                    "type": {"typename": "text"}
+                },
+                {
+                    "name": "fk1_col",
+                    "type": {"typename": "text"}
+                }
+            ]
         },
         "schedule": {
             "comment": null,

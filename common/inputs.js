@@ -317,7 +317,6 @@
             require: '?ngModel',
             scope: {
                 toggleCallback: "=?",
-                isRequired: "="
             },
             link: function (scope, elem, attrs, ngModel) {
                 if (!ngModel) return;
@@ -329,7 +328,9 @@
                     showPalette: false,
                     showInitial: true,
                     showInput: true,
-                    allowEmpty: (scope.isRequired !== true)
+                    // we allow empty values  even if it's required (just like any other input)
+                    // chaise will then properly complain if users didn't select any values
+                    allowEmpty: true
                 });
 
                 // when the model changed, change the input
@@ -383,6 +384,43 @@
      */
     .directive('inputSwitch', ['ConfigUtils', 'dataFormats', 'DataUtils', 'InputUtils', 'integerLimits', 'logService', 'maskOptions', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'UriUtils', '$log', '$rootScope',
                 function(ConfigUtils, dataFormats, DataUtils, InputUtils, integerLimits, logService, maskOptions, modalBox, modalUtils, recordCreate, recordsetDisplayModes, UriUtils, $log, $rootScope) {
+
+        /**
+         * We have multiple ways to determine a disabled input, or rather, when an input should be shown as disabled
+         *   1. the input should not be file (the upload directive handls showing proper disabled input for those)
+         *   2. If the column must be disabled based on acl or annotation
+         * NOTE: in recordedit if select-all is open the column is also marked as disabled but not here
+         */
+        function _populateInputTypeOrDisabled(vm) {
+            if (vm.columnModel.inputType === "file") {
+                return vm.columnModel.inputType;
+            }
+
+            if (vm.isDisabled) {
+                return 'disabled';
+            }
+
+            return vm.columnModel.inputType
+        }
+
+        /**
+         * - column is marked as disabled by annotation
+         * - in edit mode and column in the row is marked as disabled by acl
+         * NOTE: in recordedit there's also `we're showing the select-all control` case but not here
+         */
+        function _populateIsDisabled (vm) {
+            if (vm.columnModel.isDisabled) return true;
+
+            if (vm.mode === "edit" && vm.hasParentModel && vm.parentModel.canUpdateRows) {
+                var canUpdateRow = vm.parentModel.canUpdateRows[vm.rowIndex];
+                if (canUpdateRow && !canUpdateRow[vm.columnModel.column.name]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return {
             restrict: 'E',
             templateUrl:  UriUtils.chaiseDeploymentPath() + 'common/templates/inputs/inputSwitch.html',
@@ -433,6 +471,9 @@
                     vm.parentLogStack = vm.parentModel.logStack;
                     vm.parentLogStackPath = vm.parentModel.parentLogStackPath;
                 }
+
+                vm.isDisabled = _populateIsDisabled(vm);
+                vm.inputTypeOrDisabled = _populateInputTypeOrDisabled(vm);
 
                 vm.customErrorMessage = null;
                 vm.blurElement = InputUtils.blurElement;
@@ -526,12 +567,22 @@
                         params.displayMode = recordsetDisplayModes.foreignKeyPopupCreate;
                     }
 
-                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).contextualize.compactSelect;
-                    params.reference.session = $rootScope.session;
+                    var andFilters = [];
+                    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+                    vm.column.foreignKey.key.colset.columns.forEach(function (col) {
+                        andFilters.push({
+                            "source": col.name,
+                            "hidden": true,
+                            "not_null": true
+                        });
+                    });
+
+                    // add not null filters for key information
+                    params.reference = vm.column.filteredRef(submissionRow, rowForeignKeyData).addFacets(andFilters).contextualize.compactSelectForeignKey;
                     params.selectedRows = [];
                     params.selectMode = modalBox.singleSelectMode;
                     params.showFaceting = true;
-                    params.facetPanelOpen = false;
+                    params.facetPanelOpen = params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
                     if (vm.searchPopupGetDisabledTuples) {
                         params.getDisabledTuples = vm.searchPopupGetDisabledTuples()(vm.columnModel);

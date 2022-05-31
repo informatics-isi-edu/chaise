@@ -20,12 +20,13 @@ To run E2E tests on your machine, make sure that you've installed the following 
 - **JAVA**
 - **JDK**
 
-Before running the test cases you also need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
+Before running the test cases you also need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, `RESTRICTED_AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables.
 
 ```sh
 export CHAISE_BASE_URL=YOUR_CHAISE_BASE_URL
 export ERMREST_URL=YOUR_ERMREST_URL
-export AUTH_COOKIE=YOUR_ERMREST_COOKIE
+export AUTH_COOKIE=YOUR_WEBAUTHN_COOKIE
+export RESTRICTED_AUTH_COOKIE=YOUR_SECOND_USER_ERMREST_COOKIE
 export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
 ```
 
@@ -35,13 +36,14 @@ These variables are used in `ErmrestDataUtils` to communicate with `ERMrest`. A 
 export CHAISE_BASE_URL=https://dev.isrd.isi.edu/~<your-user-directory>chaise # No trailing `/`
 export ERMREST_URL=https://dev.isrd.isi.edu/ermrest # No trailing `/`
 export AUTH_COOKIE="webauthn=PutYourCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
+export RESTRICTED_AUTH_COOKIE="webauthn=PutAnotherCookieHere;" # You have to put `webauthn=` at the beginging and `;` at the end.
 export REMOTE_CHAISE_DIR_PATH=chirag@dev.isrd.isi.edu:public_html/chaise # No trailing `/`
 export SHARDING=false
 ```
 
 You can get your cookie by querying the database, or using the following simple steps:
 
-1. Open up [https://dev.isrd.isi.edu/chaise/search/](https://dev.isrd.isi.edu/chaise/search/) website.
+1. Open up any chaise page in the deployment that you want to run test cases on.
 2. Login. The account that you are using must have delete and create access. We use this cookie to create and delete catalogs.
 3. Open the Developer tools in your browser.
 4. Go to the console section and write `$.cookie("webauthn")`.
@@ -49,51 +51,63 @@ You can get your cookie by querying the database, or using the following simple 
 
 ## How To Run Tests
 ### Prerequistes
-- After setting up the environment variables, make sure that the `https://dev.isrd.isi.edu/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
+1. After setting up the environment variables, make sure that the `https://dev.isrd.isi.edu/~<your-user-directory>` directory has the public access(if not, give the folder the following permissions `chmod 755 <your-user-directory>`).
 
-- Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository. (This will upload your local code to the remote server)
-```sh
-$ make install
-```
+2. Make sure all the dependencies are installed by running the following command:
 
-- Make sure all the npm dependencies are installed by running `npm install`.
+    ```sh
+    make deps-test
+    ```
 
-```sh
-$ npm install
-```
+    This will install all the npm dependencies that are needed and will also make sure the Selenium's WebDriver that protractor uses is updated.
+
+    - If you just want to update the WebDriver you can do `make update-webdriver`.
+    - If the version of Chrome that is installed on your machine is different from the ChromeDriver that Selenium uses, it will throw an error. So make sure both versions are always updated and compatible.
+
+
+3. Build Chaise without installing the dependencies again:
+    ```sh
+    make dist-wo-deps
+    ```
+    As the name suggests this will not install dependencies. That's why you need to install all the dependencies in step 2.
+
+4. Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository (This will upload your local code to the remote server):
+
+    ```sh
+    make deploy
+    ```
+    If you want to also deploy the existing config files in your local machine, you can use the `make deploy-w-config` command instead.
+
 
 ### Test cases
 - To execute all test cases in sequential order, set the following:
-```sh
-export SHARDING=false
-```
+  ```sh
+  export SHARDING=false
+  ```
 
-and then run the following command:
+  and then run the following command:
 
-```sh
-$ make test
-```
-
-This will automatically update the *selenium* web-driver that protractor is using.
+  ```sh
+  $ make test
+  ```
 
 - To execute all the test cases in parallel, set the following:
 
-```sh
-export SHARDING=true
-```
+  ```sh
+  export SHARDING=true
+  ```
 
-and then run the following command:
+  and then run the following command:
 
-```sh
-$ make testparallel
-```
+  ```sh
+  $ make testparallel
+  ```
 
 - To run a specific test spec
 
     ```sh
     $ node_modules/.bin/protractor test/e2e/specs/search/data-independent/protractor.conf.js
     ```
-> Calling protractor directly won't install npm modules and will not update the selenium web-driver. So you have to do those steps manually.
 
 ## File structure
 
@@ -102,7 +116,7 @@ chaise/
 `-- test/
     |-- unit
     `-- e2e
-	|-- data_setup                       
+	|-- data_setup
 	|   |-- config                       # test configuration files
         |   |   |-- record
         |   |   |   |-- *.dev.json  # lists the schema config files (*.config.json)
@@ -118,10 +132,10 @@ chaise/
 	|	`-- SCHEMA_NAME.json         # Schema Definition json
 	|-- specs
 	|   `-- all-features
-	|       |-- record           
-	|       |   |-- TEST_NAME1.spec.js   
+	|       |-- record
+	|       |   |-- TEST_NAME1.spec.js
 	|       |   `-- TEST_NAME1.conf.js   # protractor configuration for similarly named single test
-	|       |-- recordedit         
+	|       |-- recordedit
 	|    	|                            # They introspect the existing schema to run the cases*/
 	|       `-- protractor.conf.js   # configuration for the parallel tests
 	`-- utils
@@ -350,16 +364,43 @@ When the code is pushed to ISI repo, the "Chaise end-to-end tests" Github workfl
 ### Environment Variables
 
 **./.github/workflows/main.yml**: [.e2e.yml](https://github.com/informatics-isi-edu/chaise/blob/master/.github/workflows/e2e.yml)
-specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure e2e.yml file. 
+specifies environment variables in Github workflow so that tests can be run successfully. Usually the env variables are set using terminal locally, to set them up in CI environment one has to configure e2e.yml file.
 
-- Since CI e2e test require connecting to saucelabs, `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY`, 
-  and `SAUCE_TUNNEL_IDENTIFIER` are defined . `SAUCE_TUNNEL_IDENTIFIER` is used 
+- Since CI e2e test require connecting to saucelabs, `SAUCE_USERNAME`, `SAUCE_ACCESS_KEY`,
+  and `SAUCE_TUNNEL_IDENTIFIER` are defined . `SAUCE_TUNNEL_IDENTIFIER` is used
   internally in the `e2e.yml` to create a saucelab tunnel with that identifier. And then
   during the setup the same identifier is used to ensure connecting to the correct tunnel.
 - `SHARDING: true` ensures running test cases in parallel.
 
 While running tests on **CI** you don't need to set the `REMOTE_CHAISE_DIR_PATH` in **main.yml** file.
 
+## Debugging
+
+You can use [the Node.js built-in inspector](https://nodejs.org/en/docs/inspector) to debug the test cases. To do so,
+
+1. Find the configuration that you want to debug. Since we're going to use Node.js, we have to directly target the configuration and cannot use the existing `make` targets. To make this easier, you can find the config locations in `Makefile`. In this example, we want to only debug faceting tests which is,
+    ```
+    test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+    ```
+
+2. Run protractor using `--inspect-break` to ensure debugging client waits for you to open it:
+    ```
+    node --inspect-break ./node_modules/.bin/protractor test/e2e/specs/delete-prohibited/recordset/ind-facet.conf.js
+    ```
+    - By default this will use the `9229` port. You can change this by doing `--inspect-break=0.0.0.0:1234`.
+
+3. The previous command will create a debugger that listens to a specific port, and then waits for you to open an [inspector client](https://nodejs.org/en/docs/guides/debugging-getting-started/#inspector-clients). For the purpose of this document, we're going to use Chrome DevTools. So open Chrome and navigate to the following location:
+    ```
+    chrome://inspect
+    ```
+
+4. In the Chrome's inspect page, under the "Remote Target", you should see your target. Click on "inspect" for that target.
+
+5. Chrome will open a new window that is focused on "Sources" tab. If this is the first time that you're debugging, you need to add Chaise folder to Chrome's workspace. To do so just click on "Add folder to workspace" and choose Chaise folder.
+
+6. Now you can go ahead and find the file that you want to debug in Chaise folder and add your break points to the test folder.
+
+7. Resume the execution after you've added your breakpoints and wait for protractor to reach that part of code.
 
 ## Writing test
 

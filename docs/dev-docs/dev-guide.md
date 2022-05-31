@@ -7,6 +7,7 @@ This is a guide for people who develop Chaise.  We also have our own [Chaise sty
   - [Useful links](#useful-links)
   - [SCSS structure](#scss-structure)
   - [Idioms](#idioms)
+  - [Font Awesome](#font-awesome)
 - [AngularJS-related](#angularjs-related)
   * [AngularJS Developer Guides](#angularjs-developer-guides)
   * [One-Time Binding](#one-time-binding)
@@ -83,6 +84,51 @@ If you want to add a new style, make sure you're following these rules:
 - If you're doing some calculations don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
 - Use variables if you're using the same value more than once and these values should be the same all the times (Just because you're using value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
 
+### Font Awesome
+
+In font-awesome, each font/icon can either be solid, regular, or light. In some cases
+only one version is available in the free open-source version that we're using.
+
+While using these types of fonts the font-awesome website directs us to use `fas` for sold,
+`far` for regular, and `fal` for light. `fal` is not available in the free version so
+we should not use it at all. From the font-awesome source, the only difference between `far` and `fas` is font-weight:
+
+```css
+.far, .fas {
+    font-family: "Font Awesome 5 Free";
+}
+
+.far {
+    font-weight: 400;
+}
+
+.fas {
+    font-weight: 900;
+}
+```
+
+This can cause some inconsistencies where `far`/`fas` are used in places that we're
+manually changing the `font-weight`. For example assume the following icon is used
+
+```html
+<span class="fas fa-ellipsis-v some-icon"></span>
+```
+And we're using the following CSS rule
+
+```css
+.some-icon {
+  font-weight: 400 !important;
+}
+```
+
+Eventhough by using `fas` we were meant to use the solid version of the font,
+the CSS rule will make sure we're using the regular version instead. And in this
+case, the regular version of `fa-ellipsis-v` is not available in free version of font-awesome that we're using. So,
+- We have to be careful where we're using font-awesome and avoid any manual changing
+of `font-family` or `font-weight` and let font-awesome handle it for us.
+- While changing font-awesome versions we have to make sure the fonts that we're using
+  are available. In some cases we might want to change the font-weight group by
+  updating the font-awesome classes that are used.
 
 ## AngularJS-related
 
@@ -122,12 +168,24 @@ The purpose of using variables or enumeration is to avoid rewriting (or copy-and
 - Example: The `messageMap` constant can be used to store and display user-facing messages in Chaise. [ERMrestJS#68](https://github.com/informatics-isi-edu/ermrestjs/issues/68) contains detail discussion related to this topic.
 
 ### Naming Conventions
+
+#### Chaise
 There are a few naming conventions that are being used across the apps. This pertains to variables, module names, and file names.
 - File names should be written in camel case (camelCase) with identifying information separated by `.` (`*.controller.js`, `*.app.js`, `*.html`).
 - AngularJS modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in Chaise.
 - Service, Factory, Provider, Controller, and other angular classes should be defined with camel case text leading with a capital letter. For example: `ErrorDialogController` is the convention for naming controllers. Don't shorten the text to `ctrl` because we should be using controller as syntax and want to have a more readable structure to our code.
 - Variables should follow a similar naming convention using camel case text. Variables and functions that are prefixed with an underscore, should be treated as private variables and used with caution.
 - Folder names should be different from file names. Of course folders don't have an extension so it's more apparent that they are folders, but developers should use `-` separated names for folders, i.e. `common\templates\data-link`.
+- Chaise config properties are technically case-insensitive, but to make the documents easier to read we are writing them as camel case in code and documentation.
+
+#### ERMrestJS
+- Related to annotations,
+  - All the keys and properties are case sensitive and written in lower case.
+  - Annotation keys are using kebab case (dash case).
+  - Annotation properties are using snake case.
+  - Properties that are enforcing a boolean state should be defined based on the oposite default value. For example if a button is displayed by default and we want to add a property to force its state, we have to add `hide_button`.
+- Related to markdown and templating:
+  - The helper functions are case sensitive and using came case.
 
 ## Error Handling
 

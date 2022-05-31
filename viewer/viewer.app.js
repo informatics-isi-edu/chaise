@@ -8,7 +8,8 @@
         appTitle: "Image Viewer",
         overrideHeadTitle: true,
         overrideDownloadClickBehavior: true,
-        overrideExternalLinkBehavior: true
+        overrideExternalLinkBehavior: true,
+        openIframeLinksInTab: true
     })
 
     .run(['$rootScope', function ($rootScope) {
@@ -20,8 +21,6 @@
             });
         });
     }]);
-
-    var client;
 
     angular.module('chaise.viewer', [
         'ngSanitize',
@@ -47,7 +46,6 @@
         'ngSanitize',
         'ngMessages',
         'ui.mask',
-        'ui.select',
         'ui.bootstrap',
         'angular-markdown-editor'
     ])
@@ -60,77 +58,10 @@
         }]);
     }])
 
-    // TODO this should be removed, viewer shouldn't parse the url
-    // Configure the context info from the URI
-    .config(['context', 'UriUtilsProvider', function configureContext(context, UriUtilsProvider) {
-        var utils = UriUtilsProvider.$get();
-
-        // Parse the URL
-        utils.setOrigin();
-        utils.parseURLFragment(window.location, context);
-
-        // console.log('Context', context);
-    }])
-
-    // Configure all tooltips to be attached to the body by default. To attach a
-    // tooltip on the element instead, set the `tooltip-append-to-body` attribute
-    // to `false` on the element.
-    .config(['$uibTooltipProvider', function($uibTooltipProvider) {
-        $uibTooltipProvider.options({appendToBody: true});
-    }])
-
-    // TODO not used anymore and can be removed (it was used by old annotation support code)
-    .config(['userProvider', 'context', 'SessionProvider', 'ConfigUtilsProvider', function configureUser(userProvider, context, SessionProvider, ConfigUtilsProvider) {
-        var chaiseConfig = ConfigUtilsProvider.$get().getConfigJSON();
-        SessionProvider.$get().getSession().then(function success(session) {
-            // there's no active session
-            if (!session) return;
-
-            var groups = chaiseConfig.userGroups || context.groups;
-            // session.attributes is an array of objects that have a display_name and id
-            // We MUST use the id field to check for role inclusion as it is the unique identifier
-            var attributes = session.attributes.map(function(attribute) { return attribute.id });
-            var user = userProvider.$get();
-            user.session = session;
-
-// TODO Let's try to extract this setup to unclutter *.app.js
-            // Need to check if using the new web authen
-            // if so, there will be a client object with a combination of any or all of the following: display_name, full_name, and email
-            // first priority id display_name
-            if (session.client.display_name) {
-                user.name = session.client.display_name;
-            // full_name is second priority
-            } else if (session.client.full_name) {
-                user.name = session.client.full_name;
-            // fallback if no display_name or full_name
-            } else if (session.client.email) {
-                user.name = session.client.email;
-            // Case for old web authen where client is a string
-            } else {
-                user.name = session.client
-            }
-
-            if (attributes.indexOf(groups.curators) > -1) {
-                user.role = 'curator';
-            } else if (attributes.indexOf(groups.annotators) > -1) {
-                user.role = 'annotator';
-            } else if (attributes.indexOf(groups.users) > -1) {
-                user.role = 'user';
-            } else {
-                user.role = null;
-            }
-
-            // console.log('User: ', user);
-            return;
-        }, function error(response) {
-            throw response;
-        });
-    }])
-
     // Hydrate values providers and set up iframe
     .run([
-        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', 'messageMap', '$window', 'context', 'image', '$rootScope', 'Session', 'AlertsService', 'viewerConfig', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
-        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, messageMap, $window, context, image, $rootScope, Session, AlertsService, viewerConfig, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
+        'ConfigUtils', 'ERMrest', 'Errors', 'DataUtils', 'FunctionUtils', 'headInjector', 'UriUtils', 'logService', 'messageMap', '$window', 'context', '$rootScope', 'Session', 'AlertsService', 'viewerConfig', 'viewerConstant', 'UiUtils', '$timeout', 'viewerAppUtils',
+        function runApp(ConfigUtils, ERMrest, Errors, DataUtils, FunctionUtils, headInjector, UriUtils, logService, messageMap, $window, context, $rootScope, Session, AlertsService, viewerConfig, viewerConstant, UiUtils, $timeout, viewerAppUtils) {
 
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
@@ -141,40 +72,23 @@
         $rootScope.hideAnnotationSidebar = true;
         $rootScope.annotationTuples = [];
 
-        var arrows = [];
-        var rectangles = [];
-        var sections = [];
-
         var iframe = $window.frames[0];
-        var arrows = [];
-        var rectangles = [];
-        var sections = [];
         var session;
         var imageURI, svgURIs = [], imageTuple;
-        var config = ConfigUtils.getContextJSON();
         var imageConfig = viewerConfig.getImageConfig();
         var osdConstant = viewerConstant.osdViewer;
 
-        // TODO are these needed?
-        context.server = config.server;
-        context.wid = config.contextHeaderParams.wid;
-        context.cid = config.contextHeaderParams.cid;
-        context.pid = config.contextHeaderParams.pid;
-        context.chaiseBaseURL = UriUtils.chaiseBaseURL();
         UriUtils.setOrigin();
 
         // NOTE: we're not decoding query parameters because it will mess with the encoding of url values
         var res = UriUtils.chaiseURItoErmrestURI($window.location, true, true);
         var ermrestUri = res.ermrestUri,
-            pcid = res.cid,
-            ppid = res.pid,
+            pcid = res.pcid,
+            ppid = res.ppid,
             isQueryParameter = res.isQueryParameter,
-            pageQueryParamsString = res.pageQueryParamsString,
             pageQueryParams = res.queryParams;
 
         context.catalogID = res.catalogId;
-
-        context.queryParams = pageQueryParams;
 
         FunctionUtils.registerErmrestCallbacks();
 
@@ -196,17 +110,22 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
+            session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
+
             var imageReference;
             // resolve the main (image) reference
-            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (ref) {
-                imageReference = ref;
+            ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function (reference) {
+                // TODO added this to get rid of terminal error, but this doesn't make sense to me
+                //      we shouldn't polute rootScope in other apps for no reason.
+                //      and also this should be based on contextualized reference
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
+
+                imageReference = reference;
 
                 // TODO check for filter
-                // context.filter = imageReference.location.filter;
-                // context.facets = imageReference.location.facets;
-                // DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
+                // DataUtils.verify((imageReference.location.filter || imageReference.location.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                 // TODO is it needed?
@@ -231,7 +150,9 @@
                 if (pcid) logObj.pcid = pcid;
                 if (ppid) logObj.ppid = ppid;
                 if (isQueryParameter) logObj.cqp = 1;
-                return imageReference.contextualize.detailed.read(1, logObj, false, true);
+
+                // since we want to check the ACL for updating the default_Z we have to ask for TCRS
+                return imageReference.contextualize.detailed.read(1, logObj, false, true, false, true);
             })
             // read the main (image) reference
             .then(function (imagePage) {
@@ -248,9 +169,8 @@
 
                     $rootScope.tuple = imageTuple;
 
-                    image.entity = imageTuple.data;
-                    context.imageID = image.entity.RID;
-                    imageURI = image.entity[imageConfig.legacy_osd_url_column_name];
+                    context.imageID = imageTuple.data.RID;
+                    imageURI = imageTuple.data[imageConfig.legacy_osd_url_column_name];
 
                     if (!imageURI) {
                         console.log("The " + imageConfig.legacy_osd_url_column_name + " value is empty in Image table.");
@@ -258,8 +178,8 @@
 
                     // TODO this feels hacky
                     // get the default zindex value
-                    if (imageConfig.default_z_index_column_name in image.entity) {
-                        context.defaultZIndex = image.entity[imageConfig.default_z_index_column_name];
+                    if (imageConfig.default_z_index_column_name in imageTuple.data) {
+                        context.defaultZIndex = imageTuple.data[imageConfig.default_z_index_column_name];
                     }
 
                     /**
@@ -347,6 +267,11 @@
                             watermark = val[imageConfig.watermark_foreign_key_data_column_name];
                         }
                     }
+
+                    // properly set the mainImage acls
+                    $rootScope.osdViewerParameters.acls.mainImage = {
+                        canUpdateDefaultZIndex: imageTuple.canUpdate && imageTuple.checkPermissions("column_update", imageConfig.default_z_index_column_name)
+                    };
                 }
 
                 qParamName = osdConstant.WATERMARK_QPARAM;
@@ -382,7 +307,7 @@
                 // disable the annotaiton sidebar:
                 //  - if there are no annotation and we cannot create
                 //  - the image type doesn't support annotation.
-                // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreate && !hasAnnotationQueryParam) {
+                // if ($rootScope.annotationTuples.length == 0 && !$rootScope.canCreateAnnotation && !hasAnnotationQueryParam) {
                 //     $rootScope.disableAnnotationSidebar = true;
                 // }
 
@@ -395,11 +320,6 @@
                     // TODO better error
                     throw new ERMrest.MalformedURIError("Image information is missing.");
                 }
-
-                // add acls to the osdViewerParameters
-                $rootScope.osdViewerParameters.mainImage.acls = {
-                    canUpdate: DataUtils.isObjectAndNotNull($rootScope.tuple) && $rootScope.reference.canUpdate
-                };
 
                 var osdViewerURI = origin + UriUtils.OSDViewerDeploymentPath() + "mview.html";
                 iframe.location.replace(osdViewerURI);
@@ -442,4 +362,4 @@
         // This is to allow the dropdown button to open at the top/bottom depending on the space available
         UiUtils.setBootstrapDropdownButtonBehavior();
     }]);
-})();
+  })();

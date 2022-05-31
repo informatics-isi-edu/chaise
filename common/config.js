@@ -51,6 +51,7 @@
          *      - doesn't matter if in an iframe or not, if true, hide it
          */
         var hideNavbar = (inIframe && hideNavbarParam !== false) || hideNavbarParam === true;
+        var openLinksInTab = inIframe && settings.openIframeLinksInTab;
 
         // initialize dcctx object
         $window.dcctx = {
@@ -59,7 +60,16 @@
                 pid: MathUtils.uuid(),
                 wid: $window.name
             },
-            hideNavbar: hideNavbar
+            settings: {
+                hideNavbar: hideNavbar,
+                // the settings constant is not accessible from chaise apps,
+                // therefore we're capturing them here so they can be used in chaise
+                appTitle: settings.appTitle,
+                overrideHeadTitle: settings.overrideHeadTitle,
+                overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
+                overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
+                openLinksInTab: openLinksInTab
+            }
         };
         // set chaise configuration based on what is in `chaise-config.js` first
         ConfigUtils.setConfigJSON();
@@ -77,14 +87,14 @@
                     // we already setup the defaults and the configuration based on chaise-config.js
                     if (response && response.chaiseConfig) ConfigUtils.setConfigJSON(response.chaiseConfig);
 
-                    return headInjector.setupHead(settings);
+                    return headInjector.setupHead();
                 }).then(function () {
                     $rootScope.$emit("configuration-done");
                 })
                 // no need to add a catch block here, errors has been includedso handleException has been configured to be the default handler
             } else {
                 // there's no catalog to fetch (may be an index page)
-                headInjector.setupHead(settings).then(function () {
+                headInjector.setupHead().then(function () {
                     $rootScope.$emit("configuration-done");
                 });
             }

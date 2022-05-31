@@ -149,7 +149,7 @@
          * @param  {object} onSuccessFunction   callback
          * @param  {object} logObj           The object that we want to log in the create/update request
          */
-        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj) {
+        function addRecords(isUpdate, derivedref, recordEditModel, isModalUpdate, rsReference, rsTuples, rsQueryParams, vm, onSuccessFunction, logObj, closeModal) {
             var model = isModalUpdate ? GV_recordEditModel : recordEditModel;
             viewModel = vm;
 
@@ -333,13 +333,21 @@
             params.parentReference = rsReference;
             params.displayMode = recordsetDisplayModes.addPureBinaryPopup;
 
-            params.reference = domainRef.unfilteredReference.contextualize.compactSelect;
-            params.reference.session = rsSession;
+            var andFilters = [];
+            // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+            domainRef.derivedAssociationReference.associationToRelatedFKR.key.colset.columns.forEach(function (col) {
+                andFilters.push({
+                    "source": col.name,
+                    "hidden": true,
+                    "not_null": true
+                });
+            });
+
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelectAssociationLink;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;
-            params.facetPanelOpen = false;
-            //NOTE assumption is that this function is only is called for adding pure and binary association
+            params.facetPanelOpen =  params.reference.display.facetPanelOpen !== null ? params.reference.display.facetPanelOpen : false;
 
             // TODO (could be optimized) this is already done in recordutil getTableModel (we just don't have access to the tableModel here)
             var stackElement = logService.getStackNode(
@@ -402,10 +410,10 @@
                 // tuple - returned from action in modal (should be the foreign key value in the recrodedit reference)
                 // set data in view model (model.rows) and submission model (model.submissionRows)
                 // we assume that the data for the main table has been populated before
-                var mapping = derivedref._secondFKR.mapping;
+                var mapping = derivedref.associationToRelatedFKR.mapping;
 
                 for (i = 0; i < tuples.length; i++) {
-                    derivedref._secondFKR.key.colset.columns.forEach(function(col) {
+                    derivedref.associationToRelatedFKR.key.colset.columns.forEach(function(col) {
                         if (angular.isUndefined(GV_recordEditModel.submissionRows[i])) {
                             var obj = {};
                             angular.copy(GV_recordEditModel.submissionRows[i - 1], obj);
@@ -507,7 +515,7 @@
             if (column.isAsset) {
                 type = 'file'
             } else if (isDisabled) {
-                type = 'disabled';
+                type = "disabled";
             } else if (column.isForeignKey) {
                 type = 'popup-select';
             } else {
@@ -574,7 +582,7 @@
          * @param  {Object} logObj the object will be passed to read as contextHeaderParams
          */
         function _getForeignKeyData (model, rowIndex, colNames, fkRef, logObj) {
-            fkRef.contextualize.compactSelect.read(1, logObj).then(function (page) {
+            fkRef.contextualize.compactSelectForeignKey.read(1, logObj).then(function (page) {
                 colNames.forEach(function (colName) {
                     // default value is validated
                     if (page.tuples.length > 0) {
@@ -811,6 +819,38 @@
             }
         }
 
+        /**
+         * if because of column-level acls, columns of one of the rows cannot be
+         * updated, we cannot update any other rows. so we should precompute this
+         * and attach the error so we can show it later to the users.
+         * This should be called on load, as well as when one of the records
+         * in the form is removed.
+         * TODO technically could be improved. we've already gone through the
+         * list of columns, we might not need to to do it again here
+         */
+        function populateColumnPermissionError(model, columnModel) {
+            if (!model.columnPermissionError) {
+                model.columnPermissionError = {};
+            }
+
+            if (columnModel.isDisabled) {
+                model.columnPermissionError[columnModel.column.name] = null;
+                return;
+            }
+
+            var firstIndex = model.canUpdateRows.findIndex(function (curr, index) {
+                // the whole row can be updated but the column cannot
+                return $rootScope.tuples[index].canUpdate && !curr[columnModel.column.name];
+            });
+            if (firstIndex === -1) {
+                model.columnPermissionError[columnModel.column.name] = null;
+                return;
+            }
+            var message = "This field cannot be modified. To modify it, remove all records that have this field disabled (e.g. Record Number ";
+            message +=  (firstIndex+1) + ")";
+            model.columnPermissionError[columnModel.column.name] =  message;
+        }
+
         function populateEditModelValues(model, reference, tuple, tupleIndex, isCopy) {
             // initialize row objects {column-name: value,...}
             model.rows[tupleIndex] = {};
@@ -818,6 +858,10 @@
             // these are the values that we're sending to ermrestjs,
             // chaise should not use these values and we should just populate the values
             model.submissionRows[tupleIndex] = {};
+
+            if (!isCopy) {
+                model.canUpdateRows[tupleIndex] = {};
+            }
 
             var values = tuple.values;
 
@@ -832,7 +876,14 @@
                 var i = reference.columns.findIndex(function (col) {return col.name === column.name});
 
                 // If input is disabled, and it's copy, we don't want to copy the value
-                if (colModel.inputType == "disabled" && isCopy) return;
+                var isDisabled = colModel.inputType == "disabled";
+                if (isDisabled && isCopy) return;
+
+                if (!isCopy) {
+                    // whether certain columns are disabled or not
+                    model.canUpdateRows[tupleIndex][column.name] = tuple.canUpdate && tuple.canUpdateValues[i];
+                    isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[i]);
+                }
 
                 // stringify the returned array value
                 if (column.type.isArray) {
@@ -847,10 +898,10 @@
                 switch (column.type.name) {
                     case "timestamp":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatDatetime(values[i], options);
+                        value = isDisabled ? values[i] : InputUtils.formatDatetime(values[i], options);
                         break;
                     case "timestamptz":
-                        if (colModel.inputType == "disabled") {
+                        if (isDisabled) {
                             options.outputType = "string";
                             options.outputMomentFormat = dataFormats.datetime.return;
                         }
@@ -860,13 +911,13 @@
                     case "int4":
                     case "int8":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatInt(values[i]);
+                        value = isDisabled ? values[i] : InputUtils.formatInt(values[i]);
                         break;
                     case "float4":
                     case "float8":
                     case "numeric":
                         // If input is disabled, there's no need to transform the column value.
-                        value = colModel.inputType == "disabled" ? values[i] : InputUtils.formatFloat(values[i]);
+                        value = isDisabled ? values[i] : InputUtils.formatFloat(values[i]);
                         break;
                     case "boolean":
                         value = InputUtils.formatBoolean(column, values[i]);
@@ -920,8 +971,8 @@
          * @param {ERMrest.Tuple=} originalTuple - the original tuple that comes from the first read
          * @param {Boolean} editOrCopy - true if it's edit or copy, otherwise it's false.
          */
-        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy) {
-            reference.columns.forEach(function (column) {
+        function populateSubmissionRow(modelRow, submissionRow, reference, originalTuple, editOrCopy, canUpdateRows) {
+            reference.columns.forEach(function (column, columnIndex) {
                 // If the column is a foreign key column, it needs to get the originating columns name for data submission
                 if (column.isForeignKey) {
 
@@ -948,7 +999,8 @@
                 }
                 // not foreign key, column.name is sufficient for the keys
                 var rowVal = modelRow[column.name];
-                if (rowVal && !column.isDisabled) {
+                var canUpdateCol = !DataUtils.isObjectAndNotNull(canUpdateRows) || canUpdateRows[column.name] == true;
+                if (rowVal && !column.isDisabled && canUpdateCol) {
                     if (column.type.isArray) {
                         rowVal = JSON.parse(rowVal);
                     } else {
@@ -998,7 +1050,8 @@
             getColumnModelLogAction: getColumnModelLogAction,
             populateCreateModelValues: populateCreateModelValues,
             populateEditModelValues: populateEditModelValues,
-            populateSubmissionRow: populateSubmissionRow
+            populateSubmissionRow: populateSubmissionRow,
+            populateColumnPermissionError: populateColumnPermissionError
         }
     }])
 })();

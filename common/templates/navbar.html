@@ -1,8 +1,14 @@
 <header ng-hide="hideNavbar" id="navheader" class="row">
+    <div class="chaise-navbar-banner-container" ng-repeat="banner in topBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+        <button class="close" ng-click="hideBanner($index, true)" ng-if="banner.dismissible">
+            <span aria-hidden="true">×</span>
+        </button>
+        <div class="markdown-container" ng-bind-html="banner.html | trustedHTML"></div>
+    </div>
     <nav id="mainnav" class="navbar navbar-inverse" role="navigation">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-target="#fb-navbar-main-collapse">
+            <button type="button" class="navbar-toggle collapsed" data-target="#fb-navbar-main-collapse" data-toggle="collapse">
                 <span class="sr-only">Toggle navigation</span>
                 <span class="md-chevron-down"></span>
                 MENU
@@ -39,4 +45,10 @@
             </span>
         </div><!--/.nav-collapse -->
     </nav>
+    <div class="chaise-navbar-banner-container" ng-repeat="banner in bottomBanners track by $index" ng-hide="banner.hide" ng-class="banner.key ? 'chaise-navbar-banner-container-' + banner.key : ''">
+        <button class="close" ng-click="hideBanner($index, false)" ng-if="banner.dismissible">
+            <span aria-hidden="true">×</span>
+        </button>
+        <div class="markdown-container" ng-bind-html="banner.html | trustedHTML"></div>
+    </div>
 </header>

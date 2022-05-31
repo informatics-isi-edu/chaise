@@ -46,7 +46,6 @@
         'ngSanitize',
         'ui.bootstrap',
         'ui.mask',
-        'ui.select',
         'angular-markdown-editor',
         'chaise.footer',
         'chaise.recordcreate'
@@ -153,6 +152,7 @@
 
             // Get existing session value
             session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
 
             // If session is not defined or null (Anonymous user) prompt the user to login
             if (!session) {
@@ -162,8 +162,7 @@
 
             // On resolution
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
-
-
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 // we are using filter to determine app mode, the logic for getting filter
                 // should be in the parser and we should not duplicate it in here
                 // NOTE: we might need to change this line (we're parsing the whole url just for fidinig if there's filter)
@@ -187,7 +186,6 @@
                     $rootScope.reference = reference.contextualize.entryCreate;
                 }
 
-                $rootScope.reference.session = session;
                 $rootScope.session = session;
 
                 $log.info("Reference: ", $rootScope.reference);
@@ -250,13 +248,31 @@
                             action: logService.getActionString(logService.logActions.LOAD),
                             stack: logService.getStackObject()
                         };
-                        $rootScope.reference.read(numberRowsToRead, logObj).then(function getPage(page) {
+
+                        // in edit mode, we have to check the TCRS (row-level acls)
+                        var getTCRS = context.mode === context.modes.EDIT;
+                        $rootScope.reference.read(numberRowsToRead, logObj, false, false, false, getTCRS).then(function getPage(page) {
                             $log.info("Page: ", page);
 
                             if (page.tuples.length < 1) {
                                 // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
                                 var recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
                                 throw new Errors.noRecordError({}, page.reference.displayname.value, recordSetLink);
+                            }
+
+                            // make sure at least one row is editable
+                            if (context.mode == context.modes.EDIT) {
+                                var forbiddenTuples = page.tuples.filter(function (t) {
+                                    return !t.canUpdate;
+                                });
+                                // all the rows are disabled
+                                if (forbiddenTuples.length === page.tuples.length) {
+                                    var forbiddenError = new ERMrest.ForbiddenError(messageMap.unauthorizedErrorCode, (messageMap.unauthorizedMessage + messageMap.reportErrorToAdmin));
+                                    // NOTE there might be different reasons for this (column vs row)
+                                    // should we list all of them?
+                                    forbiddenError.subMessage = forbiddenTuples[0].canUpdateReason;
+                                    throw forbiddenError;
+                                }
                             }
 
                             var column, value, headTitle;
@@ -287,6 +303,12 @@
                                 $rootScope.tuples.push(shallowTuple);
 
                                 recordCreate.populateEditModelValues(recordEditModel, $rootScope.reference, page.tuples[j], j, context.mode == context.modes.COPY);
+                            }
+
+                            if (context.mode == context.modes.EDIT) {
+                              recordEditModel.columnModels.forEach(function (cm) {
+                                recordCreate.populateColumnPermissionError(recordEditModel, cm);
+                              });
                             }
 
                             $rootScope.displayReady = true;

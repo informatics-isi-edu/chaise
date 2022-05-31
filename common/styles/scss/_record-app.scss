@@ -4,6 +4,12 @@
     $space-between-related-sections: 5px;
     $row-focus-border-width: 2px;
 
+    /*
+     * In case of related entities, the accordion icon is adding this much space,
+     * so we're making sure the rest of titles and content are aligned with it.
+     */
+    $record-header-padding-left: 40px;
+
     .top-panel-container {
         padding-bottom: 10px;
 
@@ -127,6 +133,14 @@
                         }
                     }
 
+                    // when the column header is hidden, align content with the
+                    // rest of headers
+                    &.hidden-header {
+                        > .entity-value {
+                            padding-left: $record-header-padding-left;
+                        }
+                    }
+
                     &.row-focus{
                         // row-focus will change the border top and bottom size,
                         // so we should adjust that and account for the default border
@@ -151,7 +165,7 @@
                 }
 
                 .entity-key {
-                    padding-left: 40px;
+                    padding-left: $record-header-padding-left;
                     min-width: 150px;
                 }
             }
@@ -222,7 +236,7 @@
                 }
 
                 .inline-tooltip {
-                    padding-left: 40px;
+                    padding-left: $record-header-padding-left;
                     margin-bottom: 10px;
                 }
 
@@ -267,7 +281,7 @@
                         padding: 10px 0px 10px 0px;
 
                         .accordion-content {
-                            padding-left: 40px;
+                            padding-left: $record-header-padding-left;
                             padding-right: 8px;
                         }
                     } // end .panel-body
@@ -541,7 +555,12 @@
 
         //In print we hide YouTube and other videos. This class is then made visible to display the relevant info in print mode
         .video-info-in-print{
-          visibility: visible !important;
+            /*
+            * NOTE: we're using display because visibility:hidden had aligment issues.
+            * With visibility hidden eventhough the element is invisibile, it will still take up space,
+            * and will add extra unnecessary space between the iframe and fullscreen button.
+            */
+            display: block !important;
         }
 
         alerts {

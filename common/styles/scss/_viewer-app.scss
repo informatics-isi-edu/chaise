@@ -24,6 +24,11 @@
         padding-left: 20px !important;
     }
 
+    // add more space when the title is hidden
+    .top-right-panel.no-title {
+        padding-top: 10px;
+    }
+
     .main-body, .side-panel-container {
         height: 100%;
     }
@@ -225,15 +230,6 @@
     }
 
 
-    /* .btn.pick {
-      background-color: #18558E;
-    } */
-
-    /* .btn.pick:hover {
-        background-color: #002D73;
-        border-color: #1E4E9A;
-    } */
-
     #viewer-content{
         display: flex;
         flex-direction: row;
@@ -263,11 +259,31 @@
                 position: relative;
             }
 
-            .annotation-spinner {
+            .annotation-loading-spinner {
                 #spinner {
                     top: 200px;
                     // width: 160px;
                     // height: 90px;
+                }
+            }
+
+            .annotation-spinner-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                background-color: $disabled-background-color;
+                opacity: 0.5;
+                z-index: 9; // higher than form
+            }
+
+            .annotation-spinner {
+                // make sure the text is visible in one line
+                #spinner {
+                    width: 160px;
+                    height: 105px;
+                    top: 50%;
                 }
             }
 
@@ -276,29 +292,9 @@
                 border-radius: 3px;
                 background: #f8f8f8;
 
-                .form-spinner-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    height: 100%;
-                    width: 100%;
-                    background-color: $disabled-background-color;
-                    opacity: 0.5;
-                    z-index: 6; // higher than the clear button
-                }
-
-                .form-spinner {
-                    // make sure the text is visible in one line
-                    #spinner {
-                        width: 160px;
-                        height: 105px;
-                        top: 50%;
-                    }
-                }
-
                 &.open{
                     opacity : 1;
-                    z-index: 10;
+                    z-index: 8;
                 }
 
                 .annotationRow{
@@ -575,6 +571,7 @@
                     opacity: 0.7;
                     -webkit-transition: .2s;
                     transition: opacity .2s;
+                    cursor: pointer;
                 }
                 .strokeSlider:hover {
                     opacity: 1;
@@ -662,7 +659,7 @@
                 overflow: hidden;
                 background: $white-color;
                 flex-shrink: 0;
-                min-height: 40px;
+                min-height: 30px;
                 cursor: pointer;
 
                 &:hover{
@@ -683,26 +680,27 @@
                 }
 
 
-                &.current .editBtn, &.current .editBtn i{
+                &.current .annot-item-btn, &.current .annot-item-btn i{
                     color: $white-color;
                 }
-                .editBtn.selected{
+                .annot-item-btn.selected{
                     background: #3669ac;
                     color: $white-color;
                     padding: 3px;
                 }
+                .annot-item-btn .delete-icon {
+                    padding-top: 4px;
+                }
 
-                &.current .editBtn.selected,
-                &.current .editBtn[data-type="highlightGroup"]{
+                &.current .annot-item-btn.selected,
+                &.current .annot-item-btn[data-type="highlightGroup"]{
                     color: #ffff80;
                 }
 
                 .itemContent{
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    justify-content: center;
-                    /* cursor: pointer; */
+                    margin: auto 0;
+                    width: 100%;
+                    padding: 5px 0;
                 }
 
 
@@ -751,59 +749,17 @@
                 textarea.edit:hover{
                     color: #c1c1c1;
                 }
-                .editRow{
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                }
-
-                // TODO it's called editBtn but used for all the annotation buttons
-                .editBtn{
-                    text-decoration: none;
-                    padding: 3px;
-                    border-radius: 2px;
-                    margin: 2px;
-                    color: $primary-color;
-                    cursor: pointer;
-                    font-size: 12px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    border: none;
-                    background: none;
-
-                    // change chaise default color
-                    .glyphicon-refresh {
-                        color: $primary-color;
-                    }
-
-                    &:focus {
-                        outline: none;
-                    }
-
-                    &:last-child{
-                        margin-right: 8px;
-                    }
-
-                    &:hover{
-                        color: #0099cce0;
-                    }
-
-                    &.disabled,&:disabled{
-                        color: $disabled-color;
-                        cursor: not-allowed;
-                    }
-                }
 
                 .itemRow{
-                    display: flex;
-                    flex-direction: row;
+                    // display: flex;
+                    // flex-direction: row;
                     .annotation-color-container {
                         width: 10px;
                         height: 10px;
                         background-color: transparent;
                         margin-top: 8px;
                         margin-right: 2px;
+                        display: inline-block;
 
                         .annotation-color-item {
                             height: 100%;
@@ -812,8 +768,42 @@
                     }
 
                     .anatomy {
-                        flex : 1;
                         padding: 3px;
+                    }
+
+                    .annot-item-toolbar{
+                        float: right;
+
+                        .annot-item-btn{
+                            text-decoration: none;
+                            padding: 3px;
+                            border-radius: 2px;
+                            // margin: 2px;
+                            color: $primary-color;
+                            cursor: pointer;
+                            font-size: 12px;
+                            border: none;
+                            background: none;
+                            display: inline-block;
+
+                            // change chaise default color
+                            .glyphicon-refresh {
+                                color: $primary-color;
+                            }
+
+                            &:focus {
+                                outline: none;
+                            }
+
+                            &:hover{
+                                color: #0099cce0;
+                            }
+
+                            &.disabled,&:disabled{
+                                color: $disabled-color;
+                                cursor: not-allowed;
+                            }
+                        }
                     }
                 }
 
@@ -850,7 +840,7 @@
 
     }
     .menu-btn-container{
-        display: flex;
+        // display: flex;
         /* background: #000; */
         /* border: 1px solid #737171; */
         /* border-radius: 3px; */

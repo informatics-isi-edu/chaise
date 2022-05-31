@@ -29,10 +29,10 @@ describe('Recordset add record,', function() {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
 
-    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function () {
+    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function (done) {
         // default config: maxRecordsetRowHeight = 160
-        // 160 for max height, 10 for padding, 1 for border
-        var testCell, cellHeight = 171;
+        // 160 for max height, 10 for padding
+        var testCell, cellHeight = 170;
         chaisePage.recordsetPage.getRows().then(function (rows) {
             return chaisePage.recordsetPage.getRowCells(rows[0]);
         }).then(function (cells) {
@@ -41,7 +41,8 @@ describe('Recordset add record,', function() {
 
             return testCell.getSize();
         }).then(function (dimensions) {
-            expect(dimensions.height).toBe(cellHeight);
+            // the calculations might be one pixel off
+            expect(Math.abs(dimensions.height - cellHeight) <= 1).toBeTruthy();
 
             return testCell.element(by.css(".readmore")).click();
         }).then(function () {
@@ -50,8 +51,10 @@ describe('Recordset add record,', function() {
             return testCell.getSize();
         }).then(function (tallerDimensions) {
             expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+            done();
         }).catch(function (err) {
             console.log(err);
+            done.fail(err);
         });
     });
 
@@ -141,10 +144,20 @@ describe('Recordset add record,', function() {
 
     it("go back to recordset should refresh the table with the new record", function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
-        browser.close();
+        /**
+         * we noticed this test case started failing on saucelabs,
+         * that's why we're switching tabs twice to ensure the onfocus is getting called.
+         */
         browser.switchTo().window(allWindows[0]).then(function() {
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function () {
+            return browser.switchTo().window(allWindows[0]);
+        }).then(function () {
             return chaisePage.waitForElementInverse(element(by.id("spinner")));
         }).then(function() {
+            return chaisePage.recordsetPage.getPageTitleElement().click();
+        }).then(function () {
+
             browser.wait(function() {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                     return (ct == rowCount+1);

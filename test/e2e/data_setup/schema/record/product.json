@@ -416,8 +416,14 @@
                             }
                         },
                         {
-                            "source": [{
+                            "source": [
+                                {
                                     "inbound": ["product-record", "fk_table_w_agg_accommodation"]
+                                },
+                                {
+                                    "filter": "value",
+                                    "operand_pattern": "some_invalid_value",
+                                    "negate": true
                                 },
                                 "id"
                             ],
@@ -429,6 +435,13 @@
                                 },
                                 {
                                     "inbound": ["product-record", "fk_thumbnail_collection"]
+                                },
+                                {
+                                    "or": [
+                                        {"filter": "id", "operator": "::null::"},
+                                        {"filter": "title", "operand_pattern": "some_title_that_should_not_be_used"}
+                                    ],
+                                    "negate": true
                                 },
                                 "id"
                             ],
@@ -541,6 +554,12 @@
                     "fkeys": true,
                     "columns": true,
                     "sources": {
+                        "fk_cover_prefix": {
+                            "source": [
+                                {"outbound": ["product-record", "fk_cover"]},
+                                "RID"
+                            ]
+                        },
                         "cnt_d_accommodation_inbound1": {
                             "source": [
                                 {"inbound": ["product-record", "accommodation_inbound1_fk1"]},
@@ -550,7 +569,7 @@
                         },
                         "max_title_accommodation_collection_cover": {
                             "source": [
-                                {"outbound": ["product-record", "fk_cover"]},
+                                {"sourcekey": "fk_cover_prefix"},
                                 {"inbound": ["product-record", "fk_thumbnail_collection"]},
                                 "title"
                             ],
@@ -558,7 +577,7 @@
                         },
                         "min_title_accommodation_collection_cover": {
                             "source": [
-                                {"outbound": ["product-record", "fk_cover"]},
+                                {"sourcekey": "fk_cover_prefix"},
                                 {"inbound": ["product-record", "fk_thumbnail_collection"]},
                                 "title"
                             ],
@@ -566,7 +585,7 @@
                         },
                         "entity_set_accommodation_collection_cover": {
                             "source": [
-                                {"outbound": ["product-record", "fk_cover"]},
+                                {"sourcekey": "fk_cover_prefix"},
                                 {"inbound": ["product-record", "fk_thumbnail_collection"]},
                                 "RID"
                             ]
@@ -589,23 +608,29 @@
                                 "RID"
                             ]
                         },
-                        "entity_all_outbound_outbound1_outbound1": {
+                        "fk_to_accommodation_outbound1_prefix": {
                             "source": [
                                 {"outbound": ["product-record", "fk_to_accommodation_outbound1"]},
+                                "RID"
+                            ]
+                        },
+                        "entity_all_outbound_outbound1_outbound1": {
+                            "source": [
+                                {"sourcekey": "fk_to_accommodation_outbound1_prefix"},
                                 {"outbound": ["product-record", "accommodation_outbound1_fk1"]},
                                 "RID"
                             ]
                         },
                         "entity_all_outbound_outbound1_outbound2": {
                             "source": [
-                                {"outbound": ["product-record", "fk_to_accommodation_outbound1"]},
+                                {"sourcekey": "fk_to_accommodation_outbound1_prefix"},
                                 {"outbound": ["product-record", "accommodation_outbound1_fk2"]},
                                 "RID"
                             ]
                         },
                         "entity_all_outbound_outbound1_outbound3": {
                             "source": [
-                                {"outbound": ["product-record", "fk_to_accommodation_outbound1"]},
+                                {"sourcekey": "fk_to_accommodation_outbound1_prefix"},
                                 {"outbound": ["product-record", "accommodation_outbound1_fk3"]},
                                 "RID"
                             ]

@@ -45,12 +45,15 @@ var viewerConfigs = {
             "legacy_osd_url_column_name": "uri",
         },
         /**
-         * the table that stores each individual image for each channel in each z-plane
+         * the table that stores each individual image for each channel in each z
          */
         "processed_image": {
             // procesed image table
             "schema_name": "Gene_Expression",
             "table_name": "Processed_Image",
+
+            // the channel number column
+            "channel_number_column_name": "Channel_Number",
 
             // how to sort the processed_image records
             "column_order": [{
@@ -65,17 +68,34 @@ var viewerConfigs = {
             "z_index_column_name": "Z_Index",
             "reference_image_column_name": "Reference_Image",
 
-            // the actual location of image file (info.json, ImageProperties.xml, etc)
+            /**
+             * The following attributes will help chaise to generate a url
+             * that OSD can understand to be able to locate the images.
+             *
+             * - `image_url_column_name`: where the pyremidical image is stored.
+             * - The display method (`iiif`, `dzi`, etc) should correspond to the keys defined in `image_url_pattern`s.
+             * - `iiif_version`: The version of iiif server that should be used (default is 2)
+             * - `image_url_pattern`: the url_pattern to transform the value of `image_url_column_name` into something
+             *    that OSD understands. in the `image_url_pattern` you have access to two variables:
+             *    - `iiif_version`: the IIIF version number defined (default is 2)
+             *    - `_url`: the raw value of `image_url_column_name`.
+             *    - `url`: the formatted value of `image_url_column_name`: if it's relative, chaise will prepend current hostname to it
+             *
+             * Notes:
+             * - If `image_url_pattern` is not defined for a specific display method,
+             *   the value of `image_url_column_name` column will be used without any transformation.
+             * - In the current use case,
+             *   - iiif: the hatrac location of pyremidical images are stored
+             *     in `image_url_column_name`, and the pattern attribute would allow us
+             *     to convert a hatrac url into a url that OSD can use to fetch the images.
+             *   - dzi: the location of `ImageProperties.xml` is stored in
+             *    `image_url_column_name` column and transformation is not needed.
+             *   - other types (jpeg): The location of image is stored in
+             *    `image_url_column_name` column and transformation is not needed.
+             */
             "image_url_column_name": "File_URL",
-            
-            // the channel number column
-            "channel_number_column_name": "Channel_Number",
-
-            // what is the display method (`iiif`, `dzi`, etc)
             "display_method_column_name": "Display_Method",
-
-            // how to generate the url
-            "iiif_version": "2", // if not passed, `2` will be used
+            "iiif_version": "2",
             "image_url_pattern": {
                 "iiif": "/iiif/{{{iiif_version}}}/{{#encode url}}{{/encode}}/info.json"
             }
@@ -99,7 +119,7 @@ var viewerConfigs = {
 
             // the channelName column
             "channel_name_column_name": "Name",
-            
+
             // the channelNumber column
             "channel_number_column_name": "Channel_Number",
 
@@ -108,6 +128,11 @@ var viewerConfigs = {
 
             // a boolean column that signals whether the image is greyscale or rgb
             "is_rgb_column_name": "Is_RGB",
+
+            // a jsonb column that holds the settings for the channel
+            "channel_config_column_name": "Config",
+            // the format version that should be used (default is "1.0")
+            "channel_config_format_version": "1.0",
 
             /**
              * @DEPRECATED This is here for just backward compatibilty and should not be used.
@@ -124,11 +149,25 @@ var viewerConfigs = {
             "table_name": "Image_Annotation",
 
             // fk to image table in annotation table
+            /**
+             * TODO: need a better way to specify better foreignkey path
+             * to find the visible column name, navigate to record page and find the
+             * foreignkey pseudo-column to the image table.
+             * in the HTML source code, find the tr containing the column.
+             * the visible column name is used in id attribute with the following format:
+             * id="row-<visible-column-name>"
+             */
             "reference_image_visible_column_name": "okfHjL8_zZzvahdjNJjz-Q",
             "reference_image_column_name": "Image",
 
             // the asset column that has the annotation
             "overlay_column_name": "File_URL",
+            /**
+             * This attribute is only needed if you're planning on passing
+             * annotation urls as query parameters. In this case, this path
+             * is used to distinguish between annotation and image urls in the
+             * `url` query parameter.
+             */
             "overlay_hatrac_path": "resources/gene_expression/annotations",
 
             // the columns that are used internally and should be removed from the entry form
@@ -142,6 +181,14 @@ var viewerConfigs = {
              */
             "annotated_term_displayname": "Anatomy",
             "annotated_term_column_name": "Anatomy",
+            /**
+             * TODO: need a better way to specify better foreignkey path
+             * to find the visible column name, navigate to record page and find the
+             * foreignkey pseudo-column to the annotated term table.
+             * in the HTML source code, find the tr containing the column.
+             * the visible column name is used in id attribute with the following format:
+             * id="row-<visible-column-name>"
+             */
             "annotated_term_visible_column_name": "Y7oiVf4tLQPtUWQRrtF-KQ",
             "annotated_term_foreign_key_constraint": ["Gene_Expression", "Image_Annotation_Anatomy_fkey"],
 

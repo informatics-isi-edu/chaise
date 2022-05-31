@@ -6,9 +6,9 @@
                 <div class="recordset-title-container title-container">
                     <div class="search-popup-controls recordset-title-buttons title-buttons">
                         <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'"
-                                tooltip-placement="bottom" uib-tooltip="Apply the selected rows" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="ctrl.tableModel.selectedRows.length < 1 || ctrl.disableSubmit">
+                                tooltip-placement="bottom" uib-tooltip="{{ctrl.submitTooltip}}" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="(!ctrl.rowsOnLoad && ctrl.tableModel.selectedRows.length < 1) || ctrl.disableSubmit">
                             <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
-                            <span>{{ctrl.mode == "selectFaceting" ? "Submit" : "Save" }}</span>
+                            <span>{{ctrl.submitText}}</span>
                         </button>
                         <button class="chaise-btn chaise-btn-secondary pull-right modal-close" type="button" ng-click="ctrl.cancel()" tooltip-placement="bottom" uib-tooltip="Close the dialog">
                             <strong class="chaise-btn-icon">X</strong>
@@ -35,15 +35,27 @@
                             </span>
                         </div>
                         <div ng-switch-when="popup/purebinary/add">
-                            <span>Add </span>
-                            <chaise-title reference="ctrl.tableModel.reference"></chaise-title>
+                            <span>Link </span>
+                            <chaise-title reference="ctrl.referenceWDisplayname"></chaise-title>
                             <span> to </span>
                             <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title><span>:</span>
+                            <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
+                        </div>
+                        <div ng-switch-when="popup/purebinary/unlink">
+                            <span>Unlink </span>
+                            <chaise-title reference="ctrl.tableModel.reference"></chaise-title>
+                            <span> from </span>
+                            <chaise-title reference="ctrl.tableModel.parentReference"></chaise-title>
+                            <span>:</span>
                             <chaise-title displayname="ctrl.tableModel.parentTuple.displayname"></chaise-title>
                         </div>
                         <div ng-switch-when="popup/facet">
                             <span>Search by </span>
                             <chaise-title displayname="ctrl.tableModel.displayname" comment="ctrl.tableModel.comment"></chaise-title>
+                        </div>
+                        <div ng-switch-when="popup/savedquery">
+                            <span>Saved search criteria for table </span>
+                            <chaise-title displayname="ctrl.tableModel.parentReference.displayname"></chaise-title>
                         </div>
                         <div ng-switch-default>
                             <chaise-title add-link="false" reference="ctrl.tableModel.reference"></chaise-title>
@@ -57,7 +69,7 @@
 <div class="modal-body">
     <div ng-switch="ctrl.mode">
         <!-- switch when 'selectFaceting' -->
-        <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged"></recordset-select-faceting>
+        <recordset-select-faceting ng-switch-when="selectFaceting" vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" on-favorites-changed="ctrl.onFavoritesChanged"></recordset-select-faceting>
         <!-- swtich default -->
         <recordset ng-switch-default vm="ctrl.tableModel" on-selected-rows-changed="ctrl.onSelectedRowsChanged" get-disabled-tuples="getDisabledTuples"></recordset>
     </div>

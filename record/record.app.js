@@ -72,6 +72,7 @@
 
         UriUtils.setOrigin();
 
+        // NOTE: default to false until we know a user is logged in and they can modify the main record and modify at least 1 of the related tables
         $rootScope.showEmptyRelatedTables = false;
         $rootScope.modifyRecord = chaiseConfig.editRecord === false ? false : true;
         $rootScope.showDeleteButton = chaiseConfig.deleteRecord === true ? true : false;
@@ -93,18 +94,24 @@
             // Unsubscribe onchange event to avoid this function getting called again
             Session.unsubscribeOnChange(subId);
 
+            session = Session.getSessionValue();
+            ERMrest.setClientSession(session);
             ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference);
                 context.filter = reference.location.filter;
                 context.facets = reference.location.facets;
 
                 DataUtils.verify((context.filter || context.facets), 'No filter or facet was defined. Cannot find a record without a filter or facet.');
 
-                session = Session.getSessionValue();
                 if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
+
+                // 'promptlogin' query parameter comes from static generated chaise record pages
+                if (!session && UriUtils.getQueryParam($window.location.href, "promptlogin")) {
+                    Session.loginInAPopUp(logService.logActions.LOGIN_WARNING);
+                }
 
                 // $rootScope.reference != reference after contextualization
                 $rootScope.reference = reference.contextualize.detailed;
-                $rootScope.reference.session = session;
 
                 // send string to prepend to "headTitle"
                 // <table-name>: pending... until we get row information back
@@ -151,6 +158,9 @@
                 // add hideNavbar param back if true
                 if (context.hideNavbar) url += "?hideNavbar=" + context.hideNavbar;
                 $window.history.replaceState({}, '', url);
+
+                // populate the google dataset metadata
+                recordAppUtils.attachGoogleDatasetJsonLd(tuple);
 
                 // NOTE: when the read is called, reference.activeList will be generated
                 // autmoatically but we want to make sure that urls are generated using tuple,
@@ -233,13 +243,20 @@
                             tableModel: recordAppUtils.getTableModel(reference, index, true)
                         };
                         $rootScope.hasInline = true;
+
+                        // check if user can create related or associations that are inline to set showEmptyRelatedTables on load
+                        // user can modify the current record page and can modify at least 1 of the related tables
+                        var canCreateRelation = reference.derivedAssociationReference ? reference.derivedAssociationReference.canCreate : reference.canCreate;
+                        if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && canCreateRelation) {
+                            $rootScope.showEmptyRelatedTables = true;
+                        }
                     }
                     // columns that are relying on aggregates or are aggregate themselves
                     else if (col.hasWaitFor || !col.isUnique) {
                         model = {
                             columnError: false,
                             isLoading: true,
-                            hasWaitForOrNotUnique: true
+                            requireSecondaryRequest: true
                         };
                     }
 
@@ -254,7 +271,9 @@
                 $rootScope.lastRendered = null;
                 related.forEach(function (ref, index) {
                     ref = ref.contextualize.compactBrief;
-                    if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && ref.canCreate) {
+                    // user can modify the current record page and can modify at least 1 of the related tables in visible-foreignkeys
+                    var canCreateRelation = ref.derivedAssociationReference ? ref.derivedAssociationReference.canCreate : ref.canCreate;
+                    if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && canCreateRelation) {
                         $rootScope.showEmptyRelatedTables = true;
                     }
 
@@ -277,6 +296,12 @@
                         baseTableName: $rootScope.reference.displayname
                     });
                 });
+
+                // chaiseConfig.showWriterEmptyRelatedOnLoad takes precedence over heuristics above for $rootScope.showEmptyRelatedTables when true or false
+                // showWriterEmptyRelatedOnLoad only applies to users with write permissions for current table
+                if ($rootScope.reference.canCreate && typeof chaiseConfig.showWriterEmptyRelatedOnLoad === "boolean") {
+                    $rootScope.showEmptyRelatedTables = chaiseConfig.showWriterEmptyRelatedOnLoad;
+                }
 
                 $rootScope.loading = related.length > 0;
                 $timeout(function () {

@@ -34,14 +34,17 @@
         'chaise.modal',
         'chaise.navbar',
         'chaise.record.table',
+        'chaise.recordcreate',
         'chaise.resizable',
         'chaise.utils',
         'ermrestjs',
         'ngCookies',
+        'ngMessages',
         'ngSanitize',
         'ngAnimate',
         'duScroll',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'angular-markdown-editor'
     ])
 
     .config(['$compileProvider', '$cookiesProvider', '$logProvider', '$provide', '$uibTooltipProvider', 'ConfigUtilsProvider', function($compileProvider, $cookiesProvider, $logProvider, $provide, $uibTooltipProvider, ConfigUtilsProvider) {
@@ -109,10 +112,10 @@
             var ermrestUri = res.ermrestUri,
                 pcid = res.pcid,
                 ppid = res.ppid,
+                paction = res.paction,
                 isQueryParameter = res.isQueryParameter;
 
             context.catalogID = res.catalogId;
-
 
             FunctionUtils.registerErmrestCallbacks();
 
@@ -122,12 +125,14 @@
                 // Unsubscribe onchange event to avoid this function getting called again
                 Session.unsubscribeOnChange(subId);
 
+                session = Session.getSessionValue();
+                ERMrest.setClientSession(session);
                 // TODO: the header params don't need to be included if they are part of the `getServer` call in config.js
                 ERMrest.resolve(ermrestUri, ConfigUtils.getContextHeaderParams()).then(function getReference(reference) {
+                    $rootScope.savedQuery = ConfigUtils.initializeSavingQueries(reference, res.queryParams);
                     // send string to prepend to "headTitle"
                     // <table-name>
                     headInjector.updateHeadTitle(DataUtils.getDisplaynameInnerText(reference.displayname));
-                    session = Session.getSessionValue();
                     if (!session && Session.showPreviousSessionAlert()) AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
 
                     var location = reference.location;
@@ -140,16 +145,16 @@
                     context.catalogID = reference.table.schema.catalog.id;
                     context.tableName = reference.table.name;
 
-
                     recordsetModel.reference = reference.contextualize.compact;
-                    recordsetModel.reference.session = session;
+                    // if display.facetPanelOpen is null, don't change the value since it was set prior based on showFaceting
+                    if (showFaceting && recordsetModel.reference.display.facetPanelOpen !== null) recordsetModel.config.facetPanelOpen = recordsetModel.reference.display.facetPanelOpen;
 
                     // if there's something wrong with the facet or filters in the url,
                     // this getter will complain. We want to catch these errors here,
                     // so we can construct the redirectPath correctly.
                     // NOTE we might want to eventually remove this and have
                     // the redirectPath logic in the catch all.
-                    var facetColumns = recordsetModel.reference.facetColumns;
+                    // var facetColumns = recordsetModel.reference.facetColumns;
 
                     $log.info("Reference:", recordsetModel.reference);
 
@@ -180,6 +185,8 @@
                     recordsetModel.logObject = {};
                     if (pcid) recordsetModel.logObject.pcid = pcid;
                     if (ppid) recordsetModel.logObject.ppid = ppid;
+                    if (paction) recordsetModel.logObject.paction = paction; // currently only captures the "applyQuery" action from the show saved query popup
+                    if (res.queryParams.savedQueryRid) recordsetModel.logObject.sq_rid = res.queryParams.savedQueryRid;
                     if (isQueryParameter) recordsetModel.logObject.cqp = 1;
 
                     recordsetModel.readyToInitialize = true;

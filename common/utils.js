@@ -5,13 +5,14 @@
 
     .constant("chaiseConfigPropertyNames", [
         "ermrestLocation", "showAllAttributes", "headTitle", "customCSS", "navbarBrand", "navbarBrandText",
-        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser", "defaultAnnotationColor",
+        "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser",
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
-        "signUpURL", "profileURL", "navbarMenu", "sidebarPosition", "attributesSidebarHeading", "userGroups",
+        "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading",
         "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
-        "showExportButton", "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
+        "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
-        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "configRules"
+        "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -20,23 +21,27 @@
           "headTitle": "Chaise",
           "navbarBrandText": "Chaise",
           "logoutURL": "/",
-          "dataBrowser": "/chaise/recordset",
+          "dataBrowser": "/",
           "maxRecordsetRowHeight": 160,
           "confirmDelete": true,
           "deleteRecord": false,
           "signUpURL": "",
-          "profileURL": "",
           "allowErrorDismissal": false,
           "showFaceting": false,
           "hideTableOfContents": false,
-          "showExportButton": false,
+          "navbarBanner": {},
           "navbarMenu": {},
           "navbarBrand": "",
+          "termsAndConditionsConfig": null,
           "disableDefaultExport": false,
           "exportServicePath": "/deriva/export",
           "disableExternalLinkModal": false,
           "logClientActions": true,
           "hideGoToRID": false,
+          "showWriterEmptyRelatedOnLoad": null,
+          "savedQueryConfig": null,
+          "loggedInMenu": {},
+          "facetPanelDisplay": {},
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
@@ -87,7 +92,11 @@
             title: "Your session has expired. Please login to continue.",
         },
         "previousSession": {
-            message: "Your login session has expired. You are now accessing data anonymously. <a ng-click='login()'>Log in</a> to continue your privileged access."
+            message: [
+                "Your login session has expired. You are now accessing data anonymously. ",
+                "<a ng-click='login()'>Log in</a> to continue your privileged access. ",
+                "<i class=\"chaise-icon chaise-info\" tooltip-placement=\"bottom-left\" uib-tooltip=\"Clicking on '×' button on the right will snooze this alert for one hour.\"></i>"
+            ].join("")
         },
         "noSession": {
             title: "You need to be logged in to continue."
@@ -105,7 +114,8 @@
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
             "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
             "pageRedirect": "Click <b>OK</b> to go to the ",
-            "reloadMessage": "Click <b>Reload</b> to start over."
+            "reloadMessage": "Click <b>Reload</b> to start over.",
+            "unsupportedFilters": "Click <b>OK</b> to continue with the subset of filter criteria which are supported at this time."
         },
         "errorMessageMissing": "An unexpected error has occurred. Please try again",
         "tableMissing": "No table specified in the form of 'schema-name:table-name' and no Default is set.",
@@ -132,11 +142,13 @@
             empty: "Search for any record with the empty string value",
             notNull: "Search for any record that has a value",
             showMore: "Click to show more available filters",
-            showDetails: "Click to show more details about the filters"
+            showDetails: "Click to show more details about the filters",
+            saveQuery: "Click to save the current search criteria"
         },
         "URLLimitMessage": "Maximum URL length reached. Cannot perform the requested action.",
         "queryTimeoutList": "<ul class='show-list-style'><li>Reduce the number of facet constraints.</li><li>Minimize the use of 'No value' and 'All Records with Value' filters.</li></ul>",
-        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again."
+        "queryTimeoutTooltip": "Request timeout: data cannot be retrieved. Refresh the page later to try again.",
+        "duplicateSavedQueryMessage": "This search has already been saved. Please edit it under <b>Show Saved Search Criteria</b> if you wish to change its name or description."
     })
 
     // NOTE since this has been used with ng-switch in the code, and we cannot
@@ -161,7 +173,9 @@
         foreignKeyPopupCreate: "popup/foreignkey/create",
         foreignKeyPopupEdit: "popup/foreignkey/edit",
         addPureBinaryPopup: "popup/purebinary/add",
-        facetPopup: "popup/facet"
+        unlinkPureBinaryPopup: "popup/purebinary/unlink",
+        facetPopup: "popup/facet",
+        savedQuery: "popup/savedquery"
     })
 
     .constant("defaultDisplayname", {
@@ -227,8 +241,8 @@
         };
     }])
 
-    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
-        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, messageMap, ParsedFilter, $injector, $rootScope, $window) {
+    .factory('UriUtils', ['appContextMapping', 'appTagMapping', 'ConfigUtils', 'ContextUtils', 'defaultChaiseConfig', 'Errors', 'logService', 'messageMap', 'parsedFilter', '$injector', '$rootScope', '$window',
+        function(appContextMapping, appTagMapping, ConfigUtils, ContextUtils, defaultChaiseConfig, Errors, logService, messageMap, ParsedFilter, $injector, $rootScope, $window) {
 
         function getCatalogId() {
             var catalogId = "",
@@ -466,12 +480,12 @@
             var url = chaiseBaseURL() + appPath + "/#" + location.catalog + "/" + location.path;
             var pcontext = [];
 
-            var contextObj = ConfigUtils.getContextJSON();
+            var settingsObj = ConfigUtils.getSettings();
             var contextHeaderParams = ConfigUtils.getContextHeaderParams();
             pcontext.push("pcid=" + contextHeaderParams.cid);
             pcontext.push("ppid=" + contextHeaderParams.pid);
             // only add the value to the applink function if it's true
-            if (contextObj.hideNavbar) pcontext.push("hideNavbar=" + contextObj.hideNavbar)
+            if (settingsObj.hideNavbar) pcontext.push("hideNavbar=" + settingsObj.hideNavbar)
 
             // TODO we might want to allow only certian query parameters
             if (location.queryParamsString) {
@@ -1025,7 +1039,10 @@
                 var queries = url.slice(idx+1).split("&");
                 for (var i = 0; i < queries.length; i++) {
                     var q_parts = queries[i].split("=");
-                    if (q_parts.length != 2) continue;
+                    // allow for length 1 query params
+                    if (q_parts.length > 2) continue;
+                    // if value is not defined, use true since key would still be defined
+                    q_parts[1] = q_parts[1] || true
 
                     var q_key, q_val;
                     if (dontDecodeQueryParams) {
@@ -1121,9 +1138,9 @@
             }
 
             // add hideNavbar if present/defined
-            var dcctx = ConfigUtils.getContextJSON();
-            if (dcctx.hideNavbar) {
-                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + dcctx.hideNavbar;
+            var settings = ConfigUtils.getSettings();
+            if (settings.hideNavbar) {
+                url = url + (reference.location.queryParamsString ? "&" : "?") + "hideNavbar=" + settings.hideNavbar;
             }
 
             return url;
@@ -1181,6 +1198,334 @@
         }
     }])
 
+    .factory('MenuUtils', ['ConfigUtils', 'logService', 'modalUtils', 'Session', 'UriUtils', '$sce', '$window', function (ConfigUtils, logService, modalUtils, Session, UriUtils, $sce, $window) {
+        /* ===== Private Functions and variables ===== */
+        var _path;
+        function _getPath(dcctx) {
+            if (!_path) {
+                var path = "/chaise/";
+                if (dcctx && typeof chaiseBuildVariables === "object" && typeof chaiseBuildVariables.chaiseBasePath === "string") {
+                    var path = chaiseBuildVariables.chaiseBasePath;
+                    // append "/" if not present
+                    if (path[path.length-1] !== "/") path += "/";
+                }
+
+                _path = window.location.host + path;
+            }
+
+            return _path;
+        }
+
+        /* Function to calculate the left of the toggleSubMenu*/
+        function _getOffsetValue(element){
+           var offsetLeft = 0
+           while(element) {
+              offsetLeft += element.offsetLeft;
+              element = element.offsetParent;
+           }
+           return offsetLeft;
+        }
+
+        function _getNextSibling(elem, selector) {
+            var sibling = elem.nextElementSibling;
+            if (!selector) return sibling;
+            while (sibling) {
+                if (sibling.matches(selector)) return sibling;
+                sibling = sibling.nextElementSibling;
+            }
+        }
+
+        // Function to open the menu on the left if not enough space on right
+        function _checkWidth(ele, winWidth) {
+            //revert to defaults
+            ele.classList.remove("dropdown-menu-right");
+            ele.style.width = "max-content";
+
+            // If dropdown is spilling over
+            if (Math.round(ele.getBoundingClientRect().right) < winWidth) {
+                ele.style.width = "max-content";
+            }
+            else {
+                var visibleContent =  winWidth - ele.getBoundingClientRect().left;
+                //hard-coded limit of width for opening on the left hand side
+                if (Math.round(visibleContent) < 200) {
+                    ele.classList.add("dropdown-menu-right");
+                }
+                else {
+                    ele.style.width = visibleContent + "px";
+                }
+            }
+        }
+
+        /* ===== Public Functions attached to return object ===== */
+
+        // ele - dropdown ul element
+        function checkHeight(ele, winHeight) {
+            // no dropdown is open
+            if (!ele) return;
+
+            var dropdownHeight = ele.offsetHeight;
+            var fromTop = ele.offsetTop;
+            var footerBuffer = 50;
+
+            if ((dropdownHeight + fromTop) > winHeight) {
+                var newHeight = winHeight - fromTop - footerBuffer;
+                ele.style.height = newHeight + "px";
+            }
+        }
+
+        /**
+         * It will toggle the dropdown submenu that this event is based on. If we're going to open it,
+         * it will close all the other dropdowns and also will return `true`.
+         * @return{boolean} if true, it means that we opened the menu
+         */
+        function toggleMenu($event) {
+            $event.stopPropagation();
+            $event.preventDefault();
+
+            var target = $event.target;
+            // added markdownName support allows for inline template to be defined like :span:TEXT:/span:{.class-name}
+            if ($event.target.localName != "a") {
+                target = $event.target.parentElement;
+            }
+
+            var menuTarget = _getNextSibling(target, ".dropdown-menu"); // dropdown submenu <ul>
+            menuTarget.style.width = "max-content";
+            var immediateParent = target.offsetParent; // parent, <li>
+            var parent = immediateParent.offsetParent; // parent's parent, dropdown menu <ul>
+            var posValues = _getOffsetValue(immediateParent);
+
+            // calculate the position the submenu should open from the top fo the viewport
+            menuTarget.style.top = parseInt(immediateParent.getBoundingClientRect().y) + 5 + 'px';
+
+            menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 'px';
+
+            var open = !menuTarget.classList.contains("show");
+
+            // if we're opening this, close all the other dropdowns on navbar.
+            if (open) {
+                target.closest(".dropdown-menu").querySelectorAll('.show').forEach(function(el) {
+                    el.parentElement.classList.remove("child-opened");
+                    el.classList.remove("show");
+                });
+            }
+
+            menuTarget.classList.toggle("show"); // toggle the class
+            menuTarget.style.height = "unset"; // remove height in case it was set for a different position
+            immediateParent.classList.toggle("child-opened"); // used for setting highlight color
+
+            if (open) {
+                // recalculate the height for each open submenu, <ul>
+                var openSubmenus = document.querySelectorAll(".dropdown-menu.show");
+                [].forEach.call(openSubmenus, function(el) {
+                    checkHeight(el, window.innerHeight);
+                });
+            }
+
+            //If not enough space to expand on right
+            var widthOfSubMenu = menuTarget.offsetWidth;
+            var submenuEndOnRight = (posValues + immediateParent.offsetWidth + widthOfSubMenu);
+
+            if (submenuEndOnRight > window.innerWidth) {
+                var submenuEndOnLeft = posValues + immediateParent.offsetWidth;
+                var visibleContent = window.innerWidth - submenuEndOnLeft;
+
+                if (visibleContent < 200) {
+                    menuTarget.style.left = parseInt(posValues - widthOfSubMenu) + 4 + 'px';
+                }
+                else {
+                    menuTarget.style.width = visibleContent + "px";
+                }
+            }
+            else {
+                // if vertical scrollbar then offset a bit more to make scrollbar visible
+                if (parent.scrollHeight > parent.clientHeight) {
+                    menuTarget.style.left = parseInt(posValues + immediateParent.offsetWidth) + 15 + 'px';
+                }
+            }
+
+            return open;
+        }
+
+        function isChaise(link, dcctx) {
+            if (!link) return false;
+
+            var appNames = ["record", "recordset", "recordedit", "login", "help"];
+
+            // parses the url into a location object
+            var eleUrl = document.createElement('a');
+            eleUrl.href = link;
+
+            for (var i=0; i<appNames.length; i++) {
+                var name = appNames[i];
+                // path/appName exists in our url
+                if (eleUrl.href.indexOf(_getPath(dcctx) + name) !== -1) return true;
+            }
+
+            return false;
+        }
+
+        function addLogParams(url, contextHeaderParams) {
+            // if `?` already in the url, use &
+            var paramChar = url.lastIndexOf("?") !== -1 ? "&" : "?";
+
+            var pcid = "navbar";
+            // if not navbar app, append appname
+            if (contextHeaderParams.cid !== "navbar") {
+                pcid += "/" + contextHeaderParams.cid;
+            }
+            // ppid should be the pid for the current page
+            return url + paramChar + "pcid=" + pcid + "&ppid=" + contextHeaderParams.pid;
+        }
+
+        function resetHeight(event) {
+            var menuTarget = _getNextSibling(event.target,".dropdown-menu");
+            if (menuTarget) menuTarget.style.height = "unset";
+        }
+
+        function isOptionValid(option) {
+            // if no nameMarkdownPattern, we can't show anything
+            if (!option.nameMarkdownPattern) return false;
+
+            var isValid = true;
+            switch (option.type) {
+                case "menu":
+                    // must have children to be considered a valid menu
+                    isValid = option.children && option.children.length > 0;
+                    break;
+                case "url":
+                    // accepts "urlPattern"
+                    isValid = option.url ? true : false;
+                    break;
+                case "header":
+                case "logout":
+                case "my_profile":
+                    // ignore "children", "urlPattern"
+                    break;
+                default:
+                    // if option has both children and url defined, prefer to use the children and ignore the url
+                    // if neither are defined, either the type is not supported or type was not defined
+                    if (option.children && option.children.length > 0) {
+                        option.type = "menu"
+                    } else if (option.url) {
+                        option.type = "url";
+                    } else {
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            return isValid;
+        }
+
+        // triggered when top level menu is opened/closed
+        function onToggle(open) {
+            var elems = document.querySelectorAll(".dropdown-menu.show");
+            [].forEach.call(elems, function(el) {
+                el.classList.remove("show");
+            });
+
+            // whenever a dropdown menu is closed, remove the child-opened class that adds highlight color
+            var highlightedParents = document.querySelectorAll(".dropdown-submenu.child-opened");
+            [].forEach.call(highlightedParents, function(el) {
+                el.classList.remove("child-opened");
+            });
+
+            // calculate height for each open dropdown menu
+            if (open) {
+                var openDropdowns = document.querySelectorAll(".dropdown.open ul");
+                [].forEach.call(openDropdowns, function(el) {
+                    checkHeight(el, window.innerHeight);
+                    _checkWidth(el, window.innerWidth);
+                });
+            }
+        }
+
+        /**
+         * Just to make sure browsers are not ignoring the ng-click, we are first
+         * preventing the default behavior of link, then logging the client action
+         * and then changing the location without waiting for the request,
+         * This will ensure that we're at least sending the log to server.
+         */
+        function onLinkClick() {
+            return function ($event, menuObject) {
+                $event.stopPropagation();
+
+                // NOTE: if link goes to a chaise app, client logging is not necessary (we're using ppid, pcid instead)
+                if (!isChaise(menuObject.url, ConfigUtils.getContextJSON())) {
+                    // check if external or internal resource page
+                    var action = UriUtils.isSameOrigin(menuObject.url) ? logService.logActions.NAVBAR_MENU_INTERNAL : logService.logActions.NAVBAR_MENU_EXTERNAL;
+                    logService.logClientAction({
+                        action: logService.getActionString(action, "", ""),
+                        names: menuObject.names
+                    });
+                }
+            };
+        }
+
+        function renderName(option) {
+            // new syntax will always use nameMarkdownPattern
+            if (option.nameMarkdownPattern) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(ERMrest.renderHandlebarsTemplate(option.nameMarkdownPattern, null), {inline: true}));
+            }
+
+            // support markdownName backwards compatibility for navbarMenu
+            if (option.markdownName) {
+                return $sce.trustAsHtml(ERMrest.renderMarkdown(option.markdownName, {inline: true}));
+            }
+
+            // support name backwards compatibility for navbarMenu
+            return $sce.trustAsHtml(option.name);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canShow (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.show);
+        }
+
+        // item - navbar menu object form children array
+        // session - Session factory
+        function canEnable (option) {
+            return option.acls && Session.isGroupIncluded(option.acls.enable);
+        }
+
+        // NOTE: hard coded action
+        function openProfileModal() {
+            logService.logClientAction({
+                action: logService.logActions.NAVBAR_PROFILE_OPEN
+            });
+
+            modalUtils.showModal({
+                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/profile.modal.html",
+                controller: "profileModalDialogController",
+                controllerAs: "ctrl",
+                windowClass: "profile-popup"
+            }, false, false, false);
+        }
+
+        // NOTE: hard coded action
+        function logout() {
+            Session.logout(logService.logActions.LOGOUT_NAVBAR);
+        }
+
+        return {
+            addLogParams: addLogParams,
+            canEnable: canEnable,
+            canShow: canShow,
+            checkHeight: checkHeight,
+            isChaise: isChaise,
+            isOptionValid: isOptionValid,
+            logout: logout,
+            onLinkClick: onLinkClick,
+            openProfileModal: openProfileModal,
+            onToggle: onToggle,
+            renderName: renderName,
+            resetHeight: resetHeight,
+            toggleMenu: toggleMenu
+        }
+    }])
+
     .factory('FunctionUtils', ['ConfigUtils', 'Session', 'UriUtils', function(ConfigUtils, Session, UriUtils) {
         function registerErmrestCallbacks() {
             ERMrest.appLinkFn(UriUtils.appTagToURL);
@@ -1190,7 +1535,8 @@
             var chaiseConfig = ConfigUtils.getConfigJSON();
             ERMrest.setClientConfig({
                 internalHosts: chaiseConfig.internalHosts,
-                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal
+                disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
+                facetPanelDisplay: chaiseConfig.facetPanelDisplay
             });
         }
 
@@ -1857,6 +2203,63 @@
             }
         }
 
+        /**
+         * Some of the tables can be very long and the horizontal scroll only sits at the very bottom by default
+         * A fixed horizontal scroll is added here that sticks to the top as we scroll vertically and horizontally
+         * @param {DOMElement} parent - the parent element
+         */
+        function addTopHorizontalScroll(parent) {
+            if (!parent) return;
+
+            var topScrollElementWrapper = parent.querySelector(".chaise-table-top-scroll-wrapper"),
+                topScrollElement = parent.querySelector(".chaise-table-top-scroll"),
+                recordsetTable = parent.querySelector(".recordset-table");
+
+            if (!topScrollElementWrapper || !topScrollElement || !recordsetTable) {
+                return;
+            }
+
+            // these 2 flags help us prevent cascading scroll changes back and forth across the 2 elements
+            var isSyncingTopScroll = false;
+            var isSyncingTableScroll = false;
+            // keep scrollLeft equal when scrolling from either the scrollbar or mouse/trackpad
+            topScrollElementWrapper.addEventListener('scroll', function() {
+                if (!isSyncingTopScroll) {
+                    isSyncingTableScroll = true;
+                    recordsetTable.scrollLeft = topScrollElementWrapper.scrollLeft;
+                }
+                isSyncingTopScroll = false;
+            });
+
+            recordsetTable.addEventListener('scroll', function() {
+                if (!isSyncingTableScroll) {
+                    isSyncingTopScroll = true;
+                    topScrollElementWrapper.scrollLeft = recordsetTable.scrollLeft;
+                }
+                isSyncingTableScroll = false;
+            });
+
+            // make sure that the length of the scroll is identical to the scroll at the bottom of the table
+            new ResizeSensor(recordsetTable, function () {
+                // there is no need of a scrollbar, content is not overflowing
+                if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                    topScrollElement.style.width = 0;
+                    topScrollElementWrapper.style.height = 0;
+                }
+                else {
+                    topScrollElementWrapper.style.height = "15px";
+                    topScrollElement.style.width = recordsetTable.scrollWidth + "px";
+                }
+            });
+
+            // make top scroll visible after adding the handlers to ensure its visible only when working
+            topScrollElementWrapper.style.display = "block";
+            // show only if content is overflowing
+            if  (recordsetTable.scrollWidth == recordsetTable.clientWidth) {
+                topScrollElementWrapper.style.height = "15px";
+            }
+        }
+
         return {
             humanizeTimestamp: humanizeTimestamp,
             versionDate: versionDate,
@@ -1869,7 +2272,8 @@
             attachContainerHeightSensors: attachContainerHeightSensors,
             addClass: addClass,
             removeClass: removeClass,
-            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor
+            attachMainContainerPaddingSensor: attachMainContainerPaddingSensor,
+            addTopHorizontalScroll: addTopHorizontalScroll
         }
     }])
 
@@ -1934,6 +2338,10 @@
         function getContextJSON() {
             return $window.dcctx;
         };
+
+        function getSettings() {
+            return getContextJSON().settings;
+        }
 
         function getConfigJSON() {
             return getContextJSON().chaiseConfig;
@@ -2098,7 +2506,7 @@
         }
 
         function decorateTemplateRequest(delegate, chaiseDeploymentPath) {
-            // return a function that will be called when a template needs t be fetched
+            // return a function that will be called when a template needs to be fetched
             return function(templateUrl) {
                 var version = "";
                 if (typeof chaiseBuildVariables === "object") {
@@ -2132,6 +2540,83 @@
             return mode;
         }
 
+        // NOTE: should use DataUtils.isNoneEmptyString but including causes a circular dependency
+        // DataUtils relies on errors for one functions, `verify()`. `verify` should be moved to
+        // errors to remove this circular dependency and allow utility functions with no dependencies
+        // to be used everywhere
+        function isStringAndNotEmpty(str) {
+            return typeof str === "string" && str.length > 0;
+        };
+
+        function initializeSavingQueries(reference, queryParams) {
+            var chaiseConfig = getConfigJSON();
+            // initalize to null as if there is no saved query table
+            // savedQuery object should be defined with showUI true || false for UI purposes
+            var savedQuery = {
+                defaultNameLimits: {},
+                ermrestTablePath: null,
+                ermrestAGPath: null,
+                mapping: {},
+                rid: null,
+                showUI: reference.display.showSavedQuery,
+                updated: true
+            }
+
+            // NOTE: if this is not set, saved query UI should be turned off
+            if (chaiseConfig.savedQueryConfig && typeof chaiseConfig.savedQueryConfig.storageTable == "object") {
+                var mapping = savedQuery.mapping = chaiseConfig.savedQueryConfig.storageTable;
+                // limits for when to use a modified simpler syntax for the default name value
+                // set the 3 threshold properties: facetChoiceLimit, facetTextLimit, totalTextLimit
+                var limits = chaiseConfig.savedQueryConfig.defaultName || {};
+                savedQuery.defaultNameLimits = {
+                    facetChoiceLimit: !isNaN(limits.facetChoiceLimit) ? limits.facetChoiceLimit : 5,
+                    facetTextLimit: !isNaN(limits.facetTextLimit) ? limits.facetTextLimit : 60,
+                    totalTextLimit: !isNaN(limits.totalTextLimit) ? limits.totalTextLimit : 200
+                }
+
+                var validMapping = isStringAndNotEmpty(mapping.catalog) && isStringAndNotEmpty(mapping.schema) && isStringAndNotEmpty(mapping.table);
+
+                // match ermrestUri with the savedQuery.mapping to verify if we are looking saved query recordset page
+                if (validMapping) {
+                    savedQuery.ermrestTablePath = "/ermrest/catalog/" + mapping.catalog + "/entity/" + mapping.schema + ":" + mapping.table
+                    savedQuery.ermrestAGPath = "/ermrest/catalog/" + mapping.catalog + "/attributegroup/" + mapping.schema + ":" + mapping.table
+
+                    // should only be set if mapping is valid as well since we can't update the last_execution_time without a valid mapping
+                    if (queryParams && queryParams.savedQueryRid) {
+                        savedQuery.rid = queryParams.savedQueryRid;
+                        savedQuery.updated = false; // initialized here to track that the query's last execution time has been updated
+                    }
+                } else {
+                    // if mapping is invalid, the config is ill-defined and the feature will be turned off
+                    savedQuery.showUI = false;
+                }
+            } else {
+                // if storage table is not defined, the config is ill-defined and the feature will be turned off
+                savedQuery.showUI = false;
+            }
+
+            return savedQuery;
+        }
+
+        /**
+         * Returns true if the object passed is valid for the terms and conditions feature
+         * @params {Object} obj - the termaAndConditions object from chaise-config
+         * @return {boolean} boolean - value to use the terms and conditions config requiring a specific globus group for access
+         *
+         * termsAndConditionsConfig: {
+         *     "groupId": "https://auth.globus.org/123a4bcd-ef5a-67bc-8912-d34e5fa67b89",
+         *     "joinUrl": "https://app.globus.org/groups/123a4bcd-ef5a-67bc-8912-d34e5fa67b89/join",
+         *     "groupName": "Globus group name"
+         * },
+         */
+        function validateTermsAndConditionsConfig(obj) {
+            if (!obj || typeof obj !== "object") return false;
+            var tacConfig = getConfigJSON().termsAndConditionsConfig;
+
+            // all 3 properties must be defined for this to function, if not the old login app will be used
+            return (isStringAndNotEmpty(tacConfig.groupId) && isStringAndNotEmpty(tacConfig.joinUrl) && isStringAndNotEmpty(tacConfig.groupName));
+        }
+
         return {
             configureAngular: configureAngular,
             decorateTemplateRequest: decorateTemplateRequest,
@@ -2140,7 +2625,10 @@
             setConfigJSON: setConfigJSON,
             getHTTPService: getHTTPService,
             getContextHeaderParams: getContextHeaderParams,
-            systemColumnsMode: systemColumnsMode
+            initializeSavingQueries: initializeSavingQueries,
+            systemColumnsMode: systemColumnsMode,
+            getSettings: getSettings,
+            validateTermsAndConditionsConfig: validateTermsAndConditionsConfig
         }
     }])
 
@@ -2492,10 +2980,12 @@
             stackPathClientPathSeparator = ",",
             clientPathActionSeparator = ";",
             separator = "/";
+
         var logActions = Object.freeze({
             // general
 
             // - server:
+            PRELOAD: clientPathActionSeparator + "preload",
             LOAD: clientPathActionSeparator + "load",
             RELOAD: clientPathActionSeparator + "reload",
             DELETE: clientPathActionSeparator + "delete",
@@ -2529,6 +3019,7 @@
             FACET_HISTOGRAM_LOAD: "range" + clientPathActionSeparator + "load-histogram",
             FACET_HISTOGRAM_RELOAD: "range" + clientPathActionSeparator + "reload-histogram",
             PRESELECTED_FACETS_LOAD: "choice/preselect" + clientPathActionSeparator + "preload",
+            SAVED_QUERY_OPEN: "saved-query" + clientPathActionSeparator + "open",
 
             //   - client:
             PERMALINK_LEFT: "permalink" + clientPathActionSeparator + "click-left",
@@ -2602,7 +3093,8 @@
 
             // - server:
             VIEWER_ANNOT_FETCH: clientPathActionSeparator + "fetch",
-            VIEWER_CHANNEL_DEFAULT_LOAD: "z-default" + clientPathActionSeparator + "load",
+            VIEWER_LOAD_BEFORE: clientPathActionSeparator + "load-before",
+            VIEWER_LOAD_AFTER: clientPathActionSeparator + "load-after",
 
             // - client:
             VIEWER_ANNOT_PANEL_SHOW: "toolbar/panel" + clientPathActionSeparator + "show",
@@ -2639,6 +3131,10 @@
             SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
 
+            // - login2:
+            VERIFY_GLOBUS_GROUP_LOGIN: "verify-globus-group" + clientPathActionSeparator + "login",
+            VERIFY_GLOBUS_GROUP_LOGOUT: "verify-globus-group" + clientPathActionSeparator + "logout",
+
             // - navbar:
             NAVBAR_BRANDING: "navbar/branding" + clientPathActionSeparator + "navigate",
             NAVBAR_MENU_EXTERNAL: "navbar/menu" + clientPathActionSeparator + "navigate-external",
@@ -2657,10 +3153,12 @@
             COLUMN: "col",
             PSEUDO_COLUMN: "pcol",
             FACET: "facet",
+            SAVED_QUERY: "saved_query",
 
             // used in viewer app:
             ANNOTATION: "annotation",
-            CHANNEL: "channel"
+            CHANNEL: "channel",
+            Z_PLANE: "z-plane"
         });
 
         var logStackPaths = Object.freeze({
@@ -2673,17 +3171,23 @@
             RELATED: "related",
             RELATED_INLINE: "related-inline",
             ADD_PB_POPUP: "related-link-picker",
+            UNLINK_PB_POPUP: "related-unlink-picker",
             FOREIGN_KEY_POPUP: "fk-picker",
             FACET_POPUP: "facet-picker",
+            SAVED_QUERY_CREATE_POPUP: "saved-query-entity",
+            SAVED_QUERY_SELECT_POPUP: "saved-query-picker",
             // these two have been added to the tables that recordedit is showing
             //(but not used in logs technically since we're not showing any controls he)
             RESULT_SUCCESFUL_SET: "result-successful-set",
             RESULT_FAILED_SET: "result-failed-set",
+            RESULT_DISABLED_SET: "result-disabled-set",
 
             // used in viewer app:
             ANNOTATION_ENTITY: "annotation-entity",
             ANNOTATION_SET: "annotation-set",
-            CHANNEL_SET: "channel-set"
+            CHANNEL_SET: "channel-set",
+            Z_PLANE_ENTITY: "z-plane-entity",
+            Z_PLANE_SET: "z-plane-set"
         });
 
         var appModes = Object.freeze({
@@ -2693,11 +3197,20 @@
             CREATE_PRESELECT: "create-preselect"
         });
 
+        var pactions = Object.freeze({
+            // APPLY_COLLECTION: "apply-co", // proposed for applying a personal collection
+            APPLY_SAVED_QUERY: "apply-sq",
+            EXPLORE: "explore",
+            // TITLE: "title", // proposed for title for record app
+            VIEW: "view"
+        });
+
         // why we had to reload a request
         var reloadCauses = Object.freeze({
             CLEAR_ALL: "clear-all", // clear all button
             CLEAR_CFACET: "clear-cfacet",
             CLEAR_CUSTOM_FILTER: "clear-custom-filter",
+            ENTITY_BATCH_UNLINK: "entity-batch-unlink", // row(s) in the table has been unlinked
             ENTITY_CREATE: "entity-create", // new rows has been created in the table
             ENTITY_DELETE: "entity-delete", // a row in the table has been deleted
             ENTITY_UPDATE: "entity-update", // a row in the table has been updated
@@ -2711,9 +3224,11 @@
             PAGE_LIMIT: "page-limit", // change page limit
             PAGE_NEXT: "page-next", // go to next page
             PAGE_PREV: "page-prev", // go to previous page
+            RELATED_BATCH_UNLINK: "related-batch-unlink", // row(s) in one of the related tables have been unlinked
             RELATED_CREATE: "related-create", // new rows in one of the related tables has been created
             RELATED_DELETE: "related-delete", // a row in one of the related tables has been deleted
             RELATED_UPDATE: "related-update", // a row in one of the related tables has been edited
+            RELATED_INLINE_BATCH_UNLINK: "related-inline-batch-unlink", // row(s) in one of the related (inline) tables have been unlinked
             RELATED_INLINE_CREATE: "related-inline-create", // new rows in one of the related (inline) tables has been created
             RELATED_INLINE_DELETE: "related-inline-delete", // a row in one of the related (inline) tables has been deleted
             RELATED_INLINE_UPDATE: "related-inline-update", // a row in one of the related (inline) tables has been edited
@@ -2882,6 +3397,7 @@
             logStackTypes: logStackTypes,
             logStackPaths: logStackPaths,
             logActions: logActions,
+            pactions: pactions,
             reloadCauses: reloadCauses,
             logClientAction: logClientAction,
             getActionString: getActionString,
@@ -3072,6 +3588,15 @@
         }
 
         /**
+         * make sure links open in new tab
+         */
+        function openLinksInTab () {
+            addClickListener('a[href]', function (e, element) {
+                element.target = "_blank";
+            });
+        }
+
+        /**
          * Will call the handler function upon clicking on the elements represented by selector
          * @param {string} selector the selector string
          * @param {function} handler  the handler callback function.
@@ -3118,16 +3643,18 @@
          *
          * NOTE: should only be called by config.js (or equivalent configuration app)
          */
-        function setupHead(settings) {
+        function setupHead() {
             addPolyfills();                                 // needs to be set for navbar functionality (and other chaise functionality)
             addBodyClasses();                               // doesn't need to be controlled since it relies on .chaise-body class being present
             addCanonicalTag();                              // controlled by chaise-config value to turn on/off
             setWindowName();                                // will only update if not already set
 
-            if (settings.overrideHeadTitle) addTitle(settings.appTitle);     // controlled by settings in config.js
+            var settings = ConfigUtils.getSettings();
+            if (settings.openLinksInTab) openLinksInTab();
+            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
+            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
+            if (settings.overrideHeadTitle) addTitle(settings.appTitle);
 
-            if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();    // controlled by settings in config.js
-            if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();      // controlled by settings in config.js
 
             return addCustomCSS();                          // controlled by chaise-config value to attach
         }

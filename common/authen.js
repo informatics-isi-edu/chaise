@@ -26,6 +26,49 @@
             }
         };
 
+        var _decorateSession = function(session) {
+            var attributes = [];
+            session.attributes.forEach(function (attr) {
+                // NOTE: the current assumption is that everything in session.attributes is a globus group or an identity
+                // a globus group if:
+                //   - display_name is defined
+                //   - display_name is not the same as the user's display_name
+                //   - current id is not in the identities array
+                if (attr.display_name && attr.display_name !== session.client.display_name && session.client.identities.indexOf(attr.id) == -1) {
+                    if (attr.id.indexOf("https://auth.globus.org/") === 0) {
+                        // assume id is always "https://auth.globus.org/ff766864-a03f-11e5-b097-22000aef184d"
+                        attr.webpage = "https://app.globus.org/groups/" + attr.id.substring(24) + "/about";
+                        attr.type = "globus_group";
+                    }
+
+                }
+
+                if (session.client.identities.includes(attr.id)) attr.type = "identity";
+                // attributes without a type (!globus_group and !identity) are not expected and won't be given a type
+
+                var matchIdx = null;
+                // determine if 'attr' exists in $session.attributes
+                matchIdx = attributes.findIndex(function (targetAttr) {
+                    return targetAttr.id === attr.id;
+                });
+
+                // merge if the attribute already exists, push otherwise
+                if (matchIdx !== -1) {
+                    Object.assign(attributes[matchIdx], attr);
+                } else {
+                    attributes.push(attr);
+                }
+            });
+
+            // sort the newly created atrtibutes array by display_name
+            attributes.sort(function(a, b) {
+                if (a.display_name && b.display_name) return a.display_name.localeCompare(b.display_name);
+            });
+
+            session.attributes = attributes;
+            return session;
+        }
+
         /**
          * Functions that interact with the StorageService tokens
          * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
@@ -183,7 +226,9 @@
         var logInHelper = function(logInTypeCb, win, cb, type, rejectCb, logAction){
             var referrerId = (new Date().getTime());
 
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + "login?referrerid=" + referrerId);
+            var chaiseConfig = ConfigUtils.getConfigJSON();
+            var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + loginApp + "/?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -330,7 +375,7 @@
 
                 if (!_session) {
                     // only update _session if no session is set
-                    _session = response.data;
+                    _session = _decorateSession(response.data);
                 }
 
                 _executeListeners();
@@ -362,7 +407,7 @@
                 return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function(response) {
                     if (!_session) {
                         // only update _session if no session is set
-                        _session = response.data;
+                        _session = _decorateSession(response.data);
                     }
                     return _session;
                 }).catch(function(err) {
@@ -467,7 +512,8 @@
 
             // groupArray should be the array of globus group
             isGroupIncluded: function(groupArray) {
-                if (groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
+                // if no array, assume it wasn't defined and default hasn't been set yet
+                if (!groupArray || groupArray.indexOf("*") > -1) return true; // if "*" acl, show the option
                 if (!_session) return false; // no "*" exists and no session, hide the option
 
                 for (var i=0; i < groupArray.length; i++) {
@@ -530,6 +576,63 @@
                     // if the logout fails for some reason, send the user to the logout url as defined above
                     $window.location = logoutURL;
                 });
+            },
+
+            logoutWithoutRedirect: function (action) {
+                var logoutConfig = {
+                    skipHTTP401Handling: true,
+                    headers: {}
+                };
+
+                logoutConfig.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(action, "", "")
+                };
+
+                // logout without redirecting the user
+                ConfigUtils.getHTTPService().delete(serviceURL + "/authn/session/", logoutConfig).then(function(response) {
+                    StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
+
+                }).catch(function (error) {
+                    // this is a 404 error when session doesn't exist and the user tries to logout
+                    // don't throw the error since this means the user is lready logged out
+                    console.log(error);
+                });
+            },
+
+            refreshLogin: function(action) {
+                $rootScope.showSpinner = true;
+
+                // get referrerid from browser url
+                var referrerId = UriUtils.queryStringToJSON($window.location.search).referrerid,
+                    preauthReferrer = $window.location.origin + UriUtils.chaiseDeploymentPath() + "login2/?referrerid=" + referrerId,
+                    redirectUrl = serviceURL + '/authn/preauth/?referrer=' + UriUtils.fixedEncodeURIComponent(preauthReferrer);
+
+                var loginConfig = {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'Accept': 'application/json'
+                    },
+                    skipHTTP401Handling: true
+                };
+
+                loginConfig.headers[ERMrest.contextHeaderName] = {
+                    action: logService.getActionString(action, "", "")
+                }
+
+                ConfigUtils.getHTTPService().get(redirectUrl, loginConfig).then(function(response){
+                    var data = response.data;
+
+                    // redirect_url is supposed to be the same as preauthReferrer
+                    if (data.redirect_url === undefined) {
+                        data.redirect_url = preauthReferrer;
+                    }
+
+                    $rootScope.showSpinner = false;
+                    $window.location = data.redirect_url;
+                }).catch(function (error) {
+                    $rootScope.showSpinner = false;
+                });
+
             }
         }
     }])

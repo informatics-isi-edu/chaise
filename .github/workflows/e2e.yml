@@ -9,6 +9,8 @@ on:
     branches:
       - 'master'
 
+concurrency: chaise_env
+
 jobs:
   install-and-test:
     runs-on: ubuntu-20.04
@@ -18,6 +20,7 @@ jobs:
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: true
       PYTHONWARNINGS: ignore:Unverified HTTPS request
+    timeout-minutes: 120
     steps:
       - name: Checkout repository code
         uses: actions/checkout@v2
@@ -25,6 +28,12 @@ jobs:
           path: chaise
       - name: Setup the system
         run: |
+          echo "node version:"
+          node --version
+          echo "npm version:"
+          npm --version
+          echo "env variables:"
+          printenv
           sudo timedatectl set-timezone America/Los_Angeles
           export TZ=America/Los_Angeles
           export PATH="$(systemd-path user-binaries):$PATH"
@@ -95,23 +104,28 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
-          sudo make install
+          make dist
+          sudo make deploy
       - name: Install chaise
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
-          sudo npm install
-          sudo make install
+          make deps-test
+          make dist-wo-deps
+          sudo make deploy
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1
           sudo -H -u webauthn webauthn2-manage passwd test1 dummypassword
           sudo -H -u webauthn webauthn2-manage addattr admin
           sudo -H -u webauthn webauthn2-manage assign test1 admin
+          sudo -H -u webauthn webauthn2-manage adduser test2
+          sudo -H -u webauthn webauthn2-manage passwd test2 dummypassword
       - name: Restart apache
         run: |
           sudo service apache2 restart
       - name: Setup and connect to saucelabs
+        timeout-minutes: 2
         run: |
           curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
           tar -xzf saucelabs.tar.gz

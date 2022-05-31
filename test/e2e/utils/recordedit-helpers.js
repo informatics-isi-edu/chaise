@@ -1554,25 +1554,41 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 return;
                             }
 
-                            var prevValue, invalidValue = "invalidColor";
+                            var prevValue, invalidValue = "invalidColor", testRequired = false;
+                            // c.nullok === false;
                             getExistingValue(c.name, colorInput).then(function (val) {
                                 prevValue = val;
 
                                 // clear the value
                                 return chaisePage.recordEditPage.clearInput(colorInput);
                             }).then(function () {
+                                // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then(function () {
-                                // if required, it will use the previous value
-                                if (c.nullok == false) {
-                                    expect(colorInput.getAttribute('value')).toBeTruthy(colError(c.name, "Was able to clear the input."));
+                                // // if testing required, submit the form so we can see the error
+                                if (testRequired) {
+                                    chaisePage.recordEditPage.submitForm();
+                                    return chaisePage.recordEditPage.getColorInputErrorMessage(colorInput, 'required');
                                 }
-
+                                return true;
+                            }).then(function (resp) {
+                                if (testRequired) {
+                                    expect(resp.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
+                                }
                                 return colorInput.sendKeys(invalidValue);
                             }).then (function () {
+                                // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then (function () {
-                                expect(colorInput.getAttribute('value')).not.toBe(invalidValue);
+                                // I had to turn this from a simple get attribute to wait
+                                // since it was throwing a terminal error
+                                browser.wait(function () {
+                                    return colorInput.getAttribute('value').then((function (val) {
+                                        return val == "";
+                                    })).catch(function (err) {
+                                        done.fail(err);
+                                    })
+                                });
 
                                 //Restore the value to the original one
                                 if (tableParams.primary_keys.indexOf(c.name) != -1) {
@@ -1583,9 +1599,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             }).then (function () {
                                 isDone(done);
                             }).catch(function (err) {
+                                console.log(err);
                                 done.fail(err);
                             })
-
                         });
                     });
 
@@ -1608,9 +1624,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // make sure popup is displayed
                                 chaisePage.waitForElement(popup);
 
-                                // make sure nullok is offered or not
+                                // make sure clear btn is offered regardless of null/not-null (just like any other  input)
                                 var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
-                                expect(clearBtn.isDisplayed()).toEqual(c.nullok != false, colError(c.name, "color popup: clear btn invalid state"));
+                                expect(clearBtn.isDisplayed()).toEqual(true, colError(c.name, "color popup: clear btn invalid state"));
 
                                 // write a color and submit
                                 popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
@@ -1650,6 +1666,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(colorInput).then(function () {
                                 return colorInput.sendKeys(text);
                             }).then(function () {
+                                // the input won't validate until we press enter or change focus
                                 return browser.actions().sendKeys(protractor.Key.ENTER).perform();
                             }).then(function () {
 
@@ -1751,7 +1768,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
         describe('result page, ', function () {
             it("should have the correct title.", function() {
-                var title = tableParams.results.length + "/" + tableParams.results.length + " " + tableParams.table_displayname + " Records " + (isEditMode ? "Updated" : "Created") + " Successfully";
+                var title = tableParams.results.length + "/" + tableParams.results.length + " " + tableParams.table_displayname + " records " + (isEditMode ? "updated" : "created") + " successfully";
                 expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
             });
 

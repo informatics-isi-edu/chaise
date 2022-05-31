@@ -107,8 +107,8 @@
      *     that is also passed along with the emitted event
      */
     .factory('recordTableUtils',
-            ['AlertsService', 'DataUtils', 'defaultDisplayname', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
-            function(AlertsService, DataUtils, defaultDisplayname, ErrorService, logService, MathUtils, messageMap, modalBox, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
+            ['AlertsService', 'ConfigUtils', 'DataUtils', 'defaultDisplayname', 'Errors', 'ErrorService', 'logService', 'MathUtils', 'messageMap', 'modalBox', 'modalUtils', 'recordCreate', 'recordsetDisplayModes', 'Session', 'tableConstants', 'UiUtils', 'UriUtils', '$cookies', '$document', '$log', '$q', '$rootScope', '$timeout', '$window',
+            function(AlertsService, ConfigUtils, DataUtils, defaultDisplayname, Errors, ErrorService, logService, MathUtils, messageMap, modalBox, modalUtils, recordCreate, recordsetDisplayModes, Session, tableConstants, UiUtils, UriUtils, $cookies, $document, $log, $q, $rootScope, $timeout, $window) {
 
         function FlowControlObject(maxRequests) {
             this.maxRequests = maxRequests || tableConstants.MAX_CONCURENT_REQUEST;
@@ -365,7 +365,7 @@
                         if (!notTerminal){
                             err.subMessage = err.message;
                             err.message = "The result set cannot be retrieved. Try the following to reduce the query time:\n" + messageMap.queryTimeoutList;
-                            console.log(err);
+                            $log.warn(err);
                             ErrorService.handleException(err, true);
                         }
                     } else {
@@ -456,7 +456,18 @@
             logParams.action = getTableLogAction(vm, act);
 
             (function (current, requestCauses, reloadStartTime) {
-                vm.reference.read(vm.pageLimit, logParams).then(function (page) {
+                // the places that we want to show edit or delete button, we should also ask for trs
+                // NOTE technically this should be based on passed config options but we're passing editable
+                //      to mean both edit and create, so it's not really useful here
+                var getTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 ||
+                             vm.config.displayMode === recordsetDisplayModes.fullscreen;
+
+                // if it's in related entity section, we should fetch the
+                // unlink trs (acl) of association tables
+                var getUnlinkTRS = vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 &&
+                                   vm.reference.derivedAssociationReference;
+
+                vm.reference.read(vm.pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS).then(function (page) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
                         return defer.promise;
@@ -464,7 +475,10 @@
 
                     $log.debug("counter", current, ": read main successful.");
 
-                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, page, requestCauses, reloadStartTime) : {page: page};
+
+                    return vm.getFavorites ? vm.getFavorites(vm, page) : {page: page};
+                }).then(function (result) {
+                    return vm.getDisabledTuples ? vm.getDisabledTuples(vm, result.page, requestCauses, reloadStartTime) : {page: result.page};
                 }).then(function (result) {
                     if (current !== vm.flowControlObject.counter) {
                         defer.resolve(false);
@@ -735,6 +749,7 @@
          * @param  {boolean} updateCount  if it's true we will update the displayed total count.
          * @param  {boolean} updateFacets if it's true we will udpate the opened facets.
          * @param  {boolean} sameCounter if it's true, the flow-control counter won't be updated.
+         * @param  {string?} cause why we're calling this function (optional)
          *
          * NOTE: sameCounter=true is used just to signal that we want to get results of the current
          * page status. For example when a facet opens or when users add a search term to a single facet.
@@ -830,8 +845,12 @@
             // get the aggregate values only if main page is loaded
             updateColumnAggregates(vm, _updatePage);
 
-            // update the count
-            _updateMainCount(vm, _updatePage);
+            // do not fetch table count if hideRowCount is set in the annotation for the table
+            // this is because the query takes too long sometimes
+            if(!vm.reference.display || !vm.reference.display.hideRowCount){
+                // update the count
+                _updateMainCount(vm, _updatePage);
+            }
 
             // update the facets
             if (vm.facetModels) {
@@ -997,6 +1016,187 @@
                     container.scrollTo(0, 0, 100);
                 }
             }, 0);
+        }
+
+       /**
+        * Registers the callbacks for favorites functionality used in faceting and ellipsis
+        * @param  {object} scope the scope object
+        */
+       function registerFavoritesCallbacks(scope, elem, attrs) {
+           scope.toggleFavorite = function (tupleData, favoriteTable,isFavorite) {
+               var defer = $q.defer();
+
+               var favoriteTablePath = favoriteTable.favoritesPath;
+
+               // TODO: show spinning wheel and disable star
+               // if not a favorite, add it
+               if (!isFavorite) {
+                   ERMrest.resolve($window.location.origin + favoriteTablePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
+                       var rows = [{}],
+                           favoriteRow = rows[0];
+
+                       // assumption that the column to store the id information is the name of the table
+                       // assumption that the data to store in above mentioned column is the value of the id column
+                       // assupmtion that the column to store the user information is the user_id column
+                       // TODO: add all three to config language
+                       favoriteRow[favoriteTable.name] = tupleData.id
+                       favoriteRow.user_id = scope.$root.session.client.id;
+
+                       // TODO pass proper log object
+                       // passing skipOnConflict so it won't return 409 when it encounters a duplicate
+                       return favoriteReference.contextualize.entryCreate.create(rows, null, true);
+                   }).then(function success() {
+                       // toggle favorite
+                       $log.debug("favorite created");
+                       // return true (favorite)
+                       defer.resolve(true);
+                   }).catch(function (error) {
+                       // an error here could mean a misconfiguration of the favorite_* ermrest table path
+                       // or some error while trying to create
+                       $log.warn(error);
+
+                       // return false (not favorite)
+                       defer.reject(false);
+                   });
+               } else {
+                   // assumption that the column to delete the id information is the name of the table
+                   // assumption that the data to associate for delete in above mentioned column is the value of the id column
+                   // assupmtion that the column to delete the user information is the user_id column
+                   // TODO: add all three to config language
+                   var deleteFavoritePath = $window.location.origin + favoriteTablePath + "/" + UriUtils.fixedEncodeURIComponent(favoriteTable.name) + "=" + UriUtils.fixedEncodeURIComponent(tupleData.id) + "&user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id);
+                   // if favorited, delete it
+                   ERMrest.resolve(deleteFavoritePath, ConfigUtils.getContextHeaderParams()).then(function (favoriteReference) {
+                       // delete the favorite
+                       return favoriteReference.delete();
+                   }).then(function success() {
+                       // toggle favorite
+                       $log.debug("favorite deleted");
+                       // return false (not favorite)
+                       defer.resolve(false);
+                   }, function error(error) {
+                        // TODO hacky
+                        // NOTE: 404 could mean it was already deleted, so update UI to show that
+                        if (error.code === 404) {
+                            // return false (not favorite)
+                            defer.resolve(false);
+                        } else {
+                            // TODO: what to do for error handling
+                            $log.warn("favorite delete failed")
+                            $log.warn(error);
+                            // return true (favorite)
+                            defer.reject(true);
+                        }
+                   }).catch(function (error) {
+                       // an error here could mean a misconfiguration of the favorite_* ermrest table path
+                       $log.warn(error);
+
+                       // return true (favorite)
+                       defer.reject(true);
+                   });
+               }
+
+               return defer.promise;
+           }
+       }
+
+        /**
+         * Transform facets to a more stable version that can be saved.
+         * The overal returned format is like the following:
+         * {
+         *  "and": [
+         *    {
+         *      "sourcekey": "key",
+         *      "choices": [v1, v2, ..],
+         *      "source_domain": {
+         *        "schema":
+         *        "table":
+         *        "column":
+         *      }
+         *    }
+         *  ]
+         * }
+         * NOTE: will return null if there aren't any facets
+         */
+        function _getStableFacets(scope) {
+            var filters = [];
+            if (scope.vm.search) {
+                // TODO this is a bit hacky
+                filters.push({"sourcekey": "search-box", "search": [scope.vm.search]});
+            }
+            if (!scope.vm.hasFilter()) {
+                if (filters.length > 0) {
+                    return {"and": filters};
+                } else {
+                    return null;
+                }
+            }
+            for (var i = 0; i < scope.vm.facetModels.length; i++) {
+                var fm = scope.vm.facetModels[i],
+                    fc = scope.vm.reference.facetColumns[i];
+
+                if (fm.appliedFilters.length == 0) {
+                    continue;
+                }
+
+                var filter = fc.toJSON();
+
+                // we should use sourcekey if we have it
+                // NOTE accessing private variable
+                if (fc._facetObject.sourcekey) {
+                    delete filter.source;
+                    filter.sourcekey = fc._facetObject.sourcekey;
+                }
+
+                // add entity mode
+                filter.entity = fc.isEntityMode;
+
+                // add markdown_name
+                filter.markdown_name = DataUtils.getDisplaynameInnerText(fc.displayname);
+
+                // encode source_domain
+                filter.source_domain = {
+                    schema: fc.column.table.schema.name,
+                    table: fc.column.table.name,
+                    column: fc.column.name,
+                };
+
+                // in entity choice mode we have to map to stable key
+                if (fc.isEntityMode && fc.preferredMode === "choices") {
+                    var stableKeyCols = fc.column.table.stableKey, stableKeyColName;
+                    stableKeyColName = stableKeyCols[0].name;
+                    if (stableKeyColName != fc.column.name) {
+                        // TODO we're assuming that it's just simple key,
+                        //     if this assumption has changed, we should change this implementation too
+                        // we have to change the column and choices values
+                        filter.source_domain.column = stableKeyColName;
+                        filter.choices = [];
+
+
+                        for (var j = 0; j < fm.appliedFilters.length; j++) {
+                            var af = fm.appliedFilters[j];
+                            // ignore the not-null choice (it's already encoded and we don't need to map it)
+                            if (af.isNotNull) {
+                                continue;
+                            }
+                            // add the null choice manually
+                            if (af.uniqueId == null) {
+                                filter.choices.push(null);
+                            } else {
+                                filter.choices.push(af.tuple.data[stableKeyColName]);
+                            }
+                        }
+                    }
+                }
+
+                // make sure the items are sorted so it's not based on user selection
+                if (Array.isArray(filter.choices)) {
+                    filter.choices.sort();
+                }
+
+                filters.push(filter);
+            }
+
+            return {"and": filters};
         }
 
         /**
@@ -1207,6 +1407,15 @@
                 }
                 _attachExtraAttributes(scope.vm);
             });
+
+            /**
+             * When the directive DOM is loaded, all the elements that
+             * we need for top-horizontal logic are loaded as well and therefore
+             * we don't need to wait for any condition.
+             * NOTE if we add a condition to hide an element, we should add a
+             * watcher for this one as well.
+             */
+            UiUtils.addTopHorizontalScroll(elem[0]);
         }
 
         /**
@@ -1268,6 +1477,299 @@
                 document.execCommand("copy");
 
                 document.body.removeChild(dummy[0]);
+            }
+
+            // this function is called after recordset triggers that the reference is readyToInitialize
+            // scope.$root.savedQuery is set once we have a reference
+            function registerSavedQueryFunctions () {
+                scope.showSavedQueryUI = scope.$root.savedQuery && scope.$root.savedQuery.showUI;
+                // if the UI should not be shown return before doing anything
+                if (!scope.showSavedQueryUI) return;
+
+                ERMrest.resolve($window.location.origin + scope.$root.savedQuery.ermrestTablePath, ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                    scope.vm.savedQueryReference = savedQueryReference;
+                }).catch(function (error) {
+                    // an error here could mean a misconfiguration of the saved query ermrest table path
+                    $log.warn(error);
+
+                    throw error;
+                });
+
+                var _disableSavedQueryButton;
+                scope.disableSavedQueryButton = function () {
+                    if (_disableSavedQueryButton === undefined && scope.vm.savedQueryReference) {
+                        // if insert is false, disable the button
+                        // should this be checking for insert !== true ?
+                        _disableSavedQueryButton = !scope.vm.savedQueryReference.table.rights.insert;
+                        if (_disableSavedQueryButton) scope.tooltip.saveQuery = "Please login to be able to save searches for " + scope.vm.reference.displayname.value + ".";
+                    }
+
+                    return _disableSavedQueryButton;
+                }
+
+                scope.logSavedQueryDropdownOpened = function () {
+                  logService.logClientAction({
+                      action: logService.getActionString(logService.logActions.SAVED_QUERY_OPEN),
+                      stack: logService.getStackObject()
+                  }, scope.vm.reference.defaultLogInfo);
+                }
+
+                // string constant used for both saved query functions
+                var facetTxt = "*::facets::";
+                scope.saveQuery = function () {
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
+                    var columnModels = [];
+                    var savedQueryReference = scope.vm.savedQueryReference.contextualize.entryCreate;
+                    var savedQueryConfig = scope.$root.savedQuery;
+
+                    var rowData = {
+                        rows: [{}],
+                        submissionRows: [{}],
+                        foreignKeyData: [{}],
+                        oldRows: [{}]
+                    };
+
+                    // set columns list
+                    savedQueryReference.columns.forEach(function (col) {
+                        columnModels.push(recordCreate.columnToColumnModel(col));
+                    });
+
+                    var isDescriptionMarkdown = columnModels.filter(function (model) {
+                        return model.column.name == "description"
+                    })[0].inputType == "longtext"
+
+                    function facetOptionsToString (options) {
+                        var str = "";
+                        options.forEach(function (option, idx) {
+                            var name = option.displayname.value;
+                            if (name === null) {
+                                str += " _No value_";
+                            } else if (name === "<i>All records with value </i>") {
+                                str += " _All records with value_"
+                            } else if (name === '') {
+                                str += " _Empty_"
+                            } else {
+                                str += " " + name;
+                            }
+                            if (idx+1 != options.length) str += ","
+                        });
+                        return str;
+                    }
+
+                    function facetDescription (facet, optionsString, notLastIdx) {
+                        var value = (isDescriptionMarkdown ? "  -" : "") + facet + ":" + optionsString + ";";
+                        if (notLastIdx) value += "\n";
+
+                        return value;
+                    }
+
+                    /*
+                     * The following code is for creating the default name and description
+                     *
+                     * `name` begins with the reference displayname and "with". The rest of the name is created by
+                     * iterating over each facet and the selections made in the facets. The value appended to the
+                     * name for each facet will follow 1 of 3 formats:
+                     *   1. listing the options if under the numFacetChoices and facetTextLength thresholds
+                     *      <option1>, <option2>, <option3>, ...
+                     *   2. in the case of ranges, listing the facet displayname and the selections if under the numFacetChoices and facetTextLength thresholds
+                     *      <facet displayname> (<option1>, <option2>, <option3>, ...)
+                     *   3. listing the facet displayname and number of selections if over either of the numFacetChoices or facetTextLength thresholds
+                     *      <facet displayname> (6 choices)
+                     * If the name after appending all facet names together is over the nameLength threshold,
+                     * a further shortened syntax is used for the whole name:
+                     *     <reference displayname> with x facets: <facet1 displayname>, <facet2 displayname>, <facet3 displayname>, ...
+                     *
+                     * `description` begins with the reference displayname and "with" also. The rest of the
+                     * description is created by iterating over each facet and the selections made in the facets.
+                     * description format for each facet is generally:
+                     *     <facet displayname> (x choices): <option1>, <option2>, <option3>, ...
+                     *
+                     * The format for description slightly differs depending on whether the input type is text
+                     * or longtext. If longtext, each facet description is preceded by a hyphen (`-`) and is on a new line.
+                     * Otherwise, the description is all one line with no hyphens
+                     */
+                    var nameDescriptionPrefix = scope.vm.reference.displayname.value + " with";
+                    var facetNames = "";
+
+                    var name = nameDescriptionPrefix
+                    var description = nameDescriptionPrefix + ":\n";
+
+                    var modelsWFilters = scope.vm.facetModels.filter(function (fm, idx) {
+                        fm.displayname = scope.vm.reference.facetColumns[idx].displayname.value;
+                        fm.preferredMode = scope.vm.reference.facetColumns[idx].preferredMode;
+                        return (fm.appliedFilters.length > 0);
+                    });
+
+                    if (scope.vm.search) {
+                        name += " " + scope.vm.search
+                        if (modelsWFilters.length > 0) name += ";";
+                        description += facetDescription(" Search", scope.vm.search, modelsWFilters.length > 0)
+                    }
+
+                    // iterate over the facetModels to create the default name and description values;
+                    modelsWFilters.forEach(function (fm, modelIdx) {
+                        // ===== setting default name =====
+                        // create the facetNames string in the case the name after creating the string with all facets and option names is longer than the nameLengthThreshold
+                        facetNames += " " + fm.displayname;
+                        if (modelIdx+1 != modelsWFilters.length) facetNames += ",";
+
+                        var numChoices = fm.appliedFilters.length;
+                        var facetDetails = " " + fm.displayname + " (" + numChoices + " choice" + (numChoices > 1 ? 's' : '') + ")";
+                        // set to default value to use if the threshold are broken
+                        var facetInfo = facetDetails;
+
+                        // used for the description and name if not too long
+                        var facetOptionsString = ""; // the concatenation of facet option names
+                        if (fm.preferredMode == "ranges") facetOptionsString += " " + fm.displayname + " (";
+                        facetOptionsString += facetOptionsToString(fm.appliedFilters);
+                        if (fm.preferredMode == "ranges") facetOptionsString += ")";
+
+                        // savedQueryConfig.defaultNameLimits.keys -> [ facetChoiceLimit, facetTextLimit, totalTextLimit ]
+                        if (fm.appliedFilters.length <= savedQueryConfig.defaultNameLimits.facetChoiceLimit && facetOptionsString.length <= savedQueryConfig.defaultNameLimits.facetTextLimit) facetInfo = facetOptionsString;
+                        name += facetInfo;
+                        if (modelIdx+1 != modelsWFilters.length) name += ";"
+
+                        // ===== setting default description =====
+                        description += facetDescription(facetDetails, facetOptionsString, modelIdx+1 != modelsWFilters.length);
+                    });
+
+                    // if name is longer than the set string length threshold, show the compact version with facet names only
+                    if (name.length > savedQueryConfig.defaultNameLimits.totalTextLimit) name = nameDescriptionPrefix + " " + modelsWFilters.length + " facets:" + facetNames;
+
+                    rowData.rows[0].name = name;
+                    rowData.rows[0].description = description;
+
+                    // get the stable facet
+                    var facetObj = _getStableFacets(scope);
+                    var query_id = SparkMD5.hash(JSON.stringify(facetObj));
+
+                    // set id based on hash of `facets` columns
+                    rowData.rows[0].query_id = query_id;
+                    rowData.rows[0].encoded_facets = facetObj ? ERMrest.encodeFacet(facetObj) : null;
+                    rowData.rows[0].facets = facetObj;
+                    rowData.rows[0].table_name = scope.vm.reference.table.name;
+                    rowData.rows[0].schema_name = scope.vm.reference.table.schema.name;
+                    rowData.rows[0].user_id = scope.$root.session.client.id;
+
+                    var row = rowData.rows[0];
+                    // check to see if the saved query exists for the given user, table, schema, and selected facets
+                    var queryUri = savedQueryReference.uri + "/user_id=" + UriUtils.fixedEncodeURIComponent(row.user_id) + "&schema_name=" + UriUtils.fixedEncodeURIComponent(row.schema_name) + "&table_name=" + UriUtils.fixedEncodeURIComponent(row.table_name) + "&query_id=" + row.query_id;
+
+                    ERMrest.resolve(queryUri, ConfigUtils.getContextHeaderParams()).then(function (response) {
+                        var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+                        var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, savedQueryReference.table);
+
+                        var logObj = {
+                            action: logService.getActionString(logService.logActions.PRELOAD, stackPath, logService.appModes.CREATE),
+                            stack: logService.getStackObject(currStackNode)
+                        };
+
+                        return response.read(1, logObj);
+                    }).then(function (page) {
+                        // if a row is returned, a query with this set of facets exists already
+                        if (page.tuples.length > 0) {
+                            modalUtils.showModal({
+                                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/duplicateSavedQuery.modal.html",
+                                windowClass:"duplicate-saved-query",
+                                controller: "DuplicateSavedQueryModalDialogController",
+                                controllerAs: "ctrl",
+                                keyboard: true,
+                                resolve: {
+                                    params: {
+                                        tuple: page.tuples[0]
+                                    }
+                                }
+                            }, null, null, false, false);
+                        } else {
+                            modalUtils.showModal({
+                                templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/createSavedQuery.modal.html",
+                                windowClass:"create-saved-query",
+                                controller: "SavedQueryModalDialogController",
+                                controllerAs: "ctrl",
+                                size: "md",
+                                keyboard: true,
+                                resolve: {
+                                    params: {
+                                        reference: savedQueryReference,
+                                        parentReference: scope.vm.reference,
+                                        columnModels: columnModels,
+                                        rowData: rowData
+                                    }
+                                }
+                            }, function success() {
+                                // notify user of success before closing
+                                AlertsService.addAlert("Search criteria saved.", "success");
+                            }, null, false, false);
+                        }
+                    }).catch(function (err) {
+                        $log.debug(err);
+                    });
+                }
+
+                scope.showSavedQueries = function () {
+                    var chaiseConfig = ConfigUtils.getConfigJSON();
+
+                    var facetBlob = {
+                        and: [{
+                            choices: [scope.vm.reference.table.name],
+                            source: "table_name" // name of column storing table name in saved_query table
+                        }, {
+                            choices: [scope.$root.session.client.id],
+                            source: "user_id"
+                        }]
+                    }
+
+                    ERMrest.resolve(scope.vm.savedQueryReference.uri + "/" + facetTxt + ERMrest.encodeFacet(facetBlob) + "@sort(last_execution_time::desc::)", ConfigUtils.getContextHeaderParams()).then(function (savedQueryReference) {
+                        // we don't want to allow faceting in the popup
+                        savedQueryReference = savedQueryReference.contextualize.compactSelectSavedQueries.hideFacets();
+
+                        var params = {};
+
+                        params.parentReference = scope.vm.reference;
+                        params.saveQueryRecordset = true;
+                        // used popup/savedquery so that we can configure which button to show and change the modal title
+                        params.displayMode = recordsetDisplayModes.savedQuery;
+                        params.reference = savedQueryReference;
+                        params.selectedRows = [];
+                        params.showFaceting = false;
+                        params.allowDelete = true;
+                        // NOTE: when supporting faceting in saved_queries popup
+                        //   contextualize params.reference to compact/select/saved_queries and check reference.display.facetPanelOpen before setting false
+                        params.facetPanelOpen = false;
+
+                        // TODO: fix logging stuff
+                        var stackElement = logService.getStackNode(
+                            logService.logStackTypes.SET,
+                            params.reference.table,
+                            {source: savedQueryReference.compressedDataSource, entity: true}
+                        );
+
+                        var logStack = logService.getStackObject(stackElement),
+                            logStackPath = logService.getStackPath("", logService.logStackPaths.SAVED_QUERY_SELECT_POPUP);
+
+                        params.logStack = logStack;
+                        params.logStackPath = logStackPath;
+
+                        modalUtils.showModal({
+                            animation: false,
+                            controller: "SearchPopupController",
+                            windowClass: "search-popup",
+                            controllerAs: "ctrl",
+                            resolve: {
+                                params: params
+                            },
+                            size: "lg",
+                            templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/searchPopup.modal.html"
+                        }, function (res) {
+                            // ellipsis creates a link attached to the button instead of returning here to redirect
+                            // TODO: return from modal and update page instead of reloading
+                        }, null, false, false);
+                    }).catch(function (error) {
+                        $log.warn(error);
+
+                        throw error;
+                    });
+                }
             }
 
             scope.toggleFacetPanel = function () {
@@ -1398,6 +1900,7 @@
                 update(scope.vm, true, true, true, false, logService.reloadCauses.ENTITY_DELETE);
             });
 
+            // if reference.column list changed, update columnModels
             scope.$watch(function () {
                 return (scope.vm && scope.vm.reference) ? scope.vm.reference.columns : null;
             }, function (newValue, oldValue) {
@@ -1407,13 +1910,131 @@
                 _attachExtraAttributes(scope.vm);
             });
 
-            scope.$on('facetsLoaded', function () {
-                scope.facetsLoaded = true;
+            /**
+             * Order of events:
+             * - vm.readyToInitialize shoubl be set to true when we're ready to initialize
+             * - `recordsetReadyToInitializeWatcher` will call `generateFacetColumns` which will
+             *   set vm.facetColumnsReady = true
+             *   (if facet list is empty, `facetDirectivesLoaded=true` will be called manually)
+             * - based on ng-if in recordset directive, faceting will load and populate the facets
+             *   and will emit `facetDirectivesLoaded` event, which will set facetDirectivesLoaded=true
+             *   (when we're not showing any facets, )
+             * - when `facetDirectivesLoaded` is true, recordset structure is ready. so
+             *   `recordsetStructureReadyWatcher` watcher will call `initializeRecordsetData`
+             *
+             * @param {*} scope
+             * @returns
+             */
+            var recordsetReadyToInitializeStructure = function (scope) {
+                return scope.vm.readyToInitialize;
+            }
+
+            scope.$on('facetDirectivesLoaded', function () {
+                $log.debug("all directives loaded");
+                scope.facetDirectivesLoaded = true;
             });
 
-            var recordsetReadyToInitialize = function (scope) {
-                return scope.vm.readyToInitialize && (scope.facetsLoaded || (scope.vm.reference && scope.vm.reference.facetColumns && scope.vm.reference.facetColumns.length === 0));
+            var recordsetStructureReady = function (scope) {
+                return scope.facetDirectivesLoaded;
             };
+
+            var initializeRecordsetStructure = function (scope) {
+                if (scope.ignoreFaceting) {
+                    scope.vm.facetDirectivesLoaded = true;
+                    return;
+                }
+
+                // NOTE this will affect the reference uri so it must be
+                //      done before initializing recordset
+                scope.vm.reference.generateFacetColumns().then(function (res) {
+                    scope.vm.facetColumnsReady = true;
+
+                    // if facetColumns were empty, we have to manually set the
+                    // facetDirectivesLoaded to true
+                    if (res.facetColumns.length === 0) {
+                        scope.facetDirectivesLoaded = true;
+                    }
+
+                    /**
+                     * When there are issues in the given facet,
+                     * - recordset should just load the data based on the remaining
+                     *  facets that had no issue
+                     * - we should show an error and let users know that there were some
+                     *   issues.
+                     * - we should keep the browser location like original to allow users to
+                     *   refresh and try again. Also the issue might be happening because they
+                     *   are not logged in. So we should keep the location like original so after
+                     *   logging in they can get back to the page.
+                     * - Dismissing the error should change the browser location.
+                     */
+                    if (res.issues) {
+                        var cb = function () {
+                            $rootScope.$emit('reference-modified');
+                        };
+                        ErrorService.handleException(res.issues, false, false, cb, cb);
+                    } else {
+                        // execute the following if:
+                        //   - the savedQuery UI is being shown
+                        //   - a savedQuery rid is present in the url on page load
+                        //   - the updated flag is not true
+                        //     - savedQuery.updated is initialized to true unless there is a proper savedQuery mapping and defined savedQuery rid is set
+                        if ($rootScope.savedQuery && $rootScope.savedQuery.showUI && $rootScope.savedQuery.rid && !$rootScope.savedQuery.updated) {
+                            // to prevent the following code and request from triggering more than once
+                            // NOTE: doesn't matter if the update is successful or not, we are only preventing this block from triggering more than once
+                            $rootScope.savedQuery.updated = true;
+
+                            var rows = [{}],
+                                updateRow = rows[0];
+
+                            updateRow.RID = $rootScope.savedQuery.rid
+                            updateRow.last_execution_time = "now";
+
+                            // create this fake table object so getStackNode works
+                            var fauxTable = {
+                                name: $rootScope.savedQuery.mapping.table,
+                                schema: {
+                                    name: $rootScope.savedQuery.mapping.schema
+                                }
+                            }
+
+                            var stackPath = logService.getStackPath(logService.logStackPaths.SET, logService.logStackPaths.SAVED_QUERY_CREATE_POPUP);
+                            var currStackNode = logService.getStackNode(logService.logStackTypes.SAVED_QUERY, fauxTable);
+
+                            var logObj = {
+                                action: logService.getActionString(logService.logActions.UPDATE, stackPath),
+                                stack: logService.addExtraInfoToStack(logService.getStackObject(currStackNode), {
+                                    "num_updated": 1,
+                                    "updated_keys": {
+                                        "cols": ["RID"],
+                                        "vals": [[$rootScope.savedQuery.rid]]
+                                    }
+                                })
+                            };
+
+                            var config = {
+                                skipHTTP401Handling: true,
+                                headers: {}
+                            };
+
+                            config.headers[ERMrest.contextHeaderName] = logObj;
+                            // attributegroup/CFDE:saved_query/RID;last_execution_status
+                            ConfigUtils.getHTTPService().put($window.location.origin + $rootScope.savedQuery.ermrestAGPath + "/RID;last_execution_time", rows, config).then(function (response) {
+                                // do nothing
+                            }).catch(function (error) {
+                                $log.warn("saved query last executed time could not be updated");
+                                $log.warn(error);
+                            });
+                        }
+                    }
+                }).catch(function (exception) {
+                    $log.warn(exception);
+                    scope.vm.hasLoaded = true;
+                    if (DataUtils.isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+                        exception.errorData.redirectUrl = UriUtils.createRedirectLinkFromPath(exception.errorData.redirectPath);
+                    }
+                    throw exception;
+                });
+            }
 
             /**
              * initialize the recordset. This includes:
@@ -1421,11 +2042,8 @@
              *  - scrolling to the first open facet.
              *  - initialize flow-control
              */
-            var initializeRecordset = function (scope) {
+            var initializeRecordsetData = function (scope) {
                 $timeout(function() {
-                    // NOTE
-                    // This order is very important, the ref.facetColumns is going to change the
-                    // location, so we should call read after that.
                     if (!scope.ignoreFaceting && scope.vm.reference.facetColumns.length > 0) {
                         var firstOpen = -1;
                         // create the facetsToPreProcess and also open facets
@@ -1501,24 +2119,58 @@
                 scope.resizePartners = scope.parentContainer.querySelectorAll(".top-left-panel");
             };
 
-            // initialize the recordset when it's ready to be initialized
-            attachDOMElementsToScope(scope);
-            var recordsetDOMInitializedWatcher = scope.$watch(function () {
-                return recordsetReadyToInitialize(scope);
+            // initialize the recordset structure when it's ready
+            var recordsetReadyToInitializeStructureWatcher = scope.$watch(function () {
+                return recordsetReadyToInitializeStructure(scope);
             }, function (newValue, oldValue) {
                 if(angular.equals(newValue, oldValue) || !newValue){
                     return;
                 }
+                initializeRecordsetStructure(scope);
+
+                // unbind the wwatcher
+                recordsetReadyToInitializeStructureWatcher();
+            });
+
+            // we might be able to initialize the recordset structure on load
+            if (recordsetReadyToInitializeStructure(scope)) {
+                initializeRecordsetStructure(scope);
+
+                // unbind the wwatcher
+                recordsetReadyToInitializeStructureWatcher();
+            }
+
+            // after recordset structure is ready, do DOM manipulation and start loading data
+            attachDOMElementsToScope(scope);
+            var recordsetStructureReadyWatcher = scope.$watch(function () {
+                return recordsetStructureReady(scope);
+            }, function (newValue, oldValue) {
+                if(angular.equals(newValue, oldValue) || !newValue){
+                    return;
+                }
+                // set saved query Functions
+                registerSavedQueryFunctions();
+
+                $log.debug("going to initialize recordset man");
 
                 // DOM manipulations
                 manipulateRecordsetDOMElements();
 
                 // call the flow-control to fetch the data
-                initializeRecordset(scope);
+                initializeRecordsetData(scope);
 
                 // unbind the wwatcher
-                recordsetDOMInitializedWatcher();
+                recordsetStructureReadyWatcher();
             });
+
+            // we might be able to do DOM manipulation and loading of data on load of directive
+            if (recordsetStructureReady(scope)) {
+                manipulateRecordsetDOMElements();
+                initializeRecordsetData(scope);
+
+                // unbind the watcher
+                recordsetStructureReadyWatcher();
+            }
 
             // the recordset data is initialized, so we can do extra manipulations if we need to
             var recordsetDataInitializedWatcher = scope.$watch(function () {
@@ -1541,12 +2193,6 @@
                     recordsetDataInitializedWatcher();
                 }
             });
-
-            // we might be able to initialize the recordset when it's loading
-            if (recordsetReadyToInitialize(scope)) {
-                manipulateRecordsetDOMElements();
-                initializeRecordset(scope);
-            }
         }
 
         return {
@@ -1554,6 +2200,7 @@
             update: update,
             updateColumnAggregates: updateColumnAggregates,
             updateMainEntity: updateMainEntity,
+            registerFavoritesCallbacks: registerFavoritesCallbacks,
             registerTableCallbacks: registerTableCallbacks,
             registerRecordsetCallbacks: registerRecordsetCallbacks,
             FlowControlObject: FlowControlObject,
@@ -1607,6 +2254,12 @@
                         },
                         scope.vm.reference.defaultLogInfo
                     );
+                }
+
+                scope.showAddRecord = function () {
+                    var vm = scope.vm;
+                    var isAddableDisplayMode = vm.config.displayMode.indexOf(recordsetDisplayModes.related) !== 0 && vm.config.displayMode !== recordsetDisplayModes.unlinkPureBinaryPopup;
+                    return isAddableDisplayMode && scope.canCreate();
                 }
 
                 scope.addRecord = function() {
@@ -1687,6 +2340,21 @@
                         }
                     }
                     return label + records;
+                };
+
+                scope.canCreate = function () {
+                    return scope.vm.config.editable && scope.vm.reference && scope.vm.reference.canCreate;
+                };
+
+                scope.canUpdate = function () {
+                    var res = scope.vm.config.editable && scope.vm.page && scope.vm.reference && scope.vm.reference.canUpdate;
+                    // make sure at least one row can be updated
+                    if (res) {
+                        return scope.vm.page.tuples.some(function (t) {
+                            return t.canUpdate;
+                        });
+                    }
+                    return false;
                 }
 
             }
@@ -1724,10 +2392,16 @@
                  * The recordset has a onSelectedRowsChanged which will be passed to this onSelectedRowsChangedBind.
                  */
                 onSelectedRowsChangedBind: '=?',
-                onSelectedRowsChanged: '&?'      // set row click function
+                onSelectedRowsChanged: '&?',      // set row click function
+                onFavoritesChanged: '&?'
             },
             link: function (scope, elem, attrs) {
                 recordTableUtils.registerTableCallbacks(scope, elem, attrs);
+
+                // bind the scope so it can be called
+                if (scope.onFavoritesChanged) {
+                    scope.onFavoritesChanged = scope.onFavoritesChanged();
+                }
 
                 scope.isSelected = function (tuple) {
                     if (scope.vm.matchNotNull) {
@@ -1757,7 +2431,7 @@
         }
     }])
 
-    .directive('recordList', ['defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$timeout', function(defaultDisplayname, messageMap, recordTableUtils, UriUtils, $timeout) {
+    .directive('recordList', ['ConfigUtils', 'defaultDisplayname', 'messageMap', 'recordTableUtils', 'UriUtils', '$log', '$timeout', '$window', function(ConfigUtils, defaultDisplayname, messageMap, recordTableUtils, UriUtils, $log, $timeout, $window) {
 
         return {
             restrict: 'E',
@@ -1765,7 +2439,10 @@
             scope: {
                 initialized: '=?',
                 onRowClick: '=',
-                rows: '=' // each row: {uniqueId, displayname, count, selected}
+                onFavoritesChanged: "=?",
+                rows: '=', // each row: {uniqueId, displayname, count, selected}
+                enableFavorites: "=?",
+                table: "=?"
             },
             link: function (scope, elem, attr) {
                 scope.defaultDisplayname = defaultDisplayname;
@@ -1776,13 +2453,35 @@
                     scope.onRowClick(row, $event);
                 }
 
+                recordTableUtils.registerFavoritesCallbacks(scope, elem, attr);
+
+                scope.callToggleFavorite = function (row) {
+                    if (row.isFavoriteLoading) return;
+                    row.isFavoriteLoading = true;
+
+                    scope.toggleFavorite(row.tuple.data, scope.table, row.isFavorite).then(function (isFavorite) {
+                        row.isFavorite = isFavorite;
+                    }, function (isFavorite) {
+                        row.isFavorite = isFavorite;
+                    }).catch(function (error) {
+                        $log.warn(error);
+                    }).finally(function () {
+                        row.isFavoriteLoading = false;
+                        if (scope.onFavoritesChanged) {
+                            scope.onFavoritesChanged();
+                        }
+                    });
+                }
+
                 scope.$watch('initialized', function (newVal, oldVal) {
                     if (newVal) {
                         $timeout(function () {
                             var listElem = elem[0].getElementsByClassName("chaise-list-container")[0];
 
                             // set the height to the clientHeight or the rendered height so when the content changes the page doesn't thrash
-                            listElem.style.height = listElem.scrollHeight + "px";
+                            // TODO: we should figure out why this is calculating incorrectly now
+                            // plus 1 to fix a truncation of the list issue
+                            listElem.style.height = listElem.scrollHeight + 1 + "px";
                             listElem.style.overflow = "hidden";
                         }, 0);
                     } else if (newVal == false) {
@@ -1805,7 +2504,7 @@
      *   value to the vm.selectedRows
      * NOTE removePill, removeAllPills are also changed to support these two matchNull and matchNotNull options.
      */
-    .directive('recordsetSelectFaceting', ['messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', function(messageMap, recordsetDisplayModes, recordTableUtils, UriUtils) {
+    .directive('recordsetSelectFaceting', ['ConfigUtils', 'ERMrest', 'messageMap', 'recordsetDisplayModes', 'recordTableUtils', 'UriUtils', '$q', '$window', function(ConfigUtils, ERMrest, messageMap, recordsetDisplayModes, recordTableUtils, UriUtils, $q, $window) {
 
         return {
             restrict: 'E',
@@ -1814,18 +2513,74 @@
                 mode: "=?",
                 vm: '=',
                 onSelectedRowsChanged: '&?',       // set row click function
+                onFavoritesChanged: '&?',
                 getDisabledTuples: "=?", // callback to get the disabled tuples
                 registerSetPageState: "&?"
             },
             link: function (scope, elem, attrs) {
                 // currently faceting is not defined in this mode.
                 // TODO We should eventually add faceting here, and remove these initializations
-                scope.facetsLoaded = true;
+                scope.facetDirectivesLoaded = true;
                 scope.ignoreFaceting = true; // this is a temporary flag to avoid any faceting logic
                 scope.tooltip = messageMap.tooltip;
                 scope.recordsetDisplayModes = recordsetDisplayModes;
 
                 recordTableUtils.registerRecordsetCallbacks(scope, elem, attrs);
+
+                // bind the scope so it can be called
+                if (scope.onFavoritesChanged) {
+                    scope.onFavoritesChanged = scope.onFavoritesChanged();
+                }
+
+                // fetch the favorites
+                scope.vm.getFavorites = function (vm, page) {
+                    var defer = $q.defer();
+
+                    var table = scope.vm.reference.table;
+                    // if the stable key is greater than length 1, the favorites won't be supported for now
+                    // TODO: support this for composite stable keys
+                    if (scope.$root.session && table.favoritesPath && table.stableKey.length == 1) {
+                        // array of column names that represent the stable key of leaf with favorites
+                        // favorites_* will use stable key to store this information
+                        // NOTE: hardcode `scope.reference.table.name` for use in pure and binary table mapping
+                        var key = table.stableKey[0];
+                        var displayedFacetIds = "(";
+                        page.tuples.forEach(function (tuple, idx) {
+                            // use the stable key here
+                            displayedFacetIds += UriUtils.fixedEncodeURIComponent(table.name) + "=" + UriUtils.fixedEncodeURIComponent(tuple.data[key.name]);
+                            if (idx !== page.tuples.length-1) displayedFacetIds += ";";
+                        });
+                        displayedFacetIds += ")"
+                        // resolve favorites reference for this table with given user_id
+                        var favoritesUri = $window.location.origin + table.favoritesPath + "/user_id=" + UriUtils.fixedEncodeURIComponent(scope.$root.session.client.id) + "&" + displayedFacetIds;
+
+                        ERMrest.resolve(favoritesUri, ConfigUtils.getContextHeaderParams()).then(function (favoritesReference) {
+                            // read favorites on reference
+                            // use 10 since that's the max our facets will show at once
+                            // TODO proper log object
+                            return favoritesReference.contextualize.compact.read(scope.vm.pageLimit, null, true, true);
+                        }).then(function (favoritesPage) {
+                            favoritesPage.tuples.forEach(function (favTuple) {
+                                // should only be 1
+                                var matchedTuple = page.tuples.filter(function (tuple) {
+                                    // favTuple has data as table.name and user_id
+                                    // tuple comes from leaf table, so find value based on key info
+                                    return favTuple.data[table.name] == tuple.data[key.name]
+                                });
+
+                                matchedTuple[0].isFavorite = true;
+                            });
+
+                            defer.resolve({page: page});
+                        }).catch(function (error) {
+                            defer.resolve({page: page});
+                        });
+                    } else {
+                        defer.resolve({page: page});
+                    }
+
+                    return defer.promise;
+                }
             }
         };
     }])

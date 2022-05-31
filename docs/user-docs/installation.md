@@ -6,17 +6,18 @@
 
 Chaise depends on the following server- and client-side software.
 
-- **Relational data resources**: Chaise is intended to be deployed in an
-  environment that includes the [ERMrest] service for exposing tabular (relational) data as Web resources.
+- **Relational data resources**: Chaise is intended to be deployed in an environment that includes the [ERMrest] service for exposing tabular (relational) data as Web resources.
 - **Web server**: Chaise can be hosted on any HTTP web server. Most likely you
   will want to deploy the app on the same host as [ERMrest]. If it is deployed
   on a separate host, you will need to enable [CORS] on the web server on which
   ERMrest is deployed.
 - **ERMrestJS**: [ERMrestJS] is a client library for [ERMrest]. This library must be properly installed before installing Chaise. For more information about installing ermrestjs please refer to its installation document.
+- **openseadragon-viewer**: Chaise uses [openseadragon-viewer] as part of the viewer app. If viewer app is not useful to your deployment, you don't need this. For more information about viewer app please refer to [this document](../viewer/viewer-app.md).
 
 [ERMrest]: https://github.com/informatics-isi-edu/ermrest
 [ERMrestJS]: https://github.com/informatics-isi-edu/ermrestjs
 [CORS]: https://en.wikipedia.org/wiki/Cross-origin_resource_sharing "Cross-origin resource sharing"
+[openseadragon-viewer]: https://github.com/informatics-isi-edu/openseadragon-viewer
 
 ### Development Dependencies
 
@@ -24,10 +25,10 @@ Development dependencies include:
 
 * [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any unix/linux/osx host.
 * [Rsync](https://en.wikipedia.org/wiki/Rsync): usually present on any unix/linux/osx host.
-* [Node](https://nodejs.org/) version 6.x: Mac users, we recommend downloading
+* [Node](https://nodejs.org/): Mac users, we recommend downloading
 direct from the node site as we have seen problems with the version installed
 by Homebrew.
-* Additional dependencies specified in [package.json](./package.json) will be
+* Additional dependencies specified in `package.json` will be
 automatically retrieved by NPM.
 
 ### Stop! Before going forward read this!
@@ -40,7 +41,7 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
 
 1. First you need to setup some environment variables to tell Chaise where it should install the package. The following are the variables and their default values:
 
-    ```
+    ```sh
     WEB_URL_ROOT=/
     WEB_INSTALL_ROOT=/var/www/html/
     CHAISE_REL_PATH=chaise/
@@ -50,18 +51,28 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
     Notes:
     - All the variables MUST have a trailing `/`.
 
-    - If you're installing remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
+    - If you're deploying remotely, since we're using the `WEB_INSTALL_ROOT` in `rsync` command, you can use a remote location `username@host:public_html/` for this variable.
 
-    - A very silly thing to do would be to set your deployment directory to root `/` and run `make install` with `sudo`. This would be very silly indeed, and would probably result in some corruption of your operating system. Surely, no one would ever do this. But, in the off chance that one might attempt such silliness, the `make install` rule specifies a `dont_install_in_root` prerequisite that attempts to put a stop to any such silliness before it goes too far.
+    - A very silly thing to do would be to set your deployment directory to root `/` and run `make deploy` with `sudo`. This would be very silly indeed, and would probably result in some corruption of your operating system. Surely, no one would ever do this. But, in the off chance that one might attempt such silliness, the `make deploy` rule specifies a `dont_deploy_in_root` prerequisite that attempts to put a stop to any such silliness before it goes too far.
 
-2. After making sure the variables are properly set, run the following command:
+2. Build the Chaise bundles by running the following command:
 
-    ```
-    $ make install
+    ```sh
+    make dist
     ```
 
     Notes:
-      - If the given directory does not exist, it will first create it. So you may need to run `make install` with _super user_ privileges depending on the installation directory you choose.
+    - Make sure to run this command with the owner of the current folder. If you attempt to run this with a different user, it will complain.
+
+
+3. To deploy the package, run the following:
+
+    ```sh
+    make deploy
+    ```
+
+    Notes:
+      - If the given directory does not exist, it will first create it. So you may need to run `make deploy` with _super user_ privileges depending on the deployment directory you choose (by default it's `/var/www/html/`).
 
 ## Configuration
 
@@ -75,25 +86,4 @@ Once deployed the apps can be found at `http://<hostname>/chaise/<app>`, where `
 
 ## Testing
 
-This section assumes you have already installed _and tested_ [ERMrestJS](https://github.com/informatics-isi-edu/ermrestjs). If you have not, stop here and do that first, then return this step.
-
-Before running the test cases you need to set `ERMREST_URL`, `CHAISE_BASE_URL`, `AUTH_COOKIE`, and `REMOTE_CHAISE_DIR_PATH` environment variables. See [How to Get Your AUTH_COOKIE](../dev-docs/e2e-test.md#how-to-get-your-auth-cookie).
-
-The example here is based on the assumption that the tests are installed and executed against a deployment to a userdir.
-
-```sh
-export CHAISE_BASE_URL=https://HOST/~USERNAME/chaise
-export ERMREST_URL=https://HOST/ermrest
-export AUTH_COOKIE=YOUR_ERMREST_COOKIE
-export REMOTE_CHAISE_DIR_PATH=USERNAME@HOST:public_html/chaise
-```
-
-Then run the tests (install, if you haven't already).
-
-```sh
-$ make install  # if not already installed
-$ npm install # if npm dependencies not already installed
-$ make test
-```
-
-For more information, see the [E2E tests guide](../dev-docs/e2e-test.md).
+Please refer to he [E2E tests guide](../dev-docs/e2e-test.md).

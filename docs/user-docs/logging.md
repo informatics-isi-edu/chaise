@@ -28,33 +28,47 @@ By providing `Deriva-Client-Context` header in ermrset requests we can log extra
 
 ```javascript
 {
-  "scheme":"https",
-  "host":"dev.isrd.isi.edu",
+  "elapsed": 0.037084000000000006,
+  "req": "Le-1bpTwSfSxddRT8Y0T5g",
+  "scheme": "https",
+  "host": "dev.isrd.isi.edu",
   "status": "200 OK",
-  "method":"GET",
-  "path": "/ermrest/catalog/1/entity/T:=isa:experiment/dataset=1-3VFJ/$T/M:=(experiment_type)=(vocab:experiment_type:id)@sort(name,RID)?limit=11",
-  "dcctx":{
-      "catalog":"1",
-      "schema_table":"vocab:experiment_type",
-      "stack":[
-        {
-            "type":"set",
-            "s_t":"isa:experiment",
-            "filters": {"and":[{"src":[{"o":["isa", "experiment_dataset_fkey"]}, "RID"], "ch":["1-3VFJ"]}]}
-        },
-        {
-            "type":"facet",
-            "s_t":"vocab:experiment_type",
-            "source": [{"o":["isa", "experiment_experiment_type_fkey"]}, "id"],
-            "entity":true
-        }
+  "method": "GET",
+  "path": "/ermrest/catalog/1/entity/T:=isa:dataset/(id)=(isa:dataset_organism:dataset_id)/M:=(organism)=(vocab:species:id)@sort(name,RID)?limit=11",
+  "type": "application/json",
+  "client": "128.9.180.218",
+  "referrer": "https://dev.isrd.isi.edu/chaise/recordset/",
+  "agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36",
+  "track": "916d434.5aa5c5cf6b595",
+  "dcctx": {
+    "catalog": "1",
+    "schema_table": "vocab:species",
+    "stack": [
+      {
+        "type": "set",
+        "s_t": "isa:dataset"
+      },
+      {
+        "type": "facet",
+        "s_t": "vocab:species",
+        "source": [
+          {
+            "i": ["isa", "dataset_organism_dataset_id_fkey"]
+          },
+          {
+            "o": ["isa", "dataset_organism_organism_fkey"]
+          },
+          "id"
+        ],
+        "entity": true
+      }
     ],
-    "action":":set/facet,;load",
-    "cid":"recordset",
-    "pid":"1lp2236a1p1g2age1l1a2pxo",
-    "wid":"1tw6218n1xbr2mvq251y2rsd",
-    "elapsed_ms":646
- }
+    "action": ":set/facet,choice;load",
+    "cid": "recordset",
+    "pid": "1sy623td1kht2cyu2bv01w3e",
+    "wid": "1kcg21wn27ah1hr52djl269e",
+    "elapsed_ms": 4578
+  }
 }
 ```
 
@@ -64,9 +78,9 @@ In the following, we're going to summarize what are the attributes that are bein
 
 The following are the default attributes that you can find on all the requests:
 
-- `cid`: The app name (record, recordset, recordedit).
-- `wid`: The window id (randomly generated).
-- `pid`: The page id (randomly generated).
+- `cid`: The app name (record, recordset, recordedit, etc).
+- `wid`: The window id (randomly generated). This value is stable across page loads to allow tracking of chaise app flows within one window.
+- `pid`: The page id. Randomly generated on each page load.
 - `catalog`: The catalog id.
 - `schema_table`: The `schema:table` combination. This captures the table that the current action is performed on.
 - `action`: A pre-defined string that implies what the request was for. Please refer to [Action definition](#action-definition) section for more information.
@@ -91,17 +105,19 @@ Depending on the request, we might log extra attributes that we are gong to list
   - `navbar/recordset`
   - `navbar/recordedit`
 
-  If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well.
+  If the user clicked on a link in the navbar, the `PCID` will properly denote what app the user came from that had the navbar present. A static page that uses the navbar app, will set the `PCID` as `navbar`. Otherwise the appname will be appended (i.e.   `navbar/<appname>`). This is true for the [deriva-webapps](https://github.com/informatics-isi-edu/deriva-webapps/wiki/Logging-in-WebApps#pcid-list) as well. A full list of `PCID` values (including applications that are not chaise) can be [found here](https://docs.google.com/spreadsheets/d/1zoNTG0Vx4cedIKsHvGN1mZBTeFmDMWyQ1rfKR3ksSbU).
 
 - `paction`: The action in the parent page that fired the current request. Acceptable values are:
   - `view`: Available on the first read of the main entity in record page. Indicates that user clicked on "view" button in tabular displays.
+  - `apply-sq`: Available on the first read of the main set in recordset page. Indicates that the user clicked "Apply search criteria" button in tabular displays.
+  - `explore`: Available on the first read of the main set in recordset page. Indicates that the user clicked the "Explore" button on record app.
 
 - `stack`: This attribute can be found on almost all the requests. It will capture the path that user took to get to the performed action. For example, if the logged request is for when a user interacts with a add pure and binary picker, using this stack you can figure out which main table and related (or inline table) user is interacting with. `stack` is an array of objects that each node can have the following attributes:
   - Required attributes:
     - `s_t`: The end table of this node in the format of `schema:table`.
       - As an exception, in viewer app, if an image annotation is derived from file (not database), this value will not be available on the stack object.
 
-    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related` (inline or related table), `annotation` (image annotation in viewer app).
+    - `type`: The type of the node request. It can be any of: `entity` (row based), `set` (rowset based), `col` (column), `pcol` (pseudo-column), `fk` (foreign key), `related` (inline or related table), `saved_query` (saved query dropdown functionality), `annotation` (image annotation in viewer app).
 
   - Optional attributes:
     - `filters`: The facet object using the [compressed syntax](#facet-compressed-syntax).
@@ -160,10 +176,12 @@ Depending on the request, we might log extra attributes that we are gong to list
     - `old_thickness`, `new_thickness`: Available only on "line thickness adjustment" client log in viewer app. It will capture the old and new value after user interacted with the UI to change the line thickness.
 
     - `file`: If the displayed image annotation in viewer app is derived from a while (and not database), `"file": 1` will be added to the stack (`s_t` will not be available.)
-    
-    - `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
 
-    - `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
+- `rid`: Available on the "go to RID" client action, to indicate the RID value that users searched for.
+
+- `sq_rid`: Available on the first read of the main set in recordset page. Indicates that the user navigated to this recordset page from a saved query link.
+
+- `cqp` (chaise query parameter): When a user uses a link that includes the `?` instead of the `#`. These urls are only used to help with google indexing and should be used only for navigating users from search engines to chaise apps.
 
 - `names`: Used in "navbar" request to capture the path that user took to end up in a particular menu option. It is an array of navbar option "name"s. The last item in the array if the name of the navbar option that user is acting on, and the rest are the name of its ancestors.
 
@@ -199,6 +217,8 @@ Where,
   - `facet-picker`: Used for facet picker.
   - `fk`: Based on `fk` stack node `type`.
   - `fk-picker`: Used for foreign key picker.
+  - `saved-query-entity`: Used for saved query create popup.
+  - `saved-query-picker`: Used for saved query apply picker.
   - `annotation-set`: Annotation list displayed on the viewer app.
   - `annotation-entity`: Each individual annotation displayed in annotation list of viewer app.
 
@@ -374,9 +394,9 @@ Since the asset download and also the default CSV export requests are simple red
 
 The following url patterns are what's unique about each of these requests and you can use for your analysis:
 
-- Asset download: `?limit=none&accept=csv&uinit=1&cid=`
+- Asset download: `uinit=1&cid=`
 
-- CSV default export: `uinit=1&cid=`
+- CSV default export: `?limit=none&accept=csv&uinit=1&cid=`
 
 #### Finding the displayed recordset request
 
@@ -394,6 +414,44 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ## Change Log
 
+
+### 11/04/21
+
+###### PR Links
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2137)
+
+###### Added
+  - Added a new UI context, `saved-query`, and stack path, `saved-query-entity`.
+    Together these create 5 new actions, `:set,saved-query;open`,
+    `create:set/saved-query-entity,;preload`, `create:set/saved-query-entity,;create`,
+    `create:set/saved-query-entity,;cancel`, and `:set/saved-query-entity,;update`
+  - Added stack path, `saved-query-picker`. This includes 15 actions as well
+    for a recordset modal selector further documented in the action list spreadsheet.
+
+### 04/02/21
+
+###### PR Links
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2069)
+  - [OSD viewer](https://github.com/informatics-isi-edu/openseadragon-viewer/pull/78)
+
+###### Changed
+  - Renamed `:entity/channel-set,z-default;load` to `:entity/channel-set,;load` since it has nothing to do with `default-z` anymore.
+    It was used as a backup for getting the URL information of the default-z image. But now it's the request to get all the available
+    channel information.
+  - Renamed `:entity/channel-set,;load` to `:entity/z-plane-entity,;load`. The previous
+    request included the channel information alongside the processed image information.
+    But the new request is only fetching the processed image information. Since
+    this is currently only used for default z-index, a `default_z` attribute is also
+    logged in the stack. Later this request can be used for other z-indexes as well.
+
+###### Added
+  - Added `z_index` attribute to the `:entity/annotation-set,;load` request.
+  - Added `:entity,;update` , `:entity/channel-set,;update`,
+    `:entity/z-plane-set,;count`, `:entity/z-plane-set,;reload`,
+    `:entity/z-plane-set,[search-box|slider|default-z];load-before`, and
+    `:entity/z-plane-set,[search-box|slider|default-z];load-after`
+    requests.
+
 ### 08/26/20
 
 ###### Commit/PR Links
@@ -405,12 +463,12 @@ If you're interested in doing this for each specific table, you can choose to do
 
 ###### Changed
   - Changed the annotation request in viewer app to be aligned with the rest of the apps (Action changed from `:entity,annotation;read` to `:entity/annotation-set,;load` and stack structure modified.)
-  
+
 ###### Added
   - Added proper log support to viewer app. This includes properly logging the requests that viewer app was already making and adding client logs. Please refer to the PR and documentation for more information.
-  
+
   - Added client log action for "go to RID" feature.
-  
+
   - Added `paction=view` to first request in record app, to indicates user clicked on "view" button in tabular displays.
 
 ### 02/12/20

@@ -1,8 +1,25 @@
 <div class="chaise-search-box chaise-input-group" ng-class="{'disabled-element': disabled}">
     <div class="chaise-input-control has-feedback">
         <input type="text" ng-model="searchTerm" ng-class="inputClass" ng-disabled="disabled" on-enter="enterPressed()" ng-change="inputChanged()" ng-attr-autofocus="{{focus === true}}">
-        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="!isArray(searchColumns)" ng-bind="'Search' + (searchColumns === false ? ' all columns': '')"></span>
-        <span ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="isArray(searchColumns)">
+        <span
+            ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="!isArray(searchColumns)"
+            ng-bind="'Search' + (searchColumns === false ? ' all columns': '')"
+            ng-attr-uib-tooltip="{{'Search' + (searchColumns === false ? ' all columns': '')}}"
+            tooltip-placement="bottom-left" chaise-enable-tooltip-width tooltip-enable="tooltipEnabled"
+        ></span>
+        <script type="text/ng-template" id="searchPlaceholderTooltipTemplate.html">
+            <span>Search</span>
+            <span ng-repeat="sc in searchColumns">
+                <span ng-if="sc.displayname.isHTML" ng-bind-html="sc.displayname.value"></span>
+                <span ng-if="!sc.displayname.isHTML" ng-bind="sc.displayname.value"></span>
+                <span ng-if="!$last" style="margin-left:-4px">, </span>
+            </span>
+        </script>
+        <span
+            ng-hide="searchTerm" class="chaise-input-placeholder" ng-click="changeFocus()" ng-if="isArray(searchColumns)"
+            uib-tooltip-template="'searchPlaceholderTooltipTemplate.html'" tooltip-placement="bottom-left" tooltip-class="filters-tooltip"
+            chaise-enable-tooltip-width tooltip-enable="tooltipEnabled"
+        >
             <span>Search</span>
             <span ng-repeat="sc in searchColumns">
                 <span ng-if="sc.displayname.isHTML" ng-bind-html="sc.displayname.value"></span>

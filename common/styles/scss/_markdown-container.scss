@@ -139,6 +139,15 @@
         padding: 0 !important;
         /*existing rule is padding=2, which should be changed for the other changes*/
 
+        &:only-child {
+            > li {
+                // when there is only one list and one list item within it, hide the bullets
+                &:only-child {
+                    margin-left: 0;
+                    list-style: none;
+                }
+            }
+        }
         > li {
             margin-left: 1em;
             padding-left: 0;
@@ -148,10 +157,6 @@
             }
 
             list-style: inherit;
-            &:only-child {
-                margin-left: 0;
-                list-style: none;
-            }
         }
     }
 }
@@ -595,7 +600,6 @@
     border-collapse: collapse;
     display: block;
     width: 100%;
-    overflow: auto
 }
 
 .markdown-container table td,
@@ -611,6 +615,15 @@
 
 .markdown-container table tr:nth-child(2n) {
     background-color: #f6f8fa
+}
+
+/*
+ * tables are usually used for card view where the header is completely
+ * ignored and left empty. with this rule we're making sure such headers
+ * are hidden.
+ */
+.markdown-container table th:empty {
+    display: none;
 }
 
 .markdown-container img {

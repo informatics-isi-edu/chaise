@@ -273,8 +273,12 @@
       left: $btn-padding-x;
       color: $placeholder-color;
 
-      // to make sure it doesn't go to the next line
+      // show ellipsis if there aren't enough space:
+      width: calc(100% - 10px); // we have to account for the padding-left of .button-text
+      text-overflow: ellipsis;
+      overflow: hidden;
       white-space: nowrap;
+      vertical-align: middle;
 
       // users should not be able to select the tooltip
       user-select: none;

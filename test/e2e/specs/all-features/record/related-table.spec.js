@@ -22,15 +22,20 @@ var testParams = {
         "table_w_aggregates", // related entity with aggregate columns
         "table_w_invalid_row_markdown_pattern", // related entity with invalid row_markdown_pattern
         "inbound related with display.wait_for entityset", //related entity with wait_for entityset and markdown patt
-        "inbound related with display.wait_for agg" //related entity with wait_for agg and markdown patt
-
+        "inbound related with display.wait_for agg", //related entity with wait_for agg and markdown patt
+        "inbound related with filter on related table", // related entity with filter on related table
+        "association with filter on related table", // association with filter on related table
+        "path of length 3 with filters" // path of length 3 with filters
     ],
     tocHeaders: [
         "Summary", "booking (6)", "schedule (2)", "media (1)", "association_table (1)",
         "accommodation_image (2+)", "association_table_markdown (1)", "related_table_2 (1)",
         "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)",
         "inbound related with display.wait_for entityset (3)",
-        "inbound related with display.wait_for agg (3)"
+        "inbound related with display.wait_for agg (3)",
+        "inbound related with filter on related table (1)",
+        "association with filter on related table (1)",
+        "path of length 3 with filters (1)"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
     related_table_name_with_link_in_table: "accommodation_image"
@@ -78,6 +83,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
         recordHelpers.testSharePopup({
             permalink: RIDLink,
+            // the table has history-capture: false
+            hasVersionedLink: false,
             verifyVersionedLink: false,
             citation: "Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (" + moment().format("YYYY") + ").",
             bibtextFile: false, // we don't need to test this here as well (it has been tested in record presentation)
@@ -203,8 +210,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         add: {
             relatedDisplayname: "association_table",
             tableDisplayname: "related_table",
-            modalTitle: "Add related_table to Accommodations: Super 8 North Hollywood Motel",
-            totalCount: 4,
+            modalTitle: "Link related_table to Accommodations: Super 8 North Hollywood Motel",
+            totalCount: 5,
             existingCount: 1,
             disabledRows: ["1"],
             search: {
@@ -212,17 +219,57 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 afterSearchCount: 2,
                 afterSearchDisabledRows: ["1"]
             },
-            selectIndex: 1, // after search
             rowValuesAfter: [
+                ["Television"],
+                ["Air Conditioning"],
+                ["Coffee Maker"],
+                ["UHD TV"],
+                ["Space Heater"]
+            ]
+        },
+        unlink: {
+            // we unlink rows 2 and 4 ("Air Conditioning" and "UHD TV")
+            catalogId: browser.params.catalogId,
+            relatedDisplayname: "association_table",
+            modalTitle: "Unlink association_table from Accommodations : Super 8 North Hollywood Motel",
+            totalCount: 5,
+            postDeleteMessage: "2 records successfully unlinked.\n\nClick OK to dismiss this dialog.",
+            countAfterUnlink: 3,
+            rowValuesAfter: [
+                ["Television"],
+                ["Coffee Maker"],
+                ["Space Heater"]
+            ],
+            failedPostDeleteMessage: "2 records could not be unlinked. Check the error details below to see more information.\n\nClick OK to dismiss this dialog.\nShow Error Details",
+            // we unlink row 5 ("Space Heater")
+            aclPostDeleteMessage: "1 record successfully unlinked.\n\nClick OK to dismiss this dialog.",
+            countAfterAclUnlink: 2,
+            rowValuesAfterAclRemove: [
                 ["Television"],
                 ["Coffee Maker"]
             ]
         }
     };
+
     describe("for a pure and binary association,", function () {
         recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
         recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
+
+        recordHelpers.testBatchUnlinkAssociationTable(association_table.unlink, false, pageReadyCondition);
+
+        // test trying to unlink 2 rows where 1 is allowed and 1 is not
+        // verifies the error case works as expected and rows are still selected after failure
+        // need to attach a "postLogin" function to reload the record page we are testing
+        recordHelpers.testBatchUnlinkDynamicAclsAssociationTable(association_table.unlink, false, pageReadyCondition, function () {
+            var keys = [];
+            keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
+            browser.get(url);
+
+            pageReadyCondition();
+        });
     });
 
     var association_with_page_size = {
@@ -237,16 +284,16 @@ describe ("Viewing exisiting record with related entities, ", function () {
         isAssociation: true,
         canEdit: true
     };
-    describe("for a pure and binary association with page_size, ", function () {
+    describe("for a pure and binary association with page_size and hide_row_count, ", function () {
         recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
 
-        it ("Opened modal by `Add` button should honor the page_size.", function () {
+        it ("Opened modal by `Link` button should honor the page_size and hide_row_count.", function () {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
             addRelatedRecordLink.click().then(function(){
                 chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
-                expect(title).toBe("Add file to Accommodations: Super 8 North Hollywood Motel", "titlte missmatch.");
+                expect(title).toBe("Link file to Accommodations: Super 8 North Hollywood Motel", "title missmatch.");
 
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
@@ -256,6 +303,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 return chaisePage.recordsetPage.getModalRows().count();
             }).then(function(ct){
                 expect(ct).toBe(2, "association count missmatch for file domain table.");
+
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nfirst 2\nrecords", "hide_row_count not honored");
+
                 return chaisePage.recordEditPage.getModalCloseBtn().click();
             }).catch(function(error) {
                 console.log(error);
@@ -269,6 +319,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         schemaName: "product-unordered-related-tables-links",
         displayname: "association_table_markdown",
         name: "association_table_markdown",
+        entityMarkdownName: ' <strong class="vocab">1:Television</strong> ',
         relatedName: "related_table",
         baseTable:"Accommodations",
         isAssociation: true,
@@ -303,6 +354,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canCreate: false,
         canDelete: true
     };
+
+    // When rows are added to association_table, it affects this test.
+    // data relies on rows from p&b unlink tests above
     describe("for a related entity with a path of length 3, ", function () {
         recordHelpers.testRelatedTable(path_related, pageReadyCondition);
     });
@@ -389,6 +443,157 @@ describe ("Viewing exisiting record with related entities, ", function () {
     };
     describe("for a related entity with wait_for aggregate and markdown_pattern", function () {
         recordHelpers.testRelatedTable(related_w_agg_waitfor, pageReadyCondition);
+    });
+
+    describe("regarding usage of filter in source", function () {
+        var related_w_filter_on_related = {
+            comment: "inbound related, filter on related",
+            schemaName: "product-unordered-related-tables-links",
+            displayname: "inbound related with filter on related table",
+            name: "booking",
+            baseTable:"Accommodations",
+            count: 2,
+            viewMore: {
+                displayname: "booking",
+                filter: "Accommodations\nSuper 8 North Hollywood Motel"
+            },
+            rowValues: [
+                ["247.0000",""], // created by another test case
+                ["80.0000","2016-01-01 00:00:00"]
+            ]
+        };
+        describe("for a related entity with filter on related table", function () {
+            recordHelpers.testRelatedTable(related_w_filter_on_related, pageReadyCondition);
+
+            it ("add button should not be available", function () {
+                var btn = chaisePage.recordPage.getAddRecordLink(related_w_filter_on_related.displayname);
+                expect(btn.isPresent()).toBeFalsy();
+            });
+        });
+
+        var assoc_w_filter_on_related = {
+            comment: "assoc related, filter on related",
+            schemaName: "product-unordered-related-tables-links",
+            displayname: "association with filter on related table",
+            name: "association_table",
+            relatedName: "related_table",
+            baseTable:"Accommodations",
+            isAssociation: true,
+            count: 1,
+            viewMore: {
+                displayname: "related_table",
+                filter: "base table association related\nSuper 8 North Hollywood Motel"
+            },
+            rowValues: [
+                ["Television"]
+            ],
+            rowViewPaths: [
+                [{column: "id", value: "1"}]
+            ],
+
+        };
+        describe("for a pure and binary association with filter on related table", function () {
+            recordHelpers.testRelatedTable(assoc_w_filter_on_related, pageReadyCondition);
+
+            it ("link button should not be available", function () {
+                var btn = chaisePage.recordPage.getAddRecordLink(assoc_w_filter_on_related.displayname);
+                expect(btn.isPresent()).toBeFalsy();
+            });
+        });
+
+        if (!process.env.CI) {
+            var path_related_w_filter = {
+                comment: "related with a path of length 3",
+                schemaName: "product-unordered-related-tables-links",
+                displayname: "path of length 3 with filters",
+                name: "related_table_2",
+                baseTable:"Accommodations",
+                viewMore: {
+                    displayname: "related_table_2",
+                    filter: "base table association related\nSuper 8 North Hollywood Motel"
+                },
+                rowValues: [
+                    ["three"]
+                ],
+                rowViewPaths: [
+                    [{column: "id", value: "3"}]
+                ],
+                count: 1, // one row is deleted by another test
+            };
+            describe("for a related entity with a path of length 3 with filter", function () {
+                recordHelpers.testRelatedTable(path_related_w_filter, pageReadyCondition);
+
+                it ("add button should not be available", function () {
+                    var btn = chaisePage.recordPage.getAddRecordLink(path_related_w_filter.displayname);
+                    expect(btn.isPresent()).toBeFalsy();
+                });
+            });
+        }
+    });
+
+    describe("for a pure and binary association with a null value for the key on main", function () {
+        var displayname = "association_table_null_keys",
+            tablename = "Accommodations",
+            columnname = "nullable_assoc_key",
+            addBtn;
+
+        beforeAll(function() {
+            pageReadyCondition();
+            // click show empty sections button
+            chaisePage.recordPage.getShowAllRelatedEntitiesButton().click().then(function () {
+                addBtn = chaisePage.recordPage.getAddRecordLink(displayname, true);
+            });
+        });
+
+        it("should disable the link record button", function () {
+            expect(addBtn.isEnabled()).toBeFalsy();
+        });
+
+        it("should have the proper tooltip", function () {
+            chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
+                expect(comment).toBe("'Linking to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+            });
+        });
+    });
+
+    describe("for a inbound fk with a null value for the key on main", function () {
+        var displayname = "inbound_null_key",
+            tablename = "Accommodations",
+            columnname = "nullable_assoc_key",
+            addBtn;
+
+        beforeAll(function() {
+            pageReadyCondition();
+
+            addBtn = chaisePage.recordPage.getAddRecordLink("inbound_null_key", true);
+        });
+
+        it("should disable the add record button", function () {
+            expect(addBtn.isEnabled()).toBeFalsy();
+        });
+
+        it("should have the proper tooltip", function () {
+            chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
+                expect(comment).toBe("'Adding to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+            });
+        });
+    });
+
+    describe("for a pure and binary association with a null value for the key on the leaf table", function () {
+        it("should add a not null filter and only show 2 of the 5 rows for related_table_null_key", function () {
+            var addBtn = chaisePage.recordPage.getAddRecordLink("association_table_null_keys2", true);
+            expect(addBtn.isEnabled()).toBeTruthy();
+
+            addBtn.click().then(function () {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == 2);
+                    });
+                });
+
+                expect(chaisePage.recordsetPage.getModalRows().count()).toBe(2, "Number of rows after applying not null filter is incorrect")
+            });
+        });
     });
 });
 

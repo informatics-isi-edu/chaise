@@ -4,13 +4,8 @@
         "links-table": {
             "kind": "table",
             "keys": [
-                {
-                    "comment": null,
-                    "annotations": {},
-                    "unique_columns": [
-                        "id"
-                    ]
-                }
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["int"]}
             ],
             "foreign_keys": [],
             "table_name": "links-table",
@@ -35,6 +30,195 @@
                     }
                 }, {
                     "name": "int",
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "detailed": ["id", "text", "int" ]
+                },
+                "tag:isrd.isi.edu,2016:visible-foreign-keys": {
+                    "*": [ ["links", "fk_assoc_links"] ]
+                }
+            }
+        },
+        "related_table": {
+            "comment": "Related table set to generated only to test can create on association",
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [],
+            "table_name": "related_table",
+            "schema_name": "links",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "term",
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:generated": null
+            }
+        },
+        "association_table": {
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id_related", "id_links"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["links", "fk_assoc_related_table"]],
+                    "foreign_key_columns": [{
+                            "table_name": "association_table",
+                            "schema_name": "links",
+                            "column_name": "id_related"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "related_table",
+                            "schema_name": "links",
+                            "column_name": "term"
+                    }]
+                },
+                {
+                    "names": [["links", "fk_assoc_links"]],
+                    "foreign_key_columns": [{
+                            "table_name": "association_table",
+                            "schema_name": "links",
+                            "column_name": "id_links"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "links-table",
+                            "schema_name": "links",
+                            "column_name": "int"
+                    }]
+                }
+            ],
+            "table_name": "association_table",
+            "schema_name": "links",
+            "column_definitions": [
+                {
+                    "name": "id_related",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "id_links",
+                    "nullok": false,
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {}
+        },
+        "inline_table": {
+            "kind": "table",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["int"]}
+            ],
+            "foreign_keys": [],
+            "table_name": "inline_table",
+            "schema_name": "links",
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "type": {
+                        "typename": "int"
+                    }
+                }, {
+                    "name": "text",
+                    "type": {
+                        "typename": "text"
+                    }
+                }, {
+                    "name": "int",
+                    "type": {
+                        "typename": "int"
+                    }
+                }
+            ],
+            "annotations": {
+                "tag:isrd.isi.edu,2016:visible-columns" : {
+                    "detailed": [
+                        "id", "text", "int", ["links", "fk_assoc_links"]
+                    ]
+                }
+            }
+        },
+        "inline_association_table": {
+            "kind": "table",
+            "keys": [
+                {
+                    "comment": null,
+                    "annotations": {},
+                    "unique_columns": [
+                        "id_related", "id_inline"
+                    ]
+                }
+            ],
+            "foreign_keys": [
+                {
+                    "names": [["links", "fk_inline_assoc_related_table"]],
+                    "foreign_key_columns": [{
+                            "table_name": "inline_association_table",
+                            "schema_name": "links",
+                            "column_name": "id_related"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "related_table",
+                            "schema_name": "links",
+                            "column_name": "term"
+                    }]
+                },
+                {
+                    "names": [["links", "fk_inline_assoc_inline"]],
+                    "foreign_key_columns": [{
+                            "table_name": "inline_association_table",
+                            "schema_name": "links",
+                            "column_name": "id_inline"
+                    }],
+                    "referenced_columns": [{
+                            "table_name": "inline_table",
+                            "schema_name": "links",
+                            "column_name": "int"
+                    }]
+                }
+            ],
+            "table_name": "inline_association_table",
+            "schema_name": "links",
+            "column_definitions": [
+                {
+                    "name": "id_related",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                },
+                {
+                    "name": "id_inline",
+                    "nullok": false,
                     "type": {
                         "typename": "int"
                     }

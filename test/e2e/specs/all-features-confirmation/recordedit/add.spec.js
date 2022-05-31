@@ -375,7 +375,7 @@ describe('Record Add', function() {
             }).then(function() {
                 // this is a static page, we just want to make sure this is the correct page.
                 // we don't need to test every element.
-                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(21,'Table row count could not be matched.');
+                expect(element(by.id('mainTable')).all(by.tagName('tr')).count()).toBe(22,'Table row count could not be matched.');
                 expect(element(by.id('rBold1')).getText()).toBe("**Something Bold**",'first row, first column missmatch');
                 expect(element(by.id('rBold2')).getText()).toBe("__Something Bold__",'first row, second column missmatch');
                 expect(element(by.id('oBold')).getAttribute('innerHTML')).toBe("<strong>Something Bold</strong>",'first row, third column missmatch');

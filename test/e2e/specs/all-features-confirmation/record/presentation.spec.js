@@ -92,8 +92,10 @@ var testParams = {
       tableToShow: 'Categories_5',
       sidePanelTableOrder:[ 'Summary', 'Categories_collection (5)',  'media (1)', 'Categories_collection_2 (5)',  'Categories_3 (5)',  'Categories_4 (5)',  'Categories_5 (5)',  'Categories_6 (5)']
     },
-    citationParams: {
+    sharePopupParams: {
         permalink: browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID,
+        // the table has history-capture: true
+        hasVersionedLink: true,
         verifyVersionedLink: true,
         citation: "accommodation_inbound1 one, accommodation_inbound1 three, accommodation_inbound1 five(3) Sherathon Hotel, accommodation_outbound1_outbound3 one http://www.starwoodhotels.com/sheraton/index.html (" + moment().format("YYYY") + ").",
         bibtextFile: "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib",
@@ -129,7 +131,7 @@ var testParams = {
           displayname: "table_w_aggregates",
           count: 1,
           canEdit: true,
-          canCreate: true,
+          canCreate: false, // it has filter in source, so create is disabled
           isInline: true,
           viewMore: {
               name: "table_w_aggregates",

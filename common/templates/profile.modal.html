@@ -8,9 +8,21 @@
 <div class="modal-body">
     <table class="table">
         <tbody>
-            <tr ng-repeat="(key, value) in ctrl.client" ng-if="key != 'identities'">
-                <td class="text-left">{{key | underscoreToSpace | toTitleCase}}</td>
-                <td class="text-left profileValue">{{value}}</td>
+            <tr>
+                <td class="text-left">Id</td>
+                <td class="text-left profileValue">{{ctrl.client.id}}</td>
+            </tr>
+            <tr>
+                <td class="text-left">Display Name</td>
+                <td class="text-left profileValue">{{ctrl.client.display_name}}</td>
+            </tr>
+            <tr>
+                <td class="text-left">Full Name</td>
+                <td class="text-left profileValue">{{ctrl.client.full_name}}</td>
+            </tr>
+            <tr>
+                <td class="text-left">Email</td>
+                <td class="text-left profileValue">{{ctrl.client.email}}</td>
             </tr>
             <tr ng-if="ctrl.identities">
                 <td rowspan="{{ctrl.identities.lengths}}" class="text-left">Identities</td>
@@ -24,7 +36,7 @@
                 <td class="text-left">Groups</td>
                 <td>
                     <ul>
-                        <li ng-repeat="group in ctrl.globusGroupList"><a href="https://app.globus.org/groups/{{group.truncatedId}}/about" target="_blank">{{group.display_name}}</a></li>
+                        <li ng-repeat="group in ctrl.globusGroupList"><a href="{{group.webpage}}" target="_blank">{{group.display_name}}</a></li>
                         <li ng-repeat="group in ctrl.otherGroups"><span>{{group.display_name}}</span></li>
                     </ul>
                 </td>

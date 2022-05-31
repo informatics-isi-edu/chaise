@@ -43,11 +43,11 @@ Login app has more dependencies that, if not included, are fetched dynamically. 
 
 The position of where you're adding these include statements is very important. It HAS TO be BEFORE `login.app.js`.  Adding them after `login.app.js` defeats the purpose of prefetching and actually causes duplicated fetching.
 
-You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)  
+You should not copy the contents of `dist/chaise-dependencies.html` manually and this should be part of the automated process of building Chaise and your other apps (Since the list generation is controlled by Chaise, we might update the list and therefore you should make sure you're always getting the latest list of dependencies.)
 
 If you're using [Jekyll](https://jekyllrb.com), the following are the steps on how you can achieve this:
 
-1. Make sure `make install` is done in Chaise.
+1. Make sure `make dist` and `make deploy` is done in Chaise.
     - This will create the `dist` folder in your specified build target (by default it's `/var/www/html/chaise`).
     - It will also generate the `dist/chaise-dependencies.html`.
 

@@ -55,6 +55,9 @@
                             templateUrl: TEMPLATES_PATH + 'confirm_delete.modal.html',
                             controller: 'ConfirmDeleteController',
                             controllerAs: 'ctrl',
+                            resolve: {
+                                params: { count: 1 }
+                            },
                             size: 'sm'
                         }, function onSuccess() {
                             scope.$root.showSpinner = true;

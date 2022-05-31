@@ -57,7 +57,8 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["RID", "id", "text", "int", "generated"]
+                    "*": ["RID", "id", "text", "int", "generated"],
+                    "export": []
                 },
                 "tag:misd.isi.edu,2015:display" : {
                     "markdown_name": "**Editable Id Table**"
@@ -65,6 +66,23 @@
                 "tag:isrd.isi.edu,2016:table-display" : {
                     "row_name": {
                         "row_markdown_pattern": "**{{id}}**"
+                    }
+                },
+                "tag:isrd.isi.edu,2019:export": {
+                    "*": {
+                        "templates": [{
+                            "outputs": [{
+                                "source": {
+                                    "api": "entity"
+                                },
+                                "destination": {
+                                    "type": "csv",
+                                    "name": "table_bag"
+                                }
+                            }],
+                            "displayname": "Defined template",
+                            "type": "BAG"
+                        }]
                     }
                 }
             }
@@ -115,7 +133,8 @@
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int"]
+                    "*": ["id", "text", "int"],
+                    "export": []
                 },
                 "tag:misd.isi.edu,2015:display" : {
                     "name": "<strong>Html Name</strong>"
@@ -123,9 +142,10 @@
                 "tag:isrd.isi.edu,2016:table-display": {
                     "detailed": {
                         "collapse_toc_panel": true,
-                        "hide_column_headers": true
+                        "hide_column_header": true
                     }
-                }
+                },
+                "tag:isrd.isi.edu:2020,history-capture": true
             }
         },
         "fk-table": {
