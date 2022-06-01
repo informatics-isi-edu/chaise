@@ -276,3 +276,16 @@ export function copyToClipboard(text: string) {
     });
   }
 }
+
+export function debounce(callback: Function, timeout: number) {
+  let timer: any = null;
+
+  return function(...args: any[]) {
+
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = null;
+      callback.apply(this, args);
+    }, timeout);  
+  }
+}

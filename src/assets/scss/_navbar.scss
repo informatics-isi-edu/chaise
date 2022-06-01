@@ -109,6 +109,8 @@ body > .container {
 
 #rid-search-input {
     background-color: $table-striped-background-color;
+    // Assuming width is same regardless of screen size
+    width: 125px;
 }
 
 #mainnav {
@@ -271,7 +273,6 @@ nav.navbar {
         max-width: 450px;
         
         // setting max height for submenus
-        max-height: 50vh;
         overflow-y: scroll;
     }
 
@@ -333,18 +334,14 @@ nav.navbar {
         top: 0;
         right: 100%;
         left: auto;
-        // margin-top: 0;
-        // margin-right: 0.125rem;
-        margin: -1px;
+        margin: 0px;
     }
 
     .dropend>.dropdown-menu[data-bs-popper] {
         top: 0;
         right: auto;
         left: 100%;
-        // margin-top: 0;
-        // margin-left: 0.125rem;
-        margin: -1px;
+        margin: 0px;
     }
 
     // Vertical navbar

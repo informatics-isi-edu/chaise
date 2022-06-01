@@ -301,9 +301,9 @@ const ChaiseNavbar = (): JSX.Element => {
           <Nav className='navbar-menu-options nav'>
             {renderNavbarMenuDropdowns()}
           </Nav>
-          <ChaiseLogin />
           {renderRidSearch()}
           {renderLiveButton()}
+          <ChaiseLogin />
         </Navbar.Collapse>
       </Navbar>
       {renderBanners(bottomBanners)}
