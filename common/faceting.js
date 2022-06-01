@@ -736,8 +736,8 @@
                             maxEps = (Math.abs(max) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(max))) ) : tiny;
 
                             // adjust by epsilon
-                            scope.rangeOptions.absMin = (min-minEps);
-                            scope.rangeOptions.absMax = formatFloatMax(max+maxEps);
+                            scope.rangeOptions.absMin = min ? (min-minEps) : null;
+                            scope.rangeOptions.absMax = max ? formatFloatMax(max+maxEps) : null;
                         } else {
                             scope.rangeOptions.absMin = min;
                             scope.rangeOptions.absMax = max;
