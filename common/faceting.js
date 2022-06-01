@@ -572,7 +572,12 @@
 
                     // Add new integer filter, used as the callback function to range-inputs
                     scope.addFilter = function (min, max) {
-                        var res = scope.facetColumn.addRangeFilter(min, false, max, false);
+                        if (isColumnOfType('float')) {
+                            var res = scope.facetColumn.addRangeFilter(formatFloatMin(min), false, formatFloatMax(max), false);
+                        } else {
+                            var res = scope.facetColumn.addRangeFilter(min, false, max, false);
+                        }
+
                         if (!res) {
                             return; // duplicate filter
                         }
@@ -685,6 +690,60 @@
                         }
                     }
 
+                    var FLOAT_PRECISION = 10000;
+                    function initializeRangeMinMax(min, max) {
+                        if (isColumnOfType('timestamp')) {
+                            if (!min) {
+                                scope.rangeOptions.absMin = null;
+                            } else {
+                                // incase of fractional seconds, truncate for min
+                                var m = moment(min).startOf('second');
+                                scope.rangeOptions.absMin = {
+                                    date: m.format(dataFormats.date),
+                                    time: m.format(dataFormats.time24)
+                                }
+                            }
+
+                            if (!max) {
+                                scope.rangeOptions.absMax = null;
+                            } else {
+                                // incase of fractional seconds, add 1 and truncate for max
+                                var m = moment(max).add(1, 'second').startOf('second');
+                                scope.rangeOptions.absMax = {
+                                    date: m.format(dataFormats.date),
+                                    time: m.format(dataFormats.time24)
+                                }
+                            }
+                        } else if (isColumnOfType('float')) {
+                            // epsilon can be calculated using Math.pow(2, exponent_base + log2(x))
+                            // check for float cases for extra precision
+                            var minEps = 0, maxEps = 0,
+                                tiny, expbase;
+
+                            // use the max of tiny and epsilon
+                            // max(tiny, pow(2, expbase + log2(abs(x))))
+                            // log2(0) and log2(-x) are undefined so use absolute values
+                            if (isColumnOfType('float4')) {
+                                tiny = Math.pow(2, -127); // min exponent -127
+                                expbase = -23; // 23 bit mantissa
+                            } else if (isColumnOfType('float8')) {
+                                tiny = Math.pow(2, -1022); // min exponent -1022
+                                expbase = -52; // 52 bit mantissa
+                            }
+
+                            // max(tiny, pow(2, expbase + log2(abs(x))))
+                            minEps = (Math.abs(min) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(min))) ) : tiny;
+                            maxEps = (Math.abs(max) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(max))) ) : tiny;
+
+                            // adjust by epsilon
+                            scope.rangeOptions.absMin = (min-minEps);
+                            scope.rangeOptions.absMax = formatFloatMax(max+maxEps);
+                        } else {
+                            scope.rangeOptions.absMin = min;
+                            scope.rangeOptions.absMax = max;
+                        }
+                    }
+
                     // set the absMin and absMax values
                     // all values are in their database returned format
                     function setRangeMinMax(min, max) {
@@ -692,10 +751,23 @@
                             // convert and set the values if they are defined.
                             scope.rangeOptions.absMin = timestampToDateTime(min);
                             scope.rangeOptions.absMax = timestampToDateTime(max);
+                        } else if (isColumnOfType('float')) {
+                            scope.rangeOptions.absMin = (min);
+                            scope.rangeOptions.absMax = formatFloatMax(max);
                         } else {
                             scope.rangeOptions.absMin = min;
                             scope.rangeOptions.absMax = max;
                         }
+                    }
+
+                    function formatFloatMin(min) {
+                        if (!min) return min;
+                        return Math.floor(min*FLOAT_PRECISION) / FLOAT_PRECISION;
+                    }
+
+                    function formatFloatMax(max) {
+                        if (!max) return max;
+                        return Math.ceil(max*FLOAT_PRECISION) / FLOAT_PRECISION;
                     }
 
                     // update the min/max model values to the min/max represented by the histogram
@@ -831,7 +903,7 @@
                                         return false;
                                     }
                                     // initiailize the min/max values
-                                    setRangeMinMax(response[0], response[1]);
+                                    initializeRangeMinMax(response[0], response[1]);
 
                                     // if - the max/min are null
                                     //    - bar_plot in annotation is 'false'
