@@ -37,17 +37,29 @@ const ChaiseLoginDropdown = ({
       const x = event.currentTarget.getBoundingClientRect().x;
       const y = event.currentTarget.getBoundingClientRect().y;
       const width = event.currentTarget.getBoundingClientRect().width;
-      if (event.currentTarget.getElementsByClassName('dropdown-menu')[0] && event.currentTarget.getElementsByClassName('dropdown-menu')[0])
-        event.currentTarget.getElementsByClassName('dropdown-menu')[0].removeAttribute('data-bs-popper');
-      
-        setFromTop(y);
+
+      setFromTop(y);
   
       if ((x + width) > 0.75 * windowRef.innerWidth) {
         setDropEnd(false);
-        setFromLeft(x);
+        // setFromLeft(x);
+
+        // Temporary aliging submenu always to right
+        setFromLeft(x + width);
       } else {
+        setDropEnd(true);
         setFromLeft(x + width);
       }
+      
+      // Code below is to adjust submenu to stay within the screen
+      // Only one case needs to be handled i.e., aligning submenu to the left
+      // Calculating left is pending...
+      // setTimeout(() => {
+      //   if (!dropEnd && dropdownWrapper.current && dropdownWrapper.current.getElementsByClassName('dropdown-menu')[0]) {
+      //     let x1 = dropdownWrapper.current.getElementsByClassName('dropdown-menu')[0].getBoundingClientRect().width;
+      //     setFromLeft(x - x1);
+      //   }
+      // }, 50)
     }
   }
 
@@ -67,22 +79,7 @@ const ChaiseLoginDropdown = ({
   />
 
   const renderDropdownMenu = (item: MenuOption, index: number) => {
-    // let dropEnd = true;
-    // const winWidth = windowRef.innerWidth;
-
-    // parentDropdown.current is the parent menu option that toggles open the menu below
-    // this menu is generated when the parent dropdown is opened so we don't know how wide the child will be on open
-    // check if opening the menu twice would push off the screen to have the next dropdown open left instead
-    // TODO: toggling
-    // console.log(parentDropdown)
-    // console.log(winWidth - parentDropdown.current.getBoundingClientRect().right);
-    // console.log(parentDropdown.current.getBoundingClientRect());
-    // console.log(parentDropdown.current.clientWidth);
-    // const parentWidth = parentDropdown.current.clientWidth
-    // if (parentDropdown && (Math.round(winWidth - parentDropdown.current.getBoundingClientRect().right) < parentDropdown.current.clientWidth * 2)) {
-    //   dropEnd = false;
-    // }
-
+  
     return (
       <Dropdown
         key={index}
@@ -99,7 +96,13 @@ const ChaiseLoginDropdown = ({
           dangerouslySetInnerHTML={{ __html: renderName(item) }}
         />
         <Dropdown.Menu 
-          style={{ position: 'fixed', top: fromTop, left: fromLeft, right: 'unset' }}
+          style={{ 
+            display: 'hidden',
+            position: 'fixed', 
+            top: fromTop, 
+            left: fromLeft, 
+            right: 'unset'
+          }}
         >
           <ChaiseLoginDropdown
             menu={item.children || []}
