@@ -12,7 +12,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import {isObjectAndKeyDefined} from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -25,7 +25,7 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
-
+import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -123,9 +123,9 @@ const RecordsetInner = ({
    */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
 
+  const mainContainer = useRef<HTMLDivElement>(null);
 
-  const mainContainer = useRef<any>(null);
-
+  const topLeftContainer = useRef<HTMLDivElement>(null);
 
   // initialize the recordset if it has not been done yet.
   useEffect(() => {
@@ -197,6 +197,20 @@ const RecordsetInner = ({
   }, [isInitialized]);
 
   useEffect(() => {
+    const handleResizeEvent = ((event: CustomEvent) => {
+      event.preventDefault();
+      if (topLeftContainer?.current && event?.detail?.width) {
+        topLeftContainer.current.style.width = `${event.detail.width}px`;
+      }
+    }) as EventListener;
+
+    document.addEventListener('resizable-filter-width-change', handleResizeEvent);
+    return () => {
+      document.removeEventListener('resizable-filter-width-change', handleResizeEvent);
+    }
+  }, []);
+
+  useEffect(() => {
     if (isLoading) return;
 
     // scroll to top after load
@@ -220,7 +234,7 @@ const RecordsetInner = ({
     });
   };
 
-  //-------------------  UI related functions:   --------------------//
+  //------------------- UI related functions: --------------------//
 
   const recordsetLink = getRecordsetLink();
 
@@ -256,20 +270,20 @@ const RecordsetInner = ({
     const ref = reference.search(term); // this will clear previous search first
     // TODO
     // if (checkReferenceURL(ref)) {
-      // vm.lastActiveFacet = -1;
-      // printDebugMessage(`new search term=${term}`);
+    // vm.lastActiveFacet = -1;
+    // printDebugMessage(`new search term=${term}`);
 
-      // TODO
-      // log the client action
-      // const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
+    // TODO
+    // log the client action
+    // const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
 
-      // TODO
-      // LogService.logClientAction({
-      //   action: flowControl.current.getTableLogAction(action),
-      //   stack: flowControl.current.getTableLogStack(null, extraInfo)
-      // }, ref.defaultLogInfo);
+    // TODO
+    // LogService.logClientAction({
+    //   action: flowControl.current.getTableLogAction(action),
+    //   stack: flowControl.current.getTableLogStack(null, extraInfo)
+    // }, ref.defaultLogInfo);
 
-      update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
+    update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
     // }
   };
 
@@ -295,6 +309,23 @@ const RecordsetInner = ({
     )
   }
 
+  const filterSection = (leftRef: React.RefObject<HTMLDivElement>) => (
+    <>
+      {
+        facetColumnsReady &&
+        <div
+          className={`side-panel-resizable ${panelClassName}`}
+          style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
+          ref={leftRef}
+        >
+          <div className='side-panel-container'>
+            <Faceting reference={reference} />
+          </div>
+        </div>
+      }
+    </>
+  );
+
   return (
     <div className='recordset-container app-content-container'>
       {/* TODO what about $root.error and $root.showSpinner */}
@@ -306,7 +337,7 @@ const RecordsetInner = ({
         {/* recordset level alerts */}
         <Alerts />
         <div className='top-flex-panel'>
-          <div className={`top-left-panel ${panelClassName}`}>
+          <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
             <div className='panel-header'>
               <div>
                 <h3>Refine search</h3>
@@ -401,19 +432,9 @@ const RecordsetInner = ({
 
         </div>
       </div>
-      <div className='bottom-panel-container'>
-        {
-          facetColumnsReady &&
-          <div
-            className={'side-panel-resizable ' + panelClassName}
-            style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
-          >
-            <div className='side-panel-container'>
-              <Faceting reference={reference} />
-            </div>
-          </div>
-        }
-        <div className='main-container dynamic-padding' ref={mainContainer}>
+      <SplitView
+        left={filterSection}
+        right={<div className='main-container dynamic-padding' ref={mainContainer}>
           <div className='main-body'>
             <RecordsetTable
               config={config}
@@ -421,8 +442,9 @@ const RecordsetInner = ({
             />
           </div>
           {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
-        </div>
-      </div>
+        </div>}
+        className='bottom-panel-container'
+      />
     </div>
   )
 };

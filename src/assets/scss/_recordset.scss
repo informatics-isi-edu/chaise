@@ -1,155 +1,196 @@
 @import "helpers";
 @import "variables";
 
-.recordset-container {
-  .top-panel-container {
-    .top-flex-panel .top-left-panel div.panel-header {
-      bottom: 10px;
+.chaise-body {
+  .recordset-container {
+    .top-panel-container {
+      .top-flex-panel {
+        .top-left-panel {
+          &.open-panel {
+            width: 270px;
+            flex-basis: unset;
+          }
+        }
+      }
     }
 
-    .top-right-panel {
-      .show-filter-panel-btn {
-        padding: 0;
-        margin-bottom: 10px;
-      }
-
-      .recordset-controls-container {
-        margin-bottom: 10px;
-
-        .main-search-container {
-          max-width: 400px;
+    .bottom-panel-container {
+      .side-panel-resizable {
+        &.open-panel {
+          width: 270px;
+          flex-basis: unset;
         }
-
-        // @include for-predefined-size(sm) {
-        //   .main-search-container {
-        //     min-width: 400px;
-        //   }
-        // }
-      }
-
-      .recordset-chiclets-container {
-        margin-bottom: 10px;
-
-        &.recordset-chiclets {
-          padding-right: 250px;
-        }
-
-        $filter-chiclet-margin: 5px;
-        .filter-chiclet {
-          max-width: 350px;
-          margin-right: $filter-chiclet-margin;
-          margin-bottom: $filter-chiclet-margin;
-
-          .chaise-btn:focus {
-            background-color: $white-color;
-          }
-
-          .chaise-btn.chaise-btn-secondary {
-            border-color: $border-color;
-            height: 25px;
-            min-width: 25px;
-            padding: 2px 5px;
-          }
-
-          .chaise-btn.filter-chiclet-remove {
-            padding: 3px;
-          }
-
-          .chaise-btn.filter-chiclet-title {
-            border-right: 0;
-            max-width: 150px;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            padding-right: 2px;
-            text-align: left;
-            white-space: nowrap;
-
-            // only add the colon if the title exists
-            & ~ .chaise-btn.filter-chiclet-value {
-              border-left: 0;
-
-              position: relative;
-              &:before {
-                content: ":";
-                position: absolute;
-                left: 0;
-              }
-            }
-          }
-          .chaise-btn.filter-chiclet-value {
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-            max-width: 200px;
-            padding-left: 7px;
-            padding-right: 4px;
-          }
-
-          span {
-            color: $black-color;
-            cursor: default;
-          }
-        }
-
-        .selected-chiclet {
-          border: none;
-          margin-right: 8px;
-          margin-bottom: 5px;
-          padding-right: 0;
-          display: inline-block;
-
-          .selected-chiclet-name {
-            cursor: default;
-            user-select: text;
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-          }
-
-          .selected-chiclet-remove {
-            cursor: pointer;
-            margin-right: -3px;
-            i {
-              top: 2px;
-            }
-          }
-        }
-
-        .clear-all-btn {
-          padding-left: 0;
-          margin-bottom: $filter-chiclet-margin;
-        }
-
-        // in this case the selected chiclets are not button anymore
-        &.recordset-selected-rows .clear-all-btn {
-          height: auto;
-          padding: 0;
-        }
-      }
-
-      .recordset-main-search {
-        min-width: 250px;
       }
     }
   }
 
-  .recordset-title-container.title-container {
-    margin: 0;
-    padding-bottom: 20px;
+  .recordset-container {
+    .top-panel-container {
+      .top-flex-panel .top-left-panel div.panel-header {
+        bottom: 10px;
+      }
 
-    h1 {
-      margin: 0;
+      .top-right-panel {
+        .show-filter-panel-btn {
+          padding: 0;
+          margin-bottom: 10px;
+        }
+
+        .recordset-controls-container {
+          margin-bottom: 10px;
+
+          .main-search-container {
+            max-width: 400px;
+          }
+
+          // @include for-predefined-size(sm) {
+          //   .main-search-container {
+          //     min-width: 400px;
+          //   }
+          // }
+        }
+
+        .recordset-chiclets-container {
+          margin-bottom: 10px;
+
+          &.recordset-chiclets {
+            padding-right: 250px;
+          }
+
+          $filter-chiclet-margin: 5px;
+
+          .filter-chiclet {
+            max-width: 350px;
+            margin-right: $filter-chiclet-margin;
+            margin-bottom: $filter-chiclet-margin;
+
+            .chaise-btn:focus {
+              background-color: $white-color;
+            }
+
+            .chaise-btn.chaise-btn-secondary {
+              border-color: $border-color;
+              height: 25px;
+              min-width: 25px;
+              padding: 2px 5px;
+            }
+
+            .chaise-btn.filter-chiclet-remove {
+              padding: 3px;
+            }
+
+            .chaise-btn.filter-chiclet-title {
+              border-right: 0;
+              max-width: 150px;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              padding-right: 2px;
+              text-align: left;
+              white-space: nowrap;
+
+              // only add the colon if the title exists
+              &~.chaise-btn.filter-chiclet-value {
+                border-left: 0;
+
+                position: relative;
+
+                &:before {
+                  content: ":";
+                  position: absolute;
+                  left: 0;
+                }
+              }
+            }
+
+            .chaise-btn.filter-chiclet-value {
+              text-overflow: ellipsis;
+              overflow: hidden;
+              white-space: nowrap;
+              max-width: 200px;
+              padding-left: 7px;
+              padding-right: 4px;
+            }
+
+            span {
+              color: $black-color;
+              cursor: default;
+            }
+          }
+
+          .selected-chiclet {
+            border: none;
+            margin-right: 8px;
+            margin-bottom: 5px;
+            padding-right: 0;
+            display: inline-block;
+
+            .selected-chiclet-name {
+              cursor: default;
+              user-select: text;
+              -webkit-user-select: text;
+              -moz-user-select: text;
+              -ms-user-select: text;
+            }
+
+            .selected-chiclet-remove {
+              cursor: pointer;
+              margin-right: -3px;
+
+              i {
+                top: 2px;
+              }
+            }
+          }
+
+          .clear-all-btn {
+            padding-left: 0;
+            margin-bottom: $filter-chiclet-margin;
+          }
+
+          // in this case the selected chiclets are not button anymore
+          &.recordset-selected-rows .clear-all-btn {
+            height: auto;
+            padding: 0;
+          }
+        }
+
+        .recordset-main-search {
+          min-width: 250px;
+        }
+      }
     }
 
-    .recordset-title-buttons.title-buttons {
-      padding-left: 20px;
-      min-width: 220px;
+    .recordset-title-container.title-container {
+      margin: 0;
+      padding-bottom: 20px;
 
-      .search-popup & {
-        min-width: 190px;
+      h1 {
+        margin: 0;
       }
-      .foreignkey-popup & {
-        min-width: 95px;
+
+      .recordset-title-buttons.title-buttons {
+        padding-left: 20px;
+        min-width: 220px;
+
+        .search-popup & {
+          min-width: 190px;
+        }
+
+        .foreignkey-popup & {
+          min-width: 95px;
+        }
+      }
+    }
+
+    .main-container {
+      flex: 1;
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+
+      // we're going to adjust this dynamically for dynamic-padding
+      &:not(.dynamic-padding) {
+        padding-right: $viewport-margin;
       }
     }
   }

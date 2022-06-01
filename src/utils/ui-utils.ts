@@ -187,7 +187,8 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
     if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
     mainContainerPaddingTimeout = setTimeout(function () {
       try {
-        const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+        let padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+        padding = Math.max(padding, 20);
         mainContainer.style.paddingRight = padding + 'px';
       } catch (exp) { }
     }, 10);
@@ -275,4 +276,21 @@ export function copyToClipboard(text: string) {
       $log.error(err);
     });
   }
+}
+
+
+export function fireCustomEvent(eventName = 'myEvent', targetElement = 'body', detail = {}, bubbles = true, cancelable = true, composed = false) {
+  const customEvent = new CustomEvent(eventName, {
+    detail,
+    bubbles,
+    cancelable,
+    composed,
+  });
+
+  if (targetElement === 'body') {
+    document.querySelector('body')?.dispatchEvent(customEvent);
+  } else {
+    document.body.querySelector(targetElement)?.dispatchEvent(customEvent);
+  }
+
 }
