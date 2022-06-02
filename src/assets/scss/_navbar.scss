@@ -280,9 +280,9 @@ nav.navbar {
         // overflow-y: auto;
         width: max-content;
         max-width: 450px;
-        
-        // setting max height for submenus
-        overflow-y: scroll;
+
+        // Height is set by JS Code
+        overflow-y: auto;
     }
 
     .dropdown .dropdown-toggle,

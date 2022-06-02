@@ -12,7 +12,7 @@ import {
   onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { debounce } from '../utils/ui-utils';
+import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 interface ChaiseLoginDropdownProps {
   menu: MenuOption[],
@@ -50,6 +50,13 @@ const ChaiseLoginDropdown = ({
     window.addEventListener('resize', debouncedFunc);
   })
 
+  /**
+   * Function is responsible for adjusting height of submenus.
+   * Function is called when there is resize event or when user opens submenu
+   * Set the height of Dropdown.Menu (inline style)
+   * 1. Check for subMenuRef. If it is not null get x, y, and width positions
+   * 2. calculate the available height (window height - Elements's y position)
+   */
   const setHeight = () => {
     const winHeight = windowRef.innerHeight;
     const padding = 15;
@@ -61,6 +68,8 @@ const ChaiseLoginDropdown = ({
 
       subMenuRef.current.style.maxHeight = available - padding + 'px';
     } else {
+      // When multiple submenus are open on the window, and resize event happens, 
+      // it should calculate height of all submenus & update.
 
       // Checking all dropdown menu with show class to recalculate height on resize event
       const allElementswithShow = document.getElementsByClassName('dropdown-menu show');
@@ -72,8 +81,15 @@ const ChaiseLoginDropdown = ({
     }
   }
 
+  /**
+   * Function is responsible for aligning submenu to left or right based on the available space
+   * @param event clickEvent when user clicks on menu item
+   * It will check for currentTarget's x, y, width and calculate top, left position of submenu.
+   */
   const alignDropDown = (event: any) => {
     event.preventDefault();
+
+    const threshold = 0.75 * windowRef.innerWidth;
 
     if (event.currentTarget) {
 
@@ -88,7 +104,8 @@ const ChaiseLoginDropdown = ({
 
       setFromTop(y);
   
-      if ((x + parentWidth) > 0.75 * windowRef.innerWidth) {
+      // If elements' position is greater than threshold, align left
+      if ((x + parentWidth) > threshold) {
         setDropEnd(false);
         setFromLeft(x - childWidth);
       } else {
@@ -131,6 +148,8 @@ const ChaiseLoginDropdown = ({
           dangerouslySetInnerHTML={{ __html: renderName(item) }}
         />
         <Dropdown.Menu 
+          // renderOnMount prop is required to get submenu's width that can be 
+          // used to align submenu to left or right
           renderOnMount
           style={{ 
             position: 'fixed', 
