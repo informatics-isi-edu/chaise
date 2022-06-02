@@ -732,10 +732,11 @@
                             }
 
                             // max(tiny, pow(2, expbase + log2(abs(x))))
+                            // use tiny if abs(x) is 0 or negative
                             minEps = (Math.abs(min) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(min))) ) : tiny;
                             maxEps = (Math.abs(max) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(max))) ) : tiny;
 
-                            // adjust by epsilon
+                            // adjust by epsilon if value is defined and non null
                             scope.rangeOptions.absMin = (min !== null && min !== undefined) ? formatFloatMin(min-minEps) : null;
                             scope.rangeOptions.absMax = (max !== null && max !== undefined) ? formatFloatMax(max+maxEps) : null;
                         } else {
@@ -752,7 +753,7 @@
                             scope.rangeOptions.absMin = timestampToDateTime(min);
                             scope.rangeOptions.absMax = timestampToDateTime(max);
                         } else if (isColumnOfType('float')) {
-                            scope.rangeOptions.absMin = (min);
+                            scope.rangeOptions.absMin = formatFloatMin(min);
                             scope.rangeOptions.absMax = formatFloatMax(max);
                         } else {
                             scope.rangeOptions.absMin = min;
