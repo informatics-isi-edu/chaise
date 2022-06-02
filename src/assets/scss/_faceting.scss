@@ -14,16 +14,19 @@
       &:hover {
         border-color: rgb(51, 122, 183) !important;
         animation-duration: 4s;
-        + .facet-panel {
+
+        +.facet-panel {
           margin-top: 0;
           border-top: 0;
         }
       }
+
       :focus {
         outline: none;
       }
+
       // override bootstrap default
-      + .facet-panel {
+      +.facet-panel {
         margin-top: -1px;
         // border-top: 0;
       }
@@ -94,6 +97,27 @@
       line-height: 20px;
       vertical-align: middle;
       margin: 4px;
+    }
+  }
+
+  .range-input {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 100%;
+    margin-top: 16px;
+    margin-bottom: 16px;
+
+    .range-input-from {
+      width: 40%;
+    }
+
+    .range-input-to {
+      width: 40%;
+    }
+
+    .range-inputs-error {
+      color: #a94442;
     }
   }
 }

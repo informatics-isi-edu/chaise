@@ -1,5 +1,14 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
+
+// import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+// import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+// import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+// import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
+
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -8,11 +17,11 @@ import { ResizeSensor } from 'css-element-queries';
 
 // models
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { 
-  FacetRangePickerProps, 
-  RangeOptions, 
-  RangePickerState, 
-  TimeStamp 
+import {
+  FacetRangePickerProps,
+  RangeOptions,
+  RangePickerState,
+  TimeStamp
 } from '@isrd-isi-edu/chaise/src/models/range-picker';
 
 // services
@@ -91,7 +100,7 @@ const FacetRangePicker = ({
       }
     )
   }, []);
-  
+
   useEffect(() => {
     if (facetColumn.hideNotNullChoice) {
       setRanges([getNotNullFilter(false)]);
@@ -781,7 +790,7 @@ const FacetRangePicker = ({
         List goes here
       </div>
       <div>
-        Range inputs here
+        <RangeInputs type={0} />
       </div>
       {renderHistogram()}
     </div>
