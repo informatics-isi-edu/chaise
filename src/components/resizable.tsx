@@ -10,9 +10,10 @@ Props:
     left - the left-pane component in the resizable layout
     right - the right-pane component in the resizable layout
     className - to apply custom styles on the component
-    min_width - the minimum width limit on the left-pane component | defaults to 250px
-    max_width - the maximum width limit on the left-pane component | defaults to 450px
-    initial_width - the initial width for the left-pane component | defaults to 270px
+    minWidth - the minimum width limit on the left-pane component | defaults to 250px
+    maxWidth - the maximum width limit on the left-pane component | defaults to 450px
+    initialWidth - the initial width for the left-pane component | defaults to 270px
+    convertMaxWidth - use this flag in case you pass maxWidth in vw units instead of px units
 
 Note:
     To resize other components based on the resized value left-pane component add an event listener and listen to the 
@@ -20,6 +21,16 @@ Note:
 
     For usage refer to the recordset.tsx component
 */
+
+
+const vwToPx = (value: number) => {
+    const e = document.documentElement;
+    const g = document.getElementsByTagName('body')[0];
+    const x = window.innerWidth || e.clientWidth || g.clientWidth;
+
+    const result = (x * value) / 100;
+    return result;
+}
 
 type LeftPaneProps = {
     children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
@@ -50,22 +61,28 @@ type SplitViewProps = {
     left: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
     right: React.ReactNode,
     className?: string,
-    min_width?: number,
-    max_width?: number,
-    initial_width?: number
+    minWidth?: number,
+    maxWidth?: number,
+    initialWidth?: number,
+    convertMaxWidth?: boolean
 };
 
 const SplitView = ({
     left,
     right,
     className,
-    min_width = 250,
-    max_width = 450,
-    initial_width = 270,
+    minWidth = 250,
+    maxWidth = 450,
+    initialWidth = 270,
+    convertMaxWidth = false
 }: SplitViewProps): JSX.Element => {
-    const [leftWidth, setLeftWidth] = useState<undefined | number>(initial_width || undefined);
+    const [leftWidth, setLeftWidth] = useState<undefined | number>(initialWidth || undefined);
     const [separatorXPosition, setSeparatorXPosition] = useState<undefined | number>(undefined);
     const [dragging, setDragging] = useState(false);
+    let convertedMaxWidth = maxWidth;
+    if (convertMaxWidth) {
+        convertedMaxWidth = vwToPx(maxWidth);
+    }
 
     const onMouseDown = (e: React.MouseEvent) => {
         setSeparatorXPosition(e.clientX);
@@ -86,13 +103,13 @@ const SplitView = ({
             const newLeftWidth = leftWidth + clientX - separatorXPosition;
             setSeparatorXPosition(clientX);
 
-            if (newLeftWidth < min_width) {
-                setLeftWidth(min_width);
+            if (newLeftWidth < minWidth) {
+                setLeftWidth(minWidth);
                 return;
             }
 
-            if (newLeftWidth > max_width) {
-                setLeftWidth(max_width);
+            if (newLeftWidth > convertedMaxWidth) {
+                setLeftWidth(convertedMaxWidth);
                 return;
             }
 
@@ -119,7 +136,7 @@ const SplitView = ({
                 className='divider-hitbox'
                 onMouseDown={onMouseDown}
             >
-                <div className='divider' />
+                <span className='fas fa-ellipsis-v' />
             </div>
             {right}
         </div>

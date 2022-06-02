@@ -443,7 +443,10 @@ const RecordsetInner = ({
           </div>
           {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
         </div>}
+        minWidth={170}
+        maxWidth={40}
         className='bottom-panel-container'
+        convertMaxWidth
       />
     </div>
   )
