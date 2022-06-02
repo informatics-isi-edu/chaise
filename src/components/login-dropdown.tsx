@@ -28,6 +28,7 @@ const ChaiseLoginDropdown = ({
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
   const subMenuRef = useRef<any>(null);
 
+  // state variable to define left, top, dropEnd or dropStart positions...
   const [fromTop, setFromTop] = useState<number>();
   const [fromLeft, setFromLeft] = useState<number>();
   const [dropEnd, setDropEnd] = useState<boolean>(true);
@@ -40,7 +41,6 @@ const ChaiseLoginDropdown = ({
     // First time it will be called diretly
     setHeight();
 
-    // alignSubMenu();
     window.addEventListener('resize', debouncedFunc);
   })
 
@@ -49,11 +49,14 @@ const ChaiseLoginDropdown = ({
     const padding = 15;
 
     if (subMenuRef && subMenuRef.current) {
+      // This logic will run when there is no resize event, but called on click of menu item
       const y = subMenuRef.current.getBoundingClientRect().y;
       const available = winHeight - y;
 
       subMenuRef.current.style.maxHeight = available - padding + 'px';
     } else {
+
+      // Checking all dropdown menu with show class to recalculate height on resize event
       const allElementswithShow = document.getElementsByClassName('dropdown-menu show');
       for (let i = 0; i < allElementswithShow.length; i++) {
         const ele = allElementswithShow[i];
@@ -72,6 +75,7 @@ const ChaiseLoginDropdown = ({
       const y = event.currentTarget.getBoundingClientRect().y;
       const parentWidth = event.currentTarget.getBoundingClientRect().width;
 
+      // This is necessary because getBoundingClientRect() will give 0, if div is not present in DOM
       event.currentTarget.getElementsByClassName('dropdown-menu')[0].style.display = 'block';
       const childWidth = event.currentTarget.getElementsByClassName('dropdown-menu')[0].getBoundingClientRect().width;
       event.currentTarget.getElementsByClassName('dropdown-menu')[0].style.display = null;
