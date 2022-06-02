@@ -115,7 +115,7 @@ body > .container {
     background-color: $table-striped-background-color;
     // Assuming width is same regardless of screen size
     width: 125px;
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 
 #mainnav {
@@ -127,10 +127,6 @@ body > .container {
     padding: 0px 5px 0px 20px;
     min-height: 50px;
     flex-wrap: nowrap;
-}
-
-.navbar-menu-options {
-    float: left;
 }
 
 // div replaces li, a is the case with no dropdown
