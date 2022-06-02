@@ -204,9 +204,9 @@ const RecordsetInner = ({
       }
     }) as EventListener;
 
-    document.addEventListener('resizable-filter-width-change', handleResizeEvent);
+    document.addEventListener('resizable-width-change', handleResizeEvent);
     return () => {
-      document.removeEventListener('resizable-filter-width-change', handleResizeEvent);
+      document.removeEventListener('resizable-width-change', handleResizeEvent);
     }
   }, []);
 

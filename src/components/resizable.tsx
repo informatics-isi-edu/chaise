@@ -1,14 +1,25 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_resizable.scss';
-
 import { useRef, useEffect, useState } from 'react';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
+/* 
+Component Usage:
+    This component is used to implement a horizontal dragable and resizable component/div
 
-// const min_width = 250;
+Props:
+    left - the left-pane component in the resizable layout
+    right - the right-pane component in the resizable layout
+    className - to apply custom styles on the component
+    min_width - the minimum width limit on the left-pane component | defaults to 250px
+    max_width - the maximum width limit on the left-pane component | defaults to 450px
+    initial_width - the initial width for the left-pane component | defaults to 270px
 
-// const initial_width = 270;
+Note:
+    To resize other components based on the resized value left-pane component add an event listener and listen to the 
+    'resizable-width-change' event.
 
-// const max_width = 450;
+    For usage refer to the recordset.tsx component
+*/
 
 type LeftPaneProps = {
     children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
@@ -26,7 +37,7 @@ const LeftPane = ({ children, leftWidth, setLeftWidth }: LeftPaneProps): JSX.Ele
                 return;
             }
 
-            fireCustomEvent('resizable-filter-width-change', '.split-view', { width: leftWidth });
+            fireCustomEvent('resizable-width-change', '.split-view', { width: leftWidth });
             leftRef.current.style.width = `${leftWidth}px`;
         }
     }, [leftRef, leftWidth, setLeftWidth]);
