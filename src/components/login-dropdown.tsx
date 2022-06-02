@@ -28,7 +28,13 @@ const ChaiseLoginDropdown = ({
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
   const subMenuRef = useRef<any>(null);
 
-  // state variable to define left, top, dropEnd or dropStart positions...
+  /**
+   * State variables to align submenu/dropdown to right or left
+   * @fromTop represents top: position
+   * @fromLeft represents left: position
+   * @dropEnd represents whether submenu should be left or right (might be redudant to set this 
+   * state variable, but bootstrap might be using this dropEnd or dropStart class internally)
+   */ 
   const [fromTop, setFromTop] = useState<number>();
   const [fromLeft, setFromLeft] = useState<number>();
   const [dropEnd, setDropEnd] = useState<boolean>(true);
