@@ -38,15 +38,16 @@ const ChaiseLoginDropdown = ({
   const [fromTop, setFromTop] = useState<number>();
   const [fromLeft, setFromLeft] = useState<number>();
   const [dropEnd, setDropEnd] = useState<boolean>(true);
-
+  
   useLayoutEffect(() => {
     
     // when resize event is called, it will call debounce function with 500ms timeout
     const debouncedFunc = debounce(setHeight, 500);
     
-    // First time it will be called diretly
+    // This will be called when there is a DOM Mutation
     setHeight();
 
+    // Call when there is resize event
     window.addEventListener('resize', debouncedFunc);
   })
 
@@ -57,29 +58,21 @@ const ChaiseLoginDropdown = ({
    * 1. Check for subMenuRef. If it is not null get x, y, and width positions
    * 2. calculate the available height (window height - Elements's y position)
    */
-  const setHeight = () => {
-    const winHeight = windowRef.innerHeight;
-    const padding = 15;
+   const setHeight = () => {
+     const winHeight = windowRef.innerHeight;
+     const padding = 15;
 
-    if (subMenuRef && subMenuRef.current) {
-      // This logic will run when there is no resize event, but called on click of menu item
-      const y = subMenuRef.current.getBoundingClientRect().y;
-      const available = winHeight - y;
-
-      subMenuRef.current.style.maxHeight = available - padding + 'px';
-    } else {
-      // When multiple submenus are open on the window, and resize event happens, 
-      // it should calculate height of all submenus & update.
-
-      // Checking all dropdown menu with show class to recalculate height on resize event
-      const allElementswithShow = document.getElementsByClassName('dropdown-menu show');
-      for (let i = 0; i < allElementswithShow.length; i++) {
-        const ele = allElementswithShow[i];
-        const y = ele.getBoundingClientRect().y;
-        ele.style.maxHeight = winHeight - y - padding + 'px';
-      }
-    }
-  }
+     // When multiple submenus are open on the window, and resize event happens,
+     // it should calculate height of all submenus & update.
+     // Checking all dropdown menu with show class to recalculate height on resize event
+     const allElementswithShow =
+       document.getElementsByClassName("dropdown-menu show");
+     for (let i = 0; i < allElementswithShow.length; i++) {
+       const ele = allElementswithShow[i];
+       const y = ele.getBoundingClientRect().y;
+       ele.style.maxHeight = winHeight - y - padding + "px";
+     }
+   }
 
   /**
    * Function is responsible for aligning submenu to left or right based on the available space
@@ -157,7 +150,6 @@ const ChaiseLoginDropdown = ({
             left: fromLeft, 
             right: 'unset'
           }}
-          ref={subMenuRef}
         >
           <ChaiseLoginDropdown
             menu={item.children || []}
