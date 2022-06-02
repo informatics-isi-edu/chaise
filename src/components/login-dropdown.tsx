@@ -26,7 +26,6 @@ const ChaiseLoginDropdown = ({
   menu, openProfileCb, parentDropdown
 }: ChaiseLoginDropdownProps): JSX.Element => {
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
-  const subMenuRef = useRef<any>(null);
 
   /**
    * State variables to align submenu/dropdown to right or left
@@ -75,7 +74,8 @@ const ChaiseLoginDropdown = ({
    }
 
   /**
-   * Function is responsible for aligning submenu to left or right based on the available space
+   * Function is responsible for aligning submenu to left or right based on the available right space
+   * Based on the threshold, it aligns submenu.
    * @param event clickEvent when user clicks on menu item
    * It will check for currentTarget's x, y, width and calculate top, left position of submenu.
    */

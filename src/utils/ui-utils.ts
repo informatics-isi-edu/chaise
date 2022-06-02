@@ -277,6 +277,12 @@ export function copyToClipboard(text: string) {
   }
 }
 
+/**
+ * 
+ * @param callback function that needs to be invoked after the delay
+ * @param timeout delay
+ * @returns debounced function
+ */
 export function debounce(callback: Function, timeout: number) {
   let timer: any = null;
 
