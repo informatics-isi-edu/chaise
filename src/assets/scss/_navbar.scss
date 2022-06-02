@@ -59,6 +59,10 @@ body > .container {
     }
 }
 
+.navbar-collapse.collapse {
+    display: block !important;
+}
+
 .navbar-inverse .navbar-nav.navbar-right > div > a:hover{
    color: #FFF;
 }
@@ -122,6 +126,10 @@ body > .container {
     padding: 0px 5px 0px 20px;
     min-height: 50px;
     flex-wrap: nowrap;
+}
+
+.navbar-menu-options {
+    float: left;
 }
 
 // div replaces li, a is the case with no dropdown
@@ -370,11 +378,12 @@ nav.navbar {
         }
 
         .navbar-nav {
-            float: left;
+            float: right;
             margin: 0;
 
             &.navbar-menu-options {
                 margin-right: auto;
+                float: left;
             }
 
             li {

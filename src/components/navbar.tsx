@@ -301,9 +301,10 @@ const ChaiseNavbar = (): JSX.Element => {
           <Nav className='navbar-menu-options nav'>
             {renderNavbarMenuDropdowns()}
           </Nav>
+          {/* Since we are using float: right for divs, position for chaise login comes first */}
+          <ChaiseLogin />
           {renderRidSearch()}
           {renderLiveButton()}
-          <ChaiseLogin />
         </Navbar.Collapse>
       </Navbar>
       {renderBanners(bottomBanners)}
