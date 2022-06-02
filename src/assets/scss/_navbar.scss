@@ -115,6 +115,7 @@ body > .container {
     background-color: $table-striped-background-color;
     // Assuming width is same regardless of screen size
     width: 125px;
+    overflow-x: scroll;
 }
 
 #mainnav {
