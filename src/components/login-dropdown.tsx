@@ -145,11 +145,11 @@ const ChaiseLoginDropdown = ({
           // used to align submenu to left or right
           renderOnMount
           style={{ 
-            position: 'fixed', 
             top: fromTop, 
             left: fromLeft, 
-            right: 'unset'
           }}
+          // Moved inline style position: fixed property to css class
+          className='custom-dropdown-submenu'
         >
           <ChaiseLoginDropdown
             menu={item.children || []}

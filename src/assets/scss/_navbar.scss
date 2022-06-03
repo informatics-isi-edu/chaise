@@ -59,9 +59,6 @@ body > .container {
     }
 }
 
-.navbar-collapse.collapse {
-    display: block !important;
-}
 
 .navbar-inverse .navbar-nav.navbar-right > div > a:hover{
    color: #FFF;
@@ -120,11 +117,22 @@ body > .container {
     border-radius: 0;
 }
 
+@media (max-width: 991px) {
+    .navbar-collapse {
+        overflow: auto;
+        display: grid;
+    }
+    #rid-search-input {
+        // Setting max-width for search input on smaller screens
+        max-width: 125px;
+    }
+}
+
 .navbar {
     margin-bottom: 0;
     padding: 0px 5px 0px 20px;
     min-height: 50px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 // div replaces li, a is the case with no dropdown
@@ -345,6 +353,20 @@ nav.navbar {
         right: auto;
         left: 100%;
         margin: 0px;
+    }
+
+    .custom-dropdown-submenu {
+        // Position fixed is required to align submenu on big screens 
+        // (since top, left works for position:fixed)
+        position: fixed !important;
+        right: unset;
+    }
+
+    @media (max-width: 992px) {
+        .custom-dropdown-submenu {
+            // Unsetting the previous position:fixed for smaller screens (bootstrap takes care of responsiveness)
+            position: unset !important;
+        }
     }
 
     // Vertical navbar

@@ -290,13 +290,13 @@ const ChaiseNavbar = (): JSX.Element => {
   return (
     <header id='navheader'>
       {renderBanners(topBanners)}
-      <Navbar variant='dark' expand='lg' className='navbar-inverse'>
+      <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse'>
         <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
           {renderBrandImage()}
           {' '}
           {renderBrandingHTML()}
         </Navbar.Brand>
-        <Navbar.Toggle aria-controls='navbar-dark-example' />
+        <Navbar.Toggle aria-controls='navbar-dark-example'>Menu</Navbar.Toggle>
         <Navbar.Collapse id='navbar-dark-example'>
           <Nav className='navbar-menu-options nav'>
             {renderNavbarMenuDropdowns()}
@@ -304,7 +304,7 @@ const ChaiseNavbar = (): JSX.Element => {
           {/* Since we are using float: right for divs, position for chaise login comes first */}
           <ChaiseLogin />
           {renderRidSearch()}
-          {renderLiveButton()}
+          {renderLiveButton()} 
         </Navbar.Collapse>
       </Navbar>
       {renderBanners(bottomBanners)}
