@@ -65,11 +65,11 @@ const ChaiseLoginDropdown = ({
      // it should calculate height of all submenus & update.
      // Checking all dropdown menu with show class to recalculate height on resize event
      const allElementswithShow =
-       document.getElementsByClassName("dropdown-menu show");
+       document.getElementsByClassName('dropdown-menu show');
      for (let i = 0; i < allElementswithShow.length; i++) {
        const ele = allElementswithShow[i];
        const y = ele.getBoundingClientRect().y;
-       ele.style.maxHeight = winHeight - y - padding + "px";
+       ele.style.maxHeight = winHeight - y - padding + 'px';
      }
    }
 

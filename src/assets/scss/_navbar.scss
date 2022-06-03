@@ -274,6 +274,19 @@ nav.navbar {
         margin-left: 10px;
     }
 
+    @media (max-width: 992px) {
+        .navbar-nav div.dropdown-menu {
+            // Adding max-height when screen size is small,
+            // Made important to override maxHeight set by JS (which is not relevant in small screens) 
+            max-height: 200px !important;
+            margin-left: 12px;
+
+            // Adding min-width and box-shadow so that submenus are differentiable
+            min-width: 250px;
+            box-shadow: rgb(0 0 0) -2px 10px 8px -12px;
+        }
+    }
+
     /*Adding the scroll bar to the menu */
     .navbar-nav div.dropdown-menu {
         min-height: 30px;
