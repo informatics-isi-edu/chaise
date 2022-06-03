@@ -690,7 +690,16 @@
                         }
                     }
 
+                    // floats should truncate to 4 digits always
                     var FLOAT_PRECISION = 10000;
+                    /**
+                     * Handles the initialization of timestamp and float values to account for potential precision loss. For timestamp[tz],
+                     * fractional seconds are truncated as part of the query sent to ermrest, so truncate the fractional seconds for min and
+                     * increase the max by 1 second, then truncate. For float[4,8], calculate an epsilon value for each of min and max based
+                     * on the float size. Then decrease the min by the min epsilon and increase the max by the max epsilon.
+                     * @param {string | number} min min value to initialize the inputs with
+                     * @param {string | number} max max value to initialize the inputs with
+                     */
                     function initializeRangeMinMax(min, max) {
                         if (isColumnOfType('timestamp')) {
                             if (!min) {
@@ -732,9 +741,10 @@
                             }
 
                             // max(tiny, pow(2, expbase + log2(abs(x))))
-                            // use tiny if abs(x) is 0 or negative
-                            minEps = (Math.abs(min) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(min))) ) : tiny;
-                            maxEps = (Math.abs(max) > 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(max))) ) : tiny;
+                            // use tiny as the epsilon if min/max are 0
+                            // for calling log2(x), x has to be a non-negative, non-zero number
+                            minEps = (min !== null && min !== 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(min))) ) : tiny;
+                            maxEps = (max !== null && max !== 0) ? Math.max( tiny, Math.pow(2, expbase + Math.log2(Math.abs(max))) ) : tiny;
 
                             // adjust by epsilon if value is defined and non null
                             scope.rangeOptions.absMin = (min !== null && min !== undefined) ? formatFloatMin(min-minEps) : null;
@@ -761,11 +771,21 @@
                         }
                     }
 
+                    /**
+                     * Takes a float value and truncates the string to precision 4
+                     * @param {number} min the float value to truncate
+                     * @returns {number} formatted float value
+                     */
                     function formatFloatMin(min) {
                         if (!min) return min;
                         return Math.floor(min*FLOAT_PRECISION) / FLOAT_PRECISION;
                     }
 
+                    /**
+                     * Takes a float value and truncates the string to precision 4
+                     * @param {number} max the float value to truncate
+                     * @returns {number} formatted float value
+                     */
                     function formatFloatMax(max) {
                         if (!max) return max;
                         return Math.ceil(max*FLOAT_PRECISION) / FLOAT_PRECISION;
