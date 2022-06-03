@@ -1,4 +1,4 @@
-import { MouseEvent, MouseEventHandler, useLayoutEffect, useRef, useState } from 'react';
+import { MouseEvent, MouseEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -27,6 +27,15 @@ const ChaiseLoginDropdown = ({
 }: ChaiseLoginDropdownProps): JSX.Element => {
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
+  // Register window resize event
+  useEffect(() => {
+    // when resize event is called, it will call debounce function with 500ms timeout
+    const debouncedFunc = debounce(setHeight, 500);
+    
+    // Call when there is resize event
+    window.addEventListener('resize', debouncedFunc);
+  }, []);
+
   /**
    * State variables to align submenu/dropdown to right or left
    * @fromTop represents top: position
@@ -39,15 +48,8 @@ const ChaiseLoginDropdown = ({
   const [dropEnd, setDropEnd] = useState<boolean>(true);
   
   useLayoutEffect(() => {
-    
-    // when resize event is called, it will call debounce function with 500ms timeout
-    const debouncedFunc = debounce(setHeight, 500);
-    
     // This will be called when there is a DOM Mutation
     setHeight();
-
-    // Call when there is resize event
-    window.addEventListener('resize', debouncedFunc);
   })
 
   /**
