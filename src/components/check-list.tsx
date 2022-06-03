@@ -7,6 +7,8 @@ import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 type CheckListProps = {
   initialized: boolean,
   rows: FacetCheckBoxRow[],
+  // NOTE: the onRowClick must set the .selected
+  //        the check-list component will not do that automatically
   onRowClick: (row: FacetCheckBoxRow, rowIndex: number) => void,
   // TODO
   // enableFavorites?: boolean,

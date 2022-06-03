@@ -39,7 +39,7 @@ export type SortColumn = {
 }
 
 export type FacetCheckBoxRow = {
-  uniqueId: string,
+  uniqueId?: string | null,
   displayname: Displayname,
   selected?: boolean,
   disabled?: boolean,

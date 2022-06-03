@@ -7,6 +7,8 @@ import Accordion from 'react-bootstrap/Accordion';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
 import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/facet-check-presence';
 
 // TODO subject to change
 type FacetingProps = {
@@ -17,12 +19,22 @@ const Faceting = ({
   reference
 }: FacetingProps) => {
 
+  // TODO type
+  // const onFacetToggle = (eventKey: string[]) => {
+  //   const openedFacet = eventKey[0];
+
+  //   // change the isOpen statess
+
+  //   // change the UI state
+
+  // };
+
   const renderFacet = (fc: any, index: number) => {
     switch (fc.preferredMode) {
       case 'ranges':
         return <FacetRangePicker facetColumn={fc} index={index}></FacetRangePicker>
       case 'check_presence':
-        return <>Check presence!</>;
+        return <FacetCheckPresence facetColumn={fc} index={index}></FacetCheckPresence>
       default:
         return <FacetChoicePicker facetColumn={fc} index={index}></FacetChoicePicker>
     }
@@ -48,7 +60,12 @@ const Faceting = ({
 
   return (
     <div className='faceting-columns-container'>
-      <Accordion defaultActiveKey={['0']} alwaysOpen className='panel-group'>
+      <Accordion
+        className='panel-group'
+        alwaysOpen // allow multiple to be open together
+        // activeKey={[]}
+        // onSelect={onFacetToggle}
+      >
         {renderFacets()}
       </Accordion>
     </div>
