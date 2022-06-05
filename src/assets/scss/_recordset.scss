@@ -7,7 +7,7 @@
       .top-flex-panel {
         .top-left-panel {
           &.open-panel {
-            width: 270px;
+            width: 21vw;
             flex-basis: unset;
           }
         }
@@ -17,7 +17,7 @@
     .bottom-panel-container {
       .side-panel-resizable {
         &.open-panel {
-          width: 270px;
+          width: 21vw;
           flex-basis: unset;
         }
       }
@@ -28,6 +28,7 @@
     .top-panel-container {
       .top-flex-panel .top-left-panel div.panel-header {
         bottom: 10px;
+        display: block;
       }
 
       .top-right-panel {
@@ -201,5 +202,19 @@
     height: 100%;
     -webkit-transition: all 1s;
     transition: all 1s;
+  }
+
+  .recordset-container {
+    .top-panel-container {
+      .top-flex-panel .top-left-panel .panel-header {
+        .pull-left {
+          float: left;
+        }
+
+        .pull-right {
+          float: right;
+        }
+      }
+    }
   }
 }

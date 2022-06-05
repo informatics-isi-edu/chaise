@@ -64,7 +64,9 @@ type SplitViewProps = {
     minWidth?: number,
     maxWidth?: number,
     initialWidth?: number,
-    convertMaxWidth?: boolean
+    convertMinWidth?: boolean,
+    convertMaxWidth?: boolean,
+    convertInitialWidth?: boolean
 };
 
 const SplitView = ({
@@ -74,15 +76,31 @@ const SplitView = ({
     minWidth = 250,
     maxWidth = 450,
     initialWidth = 270,
-    convertMaxWidth = false
+    convertMinWidth = false,
+    convertMaxWidth = false,
+    convertInitialWidth = false
 }: SplitViewProps): JSX.Element => {
-    const [leftWidth, setLeftWidth] = useState<undefined | number>(initialWidth || undefined);
-    const [separatorXPosition, setSeparatorXPosition] = useState<undefined | number>(undefined);
-    const [dragging, setDragging] = useState(false);
+
+
+    let convertedMinWidth = minWidth;
     let convertedMaxWidth = maxWidth;
+    let convertedInitialWidth = initialWidth;
+
+    if (convertMinWidth) {
+        convertedMinWidth = vwToPx(minWidth);
+    }
+
     if (convertMaxWidth) {
         convertedMaxWidth = vwToPx(maxWidth);
     }
+
+    if (convertInitialWidth) {
+        convertedInitialWidth = vwToPx(initialWidth);
+    }
+
+    const [leftWidth, setLeftWidth] = useState<undefined | number>(convertedInitialWidth || undefined);
+    const [separatorXPosition, setSeparatorXPosition] = useState<undefined | number>(undefined);
+    const [dragging, setDragging] = useState(false);
 
     const onMouseDown = (e: React.MouseEvent) => {
         setSeparatorXPosition(e.clientX);
@@ -103,8 +121,8 @@ const SplitView = ({
             const newLeftWidth = leftWidth + clientX - separatorXPosition;
             setSeparatorXPosition(clientX);
 
-            if (newLeftWidth < minWidth) {
-                setLeftWidth(minWidth);
+            if (newLeftWidth < convertedMinWidth) {
+                setLeftWidth(convertedMinWidth);
                 return;
             }
 

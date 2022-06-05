@@ -339,10 +339,10 @@ const RecordsetInner = ({
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
             <div className='panel-header'>
-              <div>
+              <div className='pull-left'>
                 <h3>Refine search</h3>
               </div>
-              <div>
+              <div className='pull-right'>
                 <button
                   className='hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right'
                   onClick={() => changeFacetPanelOpen()}
@@ -445,8 +445,10 @@ const RecordsetInner = ({
         </div>}
         minWidth={170}
         maxWidth={40}
+        initialWidth={21}
         className='bottom-panel-container'
         convertMaxWidth
+        convertInitialWidth
       />
     </div>
   )
