@@ -100,23 +100,26 @@
     }
   }
 
-  .range-input {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    width: 100%;
-    margin-top: 16px;
-    margin-bottom: 16px;
+  .range-input-container {
+    .range-input {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-evenly;
+      width: 100%;
+      margin-top: 16px;
+      margin-bottom: 16px;
 
-    .range-input-from {
-      width: 40%;
+      .range-input-from {
+        width: 40%;
+      }
+
+      .range-input-to {
+        width: 40%;
+      }
+
     }
 
-    .range-input-to {
-      width: 40%;
-    }
-
-    .range-inputs-error {
+    .range-input-error {
       color: #a94442;
     }
   }

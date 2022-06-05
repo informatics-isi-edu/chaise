@@ -790,7 +790,7 @@ const FacetRangePicker = ({
         List goes here
       </div>
       <div>
-        <RangeInputs type={0} />
+        <RangeInputs type={3} />
       </div>
       {renderHistogram()}
     </div>
