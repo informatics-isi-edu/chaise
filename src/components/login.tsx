@@ -253,7 +253,7 @@ const ChaiseLogin = (): JSX.Element => {
         style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}
       >
         {renderDropdownToggle()}
-        <Dropdown.Menu>{renderMenuChildren()}</Dropdown.Menu>
+        <Dropdown.Menu align='end'>{renderMenuChildren()}</Dropdown.Menu>
       </Dropdown>
     );
   }
