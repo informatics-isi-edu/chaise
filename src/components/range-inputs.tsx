@@ -64,34 +64,34 @@ const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
         console.log('validating values...');
 
         /* this error is assigned based on the error codes defined above in the errorMsgMap */
-        let error = -1;
+        // let error = -1;
 
         if (!fromVal || !toVal) {
-            error = 0;
-            return error;
+            // error = 0;
+            return 0;
         }
 
         if (type === 0) {
             if (!INTEGER_REGEXP.test(fromVal) || !INTEGER_REGEXP.test(toVal)) {
-                error = 2;
-                return error;
+                // error = 2;
+                return 2;
             }
 
             if (parseInt(fromVal) > parseInt(toVal)) {
-                error = 1;
-                return error;
+                // error = 1;
+                return 1;
             }
         }
 
         if (type === 1) {
             if (!FLOAT_REGEXP.test(fromVal) || !FLOAT_REGEXP.test(toVal)) {
-                error = 3;
-                return error;
+                // error = 3;
+                return 3;
             }
 
             if (parseInt(fromVal) > parseInt(toVal)) {
-                error = 1;
-                return error;
+                // error = 1;
+                return 1;
             }
         }
 
@@ -100,17 +100,17 @@ const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
             const toDate = momentJS(toVal);
 
             if (!fromDate.isValid() || !toDate.isValid()) {
-                error = type === 2 ? 4 : 5;
-                return error;
+                // error = type === 2 ? 4 : 5;
+                return type === 2 ? 4 : 5;
             }
 
             if (fromDate.diff(toDate) >= 0) {
-                error = 1;
-                return error;
+                // error = 1;
+                return 1;
             }
         }
 
-        return error;
+        return -1;
     }
 
 
