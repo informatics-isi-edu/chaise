@@ -97,7 +97,7 @@ const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
 
         if (type === 2 || type === 3) {
             const fromDate = momentJS(fromVal);
-            const toDate = momentJS(fromVal);
+            const toDate = momentJS(toVal);
 
             if (!fromDate.isValid() || !toDate.isValid()) {
                 error = type === 2 ? 4 : 5;
