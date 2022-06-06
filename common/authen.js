@@ -308,7 +308,7 @@
             var x = window.innerWidth/2 - 800/2;
             var y = window.innerHeight/2 - 600/2;
 
-            var win = window.open("", '_blank','width=800,height=600,left=' + x + ',top=' + y);
+            var win = window.open("", '_blank','width=800,height=750,left=' + x + ',top=' + y);
 
             logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
         };
