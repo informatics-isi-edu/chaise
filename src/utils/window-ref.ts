@@ -24,6 +24,8 @@ interface ICustomWindow extends Window {
       openLinksInTab: boolean
     }
   }
+  // momentJS library object attached for easy access
+  moment: any;
 }
 
 declare let window: ICustomWindow;
