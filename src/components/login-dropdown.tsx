@@ -27,15 +27,6 @@ const ChaiseLoginDropdown = ({
 }: ChaiseLoginDropdownProps): JSX.Element => {
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
-  // Register window resize event
-  useEffect(() => {
-    // when resize event is called, it will call debounce function with 500ms timeout
-    const debouncedFunc = debounce(setHeight, 500);
-    
-    // Call when there is resize event
-    window.addEventListener('resize', debouncedFunc);
-  }, []);
-
   /**
    * State variables to align submenu/dropdown to right or left
    * @fromTop represents top: position
@@ -46,34 +37,6 @@ const ChaiseLoginDropdown = ({
   const [fromTop, setFromTop] = useState<number>();
   const [fromLeft, setFromLeft] = useState<number>();
   const [dropEnd, setDropEnd] = useState<boolean>(true);
-  
-  useLayoutEffect(() => {
-    // This will be called when there is a DOM Mutation
-    setHeight();
-  })
-
-  /**
-   * Function is responsible for adjusting height of submenus.
-   * Function is called when there is resize event or when user opens submenu
-   * Set the height of Dropdown.Menu (inline style)
-   * 1. Check for subMenuRef. If it is not null get x, y, and width positions
-   * 2. calculate the available height (window height - Elements's y position)
-   */
-   const setHeight = () => {
-     const winHeight = windowRef.innerHeight;
-     const padding = 15;
-
-     // When multiple submenus are open on the window, and resize event happens,
-     // it should calculate height of all submenus & update.
-     // Checking all dropdown menu with show class to recalculate height on resize event
-     const allElementswithShow =
-       document.getElementsByClassName('dropdown-menu show');
-     for (let i = 0; i < allElementswithShow.length; i++) {
-       const ele = allElementswithShow[i];
-       const y = ele.getBoundingClientRect().y;
-       ele.style.maxHeight = winHeight - y - padding + 'px';
-     }
-   }
 
   /**
    * Function is responsible for aligning submenu to left or right based on the available right space
@@ -83,7 +46,8 @@ const ChaiseLoginDropdown = ({
    */
   const alignDropDown = (event: any) => {
     event.preventDefault();
-
+    const winHeight = windowRef.innerHeight;
+    const padding = 15;
     const threshold = 0.75 * windowRef.innerWidth;
 
     if (event.currentTarget) {
@@ -93,9 +57,11 @@ const ChaiseLoginDropdown = ({
       const parentWidth = event.currentTarget.getBoundingClientRect().width;
 
       // This is necessary because getBoundingClientRect() will give 0, if div is not present in DOM
-      event.currentTarget.getElementsByClassName('dropdown-menu')[0].style.display = 'block';
-      const childWidth = event.currentTarget.getElementsByClassName('dropdown-menu')[0].getBoundingClientRect().width;
-      event.currentTarget.getElementsByClassName('dropdown-menu')[0].style.display = null;
+      const subMenu = event.currentTarget.getElementsByClassName('dropdown-menu')[0];
+      subMenu.style.display = 'block';
+      const childWidth = subMenu.getBoundingClientRect().width;
+      subMenu.style.display = null;
+      subMenu.style.maxHeight = winHeight - y - padding + 'px';
 
       setFromTop(y);
   
