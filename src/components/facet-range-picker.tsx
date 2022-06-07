@@ -310,6 +310,8 @@ const FacetRangePicker = ({
     return res;
   }
 
+  console.log('facetColumn:', facetColumn);
+
   const showHistogram = (): boolean => {
     return facetColumn.barPlot && (compState.rangeOptions.absMin !== null && compState.rangeOptions.absMax !== null)
   }

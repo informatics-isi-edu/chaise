@@ -100,27 +100,40 @@
     }
   }
 
+
   .range-input-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+    .range-input-from,
+    .range-input-to {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-weight: 700;
+      }
+    }
+
     .range-input {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
-      width: 100%;
-      margin-top: 16px;
-      margin-bottom: 16px;
-
-      .range-input-from {
-        width: 40%;
-      }
-
-      .range-input-to {
-        width: 40%;
-      }
-
+      align-items: center;
     }
 
-    .range-input-error {
-      color: #a94442;
+    .range-remove-btn {
+      margin-left: 8px;
     }
   }
+
+  .range-input-error {
+    color: #a94442;
+  }
+
 }
