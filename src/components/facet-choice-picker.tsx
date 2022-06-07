@@ -1,10 +1,11 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 
+import Q from 'q';
 import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
@@ -12,33 +13,91 @@ import CheckList from '@isrd-isi-edu/chaise/src/components/check-list';
 
 type FacetChoicePickerProps = {
   facetColumn: any,
-  index: number
+  facetModel: any,
+  index: number,
+  register: Function
 }
 
 const FacetChoicePicker = ({
   facetColumn,
-  index
+  facetModel,
+  index,
+  register
 }: FacetChoicePickerProps): JSX.Element => {
-  const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps|null>(null);
-  const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([
-    {
-      uniqueId: 'row-1',
-      selected: false,
-      displayname: {value: 'row-1', isHTML: false}
-    },
-    {
-      uniqueId: 'null',
-      selected: true,
-      displayname: {value: null, isHTML: false}
-    }
-  ]);
+
+  const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
+  const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([]);
+  const [ hasMore, setHasMore ] = useState(false);
+
+  let reference: any, columnName: string;
+  if (facetColumn.isEntityMode) {
+    reference = facetColumn.sourceReference.contextualize.compactSelect;
+    columnName = facetColumn.column.name;
+  } else {
+    reference = facetColumn.scalarValuesReference;
+    // the first column will be the value column
+    columnName = reference.columns[0].name;
+  }
+  if (facetModel.isOpen) {
+    $log.debug('got the new reference man!');
+  }
+
+  // make sure to add the search term
+  // if (searchTerm) {
+  //   reference = scope.reference.search(scope.searchTerm);
+  // }
+
+  useEffect(() => {
+    register(index, updateFacet, preProcessFacet);
+  }, []);
+
+  const updateFacet = () => {
+    const defer = Q.defer();
+    $log.debug(`updating facet ${index}`);
+
+    (function (uri) {
+      reference.read(10, {}, true).then((page: any) => {
+        // if this is not the result of latest facet change
+        if (reference.uri !== uri) {
+          defer.resolve(false);
+          return defer.promise;
+        }
+
+        setHasMore(page.hasNext);
+
+        setCheckboxRows(page.tuples.map((tuple: any, index: number) => {
+          return {
+            uniqueId: tuple.uniqueId,
+            displayname: tuple.displayname,
+            selected: false,
+            disabled: false
+          }
+        }));
+
+        defer.resolve(true);
+      });
+    })(reference.uri);
+
+    return defer.promise;
+  };
+
+  const preProcessFacet = () => {
+    const defer = Q.defer();
+    $log.debug(`preprocessing facet ${index}`);
+
+    setTimeout(() => {
+      defer.resolve(true);
+    }, 1000);
+
+    return defer.promise;
+  }
 
   const searchCallback = (searchTerm: any, action: any) => {
     $log.log(`search for ${searchTerm} in facet index=${index}`);
   }
 
   const openRecordsetModal = () => {
-    const recordsetConfig : RecordsetConfig = {
+    const recordsetConfig: RecordsetConfig = {
       viewable: false,
       editable: false,
       deletable: false,
@@ -53,9 +112,9 @@ const FacetChoicePicker = ({
 
     let reference;
     if (facetColumn.isEntityMode) {
-        reference = facetColumn.sourceReference.contextualize.compactSelect;
+      reference = facetColumn.sourceReference.contextualize.compactSelect;
     } else {
-        reference = facetColumn.scalarValuesReference;
+      reference = facetColumn.scalarValuesReference;
     }
 
     // TODO log object should be cached and be proper!
@@ -83,13 +142,12 @@ const FacetChoicePicker = ({
     setRecordsetModalProps(null);
   };
 
-  const onRowClick = (row: FacetCheckBoxRow, rowIndex: number) => {
+  const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
     const checked = !row.selected;
-
     $log.log(`facet checkbox ${row.uniqueId} has been ${checked ? 'selected' : 'deselected'}`);
 
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
-      return prev.map((curr: FacetCheckBoxRow) => curr !== row ? curr : {...curr, selected: checked});
+      return prev.map((curr: FacetCheckBoxRow) => curr !== row ? curr : { ...curr, selected: checked });
     });
   };
 
@@ -110,7 +168,7 @@ const FacetChoicePicker = ({
         >
           <span className='chaise-btn-icon far fa-window-restore'></span>
           {/* <span ng-bind='hasMore || showFindMore ? 'Show More' : 'Show Details''></span> */}
-          <span>Show more</span>
+          <span>{hasMore ? 'Show more' : 'Show Details'}</span>
         </button>
         {/* <a id='reset-facet' ng-if='facetModel.noConstraints' class='pull-right' ng-click='::retryQuery(false)' tooltip-placement='bottom' uib-tooltip='Retry updating the facet values with constraints.'><b>Retry</b></a> */}
         {

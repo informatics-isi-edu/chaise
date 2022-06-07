@@ -46,3 +46,33 @@ export type FacetCheckBoxRow = {
   isNotNull?: boolean,
   alwaysShowTooltip?: boolean
 }
+
+export type FacetModel = {
+  initialized: boolean,
+  isOpen: boolean,
+  isLoading: boolean,
+  noConstraints: boolean,
+  facetError: boolean
+}
+
+export type FacetRequestModel = {
+  // some facets require extra step to process preselected filters
+  preProcessed: boolean,
+  processed: boolean,
+  // TODO why??
+  // appliedFilters: [],
+  registered: boolean,
+  updateFacet: Function, // TODO
+  preProcessFacet: Function, //TODO
+  reloadCauses: string[], // why the reload request is being sent to the server (might be empty)
+  reloadStartTime: number, //when the facet became dirty
+  // TODO log stuff
+  // I could capture the whole logStack,
+  // but only did logStackNode so I can call the recordTableUtils.getTableLogStack with it.
+  // logStackNode: facetLogStackNode,
+  // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
+  // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
+  // if the stable key is greater than length 1, the favorites won't be supported for now
+  // TODO: support this for composite stable keys
+  // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1
+}

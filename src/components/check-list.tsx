@@ -9,7 +9,7 @@ type CheckListProps = {
   rows: FacetCheckBoxRow[],
   // NOTE: the onRowClick must set the .selected
   //        the check-list component will not do that automatically
-  onRowClick: (row: FacetCheckBoxRow, rowIndex: number) => void,
+  onRowClick: (row: FacetCheckBoxRow, rowIndex: number, event: any) => void,
   // TODO
   // enableFavorites?: boolean,
   // onFavoritesChanged: Function
@@ -41,7 +41,7 @@ const CheckList = ({
             // TODO for testing, id was changed to className to be more appropriate
             className={`checkbox-${index} ellipsis-text`} type='checkbox'
             checked={row.selected} disabled={row.disabled}
-            onClick={() => onRowClick(row, index)}
+            onChange={(event) => onRowClick(row, index, event)}
           />
           {/* TODO tooltip for null */}
           <label><DisplayValue value={row.displayname} specialNullEmpty={true} /></label>

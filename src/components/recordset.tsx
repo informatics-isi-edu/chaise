@@ -74,6 +74,11 @@ const Recordset = ({
   );
 };
 
+type RecordsetInnerProps = {
+  initialReference: any,
+  config: RecordsetConfig
+};
+
 /**
  * based on my understanding provider and the usage of context cannot be on the
  * same level, that's why the Recordset comp is just a wrapper that has all the
@@ -82,7 +87,7 @@ const Recordset = ({
 const RecordsetInner = ({
   initialReference,
   config
-}: any): JSX.Element => {
+}: RecordsetInnerProps): JSX.Element => {
 
   const { dispatchError } = useError();
 
@@ -159,8 +164,7 @@ const RecordsetInner = ({
 
       setFacetColumnsReady(true);
 
-      // initialize the data
-      initialize();
+      // facet will call initialize when it's fully loaded
 
       /**
        * When there are issues in the given facet,
@@ -246,10 +250,10 @@ const RecordsetInner = ({
    */
   const changeSearch = (term: string | null, action: LogActions) => {
     // TODO added for test, should be removed
-    $log.info('adding alert!!');
-    addAlert('Search initiated', ChaiseAlertType.INFO, () => {
-      $log.info('removed!');
-    });
+    // $log.info('adding alert!!');
+    // addAlert('Search initiated', ChaiseAlertType.INFO, () => {
+    //   $log.info('removed!');
+    // });
     $log.log(`search with term: ${term}, action : ${action}`);
     if (term) term = term.trim();
 
@@ -409,7 +413,7 @@ const RecordsetInner = ({
             style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
             <div className='side-panel-container'>
-              <Faceting reference={reference} />
+              <Faceting />
             </div>
           </div>
         }

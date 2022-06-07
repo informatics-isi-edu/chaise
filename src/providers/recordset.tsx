@@ -25,7 +25,9 @@ export const RecordsetContext = createContext<{
   page: any,
   colValues: any,
   columnModels: any,
-  totalRowCount: number|null
+  totalRowCount: number|null,
+  registerFacetCallbacks: any, // TODO
+  printDebugMessage: any // TODO
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -86,7 +88,7 @@ export default function RecordsetProvider({
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
 
-  const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
+  const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo, config.disableFaceting));
 
   // call the flow-control after each reference object
   useEffect(() => {
@@ -173,7 +175,11 @@ export default function RecordsetProvider({
     }
 
     if (updateFacets) {
-      // TODO
+      $log.debug('facets should be updated!');
+      if (flowControl.current.updateFacetStatesCallback) {
+        $log.debug('calling the callback!!!!!');
+        flowControl.current.updateFacetStatesCallback(cause);
+      }
     }
 
     if (updateResult) {
@@ -245,8 +251,10 @@ export default function RecordsetProvider({
       updateTotalRowCount(updatePage);
     }
 
-    // TODO the rest
-    // setFacetReferesh(facetRefresh+1);
+    // fetch the facets
+    if (flowControl.current.updateFacetsCallback) {
+      flowControl.current.updateFacetsCallback(flowControl, updatePage);
+    }
   };
 
   /**
@@ -748,6 +756,11 @@ export default function RecordsetProvider({
     });
   };
 
+  const registerFacetCallbacks = (updateFacetStatesCallback: any, updateFacetsCallback: any) => {
+    flowControl.current.updateFacetsCallback = updateFacetsCallback;
+    flowControl.current.updateFacetStatesCallback = updateFacetStatesCallback;
+  };
+
 
   const providerValue = useMemo(() => {
     return {
@@ -761,7 +774,9 @@ export default function RecordsetProvider({
       page,
       colValues,
       columnModels,
-      totalRowCount
+      totalRowCount,
+      registerFacetCallbacks,
+      printDebugMessage
     };
   }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);
 
