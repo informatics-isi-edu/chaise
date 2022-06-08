@@ -2,26 +2,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_resizable.scss';
 import { useRef, useEffect, useState } from 'react';
 import { fireCustomEvent, convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-/* 
-Component Usage:
-    This component is used to implement a horizontal dragable and resizable component/div
-
-Props:
-    left - the left-pane component in the resizable layout
-    right - the right-pane component in the resizable layout
-    className - to apply custom styles on the component
-    minWidth - the minimum width limit on the left-pane component | defaults to 250px
-    maxWidth - the maximum width limit on the left-pane component | defaults to 450px
-    initialWidth - the initial width for the left-pane component | defaults to 270px
-    convertMaxWidth - use this flag in case you pass maxWidth in vw units instead of px units
-
-Note:
-    To resize other components based on the resized value left-pane component add an event listener and listen to the 
-    'resizable-width-change' event.
-
-    For usage refer to the recordset.tsx component
-*/
-
 type LeftPaneProps = {
     children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
     leftWidth: number | undefined,
@@ -41,14 +21,56 @@ const LeftPane = ({ children, leftWidth }: LeftPaneProps): JSX.Element => {
 };
 
 type SplitViewProps = {
-    left: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
-    right: React.ReactNode,
+    /**
+     * a function that returns the left-pane component in the resizable layout
+     * pass the leftRef as a ref to the outermost element of your left-pane component
+     */
+    left: ((ref: React.RefObject<HTMLDivElement>) => JSX.Element),
+
+    /**
+     * the right-pane component in the resizable layout or a function that returns the right-pane component
+     */
+    right: JSX.Element | (() => JSX.Element),
+
+    /**
+     * use for applying custom styles on the component
+     */
     className?: string,
+
+    /**
+     * the minimum width limit on the left-pane component
+     * defaults to 250px
+     */
     minWidth?: number,
+
+    /**
+     * the maximum width limit on the left-pane component
+     * defaults to 450px
+     */
     maxWidth?: number,
+
+    /**
+     * the initial width for the left-pane component
+     * defaults to 270px
+     */
     initialWidth?: number,
+
+    /**
+     * set this flag in case you pass maxWidth in vw units instead of px units
+     * defaults to false
+     */
     convertMinWidth?: boolean,
+
+    /**
+     * set this flag in case you pass minWidth in vw units instead of px units
+     * defaults to false
+     */
     convertMaxWidth?: boolean,
+
+    /**
+     * set this flag in case you pass initialWidth in vw units instead of px units
+     * defaults to false
+     */
     convertInitialWidth?: boolean
 };
 
@@ -57,6 +79,13 @@ type StateDef = {
     xPos: undefined | number,
     dragging: boolean,
 }
+
+/**
+ * This component is used to implement a horizontal dragable and resizable component/div
+ * Note:
+ * To resize other components based on the resized value left-pane component add an event listener and listen to the 'resizable-width-change' event.
+ * For usage refer to the recordset.tsx component
+ */
 
 const SplitView = ({
     left,
@@ -138,7 +167,7 @@ const SplitView = ({
             >
                 <span className='fas fa-ellipsis-v' />
             </div>
-            {right}
+            {typeof right === 'function' ? right() : right}
         </div>
     );
 };

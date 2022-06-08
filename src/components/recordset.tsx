@@ -309,7 +309,7 @@ const RecordsetInner = ({
     )
   }
 
-  const filterSection = (leftRef: React.RefObject<HTMLDivElement>) => (
+  const facetingSection = (leftRef: React.RefObject<HTMLDivElement>) => (
     <>
       {
         facetColumnsReady &&
@@ -325,6 +325,21 @@ const RecordsetInner = ({
       }
     </>
   );
+
+
+  const renderMainContainer = () => (
+    <div className='main-container dynamic-padding' ref={mainContainer}>
+      <div className='main-body'>
+        <RecordsetTable
+          config={config}
+          initialSortObject={initialReference.location.sortObject}
+        />
+      </div>
+      {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
+    </div>
+  );
+
+
 
   return (
     <div className='recordset-container app-content-container'>
@@ -433,16 +448,8 @@ const RecordsetInner = ({
         </div>
       </div>
       <SplitView
-        left={filterSection}
-        right={<div className='main-container dynamic-padding' ref={mainContainer}>
-          <div className='main-body'>
-            <RecordsetTable
-              config={config}
-              initialSortObject={initialReference.location.sortObject}
-            />
-          </div>
-          {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
-        </div>}
+        left={facetingSection}
+        right={renderMainContainer}
         minWidth={170}
         maxWidth={40}
         initialWidth={21}
