@@ -11,6 +11,7 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+import { NormalModule } from 'webpack';
 
 // TODO more comments and proper types
 
@@ -88,7 +89,7 @@ export default function RecordsetProvider({
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
 
-  const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo, config.disableFaceting));
+  const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
   // call the flow-control after each reference object
   useEffect(() => {
@@ -166,7 +167,7 @@ export default function RecordsetProvider({
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  const update = (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
+  const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
@@ -175,9 +176,7 @@ export default function RecordsetProvider({
     }
 
     if (updateFacets) {
-      $log.debug('facets should be updated!');
       if (flowControl.current.updateFacetStatesCallback) {
-        $log.debug('calling the callback!!!!!');
         flowControl.current.updateFacetStatesCallback(cause);
       }
     }
@@ -218,12 +217,10 @@ export default function RecordsetProvider({
     if (newRef) {
       // after react sets the reference, the useEffect will trigger updatePage
       setReference(newRef);
+    } else if (limit && typeof limit === 'number') {
+      setPageLimit(limit);
     } else {
-      if (limit && typeof limit === 'number') {
-        setPageLimit(limit);
-      } else {
-        updatePage();
-      }
+      updatePage();
     }
 
     return true;

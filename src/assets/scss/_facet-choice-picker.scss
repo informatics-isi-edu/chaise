@@ -7,8 +7,17 @@
       margin-bottom: 10px;
     }
 
-    .show-more-btn {
-      padding: 0;
+    .button-container {
+      height: 20px;
+
+      .retry-btn {
+        padding: 0;
+      }
+
+      .show-more-btn {
+        padding: 0;
+        float: right;
+      }
     }
   }
 }

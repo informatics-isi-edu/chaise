@@ -122,7 +122,7 @@ const Faceting = ({
       });
     });
 
-    // all the facets are closed, the one should be processed.
+    // all the facets are closed, the fist one should be processed.
     if (!atLeastOneOpen) {
       facetRequestModels.current[0].processed = false;
     }
@@ -214,7 +214,6 @@ const Faceting = ({
 
     // preprocess facets first
     const index = facetsToPreProcess.current.shift();
-
     if (typeof index === 'number') {
       flowControl.current.queue.occupiedSlots++;
       (function (i: number, currentCounter: number) {
@@ -247,7 +246,7 @@ const Faceting = ({
         frm.processed = true;
 
         (function (i) {
-          printDebugMessage(`updating facet (index=${i}`);
+          printDebugMessage(`updating facet (index=${i})`);
           facetRequestModels.current[i].updateFacet().then(function (res: any) {
             setFacetModelByIndex(i, { facetError: false });
             afterFacetUpdate(i, res, flowControl);
@@ -437,7 +436,6 @@ const Faceting = ({
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
-  $log.debug(`activekeys: ${activeKeys}`);
 
   if (!displayFacets) {
     return <></>

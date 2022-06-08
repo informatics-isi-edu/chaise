@@ -34,6 +34,9 @@ export class RecordsetFlowControl {
   logObject: any;
   logAppMode: string | undefined;
 
+  updateFacetsCallback?: Function;
+  updateFacetStatesCallback?: Function;
+
   aggregateResults: any;
   templateVariables: any;
 

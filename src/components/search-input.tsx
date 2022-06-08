@@ -10,14 +10,36 @@ import { ResizeSensor } from 'css-element-queries';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type SearchInputProps = {
+  /**
+   * Will be called after search is triggered
+   */
   searchCallback: Function,
+  /**
+   * The search columns
+   */
   searchColumns: any,
+  /**
+   * The initial search term
+   */
   initialSearchTerm: string,
+  /**
+   * The custom class that will be attached to the input
+   */
   inputClass?: string,
+  /**
+   * Whether input should be focused
+   */
   focus?: boolean,
+  /**
+   * Whether input should be disabled
+   */
   disabled?: boolean
 }
 
+/**
+ * Creates a search input that allows users to type a search text and calls
+ * the given callback.
+ */
 const SearchInput = ({
   initialSearchTerm,
   searchCallback,
