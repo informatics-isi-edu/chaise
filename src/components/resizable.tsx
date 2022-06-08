@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_resizable.scss';
 import { useRef, useEffect, useState } from 'react';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { fireCustomEvent, convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 /* 
 Component Usage:
@@ -22,40 +22,23 @@ Note:
     For usage refer to the recordset.tsx component
 */
 
-
-const vwToPx = (value: number) => {
-    const e = document.documentElement;
-    const g = document.getElementsByTagName('body')[0];
-    const x = window.innerWidth || e.clientWidth || g.clientWidth;
-
-    const result = (x * value) / 100;
-    return result;
-}
-
 type LeftPaneProps = {
     children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
     leftWidth: number | undefined,
-    setLeftWidth: (value: number) => void
 };
 
-const LeftPane = ({ children, leftWidth, setLeftWidth }: LeftPaneProps): JSX.Element => {
+const LeftPane = ({ children, leftWidth }: LeftPaneProps): JSX.Element => {
     const leftRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (leftRef?.current) {
-            if (!leftWidth) {
-                setLeftWidth(leftRef.current.clientWidth);
-                return;
-            }
-
             fireCustomEvent('resizable-width-change', '.split-view', { width: leftWidth });
             leftRef.current.style.width = `${leftWidth}px`;
         }
-    }, [leftRef, leftWidth, setLeftWidth]);
+    }, [leftRef, leftWidth]);
 
     return children(leftRef);
 };
-
 
 type SplitViewProps = {
     left: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
@@ -69,6 +52,12 @@ type SplitViewProps = {
     convertInitialWidth?: boolean
 };
 
+type StateDef = {
+    leftWidth: number,
+    xPos: undefined | number,
+    dragging: boolean,
+}
+
 const SplitView = ({
     left,
     right,
@@ -81,57 +70,50 @@ const SplitView = ({
     convertInitialWidth = false
 }: SplitViewProps): JSX.Element => {
 
-
     let convertedMinWidth = minWidth;
+
     let convertedMaxWidth = maxWidth;
+
     let convertedInitialWidth = initialWidth;
 
     if (convertMinWidth) {
-        convertedMinWidth = vwToPx(minWidth);
+        convertedMinWidth = convertVWToPixel(minWidth);
     }
 
     if (convertMaxWidth) {
-        convertedMaxWidth = vwToPx(maxWidth);
+        convertedMaxWidth = convertVWToPixel(maxWidth);
     }
 
     if (convertInitialWidth) {
-        convertedInitialWidth = vwToPx(initialWidth);
+        convertedInitialWidth = convertVWToPixel(initialWidth);
     }
 
-    const [leftWidth, setLeftWidth] = useState<undefined | number>(convertedInitialWidth || undefined);
-    const [separatorXPosition, setSeparatorXPosition] = useState<undefined | number>(undefined);
-    const [dragging, setDragging] = useState(false);
+    const [leftState, setLeftState] = useState<StateDef>({ leftWidth: convertedInitialWidth, xPos: undefined, dragging: false });
 
-    const onMouseDown = (e: React.MouseEvent) => {
-        setSeparatorXPosition(e.clientX);
-        setDragging(true);
-    };
+    const onMouseDown = (e: React.MouseEvent) => setLeftState({ ...leftState, xPos: e.clientX, dragging: true });
 
     const onMouseMove = (e: MouseEvent) => {
         e.preventDefault();
         onMove(e.clientX);
     };
 
-    const onMouseUp = () => {
-        setDragging(false);
-    };
+    const onMouseUp = () => setLeftState({ ...leftState, dragging: false });
 
     const onMove = (clientX: number) => {
-        if (dragging && leftWidth && separatorXPosition) {
-            const newLeftWidth = leftWidth + clientX - separatorXPosition;
-            setSeparatorXPosition(clientX);
+        if (leftState.dragging && leftState.leftWidth && leftState.xPos) {
+            const newLeftWidth = leftState.leftWidth + clientX - leftState.xPos;
 
             if (newLeftWidth < convertedMinWidth) {
-                setLeftWidth(convertedMinWidth);
+                setLeftState({ ...leftState, leftWidth: convertedMinWidth, xPos: clientX });
                 return;
             }
 
             if (newLeftWidth > convertedMaxWidth) {
-                setLeftWidth(convertedMaxWidth);
+                setLeftState({ ...leftState, leftWidth: convertedMaxWidth, xPos: clientX });
                 return;
             }
 
-            setLeftWidth(newLeftWidth);
+            setLeftState({ ...leftState, leftWidth: newLeftWidth, xPos: clientX });
         }
     };
 
@@ -147,7 +129,7 @@ const SplitView = ({
 
     return (
         <div className={`split-view ${className ?? ''}`}>
-            <LeftPane leftWidth={leftWidth} setLeftWidth={setLeftWidth}>
+            <LeftPane leftWidth={leftState.leftWidth}>
                 {left}
             </LeftPane>
             <div
