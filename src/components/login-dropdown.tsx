@@ -29,14 +29,16 @@ const ChaiseLoginDropdown = ({
 
   /**
    * State variables to align submenu/dropdown to right or left
-   * @fromTop represents top: position
-   * @fromLeft represents left: position
-   * @dropEnd represents whether submenu should be left or right (might be redudant to set this 
+   * subMenuStyle.fromTop represents top: position
+   * subMenuStyle.fromLeft represents left: position
+   * subMenuStyle.dropEnd represents whether submenu should be left or right (might be redudant to set this 
    * state variable, but bootstrap might be using this dropEnd or dropStart class internally)
    */ 
-  const [fromTop, setFromTop] = useState<number>();
-  const [fromLeft, setFromLeft] = useState<number>();
-  const [dropEnd, setDropEnd] = useState<boolean>(true);
+  const [subMenuStyle, setSubMenuStyle] = useState<any>({
+    fromTop: 0,
+    fromLeft: 0,
+    dropEnd: true
+  });
 
   /**
    * Function is responsible for aligning submenu to left or right based on the available right space
@@ -51,6 +53,10 @@ const ChaiseLoginDropdown = ({
     const threshold = windowRef.innerWidth;
 
     if (event.currentTarget) {
+
+      let fromTop = 0;
+      let fromLeft = 0;
+      let dropEnd = true;
 
       const parentMenuEleRect = event.currentTarget.getBoundingClientRect();
 
@@ -74,29 +80,33 @@ const ChaiseLoginDropdown = ({
       const availableHeight = winHeight - y;
       if (childHeight > availableHeight) {
         if ((childHeight - availableHeight) > y) {
-          setFromTop(0);
+          fromTop = 0;
         } else {
-          setFromTop(y - (childHeight - availableHeight))
+          fromTop = y - (childHeight - availableHeight);
         }
         subMenu.style.maxHeight = winHeight - padding + 'px';
       } else {
-        setFromTop(y);
+        fromTop = y;
       }
   
       // If elements' position is greater than threshold, align left
       if (alignRight && (x + parentWidth + childWidth) < threshold) {
         // Align right if parentMenu is right and subMenu is within window screen
-        setDropEnd(true);
-        setFromLeft(x + parentWidth);
+        fromLeft = x + parentWidth;
       } else if (!alignRight && (x - childWidth) < 0) {
         // Align right if parentMenu is left and subMenu is within window screen
-        setDropEnd(true);
-        setFromLeft(x + parentWidth)
+        fromLeft = x + parentWidth;
       } else {
         // Align left if parentMenu is left and subMenu is within window screen
-        setDropEnd(false);
-        setFromLeft(x - childWidth);
+        dropEnd = false;
+        fromLeft = x - childWidth;
       }
+
+      setSubMenuStyle({
+        fromLeft, 
+        fromTop,
+        dropEnd
+      });
     }
   }
 
@@ -120,7 +130,7 @@ const ChaiseLoginDropdown = ({
     return (
       <Dropdown
         key={index}
-        drop={dropEnd ? 'end' : 'start'}
+        drop={subMenuStyle.dropEnd ? 'end' : 'start'}
         className='dropdown-submenu'
         ref={dropdownWrapper}
         onClick={alignDropDown}
@@ -137,8 +147,8 @@ const ChaiseLoginDropdown = ({
           // used to align submenu to left or right
           renderOnMount
           style={{ 
-            top: fromTop, 
-            left: fromLeft, 
+            top: subMenuStyle.fromTop, 
+            left: subMenuStyle.fromLeft, 
           }}
           // Moved inline style position: fixed property to css class
           className='custom-dropdown-submenu'
@@ -147,7 +157,7 @@ const ChaiseLoginDropdown = ({
             menu={item.children || []}
             openProfileCb={openProfileCb}
             parentDropdown={dropdownWrapper}
-            alignRight={dropEnd}
+            alignRight={subMenuStyle.dropEnd}
           />
         </Dropdown.Menu>
       </Dropdown>)
