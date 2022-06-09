@@ -335,7 +335,7 @@ const ChaiseNavbar = (): JSX.Element => {
             onClick={adjustNavBarHeight}
             renderMenuOnMount
           >
-            <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>
+            <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></ChaiseLoginDropdown>
           </NavDropdown>
         );
       }

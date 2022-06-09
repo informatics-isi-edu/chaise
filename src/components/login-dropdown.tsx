@@ -12,18 +12,18 @@ import {
   onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 interface ChaiseLoginDropdownProps {
   menu: MenuOption[],
   openProfileCb?: MouseEventHandler,
   parentDropdown: any // TODO: useRef wrapper type
+  alignRight: boolean
 }
 
 // NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax
 //       hasn't been updated to use the "types" or set default types on menu ingest
 const ChaiseLoginDropdown = ({
-  menu, openProfileCb, parentDropdown
+  menu, openProfileCb, parentDropdown, alignRight
 }: ChaiseLoginDropdownProps): JSX.Element => {
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
@@ -52,26 +52,48 @@ const ChaiseLoginDropdown = ({
 
     if (event.currentTarget) {
 
-      const x = event.currentTarget.getBoundingClientRect().x;
-      const y = event.currentTarget.getBoundingClientRect().y;
-      const parentWidth = event.currentTarget.getBoundingClientRect().width;
+      const parentMenuEleRect = event.currentTarget.getBoundingClientRect();
+
+      const x = parentMenuEleRect.x;
+      const y = parentMenuEleRect.y;
+      const parentWidth = parentMenuEleRect.width;
 
       // This is necessary because getBoundingClientRect() will give 0, if div is not present in DOM
       const subMenu = event.currentTarget.getElementsByClassName('dropdown-menu')[0];
       subMenu.style.display = 'block';
       const childWidth = subMenu.getBoundingClientRect().width;
+      
+      // TODO: To fix the issue by assigning submenu’s height to available 
+      // screen height so that all menu items are visible.
+      // const childHeight = subMenu.getBoundingClientRect().height;
+
       subMenu.style.display = null;
       subMenu.style.maxHeight = winHeight - y - padding + 'px';
+
+      // TODO: To fix the issue by assigning submenu’s height to available 
+      // screen height so that all menu items are visible.
+      // const availableHeight = winHeight - y;
+      // if (childHeight + y >= winHeight) {
+      //   setFromTop(y - (childHeight - availableHeight));
+      // } else {
+      //   setFromTop(y);
+      // }
 
       setFromTop(y);
   
       // If elements' position is greater than threshold, align left
-      if ((x + parentWidth) > threshold) {
-        setDropEnd(false);
-        setFromLeft(x - childWidth);
-      } else {
+      if (alignRight && (x + parentWidth) < threshold) {
+        // Align right if parentMenu is right and subMenu is within window screen
         setDropEnd(true);
         setFromLeft(x + parentWidth);
+      } else if (!alignRight && (x - childWidth) < 0) {
+        // Align right if parentMenu is left and subMenu is within window screen
+        setDropEnd(true);
+        setFromLeft(x + parentWidth)
+      } else {
+        // Align left if parentMenu is left and subMenu is within window screen
+        setDropEnd(false);
+        setFromLeft(x - childWidth);
       }
     }
   }
@@ -123,6 +145,7 @@ const ChaiseLoginDropdown = ({
             menu={item.children || []}
             openProfileCb={openProfileCb}
             parentDropdown={dropdownWrapper}
+            alignRight={dropEnd}
           />
         </Dropdown.Menu>
       </Dropdown>)
