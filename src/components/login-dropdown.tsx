@@ -47,7 +47,7 @@ const ChaiseLoginDropdown = ({
   const alignDropDown = (event: any) => {
     event.preventDefault();
     const winHeight = windowRef.innerHeight;
-    const padding = 15;
+    const padding = 30;
     const threshold = windowRef.innerWidth;
 
     if (event.currentTarget) {
@@ -63,23 +63,21 @@ const ChaiseLoginDropdown = ({
       subMenu.style.display = 'block';
       const childWidth = subMenu.getBoundingClientRect().width;
       
-      // TODO: To fix the issue by assigning submenu’s height to available 
+      // NOTE: To fix the issue by assigning submenu’s height to available 
       // screen height so that all menu items are visible.
-      // const childHeight = subMenu.getBoundingClientRect().height;
+      const childHeight = subMenu.scrollHeight;
 
       subMenu.style.display = null;
-      subMenu.style.maxHeight = winHeight - y - padding + 'px';
 
-      // TODO: To fix the issue by assigning submenu’s height to available 
+      // NOTE: To fix the issue by assigning submenu’s height to available 
       // screen height so that all menu items are visible.
-      // const availableHeight = winHeight - y;
-      // if (childHeight + y >= winHeight) {
-      //   setFromTop(y - (childHeight - availableHeight));
-      // } else {
-      //   setFromTop(y);
-      // }
-
-      setFromTop(y);
+      const availableHeight = winHeight - y;
+      if (childHeight > availableHeight) {
+        setFromTop(y - (childHeight - availableHeight))
+        subMenu.style.maxHeight = winHeight - padding + 'px';
+      } else {
+        setFromTop(y);
+      }
   
       // If elements' position is greater than threshold, align left
       if (alignRight && (x + parentWidth + childWidth) < threshold) {
