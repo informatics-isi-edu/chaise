@@ -73,7 +73,11 @@ const ChaiseLoginDropdown = ({
       // screen height so that all menu items are visible.
       const availableHeight = winHeight - y;
       if (childHeight > availableHeight) {
-        setFromTop(y - (childHeight - availableHeight))
+        if ((childHeight - availableHeight) > y) {
+          setFromTop(0);
+        } else {
+          setFromTop(y - (childHeight - availableHeight))
+        }
         subMenu.style.maxHeight = winHeight - padding + 'px';
       } else {
         setFromTop(y);
