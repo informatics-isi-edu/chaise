@@ -133,7 +133,7 @@ const ChaiseNavbar = (): JSX.Element => {
     // When multiple submenus are open on the window, and resize event happens,
     // it should calculate height of all submenus & update.
     // Checking all dropdown menu with show class to recalculate height on resize event
-    const menubar = document.getElementById('navbarHeader');
+    const menubar = document.getElementById('menubarHeader');
     if (menubar) {
      const allElementswithShow = menubar.getElementsByClassName('dropdown-menu');
      for (let i = 0; i < allElementswithShow.length; i++) {
@@ -346,7 +346,7 @@ const ChaiseNavbar = (): JSX.Element => {
   };
 
   return (
-    <header id='navbarHeader'>
+    <header id='navheader'>
       {renderBanners(topBanners)}
       <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse'>
         <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
@@ -356,7 +356,7 @@ const ChaiseNavbar = (): JSX.Element => {
         </Navbar.Brand>
         <Navbar.Toggle aria-controls='navbar-dark-example'>Menu</Navbar.Toggle>
         <Navbar.Collapse id='navbar-dark-example'>
-          <Nav className='navbar-menu-options nav'>
+          <Nav className='navbar-menu-options nav' id='menubarHeader'>
             {renderNavbarMenuDropdowns()}
           </Nav>
           {/* Since we are using float: right for divs, position for chaise login comes first */}
