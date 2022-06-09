@@ -48,7 +48,7 @@ const ChaiseLoginDropdown = ({
     event.preventDefault();
     const winHeight = windowRef.innerHeight;
     const padding = 15;
-    const threshold = 0.75 * windowRef.innerWidth;
+    const threshold = windowRef.innerWidth;
 
     if (event.currentTarget) {
 
@@ -82,7 +82,7 @@ const ChaiseLoginDropdown = ({
       setFromTop(y);
   
       // If elements' position is greater than threshold, align left
-      if (alignRight && (x + parentWidth) < threshold) {
+      if (alignRight && (x + parentWidth + childWidth) < threshold) {
         // Align right if parentMenu is right and subMenu is within window screen
         setDropEnd(true);
         setFromLeft(x + parentWidth);

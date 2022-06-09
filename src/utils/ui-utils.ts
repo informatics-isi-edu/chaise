@@ -295,6 +295,8 @@ export function debounce(callback: Function, timeout: number) {
       callback.apply(this, args);
     }, timeout);  
   }
+}
+
 /*
   This function is used for firing custom events
   @param {string} eventName - the event name
