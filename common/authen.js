@@ -305,10 +305,21 @@
                 };
             }
 
-            var x = window.innerWidth/2 - 800/2;
-            var y = window.innerHeight/2 - 600/2;
+            // make sure the width and height are not bigger than the screen
+            var popupWidth = Math.min(800, screen.availWidth), 
+                popupHeight = Math.min(750, screen.availHeight);
+            var topOffset = 50;
 
-            var win = window.open("", '_blank','width=800,height=750,left=' + x + ',top=' + y);
+            // left should be in the middle of the screen
+            var popupLeft = (screen.availWidth - popupWidth) / 2;
+            // top should just have some small offset if there's available space
+            var popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
+
+            // open a window with proper position and width and height
+            var win = window.open("", '_blank','width=' + popupWidth + ',height=' + popupHeight + ',left=' + popupLeft + ',top=' + popupTop);
+
+            // focus on the opened window
+            win.focus();
 
             logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
         };
