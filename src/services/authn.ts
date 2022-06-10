@@ -127,10 +127,21 @@ export default class AuthnService {
       };
     }
 
-    const x = window.innerWidth / 2 - 800 / 2;
-    const y = window.innerHeight / 2 - 600 / 2;
+    // make sure the width and height are not bigger than the screen
+    const popupWidth = Math.min(800, screen.availWidth);
+    const popupHeight = Math.min(750, screen.availHeight)
+    const topOffset = 50;
 
-    const win = window.open('', '_blank', `width=800,height=600,left=${x},top=${y}`);
+    // left should be in the middle of the screen
+    const popupLeft = (screen.availWidth - popupWidth) / 2;
+    // top should just have some small offset if there's available space
+    const popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
+
+    // open a window with proper position and width and height
+    const win = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
+
+    // focus on the opened window
+    win?.focus();
 
     AuthnService.logInHelper(AuthnService.loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };

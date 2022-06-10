@@ -11,6 +11,7 @@ This is a guide for people who develop Chaise.
   * [Lint](#lint)
   * [CSS/SCSS](#cssscss-1)
   * [Font Awesome](#font-awesome)
+  * [Handling time](#handling-time)
 - [Folder structure](#folder-structure)
 - [Building and installation](#building-and-installation)
     + [Make targets](#make-targets)
@@ -219,6 +220,15 @@ of `font-family` or `font-weight` and let font-awesome handle it for us.
   are available. In some cases, we might want to change the font-weight group by
   updating the font-awesome classes that are used.
 
+### Handling time
+
+Regarding `timestamp` and `timestamptz` column types:
+
+- A `timestamptz` value is stored as a single point in time in Postgres. When the value is retrieved, the value is in whatever time zone the database is in.
+- A `timestamp` value is stored as a string with the date and time; time zone info will be dropped in Postgres.
+- When submitting values for `timestamp` and `timestamptz` columns, the app should just submit the values as browser's local time. (The app currently converts to UTC before submitting, which is unnecessary.)
+- When displaying `timestamp` value, display whatever is in the database (the date and time, no need to convert to local time because there's no time zone info attached anyway)
+- When displaying `timestamptz` value, convert that value to browser's local time.
 
 ## Folder structure
 
