@@ -17,6 +17,12 @@ interface ChaiseLoginDropdownProps {
   menu: MenuOption[],
   openProfileCb?: MouseEventHandler,
   parentDropdown: any // TODO: useRef wrapper type
+  /**
+   * Property to capture parent menu's alignment. 
+   * submenu takes alginRight prop and makes decision whether to align right or left
+   * based on parent's alignment. (eg: if parent alignment is right, child will continue to align
+   * right till it reaches end of the screen)
+   */
   alignRight: boolean
 }
 
