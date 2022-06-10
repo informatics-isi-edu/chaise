@@ -51,7 +51,7 @@ You should not copy the contents of `dist/chaise-dependencies.html` manually and
 
 If you're using [Jekyll](https://jekyllrb.com), the following are the steps on how you can achieve this:
 
-1. Make sure `make install` is done in Chaise.
+1. Make sure `make dist` and `make deploy` is done in Chaise.
     - This will create the `dist` folder in your specified build target (by default it's `/var/www/html/chaise`).
     - It will also generate the `dist/chaise-dependencies.html`.
 

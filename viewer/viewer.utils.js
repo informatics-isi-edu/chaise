@@ -1110,7 +1110,7 @@
         }
 
         /**
-         * The expected input format: [{channelNumber: , settings: }]]
+         * The expected input format: [{channelNumber: , channelConfig: , pseudoColor}]]
          * TODO this function is not using ermrestjs and directly sending a request
          * to ermrest. This is because we cannot assume the config column is visible,
          * while the Reference.update only allows updating of the visible columns.
@@ -1125,13 +1125,17 @@
             url += UriUtils.fixedEncodeURIComponent(channelConfig.table_name) + "/";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.reference_image_column_name) + ",";
             url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_number_column_name) + ";";
-            url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_config_column_name);
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.channel_config_column_name) + ",";
+            url += UriUtils.fixedEncodeURIComponent(channelConfig.pseudo_color_column_name);
 
             var ch = osdConstant.CHANNEL_CONFIG;
             data.forEach(function (d) {
                 var saved = {};
                 saved[channelConfig.reference_image_column_name] = context.imageID;
                 saved[channelConfig.channel_number_column_name] = d.channelNumber;
+                if (d.pseudoColor) {
+                    saved[channelConfig.pseudo_color_column_name] = d.pseudoColor;
+                }
                 var config = {};
                 config[ch.NAME_ATTR] = ch.FORMAT_NAME;
                 config[ch.VERSION_ATTR] = channelConfigFormatVersion;
@@ -1224,4 +1228,4 @@
 
     }]);
 
-  })();
+})();

@@ -362,7 +362,10 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(done){
-          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
+          const modalOkBtn = element(by.id('error-ok-button'));
+          // make sure ok button is clickable
+          browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+          chaisePage.clickButton(modalOkBtn).then(function(){
               return chaisePage.waitForElement(modalTitle);
           }).then (function (){
              return modalTitle.getText();
@@ -376,7 +379,10 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should redirect to RecordSet', function(done){
-          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
+          const modalOkBtn = element(by.id('error-ok-button'));
+          // make sure ok button is clickable
+          browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+          chaisePage.clickButton(modalOkBtn).then(function(){
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
@@ -479,7 +485,13 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(){
+            const modalOkBtn = element(by.id('error-ok-button'));
+            // make sure ok button is clickable
+            browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+            modalOkBtn.click().then(function(){
+                // doing .click() triggers the browser to show the alert
+                return browser.switchTo().alert().accept();
+            }).then(function () {
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 var newapplink = url.replace("recordedit", "recordset"),

@@ -283,11 +283,10 @@ This section will focus on more advanced details related to installation. Please
 #### Make targets
 The following are all the Makefile targets related to installation:
 
-- `install`:  This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
-- `install-wo-deps`: Designed for development purposes, will only build and install Chaise.
-- `install-w-config`: The same as `install`, but will also `rsync` the configuration files.
-- `install-wo-deps-w-config`: The same as `install-wo-deps`, but will also `rsync` the configuration files.
-
+- `dist`: This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
+- `dist-wo-deps`: Designed for development purposes, will only build and install Chaise.
+- `deploy`: Deployed the built folders into the given location.
+- `deploy-w-config`:  The same as `deploy`, but will also `rsync` the configuration files.
 #### NPM
 This section will go over how we think the NPM modules should be managed.
 
