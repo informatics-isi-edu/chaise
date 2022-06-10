@@ -117,7 +117,7 @@ body > .container {
     border-radius: 0;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 992px) {
     .navbar-collapse {
         overflow: auto;
         display: grid;
@@ -458,6 +458,10 @@ nav.navbar {
         // Display is set to block in bigger screens to align login and search input 
         .navbar-collapse.collapse {
             display: block !important;
+        }
+
+        div.dropdown-submenu.show {
+            background-color: #d0e0f0;
         }
     }
 }
