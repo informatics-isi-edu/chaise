@@ -428,7 +428,7 @@ nav.navbar {
 
         .dropdown-menu > a,
         .dropdown-menu > div > a {  
-            color: #9d9d9d;
+            color: $dropdown-menu-anchor-color;
 
             &:focus,
             &:hover {
@@ -445,11 +445,11 @@ nav.navbar {
             color: white;
 
             &:hover {
-                background-color: #333;
+                background-color: $black-color;
             }
             &:focus {
                 box-shadow: none;
-                background-color: #333;
+                background-color: $black-color;
             }
         }
     }
@@ -461,7 +461,7 @@ nav.navbar {
         }
 
         div.dropdown-submenu.show {
-            background-color: #d0e0f0;
+            background-color: $table-header-background-color;
         }
     }
 }
