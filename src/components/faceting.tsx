@@ -46,7 +46,7 @@ const Faceting = ({
         isOpen: fc.isOpen,
         isLoading: fc.isOpen,
         noConstraints: false,
-        facetError: false
+        facetError: false,
       });
     });
     // all the facets are closed, open the first one
@@ -130,19 +130,26 @@ const Faceting = ({
     setDisplayFacets(true);
   }, []);
 
+  /**
+   * After all the facets are registerd, now we can initialize the data
+   */
   useEffect(() => {
     if (!readyToInitialize) return;
-
-    $log.debug('registering facet callbacks!');
-    registerFacetCallbacks(updateFacetStates, updateFacets);
-
     // initialize the recordset data only when facets are loaded
     initialize();
   }, [readyToInitialize]);
 
+  /**
+   * This will ensure the registered functions in flow-control
+   * are updated based on the latest facet changes
+   */
+  useEffect(() => {
+    registerFacetCallbacks(updateFacetStates, updateFacets);
+  }, [facetModels]);
+
   //-------------------  flow-control related functions:   --------------------//
 
-  const registerFacet = (index: number, updateFacet: Function, preprocessFacet: Function) => {
+  function registerFacet (index: number, updateFacet: Function, preprocessFacet: Function) {
     facetRequestModels.current[index].updateFacet = updateFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
     facetRequestModels.current[index].registered = true;
@@ -154,8 +161,6 @@ const Faceting = ({
   }
 
   const updateFacetStates = (cause?: string) => {
-    $log.debug('updating facets states!!!!!!!');
-
     // batch all the state changes into one
     const modifiedAttrs: { [index: number]: { [key: string]: boolean } } = {};
 
@@ -204,13 +209,12 @@ const Faceting = ({
   }
 
   const updateFacets = (flowControl: any, updatePage: Function) => {
-    $log.debug('updating facets!!!!!!!');
     if (!flowControl.current.haveFreeSlot()) {
       $log.debug('no free slot!');
       return;
     }
 
-    $log.debug(`have free slotm preprocess length: ${facetsToPreProcess.current.length}`);
+    $log.debug(`have free slot, preprocess length: ${facetsToPreProcess.current.length}`);
 
     // preprocess facets first
     const index = facetsToPreProcess.current.shift();
@@ -274,7 +278,7 @@ const Faceting = ({
       setFacetModelByIndex(index, { isLoading: true });
     }
 
-    $log.debug(`faceting: sending a request to update the facet index=${index}`);
+    $log.debug(`faceting: asking flow control to update facet index=${index}`);
 
     if (!Number.isInteger(frm.reloadStartTime) || frm.reloadStartTime === -1) {
       frm.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
@@ -436,6 +440,7 @@ const Faceting = ({
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
+  $log.debug(`open facets are: ${activeKeys}`);
 
   if (!displayFacets) {
     return <></>

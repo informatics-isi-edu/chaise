@@ -753,7 +753,7 @@ export default function RecordsetProvider({
     });
   };
 
-  const registerFacetCallbacks = (updateFacetStatesCallback: any, updateFacetsCallback: any) => {
+  const registerFacetCallbacks = function (updateFacetStatesCallback: any, updateFacetsCallback: any) {
     flowControl.current.updateFacetsCallback = updateFacetsCallback;
     flowControl.current.updateFacetStatesCallback = updateFacetStatesCallback;
   };

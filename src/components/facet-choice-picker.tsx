@@ -45,16 +45,18 @@ const FacetChoicePicker = ({
 
   /**
    * register the flow-control related functions for the facet
+   * this will ensure the functions are registerd based on the latest facet changes
    */
   useEffect(() => {
     register(index, updateFacet, preProcessFacet);
-  }, []);
+  }, [facetModel]);
 
   //-------------------  flow-control related functions:   --------------------//
 
   const updateFacet = () => {
     const defer = Q.defer();
     $log.debug(`updating facet ${index}`);
+    $log.debug(`facet model is ${facetModel.isOpen}, ${facetModel.isLoading}`);
 
     let reference: any, columnName: string;
     if (facetColumn.isEntityMode) {
@@ -92,7 +94,7 @@ const FacetChoicePicker = ({
     })(reference.uri);
 
     return defer.promise;
-  };
+  }
 
   const preProcessFacet = () => {
     const defer = Q.defer();
@@ -103,7 +105,7 @@ const FacetChoicePicker = ({
     }, 1000);
 
     return defer.promise;
-  };
+  }
 
   //-------------------  UI related callbacks:   --------------------//
 
