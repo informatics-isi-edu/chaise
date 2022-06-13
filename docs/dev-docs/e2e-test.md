@@ -56,7 +56,7 @@ You can get your cookie by querying the database, or using the following simple 
 2. Make sure all the dependencies are installed by running the following command:
 
     ```sh
-    $ make deps-test
+    make deps-test
     ```
 
     This will install all the npm dependencies that are needed and will also make sure the Selenium's WebDriver that protractor uses is updated.
@@ -65,15 +65,18 @@ You can get your cookie by querying the database, or using the following simple 
     - If the version of Chrome that is installed on your machine is different from the ChromeDriver that Selenium uses, it will throw an error. So make sure both versions are always updated and compatible.
 
 
-3. Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository. (This will upload your local code to the remote server)
+3. Build Chaise without installing the dependencies again:
     ```sh
-    $ make install-wo-deps
+    make dist-wo-deps
     ```
+    As the name suggests this will not install dependencies. That's why you need to install all the dependencies in step 2.
 
-    - As the name suggests this will not install dependencies. That's why you need to install all the dependencies in step 2. The following are other available targets related to install:
-      - `install`: Will install production dependencies before installing (not advised for testing purposes and should be used for production)
-      - `install-w-config`: The same as `install` and will also copy the `chaise-config.js` file to the remote location.
-      - `install-wo-deps-w-config`: The same as `install-w-deps` and will also copy the `chaise-config.js` file to the remote location.
+4. Upload your code on the `https://dev.isrd.isi.edu/~<your-user-directory>` by the running the following command in your local chaise repository (This will upload your local code to the remote server):
+
+    ```sh
+    make deploy
+    ```
+    If you want to also deploy the existing config files in your local machine, you can use the `make deploy-w-config` command instead.
 
 
 ### Test cases

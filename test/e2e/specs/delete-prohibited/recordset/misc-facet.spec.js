@@ -696,7 +696,6 @@ describe("Other facet features, ", function() {
         });
     });
 
-    return;
     describe("regarding UnsupportedFilters handling, ", function () {
         var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
         var currParams = testParams.unsupported_filters_error;
