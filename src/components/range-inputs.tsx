@@ -1,6 +1,7 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 import { useState, useRef } from 'react';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+// import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 
 
 /* 
@@ -47,7 +48,7 @@ type RangeInputProps = {
 
 const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, value, id }: RangeInputProps): JSX.Element => {
 
-    const clearVal = () => {
+    const clearInput = () => {
         const element = document.querySelector(`#${id}`) as HTMLInputElement;
         if (element?.value) {
             element.value = '';
@@ -55,20 +56,21 @@ const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, valu
     }
 
     return (
-        <div className='range-input'>
+        <div className='range-input-field chaise-input-control has-feedback'>
             {
                 type in [0, 1] ? <input id={id} type='number' placeholder={placeholder} className={classes} ref={reference} />
-                    : type === 2 ? <input id={id} type='date' className={classes} ref={reference}
+                    : type === 2 ? <input id={id} type='date' className={classes} ref={reference} step='1'
                         defaultValue={value} required pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' />
-                        : <input id={id} type='datetime-local' className={classes} ref={reference} required
-                            min='1970-01-01T00:00:00' max='2999-12-31T11:59:59' />
+                        : <input id={id} type='datetime-local' className={classes} ref={reference}
+                            min='1970-01-01T00:00:00' max='2999-12-31T11:59:59' step='1' required />
 
             }
-            <ClearInputBtn
-                btnClassName='range-remove-btn'
+            <span className='fa-solid fa-x range-input-clear' onClick={clearInput} />
+            {/* <ClearInputBtn
+                btnClassName='chaise-input-control-feedback'
                 clickCallback={clearVal}
                 show
-            />
+            /> */}
         </div>
     )
 }
@@ -76,10 +78,11 @@ const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, valu
 
 
 type RangeInputHOCProps = {
-    type: number
+    type: number,
+    classes?: string
 };
 
-const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
+const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
     const momentJS = windowRef.moment;
     const fromRef = useRef<HTMLInputElement>(null);
     const toRef = useRef<HTMLInputElement>(null);
@@ -122,8 +125,11 @@ const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
         }
 
         if (type === 2 || type === 3) {
-            const fromDate = momentJS(fromVal);
-            const toDate = momentJS(toVal);
+
+            const formatString = type === 2 ? 'YYYY-MM-DD' : 'YYYY-MM-DDThh:mm';
+
+            const fromDate = momentJS(fromVal, formatString, true);
+            const toDate = momentJS(toVal, formatString, true);
 
             if (!fromDate.isValid() || !toDate.isValid()) {
                 // error = type === 2 ? 4 : 5;
@@ -148,9 +154,12 @@ const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
         console.log('validation result:', validatedResult);
 
         if (validatedResult === -1) {
+            // clear out any previous errors when a new submission is validated
+            setError(null);
+
             /* eslint-disable  @typescript-eslint/no-non-null-assertion */
             let fromVal = fromRef.current!.value;
-            let toVal = fromRef.current!.value;
+            let toVal = toRef.current!.value;
             /* eslint-enable  @typescript-eslint/no-non-null-assertion */
 
 
@@ -165,27 +174,29 @@ const RangeInputHOC = ({ type }: RangeInputHOCProps) => {
         }
     };
 
+    const classTypeName = type in [0, 1] ? 'numeric-width' : type === 2 ? 'date-width' : 'time-width'
+
     return (
-        <>
+        <div className={classes}>
             <div className='range-input-container'>
-                <div className='range-input-from'>
-                    <label htmlFor='from-val'>From:</label>
-                    <RangeInput id='from-val' placeholder='from' reference={fromRef} type={type} value='2015-06-01' />
+                <div className={`range-input ${classTypeName}`}>
+                    <label htmlFor='range-from-val'>From:</label>
+                    <RangeInput id='range-from-val' placeholder='from' reference={fromRef} type={type} value='2015-06-01' />
                 </div>
 
-                <div className='range-input-to'>
-                    <label htmlFor='to-val'>To:</label>
-                    <RangeInput id='to-val' placeholder='to' reference={toRef} type={type} value='2018-08-29' />
+                <div className={`range-input ${classTypeName}`}>
+                    <label htmlFor='range-to-val'>To:</label>
+                    <RangeInput id='range-to-val' placeholder='to' reference={toRef} type={type} value='2018-08-29' />
                 </div>
 
-                <button className='chaise-btn chaise-btn-primary' onClick={handleSubmit}>
+                <button className='chaise-btn chaise-btn-primary range-input-submit-btn' onClick={handleSubmit}>
                     <span className='chaise-btn-icon fa-solid fa-check' />
                 </button>
             </div>
             {
                 error && <span className='range-input-error'>{error}</span>
             }
-        </>
+        </div>
     );
 };
 

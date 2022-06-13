@@ -183,6 +183,11 @@ html {
     display: none;
   }
 
+  .remove-input-btn {
+    cursor: pointer;
+    pointer-events: all;
+  }
+
   .disabled-form .btn.btn-inverted[disabled]:hover {
     background-color: white !important;
     border-color: $border-color  !important;

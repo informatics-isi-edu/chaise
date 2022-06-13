@@ -100,40 +100,9 @@
     }
   }
 
-
-  .range-input-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-top: 12px;
-    margin-bottom: 12px;
-
-    .range-input-from,
-    .range-input-to {
-      width: 40%;
-      display: flex;
-      flex-direction: column;
-
-      label {
-        font-weight: 700;
-      }
-    }
-
-    .range-input {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .range-remove-btn {
-      margin-left: 8px;
+  .range-picker {
+    .facet-range-input {
+      margin: 12px 0;
     }
   }
-
-  .range-input-error {
-    color: #a94442;
-  }
-
 }
