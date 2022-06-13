@@ -21,10 +21,9 @@ const INTEGER_REGEXP = /^\-?\d+$/;
 
 const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
 
+const TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
 
-const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
-
-const DATE_FORMAT = 'HH:mm:ss';
+const DATE_FORMAT = 'YYYY-MM-DD';
 
 const errorMsgMap: {
     [key: number]: string;
@@ -34,7 +33,7 @@ const errorMsgMap: {
     2: 'Please enter an integer value',
     3: 'Please enter a decimal value',
     4: 'Please enter a date value in YYYY-MM-DD format',
-    5: 'Please enter a time value in 24-hr HH:MM:SS format'
+    5: 'Please enter a time value in 24-hr YYYY-MM-DDTHH:MM format'
 };
 
 type RangeInputProps = {
@@ -61,8 +60,8 @@ const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, valu
                 type in [0, 1] ? <input id={id} type='number' placeholder={placeholder} className={classes} ref={reference} />
                     : type === 2 ? <input id={id} type='date' className={classes} ref={reference} step='1'
                         defaultValue={value} required pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' />
-                        : <input id={id} type='datetime-local' className={classes} ref={reference}
-                            min='1970-01-01T00:00:00' max='2999-12-31T11:59:59' step='1' required />
+                        : <input id={id} type='datetime-local' placeholder='YYYY-MM-DDTHH:MM' className={classes} ref={reference}
+                            min='1970-01-01T00:00' max='2999-12-31T11:59' required />
 
             }
             <span className='fa-solid fa-x range-input-clear' onClick={clearInput} />
@@ -126,7 +125,7 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
 
         if (type === 2 || type === 3) {
 
-            const formatString = type === 2 ? 'YYYY-MM-DD' : 'YYYY-MM-DDThh:mm';
+            const formatString = type === 2 ? DATE_FORMAT : TIME_FORMAT;
 
             const fromDate = momentJS(fromVal, formatString, true);
             const toDate = momentJS(toVal, formatString, true);
@@ -157,18 +156,16 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
             // clear out any previous errors when a new submission is validated
             setError(null);
 
+            // no longer needed sine we throw an error in case format is not as expected when checking with moment.isValid
+
+            // if (type in [2, 3]) {
+            //     fromVal = momentJS(fromVal).format(type === 2 ? DATE_FORMAT : TIME_FORMAT);
+            //     toVal = momentJS(toVal).format(type === 2 ? DATE_FORMAT : TIME_FORMAT);
+            // }
+
             /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-            let fromVal = fromRef.current!.value;
-            let toVal = toRef.current!.value;
+            console.log('values sent to server', { fromVal: fromRef.current!.value, toVal: toRef.current!.value });
             /* eslint-enable  @typescript-eslint/no-non-null-assertion */
-
-
-            if (type in [2, 3]) {
-                fromVal = momentJS(fromVal).format(type === 2 ? DATE_FORMAT : TIME_FORMAT);
-                toVal = momentJS(toVal).format(type === 2 ? DATE_FORMAT : TIME_FORMAT);
-            }
-
-            console.log('values sent to server', { fromVal, toVal });
         } else {
             setError(errorMsgMap[validatedResult]);
         }
