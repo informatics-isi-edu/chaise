@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - 'master'
-      - 'filename-ext'
   pull_request:
     branches:
       - 'master'

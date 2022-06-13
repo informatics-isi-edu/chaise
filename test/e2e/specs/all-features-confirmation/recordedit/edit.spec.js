@@ -103,7 +103,7 @@ var testParams = {
            "fileid", "uri", "filename", "bytes"
        ],
        results: [
-           ["4", {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/4/png/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
+           ["4", {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/4/.png/", "value": "testfile500kb.png"}, "testfile500kb.png", "512,000"]
        ],
        files : [{
            name: "testfile500kb.png",
