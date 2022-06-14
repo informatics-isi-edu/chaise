@@ -2,7 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
 // import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 // import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 // import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 
 // components
@@ -70,9 +70,12 @@ const FacetRangePicker = ({
       type: 'bar'
     }],
     config: {
-      displayModeBar: false
+      displayModeBar: false,
+      responsive: true
     },
     layout: {
+      autosize: true,
+      height: 150,
       margin: {
         l: 40,
         r: 0,
@@ -101,6 +104,8 @@ const FacetRangePicker = ({
     frames: []
   });
 
+  const plotlyRef = useRef<any>(null)
+
   const numBuckets = facetColumn.histogramBucketCount;
 
   const isColumnOfType = (columnType: string) => {
@@ -123,6 +128,10 @@ const FacetRangePicker = ({
     }
 
     setPlot({ ...plot, layout: layout });
+
+    document.addEventListener('resizable-width-change', () => {
+      if (plotlyRef) plotlyRef.current.resizeHandler();
+    });
 
     // NOTE: temporary
     updateFacetData();
@@ -589,12 +598,94 @@ const FacetRangePicker = ({
     });
   }
 
+  // this event is triggered when the:
+  //      plot is zoomed/double clicked
+  //      xaxis is panned/stretched/shrunk
+  const plotlyRelayout = (event: any) => {
+    try {
+      setTimeout(function () {
+        let shouldRelayout = true;
+        // min/max is value interpretted by plotly by position of range in respect to x axis values
+        const min = event['xaxis.range[0]'];
+        const max = event['xaxis.range[1]'];
+
+        // This case can happen when:
+        //   - the user double clicks the plot
+        //   - the relayout event is called because the element was resized (panel stretched or shrunk)
+        //   - Plotly.relayout is called to update xaxis.fixedrange
+        // if both undefined, don't re-fetch data
+        if (typeof min === 'undefined' && typeof max === 'undefined') {
+          shouldRelayout = false
+          setCompState({...compState, relayout: shouldRelayout});
+          return;
+        }
+
+        let minMaxRangeOptions = {absMin: compState.rangeOptions.absMin, absMax: compState.rangeOptions.absMax};
+        // if min is undefined, absMin remains unchanged (happens when xaxis max is stretched)
+        // and if not null, update the value
+        if (min !== null && typeof min !== 'undefined') {
+          if (isColumnOfType('int')) {
+            minMaxRangeOptions.absMin = Math.round(min);
+          } else if (isColumnOfType('date')) {
+            minMaxRangeOptions.absMin = windowRef.moment(min).format(dataFormats.date);
+          } else if (isColumnOfType('timestamp')) {
+            const minMoment = windowRef.moment(min);
+            minMaxRangeOptions.absMin = {
+              date: minMoment.format(dataFormats.date),
+              time: minMoment.format(dataFormats.time24)
+            };
+          } else {
+            minMaxRangeOptions.absMin = min;
+          }
+        }
+
+        // if max is undefined, absMax remains unchanged (happens when xaxis min is stretched)
+        // and if not null, update the value
+        if (max !== null && typeof max !== 'undefined') {
+          if (isColumnOfType('int')) {
+            minMaxRangeOptions.absMax = Math.round(max);
+          } else if (isColumnOfType('date')) {
+            minMaxRangeOptions.absMax = windowRef.moment(max).format(dataFormats.date);
+          } else if (isColumnOfType('timestamp')) {
+            const maxMoment = windowRef.moment(max);
+            minMaxRangeOptions.absMax = {
+              date: maxMoment.format(dataFormats.date),
+              time: maxMoment.format(dataFormats.time24)
+            }
+          } else {
+            minMaxRangeOptions.absMax = max;
+          }
+        } 
+        console.log(minMaxRangeOptions);
+
+        setCompState({
+          ...compState,
+          relayout: shouldRelayout,
+          rangeOptions: {
+            ...compState.rangeOptions,
+            absMin: minMaxRangeOptions.absMin,
+            absMax: minMaxRangeOptions.absMax,
+          }
+        });
+        
+        // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
+      });
+    } catch (err) {
+      // setRangeVars();
+      $log.warn(err);
+    }
+  }
+
   const renderPlot = () => {
     if (plot.data[0].x.length < 1 || plot.data[0].y.length < 1) return;
     return (<Plot
+      config={plot.options}
       data={plot.data}
       layout={plot.layout}
-      config={plot.options}
+      onRelayout={(event) => plotlyRelayout(event)}
+      ref={plotlyRef}
+      style={{ 'width': '100%' }}
+      useResizeHandler
     // plotly events have their own prop names
     />)
   }
@@ -608,12 +699,54 @@ const FacetRangePicker = ({
     const lineWithApostrophe = 'Interacting with the histogram does not automatically apply the filter, ' +
       'it will fill in the min/max input fields for you based on the histogram\'s current range.'
 
-    return(<>
+    return (<>
       <p>You can interact with the histogram in 2 ways: zooming and panning.</p>
       <p>{splitLine1}</p>
       <p>{splitLine2}</p>
       <p>{lineWithApostrophe}</p>
-      </>)
+    </>)
+  }
+
+  const renderZoomInButton = () => {
+    const zoomInButton = <button
+      type='button'
+      className='zoom-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm'
+      disabled={compState.disableZoomIn}
+      onClick={zoomInPlot}
+    >
+      <span className='chaise-icon chaise-zoom-in'></span>
+    </button>;
+
+    // if button is disabled, don't attach the OverlayTrigger
+    if (compState.disableZoomIn) return (zoomInButton);
+
+    return (<OverlayTrigger
+      placement='bottom'
+      overlay={<Tooltip>Zoom</Tooltip>}
+    >
+      {zoomInButton}
+    </OverlayTrigger>)
+  }
+
+  const renderZoomOutButton = () => {
+    const zoomOutButton = <button
+      type='button'
+      className='unzoom-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm'
+      disabled={compState.histogramDataStack.length <= 1}
+      onClick={zoomOutPlot}
+    >
+      <span className='chaise-icon chaise-zoom-out'></span>
+    </button>;
+
+    // if button is disabled, don't attach the OverlayTrigger
+    if (compState.histogramDataStack.length <= 1) return (zoomOutButton);
+
+    return (<OverlayTrigger
+      placement='bottom'
+      overlay={<Tooltip>Unzoom</Tooltip>}
+    >
+      {zoomOutButton}
+    </OverlayTrigger>)
   }
 
   const renderHistogram = () => {
@@ -622,8 +755,8 @@ const FacetRangePicker = ({
       return (<>
         <div className='plotly-actions'>
           <div className='chaise-btn-group' style={{ 'zIndex': 1 }}>
-            <OverlayTrigger 
-              placement='right' 
+            <OverlayTrigger
+              placement='right'
               overlay={
                 <Tooltip>
                   {renderHistogramHelpTooltip()}
@@ -633,26 +766,8 @@ const FacetRangePicker = ({
                 <span className='chaise-icon chaise-info'></span>
               </button>
             </OverlayTrigger>
-            <OverlayTrigger placement='bottom' overlay={<Tooltip>Zoom</Tooltip>}>
-              <button 
-                type='button' 
-                className='zoom-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm' 
-                disabled={compState.disableZoomIn}
-                onClick={zoomInPlot}
-              >
-                <span className='chaise-icon chaise-zoom-in'></span>
-              </button>
-            </OverlayTrigger>
-            <OverlayTrigger placement='bottom' overlay={<Tooltip>Unzoom</Tooltip>}>
-              <button 
-                type='button' 
-                className='unzoom-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm' 
-                disabled={compState.histogramDataStack.length <= 1}
-                onClick={zoomOutPlot}
-              >
-                <span className='chaise-icon chaise-zoom-out'></span>
-              </button>
-            </OverlayTrigger>
+            {renderZoomInButton()}
+            {renderZoomOutButton()}
             <OverlayTrigger placement='bottom' overlay={<Tooltip>Reset</Tooltip>}>
               <button type='button' className='reset-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm' onClick={resetPlot}>
                 <span className='fas fa-undo'></span>
