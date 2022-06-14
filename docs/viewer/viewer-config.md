@@ -14,21 +14,20 @@ The following is the assumed model of a fully-configured viewer app:
 (All the table and column names are configurable)
 
 - `Image` table is the entry point of the viewer app.
-- `Processed_Image` table is the actual table that stores the data for each image channels
-  in each z-plane. For example if an image has two stored z-indices and each one has
+- `Processed_Image` table is the actual table that stores the data for each image channel
+  in each z-plane. For example, if an image has two stored z-indices and each one has
   two channels, there will be 4 records of `Processed_Image` table.
 - `Image_Channel` table stores the channel information (whether it's greyscale,
   the pseudo color, channel name, and default [channel configuration](#channel-configuration))
-- `Image_Annotation` table stores the annotations. It MUST have an asset column that
-  will be used for storing the annotation files.
+- `Image_Annotation` table stores the annotations. It MUST have an asset column used to store the annotation files.
 - `Annotated_Term` is the term that each annotation will be associated with.
   For each image in each z-index, there can only be one annotation per term.
 
 ## Configuration
 
 To allow flexibility, the configuration file can have multiple configurations.
-Each configuration is specified by a given key name. When users navigate to
-the viewer app, we will use the `config` query parameter to figure out which
+Each configuration is specified by a given key name. When users go to
+the viewer app, we will use the `config` query parameter to determine which
 configuration we should use.
 
 The configuration file must be defined under `viewer/viewer-config.js` and the following is the structure of this config file:
@@ -37,14 +36,14 @@ var viewerConfigs = {
   <config-name>: <configuration>
 };
 ```
-> The variable MUST be defined exactly this way. Viewer app uses this `viewerConfigs` global variable.
+> The variable MUST be defined exactly this way. The viewer app uses this `viewerConfigs` global variable.
 
 Where
 - `<config-name>` is a string that will be matched with the given `config` query parameter.
   - `"*"` can be used to indicate the default configuration. If the query parameter is missing or given name wasn't found, this configuration will be used.
 - `<configuration>` can be one of the following:
   - Another `<config-name>` to indicate that chaise should use the configuration defined under the other `<config-name>`.
-  - An object. The expected structure of object is explained in the [parameters](#parameters) section.
+  - An object. The expected structure of the object is explained in the [parameters](#parameters) section.
 
 
 For example, let's assume the following is how the `viewer-config.js` looks like:
@@ -60,8 +59,8 @@ var viewerConfigs = {
 Then:
 1. Navigating to a page with `?config=img1` query parameter will use `<config2>`.
 2. Navigating to a page with `?config=img2` query parameter will also use `<config2>`.
-3. Navigating to a page without any `config` query parameters, or with `config`
-query parameters other than "img1" and "img2", will ues `<config1>`.
+3. Navigating to a page without any `config` query parameters or with `config`
+query parameters other than "img1" and "img2", will use `<config1>`.
 
 ### Parameters
 
@@ -69,8 +68,8 @@ The parameters are explained in the [`viewer-config-sample.js`](https://github.c
 
 ## Channel Configuration
 
-As it was mentioned in the model section, one of the specified columns in the
-`Image_Channel` table is `Config`. This will allow preserving the values that
+As was mentioned in the model section, one of the specified columns in the
+`Image_Channel` table is `Config`. This will preserve the values that
 will manipulate the displayed colors for each channel. This column is defined as
 `jsonb` type with the following expected structure:
 
@@ -84,9 +83,9 @@ will manipulate the displayed colors for each channel. This column is defined as
 }
 
 ```
-> If Config column is not defined, or the value is not in the expected format, OSD viewer will use the default values.
+> If the Config column is not defined, or the value is not in the expected format, the OSD viewer will use the default values.
 
-Currently, in viewer app, we're using `"channel-parameters"` as the format name and `"1.0"`
+Currently, in the viewer app, we're using `"channel-parameters"` as the format name and `"1.0"`
 as the version number. And the config attributes are as follows:
 
 <table>

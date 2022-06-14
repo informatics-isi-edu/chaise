@@ -187,7 +187,8 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
     if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
     mainContainerPaddingTimeout = setTimeout(function () {
       try {
-        const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+        let padding = mainContainer.clientWidth - topRightPanel.clientWidth;
+        padding = Math.max(padding, 20);
         mainContainer.style.paddingRight = padding + 'px';
       } catch (exp) { }
     }, 10);
@@ -275,4 +276,44 @@ export function copyToClipboard(text: string) {
       $log.error(err);
     });
   }
+}
+
+/*
+  This function is used for firing custom events
+  @param {string} eventName - the event name
+  @param {string} targetElement - a DOM element from which the event will propogate
+  @param {object} detail - a custom object for passing data with the event
+  @param {boolean} bubbles - whether the event should be propagated upward to the parent element
+  @param {boolean} cancelable - whether the event can be canceled using event.preventDefault
+  @param {boolean} composed - whether the event will propagate across the shadow DOM boundary into the standard DOM
+ */
+export function fireCustomEvent(eventName = 'myEvent', targetElement = 'body', detail = {}, bubbles = true, cancelable = true, composed = false) {
+  const customEvent = new CustomEvent(eventName, {
+    detail,
+    bubbles,
+    cancelable,
+    composed,
+  });
+
+  if (targetElement === 'body') {
+    document.querySelector('body')?.dispatchEvent(customEvent);
+  } else {
+    document.body.querySelector(targetElement)?.dispatchEvent(customEvent);
+  }
+
+}
+
+/*
+  This function is used to covnvert values in vw units to px units
+  @param {number} value - the dimension value in vw units
+  @returns {number} the dimension value in px units
+*/
+
+export function convertVWToPixel(value: number) {
+  const e = document.documentElement;
+  const g = document.getElementsByTagName('body')[0];
+  const x = window.innerWidth || e.clientWidth || g.clientWidth;
+
+  const result = (x * value) / 100;
+  return result;
 }

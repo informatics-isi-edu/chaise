@@ -144,7 +144,8 @@
                         "collapse_toc_panel": true,
                         "hide_column_header": true
                     }
-                }
+                },
+                "tag:isrd.isi.edu:2020,history-capture": true
             }
         },
         "fk-table": {

@@ -317,7 +317,6 @@
             require: '?ngModel',
             scope: {
                 toggleCallback: "=?",
-                isRequired: "="
             },
             link: function (scope, elem, attrs, ngModel) {
                 if (!ngModel) return;
@@ -329,7 +328,9 @@
                     showPalette: false,
                     showInitial: true,
                     showInput: true,
-                    allowEmpty: (scope.isRequired !== true)
+                    // we allow empty values  even if it's required (just like any other input)
+                    // chaise will then properly complain if users didn't select any values
+                    allowEmpty: true
                 });
 
                 // when the model changed, change the input
