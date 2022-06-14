@@ -1,16 +1,18 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
-// import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-// import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-// import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { useEffect, useRef, useState } from 'react';
-import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 
 // models
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { 
+  FacetRangePickerProps, 
+  RangeOptions, 
+  RangePickerState, 
+  TimeStamp 
+} from '@isrd-isi-edu/chaise/src/models/range-picker';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -20,35 +22,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getNotNullFilter } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { render } from 'sass';
-
-
-type FacetRangePickerProps = {
-  facetColumn: any,
-  index: number
-}
-
-type RangePickerState = {
-  disableZoomIn: boolean,
-  histogramDataStack: any[],
-  rangeOptions: RangeOptions,
-  relayout: boolean
-}
-
-/**  
- * min and max types for the following column types:
- *   float, integer - number
- *   date           - string
- *   timestamp[tz]  - {date: string, time: string}
- **/
-type RangeOptions = {
-  absMin: number | string | { date: string, time: string } | null,
-  absMax: number | string | { date: string, time: string } | null,
-  model: {
-    min: number | string | { date: string, time: string } | null,
-    max: number | string | { date: string, time: string } | null,
-  }
-}
+import { PlotData, PlotlyDataLayoutConfig } from 'plotly.js';
 
 const FacetRangePicker = ({
   facetColumn,
@@ -61,73 +35,74 @@ const FacetRangePicker = ({
     histogramDataStack: [],
     rangeOptions: { absMin: null, absMax: null, model: { min: null, max: null } },
     relayout: false,
+    plot: {
+      data: [{
+        x: [],
+        y: [],
+        type: 'bar'
+      }],
+      config: {
+        displayModeBar: false,
+        responsive: true
+      },
+      layout: {
+        autosize: true,
+        height: 150,
+        margin: {
+          l: 40,
+          r: 0,
+          b: 80,
+          t: 20,
+          pad: 2
+        },
+        xaxis: {
+          fixedrange: false,
+          ticks: 'inside',
+          tickangle: 45,
+          // set to "linear" for int/float graphs
+          // set to "date" for date/timestamp graphs
+          type: '-'
+          // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
+          // autorange: true // default is true. if range is provided, set to false.
+          // rangemode: "normal"/"tozero"/"nonnegative"
+        },
+        yaxis: {
+          fixedrange: true,
+          zeroline: true,
+          tickformat: ',d'
+        },
+        bargap: 0
+      }
+    }
   })
-
-  const [plot, setPlot] = useState<any>({
-    data: [{
-      x: [],
-      y: [],
-      type: 'bar'
-    }],
-    config: {
-      displayModeBar: false,
-      responsive: true
-    },
-    layout: {
-      autosize: true,
-      height: 150,
-      margin: {
-        l: 40,
-        r: 0,
-        b: 80,
-        t: 20,
-        pad: 2
-      },
-      xaxis: {
-        fixedrange: false,
-        ticks: 'inside',
-        tickangle: 45,
-        // set to "linear" for int/float graphs
-        // set to "date" for date/timestamp graphs
-        type: '-'
-        // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
-        // autorange: true // default is true. if range is provided, set to false.
-        // rangemode: "normal"/"tozero"/"nonnegative"
-      },
-      yaxis: {
-        fixedrange: true,
-        zeroline: true,
-        tickformat: ',d'
-      },
-      bargap: 0
-    },
-    frames: []
-  });
 
   const plotlyRef = useRef<any>(null)
 
   const numBuckets = facetColumn.histogramBucketCount;
 
-  const isColumnOfType = (columnType: string) => {
-    return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
-  }
 
   useEffect(() => {
     if (facetColumn.hideNotNullChoice) {
       setRanges([getNotNullFilter(false)]);
     }
 
-    const layout = { ...plot.layout };
+    const layout = { ...compState.plot.layout };
     if (isColumnOfType('int')) {
-      layout.margin.b = 40;
-      layout.xaxis.tickformat = ',d';
+      if (layout.margin && typeof layout.margin === 'object') layout.margin.b = 40;
+      if (layout.xaxis && typeof layout.xaxis === 'object') layout.xaxis.tickformat = ',d';
     } else if (isColumnOfType('date')) {
-      layout.xaxis.tickformat = '%Y-%m-%d';
+      if (layout.xaxis && typeof layout.xaxis === 'object') layout.xaxis.tickformat = '%Y-%m-%d';
     } else if (isColumnOfType('timestamp')) {
-      layout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
+      if (layout.xaxis && typeof layout.xaxis === 'object') layout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
     }
 
-    setPlot({ ...plot, layout: layout });
+    setCompState({
+      ...compState,
+      plot: {
+        ...compState.plot,
+        layout: layout
+      }
+    });
 
     document.addEventListener('resizable-width-change', () => {
       if (plotlyRef) plotlyRef.current.resizeHandler();
@@ -146,8 +121,9 @@ const FacetRangePicker = ({
     // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
   }, [compState.relayout])
 
+
+  /***** API call functions *****/
   const updateFacetData = () => {
-    console.log('update facet data');
     // var defer = $q.defer();
 
     (function (uri, reloadCauses, reloadStartTime) {
@@ -169,7 +145,6 @@ const FacetRangePicker = ({
       // }
       // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
       facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
-        console.log('facet data: ', response);
         if (facetColumn.sourceReference.uri !== uri) {
           // return false to defer.resolve() in .then() callback
           // return false;
@@ -229,12 +204,12 @@ const FacetRangePicker = ({
   };
 
   // NOTE: min and max are passed as parameters since we don't want to rely on state values being set/updated before sending this request
-  const histogramData = (min: any, max: any, reloadCauses: any, reloadStartTime: any) => {
+  const histogramData = (min: RangeOptions['absMin'], max: RangeOptions['absMax'], reloadCauses: any, reloadStartTime: any) => {
     // var defer = $q.defer();
 
     (function (uri) {
-      const requestMin = isColumnOfType('timestamp') ? dateTimeToTimestamp(min) : min,
-        requestMax = isColumnOfType('timestamp') ? dateTimeToTimestamp(max) : max;
+      const requestMin = isColumnOfType('timestamp') ? dateTimeToTimestamp(min as TimeStamp) : min,
+        requestMax = isColumnOfType('timestamp') ? dateTimeToTimestamp(max as TimeStamp) : max;
 
       const facetLog = getDefaultLogInfo();
       let action = LogActions.FACET_HISTOGRAM_LOAD;
@@ -257,26 +232,17 @@ const FacetRangePicker = ({
         // after zooming in, we don't care about displaying values beyond the set the user sees
         // if set is greater than bucketCount, remove last bin (we should only see this when the max+ bin is present)
         if (shouldRelayout && response.x.length > numBuckets) {
-          // no need to splice off labels because they are used for lookup
-          // i.e. response.labels.(min/max)
           response.x.splice(-1, 1);
           response.y.splice(-1, 1);
           shouldRelayout = false;
         }
 
-        const plotData = [...plot.data];
+        const plotData = [...compState.plot.data] as any[];
         plotData[0].x = response.x;
         plotData[0].y = response.y;
 
-        const plotLayout = { ...plot.layout };
-        plotLayout.xaxis.range = updateHistogramRange();
-
-        setPlot({
-          ...plot,
-          data: plotData,
-          layout: plotLayout,
-          labels: response.labels
-        });
+        const plotLayout = { ...compState.plot.layout };
+        if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') plotLayout.xaxis.range = updateHistogramRange(min, max);
 
         response.min = requestMin;
         response.max = requestMax;
@@ -289,6 +255,11 @@ const FacetRangePicker = ({
           ...compState,
           disableZoomIn: disableZoomIn(min, max),
           histogramDataStack: histogramDataStack,
+          plot: {
+            ...compState.plot,
+            data: plotData,
+            layout: plotLayout
+          },
           relayout: shouldRelayout,
           rangeOptions: {
             absMin: min,
@@ -309,28 +280,18 @@ const FacetRangePicker = ({
     // return defer.promise;
   }
 
+
+  /***** Helpers and Setter functions *****/
+  const isColumnOfType = (columnType: string) => {
+    return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
+  }
+
   const getDefaultLogInfo = () => {
     const res = facetColumn.sourceReference.defaultLogInfo;
 
     // TODO: res.stack for defaultLogInfo
     // res.stack = scope.parentCtrl.getFacetLogStack(index);
     return res;
-  }
-
-  // sets both the range and the inputs
-  const setRangeVarsAndRelayout = () => {
-    const tempPlot = { ...plot };
-    tempPlot.layout.xaxis.range = updateHistogramRange();
-
-    const tempState = { ...compState };
-
-    const inputModel = tempState.rangeOptions.model;
-    inputModel.min = compState.rangeOptions.absMin;
-    inputModel.max = compState.rangeOptions.absMax;
-
-    console.log('set range vars');
-    setPlot(tempPlot);
-    setCompState(tempState);
   }
 
   const showHistogram = (): boolean => {
@@ -451,7 +412,7 @@ const FacetRangePicker = ({
    * @return {string} timestamp in submission format
    * NOTE might return `null`
    */
-  const dateTimeToTimestamp = (obj: any) => {
+  const dateTimeToTimestamp = (obj: TimeStamp) => {
     if (!obj) return null;
     const ts = obj.date + obj.time;
     return windowRef.moment(ts, dataFormats.date + dataFormats.time24).format(dataFormats.datetime.submission);
@@ -472,26 +433,28 @@ const FacetRangePicker = ({
     };
   }
 
-  const updateHistogramRange = () => {
+  const updateHistogramRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
     if (isColumnOfType('timestamp')) {
-      return [dateTimeToTimestamp(compState.rangeOptions.absMin), dateTimeToTimestamp(compState.rangeOptions.absMax)];
+      return [dateTimeToTimestamp(min as TimeStamp), dateTimeToTimestamp(max as TimeStamp)];
     } else {
-      return [compState.rangeOptions.absMin, compState.rangeOptions.absMax];
+      return [min, max];
     }
   }
 
-  /* Plot Button Functions */
+
+  /***** Plot Interaction Functions *****/
   // Zoom the set into the middle 50% of the buckets
   const zoomInPlot = () => {
     // NOTE: x[x.length-1] may not be representative of the absolute max
     // range is based on the index of the bucket representing the max value
-    let maxIndex = plot.data[0].x.findIndex((value: any) => {
+    const plotData = compState.plot.data as any[];
+    let maxIndex = plotData[0].x.findIndex((value: any) => {
       return compState.rangeOptions.absMax !== null ? value >= compState.rangeOptions.absMax : 0;
     });
 
     // the last bucket is a value less than the max but includes max in it
     if (maxIndex < 0) {
-      maxIndex = plot.data[0].x.length;
+      maxIndex = plotData[0].x.length;
     }
 
     // zooming in should increase clarity by 50%
@@ -502,7 +465,7 @@ const FacetRangePicker = ({
     const minBinIndex = median - zoomRange;
     const maxBinIndex = median + zoomRange;
 
-    const rangeMinMax = updateRangeMinMax(plot.data[0].x[minBinIndex], plot.data[0].x[maxBinIndex]);
+    const rangeMinMax = updateRangeMinMax(plotData[0].x[minBinIndex], plotData[0].x[maxBinIndex]);
     setCompState({
       ...compState,
       disableZoomIn: disableZoomIn(rangeMinMax.absMin, rangeMinMax.absMax),
@@ -525,8 +488,8 @@ const FacetRangePicker = ({
 
         limitedRange = windowRef.moment.duration((maxMoment.diff(minMoment))).asDays() <= numBuckets;
       } else if (isColumnOfType('timestamp')) {
-        const minTS: any = min;
-        const maxTS: any = max;
+        const minTS: TimeStamp = min as TimeStamp;
+        const maxTS: TimeStamp = max as TimeStamp;
 
         limitedRange = (minTS.date + minTS.time) === (maxTS.date + maxTS.time);
       } else {
@@ -568,25 +531,26 @@ const FacetRangePicker = ({
   }
 
   const updatePreviousPlotValues = (data: any, histogramDataStack: any[]) => {
-    const plotData = [...plot.data];
+    const plotData = [...compState.plot.data] as any[];
     plotData[0].x = data.x;
     plotData[0].y = data.y;
 
-    const plotLayout = { ...plot.layout };
-    plotLayout.xaxis.range = updateHistogramRange();
-
-    setPlot({
-      ...plot,
-      data: plotData,
-      layout: plotLayout,
-      labels: data.labels
-    })
+    const plotLayout = { ...compState.plot.layout };
 
     const rangeOptions = updateRangeMinMax(data.min, data.max);
+    if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
+      plotLayout.xaxis.range = updateHistogramRange(rangeOptions.absMin, rangeOptions.absMax);
+    }
+
     setCompState({
       ...compState,
       disableZoomIn: disableZoomIn(rangeOptions.absMin, rangeOptions.absMax),
       histogramDataStack: histogramDataStack,
+      plot: {
+        ...compState.plot,
+        data: plotData,
+        layout: plotLayout
+      },
       rangeOptions: {
         absMin: rangeOptions.absMin,
         absMax: rangeOptions.absMax,
@@ -616,11 +580,11 @@ const FacetRangePicker = ({
         // if both undefined, don't re-fetch data
         if (typeof min === 'undefined' && typeof max === 'undefined') {
           shouldRelayout = false
-          setCompState({...compState, relayout: shouldRelayout});
+          setCompState({ ...compState, relayout: shouldRelayout });
           return;
         }
 
-        let minMaxRangeOptions = {absMin: compState.rangeOptions.absMin, absMax: compState.rangeOptions.absMax};
+        const minMaxRangeOptions = { absMin: compState.rangeOptions.absMin, absMax: compState.rangeOptions.absMax };
         // if min is undefined, absMin remains unchanged (happens when xaxis max is stretched)
         // and if not null, update the value
         if (min !== null && typeof min !== 'undefined') {
@@ -655,8 +619,7 @@ const FacetRangePicker = ({
           } else {
             minMaxRangeOptions.absMax = max;
           }
-        } 
-        console.log(minMaxRangeOptions);
+        }
 
         setCompState({
           ...compState,
@@ -667,26 +630,47 @@ const FacetRangePicker = ({
             absMax: minMaxRangeOptions.absMax,
           }
         });
-        
+
         // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
       });
     } catch (err) {
-      // setRangeVars();
+      const plotLayout = { ...compState.plot.layout }
+      if (plotLayout.xaxis && typeof plotLayout.xaxis === 'object') {
+        plotLayout.xaxis.range = updateHistogramRange(compState.rangeOptions.absMin, compState.rangeOptions.absMax);
+      }
+
+      setCompState({
+        ...compState,
+        plot: {
+          ...compState.plot,
+          layout: plotLayout
+        },
+        rangeOptions: {
+          ...compState.rangeOptions,
+          model: {
+            min: compState.rangeOptions.absMin,
+            max: compState.rangeOptions.absMax
+          }
+        },
+      })
+
       $log.warn(err);
     }
   }
 
+
+  /***** render functions *****/
   const renderPlot = () => {
-    if (plot.data[0].x.length < 1 || plot.data[0].y.length < 1) return;
+    const plotData = compState.plot.data as any[];
+    if (plotData[0].x.length < 1 || plotData[0].y.length < 1) return;
     return (<Plot
-      config={plot.options}
-      data={plot.data}
-      layout={plot.layout}
+      config={compState.plot.config}
+      data={compState.plot.data}
+      layout={compState.plot.layout ? compState.plot.layout : {}}
       onRelayout={(event) => plotlyRelayout(event)}
       ref={plotlyRef}
       style={{ 'width': '100%' }}
       useResizeHandler
-    // plotly events have their own prop names
     />)
   }
 
