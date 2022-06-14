@@ -43,8 +43,7 @@ export type FacetCheckBoxRow = {
   displayname: Displayname,
   selected?: boolean,
   disabled?: boolean,
-  isNotNull?: boolean,
-  alwaysShowTooltip?: boolean
+  isNotNull?: boolean
 }
 
 export type FacetModel = {

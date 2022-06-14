@@ -2,20 +2,110 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_check-list.scss';
 
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { useLayoutEffect, useRef } from 'react';
-
+import { useLayoutEffect, useRef, useState } from 'react';
+import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
+import { ResizeSensor } from 'css-element-queries';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type CheckListProps = {
+  /**
+   * whether the list is intiialized or not.
+   * if initialized, we will set the height otherwise the height remains unchanged
+   */
   initialized: boolean,
+  /**
+   * The rows that should be displayed
+   */
   rows: FacetCheckBoxRow[],
-  // NOTE: the onRowClick must set the .selected
-  //        the check-list component will not do that automatically
+  /**
+   * Will be called after clicking on the rows
+   * * the onRowClick must set the `.selected`. The check-list component will not do that automatically
+   */
   onRowClick: (row: FacetCheckBoxRow, rowIndex: number, event: any) => void,
   // TODO
   // enableFavorites?: boolean,
   // onFavoritesChanged: Function
 }
 
+type CheckListRowLabelProps = {
+  /**
+   * The diplayed row
+   */
+  row: FacetCheckBoxRow,
+  /**
+   * The index of row
+   */
+  index: number
+}
+
+/**
+ * Represent each row in the checklist
+ * Since we want to watch the width of each row, it was easier to create this
+ */
+const CheckListRowLabel = ({
+  row,
+  index
+}: CheckListRowLabelProps): JSX.Element => {
+
+  // in these cases we want the tooltip to always show up.
+  const alwaysShowTooltip = row.isNotNull || row.displayname.value === null || row.displayname.value === '';
+
+  // conditionally show tooltip for the rows that the whole value is not visible
+  const [showCroppedTooltip, setShowCroppedTooltip] = useState(false);
+  const labelContainer = useRef<HTMLLabelElement>(null);
+
+  /**
+   * look for the width changes and show tooltip if needed
+   */
+  useLayoutEffect(()=> {
+    if (!labelContainer.current || alwaysShowTooltip) return;
+    new ResizeSensor(
+      labelContainer.current,
+      () => {
+        if (!labelContainer.current) return;
+        const el = labelContainer.current as HTMLElement;
+        if (!el) return;
+        // placeholder should be displayed if we're showing ellipsis
+        setShowCroppedTooltip(el.scrollWidth > el.offsetWidth);
+      }
+    )
+  }, []);
+
+  /**
+   * The tooltip for null, not-null, and empty is special
+   * other cases will show the displayname.
+   */
+  let tooltip = row.displayname;
+  if (row.isNotNull) {
+    tooltip = { isHTML: false, value: MESSAGE_MAP.tooltip.notNull };
+  } else if (row.displayname.value === null) {
+    tooltip = { isHTML: false, value: MESSAGE_MAP.tooltip.null };
+  } else if (row.displayname.value === '') {
+    tooltip = { isHTML: false, value: MESSAGE_MAP.tooltip.empty };
+  }
+
+  return (
+    <ConditionalWrapper
+      condition={alwaysShowTooltip || showCroppedTooltip}
+      wrapper={wrapperChild => (
+        <OverlayTrigger
+          placement='bottom-start'
+          overlay={<Tooltip><DisplayValue value={tooltip} /></Tooltip>}
+        >
+          {wrapperChild}
+        </OverlayTrigger>
+      )}
+    >
+      <label ref={labelContainer}><DisplayValue value={row.displayname} specialNullEmpty={true} /></label>
+    </ConditionalWrapper>
+  )
+};
+
+/**
+ * Show a checklist of options for faceting
+ */
 const CheckList = ({
   initialized,
   rows,
@@ -27,7 +117,7 @@ const CheckList = ({
   const listContainer = useRef<any>(null);
 
   /**
-   * Seth the height of
+   * Set the height of list container to avoid jumping
    */
   useLayoutEffect(() => {
     if (!listContainer.current) return;
@@ -58,18 +148,16 @@ const CheckList = ({
       if (row.disabled) {
         rowClass += ' disabled-row';
       }
-      // TODO tooltip
 
       return (
         <li key={row.uniqueId} className={rowClass}>
           <input
             // TODO for testing, id was changed to className to be more appropriate
-            className={`checkbox-${index} ellipsis-text`} type='checkbox'
+            className={`checkbox-${index}`} type='checkbox'
             checked={row.selected} disabled={row.disabled}
             onChange={(event) => onRowClick(row, index, event)}
           />
-          {/* TODO tooltip for null */}
-          <label><DisplayValue value={row.displayname} specialNullEmpty={true} /></label>
+          <CheckListRowLabel row={row} index={index} />
           {/* TODO favorites: */}
           {/* <span ng-if="enableFavorites && row.isFavoriteLoading" className="favorite-icon favorite-spinner-container pull-right">
             <span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
@@ -81,9 +169,6 @@ const CheckList = ({
       );
     });
   }
-
-
-
 
   return (
     <ul className='chaise-list-container' ref={listContainer}>
