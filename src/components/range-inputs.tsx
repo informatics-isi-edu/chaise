@@ -1,21 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 import { useState, useRef } from 'react';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-// import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-
-
-/* 
-type: 
-0 - int
-1 - float
-2 - date
-3 - timestamp
-*/
-
-/*
-Todo:
-Will this component be used in other places - if yes then move the css of out _faceting.css
-*/
 
 const INTEGER_REGEXP = /^\-?\d+$/;
 
@@ -25,6 +10,9 @@ const TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
+/**
+ * an object for mapping the error codes to the error messages
+ */
 const errorMsgMap: {
     [key: number]: string;
 } = {
@@ -77,7 +65,17 @@ const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, valu
 
 
 type RangeInputHOCProps = {
+    /**
+     * an enum for the type of input expected
+     * 0 - int
+     * 1 - float
+     * 2 - date
+     * 3 - timestamp
+     */
     type: number,
+    /**
+     * use for applying custom styles on the component
+     */
     classes?: string
 };
 
@@ -89,54 +87,40 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
     const [error, setError] = useState<string | null>(null);
 
     const validateValues = (fromVal: string, toVal: string): number => {
-        console.log('validating values...');
-
-        /* this error is assigned based on the error codes defined above in the errorMsgMap */
-        // let error = -1;
-
         if (!fromVal || !toVal) {
-            // error = 0;
             return 0;
         }
 
         if (type === 0) {
             if (!INTEGER_REGEXP.test(fromVal) || !INTEGER_REGEXP.test(toVal)) {
-                // error = 2;
                 return 2;
             }
 
             if (parseInt(fromVal) > parseInt(toVal)) {
-                // error = 1;
                 return 1;
             }
         }
 
         if (type === 1) {
             if (!FLOAT_REGEXP.test(fromVal) || !FLOAT_REGEXP.test(toVal)) {
-                // error = 3;
                 return 3;
             }
 
             if (parseInt(fromVal) > parseInt(toVal)) {
-                // error = 1;
                 return 1;
             }
         }
 
         if (type === 2 || type === 3) {
-
             const formatString = type === 2 ? DATE_FORMAT : TIME_FORMAT;
-
             const fromDate = momentJS(fromVal, formatString, true);
             const toDate = momentJS(toVal, formatString, true);
 
             if (!fromDate.isValid() || !toDate.isValid()) {
-                // error = type === 2 ? 4 : 5;
                 return type === 2 ? 4 : 5;
             }
 
             if (fromDate.diff(toDate) >= 0) {
-                // error = 1;
                 return 1;
             }
         }
@@ -153,15 +137,8 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
         console.log('validation result:', validatedResult);
 
         if (validatedResult === -1) {
-            // clear out any previous errors when a new submission is validated
+            /* clear out any previous errors when a new submission is validated */
             setError(null);
-
-            // no longer needed sine we throw an error in case format is not as expected when checking with moment.isValid
-
-            // if (type in [2, 3]) {
-            //     fromVal = momentJS(fromVal).format(type === 2 ? DATE_FORMAT : TIME_FORMAT);
-            //     toVal = momentJS(toVal).format(type === 2 ? DATE_FORMAT : TIME_FORMAT);
-            // }
 
             /* eslint-disable  @typescript-eslint/no-non-null-assertion */
             console.log('values sent to server', { fromVal: fromRef.current!.value, toVal: toRef.current!.value });
@@ -178,12 +155,12 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
             <div className='range-input-container'>
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor='range-from-val'>From:</label>
-                    <RangeInput id='range-from-val' placeholder='from' reference={fromRef} type={type} value='2015-06-01' />
+                    <RangeInput id='range-from-val' reference={fromRef} type={type} value='2015-06-01' />
                 </div>
 
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor='range-to-val'>To:</label>
-                    <RangeInput id='range-to-val' placeholder='to' reference={toRef} type={type} value='2018-08-29' />
+                    <RangeInput id='range-to-val' reference={toRef} type={type} value='2018-08-29' />
                 </div>
 
                 <button className='chaise-btn chaise-btn-primary range-input-submit-btn' onClick={handleSubmit}>
