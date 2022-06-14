@@ -53,11 +53,6 @@ const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, valu
 
             }
             <span className='fa-solid fa-x range-input-clear' onClick={clearInput} />
-            {/* <ClearInputBtn
-                btnClassName='chaise-input-control-feedback'
-                clickCallback={clearVal}
-                show
-            /> */}
         </div>
     )
 }
