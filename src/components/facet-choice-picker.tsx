@@ -7,7 +7,7 @@ import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
@@ -29,19 +29,38 @@ type FacetChoicePickerProps = {
   /**
    * Allows registering flow-control related function in the faceting component
    */
-  register: Function
+  register: Function,
+  /**
+   * Whether the facet panel is open or not
+   */
+  facetPanelOpen: boolean
 }
 
 const FacetChoicePicker = ({
   facetColumn,
   facetModel,
   index,
-  register
+  register,
+  facetPanelOpen
 }: FacetChoicePickerProps): JSX.Element => {
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
   const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([]);
   const [hasMore, setHasMore] = useState(false);
+  const [showFindMore, setShowFindMore] = useState(false);
+
+  const choicePickerContainer = useRef<any>(null);
+  const listContainer = useRef<any>(null);
+
+  let facetReference: any, columnName: string;
+  if (facetColumn.isEntityMode) {
+    facetReference = facetColumn.sourceReference.contextualize.compactSelect;
+    columnName = facetColumn.column.name;
+  } else {
+    facetReference = facetColumn.scalarValuesReference;
+    // the first column will be the value column
+    columnName = facetReference.columns[0].name;
+  }
 
   /**
    * register the flow-control related functions for the facet
@@ -51,29 +70,29 @@ const FacetChoicePicker = ({
     register(index, updateFacet, preProcessFacet);
   }, [facetModel]);
 
-  //-------------------  flow-control related functions:   --------------------//
+  /**
+   * we're setting the height of ChecList in check-list to avoid jumping of UI
+   * if because of this logic some options are hidden, we should make sure
+   * we're indicating that in the UI.
+   */
+  useLayoutEffect(() => {
+    if (facetModel.isOpen && !facetModel.isLoading) {
+      setShowFindMore(listContainer.current.scrollHeight > listContainer.current.offsetHeight);
+    }
+  }, [facetModel.isOpen, facetModel.isLoading]);
 
+  //-------------------  flow-control related functions:   --------------------//
   const updateFacet = () => {
     const defer = Q.defer();
     $log.debug(`updating facet ${index}`);
     $log.debug(`facet model is ${facetModel.isOpen}, ${facetModel.isLoading}`);
 
-    let reference: any, columnName: string;
-    if (facetColumn.isEntityMode) {
-      reference = facetColumn.sourceReference.contextualize.compactSelect;
-      columnName = facetColumn.column.name;
-    } else {
-      reference = facetColumn.scalarValuesReference;
-      // the first column will be the value column
-      columnName = reference.columns[0].name;
-    }
-
-    $log.debug(reference.uri);
+    $log.debug(facetReference.uri);
 
     (function (uri) {
-      reference.read(10, {}, true).then((page: any) => {
+      facetReference.read(10, {}, true).then((page: any) => {
         // if this is not the result of latest facet change
-        if (reference.uri !== uri) {
+        if (facetReference.uri !== uri) {
           defer.resolve(false);
           return defer.promise;
         }
@@ -91,7 +110,7 @@ const FacetChoicePicker = ({
 
         defer.resolve(true);
       });
-    })(reference.uri);
+    })(facetReference.uri);
 
     return defer.promise;
   }
@@ -127,28 +146,21 @@ const FacetChoicePicker = ({
       // enableFavorites
     };
 
-    let reference;
-    if (facetColumn.isEntityMode) {
-      reference = facetColumn.sourceReference.contextualize.compactSelect;
-    } else {
-      reference = facetColumn.scalarValuesReference;
-    }
-
     // TODO log object should be cached and be proper!
     const logInfo = {
       logObject: null,
       logStack: [
         LogService.getStackNode(
           LogStackTypes.SET,
-          reference.table,
-          reference.filterLogInfo,
+          facetReference.table,
+          facetReference.filterLogInfo,
         ),
       ],
       logStackPath: LogStackTypes.SET,
     };
 
     setRecordsetModalProps({
-      initialReference: reference,
+      initialReference: facetReference,
       initialPageLimit: 25,
       config: recordsetConfig,
       logInfo,
@@ -184,11 +196,13 @@ const FacetChoicePicker = ({
           searchColumns={facetColumn.isEntityMode ? facetColumn.sourceReference.searchColumns : null}
           disabled={facetColumn.hasNotNullFilter}
         />
-        <CheckList
-          initialized={facetModel.isOpen && facetModel.initialized}
-          rows={checkboxRows}
-          onRowClick={onRowClick}
-        />
+        <div ref={listContainer}>
+          <CheckList
+            initialized={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
+            rows={checkboxRows}
+            onRowClick={onRowClick}
+          />
+        </div>
         <div className='button-container'>
           <button
             id='show-more' className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
@@ -196,8 +210,7 @@ const FacetChoicePicker = ({
             onClick={() => openRecordsetModal()}
           >
             <span className='chaise-btn-icon far fa-window-restore'></span>
-            {/* TODO should also take care of the available height like `showFindMore` */}
-            <span>{hasMore ? 'Show more' : 'Show Details'}</span>
+            <span>{(hasMore || showFindMore) ? 'Show More' : 'Show Details'}</span>
           </button>
           {facetModel.noConstraints &&
             <OverlayTrigger
@@ -231,7 +244,7 @@ const FacetChoicePicker = ({
   }
 
   return (
-    <div className='choice-picker'>
+    <div className='choice-picker' ref={choicePickerContainer}>
       {!facetModel.facetError && renderPickerContainer()}
       {facetModel.facetError && renderErrorContainer()}
       {

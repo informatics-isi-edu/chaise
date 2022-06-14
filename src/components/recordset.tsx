@@ -413,7 +413,7 @@ const RecordsetInner = ({
             style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
             <div className='side-panel-container'>
-              <Faceting />
+              <Faceting facetPanelOpen={facetPanelOpen} />
             </div>
           </div>
         }

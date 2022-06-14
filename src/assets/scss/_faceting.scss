@@ -1,6 +1,11 @@
 @import "variables";
 
 .faceting-columns-container {
+  // disable the animation from the accordion
+  .accordion-collapse.collapsing {
+    transition: none !important;
+  }
+
   .panel-group {
     margin-bottom: 20px;
 

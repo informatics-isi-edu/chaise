@@ -21,11 +21,11 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // TODO subject to change
 type FacetingProps = {
-  // reference: any
+  facetPanelOpen: boolean
 }
 
 const Faceting = ({
-  // reference
+  facetPanelOpen
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
@@ -392,7 +392,7 @@ const Faceting = ({
       default:
         return <FacetChoicePicker
           facetModel={fm} facetColumn={fc} index={index}
-          register={registerFacet}
+          register={registerFacet} facetPanelOpen={facetPanelOpen}
         />
     }
   };
