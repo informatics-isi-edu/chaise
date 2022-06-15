@@ -6,26 +6,21 @@ import { useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 type FacetHeaderProps = {
-  key: string;
-  headerText: any;
-  showTooltipIcon: any;
-  tooltipContent: any;
+  displayname: Displayname; // content to be displayed as panel header
+  showTooltipIcon?: boolean; // prop to enable tooltip for displayname
+  comment?: string; // Optional text to be shown on hover of displayname
 };
 
 /**
- * @param key key prop to uniquely identify panel header item
- * @param headerText headerText prop that holds content to show as header
- * @param showTooltipIcon prop to enable tooltip for header text
- * @param tooltipContent text to be shown on hover of header text
  * @returns FacetHeader Component
  */
 const FacetHeader = ({
-  key,
-  headerText,
-  showTooltipIcon,
-  tooltipContent,
+  displayname,
+  showTooltipIcon=false,
+  comment,
 }: FacetHeaderProps) => {
   /**
    * @contentRef variable to store ref of facet header text
@@ -42,22 +37,22 @@ const FacetHeader = ({
     return false;
   };
 
+  const renderTooltipContent = () => {
+    if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && comment) {
+      return <><DisplayValue value={displayname} />: {comment}</>;
+    } else if (comment) {
+      return comment;
+    } else {
+      return <DisplayValue value={displayname} />;
+    }
+  }
+
   return (
     <OverlayTrigger
       placement='right'
       overlay={
         <Tooltip style={{ maxWidth: '50%', whiteSpace: 'nowrap' }}>
-          {contentRef &&
-          contentRef.current &&
-          isTextOverflow(contentRef.current) ? (
-            <>
-              <DisplayValue value={headerText} />: {tooltipContent}
-            </>
-          ) : tooltipContent ? (
-            tooltipContent
-          ) : (
-            <DisplayValue value={headerText} />
-          )}
+          {renderTooltipContent()}
         </Tooltip>
       }
       onToggle={(nextshow: boolean) => {
@@ -71,9 +66,9 @@ const FacetHeader = ({
       }}
       show={show}
     >
-      <div className='accordion-toggle ellipsis' id={key}>
+      <div className='accordion-toggle ellipsis'>
         <div ref={contentRef} className='facet-header-text ellipsis'>
-          <DisplayValue value={headerText} />
+          <DisplayValue value={displayname} />
           {/* Condition to show tooltip icon */}
           {showTooltipIcon && (
             <span className='chaise-icon-for-tooltip align-center-icon'></span>

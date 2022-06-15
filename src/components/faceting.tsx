@@ -34,12 +34,11 @@ const Faceting = ({
           {/* TODO: On Click of header text in facet panel, because of the overlay 
             it wont trigger accordion to open. Aref is handling that part (handling accordion 
             open and close manually) */}
-          <Accordion.Header>
+          <Accordion.Header id={`fc-heading-${index}`}>
             <FacetHeader 
-              key={`fc-heading-${index}`}
-              headerText={fc.displayname} 
+              displayname={fc.displayname} 
               showTooltipIcon={fc.comment ? true : false} 
-              tooltipContent={fc.comment}
+              comment={fc.comment}
             />
           </Accordion.Header>
           <Accordion.Body>

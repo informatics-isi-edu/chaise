@@ -46,11 +46,15 @@
         // Overriding accordian-button css to align right angle bracket icon to left
         &::after {
           margin: 0px 8px;
-          transform: rotate(-90deg);
+          background-image: none;
+          content: '\f054'; // fa-solid fa-chevron-right
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          transform: unset;
         }
 
         &:not(.collapsed)::after {
-          transform: rotate(0deg);
+          content: '\f107'; // fa-solid fa-chevron-down
         }
 
         &:focus {
