@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 import Q from 'q';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
@@ -12,6 +12,7 @@ import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import CheckList from '@isrd-isi-edu/chaise/src/components/check-list';
+import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/facet-utils';
 
 type FacetChoicePickerProps = {
   /**
@@ -33,7 +34,8 @@ type FacetChoicePickerProps = {
   /**
    * Whether the facet panel is open or not
    */
-  facetPanelOpen: boolean
+  facetPanelOpen: boolean,
+  updateFacetColumn: Function
 }
 
 const FacetChoicePicker = ({
@@ -41,7 +43,8 @@ const FacetChoicePicker = ({
   facetModel,
   index,
   register,
-  facetPanelOpen
+  facetPanelOpen,
+  updateFacetColumn,
 }: FacetChoicePickerProps): JSX.Element => {
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
@@ -67,7 +70,7 @@ const FacetChoicePicker = ({
    * this will ensure the functions are registerd based on the latest facet changes
    */
   useEffect(() => {
-    register(index, updateFacet, preProcessFacet);
+    register(index, processFacet, preProcessFacet);
   }, [facetModel]);
 
   /**
@@ -82,15 +85,26 @@ const FacetChoicePicker = ({
   }, [facetModel.isOpen, facetModel.isLoading]);
 
   //-------------------  flow-control related functions:   --------------------//
-  const updateFacet = () => {
+  const processFacet = () => {
     const defer = Q.defer();
     $log.debug(`updating facet ${index}`);
     $log.debug(`facet model is ${facetModel.isOpen}, ${facetModel.isLoading}`);
 
     $log.debug(facetReference.uri);
 
+    const updatedRows : FacetCheckBoxRow[] = [];
+
+    // show not-null if it exists or hide_not_null_choice is missing.
+    if (!facetColumn.hideNotNullChoice) {
+      updatedRows.push(getNotNullFacetCheckBoxRow(facetColumn.hasNotNullFilter));
+    }
+
+    if (!facetColumn.hideNullChoice) {
+      updatedRows.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter, facetColumn.hasNotNullFilter));
+    }
+
     (function (uri) {
-      facetReference.read(10, {}, true).then((page: any) => {
+      facetReference.read(8, {}, true).then((page: any) => {
         // if this is not the result of latest facet change
         if (facetReference.uri !== uri) {
           defer.resolve(false);
@@ -99,14 +113,16 @@ const FacetChoicePicker = ({
 
         setHasMore(page.hasNext);
 
-        setCheckboxRows(page.tuples.map((tuple: any, index: number) => {
+        updatedRows.push(...page.tuples.map((tuple: any, index: number) => {
           return {
             uniqueId: tuple.uniqueId,
             displayname: tuple.displayname,
             selected: false,
-            disabled: false
+            disabled: facetColumn.hasNotNullFilter
           }
         }));
+
+        setCheckboxRows(updatedRows);
 
         defer.resolve(true);
       });
@@ -128,8 +144,26 @@ const FacetChoicePicker = ({
 
   //-------------------  UI related callbacks:   --------------------//
 
-  const searchCallback = (searchTerm: any, action: any) => {
-    $log.log(`search for ${searchTerm} in facet index=${index}`);
+  const searchCallback = (term: string | null, action: LogActions) => {
+    // $log.log(`search for ${term} in facet index=${index}`);
+
+    // if (term) term = term.trim();
+    // const ref = facetReference.search(term);
+    // TODO
+    // if (scope.$root.checkReferenceURL(ref)) {
+    // scope.searchTerm = term;
+
+    // log the client action
+    // var extraInfo = typeof term === "string" ? {"search-str": term} : {};
+    // logService.logClientAction({
+    //     action: scope.parentCtrl.getFacetLogAction(scope.index, action),
+    //     stack: scope.parentCtrl.getFacetLogStack(scope.index, extraInfo)
+    // }, scope.facetColumn.sourceReference.defaultLogInfo);
+
+    $log.debug(`faceting: request for facet (index=${index} update. new search=${term}`);
+    // updateFacetColumn(index, true, LogReloadCauses.FACET_SEARCH_BOX);
+    // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_SEARCH_BOX);
+    // }
   }
 
   const openRecordsetModal = () => {

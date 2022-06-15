@@ -106,7 +106,7 @@ const Faceting = ({
         // TODO why??
         // appliedFilters: [],
         registered: false,
-        updateFacet: () => { throw new Error('function not registered') },
+        processFacet: () => { throw new Error('function not registered') },
         preProcessFacet: () => { throw new Error('function not registered') },
         reloadCauses: [], // why the reload request is being sent to the server (might be empty)
         reloadStartTime: -1, //when the facet became dirty
@@ -149,8 +149,8 @@ const Faceting = ({
 
   //-------------------  flow-control related functions:   --------------------//
 
-  function registerFacet (index: number, updateFacet: Function, preprocessFacet: Function) {
-    facetRequestModels.current[index].updateFacet = updateFacet;
+  function registerFacet (index: number, processFacet: Function, preprocessFacet: Function) {
+    facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
     facetRequestModels.current[index].registered = true;
 
@@ -251,7 +251,7 @@ const Faceting = ({
 
         (function (i) {
           printDebugMessage(`updating facet (index=${i})`);
-          facetRequestModels.current[i].updateFacet().then(function (res: any) {
+          facetRequestModels.current[i].processFacet().then(function (res: any) {
             setFacetModelByIndex(i, { facetError: false });
             afterFacetUpdate(i, res, flowControl);
             updatePage();
@@ -347,22 +347,6 @@ const Faceting = ({
     // }
   };
 
-  /**
-   * The clickhandler that bootstrap expects for clicking on the accordion header
-   * will call the toggleFacet function
-   * @param eventKey
-   */
-  const onFacetSelect = (eventKey: any) => {
-    $log.debug('selected a facet with : ' + eventKey);
-    let key = 0;
-    if (Array.isArray(eventKey)) {
-      key = parseInt(eventKey[0]);
-    } else if (typeof eventKey === 'string') {
-      key = parseInt(eventKey);
-    }
-    toggleFacet(key);
-  };
-
   // TODO
   const scrollToFacet = (index: number, dontLog?: boolean) => {
     $log.debug(`scrolling to facet ${index}`);
@@ -393,6 +377,7 @@ const Faceting = ({
         return <FacetChoicePicker
           facetModel={fm} facetColumn={fc} index={index}
           register={registerFacet} facetPanelOpen={facetPanelOpen}
+          updateFacetColumn={updateFacetColumn}
         />
     }
   };

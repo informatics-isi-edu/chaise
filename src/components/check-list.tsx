@@ -59,7 +59,7 @@ const CheckListRowLabel = ({
   /**
    * look for the width changes and show tooltip if needed
    */
-  useLayoutEffect(()=> {
+  useLayoutEffect(() => {
     if (!labelContainer.current || alwaysShowTooltip) return;
     new ResizeSensor(
       labelContainer.current,
@@ -98,7 +98,13 @@ const CheckListRowLabel = ({
         </OverlayTrigger>
       )}
     >
-      <label ref={labelContainer}><DisplayValue value={row.displayname} specialNullEmpty={true} /></label>
+      <label
+        // we have specific tooltip for these modes
+        className={alwaysShowTooltip ? 'chaise-icon-for-tooltip' : ''}
+        ref={labelContainer}
+      >
+        <DisplayValue value={row.displayname} specialNullEmpty={true} />
+      </label>
     </ConditionalWrapper>
   )
 };

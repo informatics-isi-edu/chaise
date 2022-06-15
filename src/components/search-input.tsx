@@ -13,7 +13,7 @@ type SearchInputProps = {
   /**
    * Will be called after search is triggered
    */
-  searchCallback: Function,
+  searchCallback: (searchTerm: string | null, action: LogActions) => void,
   /**
    * The search columns
    */
