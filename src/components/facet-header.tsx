@@ -8,14 +8,19 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
+/**
+ * @displayname content to be displayed as panel header
+ * @showTooltipIcon Optional prop to enable tooltip for displayname
+ * @comment Optional text to be shown on hover of displayname
+ */
 type FacetHeaderProps = {
-  displayname: Displayname; // content to be displayed as panel header
-  showTooltipIcon?: boolean; // prop to enable tooltip for displayname
-  comment?: string; // Optional text to be shown on hover of displayname
+  displayname: Displayname;
+  showTooltipIcon?: boolean;
+  comment?: string;
 };
 
 /**
- * @returns FacetHeader Component
+ * @returns {FacetHeader} Component that renders custom text (displayname) on facet header. 
  */
 const FacetHeader = ({
   displayname,
