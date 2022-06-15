@@ -15,6 +15,13 @@ type FacetingProps = {
   reference: any
 }
 
+type FacetHeaderProps = {
+  key: string,
+  headerText: any,
+  showTooltipIcon: any,
+  tooltipContent: any
+}
+
 const Faceting = ({
   reference
 }: FacetingProps) => {
@@ -37,7 +44,7 @@ const Faceting = ({
    * @param tooltipContent text to be shown on hover of header text
    * @returns FacetHeader Component
    */
-  const FacetHeader = ({ key, headerText, showTooltipIcon, tooltipContent }) => {
+  const FacetHeader = ({ key, headerText, showTooltipIcon, tooltipContent }: FacetHeaderProps) => {
     /**
      * @contentRef variable to store ref of facet header text
      * @show state variable to control whether to show tooltip or not
