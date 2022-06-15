@@ -51,10 +51,12 @@
           font-family: "Font Awesome 6 Free";
           font-weight: 900;
           transform: unset;
+          font-size: 18px;
+          height: unset;
         }
 
         &:not(.collapsed)::after {
-          content: '\f107'; // fa-solid fa-chevron-down
+          content: '\f078'; // fa-solid fa-chevron-down
         }
 
         &:focus {
