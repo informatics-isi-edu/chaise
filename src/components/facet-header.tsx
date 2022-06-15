@@ -37,6 +37,11 @@ const FacetHeader = ({
     return false;
   };
 
+  /**
+   * If header text overflowed, display tooltip on hover of header.
+   * If comment is present and header text overflowed, then display tooltip in <header text>: <comment> format
+   * @returns tooltip content that needs to be displayed on hover of panel header text
+   */
   const renderTooltipContent = () => {
     if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && comment) {
       return <><DisplayValue value={displayname} />: {comment}</>;
