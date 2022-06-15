@@ -35,7 +35,7 @@ const FacetHeader = ({
   const [show, setShow] = useState(false);
 
   // Function to check the text overflow.
-  const isTextOverflow = (element) => {
+  const isTextOverflow = (element: HTMLElement) => {
     if (element) {
       return element.offsetWidth < element.scrollWidth;
     }
@@ -44,7 +44,6 @@ const FacetHeader = ({
 
   return (
     <OverlayTrigger
-      trigger='hover'
       placement='right'
       overlay={
         <Tooltip style={{ maxWidth: '50%', whiteSpace: 'nowrap' }}>

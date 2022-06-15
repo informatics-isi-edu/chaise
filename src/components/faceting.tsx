@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Accordion from 'react-bootstrap/Accordion';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
 import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
-import FacetHeader from '@isrd-isi-edu/chaise/src/components/FacetHeader';
+import FacetHeader from '@isrd-isi-edu/chaise/src/components/facet-header';
 
 // TODO subject to change
 type FacetingProps = {
