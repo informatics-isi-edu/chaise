@@ -253,13 +253,13 @@ const ChaiseLogin = (): JSX.Element => {
         style={{ marginLeft: (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) ? 'auto' : '' }}
       >
         {renderDropdownToggle()}
-        <Dropdown.Menu>{renderMenuChildren()}</Dropdown.Menu>
+        <Dropdown.Menu align='end'>{renderMenuChildren()}</Dropdown.Menu>
       </Dropdown>
     );
   }
 
   return (
-    <Nav className='login-menu-options navbar-right'>
+    <Nav className='login-menu-options nav navbar-nav navbar-right'>
       {renderLoginMenu()}
       <ProfileModal showProfile={showProfile} setShowProfile={setShowProfile}></ProfileModal>
     </Nav>
