@@ -51,28 +51,10 @@ const SearchInput = ({
 
   const inputEl = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(true);
+  const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(false);
   const inputContainer = useRef<HTMLDivElement>(null);
-  const inputChangedTimeout = useRef<number|null>(null);
+  const inputChangedTimeout = useRef<number | null>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
-
-  // conditionally add tooltip for the placeholder
-  // TODO can we improve this?
-  useLayoutEffect(()=> {
-    if (!inputContainer.current) return;
-    new ResizeSensor(
-      inputContainer.current,
-      () => {
-        if (!inputContainer.current) return;
-        const el = inputContainer.current.querySelector('.chaise-input-placeholder') as HTMLElement;
-        if (!el) return;
-
-        // placeholder should be displayed if we're showing ellipsis
-        const show = el.scrollWidth > el.offsetWidth;
-        setShowPlaceholderTooltip(show);
-      }
-    )
-  }, []);
 
   const changeFocus = () => {
     if (disabled) return;
@@ -146,16 +128,20 @@ const SearchInput = ({
     }
 
     return (
-      <ConditionalWrapper
-        condition={showPlaceholderTooltip}
-        wrapper={children => (
-          <OverlayTrigger
-            placement='bottom-start'
-            overlay={<Tooltip>{inner}</Tooltip>}
-          >
-            {children}
-          </OverlayTrigger>
-        )}
+      <OverlayTrigger
+        trigger='hover'
+        placement='bottom-start'
+        overlay={<Tooltip>{inner}</Tooltip>}
+        onToggle={(nextshow: boolean) => {
+          if (!inputContainer.current) return;
+
+          const el = inputContainer.current.querySelector('.chaise-input-placeholder') as HTMLElement;
+          const overflow = el && el.scrollWidth > el.offsetWidth;
+
+          // placeholder should be displayed if we're showing ellipsis
+          setShowPlaceholderTooltip(nextshow && overflow);
+        }}
+        show={showPlaceholderTooltip}
       >
         <span
           className='chaise-input-placeholder'
@@ -163,7 +149,7 @@ const SearchInput = ({
         >
           {inner}
         </span>
-      </ConditionalWrapper>
+      </OverlayTrigger>
     );
   }
   return (

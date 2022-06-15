@@ -52,26 +52,8 @@ const CheckListRowLabel = ({
   // in these cases we want the tooltip to always show up.
   const alwaysShowTooltip = row.isNotNull || row.displayname.value === null || row.displayname.value === '';
 
-  // conditionally show tooltip for the rows that the whole value is not visible
-  const [showCroppedTooltip, setShowCroppedTooltip] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const labelContainer = useRef<HTMLLabelElement>(null);
-
-  /**
-   * look for the width changes and show tooltip if needed
-   */
-  useLayoutEffect(() => {
-    if (!labelContainer.current || alwaysShowTooltip) return;
-    new ResizeSensor(
-      labelContainer.current,
-      () => {
-        if (!labelContainer.current) return;
-        const el = labelContainer.current as HTMLElement;
-        if (!el) return;
-        // placeholder should be displayed if we're showing ellipsis
-        setShowCroppedTooltip(el.scrollWidth > el.offsetWidth);
-      }
-    )
-  }, []);
 
   /**
    * The tooltip for null, not-null, and empty is special
@@ -87,26 +69,34 @@ const CheckListRowLabel = ({
   }
 
   return (
-    <ConditionalWrapper
-      condition={alwaysShowTooltip || showCroppedTooltip}
-      wrapper={wrapperChild => (
-        <OverlayTrigger
-          placement='bottom-start'
-          overlay={<Tooltip><DisplayValue value={tooltip} /></Tooltip>}
-        >
-          {wrapperChild}
-        </OverlayTrigger>
-      )}
+    <OverlayTrigger
+      trigger='hover'
+      placement='bottom-start'
+      overlay={<Tooltip><DisplayValue value={tooltip} /></Tooltip>}
+      onToggle={(nextshow: boolean) => {
+        if (!labelContainer.current) return;
+
+        const el = labelContainer.current as HTMLElement;
+        const overflow = el.scrollWidth > el.offsetWidth;
+
+        /**
+         * tooltip should be displayed if it's toggled on, and,
+         *   - we always want to show tooltip
+         *   - or the content overflows and is showing ellipsis
+         */
+        setShowTooltip(nextshow && (overflow || alwaysShowTooltip));
+      }}
+      show={showTooltip}
     >
-      <label
+       <label
         // we have specific tooltip for these modes
         className={alwaysShowTooltip ? 'chaise-icon-for-tooltip' : ''}
         ref={labelContainer}
       >
         <DisplayValue value={row.displayname} specialNullEmpty={true} />
       </label>
-    </ConditionalWrapper>
-  )
+    </OverlayTrigger>
+  );
 };
 
 /**
