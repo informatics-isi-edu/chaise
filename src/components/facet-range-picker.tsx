@@ -1,9 +1,10 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
+import { ResizeSensor } from 'css-element-queries';
 
 // models
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
@@ -76,11 +77,22 @@ const FacetRangePicker = ({
     }
   })
 
-  const plotlyRef = useRef<any>(null)
+
+  const facetContainer = useRef<HTMLDivElement>(null);
+  const plotlyRef = useRef<any>(null);
 
   const numBuckets = facetColumn.histogramBucketCount;
 
-
+  useLayoutEffect(() => {
+    if (!facetContainer.current) return;
+    new ResizeSensor(
+      facetContainer.current,
+      () => {
+        if (facetContainer.current && plotlyRef.current) plotlyRef.current.resizeHandler();
+      }
+    )
+  }, []);
+  
   useEffect(() => {
     if (facetColumn.hideNotNullChoice) {
       setRanges([getNotNullFilter(false)]);
@@ -102,10 +114,6 @@ const FacetRangePicker = ({
         ...compState.plot,
         layout: layout
       }
-    });
-
-    document.addEventListener('resizable-width-change', () => {
-      if (plotlyRef) plotlyRef.current.resizeHandler();
     });
 
     // NOTE: temporary
@@ -769,7 +777,7 @@ const FacetRangePicker = ({
   }
 
   return (
-    <div className='range-picker'>
+    <div className='range-picker' ref={facetContainer}>
       <div>
         List goes here
       </div>
