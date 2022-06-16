@@ -64,7 +64,7 @@ const CheckListRowLabel = ({
   return (
     <OverlayTrigger
       trigger='hover'
-      placement='bottom-start'
+      placement='right'
       overlay={<Tooltip><DisplayValue value={tooltip} /></Tooltip>}
       onToggle={(nextshow: boolean) => {
         if (!labelContainer.current) return;

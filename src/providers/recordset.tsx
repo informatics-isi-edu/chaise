@@ -29,7 +29,14 @@ export const RecordsetContext = createContext<{
   columnModels: any,
   totalRowCount: number|null,
   registerFacetCallbacks: any, // TODO
-  printDebugMessage: any // TODO
+  printDebugMessage: any, // TODO
+  /**
+   * given a reference will check the url length, and if it's above the limit:
+   *   - will show an alert
+   *   - will return false
+   * otherwise it will return true.
+   */
+  checkReferenceURL: (ref: any) => boolean
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -113,7 +120,7 @@ export default function RecordsetProvider({
     }, reference.defaultLogInfo)
   };
 
-  const checkReferenceURL = (ref: any) => {
+  const checkReferenceURL = (ref: any) : boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
     if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
 
