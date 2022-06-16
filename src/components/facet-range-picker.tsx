@@ -23,7 +23,6 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getNotNullFilter } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { PlotData, PlotlyDataLayoutConfig } from 'plotly.js';
 
 const FacetRangePicker = ({
   facetColumn,
