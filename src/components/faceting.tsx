@@ -1,12 +1,11 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
 import { useEffect, useState } from 'react';
-
 // Components
 import Accordion from 'react-bootstrap/Accordion';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
 import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
+import FacetHeader from '@isrd-isi-edu/chaise/src/components/facet-header';
 
 // TODO subject to change
 type FacetingProps = {
@@ -32,11 +31,15 @@ const Faceting = ({
     return reference.facetColumns.map((fc: any, index: number) => {
       return (
         <Accordion.Item eventKey={index + ''} key={index} className='facet-panel'>
-          <Accordion.Header>
-            <div className='accordion-toggle ellipsis' id={'fc-heading-' + index}>
-              <span className='facet-header-text'><DisplayValue value={fc.displayname} /></span>
-              <span className='facet-header-icon'></span>
-            </div>
+          {/* TODO: On Click of header text in facet panel, because of the overlay 
+            it wont trigger accordion to open. Aref is handling that part (handling accordion 
+            open and close manually) */}
+          <Accordion.Header id={`fc-heading-${index}`}>
+            <FacetHeader 
+              displayname={fc.displayname} 
+              showTooltipIcon={fc.comment ? true : false} 
+              comment={fc.comment}
+            />
           </Accordion.Header>
           <Accordion.Body>
             {renderFacet(fc, index)}
