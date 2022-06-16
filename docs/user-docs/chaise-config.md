@@ -542,7 +542,7 @@ system columns:
 
 ### System Columns Configuration:
  #### systemColumnsDisplayCompact
- If set to `true`, apply the system columns heuristics when no visible columns list is defined. This will put the RID system column as the first self referencing key column. 'RCB', 'RMB', 'RCT', 'RMT' will be placed at the very end of the list respectively. If set to an array, only system columns in the array will be displayed in the order mentioned earlier. This applies to compact and all subcontexts.
+ If set to `true`, apply the system columns heuristics when no visible columns list is defined. This will put the RID system column as the first self referencing key column. 'RCB', 'RMB', 'RCT', 'RMT' will be placed at the very end of the list respectively. If set to an array, only system columns in the array will be displayed in the order mentioned earlier. Defining this property as `[]` will hide all system columns. Setting to `false` will fall back to the default behavior. This applies to compact and all subcontexts.
    - Type: Boolean || Array
    - Default behavior: system columns will be displayed based on how ermrest returns the set of all columns
    - Sample syntax:
