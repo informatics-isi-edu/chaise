@@ -8,33 +8,42 @@ import Tooltip from 'react-bootstrap/Tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
-/**
- * @displayname content to be displayed as panel header
- * @showTooltipIcon Optional prop to enable tooltip for displayname
- * @comment Optional text to be shown on hover of displayname
- */
 type FacetHeaderProps = {
+  /**
+   * content to be displayed as panel header
+   */
   displayname: Displayname;
+  /**
+   * Optional prop to enable tooltip for displayname
+   */
   showTooltipIcon?: boolean;
+  /**
+   * Optional text to be shown on hover of displayname
+   */
   comment?: string;
 };
 
 /**
- * @returns {FacetHeader} Component that renders custom text (displayname) on facet header. 
+ * @returns {Component} FacetHeader Component that renders custom text (displayname) on facet header. 
  */
 const FacetHeader = ({
   displayname,
   showTooltipIcon=false,
   comment,
 }: FacetHeaderProps) => {
+
   /**
-   * @contentRef variable to store ref of facet header text
-   * @show state variable to control whether to show tooltip or not
+   * variable to store ref of facet header text
    */
   const contentRef = useRef(null);
+  /**
+   * state variable to control whether to show tooltip or not
+   */
   const [show, setShow] = useState(false);
 
-  // Function to check the text overflow.
+  /**
+   * Function to check the text overflow.
+   */
   const isTextOverflow = (element: HTMLElement) => {
     if (element) {
       return element.offsetWidth < element.scrollWidth;
