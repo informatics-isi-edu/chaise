@@ -271,7 +271,7 @@ const Faceting = ({
     return;
   };
 
-  const updateFacetColumn = (index: number, setIsLoading: boolean, cause?: string) => {
+  const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string) => {
     const frm = facetRequestModels.current[index];
     frm.processed = false;
     if (setIsLoading) {
@@ -322,7 +322,7 @@ const Faceting = ({
       else if (!fm.initialized) {
         // send a request
         // TODO should have priority
-        updateFacetColumn(index, false);
+        dispatchFacetUpdate(index, false);
 
         return {
           ...fm,
@@ -377,7 +377,7 @@ const Faceting = ({
         return <FacetChoicePicker
           facetModel={fm} facetColumn={fc} index={index}
           register={registerFacet} facetPanelOpen={facetPanelOpen}
-          updateFacetColumn={updateFacetColumn}
+          dispatchFacetUpdate={dispatchFacetUpdate}
         />
     }
   };

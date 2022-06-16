@@ -13,6 +13,7 @@ import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal'
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import CheckList from '@isrd-isi-edu/chaise/src/components/check-list';
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/facet-utils';
+import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 
 type FacetChoicePickerProps = {
   /**
@@ -35,7 +36,10 @@ type FacetChoicePickerProps = {
    * Whether the facet panel is open or not
    */
   facetPanelOpen: boolean,
-  updateFacetColumn: Function
+  /**
+   * ask flow-control to update the data
+   */
+  dispatchFacetUpdate: Function
 }
 
 const FacetChoicePicker = ({
@@ -44,16 +48,24 @@ const FacetChoicePicker = ({
   index,
   register,
   facetPanelOpen,
-  updateFacetColumn,
+  dispatchFacetUpdate,
 }: FacetChoicePickerProps): JSX.Element => {
+
+  const isFirstRender = useIsFirstRender();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
   const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([]);
   const [hasMore, setHasMore] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState<string | null>(null);
+
+  /**
+   * Whether we should display "show more" if some items are hidden because of height
+   */
   const [showFindMore, setShowFindMore] = useState(false);
 
-  const choicePickerContainer = useRef<any>(null);
-  const listContainer = useRef<any>(null);
+  const choicePickerContainer = useRef<HTMLDivElement>(null);
+  const listContainer = useRef<HTMLDivElement>(null);
 
   let facetReference: any, columnName: string;
   if (facetColumn.isEntityMode) {
@@ -65,6 +77,11 @@ const FacetChoicePicker = ({
     columnName = facetReference.columns[0].name;
   }
 
+  // make sure to add the search term
+  if (searchTerm) {
+    facetReference = facetReference.search(searchTerm);
+  }
+
   /**
    * register the flow-control related functions for the facet
    * this will ensure the functions are registerd based on the latest facet changes
@@ -73,12 +90,34 @@ const FacetChoicePicker = ({
     register(index, processFacet, preProcessFacet);
   }, [facetModel]);
 
+  // when searchTerm changed, ask flow-control to update it
+  useEffect(() => {
+    if (isFirstRender) return;
+    // make sure the callbacks with latest scope are used
+    register(index, processFacet, preProcessFacet);
+
+    // TODO
+    // log the client action
+    // var extraInfo = typeof term === "string" ? {"search-str": term} : {};
+    // logService.logClientAction({
+    //     action: scope.parentCtrl.getFacetLogAction(scope.index, action),
+    //     stack: scope.parentCtrl.getFacetLogStack(scope.index, extraInfo)
+    // }, scope.facetColumn.sourceReference.defaultLogInfo);
+
+    $log.debug(`faceting: request for facet (index=${index} update. new search=${searchTerm}`);
+
+    // ask the parent to update the facet column
+    dispatchFacetUpdate(index, true, LogReloadCauses.FACET_SEARCH_BOX);
+
+  }, [searchTerm]);
+
   /**
    * we're setting the height of ChecList in check-list to avoid jumping of UI
    * if because of this logic some options are hidden, we should make sure
    * we're indicating that in the UI.
    */
   useLayoutEffect(() => {
+    if (!listContainer.current) return;
     if (facetModel.isOpen && !facetModel.isLoading) {
       setShowFindMore(listContainer.current.scrollHeight > listContainer.current.offsetHeight);
     }
@@ -92,7 +131,7 @@ const FacetChoicePicker = ({
 
     $log.debug(facetReference.uri);
 
-    const updatedRows : FacetCheckBoxRow[] = [];
+    const updatedRows: FacetCheckBoxRow[] = [];
 
     // show not-null if it exists or hide_not_null_choice is missing.
     if (!facetColumn.hideNotNullChoice) {
@@ -145,24 +184,12 @@ const FacetChoicePicker = ({
   //-------------------  UI related callbacks:   --------------------//
 
   const searchCallback = (term: string | null, action: LogActions) => {
-    // $log.log(`search for ${term} in facet index=${index}`);
-
-    // if (term) term = term.trim();
+    if (term) term = term.trim();
     // const ref = facetReference.search(term);
     // TODO
     // if (scope.$root.checkReferenceURL(ref)) {
     // scope.searchTerm = term;
-
-    // log the client action
-    // var extraInfo = typeof term === "string" ? {"search-str": term} : {};
-    // logService.logClientAction({
-    //     action: scope.parentCtrl.getFacetLogAction(scope.index, action),
-    //     stack: scope.parentCtrl.getFacetLogStack(scope.index, extraInfo)
-    // }, scope.facetColumn.sourceReference.defaultLogInfo);
-
-    $log.debug(`faceting: request for facet (index=${index} update. new search=${term}`);
-    // updateFacetColumn(index, true, LogReloadCauses.FACET_SEARCH_BOX);
-    // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_SEARCH_BOX);
+    setSearchTerm(term);
     // }
   }
 
@@ -225,6 +252,7 @@ const FacetChoicePicker = ({
     return (
       <div className='picker-container'>
         <SearchInput
+          // NOTE the initial search term is always empty
           initialSearchTerm={''}
           searchCallback={searchCallback}
           searchColumns={facetColumn.isEntityMode ? facetColumn.sourceReference.searchColumns : null}

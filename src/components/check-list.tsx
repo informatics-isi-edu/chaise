@@ -3,10 +3,8 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_check-list.scss';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { ResizeSensor } from 'css-element-queries';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type CheckListProps = {
@@ -33,11 +31,7 @@ type CheckListRowLabelProps = {
   /**
    * The diplayed row
    */
-  row: FacetCheckBoxRow,
-  /**
-   * The index of row
-   */
-  index: number
+  row: FacetCheckBoxRow
 }
 
 /**
@@ -45,8 +39,7 @@ type CheckListRowLabelProps = {
  * Since we want to watch the width of each row, it was easier to create this
  */
 const CheckListRowLabel = ({
-  row,
-  index
+  row
 }: CheckListRowLabelProps): JSX.Element => {
 
   // in these cases we want the tooltip to always show up.
@@ -136,7 +129,12 @@ const CheckList = ({
 
   const renderRows = () => {
     if (initialized && rows.length === 0) {
-      return <>No Results Found</>
+      return (
+        // mimic the same structure to make sure the height and ellipsis works the same
+        <li className='chaise-checkbox ellipsis-text no-left-padding'>
+          <CheckListRowLabel row={{displayname: {value: 'No results found', isHTML: false}}} />
+        </li>
+      )
     }
 
     return rows.map((row: FacetCheckBoxRow, index: number) => {
@@ -153,7 +151,7 @@ const CheckList = ({
             checked={row.selected} disabled={row.disabled}
             onChange={(event) => onRowClick(row, index, event)}
           />
-          <CheckListRowLabel row={row} index={index} />
+          <CheckListRowLabel row={row} />
           {/* TODO favorites: */}
           {/* <span ng-if="enableFavorites && row.isFavoriteLoading" className="favorite-icon favorite-spinner-container pull-right">
             <span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>

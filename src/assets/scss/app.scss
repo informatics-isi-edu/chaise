@@ -548,6 +548,9 @@ html {
       min-height: 20px;
       margin-bottom: 0;
     }
+    &.no-left-padding label {
+      padding-left: 0;
+    }
 
     input {
       position: absolute;
