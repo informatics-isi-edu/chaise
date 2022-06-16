@@ -39,7 +39,11 @@ type FacetChoicePickerProps = {
   /**
    * ask flow-control to update the data
    */
-  dispatchFacetUpdate: Function
+  dispatchFacetUpdate: Function,
+  /**
+   * Allows checking of the reference url and will display an alert if needed
+   */
+  checkReferenceURL: Function
 }
 
 const FacetChoicePicker = ({
@@ -49,6 +53,7 @@ const FacetChoicePicker = ({
   register,
   facetPanelOpen,
   dispatchFacetUpdate,
+  checkReferenceURL
 }: FacetChoicePickerProps): JSX.Element => {
 
   const isFirstRender = useIsFirstRender();
@@ -182,15 +187,14 @@ const FacetChoicePicker = ({
   }
 
   //-------------------  UI related callbacks:   --------------------//
-
   const searchCallback = (term: string | null, action: LogActions) => {
     if (term) term = term.trim();
-    // const ref = facetReference.search(term);
-    // TODO
-    // if (scope.$root.checkReferenceURL(ref)) {
-    // scope.searchTerm = term;
-    setSearchTerm(term);
-    // }
+
+    // make sure adding the search doesn't go above the URL length limit
+    const ref = facetReference.search(term);
+    if (checkReferenceURL(ref)) {
+      setSearchTerm(term);
+    }
   }
 
   const openRecordsetModal = () => {

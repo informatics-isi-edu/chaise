@@ -12,6 +12,7 @@ import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-u
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NormalModule } from 'webpack';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
 // TODO more comments and proper types
 
@@ -54,6 +55,8 @@ export default function RecordsetProvider({
   getDisabledTuples
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
+  const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
+
   const [reference, setReference] = useState<any>(initialReference);
   /**
    * whether the component has initialized or not
@@ -116,11 +119,10 @@ export default function RecordsetProvider({
 
       $log.warn('url length limit will be reached!');
 
-      // TODO
       // show the alert (the function will handle just showing one alert)
-      // AlertsService.addURLLimitAlert();
+      addURLLimitAlert();
 
-      // TODO
+      // TODO I should be able to pass the function from the comp to this provider
       // // scroll to top of the container so users can see the alert
       // scrollMainContainerToTop();
 
@@ -129,7 +131,7 @@ export default function RecordsetProvider({
     }
 
     // remove the alert if it's present since we don't need it anymore
-    // AlertsService.deleteURLLimitAlert();
+    removeURLLimitAlert();
     return true;
   };
 
@@ -773,7 +775,8 @@ export default function RecordsetProvider({
       columnModels,
       totalRowCount,
       registerFacetCallbacks,
-      printDebugMessage
+      printDebugMessage,
+      checkReferenceURL
     };
   }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);
 

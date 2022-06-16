@@ -29,7 +29,7 @@ const Faceting = ({
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
-  const { reference, registerFacetCallbacks, initialize, update, printDebugMessage } = useRecordset();
+  const { reference, registerFacetCallbacks, initialize, update, printDebugMessage, checkReferenceURL } = useRecordset();
 
   const [displayFacets, setDisplayFacets] = useState(false);
   const [readyToInitialize, setReadyToInitialize] = useState(false);
@@ -377,7 +377,7 @@ const Faceting = ({
         return <FacetChoicePicker
           facetModel={fm} facetColumn={fc} index={index}
           register={registerFacet} facetPanelOpen={facetPanelOpen}
-          dispatchFacetUpdate={dispatchFacetUpdate}
+          dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
         />
     }
   };
