@@ -36,9 +36,28 @@
         padding: 10px 5px;
         text-transform: none;
         position: relative;
+        // Overriding accordian-button css to align right angle bracket icon to left
+        flex-direction: row-reverse;
+        justify-content: flex-end;
 
         background-color: $table-header-background-color;
         color: $black-color;
+
+        // Overriding accordian-button css to align right angle bracket icon to left
+        &::after {
+          margin: 0px 8px;
+          background-image: none;
+          content: '\f054'; // fa-solid fa-chevron-right
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          transform: unset;
+          font-size: 1.25rem;
+          height: unset;
+        }
+
+        &:not(.collapsed)::after {
+          content: '\f078'; // fa-solid fa-chevron-down
+        }
 
         &:focus {
           box-shadow: none;
@@ -65,6 +84,16 @@
       .accordion-body {
         padding: 10px;
       }
+    }
+
+    .facet-header-text {
+      font-size: 1.25rem;
+    }
+
+    .align-center-icon {
+      line-height: 20px;
+      vertical-align: middle;
+      margin: 4px;
     }
   }
 }
