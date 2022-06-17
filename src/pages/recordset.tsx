@@ -16,6 +16,7 @@ import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -63,7 +64,7 @@ const RecordsetApp = (): JSX.Element => {
       // set the global log stack and log stack path
       LogService.config(logStack, logStackPath);
 
-      let initialPageLimit = 25;
+      let initialPageLimit = RECORDSET_DEAFULT_PAGE_SIZE;
       if (reference.location.queryParams.limit) {
         initialPageLimit = parseInt(reference.location.queryParams.limit, 10);
       } else if (reference.display.defaultPageSize) {

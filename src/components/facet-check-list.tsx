@@ -7,7 +7,7 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
-type CheckListProps = {
+type FacetCheckListProps = {
   /**
    * whether the list is intiialized or not.
    * if initialized, we will set the height otherwise the height remains unchanged
@@ -22,12 +22,16 @@ type CheckListProps = {
    * * the onRowClick must set the `.selected`. The check-list component will not do that automatically
    */
   onRowClick: (row: FacetCheckBoxRow, rowIndex: number, event: any) => void,
+  /**
+   * If true, we should disable other options
+   */
+  hasNotNullFilter: boolean
   // TODO
   // enableFavorites?: boolean,
   // onFavoritesChanged: Function
 }
 
-type CheckListRowLabelProps = {
+type FacetCheckListRowLabelProps = {
   /**
    * The diplayed row
    */
@@ -38,9 +42,9 @@ type CheckListRowLabelProps = {
  * Represent each row in the checklist
  * Since we want to watch the width of each row, it was easier to create this
  */
-const CheckListRowLabel = ({
+const FacetCheckListRowLabel = ({
   row
-}: CheckListRowLabelProps): JSX.Element => {
+}: FacetCheckListRowLabelProps): JSX.Element => {
 
   // in these cases we want the tooltip to always show up.
   const alwaysShowTooltip = row.isNotNull || row.displayname.value === null || row.displayname.value === '';
@@ -95,11 +99,12 @@ const CheckListRowLabel = ({
 /**
  * Show a checklist of options for faceting
  */
-const CheckList = ({
+const FacetCheckList = ({
   initialized,
   rows,
-  onRowClick
-}: CheckListProps): JSX.Element => {
+  onRowClick,
+  hasNotNullFilter
+}: FacetCheckListProps): JSX.Element => {
   // TODO favorites support:
   // const [favoritesLoading, setFavoritesLoading] = useState<{[key: number]: boolean}>({});
 
@@ -132,14 +137,17 @@ const CheckList = ({
       return (
         // mimic the same structure to make sure the height and ellipsis works the same
         <li className='chaise-checkbox ellipsis-text no-left-padding'>
-          <CheckListRowLabel row={{displayname: {value: 'No results found', isHTML: false}}} />
+          <FacetCheckListRowLabel row={{displayname: {value: 'No results found', isHTML: false}}} />
         </li>
       )
     }
 
     return rows.map((row: FacetCheckBoxRow, index: number) => {
       let rowClass = 'chaise-checkbox ellipsis-text';
-      if (row.disabled) {
+      // if there's a not-null, all the other options should be disabled
+      const disabled = hasNotNullFilter && !row.isNotNull;
+
+      if (disabled) {
         rowClass += ' disabled-row';
       }
 
@@ -148,10 +156,10 @@ const CheckList = ({
           <input
             // TODO for testing, id was changed to className to be more appropriate
             className={`checkbox-${index}`} type='checkbox'
-            checked={row.selected} disabled={row.disabled}
+            checked={row.selected} disabled={disabled}
             onChange={(event) => onRowClick(row, index, event)}
           />
-          <CheckListRowLabel row={row} />
+          <FacetCheckListRowLabel row={row} />
           {/* TODO favorites: */}
           {/* <span ng-if="enableFavorites && row.isFavoriteLoading" className="favorite-icon favorite-spinner-container pull-right">
             <span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
@@ -171,4 +179,4 @@ const CheckList = ({
   )
 };
 
-export default CheckList;
+export default FacetCheckList;

@@ -36,6 +36,7 @@ export class RecordsetFlowControl {
 
   updateFacetsCallback?: Function;
   updateFacetStatesCallback?: Function;
+  lastActiveFacet?: number;
 
   aggregateResults: any;
   templateVariables: any;

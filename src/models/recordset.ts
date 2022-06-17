@@ -42,8 +42,9 @@ export type FacetCheckBoxRow = {
   uniqueId?: string | null,
   displayname: Displayname,
   selected?: boolean,
-  disabled?: boolean,
-  isNotNull?: boolean
+  isNotNull?: boolean,
+  tuple?: any,
+  isFavorite?: boolean,
 }
 
 export type FacetModel = {
@@ -51,7 +52,10 @@ export type FacetModel = {
   isOpen: boolean,
   isLoading: boolean,
   noConstraints: boolean,
-  facetError: boolean
+  facetError: boolean,
+  // if the stable key is greater than length 1, the favorites won't be supported for now
+  // TODO: support this for composite stable keys
+  enableFavorites: boolean
 }
 
 export type FacetRequestModel = {
@@ -71,7 +75,4 @@ export type FacetRequestModel = {
   // logStackNode: facetLogStackNode,
   // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
   // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
-  // if the stable key is greater than length 1, the favorites won't be supported for now
-  // TODO: support this for composite stable keys
-  // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1
 }

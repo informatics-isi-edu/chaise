@@ -11,9 +11,10 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
-import CheckList from '@isrd-isi-edu/chaise/src/components/check-list';
+import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/facet-utils';
 import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
+import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type FacetChoicePickerProps = {
   /**
@@ -27,7 +28,7 @@ type FacetChoicePickerProps = {
   /**
    * The index of facet in the list of facetColumns
    */
-  index: number,
+  facetIndex: number,
   /**
    * Allows registering flow-control related function in the faceting component
    */
@@ -43,17 +44,22 @@ type FacetChoicePickerProps = {
   /**
    * Allows checking of the reference url and will display an alert if needed
    */
-  checkReferenceURL: Function
+  checkReferenceURL: Function,
+  /**
+   * dispatch the update of reference
+   */
+  updateRecordsetReference: Function
 }
 
 const FacetChoicePicker = ({
   facetColumn,
   facetModel,
-  index,
+  facetIndex,
   register,
   facetPanelOpen,
   dispatchFacetUpdate,
-  checkReferenceURL
+  checkReferenceURL,
+  updateRecordsetReference
 }: FacetChoicePickerProps): JSX.Element => {
 
   const isFirstRender = useIsFirstRender();
@@ -72,6 +78,7 @@ const FacetChoicePicker = ({
   const choicePickerContainer = useRef<HTMLDivElement>(null);
   const listContainer = useRef<HTMLDivElement>(null);
 
+  // populate facetReference and columnName that are used throughout the component
   let facetReference: any, columnName: string;
   if (facetColumn.isEntityMode) {
     facetReference = facetColumn.sourceReference.contextualize.compactSelect;
@@ -87,19 +94,27 @@ const FacetChoicePicker = ({
     facetReference = facetReference.search(searchTerm);
   }
 
+  // remove the constraints if scope.facetModel.noConstraints
+  if (facetModel.noConstraints) {
+    facetReference = facetReference.unfilteredReference;
+    if (facetColumn.isEntityMode) {
+      facetReference = facetReference.contextualize.compactSelect;
+    }
+  }
+
   /**
    * register the flow-control related functions for the facet
    * this will ensure the functions are registerd based on the latest facet changes
    */
   useEffect(() => {
-    register(index, processFacet, preProcessFacet);
-  }, [facetModel]);
+    register(facetIndex, processFacet, preProcessFacet);
+  }, [facetModel, checkboxRows]);
 
   // when searchTerm changed, ask flow-control to update it
   useEffect(() => {
     if (isFirstRender) return;
     // make sure the callbacks with latest scope are used
-    register(index, processFacet, preProcessFacet);
+    register(facetIndex, processFacet, preProcessFacet);
 
     // TODO
     // log the client action
@@ -109,10 +124,10 @@ const FacetChoicePicker = ({
     //     stack: scope.parentCtrl.getFacetLogStack(scope.index, extraInfo)
     // }, scope.facetColumn.sourceReference.defaultLogInfo);
 
-    $log.debug(`faceting: request for facet (index=${index} update. new search=${searchTerm}`);
+    $log.debug(`faceting: request for facet (index=${facetIndex} update. new search=${searchTerm}`);
 
     // ask the parent to update the facet column
-    dispatchFacetUpdate(index, true, LogReloadCauses.FACET_SEARCH_BOX);
+    dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_SEARCH_BOX);
 
   }, [searchTerm]);
 
@@ -129,62 +144,204 @@ const FacetChoicePicker = ({
   }, [facetModel.isOpen, facetModel.isLoading]);
 
   //-------------------  flow-control related functions:   --------------------//
+  const preProcessFacet = () => {
+    const defer = Q.defer();
+
+    // if not_null exist, other filters are not relevant
+    if (facetColumn.hasNotNullFilter) {
+      // facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
+      setCheckboxRows([getNotNullFacetCheckBoxRow(true)]);
+
+      defer.resolve();
+    }
+    else if (facetColumn.choiceFilters.length === 0) {
+      defer.resolve();
+    }
+    else {
+      const res: FacetCheckBoxRow[] = [];
+
+      // getChoiceDisplaynames won't return the null filter, so we need to check for it first
+      if (facetColumn.hasNullFilter) {
+        // scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter(true));
+        res.push(getNullFacetCheckBoxRow(true));
+      }
+
+      // TODO
+      const facetLog = {};
+      // const facetLog = getDefaultLogInfo(scope);
+      // facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, logService.logActions.PRESELECTED_FACETS_LOAD);
+      facetColumn.getChoiceDisplaynames(facetLog).then(function (filters: any) {
+        filters.forEach(function (f: any) {
+          // scope.facetModel.appliedFilters.push({
+          //   uniqueId: f.uniqueId,
+          //   displayname: f.displayname,
+          //   tuple: f.tuple // the returned tuple might be null (in case of scalar)
+          // });
+          res.push({
+            uniqueId: f.uniqueId,
+            displayname: f.displayname,
+            tuple: f.tuple, // the returned tuple might be null (in case of scalar)
+            selected: true
+          });
+        });
+
+        setCheckboxRows(res);
+
+        defer.resolve();
+      }).catch(function (error: any) {
+        defer.reject(error);
+      });
+    }
+
+    return defer.promise;
+  }
+
   const processFacet = () => {
     const defer = Q.defer();
-    $log.debug(`updating facet ${index}`);
-    $log.debug(`facet model is ${facetModel.isOpen}, ${facetModel.isLoading}`);
 
     $log.debug(facetReference.uri);
 
+    // we will set the checkboxRows to the value of this variable at the end
     const updatedRows: FacetCheckBoxRow[] = [];
 
-    // show not-null if it exists or hide_not_null_choice is missing.
-    if (!facetColumn.hideNotNullChoice) {
-      updatedRows.push(getNotNullFacetCheckBoxRow(facetColumn.hasNotNullFilter));
+    // add not-null filter if it should be added and already has not been selected
+    if (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) {
+      updatedRows.push(getNotNullFacetCheckBoxRow());
     }
 
-    if (!facetColumn.hideNullChoice) {
-      updatedRows.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter, facetColumn.hasNotNullFilter));
+    // add null filter if it should be added and already has not been selected
+    if (!facetColumn.hideNullChoice && !facetColumn.hasNullFilter) {
+      updatedRows.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter));
+    }
+
+    // add the already selected facets
+    updatedRows.push(...getAppliedFilters());
+
+    // maxCheckboxLen: Maximum number of checkboxes that we could show
+    // (PAGE_SIZE + if not-null is allowed + if null is allowed)
+    let maxCheckboxLen = FACET_PANEL_DEFAULT_PAGE_SIZE;
+    if (!facetColumn.hideNotNullChoice) maxCheckboxLen++;
+    if (!facetColumn.hideNullChoice) maxCheckboxLen++;
+
+    // appliedLen: number of applied filters (apart from null and not-null)
+    //if this is more than PAGE_SIZE, we don't need to read the data.
+    let appliedLen = updatedRows.length;
+    if (facetColumn.hasNullFilter) appliedLen--;
+    if (facetColumn.hasNotNullFilter) appliedLen--;
+
+    // there are more than PAGE_SIZE selected rows, just display them.
+    if (appliedLen >= FACET_PANEL_DEFAULT_PAGE_SIZE) {
+      // there might be more, we're not sure
+      processFavorites(updatedRows).then(function (res) {
+
+        setHasMore(true);
+        setCheckboxRows(updatedRows);
+
+        defer.resolve(res);
+      }).catch(function (err) {
+        defer.reject(err);
+      });
+      return defer.promise;
     }
 
     (function (uri) {
-      facetReference.read(8, {}, true).then((page: any) => {
+      // TODO log stuff
+      // the reload causes and stuff should be handled by the parent not here
+      const facetLog = {};
+      // var facetLog = getDefaultLogInfo(scope);
+
+      // // create the action
+      // var action = logService.logActions.FACET_CHOICE_LOAD;
+      // if (scope.facetModel.reloadCauses.length > 0) {
+      //     action = logService.logActions.FACET_CHOICE_RELOAD;
+      //     // add causes
+      //     facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.reloadCauses, scope.facetModel.reloadStartTime);
+      // }
+      // facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
+
+      // // update the filter log info to stack
+      // logService.updateStackFilterInfo(facetLog.stack, scope.reference.filterLogInfo);
+
+
+      facetReference.read(FACET_PANEL_DEFAULT_PAGE_SIZE, facetLog, true).then((page: any) => {
         // if this is not the result of latest facet change
         if (facetReference.uri !== uri) {
           defer.resolve(false);
           return defer.promise;
         }
 
+        // TODO handle by the parent
+        // scope.facetModel.reloadCauses = [];
+        // scope.facetModel.reloadStartTime = -1;
+
+        // TODO could be merged with checkBoxRows
         setHasMore(page.hasNext);
 
-        updatedRows.push(...page.tuples.map((tuple: any, index: number) => {
-          return {
-            uniqueId: tuple.uniqueId,
-            displayname: tuple.displayname,
-            selected: false,
-            disabled: facetColumn.hasNotNullFilter
+        page.tuples.forEach(function (tuple: any) {
+          // if we're showing enough rows
+          if (updatedRows.length === maxCheckboxLen) {
+            return;
           }
-        }));
+
+          // filter and tuple uniqueId might be different
+          const value = getFilterUniqueId(tuple, columnName);
+
+          const i = updatedRows.findIndex(function (row) {
+            return row.uniqueId === value && !row.isNotNull;
+          });
+
+          // it's already selected
+          if (i !== -1) {
+            return;
+          }
+
+          updatedRows.push({
+            selected: false,
+            uniqueId: value,
+            displayname: tuple.displayname,
+            tuple: tuple
+          });
+        });
+
+        return processFavorites(updatedRows);
+      }).then((result: any) => {
 
         setCheckboxRows(updatedRows);
 
-        defer.resolve(true);
+        defer.resolve(result);
+      }).catch(function (err: any) {
+        defer.reject(err);
       });
     })(facetReference.uri);
 
     return defer.promise;
+  };
+
+  const getAppliedFilters = () => {
+    return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
+  };
+
+  /**
+   * Given tuple and the columnName that should be used, return
+   * the filter's uniqueId (in case of entityPicker, it might be different from the tuple's uniqueId)
+   * @param  {Object} tuple      the tuple object
+   * @param  {string} columnName name of column (in scalar it is 'value')
+   * @return {string}            filter's uniqueId
+   */
+  const getFilterUniqueId = (tuple: any, columnName: string) => {
+    if (tuple.data && columnName in tuple.data) {
+      return tuple.data[columnName];
+    }
+    return tuple.uniqueId;
   }
 
-  const preProcessFacet = () => {
+  const processFavorites = (rows: any) => {
     const defer = Q.defer();
-    $log.debug(`preprocessing facet ${index}`);
-
-    setTimeout(() => {
-      defer.resolve(true);
-    }, 1000);
+    // TODO favorites
+    defer.resolve(true);
 
     return defer.promise;
-  }
+  };
 
   //-------------------  UI related callbacks:   --------------------//
   const searchCallback = (term: string | null, action: LogActions) => {
@@ -226,7 +383,7 @@ const FacetChoicePicker = ({
 
     setRecordsetModalProps({
       initialReference: facetReference,
-      initialPageLimit: 25,
+      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
     });
@@ -240,6 +397,32 @@ const FacetChoicePicker = ({
     const checked = !row.selected;
     $log.log(`facet checkbox ${row.uniqueId} has been ${checked ? 'selected' : 'deselected'}`);
 
+    const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
+    // get the new reference based on the operation
+    let ref;
+    if (row.isNotNull) {
+      if (checked) {
+        ref = facetColumn.addNotNullFilter();
+      } else {
+        ref = facetColumn.removeNotNullFilter();
+      }
+      $log.debug(`faceting: request for facet (index=${facetIndex}) choice add. Not null filter.`);
+    } else {
+      if (checked) {
+        ref = facetColumn.addChoiceFilters([row.uniqueId]);
+      } else {
+        ref = facetColumn.removeChoiceFilters([row.uniqueId]);
+      }
+      $log.debug(`faceting: request for facet (index=${facetIndex}) choice ${row.selected ? 'add' : 'remove'}. uniqueId='${row.uniqueId}`);
+    }
+
+    // this function checks the URL length as well and might fails
+    if (!updateRecordsetReference(ref, facetIndex, cause)) {
+      $log.debug('faceting: URL limit reached. Reverting the change.');
+      event.preventDefault();
+      return;
+    }
+
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => curr !== row ? curr : { ...curr, selected: checked });
     });
@@ -247,7 +430,7 @@ const FacetChoicePicker = ({
 
   const retryQuery = (noConstraints: boolean) => {
     // TODO
-    $log.debug(`retrying facet ${index}`);
+    $log.debug(`retrying facet ${facetIndex}`);
   }
 
   //-------------------  render logic:   --------------------//
@@ -263,9 +446,9 @@ const FacetChoicePicker = ({
           disabled={facetColumn.hasNotNullFilter}
         />
         <div ref={listContainer}>
-          <CheckList
+          <FacetCheckList
             initialized={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
-            rows={checkboxRows}
+            rows={checkboxRows} hasNotNullFilter={facetColumn.hasNotNullFilter}
             onRowClick={onRowClick}
           />
         </div>

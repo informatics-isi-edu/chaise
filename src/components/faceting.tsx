@@ -47,6 +47,9 @@ const Faceting = ({
         isLoading: fc.isOpen,
         noConstraints: false,
         facetError: false,
+        // TODO
+        // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1,
+        enableFavorites: false,
       });
     });
     // all the facets are closed, open the first one
@@ -116,9 +119,6 @@ const Faceting = ({
         // logStackNode: facetLogStackNode,
         // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
         // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
-        // if the stable key is greater than length 1, the favorites won't be supported for now
-        // TODO: support this for composite stable keys
-        // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1
       });
     });
 
@@ -149,7 +149,7 @@ const Faceting = ({
 
   //-------------------  flow-control related functions:   --------------------//
 
-  function registerFacet (index: number, processFacet: Function, preprocessFacet: Function) {
+  function registerFacet(index: number, processFacet: Function, preprocessFacet: Function) {
     facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
     facetRequestModels.current[index].registered = true;
@@ -160,7 +160,7 @@ const Faceting = ({
     }
   }
 
-  const updateFacetStates = (cause?: string) => {
+  const updateFacetStates = (flowControl: any, cause?: string) => {
     // batch all the state changes into one
     const modifiedAttrs: { [index: number]: { [key: string]: boolean } } = {};
 
@@ -168,10 +168,9 @@ const Faceting = ({
     facetRequestModels.current.forEach(function (frm: any, index: number) {
       const facetModel = facetModels[index];
 
-      // TODO
-      // if (vm.lastActiveFacet === index) {
-      // return;
-      // }
+      if (flowControl.current.lastActiveFacet === index) {
+        return;
+      }
 
       // if it's open, we need to process it
       if (facetModel.isOpen) {
@@ -192,8 +191,8 @@ const Faceting = ({
       }
     });
 
-    $log.debug('modified arrs:');
-    $log.debug(modifiedAttrs);
+    // $log.debug('modified arrs:');
+    // $log.debug(modifiedAttrs);
     setMultipleFacetModelsByIndex(modifiedAttrs);
   };
 
@@ -251,6 +250,11 @@ const Faceting = ({
 
         (function (i) {
           printDebugMessage(`updating facet (index=${i})`);
+
+          // TODO facetRequestModel stuff should be passed to process facet
+          //      e.g. reloadCauses, reloadTime, etc..
+          //      everything should be handled here eventually
+          //      and the processFacet should only use the values and not modify them
           facetRequestModels.current[i].processFacet().then(function (res: any) {
             setFacetModelByIndex(i, { facetError: false });
             afterFacetUpdate(i, res, flowControl);
@@ -290,6 +294,17 @@ const Faceting = ({
     // call the flow-control, so the update of facet is queued properly
     update(null, null, false, false, false, true);
   };
+
+  const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean) => {
+    if (!checkReferenceURL(newRef)) {
+      return false;
+    }
+
+    if (!keepRef) {
+      update(newRef, null, true, true, true, false, cause, index);
+    }
+    return true;
+  }
 
   //-------------------  UI related callbacks:   --------------------//
 
@@ -375,9 +390,10 @@ const Faceting = ({
       //   return <FacetCheckPresence facetColumn={fc} index={index}></FacetCheckPresence>
       default:
         return <FacetChoicePicker
-          facetModel={fm} facetColumn={fc} index={index}
+          facetModel={fm} facetColumn={fc} facetIndex={index}
           register={registerFacet} facetPanelOpen={facetPanelOpen}
           dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
+          updateRecordsetReference={updateRecordsetReference}
         />
     }
   };

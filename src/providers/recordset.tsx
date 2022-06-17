@@ -5,7 +5,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
-import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -22,7 +22,7 @@ export const RecordsetContext = createContext<{
   isLoading: boolean,
   isInitialized: boolean,
   initialize: () => void,
-  update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => boolean,
+  update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
   pageLimit: any,
   page: any,
   colValues: any,
@@ -70,7 +70,7 @@ export default function RecordsetProvider({
    */
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : 25);
+  const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
   const [page, setPage] = useState<any>(null);
   const [colValues, setColValues] = useState<any>([]);
   /**
@@ -169,6 +169,7 @@ export default function RecordsetProvider({
    * @param  {boolean} updateFacets if it's true we will udpate the opened facets.
    * @param  {boolean} sameCounter if it's true, the flow-control counter won't be updated.
    * @param  {string?} cause why we're calling this function (optional)
+   * @param  {number?} lastActiveFacet the facet that has been active and should rename active
    * NOTE: we're passing newRef here to ensure the reference and flowControl object are updated together
    * NOTE: sameCounter=true is used just to signal that we want to get results of the current
    * page status. For example when a facet opens or when users add a search term to a single facet.
@@ -176,7 +177,7 @@ export default function RecordsetProvider({
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string) => {
+  const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => {
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
@@ -184,9 +185,13 @@ export default function RecordsetProvider({
       return false;
     }
 
+    if (typeof lastActiveFacet === 'number') {
+      flowControl.current.lastActiveFacet = lastActiveFacet;
+    }
+
     if (updateFacets) {
       if (flowControl.current.updateFacetStatesCallback) {
-        flowControl.current.updateFacetStatesCallback(cause);
+        flowControl.current.updateFacetStatesCallback(flowControl, cause);
       }
     }
 

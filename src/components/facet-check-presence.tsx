@@ -1,5 +1,5 @@
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
-import CheckList from '@isrd-isi-edu/chaise/src/components/check-list';
+// import CheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
 import { useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/facet-utils';
@@ -38,7 +38,8 @@ const FacetCheckPresence = ({
 
   return (
     <div className='check-presence'>
-      <CheckList initialized={true} rows={checkboxRows} onRowClick={onRowClick} />
+      {/* TODO */}
+      {/* <CheckList initialized={true} rows={checkboxRows} onRowClick={onRowClick} /> */}
     </div>
   )
 };
