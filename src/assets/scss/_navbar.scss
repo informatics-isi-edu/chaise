@@ -45,6 +45,7 @@ body > .container {
     padding: 15px 15px;
     font-size: 18px;
     line-height: 20px;
+    margin-right: 0px;
 }
 
 #live-btn {
@@ -57,6 +58,7 @@ body > .container {
         text-decoration: underline;
     }
 }
+
 
 .navbar-inverse .navbar-nav.navbar-right > div > a:hover{
    color: #FFF;
@@ -108,17 +110,29 @@ body > .container {
 
 #rid-search-input {
     background-color: $table-striped-background-color;
+    overflow-x: auto;
 }
 
 #mainnav {
     border-radius: 0;
 }
 
+@media (max-width: 992px) {
+    .navbar-collapse {
+        overflow: auto;
+        display: grid;
+    }
+    #rid-search-input {
+        // Setting max-width for search input on smaller screens
+        max-width: 125px;
+    }
+}
+
 .navbar {
     margin-bottom: 0;
     padding: 0px 5px 0px 20px;
     min-height: 50px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 // div replaces li, a is the case with no dropdown
@@ -196,10 +210,6 @@ nav.navbar {
         font-weight: 600;
     }
 
-    .navbar-nav .chaise-dropdown-header {
-        color: $border-color;
-    }
-
     .dropdown-submenu {
         position: relative;
     }
@@ -268,6 +278,9 @@ nav.navbar {
         // overflow-y: auto;
         width: max-content;
         max-width: 450px;
+
+        // Height is set by JS Code
+        overflow-y: auto;
     }
 
     .dropdown .dropdown-toggle,
@@ -328,16 +341,28 @@ nav.navbar {
         top: 0;
         right: 100%;
         left: auto;
-        margin-top: 0;
-        margin-right: 0.125rem;
+        margin: 0px;
     }
 
     .dropend>.dropdown-menu[data-bs-popper] {
         top: 0;
         right: auto;
         left: 100%;
-        margin-top: 0;
-        margin-left: 0.125rem;
+        margin: 0px;
+    }
+
+    .custom-dropdown-submenu {
+        // Position fixed is required to align submenu on big screens 
+        // (since top, left works for position:fixed)
+        position: fixed !important;
+        right: unset;
+    }
+
+    @media (max-width: 992px) {
+        .custom-dropdown-submenu {
+            // Unsetting the previous position:fixed for smaller screens (bootstrap takes care of responsiveness)
+            position: unset !important;
+        }
     }
 
     // Vertical navbar
@@ -366,11 +391,12 @@ nav.navbar {
         }
 
         .navbar-nav {
-            float: left;
+            float: right;
             margin: 0;
 
             &.navbar-menu-options {
                 margin-right: auto;
+                float: left;
             }
 
             li {
@@ -381,6 +407,57 @@ nav.navbar {
                     padding-bottom: 15px;
                 }
             }
+        }
+    }
+
+    @media (max-width: 992px) {
+        .navbar-nav div.dropdown-menu {
+            // Adding max-height when screen size is small,
+            // Made important to override maxHeight set by JS (which is not relevant in small screens) 
+            max-height: unset !important;
+            padding-left: 16px;
+
+            // Adding min-width and box-shadow so that submenus are differentiable
+            min-width: 250px;
+            background: transparent;
+        }
+
+        .dropdown-menu > a,
+        .dropdown-menu > div > a {  
+            color: $dropdown-menu-anchor-color;
+
+            &:focus,
+            &:hover {
+                color: white;
+                background: transparent;
+            }
+        }
+
+        // Menu Toggler css in smaller screens
+        .navbar-toggler {
+            border: 1px solid white;
+            padding: 8px;
+            margin-right: 16px;
+            color: white;
+
+            &:hover {
+                background-color: $black-color;
+            }
+            &:focus {
+                box-shadow: none;
+                background-color: $black-color;
+            }
+        }
+    }
+
+    @media (min-width: 992px) {
+        // Display is set to block in bigger screens to align login and search input 
+        .navbar-collapse.collapse {
+            display: block !important;
+        }
+
+        div.dropdown-submenu.show {
+            background-color: $table-header-background-color;
         }
     }
 }

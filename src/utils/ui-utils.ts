@@ -278,6 +278,25 @@ export function copyToClipboard(text: string) {
   }
 }
 
+/**
+ * 
+ * @param callback function that needs to be invoked after the delay
+ * @param timeout delay
+ * @returns debounced function
+ */
+export function debounce(callback: Function, timeout: number) {
+  let timer: any = null;
+
+  return function(...args: any[]) {
+
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      timer = null;
+      callback.apply(this, args);
+    }, timeout);  
+  }
+}
+
 /*
   This function is used for firing custom events
   @param {string} eventName - the event name
