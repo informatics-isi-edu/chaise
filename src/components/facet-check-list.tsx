@@ -67,7 +67,7 @@ const FacetCheckListRowLabel = ({
 
   return (
     <OverlayTrigger
-      trigger='hover'
+      trigger={['hover', 'focus']}
       placement='right'
       overlay={<Tooltip><DisplayValue value={tooltip} /></Tooltip>}
       onToggle={(nextshow: boolean) => {

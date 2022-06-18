@@ -36,6 +36,11 @@ export class RecordsetFlowControl {
 
   updateFacetsCallback?: Function;
   updateFacetStatesCallback?: Function;
+  getAppliedFilters?: Function;
+  removeAppliedFilters?: Function;
+  focusOnFacet?: Function;
+
+
   lastActiveFacet?: number;
 
   aggregateResults: any;

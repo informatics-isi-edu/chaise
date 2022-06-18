@@ -14,18 +14,20 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/facet-check-presence';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // TODO subject to change
 type FacetingProps = {
-  facetPanelOpen: boolean
+  facetPanelOpen: boolean,
+  registerRecordsetCallbacks: Function
 }
 
 const Faceting = ({
-  facetPanelOpen
+  facetPanelOpen,
+  registerRecordsetCallbacks
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
@@ -111,6 +113,7 @@ const Faceting = ({
         registered: false,
         processFacet: () => { throw new Error('function not registered') },
         preProcessFacet: () => { throw new Error('function not registered') },
+        getAppliedFilters: () => { throw new Error('function not registered') },
         reloadCauses: [], // why the reload request is being sent to the server (might be empty)
         reloadStartTime: -1, //when the facet became dirty
         // TODO log stuff
@@ -145,13 +148,15 @@ const Faceting = ({
    */
   useEffect(() => {
     registerFacetCallbacks(updateFacetStates, updateFacets);
+    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacetFromRS);
   }, [facetModels]);
 
   //-------------------  flow-control related functions:   --------------------//
 
-  function registerFacet(index: number, processFacet: Function, preprocessFacet: Function) {
+  function registerFacet(index: number, processFacet: Function, preprocessFacet: Function, getAppliedFilters: Function) {
     facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
+    facetRequestModels.current[index].getAppliedFilters = getAppliedFilters;
     facetRequestModels.current[index].registered = true;
 
     if (facetRequestModels.current.every((el) => el.registered)) {
@@ -304,7 +309,81 @@ const Faceting = ({
       update(newRef, null, true, true, true, false, cause, index);
     }
     return true;
+  };
+
+  //------------------- callbacks that recordset will call: ----------------//
+  /**
+   * it will return an array of arrays
+   * @returns
+   */
+  const getAppliedFiltersFromRS = () => {
+    // TODO proper type
+    const res: any = facetRequestModels.current.map((frm: any) => {
+      return frm.getAppliedFilters();
+    })
+    return res;
+  };
+
+  const removeAppliedFiltersFromRS = (index?: number | 'filters' | 'cfacets') => {
+    let newRef, reason = LogReloadCauses.FACET_CLEAR, action = '';
+    if (index === 'filters') {
+      // only remove custom filters on the reference (not the facet)
+      // TODO LOG should we log this?
+      newRef = reference.removeAllFacetFilters(false, true, true);
+      action = LogActions.BREADCRUMB_CLEAR_CUSTOM;
+      reason = LogReloadCauses.CLEAR_CUSTOM_FILTER;
+    } else if (index === 'cfacets') {
+      // only remove custom facets on the reference
+      newRef = reference.removeAllFacetFilters(true, false, true);
+      action = LogActions.BREADCRUMB_CLEAR_CFACET;
+      reason = LogReloadCauses.CLEAR_CFACET;
+    } else if (typeof index === 'undefined') {
+      // // delete all filters and facets
+      newRef = reference.removeAllFacetFilters();
+      action = LogActions.BREADCRUMB_CLEAR_ALL;
+      reason = LogReloadCauses.CLEAR_ALL;
+
+      if (reference.location.searchTerm) {
+        newRef = newRef.search();
+      }
+
+    } else {
+      // delete all fitler for one column
+      newRef = reference.facetColumns[index].removeAllFilters();
+
+      // log the action
+      // TODO
+      // var fc = scope.vm.reference.facetColumns[index];
+      // logService.logClientAction({
+      //   action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_CLEAR),
+      //   stack: currentCtrl.getFacetLogStack(index)
+      // }, fc.sourceReference.defaultLogInfo);
+    }
+
+    // whether we should log the action for the whole page or not
+    if (action) {
+      // TODO
+      // log the action
+      // logService.logClientAction(
+      //   {
+      //     action: recordTableUtils.getTableLogAction(scope.vm, action),
+      //     stack: recordTableUtils.getTableLogStack(scope.vm)
+      //   },
+      //   scope.vm.reference.defaultLogInfo
+      // );
+    }
+
+    updateRecordsetReference(newRef, -1, reason);
   }
+
+  const focusOnFacetFromRS = (index: number, dontUpdate?: boolean) => {
+    const fm = facetModels[index];
+    if (!fm.isOpen && (dontUpdate !== true)) {
+      toggleFacet(index, true);
+    }
+
+    scrollToFacet(index, dontUpdate);
+  };
 
   //-------------------  UI related callbacks:   --------------------//
 
@@ -366,17 +445,6 @@ const Faceting = ({
   const scrollToFacet = (index: number, dontLog?: boolean) => {
     $log.debug(`scrolling to facet ${index}`);
   };
-
-  // TODO should be registered in the recordset provider
-  const focusOnFacet = (index: number, dontUpdate?: boolean) => {
-    const fm = facetModels[index];
-    if (!fm.isOpen && (dontUpdate !== true)) {
-      toggleFacet(index, true);
-    }
-
-    scrollToFacet(index, dontUpdate);
-  };
-
 
   //-------------------  render logic:   --------------------//
 

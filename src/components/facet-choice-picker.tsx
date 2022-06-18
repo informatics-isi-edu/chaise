@@ -107,14 +107,14 @@ const FacetChoicePicker = ({
    * this will ensure the functions are registerd based on the latest facet changes
    */
   useEffect(() => {
-    register(facetIndex, processFacet, preProcessFacet);
+    callRegister();
   }, [facetModel, checkboxRows]);
 
   // when searchTerm changed, ask flow-control to update it
   useEffect(() => {
     if (isFirstRender) return;
     // make sure the callbacks with latest scope are used
-    register(facetIndex, processFacet, preProcessFacet);
+    callRegister();
 
     // TODO
     // log the client action
@@ -144,6 +144,10 @@ const FacetChoicePicker = ({
   }, [facetModel.isOpen, facetModel.isLoading]);
 
   //-------------------  flow-control related functions:   --------------------//
+  const callRegister = () => {
+    register(facetIndex, processFacet, preProcessFacet, getAppliedFilters);
+  };
+
   const preProcessFacet = () => {
     const defer = Q.defer();
 

@@ -67,6 +67,7 @@ export type FacetRequestModel = {
   registered: boolean,
   processFacet: Function, // TODO
   preProcessFacet: Function, //TODO
+  getAppliedFilters: Function, // TODO
   reloadCauses: string[], // why the reload request is being sent to the server (might be empty)
   reloadStartTime: number, //when the facet became dirty
   // TODO log stuff

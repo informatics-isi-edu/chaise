@@ -85,6 +85,11 @@
             padding-right: 4px;
           }
 
+          button span {
+            color: $primary-color;
+            cursor: pointer;
+          }
+
           span {
             color: $black-color;
             cursor: default;

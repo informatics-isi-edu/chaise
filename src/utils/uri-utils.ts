@@ -517,3 +517,12 @@ export function getAbsoluteURL(uri: string, origin?: string) {
   // else prepend the server uri with an additional "/"
   return `${origin}/${uri}`;
 }
+
+/**
+ * This function can be used for making the custom filters easier to read
+ * @param filter the filter string
+ * @returns transformed filter that can be used for display
+ */
+export function transformCustomFilter(filter: string) {
+  return filter.replace(/&/g, '& ').replace(/;/g, '; ');
+}

@@ -12,8 +12,8 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import {isObjectAndKeyDefined} from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -21,10 +21,11 @@ import Faceting from '@isrd-isi-edu/chaise/src/components/faceting';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/table-header';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
-import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
+import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 /**
  * TODO
@@ -101,10 +102,6 @@ const RecordsetInner = ({
     update
   } = useRecordset();
 
-  const {
-    addAlert
-  } = useAlert();
-
   /**
    * whether the facet panel should be open or closed
    * NOTE: will return false if faceting is disabled or should be hidden
@@ -130,6 +127,12 @@ const RecordsetInner = ({
 
 
   const mainContainer = useRef<any>(null);
+  // TODO proper type
+  const facetCallbacks = useRef<{
+    getAppliedFilters: any,
+    removeAppliedFilters: any,
+    focusOnFacet: any,
+  } | null>(null);
 
 
   // initialize the recordset if it has not been done yet.
@@ -224,6 +227,10 @@ const RecordsetInner = ({
     });
   };
 
+  const registerCallbacksFromFaceting = (getAppliedFilters: Function, removeAppliedFilters: Function, focusOnFacet: Function) => {
+    facetCallbacks.current = { getAppliedFilters, removeAppliedFilters, focusOnFacet };
+  }
+
   //-------------------  UI related functions:   --------------------//
 
   const recordsetLink = getRecordsetLink();
@@ -249,31 +256,26 @@ const RecordsetInner = ({
    * @param action string the log action
    */
   const changeSearch = (term: string | null, action: LogActions) => {
-    // TODO added for test, should be removed
-    // $log.info('adding alert!!');
-    // addAlert('Search initiated', ChaiseAlertType.INFO, () => {
-    //   $log.info('removed!');
-    // });
     $log.log(`search with term: ${term}, action : ${action}`);
     if (term) term = term.trim();
 
     const ref = reference.search(term); // this will clear previous search first
     // TODO
     // if (checkReferenceURL(ref)) {
-      // vm.lastActiveFacet = -1;
-      // printDebugMessage(`new search term=${term}`);
+    // vm.lastActiveFacet = -1;
+    // printDebugMessage(`new search term=${term}`);
 
-      // TODO
-      // log the client action
-      // const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
+    // TODO
+    // log the client action
+    // const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
 
-      // TODO
-      // LogService.logClientAction({
-      //   action: flowControl.current.getTableLogAction(action),
-      //   stack: flowControl.current.getTableLogStack(null, extraInfo)
-      // }, ref.defaultLogInfo);
+    // TODO
+    // LogService.logClientAction({
+    //   action: flowControl.current.getTableLogAction(action),
+    //   stack: flowControl.current.getTableLogStack(null, extraInfo)
+    // }, ref.defaultLogInfo);
 
-      update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
+    update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
     // }
   };
 
@@ -284,7 +286,102 @@ const RecordsetInner = ({
   };
 
   const renderSelectedFacetFilters = () => {
-    return <></>
+    if (!facetCallbacks.current) {
+      $log.debug('TESTING: callback not registered!');
+      return;
+    }
+    const loc = reference.location;
+
+    if (!loc) return;
+    const hasFilter = loc.filter;
+    const hasFacets = loc.facets && loc.facets.hasVisibleFilters;
+    const hasCustomFacets = loc.customFacets && loc.customFacets.displayname;
+
+    // if there aren't any filters, don't show the container at all
+    if (!hasFilter && !hasCustomFacets && !hasFacets) return;
+
+    // the displayed chiclets
+    const chiclets: JSX.Element[] = [];
+
+    // filters
+    if (hasFilter) {
+      chiclets.push(
+        <FilterChiclet
+          key='filters'
+          identifier={'filters'}
+          iconTooltip={'Clear custom filter applied'}
+          title={'Custom Filter'}
+          value={transformCustomFilter(loc.filtersString)}
+          onRemove={facetCallbacks.current.removeAppliedFilters}
+        />
+      );
+    }
+
+    // cfacets
+    if (hasCustomFacets) {
+      const cFacetRemovable = loc.customFacets.removable;
+      chiclets.push(
+        <FilterChiclet
+          key='cfacets'
+          identifier={'cfacets'}
+          iconTooltip={cFacetRemovable ? 'Clear custom filter applied' : 'Predefined filter(s)'}
+          // when it's not removable we're showing the icon and that's enough
+          title={cFacetRemovable ? 'Custom Filter' : undefined}
+          value={transformCustomFilter(loc.filter)}
+          onRemove={cFacetRemovable ? facetCallbacks.current.removeAppliedFilters : null}
+        />
+      );
+    }
+
+    // facets
+    if (hasFacets) {
+      const facetAppliedFilters = facetCallbacks.current.getAppliedFilters();
+      if (Array.isArray(facetAppliedFilters)) {
+        facetAppliedFilters.forEach((faf: any, facetIndex: number) => {
+          if (faf.length === 0) return;
+
+          const facetDisplayname = reference.facetColumns[facetIndex].displayname;
+          const chicletValue : JSX.Element[] = [];
+          const chicletValueTooltip : JSX.Element[] = [];
+
+          faf.forEach((f: any, filterIndex: number) => {
+            chicletValue.push(
+              <>
+                <DisplayValue key={f.uniqueId} value={f.displayname} specialNullEmpty={true} />
+                {(filterIndex !== faf.length -1) && <span>, </span>}
+              </>
+            );
+
+            chicletValueTooltip.push(
+              <>
+                <span style={{'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke'}}>&bull;</span>
+                <DisplayValue key={f.uniqueId} value={f.displayname} specialNullEmpty={true} />
+              </>
+            )
+          });
+
+          chiclets.push(
+            <FilterChiclet
+              key={`facet-${facetIndex}`}
+              identifier={facetIndex}
+              iconTooltip={'Clear filter applied'}
+              title={facetDisplayname}
+              titleTooltip={<span>Go to <DisplayValue value={facetDisplayname}/> filter</span>}
+              value={chicletValue}
+              valueTooltip={chicletValueTooltip}
+              onRemove={facetCallbacks.current!.removeAppliedFilters}
+              onTitleClick={facetCallbacks.current!.focusOnFacet}
+            />
+          );
+        });
+      }
+    }
+
+    return (
+      <div className='recordset-chiclets-container recordset-chiclets'>
+        {chiclets}
+      </div>
+    )
   }
 
   const renderShowFilterPanelBtn = () => {
@@ -398,7 +495,7 @@ const RecordsetInner = ({
                 </div>
               </div>
             </div>
-            {renderSelectedFacetFilters()}
+            {facetColumnsReady && renderSelectedFacetFilters()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
           </div>
@@ -413,7 +510,7 @@ const RecordsetInner = ({
             style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
             <div className='side-panel-container'>
-              <Faceting facetPanelOpen={facetPanelOpen} />
+              <Faceting facetPanelOpen={facetPanelOpen} registerRecordsetCallbacks={registerCallbacksFromFaceting} />
             </div>
           </div>
         }

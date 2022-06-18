@@ -127,7 +127,7 @@ const SearchInput = ({
 
     return (
       <OverlayTrigger
-        trigger='hover'
+        trigger={['hover', 'focus']}
         placement='bottom-start'
         overlay={<Tooltip>{inner}</Tooltip>}
         onToggle={(nextshow: boolean) => {
