@@ -2,7 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
 import React, { useEffect, useRef, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -117,6 +117,8 @@ const RecordsetInner = ({
     }
     return res;
   });
+
+  const [cancelDownloadAlert, setCancelDownloadAlert] = useState(false);
 
   /**
    * We have to validate the facets first, and then we can show them.
@@ -351,6 +353,11 @@ const RecordsetInner = ({
       <div className='top-panel-container'>
         {/* recordset level alerts */}
         <Alerts />
+
+        {cancelDownloadAlert && <Alert style={{ marginLeft: 20}} dismissible variant='warning' onClose={() => setCancelDownloadAlert(false)}>
+          <strong>Warning </strong>Export request has been canceled.
+        </Alert>}
+
         <div className='top-flex-panel'>
           <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
             <div className='panel-header'>
@@ -376,6 +383,7 @@ const RecordsetInner = ({
                   <Export
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
+                    cancelDownload={() => setCancelDownloadAlert(true)}
                   />
                   <OverlayTrigger placement='bottom' overlay={
                     <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
