@@ -10,9 +10,9 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 type FacetCheckListProps = {
   /**
    * whether the list is intiialized or not.
-   * if initialized, we will set the height otherwise the height remains unchanged
+   * if setHeight, we will set the height otherwise the height remains unchanged
    */
-  initialized: boolean,
+  setHeight?: boolean,
   /**
    * The rows that should be displayed
    */
@@ -25,7 +25,7 @@ type FacetCheckListProps = {
   /**
    * If true, we should disable other options
    */
-  hasNotNullFilter: boolean
+  hasNotNullFilter?: boolean
   // TODO
   // enableFavorites?: boolean,
   // onFavoritesChanged: Function
@@ -100,7 +100,7 @@ const FacetCheckListRowLabel = ({
  * Show a checklist of options for faceting
  */
 const FacetCheckList = ({
-  initialized,
+  setHeight,
   rows,
   onRowClick,
   hasNotNullFilter
@@ -117,7 +117,7 @@ const FacetCheckList = ({
     if (!listContainer.current) return;
 
     const el = listContainer.current;
-    if (initialized) {
+    if (setHeight) {
 
       // the timeout is needed to make sure we're getting the height after it's added to DOM
       setTimeout(() => {
@@ -130,10 +130,10 @@ const FacetCheckList = ({
       el.style.height = '';
       el.style.overflow = '';
     }
-  }, [initialized]);
+  }, [setHeight]);
 
   const renderRows = () => {
-    if (initialized && rows.length === 0) {
+    if (setHeight && rows.length === 0) {
       return (
         // mimic the same structure to make sure the height and ellipsis works the same
         <li className='chaise-checkbox ellipsis-text no-left-padding'>

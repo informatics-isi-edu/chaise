@@ -85,6 +85,8 @@ const Faceting = ({
 
   const facetsToPreProcess = useRef<number[]>([]);
 
+  const sidePanelContainer = useRef<HTMLDivElement>(null);
+
   // register the flow-control related callbacks
   useEffect(() => {
     facetRequestModels.current = [];
@@ -378,6 +380,7 @@ const Faceting = ({
 
   const focusOnFacetFromRS = (index: number, dontUpdate?: boolean) => {
     const fm = facetModels[index];
+    $log.debug(`dontUpdate: ${dontUpdate}, index: ${index}, isOpen: ${fm.isOpen}`);
     if (!fm.isOpen && (dontUpdate !== true)) {
       toggleFacet(index, true);
     }
@@ -441,9 +444,42 @@ const Faceting = ({
     // }
   };
 
-  // TODO
+  /**
+   * Given the index of a facet, scroll to it
+   * @param index the index of facet
+   * @param dontLog whether we should log this event or not
+   */
   const scrollToFacet = (index: number, dontLog?: boolean) => {
+    if (!sidePanelContainer.current) return;
+
+    const el = sidePanelContainer.current.querySelectorAll('.facet-panel')[index] as HTMLElement;
+    if (!el) return;
+
     $log.debug(`scrolling to facet ${index}`);
+
+    // TODO
+    // if (!dontLog) {
+    //   var const = reference.facetColumns[index];
+    //   logService.logClientAction({
+    //     action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_SCROLL_TO),
+    //     stack: currentCtrl.getFacetLogStack(index)
+    //   }, fc.sourceReference.defaultLogInfo);
+    // }
+
+    // scroll
+    sidePanelContainer.current.scrollTo({
+      top: el.offsetTop,
+      behavior: 'smooth'
+    });
+
+    // flash the activeness
+    setTimeout(() => {
+      el.classList.add('active');
+      setTimeout(() => {
+        el.classList.remove('active');
+      }, 1600);
+    }, 100);
+
   };
 
   //-------------------  render logic:   --------------------//
@@ -454,8 +490,12 @@ const Faceting = ({
       // TODO
       // case 'ranges':
       //   return <FacetRangePicker facetColumn={fc} index={index}></FacetRangePicker>
-      // case 'check_presence':
-      //   return <FacetCheckPresence facetColumn={fc} index={index}></FacetCheckPresence>
+      case 'check_presence':
+        return <FacetCheckPresence
+          facetModel={fm} facetColumn={fc} facetIndex={index}
+          register={registerFacet}
+          updateRecordsetReference={updateRecordsetReference}
+        />
       default:
         return <FacetChoicePicker
           facetModel={fm} facetColumn={fc} facetIndex={index}
@@ -509,21 +549,22 @@ const Faceting = ({
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
-  $log.debug(`open facets are: ${activeKeys}`);
 
   if (!displayFacets) {
     return <></>
   }
 
   return (
-    <div className='faceting-columns-container'>
-      <Accordion
-        className='panel-group'
-        alwaysOpen // allow multiple to be open together
-        activeKey={activeKeys}
-      >
-        {renderFacets()}
-      </Accordion>
+    <div className='side-panel-container' ref={sidePanelContainer}>
+      <div className='faceting-columns-container'>
+        <Accordion
+          className='panel-group'
+          alwaysOpen // allow multiple to be open together
+          activeKey={activeKeys}
+        >
+          {renderFacets()}
+        </Accordion>
+      </div>
     </div>
   )
 }

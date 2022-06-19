@@ -428,7 +428,12 @@ const FacetChoicePicker = ({
     }
 
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
-      return prev.map((curr: FacetCheckBoxRow) => curr !== row ? curr : { ...curr, selected: checked });
+      return prev.map((curr: FacetCheckBoxRow) => {
+        if (curr === row) return {...curr, selected: checked};
+        // if not-null is selected, remove all the other filters
+        else if (row.isNotNull && checked) return {...curr, selected: false}
+        else return curr;
+      });
     });
   };
 
@@ -451,7 +456,7 @@ const FacetChoicePicker = ({
         />
         <div ref={listContainer}>
           <FacetCheckList
-            initialized={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
+            setHeight={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
             rows={checkboxRows} hasNotNullFilter={facetColumn.hasNotNullFilter}
             onRowClick={onRowClick}
           />

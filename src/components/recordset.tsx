@@ -509,9 +509,7 @@ const RecordsetInner = ({
             className={'side-panel-resizable ' + panelClassName}
             style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
-            <div className='side-panel-container'>
-              <Faceting facetPanelOpen={facetPanelOpen} registerRecordsetCallbacks={registerCallbacksFromFaceting} />
-            </div>
+            <Faceting facetPanelOpen={facetPanelOpen} registerRecordsetCallbacks={registerCallbacksFromFaceting} />
           </div>
         }
         <div className='main-container dynamic-padding' ref={mainContainer}>
