@@ -21,8 +21,46 @@ const errorMsgMap: {
     2: 'Please enter an integer value',
     3: 'Please enter a decimal value',
     4: 'Please enter a date value in YYYY-MM-DD format',
-    5: 'Please enter a time value in 24-hr YYYY-MM-DDTHH:MM format'
+    5: 'Please enter a time value in YYYY-MM-DD HH:MM format'
 };
+
+type DateTimePickerProps = {
+    classes?: string,
+    id: string,
+    value: string
+};
+
+const DateTimePicker = ({ classes, id, value }: DateTimePickerProps): JSX.Element => {
+
+    const clearInput = (event: React.SyntheticEvent) => {
+        const elementId = (event.target as HTMLInputElement)?.dataset.id;
+        const element = document.querySelector(`#${elementId}`) as HTMLInputElement;
+
+        event.preventDefault();
+
+        if (element?.value) {
+            element.value = '';
+        }
+
+        return;
+    }
+
+    return (
+        <div className='range-input-datetime'>
+            <div className='range-input-field'>
+                <input id={`${id}-date`} className={classes} type='date'
+                    placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} required />
+                <span className='fa-solid fa-x range-input-clear' data-id={`${id}-date`} onClick={clearInput} />
+            </div>
+            <div className='range-input-field'>
+                <input id={`${id}-time`} className={classes} type='time'
+                    placeholder='HH:MM' min='00:00' max='23:59' defaultValue='00:00' required />
+                <span className='fa-solid fa-x range-input-clear' data-id={`${id}-time`} onClick={clearInput} />
+            </div>
+        </div>
+    );
+};
+
 
 type RangeInputProps = {
     placeholder?: string,
@@ -43,20 +81,21 @@ const RangeInput = ({ placeholder = 'Enter', classes = '', reference, type, valu
     }
 
     return (
-        <div className='range-input-field chaise-input-control has-feedback'>
-            {
-                type in [0, 1] ? <input id={id} type='number' placeholder={placeholder} className={classes} ref={reference} />
-                    : type === 2 ? <input id={id} type='date' className={classes} ref={reference} step='1'
-                        defaultValue={value} required pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' />
-                        : <input id={id} type='datetime-local' placeholder='YYYY-MM-DDTHH:MM' className={classes} ref={reference}
-                            min='1970-01-01T00:00' max='2999-12-31T11:59' required />
+        type === 3 ? (
+            <DateTimePicker classes={classes} id={id} value={value} />
+        ) : (
+            <div className='range-input-field'>
+                {
+                    type in [0, 1] ? <input id={id} type='number' placeholder={placeholder} className={classes} ref={reference} />
+                        : <input id={id} type='date' className={classes} ref={reference} step='1'
+                            defaultValue={value} required pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' />
+                }
+                <span className='fa-solid fa-x range-input-clear' onClick={clearInput} />
+            </div>
+        )
 
-            }
-            <span className='fa-solid fa-x range-input-clear' onClick={clearInput} />
-        </div>
     )
-}
-    ;
+};
 
 
 type RangeInputHOCProps = {
@@ -123,11 +162,25 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
         return -1;
     }
 
+    const formatTimeValues = () => {
+        const fromDateVal = (document.querySelector('#range-from-val-date') as HTMLInputElement)?.value;
+        const fromTimeVal = (document.querySelector('#range-from-val-time') as HTMLInputElement)?.value || '00:00';
+
+        const toDateVal = (document.querySelector('#range-to-val-date') as HTMLInputElement)?.value;
+        const toTimeVal = (document.querySelector('#range-to-val-time') as HTMLInputElement)?.value || '00:00';
+
+        return { fromVal: `${fromDateVal}T${fromTimeVal}`, toVal: `${toDateVal}T${toTimeVal}` }
+    }
+
+
+
 
     const handleSubmit = () => {
-        console.log('submitted values', { fromRef: fromRef?.current?.value, toRef: toRef?.current?.value });
+        const formatedValues = type === 3 ? formatTimeValues() : { fromVal: fromRef?.current?.value || '', toVal: toRef?.current?.value || '' };
 
-        const validatedResult = validateValues(fromRef?.current?.value || '', toRef?.current?.value || '');
+        console.log('submitted values', formatedValues);
+
+        const validatedResult = validateValues(formatedValues.fromVal, formatedValues.toVal);
 
         console.log('validation result:', validatedResult);
 
@@ -136,7 +189,7 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
             setError(null);
 
             /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-            console.log('values sent to server', { fromVal: fromRef.current!.value, toVal: toRef.current!.value });
+            console.log('values sent to server', formatedValues);
             /* eslint-enable  @typescript-eslint/no-non-null-assertion */
         } else {
             setError(errorMsgMap[validatedResult]);
@@ -150,12 +203,14 @@ const RangeInputHOC = ({ type, classes }: RangeInputHOCProps) => {
             <div className='range-input-container'>
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor='range-from-val'>From:</label>
-                    <RangeInput id='range-from-val' reference={fromRef} type={type} value='2015-06-01' />
+                    <RangeInput id='range-from-val' reference={fromRef} type={type} value='2015-06-01'
+                        classes='chaise-input-control has-feedback' />
                 </div>
 
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor='range-to-val'>To:</label>
-                    <RangeInput id='range-to-val' reference={toRef} type={type} value='2018-08-29' />
+                    <RangeInput id='range-to-val' reference={toRef} type={type} value='2018-08-29'
+                        classes='chaise-input-control has-feedback' />
                 </div>
 
                 <button className='chaise-btn chaise-btn-primary range-input-submit-btn' onClick={handleSubmit}>

@@ -21,7 +21,19 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        position: relative;
     }
+
+    .range-input-datetime {
+        flex-direction: column;
+
+        #range-to-val-date,
+        #range-from-val-date {
+            margin-bottom: 5px;
+        }
+    }
+
+
 
     .range-input-clear {
         position: absolute;
@@ -32,18 +44,15 @@
     .range-input {
         margin-right: 5px;
         flex-shrink: 0;
-        max-width: 200px;
+        max-width: 180px;
 
-        &.numeric-width {
+        &.numeric-width,
+        &.date-width {
             min-width: 140px;
         }
 
-        &.date-width {
-            min-width: 160px;
-        }
-
         &.time-width {
-            min-width: 200px;
+            min-width: 160px;
         }
     }
 
