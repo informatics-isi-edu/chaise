@@ -59,7 +59,7 @@ const FacetCheckPresence = ({
 
   //-------------------  flow-control related functions:   --------------------//
   const callRegister = () => {
-    register(facetIndex, processFacet, preProcessFacet, getAppliedFilters);
+    register(facetIndex, processFacet, preProcessFacet, getAppliedFilters, removeAppliedFilters);
   };
 
   const preProcessFacet = () => {
@@ -89,6 +89,14 @@ const FacetCheckPresence = ({
   const getAppliedFilters = () => {
     return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
+
+  const removeAppliedFilters = () => {
+    setCheckboxRows((prev: FacetCheckBoxRow[]) => {
+      return prev.map((curr: FacetCheckBoxRow) => {
+        return {...curr, selected: false}
+      });
+    });
+  }
 
   //-------------------  UI related callbacks:   --------------------//
   const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {

@@ -145,7 +145,7 @@ const FacetChoicePicker = ({
 
   //-------------------  flow-control related functions:   --------------------//
   const callRegister = () => {
-    register(facetIndex, processFacet, preProcessFacet, getAppliedFilters);
+    register(facetIndex, processFacet, preProcessFacet, getAppliedFilters, removeAppliedFilters);
   };
 
   const preProcessFacet = () => {
@@ -324,6 +324,14 @@ const FacetChoicePicker = ({
   const getAppliedFilters = () => {
     return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
+
+  const removeAppliedFilters = () => {
+    setCheckboxRows((prev: FacetCheckBoxRow[]) => {
+      return prev.map((curr: FacetCheckBoxRow) => {
+        return {...curr, selected: false}
+      });
+    });
+  }
 
   /**
    * Given tuple and the columnName that should be used, return

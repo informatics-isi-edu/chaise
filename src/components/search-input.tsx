@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -31,7 +31,12 @@ type SearchInputProps = {
   /**
    * Whether input should be disabled
    */
-  disabled?: boolean
+  disabled?: boolean,
+  /**
+   * A ref that can be used from the parent to clear the search
+   * This component is going to register this function when it renders
+   */
+  forceClearSearch?: any
 }
 
 /**
@@ -44,7 +49,8 @@ const SearchInput = ({
   inputClass,
   searchColumns,
   focus,
-  disabled
+  disabled,
+  forceClearSearch
 }: SearchInputProps): JSX.Element => {
 
   const inputEl = useRef<HTMLInputElement>(null);
@@ -53,6 +59,12 @@ const SearchInput = ({
   const inputContainer = useRef<HTMLDivElement>(null);
   const inputChangedTimeout = useRef<number | null>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
+
+  useEffect(() => {
+    if (forceClearSearch) {
+      forceClearSearch.current = clearSearch;
+    }
+  }, [])
 
   const changeFocus = () => {
     if (disabled) return;

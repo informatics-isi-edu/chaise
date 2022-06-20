@@ -136,7 +136,7 @@ const FacetCheckList = ({
     if (setHeight && rows.length === 0) {
       return (
         // mimic the same structure to make sure the height and ellipsis works the same
-        <li className='chaise-checkbox ellipsis-text no-left-padding'>
+        <li key={'empty'} className='chaise-checkbox ellipsis-text no-left-padding'>
           <FacetCheckListRowLabel row={{displayname: {value: 'No results found', isHTML: false}}} />
         </li>
       )
@@ -152,7 +152,7 @@ const FacetCheckList = ({
       }
 
       return (
-        <li key={row.uniqueId} className={rowClass}>
+        <li key={`checkbox-${row.uniqueId}`} className={rowClass}>
           <input
             // TODO for testing, id was changed to className to be more appropriate
             className={`checkbox-${index}`} type='checkbox'

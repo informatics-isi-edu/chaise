@@ -134,6 +134,8 @@ const RecordsetInner = ({
     focusOnFacet: any,
   } | null>(null);
 
+  const clearSearch = useRef<() => void>(null);
+
 
   // initialize the recordset if it has not been done yet.
   useEffect(() => {
@@ -231,6 +233,15 @@ const RecordsetInner = ({
     facetCallbacks.current = { getAppliedFilters, removeAppliedFilters, focusOnFacet };
   }
 
+  const clearAllFilters = () => {
+    if (clearSearch && clearSearch.current) {
+      clearSearch.current();
+    }
+
+    // ask flow control to remove all the applied filters
+    facetCallbacks.current!.removeAppliedFilters();
+  }
+
   //-------------------  UI related functions:   --------------------//
 
   const recordsetLink = getRecordsetLink();
@@ -285,17 +296,18 @@ const RecordsetInner = ({
     return <></>
   };
 
-  const renderSelectedFacetFilters = () => {
+  const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
-      $log.debug('TESTING: callback not registered!');
       return;
     }
     const loc = reference.location;
 
     if (!loc) return;
     const hasFilter = loc.filter;
-    const hasFacets = loc.facets && loc.facets.hasVisibleFilters;
+    const hasFacets = loc.facets && loc.facets.hasNonSearchBoxVisibleFacets;
     const hasCustomFacets = loc.customFacets && loc.customFacets.displayname;
+    // don't show clear all filters when the custom facet is not removable
+    const showClearAll = hasFilter || hasFacets || (hasCustomFacets && loc.customFacets.removable);
 
     // if there aren't any filters, don't show the container at all
     if (!hasFilter && !hasCustomFacets && !hasFacets) return;
@@ -341,22 +353,22 @@ const RecordsetInner = ({
           if (faf.length === 0) return;
 
           const facetDisplayname = reference.facetColumns[facetIndex].displayname;
-          const chicletValue : JSX.Element[] = [];
-          const chicletValueTooltip : JSX.Element[] = [];
+          const chicletValue: JSX.Element[] = [];
+          const chicletValueTooltip: JSX.Element[] = [];
 
           faf.forEach((f: any, filterIndex: number) => {
             chicletValue.push(
-              <>
-                <DisplayValue key={f.uniqueId} value={f.displayname} specialNullEmpty={true} />
-                {(filterIndex !== faf.length -1) && <span>, </span>}
-              </>
+              <span key={f.uniqueId}>
+                <DisplayValue value={f.displayname} specialNullEmpty={true} />
+                {(filterIndex !== faf.length - 1) && <span>, </span>}
+              </span>
             );
 
             chicletValueTooltip.push(
-              <>
-                <span style={{'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke'}}>&bull;</span>
-                <DisplayValue key={f.uniqueId} value={f.displayname} specialNullEmpty={true} />
-              </>
+              <span key={f.uniqueId}>
+                <span style={{ 'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke' }}>&bull;</span>
+                <DisplayValue value={f.displayname} specialNullEmpty={true} />
+              </span>
             )
           });
 
@@ -366,7 +378,7 @@ const RecordsetInner = ({
               identifier={facetIndex}
               iconTooltip={'Clear filter applied'}
               title={facetDisplayname}
-              titleTooltip={<span>Go to <DisplayValue value={facetDisplayname}/> filter</span>}
+              titleTooltip={<span>Go to <DisplayValue value={facetDisplayname} /> filter</span>}
               value={chicletValue}
               valueTooltip={chicletValueTooltip}
               onRemove={facetCallbacks.current!.removeAppliedFilters}
@@ -380,6 +392,19 @@ const RecordsetInner = ({
     return (
       <div className='recordset-chiclets-container recordset-chiclets'>
         {chiclets}
+        {showClearAll &&
+          <OverlayTrigger
+            placement='bottom-start'
+            overlay={<Tooltip>Clear all filters applied</Tooltip>}
+          >
+            <button
+              className='clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn'
+              onClick={() => clearAllFilters()}
+            >
+              <span>Clear all filters</span>
+            </button>
+          </OverlayTrigger>
+        }
       </div>
     )
   }
@@ -491,11 +516,12 @@ const RecordsetInner = ({
                     searchColumns={initialReference.searchColumns}
                     disabled={false}
                     focus={true}
+                    forceClearSearch={clearSearch}
                   />
                 </div>
               </div>
             </div>
-            {facetColumnsReady && renderSelectedFacetFilters()}
+            {facetColumnsReady && renderSelectedFilterChiclets()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
           </div>

@@ -116,6 +116,7 @@ const Faceting = ({
         processFacet: () => { throw new Error('function not registered') },
         preProcessFacet: () => { throw new Error('function not registered') },
         getAppliedFilters: () => { throw new Error('function not registered') },
+        removeAppliedFilters: () => { throw new Error('function not registered') },
         reloadCauses: [], // why the reload request is being sent to the server (might be empty)
         reloadStartTime: -1, //when the facet became dirty
         // TODO log stuff
@@ -155,14 +156,16 @@ const Faceting = ({
 
   //-------------------  flow-control related functions:   --------------------//
 
-  function registerFacet(index: number, processFacet: Function, preprocessFacet: Function, getAppliedFilters: Function) {
+  function registerFacet(index: number, processFacet: Function, preprocessFacet: Function,
+    getAppliedFilters: Function, removeAppliedFilters: Function) {
+
     facetRequestModels.current[index].processFacet = processFacet;
     facetRequestModels.current[index].preProcessFacet = preprocessFacet;
     facetRequestModels.current[index].getAppliedFilters = getAppliedFilters;
+    facetRequestModels.current[index].removeAppliedFilters = removeAppliedFilters;
     facetRequestModels.current[index].registered = true;
 
     if (facetRequestModels.current.every((el) => el.registered)) {
-      $log.debug('all facets are registered, going to initialize');
       setReadyToInitialize(true);
     }
   }
@@ -319,11 +322,9 @@ const Faceting = ({
    * @returns
    */
   const getAppliedFiltersFromRS = () => {
-    // TODO proper type
-    const res: any = facetRequestModels.current.map((frm: any) => {
+    return facetRequestModels.current.map((frm: any) => {
       return frm.getAppliedFilters();
-    })
-    return res;
+    });
   };
 
   const removeAppliedFiltersFromRS = (index?: number | 'filters' | 'cfacets') => {
@@ -339,19 +340,12 @@ const Faceting = ({
       newRef = reference.removeAllFacetFilters(true, false, true);
       action = LogActions.BREADCRUMB_CLEAR_CFACET;
       reason = LogReloadCauses.CLEAR_CFACET;
-    } else if (typeof index === 'undefined') {
-      // // delete all filters and facets
-      newRef = reference.removeAllFacetFilters();
-      action = LogActions.BREADCRUMB_CLEAR_ALL;
-      reason = LogReloadCauses.CLEAR_ALL;
-
-      if (reference.location.searchTerm) {
-        newRef = newRef.search();
-      }
-
-    } else {
+    } else if (typeof index === 'number') {
       // delete all fitler for one column
       newRef = reference.facetColumns[index].removeAllFilters();
+
+      // remove all the checkboxes in the UI
+      facetRequestModels.current[index].removeAppliedFilters();
 
       // log the action
       // TODO
@@ -360,6 +354,14 @@ const Faceting = ({
       //   action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_CLEAR),
       //   stack: currentCtrl.getFacetLogStack(index)
       // }, fc.sourceReference.defaultLogInfo);
+    } else {
+      // // delete all filters and facets
+      newRef = reference.removeAllFacetFilters();
+      action = LogActions.BREADCRUMB_CLEAR_ALL;
+      reason = LogReloadCauses.CLEAR_ALL;
+
+      // remove all the checkboxes in the UI
+      facetRequestModels.current.forEach((frm) => {frm.removeAppliedFilters()});
     }
 
     // whether we should log the action for the whole page or not
@@ -375,6 +377,8 @@ const Faceting = ({
       // );
     }
 
+    // removing filter should just reduce the url length limit,
+    // so we don't need to check for the returned value of this function
     updateRecordsetReference(newRef, -1, reason);
   }
 
