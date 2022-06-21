@@ -8,54 +8,77 @@ import { Button, Modal } from 'react-bootstrap';
 
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 type ExportProps = {
   reference: any;
+  /**
+   * prop to make export button disable
+   */
   disabled: boolean;
-  cancelDownload: any
+  /**
+   * prop that triggers download cancel
+   */
+  onCancelDownload: any
 };
 
 type ExportModalProps = {
+  /**
+   * prop to set export modal title
+   */
+  title: string;
+  /**
+   * prop to show modal
+   */
   show: boolean;
+  /**
+   * prop to close modal
+   */
   closeModal: () => void;
 };
 
-const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Element => {
+const Export = ({ reference, disabled, onCancelDownload }: ExportProps): JSX.Element => {
   /**
    * State variable to open progress modal dialog
    */
   const [show, setShow] = useState(false);
   /**
-   * State variable to show spinner
+   * State variable to export options
    */
   const [options, setOptions] = useState([]);
   /**
    * State Variable to store currently exporting object
    */
-  const [exportingOption, setExportingOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+  /**
+   * State Variable to store exporter object which is used to cancel export.
+   */
+  const [exporterObj, setExporterObj] = useState(null);
 
   useEffect(() => {
     const options: any = [];
 
-    if (reference.csvDownloadLink) {
-      options.push({
-        displayname: 'CSV',
-        type: 'DIRECT',
-      });
+    if (reference) {
+      if (reference.csvDownloadLink) {
+        options.push({
+          displayname: 'Search results (CSV)',
+          type: 'DIRECT',
+        });
+      }
+  
+      const templates = reference.getExportTemplates(
+        !ConfigService.chaiseConfig.disableDefaultExport
+      );
+      
+      options.push(...templates);
+  
+      setOptions(options);
     }
-
-    const templates = reference.getExportTemplates(
-      !ConfigService.chaiseConfig.disableDefaultExport
-    );
-    
-    options.push(...templates);
-
-    setOptions(options);
 
   }, [reference]);
 
-  const startExporting = (option: any) => (event: any) => {
-    setShow(true);
+  const startExporting = (option: any) => () => {
     const formatType = option.type;
 
     switch(formatType) {
@@ -64,16 +87,29 @@ const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Eleme
         break;
       case 'BAG':
       case 'FILE': 
-        setExportingOption(option);
+        setShow(true);
+        setSelectedOption(option);
         const bagName = reference.table.name;
-        const exporter = ConfigService.ERMrest.Exporter(
+        const exporter = new ConfigService.ERMrest.Exporter(
           reference,
           bagName,
           option,
           ConfigService.chaiseConfig.exportServicePath
         );
+        setExporterObj(exporter);
         if (exporter) {
+          const logStack = LogService.addExtraInfoToStack(null, {
+              template: {
+                  displayname: exporter.template.displayname,
+                  type: exporter.template.type
+              }
+          });
+          const logObj = {
+              action: LogService.getActionString(LogActions.EXPORT),
+              stack: logStack
+          }
           exporter
+            .run(logObj)
             .then((response: any) => {
               // if it was canceled, just ignore the result
               setShow(false);
@@ -88,10 +124,19 @@ const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Eleme
     }
   };
 
+  const cancelExport = () => {
+    // Cancel download
+    if (!!exporterObj) {
+      exporterObj.cancel();
+    }
+  }
+
   const closeModal = () => {
-    // TODO: Cancel Download logic will go here
-    cancelDownload();
+    cancelExport();
     setShow(false);
+
+    // Call parent component callback to show alert box
+    onCancelDownload();
   };
 
   /**
@@ -106,7 +151,7 @@ const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Eleme
         keyboard={false}
       >
         <Modal.Header>
-          <Modal.Title>Exporting {exportingOption && exportingOption.displayname}</Modal.Title>
+          <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <div className='modal-text'>Your request is being processed...</div>
@@ -123,7 +168,7 @@ const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Eleme
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant='outline-primary' onClick={closeModal}>
+          <Button className='chaise-btn chaise-btn-primary' variant='outline-primary' onClick={closeModal}>
             cancel
           </Button>
         </Modal.Footer>
@@ -137,19 +182,20 @@ const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Eleme
 
   return (
     <>
-      <OverlayTrigger
-        placement='left'
-        overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
-      >
         <Dropdown className='export-menu'>
-          <Dropdown.Toggle
-            disabled={disabled}
-            variant='success'
-            className='chaise-btn chaise-btn-primary'
+          <OverlayTrigger
+            placement='left'
+            overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
           >
-            {renderExportIcon()}
-            <span>Export</span>
-          </Dropdown.Toggle>
+            <Dropdown.Toggle
+              disabled={disabled}
+              variant='success'
+              className='chaise-btn chaise-btn-primary'
+            >
+              {renderExportIcon()}
+              <span>Export</span>
+            </Dropdown.Toggle>
+          </OverlayTrigger>
           <Dropdown.Menu>
             {options.map((option: any, index: number) => (
               <Dropdown.Item
@@ -162,8 +208,12 @@ const Export = ({ reference, disabled, cancelDownload }: ExportProps): JSX.Eleme
             ))}
           </Dropdown.Menu>
         </Dropdown>
-      </OverlayTrigger>
-      <ExportModal show={show} closeModal={closeModal} />
+      
+      <ExportModal 
+        title={`Exporting ${selectedOption ? selectedOption.displayname : ''}`}
+        show={show} 
+        closeModal={closeModal} 
+      />
     </>
   );
 };

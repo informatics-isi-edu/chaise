@@ -118,7 +118,7 @@ const RecordsetInner = ({
     return res;
   });
 
-  const [cancelDownloadAlert, setCancelDownloadAlert] = useState(false);
+  const [showCancelDownloadAlert, setShowCancelDownloadAlert] = useState(false);
 
   /**
    * We have to validate the facets first, and then we can show them.
@@ -354,7 +354,7 @@ const RecordsetInner = ({
         {/* recordset level alerts */}
         <Alerts />
 
-        {cancelDownloadAlert && <Alert style={{ marginLeft: 20}} dismissible variant='warning' onClose={() => setCancelDownloadAlert(false)}>
+        {showCancelDownloadAlert && <Alert className='alertbox' dismissible variant='warning' onClose={() => setShowCancelDownloadAlert(false)}>
           <strong>Warning </strong>Export request has been canceled.
         </Alert>}
 
@@ -383,7 +383,7 @@ const RecordsetInner = ({
                   <Export
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
-                    cancelDownload={() => setCancelDownloadAlert(true)}
+                    onCancelDownload={() => setShowCancelDownloadAlert(true)}
                   />
                   <OverlayTrigger placement='bottom' overlay={
                     <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
