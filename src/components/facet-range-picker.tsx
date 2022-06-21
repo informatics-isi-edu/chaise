@@ -3,7 +3,12 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import Plot from 'react-plotly.js';
+
+// customizable method: use your own `Plotly` object to use minified basic distribution of plotlyjs
+import Plotly from 'plotly.js-basic-dist-min';
+import createPlotlyComponent from 'react-plotly.js/factory';
+const Plot = createPlotlyComponent(Plotly);
+
 import { ResizeSensor } from 'css-element-queries';
 
 // models
@@ -674,7 +679,7 @@ const FacetRangePicker = ({
       config={compState.plot.config}
       data={compState.plot.data}
       layout={compState.plot.layout ? compState.plot.layout : {}}
-      onRelayout={(event) => plotlyRelayout(event)}
+      onRelayout={(event: any) => plotlyRelayout(event)}
       ref={plotlyRef}
       style={{ 'width': '100%' }}
       useResizeHandler
