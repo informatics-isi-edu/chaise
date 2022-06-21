@@ -137,7 +137,7 @@ const ChaiseNavbar = (): JSX.Element => {
     if (menubar) {
      const allElementswithShow = menubar.getElementsByClassName('dropdown-menu');
      for (let i = 0; i < allElementswithShow.length; i++) {
-       const ele = allElementswithShow[i];
+       const ele: any = allElementswithShow[i];
        const y = ele.getBoundingClientRect().y;
        ele.style.maxHeight = winHeight - y - padding + 'px';
      }
@@ -149,7 +149,7 @@ const ChaiseNavbar = (): JSX.Element => {
    * @param event Current target i.e., navbar
    * @returns None
    */
-  const adjustNavBarHeight = (event) => {
+  const adjustNavBarHeight = (event: any) => {
     event.preventDefault();
     const winHeight = windowRef.innerHeight;
     const padding = 15;
@@ -348,7 +348,7 @@ const ChaiseNavbar = (): JSX.Element => {
   return (
     <header id='navheader'>
       {renderBanners(topBanners)}
-      <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse'>
+      <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
         <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
           {renderBrandImage()}
           {' '}
