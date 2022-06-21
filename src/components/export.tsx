@@ -184,7 +184,7 @@ const Export = ({ reference, disabled, onCancelDownload }: ExportProps): JSX.Ele
     <>
         <Dropdown className='export-menu'>
           <OverlayTrigger
-            placement='left'
+            placement='bottom'
             overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
           >
             <Dropdown.Toggle
