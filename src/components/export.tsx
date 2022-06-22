@@ -67,6 +67,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
         !ConfigService.chaiseConfig.disableDefaultExport
       );
       
+      // Update the list of templates in UI
       options.push(...templates);
   
       setOptions(options);
@@ -74,6 +75,11 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
 
   }, [reference]);
 
+  /**
+   * Send the request for export
+   * @param option selected export option
+   * @returns Downloads the selected file
+   */
   const startExporting = (option: any) => () => {
     const formatType = option.type;
 
@@ -93,6 +99,12 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
           option,
           ConfigService.chaiseConfig.exportServicePath
         );
+        const exportParametersString = JSON.stringify(exporter.exportParameters, null, '  ');
+
+        // begin export and start a timer
+        console.info('Executing external export with the following parameters:\n' + exportParametersString);
+        console.time('External export duration');
+
         setExporterObj(exporter);
         if (exporter) {
           const logStack = LogService.addExtraInfoToStack(null, {
@@ -111,6 +123,8 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
               setShowProgressModal(false);
               setIsDownloading(false);
 
+              console.timeEnd('External export duration');
+
               // if it was canceled, just ignore the result
               if (response.canceled) return;
               location.href = response.data[0];
@@ -118,6 +132,12 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
             .catch((error: any) => {
               setShowProgressModal(false);
               setIsDownloading(false);
+
+              console.timeEnd('External export duration');
+              
+              error.subMessage = error.message;
+              error.message = 'Export failed. Please report this problem to your system administrators.';
+              
               dispatchError({ 
                 error: error,
                 isGlobal: true 
@@ -161,7 +181,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
             show={showTooltip}
           >
             <Dropdown.Toggle
-              disabled={disabled || isDownloading}
+              disabled={disabled || isDownloading || options.length === 0}
               variant='success'
               className='chaise-btn chaise-btn-primary'
             >
