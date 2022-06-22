@@ -65,9 +65,20 @@ const FacetChoicePicker = ({
   const isFirstRender = useIsFirstRender();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
+
+  /**
+   * The displayed checkboxes
+   */
   const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([]);
+
+  /**
+   * Whether there are more options or not
+   */
   const [hasMore, setHasMore] = useState(false);
 
+  /**
+   * The search term that should be applied to the reference
+   */
   const [searchTerm, setSearchTerm] = useState<string | null>(null);
 
   /**
@@ -144,10 +155,16 @@ const FacetChoicePicker = ({
   }, [facetModel.isOpen, facetModel.isLoading]);
 
   //-------------------  flow-control related functions:   --------------------//
+  /**
+   * register the callbacks (this should be called after related state variables changed)
+   */
   const callRegister = () => {
     register(facetIndex, processFacet, preProcessFacet, getAppliedFilters, removeAppliedFilters);
   };
 
+  /**
+   * The registered callback to pre-process facets
+   */
   const preProcessFacet = () => {
     const defer = Q.defer();
 
@@ -200,6 +217,9 @@ const FacetChoicePicker = ({
     return defer.promise;
   }
 
+  /**
+   * The registered callback to process and update facets
+   */
   const processFacet = () => {
     const defer = Q.defer();
 
@@ -278,7 +298,6 @@ const FacetChoicePicker = ({
         // scope.facetModel.reloadCauses = [];
         // scope.facetModel.reloadStartTime = -1;
 
-        // TODO could be merged with checkBoxRows
         setHasMore(page.hasNext);
 
         page.tuples.forEach(function (tuple: any) {
@@ -321,10 +340,16 @@ const FacetChoicePicker = ({
     return defer.promise;
   };
 
+  /**
+   * The registered callback to get the selected filters
+   */
   const getAppliedFilters = () => {
     return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
+  /**
+   * The registered callback to remove all the selected filters
+   */
   const removeAppliedFilters = () => {
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
@@ -347,6 +372,7 @@ const FacetChoicePicker = ({
     return tuple.uniqueId;
   }
 
+  // TODO
   const processFavorites = (rows: any) => {
     const defer = Q.defer();
     // TODO favorites
@@ -356,6 +382,11 @@ const FacetChoicePicker = ({
   };
 
   //-------------------  UI related callbacks:   --------------------//
+
+  /**
+   * The registered callback in search-input
+   * This will not directly trigger flow-control update and will only change the searchTerm
+   */
   const searchCallback = (term: string | null, action: LogActions) => {
     if (term) term = term.trim();
 

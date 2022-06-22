@@ -127,11 +127,14 @@ const RecordsetInner = ({
 
 
   const mainContainer = useRef<any>(null);
-  // TODO proper type
+
+  /**
+   * The callbacks from faceting.tsx that we will use here
+   */
   const facetCallbacks = useRef<{
-    getAppliedFilters: any,
-    removeAppliedFilters: any,
-    focusOnFacet: any,
+    getAppliedFilters: Function,
+    removeAppliedFilters: Function,
+    focusOnFacet: Function,
   } | null>(null);
 
   const clearSearch = useRef<() => void>(null);
@@ -205,6 +208,7 @@ const RecordsetInner = ({
 
   }, [isInitialized]);
 
+  // after data loads, scroll to top and change the browser location
   useEffect(() => {
     if (isLoading) return;
 
@@ -229,6 +233,9 @@ const RecordsetInner = ({
     });
   };
 
+  /**
+   * The callbacks from faceting.tsx that are used in this component
+   */
   const registerCallbacksFromFaceting = (getAppliedFilters: Function, removeAppliedFilters: Function, focusOnFacet: Function) => {
     facetCallbacks.current = { getAppliedFilters, removeAppliedFilters, focusOnFacet };
   }
@@ -324,7 +331,7 @@ const RecordsetInner = ({
           iconTooltip={'Clear custom filter applied'}
           title={'Custom Filter'}
           value={transformCustomFilter(loc.filtersString)}
-          onRemove={facetCallbacks.current.removeAppliedFilters}
+          onRemove={(identifier) => facetCallbacks.current!.removeAppliedFilters(identifier)}
         />
       );
     }
@@ -340,7 +347,7 @@ const RecordsetInner = ({
           // when it's not removable we're showing the icon and that's enough
           title={cFacetRemovable ? 'Custom Filter' : undefined}
           value={transformCustomFilter(loc.filter)}
-          onRemove={cFacetRemovable ? facetCallbacks.current.removeAppliedFilters : null}
+          onRemove={cFacetRemovable ? (identifier) => facetCallbacks.current!.removeAppliedFilters(identifier) : undefined}
         />
       );
     }
@@ -357,6 +364,7 @@ const RecordsetInner = ({
           const chicletValueTooltip: JSX.Element[] = [];
 
           faf.forEach((f: any, filterIndex: number) => {
+            // comma-separated values
             chicletValue.push(
               <span key={f.uniqueId}>
                 <DisplayValue value={f.displayname} specialNullEmpty={true} />
@@ -364,6 +372,7 @@ const RecordsetInner = ({
               </span>
             );
 
+            // tooltip is using bullet icon as a separator
             chicletValueTooltip.push(
               <span key={f.uniqueId}>
                 <span style={{ 'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke' }}>&bull;</span>
@@ -381,8 +390,9 @@ const RecordsetInner = ({
               titleTooltip={<span>Go to <DisplayValue value={facetDisplayname} /> filter</span>}
               value={chicletValue}
               valueTooltip={chicletValueTooltip}
-              onRemove={facetCallbacks.current!.removeAppliedFilters}
-              onTitleClick={facetCallbacks.current!.focusOnFacet}
+              onRemove={(identifier) => facetCallbacks.current!.removeAppliedFilters(identifier)}
+              // we cannot just pass the callback in the following since it's causing staleness state issue
+              onTitleClick={(identifier) => facetCallbacks.current!.focusOnFacet(identifier)}
             />
           );
         });
@@ -535,7 +545,10 @@ const RecordsetInner = ({
             className={'side-panel-resizable ' + panelClassName}
             style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
           >
-            <Faceting facetPanelOpen={facetPanelOpen} registerRecordsetCallbacks={registerCallbacksFromFaceting} />
+            <Faceting
+              facetPanelOpen={facetPanelOpen}
+              registerRecordsetCallbacks={registerCallbacksFromFaceting}
+            />
           </div>
         }
         <div className='main-container dynamic-padding' ref={mainContainer}>

@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Components
 import Accordion from 'react-bootstrap/Accordion';
@@ -19,15 +19,22 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
-// TODO subject to change
 type FacetingProps = {
+  /**
+   * Whether the facet panel is currently open or not
+   */
   facetPanelOpen: boolean,
-  registerRecordsetCallbacks: Function
+  /**
+   * The functions that recordset is going to use from this component..
+   * NOTE we have to make sure this function is called after each update of
+   *      state variables that they use. Otherwise we will face a staleness issues.
+   */
+  registerRecordsetCallbacks: any
 }
 
 const Faceting = ({
   facetPanelOpen,
-  registerRecordsetCallbacks
+  registerRecordsetCallbacks,
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
@@ -37,8 +44,8 @@ const Faceting = ({
   const [readyToInitialize, setReadyToInitialize] = useState(false);
 
   const [facetModels, setFacetModels] = useState<FacetModel[]>(() => {
-    // TODO type
-    let res: any[] = [], firstOpen = -1;
+    const res: FacetModel[] = [];
+    let firstOpen = -1;
     reference.facetColumns.forEach((fc: any, index: number) => {
       if (fc.isOpen) {
         firstOpen = (firstOpen === -1 || firstOpen > index) ? index : firstOpen;
@@ -60,8 +67,6 @@ const Faceting = ({
       res[0].isOpen = true;
       res[0].isLoading = true;
     }
-
-    // TODO focus on the first open.. most probably in the useEffect
     return res;
   });
   const setFacetModelByIndex = (index: number, updatedVals: { [key: string]: boolean }) => {
@@ -87,7 +92,9 @@ const Faceting = ({
 
   const sidePanelContainer = useRef<HTMLDivElement>(null);
 
-  // register the flow-control related callbacks
+  /**
+   * register the flow-control related callbacks and then show facets
+   */
   useEffect(() => {
     facetRequestModels.current = [];
     facetsToPreProcess.current = [];
@@ -137,6 +144,21 @@ const Faceting = ({
   }, []);
 
   /**
+   * When facets are displayed, scroll to the first open one
+   */
+  useLayoutEffect(() => {
+    if (!displayFacets) return;
+    let firstOpen = 0;
+    reference.facetColumns.some((fc: any, index: number) => {
+      firstOpen = index;
+      return fc.isOpen;
+    });
+    setTimeout(() => {
+      scrollToFacet(firstOpen, true);
+    }, 200);
+  }, [displayFacets])
+
+  /**
    * After all the facets are registerd, now we can initialize the data
    */
   useEffect(() => {
@@ -151,24 +173,10 @@ const Faceting = ({
    */
   useEffect(() => {
     registerFacetCallbacks(updateFacetStates, updateFacets);
-    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacetFromRS);
+    registerRecordsetCallbacks(getAppliedFiltersFromRS, removeAppliedFiltersFromRS, focusOnFacet);
   }, [facetModels]);
 
   //-------------------  flow-control related functions:   --------------------//
-
-  function registerFacet(index: number, processFacet: Function, preprocessFacet: Function,
-    getAppliedFilters: Function, removeAppliedFilters: Function) {
-
-    facetRequestModels.current[index].processFacet = processFacet;
-    facetRequestModels.current[index].preProcessFacet = preprocessFacet;
-    facetRequestModels.current[index].getAppliedFilters = getAppliedFilters;
-    facetRequestModels.current[index].removeAppliedFilters = removeAppliedFilters;
-    facetRequestModels.current[index].registered = true;
-
-    if (facetRequestModels.current.every((el) => el.registered)) {
-      setReadyToInitialize(true);
-    }
-  }
 
   const updateFacetStates = (flowControl: any, cause?: string) => {
     // batch all the state changes into one
@@ -201,8 +209,6 @@ const Faceting = ({
       }
     });
 
-    // $log.debug('modified arrs:');
-    // $log.debug(modifiedAttrs);
     setMultipleFacetModelsByIndex(modifiedAttrs);
   };
 
@@ -222,8 +228,6 @@ const Faceting = ({
       $log.debug('no free slot!');
       return;
     }
-
-    $log.debug(`have free slot, preprocess length: ${facetsToPreProcess.current.length}`);
 
     // preprocess facets first
     const index = facetsToPreProcess.current.shift();
@@ -248,7 +252,6 @@ const Faceting = ({
       })(index, flowControl.current.queue.counter);
     }
     else {
-      $log.debug(`going through request models, length: ${facetRequestModels.current.length}`);
       facetRequestModels.current.forEach(function (frm, index) {
         if (!frm.preProcessed || frm.processed || !flowControl.current.haveFreeSlot()) {
           return;
@@ -285,6 +288,32 @@ const Faceting = ({
     return;
   };
 
+  //-------------------  callbacks that facet pickers will call:   --------------------//
+
+  /**
+   * Register the facet functions used for flow-control and recordset communication
+   * When all the facets have called this function, it will ask flow-control to initialize data
+   */
+  const registerFacet = (index: number, processFacet: Function, preprocessFacet: Function,
+    getAppliedFilters: Function, removeAppliedFilters: Function) => {
+
+    facetRequestModels.current[index].processFacet = processFacet;
+    facetRequestModels.current[index].preProcessFacet = preprocessFacet;
+    facetRequestModels.current[index].getAppliedFilters = getAppliedFilters;
+    facetRequestModels.current[index].removeAppliedFilters = removeAppliedFilters;
+    facetRequestModels.current[index].registered = true;
+
+    if (facetRequestModels.current.every((el) => el.registered)) {
+      setReadyToInitialize(true);
+    }
+  }
+
+  /**
+   * ask flow-control to update data displayed for one facet
+   * @param index the facet index
+   * @param setIsLoading whether we should also change the spinner status
+   * @param cause the cause of update
+   */
   const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string) => {
     const frm = facetRequestModels.current[index];
     frm.processed = false;
@@ -305,6 +334,15 @@ const Faceting = ({
     update(null, null, false, false, false, true);
   };
 
+  /**
+   * Update the reference's recordset and call the flow-control to update
+   * NOTE: it will check for the url length limitation
+   * @param newRef the new reference
+   * @param index facet index
+   * @param cause the cause of update
+   * @param keepRef if true, we will not change the reference (the function is used for url length check)
+   * @returns
+   */
   const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean) => {
     if (!checkReferenceURL(newRef)) {
       return false;
@@ -319,7 +357,6 @@ const Faceting = ({
   //------------------- callbacks that recordset will call: ----------------//
   /**
    * it will return an array of arrays
-   * @returns
    */
   const getAppliedFiltersFromRS = () => {
     return facetRequestModels.current.map((frm: any) => {
@@ -327,6 +364,10 @@ const Faceting = ({
     });
   };
 
+  /**
+   * Remove the applied filters
+   * @param index if number it's a facet index, otherwise it will be cfacets or filters.
+   */
   const removeAppliedFiltersFromRS = (index?: number | 'filters' | 'cfacets') => {
     let newRef, reason = LogReloadCauses.FACET_CLEAR, action = '';
     if (index === 'filters') {
@@ -382,9 +423,13 @@ const Faceting = ({
     updateRecordsetReference(newRef, -1, reason);
   }
 
-  const focusOnFacetFromRS = (index: number, dontUpdate?: boolean) => {
+  /**
+   * Focus on the given facet
+   * @param index
+   * @param dontUpdate whether we should also trigger an update request or not
+   */
+   const focusOnFacet = (index: number, dontUpdate?: boolean) => {
     const fm = facetModels[index];
-    $log.debug(`dontUpdate: ${dontUpdate}, index: ${index}, isOpen: ${fm.isOpen}`);
     if (!fm.isOpen && (dontUpdate !== true)) {
       toggleFacet(index, true);
     }
@@ -401,40 +446,40 @@ const Faceting = ({
    * @param dontLog
    */
   const toggleFacet = (index: number, dontLog?: boolean) => {
-    $log.debug(`facet ${index} toggled!`);
+    setFacetModels((prevFacetModels) => {
+      return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
+        if (index !== fmIndex) return fm;
+        const isOpen = !fm.isOpen;
 
-    setFacetModels(facetModels.map((fm: FacetModel, fmIndex: number) => {
-      if (index !== fmIndex) return fm;
-      const isOpen = !fm.isOpen;
+        // if we're closing it
+        if (!isOpen) {
+          return {
+            ...fm,
+            isOpen,
+            // hide the spinner:
+            isLoading: false,
+            // if we were waiting for data, make sure to fetch it later
+            initialized: !fm.isLoading
+          }
 
-      // if we're closing it
-      if (!isOpen) {
-        return {
-          ...fm,
-          isOpen,
-          // hide the spinner:
-          isLoading: false,
-          // if we were waiting for data, make sure to fetch it later
-          initialized: !fm.isLoading
+        }
+        // if it's open and not initialized, then get the data
+        else if (!fm.initialized) {
+          // send a request
+          // TODO should have priority
+          dispatchFacetUpdate(index, false);
+
+          return {
+            ...fm,
+            isOpen,
+            isLoading: true
+          };
         }
 
-      }
-      // if it's open and not initialized, then get the data
-      else if (!fm.initialized) {
-        // send a request
-        // TODO should have priority
-        dispatchFacetUpdate(index, false);
-
-        return {
-          ...fm,
-          isOpen,
-          isLoading: true
-        };
-      }
-
-      // otherwise we should just change the isOpen
-      return { ...fm, isOpen };
-    }));
+        // otherwise we should just change the isOpen
+        return { ...fm, isOpen };
+      });
+    });
 
 
     // TODO
@@ -459,8 +504,6 @@ const Faceting = ({
     const el = sidePanelContainer.current.querySelectorAll('.facet-panel')[index] as HTMLElement;
     if (!el) return;
 
-    $log.debug(`scrolling to facet ${index}`);
-
     // TODO
     // if (!dontLog) {
     //   var const = reference.facetColumns[index];
@@ -470,6 +513,7 @@ const Faceting = ({
     //   }, fc.sourceReference.defaultLogInfo);
     // }
 
+    // TODO delay this event (using debounce from react branch)
     // scroll
     sidePanelContainer.current.scrollTo({
       top: el.offsetTop,
@@ -497,15 +541,14 @@ const Faceting = ({
       case 'check_presence':
         return <FacetCheckPresence
           facetModel={fm} facetColumn={fc} facetIndex={index}
-          register={registerFacet}
-          updateRecordsetReference={updateRecordsetReference}
+          register={registerFacet} updateRecordsetReference={updateRecordsetReference}
         />
       default:
         return <FacetChoicePicker
           facetModel={fm} facetColumn={fc} facetIndex={index}
-          register={registerFacet} facetPanelOpen={facetPanelOpen}
+          register={registerFacet} updateRecordsetReference={updateRecordsetReference}
           dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
-          updateRecordsetReference={updateRecordsetReference}
+          facetPanelOpen={facetPanelOpen}
         />
     }
   };

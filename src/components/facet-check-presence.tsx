@@ -58,16 +58,25 @@ const FacetCheckPresence = ({
   }, [facetModel, checkboxRows]);
 
   //-------------------  flow-control related functions:   --------------------//
+  /**
+   * register the callbacks (this should be called after related state variables changed)
+   */
   const callRegister = () => {
     register(facetIndex, processFacet, preProcessFacet, getAppliedFilters, removeAppliedFilters);
   };
 
+  /**
+   * The registered callback to pre-process facets
+   */
   const preProcessFacet = () => {
     const defer = Q.defer();
     // this function is expected but we don't need any extra logic here.
     return defer.resolve(true), defer.promise;
   }
 
+  /**
+   * The registered callback to process and update facets
+   */
   const processFacet = () => {
     const defer = Q.defer();
 
@@ -86,10 +95,16 @@ const FacetCheckPresence = ({
     return defer.resolve(true), defer.promise;
   };
 
+  /**
+   * The registered callback to get the selected filters
+   */
   const getAppliedFilters = () => {
     return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
+  /**
+   * The registered callback to remove all the selected filters
+   */
   const removeAppliedFilters = () => {
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
@@ -101,7 +116,6 @@ const FacetCheckPresence = ({
   //-------------------  UI related callbacks:   --------------------//
   const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
     const checked = !row.selected;
-    $log.log(`facet checkbox ${row.uniqueId} has been ${checked ? 'selected' : 'deselected'}`);
 
     const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
     // get the new reference based on the operation

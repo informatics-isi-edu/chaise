@@ -26,7 +26,7 @@ type FacetCheckListProps = {
    * If true, we should disable other options
    */
   hasNotNullFilter?: boolean
-  // TODO
+  // TODO favorites support
   // enableFavorites?: boolean,
   // onFavoritesChanged: Function
 }
