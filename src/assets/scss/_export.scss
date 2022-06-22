@@ -26,7 +26,8 @@
 }
 
 .btn-success.dropdown-toggle {
-    background-color: #4674A7 !important;
+    // CSS to override default box shadow for bootstrap button
+    box-shadow: none !important;
 }
 
 .modal-body {
