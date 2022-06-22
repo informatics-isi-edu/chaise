@@ -1,0 +1,22 @@
+.chaise-list-container {
+  padding-left: 0;
+  margin-bottom: 0px;
+
+  .chaise-checkbox {
+    margin-bottom: 7px;
+    margin-left: 5px;
+    height: 22px;
+
+    // puts the checkbox+label to the left and the favorite icon to the right
+    display: flex;
+    justify-content: space-between;
+  }
+
+  li:hover {
+    background-color: rgb(241, 241, 241);
+
+    .hover-show {
+      visibility: visible;
+    }
+  }
+}

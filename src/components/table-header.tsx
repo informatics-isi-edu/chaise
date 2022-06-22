@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
 
-// models 
+// models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
@@ -95,7 +95,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     <div className='chaise-table-header row'>
       <div className={'chaise-table-header-total-count col-xs-12 col-sm-6' + (page && page.tuples.length > 0 ? ' with-page-size-dropdown' : '')}>
         <span className='displaying-text'>Displaying {prependLabel()}</span>
-        {renderPageSizeDropdown()}
+        {page && page.length > 0 && renderPageSizeDropdown()}
         <span className='total-count-text'>
           {appendLabel()}
           {/* TODO: error handling for table data. Requests timed out (alert icon) and push more rows pending (loader icon)

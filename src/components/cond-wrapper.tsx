@@ -1,14 +1,32 @@
 import { PropsWithChildren, ReactElement } from 'react';
 
 type ConditionalWrapperProps = {
+  /**
+   * The condition that dictates whether we should show the wrapper or not
+   */
   condition: boolean;
+  /**
+   * A function that returns the wrapper. Make sure the children is properly
+   * used in here.
+   */
   wrapper: (children: ReactElement) => JSX.Element;
+  /**
+   * The inner element
+   */
   children: JSX.Element;
 }
 
 /**
  * conditionally wrap an element
- * @returns
+ * Example:
+ *  <ConditionalWrapper
+ *       condition={showPlaceholderTooltip}
+ *       wrapper={children => (
+ *         {/* The wrapper goes here and make sure to use the children inside it /*}
+ *       )}
+ *     >
+ *     {/* The inner component goes here /*}
+ *  </ConditionalWrapper>
  */
 export const ConditionalWrapper = ({
   condition,

@@ -3,16 +3,23 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
-import Plot from 'react-plotly.js';
+
+// customizable method: use your own `Plotly` object to use minified basic distribution of plotlyjs
+import Plotly from 'plotly.js-basic-dist-min';
+import createPlotlyComponent from 'react-plotly.js/factory';
+const Plot = createPlotlyComponent(Plotly);
+
 import { ResizeSensor } from 'css-element-queries';
+import Q from 'q';
 
 // models
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { 
-  FacetRangePickerProps, 
-  RangeOptions, 
-  RangePickerState, 
-  TimeStamp 
+import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  FacetRangePickerProps,
+  RangeOptions,
+  RangePickerState,
+  TimeStamp
 } from '@isrd-isi-edu/chaise/src/models/range-picker';
 
 // services
@@ -21,14 +28,18 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getNotNullFilter } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { getNotNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
 
 const FacetRangePicker = ({
   facetColumn,
-  index
+  facetModel,
+  facetIndex,
+  register,
+  updateRecordsetReference
 }: FacetRangePickerProps): JSX.Element => {
-  const [ranges, setRanges] = useState<any[]>([]);
+  const [ranges, setRanges] = useState<FacetCheckBoxRow[]>([]);
 
   const [compState, setCompState] = useState<RangePickerState>({
     disableZoomIn: false,
@@ -91,10 +102,10 @@ const FacetRangePicker = ({
       }
     )
   }, []);
-  
+
   useEffect(() => {
     if (facetColumn.hideNotNullChoice) {
-      setRanges([getNotNullFilter(false)]);
+      setRanges([getNotNullFacetCheckBoxRow(false)]);
     }
 
     const layout = { ...compState.plot.layout };
@@ -127,6 +138,63 @@ const FacetRangePicker = ({
     })(facetColumn.sourceReference.uri);
     // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
   }, [compState.relayout])
+
+  /**
+   * register the flow-control related functions for the facet
+   * this will ensure the functions are registerd based on the latest facet changes
+   */
+   useEffect(() => {
+    callRegister();
+  }, [facetModel, ranges]);
+
+  //-------------------  flow-control related functions:   --------------------//
+  /**
+   * register the callbacks (this should be called after related state variables changed)
+   */
+   const callRegister = () => {
+    register(facetIndex, processFacet, preProcessFacet, getAppliedFilters, removeAppliedFilters);
+  };
+
+  /**
+   * The registered callback to pre-process facets
+   */
+  const preProcessFacet = () => {
+    const defer = Q.defer();
+    // TODO
+
+    return defer.resolve(true), defer.promise;
+  }
+
+  /**
+   * The registered callback to process and update facets
+   */
+  const processFacet = () => {
+    const defer = Q.defer();
+
+    // TODO
+
+    return defer.resolve(true), defer.promise;
+  };
+
+  /**
+   * The registered callback to get the selected filters
+   */
+  const getAppliedFilters = () => {
+    // TODO
+    return ranges.filter((cbr: FacetCheckBoxRow) => cbr.selected);
+  };
+
+  /**
+   * The registered callback to remove all the selected filters
+   */
+  const removeAppliedFilters = () => {
+    // TODO
+    setRanges((prev: FacetCheckBoxRow[]) => {
+      return prev.map((curr: FacetCheckBoxRow) => {
+        return {...curr, selected: false}
+      });
+    });
+  }
 
 
   /***** API call functions *****/
@@ -163,7 +231,7 @@ const FacetRangePicker = ({
         // if - the max/min are null
         //    - bar_plot in annotation is 'false'
         //    - histogram not supported for column type
-        // since compState might not have been updated, do the showHistogram() check but with the supplied min/max 
+        // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
         if (!(facetColumn.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
           // TODO: resolve use of defer?
           // return true to defer.resolve() in .then() callback
@@ -674,7 +742,7 @@ const FacetRangePicker = ({
       config={compState.plot.config}
       data={compState.plot.data}
       layout={compState.plot.layout ? compState.plot.layout : {}}
-      onRelayout={(event) => plotlyRelayout(event)}
+      onRelayout={(event: any) => plotlyRelayout(event)}
       ref={plotlyRef}
       style={{ 'width': '100%' }}
       useResizeHandler

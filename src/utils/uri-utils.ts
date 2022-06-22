@@ -3,7 +3,7 @@
  */
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { BUILD_VARIABLES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -516,4 +516,13 @@ export function getAbsoluteURL(uri: string, origin?: string) {
 
   // else prepend the server uri with an additional "/"
   return `${origin}/${uri}`;
+}
+
+/**
+ * This function can be used for making the custom filters easier to read
+ * @param filter the filter string
+ * @returns transformed filter that can be used for display
+ */
+export function transformCustomFilter(filter: string) {
+  return filter.replace(/&/g, '& ').replace(/;/g, '; ');
 }
