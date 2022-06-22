@@ -1,6 +1,11 @@
 @import "variables";
 
 .faceting-columns-container {
+  // disable the animation from the accordion
+  .accordion-collapse.collapsing {
+    transition: none !important;
+  }
+
   .panel-group {
     margin-bottom: 20px;
 
@@ -78,6 +83,13 @@
         .facet-header-icon {
           position: absolute;
           right: 5px;
+
+          .facet-spinner {
+            color: #828282;
+            width: 1.3rem;
+            height: 1.3rem;
+            border-width: .2em;
+          }
         }
       }
 
