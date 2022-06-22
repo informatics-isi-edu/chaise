@@ -33,19 +33,19 @@ var testParams = {
         }, {
             name: "timestamp_col",
             absMin: { date: "2007-04-06", time: "01:01:01" },
-            absMax: { date: "2007-09-30", time: "06:30:30" },
+            absMax: { date: "2007-09-30", time: "06:30:31" },
             zoom1: {
-                min: {date: "2007-05-11", time: "11:42:54"},
-                max: {date: "2007-08-25", time: "19:48:36"}
+                min: {date: "2007-05-11", time: "11:42:55"},
+                max: {date: "2007-08-25", time: "19:48:37"}
             },
             zoom2: {
-                min: {date: "2007-06-01", time: "18:08:02"},
-                max: {date: "2007-08-04", time: "13:23:27"}
+                min: {date: "2007-06-01", time: "18:08:03"},
+                max: {date: "2007-08-04", time: "13:23:28"}
             },
             allRecords: "Displaying\nfirst 25\nof 155 matching results",
             zoom3: {
-                min: {date: "2007-06-14", time: "12:23:07"},
-                max: {date: "2007-07-22", time: "19:08:22"}
+                min: {date: "2007-06-14", time: "12:23:08"},
+                max: {date: "2007-07-22", time: "19:08:23"}
             }
         }
     ]
@@ -86,7 +86,7 @@ describe("Viewing Recordset with Faceting,", function() {
         it("should have " + testParams.totalNumFacets + " facets", function () {
             expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "Displayed list of facets is incorrect");
         });
-        
+
         if (!process.env.CI) {
             console.log("histogram test cases only work on CI environments.");
             return;

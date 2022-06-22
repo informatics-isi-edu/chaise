@@ -18,6 +18,7 @@ import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import FacetHeader from '@isrd-isi-edu/chaise/src/components/facet-header';
 
 type FacetingProps = {
   /**
@@ -558,32 +559,18 @@ const Faceting = ({
       const facetModel = facetModels[index];
 
       return (
-        // TODO id changed to class (test cases need to be updated)
+        // TODO TESTING id changed to class (test cases need to be updated)
         <Accordion.Item eventKey={index + ''} key={index} className={`facet-panel fc-${index}`}>
-          <Accordion.Header onClick={() => toggleFacet(index)}>
-            <div className='accordion-toggle ellipsis' id={'fc-heading-' + index}>
-              <span className='facet-header-text'><DisplayValue value={fc.displayname} /></span>
-              <span className='facet-header-icon'>
-                {
-                  (facetModel.isLoading && (!facetModel.facetError || facetModel.noConstraints)) &&
-                  <Spinner animation='border' />
-                }
-                {
-                  (facetModel.facetError || facetModel.noConstraints) &&
-                  <OverlayTrigger
-                    placement='right'
-                    overlay={
-                      <Tooltip>
-                        {facetModel.noConstraints && <span>showing facet values without any constraints applied.</span>}
-                        {facetModel.facetError && <span>Request timeout: The facet values cannot be retrieved for updates.</span>}
-                      </Tooltip>
-                    }
-                  >
-                    <span className='fa-solid fa-triangle-exclamation' />
-                  </OverlayTrigger>
-                }
-              </span>
-            </div>
+          {/* TODO TESTING id changed to class */}
+          <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
+            <FacetHeader
+              displayname={fc.displayname}
+              showTooltipIcon={fc.comment ? true : false}
+              comment={fc.comment}
+              isLoading={facetModel.isLoading}
+              facetError={facetModel.facetError}
+              noConstraints={facetModel.noConstraints}
+            />
           </Accordion.Header>
           <Accordion.Body>
             {renderFacet(fc, index)}

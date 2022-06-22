@@ -122,6 +122,8 @@ export function isOptionValid(option: any): boolean {
         option.type = 'menu';
       } else if (option.urlPattern || option.url) {
         option.type = 'url';
+      } else if (option.header) {
+        option.type = 'header';
       } else {
         isValid = false;
       }
@@ -137,9 +139,10 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
     const option: MenuOption = {
       acls: menuOpt.acls || acls,
       isValid: false,
-      nameMarkdownPattern: menuOpt.nameMarkdownPattern || menuOpt.markdownPattern || menuOpt.name,
+      nameMarkdownPattern: menuOpt.nameMarkdownPattern || menuOpt.markdownPattern || menuOpt.markdownName || menuOpt.name,
       newTab: openNewTab,
-      type: menuOpt.type
+      type: menuOpt.type,
+      ...menuOpt
     }
 
     if (Array.isArray(menuOpt.children)) {

@@ -14,7 +14,6 @@ import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToC
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting';
@@ -26,7 +25,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-
+import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -125,8 +124,8 @@ const RecordsetInner = ({
    */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
 
-
-  const mainContainer = useRef<any>(null);
+  const mainContainer = useRef<HTMLDivElement>(null);
+  const topLeftContainer = useRef<HTMLDivElement>(null);
 
   /**
    * The callbacks from faceting.tsx that we will use here
@@ -138,6 +137,7 @@ const RecordsetInner = ({
   } | null>(null);
 
   const clearSearch = useRef<() => void>(null);
+
 
 
   // initialize the recordset if it has not been done yet.
@@ -210,6 +210,20 @@ const RecordsetInner = ({
 
   // after data loads, scroll to top and change the browser location
   useEffect(() => {
+    const handleResizeEvent = ((event: CustomEvent) => {
+      event.preventDefault();
+      if (topLeftContainer?.current && event?.detail?.width) {
+        topLeftContainer.current.style.width = `${event.detail.width}px`;
+      }
+    }) as EventListener;
+
+    document.addEventListener('resizable-width-change', handleResizeEvent);
+    return () => {
+      document.removeEventListener('resizable-width-change', handleResizeEvent);
+    }
+  }, []);
+
+  useEffect(() => {
     if (isLoading) return;
 
     // scroll to top after load
@@ -232,6 +246,7 @@ const RecordsetInner = ({
       behavior: 'smooth',
     });
   };
+
 
   /**
    * The callbacks from faceting.tsx that are used in this component
@@ -431,6 +446,41 @@ const RecordsetInner = ({
     )
   }
 
+  const facetingSection = (leftRef: React.RefObject<HTMLDivElement>) => (
+    <>
+      {
+        facetColumnsReady &&
+        <div
+          className={`side-panel-resizable ${panelClassName}`}
+          style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
+          ref={leftRef}
+        >
+          <div className='side-panel-container'>
+            <Faceting
+              facetPanelOpen={facetPanelOpen}
+              registerRecordsetCallbacks={registerCallbacksFromFaceting}
+            />
+          </div>
+        </div>
+      }
+    </>
+  );
+
+
+  const renderMainContainer = () => (
+    <div className='main-container dynamic-padding' ref={mainContainer}>
+      <div className='main-body'>
+        <RecordsetTable
+          config={config}
+          initialSortObject={initialReference.location.sortObject}
+        />
+      </div>
+      {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
+    </div>
+  );
+
+
+
   return (
     <div className='recordset-container app-content-container'>
       {/* TODO what about $root.error and $root.showSpinner */}
@@ -442,12 +492,12 @@ const RecordsetInner = ({
         {/* recordset level alerts */}
         <Alerts />
         <div className='top-flex-panel'>
-          <div className={`top-left-panel ${panelClassName}`}>
+          <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
             <div className='panel-header'>
-              <div>
+              <div className='pull-left'>
                 <h3>Refine search</h3>
               </div>
-              <div>
+              <div className='pull-right'>
                 <button
                   className='hide-filter-panel-btn chaise-btn chaise-btn-tertiary pull-right'
                   onClick={() => changeFacetPanelOpen()}
@@ -538,29 +588,16 @@ const RecordsetInner = ({
 
         </div>
       </div>
-      <div className='bottom-panel-container'>
-        {
-          facetColumnsReady &&
-          <div
-            className={'side-panel-resizable ' + panelClassName}
-            style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
-          >
-            <Faceting
-              facetPanelOpen={facetPanelOpen}
-              registerRecordsetCallbacks={registerCallbacksFromFaceting}
-            />
-          </div>
-        }
-        <div className='main-container dynamic-padding' ref={mainContainer}>
-          <div className='main-body'>
-            <RecordsetTable
-              config={config}
-              initialSortObject={initialReference.location.sortObject}
-            />
-          </div>
-          {config.displayMode === RecordsetDisplayMode.FULLSCREEN && <Footer />}
-        </div>
-      </div>
+      <SplitView
+        left={facetingSection}
+        right={renderMainContainer}
+        minWidth={170}
+        maxWidth={40}
+        initialWidth={21}
+        className='bottom-panel-container'
+        convertMaxWidth
+        convertInitialWidth
+      />
     </div>
   )
 };

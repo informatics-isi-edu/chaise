@@ -83,6 +83,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
         recordHelpers.testSharePopup({
             permalink: RIDLink,
+            // the table has history-capture: false
+            hasVersionedLink: false,
             verifyVersionedLink: false,
             citation: "Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (" + moment().format("YYYY") + ").",
             bibtextFile: false, // we don't need to test this here as well (it has been tested in record presentation)

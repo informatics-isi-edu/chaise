@@ -104,13 +104,15 @@ jobs:
         run: |
           git clone https://github.com/informatics-isi-edu/ermrestjs.git
           cd ermrestjs
-          sudo make install
+          make dist
+          sudo make deploy
       - name: Install chaise
         run: |
           sudo mkdir -p /var/www/html/chaise
           cd chaise
-          sudo make deps-test
-          sudo make install-wo-deps
+          make deps-test
+          make dist-wo-deps
+          sudo make deploy
       - name: Add tests users
         run: |
           sudo -H -u webauthn webauthn2-manage adduser test1

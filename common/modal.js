@@ -78,23 +78,9 @@
             params.reference = reference;
             params.title = (extraParams.title ? extraParams.title : "Share");
 
-            var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
             params.permalink = UriUtils.resolvePermalink(tuple, reference);
-            params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
-            params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
-            params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
 
-            var stack = params.logStack ? params.logStack : logService.getStackObject();
-            var snaptimeHeader = {
-                action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
-                stack: stack,
-                catalog: reference.defaultLogInfo.catalog,
-                schema_table: reference.defaultLogInfo.schema_table
-            }
-            refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
-                // if current fetched snpatime doesn't match old snaptime, show a warning
-                params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
-            }).finally(function() {
+            var showSharePopup = function () {
                 showModal({
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                     controller: "ShareCitationController",
@@ -106,7 +92,36 @@
                 }, false, false, false); // not defining any extra callbacks
 
                 defer.resolve();
-            });
+            }
+
+            // make sure the table supports history features
+            if (reference.table.supportHistory) {
+                var versionString = "@" + (reference.location.version || refTable.schema.catalog.snaptime);
+                params.showVersionLink = true;
+                params.versionLink = UriUtils.resolvePermalink(tuple, reference, versionString);
+                params.versionDateRelative = UiUtils.humanizeTimestamp(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+                params.versionDate = UiUtils.versionDate(ERMrest.versionDecodeBase32(refTable.schema.catalog.snaptime));
+
+                // see if we need to show the version warning or not
+                var stack = params.logStack ? params.logStack : logService.getStackObject();
+                var snaptimeHeader = {
+                    action: logService.getActionString(logService.logActions.SHARE_OPEN, params.logStackPath),
+                    stack: stack,
+                    catalog: reference.defaultLogInfo.catalog,
+                    schema_table: reference.defaultLogInfo.schema_table
+                }
+                refTable.schema.catalog.currentSnaptime(snaptimeHeader).then(function (snaptime) {
+                    // if current fetched snpatime doesn't match old snaptime, show a warning
+                    params.showVersionWarning = (snaptime !== refTable.schema.catalog.snaptime);
+                }).finally(function() {
+                    showSharePopup();
+                });
+            } else {
+                // we're not showing the version link and therefore warning is not needed
+                params.showVersionWarning = false;
+                params.showVersionLink = false;
+                showSharePopup();
+            }
 
             return defer.promise;
         }
@@ -515,6 +530,7 @@
      * Params object values:
      *   - {String} displayname - used for citation content and filename for bibtex download
      *   - {String} permalink - link to the live catalog
+     *   - {Boolean} showVersionLink - whether we should show the version link
      *   - {String} versionLink - link to the current version of the live catalog
      *   - {String} versionDate - version decoded to it's datetime
      *   - {String} versionDateRelative - version decoded to it's datetime then presented as relative to today's date

@@ -29,7 +29,7 @@ describe('Recordset add record,', function() {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
 
-    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function () {
+    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function (done) {
         // default config: maxRecordsetRowHeight = 160
         // 160 for max height, 10 for padding
         var testCell, cellHeight = 170;
@@ -41,7 +41,8 @@ describe('Recordset add record,', function() {
 
             return testCell.getSize();
         }).then(function (dimensions) {
-            expect(dimensions.height).toBe(cellHeight);
+            // the calculations might be one pixel off
+            expect(Math.abs(dimensions.height - cellHeight) <= 1).toBeTruthy();
 
             return testCell.element(by.css(".readmore")).click();
         }).then(function () {
@@ -50,8 +51,10 @@ describe('Recordset add record,', function() {
             return testCell.getSize();
         }).then(function (tallerDimensions) {
             expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+            done();
         }).catch(function (err) {
             console.log(err);
+            done.fail(err);
         });
     });
 
