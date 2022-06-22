@@ -1,16 +1,16 @@
 let chaisePage = require('../../../utils/chaise.page.js');
-const {By, until} = require('selenium-webdriver');
 
 describe('Navbar ', function() {
-    let driver, navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
+    let navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
     beforeAll(function () {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         
-        // menu = browser.executeScript("return document.getElementById('navbar-menu')");
+        navbar = element(by.id('mainnav'));
+        menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig;').then(function(config) {
             chaiseConfig = config;
-            navbar = browser.wait(until.elementLocated(By.id('mainnav')), browser.params.defaultTimeout);
+            browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
         });
     });
 
@@ -19,13 +19,13 @@ describe('Navbar ', function() {
     });
 
     it('should display the right title from chaiseConfig', function() {
-        let actualTitle = browser.wait(until.elementLocated(By.id('brand-text')), browser.params.defaultTimeout);
+        var actualTitle = element(by.id('brand-text'));
         let expectedTitle = chaiseConfig.navbarBrandText;
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
     it('should use the brand image/logo specified in chaiseConfig', function() {
-        let actualLogo = browser.wait(until.elementLocated(By.id('brand-image')), browser.params.defaultTimeout);
+        var actualLogo = element(by.id('brand-image'));
         let expectedLogo = chaiseConfig.navbarBrandImage;
         expect(actualLogo.isDisplayed()).toBeTruthy();
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
