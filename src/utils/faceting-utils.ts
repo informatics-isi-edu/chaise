@@ -1,43 +1,26 @@
-import { defaultDisplayname } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { DEFAULT_DISPLAYNAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * Returns an object that can be used for showing the null filter
- * @param  {boolean} selected whether it should be selected
- * @param  {boolean} disabled whether it should be disabled
- * 
- * NOTE: refactored in react branch to require parmaeter to be boolean type instead of null or objects
+ * @param  {boolean?} selected whether it should be selected
  */
-export function getNullFilter(selected: boolean, disabled: boolean) {
+export function getNullFacetCheckBoxRow(selected?: boolean): FacetCheckBoxRow {
   return {
-      selected: selected,
-      disabled: disabled,
-      uniqueId: null,
-      displayname: {'value': null, 'isHTML': false},
-      tooltip: {
-          value: MESSAGE_MAP.tooltip.null,
-          isHTML: false
-      },
-      alwaysShowTooltip: true
+    selected: (typeof selected === 'boolean') ? selected : false,
+    uniqueId: null,
+    displayname: { 'value': null, 'isHTML': false }
   };
 }
 
-/**
- * Returns an object that can be used for showing the not-null filter
- * @param  {boolean} selected whether it should be selected
- * @param  {boolean} disabled whether it should be disabled
- * 
- * NOTE: refactored in react branch to require parmaeter to be boolean type instead of null or objects
- */
-export function getNotNullFilter(selected: boolean) {
+/**b
+* Returns an object that can be used for showing the not-null filter
+* @param  {boolean?} selected whether it should be selected
+*/
+export function getNotNullFacetCheckBoxRow(selected?: boolean): FacetCheckBoxRow {
   return {
-      selected: selected,
-      isNotNull: true,
-      displayname: {'value': defaultDisplayname.notNull, 'isHTML': true},
-      tooltip: {
-          value: MESSAGE_MAP.tooltip.notNull,
-          isHTML: false
-      },
-      alwaysShowTooltip: true
+    selected: (typeof selected === 'boolean') ? selected : false,
+    isNotNull: true,
+    displayname: { 'value': DEFAULT_DISPLAYNAME.notNull, 'isHTML': true }
   };
 }

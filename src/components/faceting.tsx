@@ -4,14 +4,10 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // Components
 import Accordion from 'react-bootstrap/Accordion';
-import Spinner from 'react-bootstrap/Spinner';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
-import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/facet-check-presence';
+import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
@@ -536,9 +532,11 @@ const Faceting = ({
   const renderFacet = (fc: any, index: number) => {
     const fm = facetModels[index];
     switch (fc.preferredMode) {
-      // TODO
-      // case 'ranges':
-      //   return <FacetRangePicker facetColumn={fc} index={index}></FacetRangePicker>
+      case 'ranges':
+        return <FacetRangePicker
+          facetModel={fm} facetColumn={fc} facetIndex={index}
+          register={registerFacet} updateRecordsetReference={updateRecordsetReference}
+        />
       case 'check_presence':
         return <FacetCheckPresence
           facetModel={fm} facetColumn={fc} facetIndex={index}

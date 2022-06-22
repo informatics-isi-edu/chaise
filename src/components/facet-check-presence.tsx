@@ -2,7 +2,7 @@ import { FacetCheckBoxRow, FacetModel } from '@isrd-isi-edu/chaise/src/models/re
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
 import { useEffect, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/facet-utils';
+import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import Q from 'q';
 import { LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
@@ -28,7 +28,7 @@ type FacetCheckPresenceProps = {
    * dispatch the update of reference
    */
    updateRecordsetReference: Function
-}
+};
 
 const FacetCheckPresence = ({
   facetColumn,

@@ -1,14 +1,27 @@
 import { PlotData, PlotlyDataLayoutConfig } from 'plotly.js'
+import { FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset'
 
 export type FacetRangePickerProps = {
-  /** 
-   * model for this specific facet with column attached to it 
+  /**
+   * model for this specific facet with column attached to it
    */
   facetColumn: any,
-  /** 
-   * index of this facet in the list of facets
+  /**
+   * The facet model that has the UI state variables
    */
-  index: number
+   facetModel: FacetModel,
+  /**
+   * The index of facet in the list of facetColumns
+   */
+  facetIndex: number,
+  /**
+  * Allows registering flow-control related function in the faceting component
+  */
+  register: Function,
+  /**
+   * dispatch the update of reference
+   */
+   updateRecordsetReference: Function
 }
 
 export type RangePickerState = {
@@ -34,7 +47,7 @@ export type RangePickerState = {
   relayout: boolean
 }
 
-/**  
+/**
  * min and max types for the following column types:
  *   float, integer - number
  *   date           - string
@@ -61,13 +74,13 @@ export type RangePickerState = {
   }
 }
 
-export type TimeStamp = { 
+export type TimeStamp = {
   /**
    * the date value for the timestamp[tz]
    */
-  date: string, 
+  date: string,
   /**
    * the time value for the timestamp[tz]
    */
-  time: string 
+  time: string
 }

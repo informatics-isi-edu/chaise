@@ -12,7 +12,7 @@ import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
-import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/facet-utils';
+import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
