@@ -24,10 +24,6 @@ type ExportProps = {
 
 const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
   /**
-   * State variable to open progress modal dialog
-   */
-  const [showProgressModal, setShowProgressModal] = useState<boolean>(false);
-  /**
    * State variable to export options
    */
   const [options, setOptions] = useState<Array>([]);
@@ -39,10 +35,6 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
    * State Variable to store exporter object which is used to cancel export.
    */
   const [exporterObj, setExporterObj] = useState<any>(null);
-  /**
-   * State variable to disable Export button 
-   */
-  const [isDownloading, setIsDownloading] = useState<boolean>(false);
   /**
    * State variable to control tooltip visiblity
    */
@@ -89,8 +81,6 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
         break;
       case 'BAG':
       case 'FILE': 
-        setIsDownloading(true);
-        setShowProgressModal(true);
         setSelectedOption(option);
         const bagName = reference.table.name;
         const exporter = new ConfigService.ERMrest.Exporter(
@@ -120,8 +110,8 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
           exporter
             .run(logObj)
             .then((response: any) => {
-              setShowProgressModal(false);
-              setIsDownloading(false);
+              setSelectedOption(null);
+              setExporterObj(null);
 
               console.timeEnd('External export duration');
 
@@ -130,8 +120,8 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
               location.href = response.data[0];
             })
             .catch((error: any) => {
-              setShowProgressModal(false);
-              setIsDownloading(false);
+              setSelectedOption(null);
+              setExporterObj(null);
 
               console.timeEnd('External export duration');
               
@@ -162,8 +152,8 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
 
   const closeModal = () => {
     cancelExport();
-    setShowProgressModal(false);
-
+    setSelectedOption(null);
+    
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
@@ -181,7 +171,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
             show={showTooltip}
           >
             <Dropdown.Toggle
-              disabled={disabled || isDownloading || options.length === 0}
+              disabled={disabled || !!selectedOption || options.length === 0}
               variant='success'
               className='chaise-btn chaise-btn-primary'
             >
@@ -204,7 +194,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
       
       <ExportModal 
         title={`Exporting ${selectedOption ? selectedOption.displayname : ''}`}
-        show={showProgressModal} 
+        show={!!selectedOption} 
         closeModal={closeModal} 
       />
     </>
