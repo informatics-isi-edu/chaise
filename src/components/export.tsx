@@ -26,7 +26,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
   /**
    * State variable to export options
    */
-  const [options, setOptions] = useState<Array>([]);
+  const [options, setOptions] = useState<any[]>([]);
   /**
    * State Variable to store currently exporting object
    */
@@ -153,7 +153,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
   const closeModal = () => {
     cancelExport();
     setSelectedOption(null);
-    
+
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
