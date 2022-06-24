@@ -93,6 +93,7 @@
 
   &:focus {
     background-color: darken($primary-color, 10%);
+    box-shadow: none;
   }
 }
 

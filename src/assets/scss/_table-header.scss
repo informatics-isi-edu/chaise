@@ -28,4 +28,10 @@
     padding-bottom: 2px;
     margin-right: 4px;
   }
+
+  .pull-right {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
 }

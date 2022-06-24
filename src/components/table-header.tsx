@@ -14,14 +14,15 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 
 type TableHeaderProps = {
-  config: RecordsetConfig
+  config: RecordsetConfig,
+  onRecordRequest: (id: string) => void
 }
 
-const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
+const TableHeader = ({ config, onRecordRequest }: TableHeaderProps): JSX.Element => {
   const { logRecordsetClientAction, colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
@@ -96,25 +97,31 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     return label + recordsText;
   }
 
+  /**
+   * on click of create button generate referrer id, construct the link and open in new tab
+   */
   const addRecord = () => {
-    // TODO: generating random number
-    const referrer_id = 'recordset-' + '23534634124653';
+    const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
     const newRef = reference.table?.reference?.contextualize?.entryCreate;
     let appLink = newRef.appLink;
 
-    appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
+    if (appLink) {
+      appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
       'invalidate=' + fixedEncodeURIComponent(referrer_id);
 
-    LogService.logClientAction(
-      {
-        action: logRecordsetClientAction(LogActions.ADD_INTEND),
-      },
-      reference.defaultLogInfo
-    );
+      onRecordRequest(referrer_id);
 
-    windowRef.open(appLink, '_blank');
+      if (config.displayMode !== RecordsetDisplayMode.FULLSCREEN) {
+        logRecordsetClientAction(LogActions.ADD_INTEND);
+      }
+
+      windowRef.open(appLink, '_blank');
+    }
   };
 
+  /**
+   * navigate on click of edit button
+   */
   const editRecord = () => {
     let link = reference.contextualize?.entryEdit?.appLink;
 
@@ -124,21 +131,43 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     location.href = link;
   };
 
-  const shouldShowAddButton = () => {
+  /**
+   * whether to display create button
+   */
+  const shouldShowCreateButton = () => {
     const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 
-      && config.displayMode === RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
+      && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
 
     return isAddableDisplayMode && config.editable && reference && reference.canCreate;
   }
 
+  /**
+   * whether to display edit button
+   */
   const shouldShowEditButton = () => {
-    // TODO: should add canUpdate()
-    return config.displayMode === RecordsetDisplayMode.FULLSCREEN;
+    return config.displayMode === RecordsetDisplayMode.FULLSCREEN && canUpdate();
   }
 
+  /**
+   * whether to disable edit button (check if pagelimit is more than maximum allowed)
+   */
   const shouldEditButtonDisabled = () => {
     return pageLimit > RECORDEDIT_MAX_ROWS;
   }
+
+  /**
+   * Condition to make sure at least one row can be updated
+   */
+  const canUpdate = () => {
+    const res = config.editable && page && reference && reference.canUpdate;
+
+    if (res) {
+      return page.tuples.some(function (row: any) {
+        return row.canUpdate;
+      });
+    }
+    return false;
+  };
 
   return (
     <div className='chaise-table-header row'>
@@ -161,9 +190,8 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
       <div className='col-xs-12 col-sm-6'>
         <div
           className='pull-right'
-          style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
         >
-          {shouldShowAddButton() && (
+          {shouldShowCreateButton() && (
             <OverlayTrigger
               placement='bottom-end'
               overlay={
@@ -178,7 +206,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                 onClick={addRecord}
               >
                 <span className='chaise-btn-icon fa-solid fa-plus' />
-                {config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}
+                <span>{config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}</span>
               </Button>
             </OverlayTrigger>
           )}
@@ -199,7 +227,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                 disabled={shouldEditButtonDisabled()}
               >
                 <span className='chaise-btn-icon fa-solid fa-pen' />
-                Bulk Edit
+                <span>Bulk Edit</span>
               </Button>
             </OverlayTrigger>
           )}

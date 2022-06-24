@@ -123,6 +123,11 @@ const RecordsetInner = ({
    */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
 
+  /**
+   * State variable to hold newly created referrer ids
+   */
+  const [recordRequests, setRecordRequests] = useState<any[]>([]);
+
   const mainContainer = useRef<HTMLDivElement>(null);
 
   const topLeftContainer = useRef<HTMLDivElement>(null);
@@ -205,8 +210,10 @@ const RecordsetInner = ({
     }) as EventListener;
 
     document.addEventListener('resizable-width-change', handleResizeEvent);
+    window.addEventListener('focus', updateRecords);
     return () => {
       document.removeEventListener('resizable-width-change', handleResizeEvent);
+      window.removeEventListener('focus', updateRecords);
     }
   }, []);
 
@@ -233,6 +240,31 @@ const RecordsetInner = ({
       behavior: 'smooth',
     });
   };
+
+  const updateRecords = () => {
+    let completed = 1; 
+
+    for (const referrerId in recordRequests) {
+      // TODO: ask
+      // const cookie = $cookies.getObject(referrerId);
+      // if (cookie) {
+        delete recordRequests[referrerId];
+        // $cookies.remove(referrerId);
+        completed += 1;
+      // }
+    }
+
+    if (completed > 0) {
+      const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
+
+      // TODO: ask
+      update(null, null, true, true, true, false, cause);
+    }
+  };
+
+  const onRecordRequest = (referrerId: string) => {
+    setRecordRequests([...recordRequests, referrerId]);
+  }
 
   //------------------- UI related functions: --------------------//
 
@@ -442,7 +474,7 @@ const RecordsetInner = ({
             </div>
             {renderSelectedFacetFilters()}
             {renderShowFilterPanelBtn()}
-            <TableHeader config={config} />
+            <TableHeader config={config} onRecordRequest={onRecordRequest} />
           </div>
 
         </div>

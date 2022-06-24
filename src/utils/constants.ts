@@ -106,7 +106,7 @@ export const DEFAULT_DISPLAYNAME = {
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 
-export const RECORDEDIT_MAX_ROWS = 50;
+export const RECORDEDIT_MAX_ROWS = 200;
 
 // TODO if chaise is not built how we expect, this value will be undefiend.
 //      we might be able to enforce this during the npm install command of chaise
