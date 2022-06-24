@@ -165,7 +165,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
     <>
         <Dropdown className='export-menu' onClick={() => setShowTooltip(false)}>
           <OverlayTrigger
-            placement='bottom'
+            placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
             overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
             onToggle={(next: boolean) => setShowTooltip(next)}
             show={showTooltip}
