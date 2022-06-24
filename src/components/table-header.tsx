@@ -2,6 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
+import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 // models 
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -11,13 +12,17 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // utilities
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableHeaderProps = {
   config: RecordsetConfig
 }
 
 const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
-  const { colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
+  const { logRecordsetClientAction, colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
 
@@ -91,9 +96,58 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     return label + recordsText;
   }
 
+  const addRecord = () => {
+    // TODO: generating random number
+    const referrer_id = 'recordset-' + '23534634124653';
+    const newRef = reference.table?.reference?.contextualize?.entryCreate;
+    let appLink = newRef.appLink;
+
+    appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
+      'invalidate=' + fixedEncodeURIComponent(referrer_id);
+
+    LogService.logClientAction(
+      {
+        action: logRecordsetClientAction(LogActions.ADD_INTEND),
+      },
+      reference.defaultLogInfo
+    );
+
+    windowRef.open(appLink, '_blank');
+  };
+
+  const editRecord = () => {
+    let link = reference.contextualize?.entryEdit?.appLink;
+
+    if (link.indexOf('?limit=') === -1 && link.indexOf('&limit=') === -1)
+      link = link + (link.indexOf('?') === -1 ? '?limit=' : '&limit=') + pageLimit;
+
+    location.href = link;
+  };
+
+  const shouldShowAddButton = () => {
+    const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 
+      && config.displayMode === RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
+
+    return isAddableDisplayMode && config.editable && reference && reference.canCreate;
+  }
+
+  const shouldShowEditButton = () => {
+    // TODO: should add canUpdate()
+    return config.displayMode === RecordsetDisplayMode.FULLSCREEN;
+  }
+
+  const shouldEditButtonDisabled = () => {
+    return pageLimit > RECORDEDIT_MAX_ROWS;
+  }
+
   return (
     <div className='chaise-table-header row'>
-      <div className={'chaise-table-header-total-count col-xs-12 col-sm-6' + (page && page.tuples.length > 0 ? ' with-page-size-dropdown' : '')}>
+      <div
+        className={
+          'chaise-table-header-total-count col-xs-12 col-sm-6' +
+          (page && page.tuples.length > 0 ? ' with-page-size-dropdown' : '')
+        }
+      >
         <span className='displaying-text'>Displaying {prependLabel()}</span>
         {renderPageSizeDropdown()}
         <span className='total-count-text'>
@@ -105,26 +159,54 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         </span>
       </div>
       <div className='col-xs-12 col-sm-6'>
-        <div className='pull-right'>
-          {/* <button ng-if='showAddRecord()'
-                className='chaise-table-header-create-link chaise-btn'
-                ng-className='vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary''
-                ng-click='addRecord()' tooltip-placement='bottom-right' uib-tooltip='Create new {{vm.displayname ? vm.displayname.value : vm.reference.displayname.value}}'>
-                <span className='chaise-btn-icon glyphicon glyphicon-plus'></span>
-                <span>{{config.displayMode === recordsetDisplayModes.fullscreen ? 'Create' : 'Create new'}}</span>
-            </button>
-            <button ng-if='vm.config.displayMode === recordsetDisplayModes.fullscreen && canUpdate()'
-                className='chaise-table-header-edit-link chaise-btn chaise-btn-primary'
-                ng-click='editRecord()' ng-disabled='{{vm.pageLimit > vm.RECORDEDIT_MAX_ROWS}}' tooltip-placement='bottom-right'
-                uib-tooltip='{{ ((vm.pageLimit > vm.RECORDEDIT_MAX_ROWS) ? 'Editing disabled when items per page > ' + vm.RECORDEDIT_MAX_ROWS : 'Edit this page of records.' ) }}'>
-                <span className='chaise-btn-icon glyphicon glyphicon-pencil'></span>
-                <span>Bulk Edit</span>
-            </button> */}
+        <div
+          className='pull-right'
+          style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}
+        >
+          {shouldShowAddButton() && (
+            <OverlayTrigger
+              placement='bottom-end'
+              overlay={
+                <Tooltip>
+                  Create new{' '}
+                  {reference.displayname && reference.displayname.value}
+                </Tooltip>
+              }
+            >
+              <Button
+                className='chaise-btn chaise-btn-primary'
+                onClick={addRecord}
+              >
+                <span className='chaise-btn-icon fa-solid fa-plus' />
+                {config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}
+              </Button>
+            </OverlayTrigger>
+          )}
+
+          {/* Edit Button */}
+          {shouldShowEditButton() && (
+            <OverlayTrigger
+              placement='bottom-end'
+              overlay={
+                <Tooltip>
+                  {shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page for records.'}
+                </Tooltip>
+              }
+            >
+              <Button
+                className='chaise-btn chaise-btn-primary'
+                onClick={editRecord}
+                disabled={shouldEditButtonDisabled()}
+              >
+                <span className='chaise-btn-icon fa-solid fa-pen' />
+                Bulk Edit
+              </Button>
+            </OverlayTrigger>
+          )}
         </div>
       </div>
     </div>
-
-  )
+  );
 }
 
 export default TableHeader;
