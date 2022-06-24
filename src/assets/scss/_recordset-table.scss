@@ -169,12 +169,6 @@
       margin: -3px;
       height: auto; //override the default button height
       min-height: 25px; // make sure the button has default height
-      // make sure the three icons are shown in the center of the cell.
-      // (the font baseline of these two icons are different and need to be adjusted)
-      .chaise-view-details, .fa-file-alt, .fa-trash-alt {
-        position: relative;
-        top: -2px;
-      }
     }
 
     .apply-saved-query-button.disabled {
