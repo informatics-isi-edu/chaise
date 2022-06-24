@@ -486,13 +486,16 @@ const FacetChoicePicker = ({
   const renderPickerContainer = () => {
     return (
       <div className='picker-container'>
-        <SearchInput
-          // NOTE the initial search term is always empty
-          initialSearchTerm={''}
-          searchCallback={searchCallback}
-          searchColumns={facetColumn.isEntityMode ? facetColumn.sourceReference.searchColumns : null}
-          disabled={facetColumn.hasNotNullFilter}
-        />
+        {facetColumn.column.type.name !== 'boolean' && 
+          <SearchInput
+            // NOTE the initial search term is always empty
+            initialSearchTerm={''}
+            inputClass='facet-search-input'
+            searchCallback={searchCallback}
+            searchColumns={facetColumn.isEntityMode ? facetColumn.sourceReference.searchColumns : null}
+            disabled={facetColumn.hasNotNullFilter}
+          />
+        }
         <div ref={listContainer}>
           <FacetCheckList
             setHeight={facetModel.isOpen && facetModel.initialized && facetPanelOpen}

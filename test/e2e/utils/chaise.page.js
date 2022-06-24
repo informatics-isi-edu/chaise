@@ -1030,19 +1030,23 @@ var recordsetPage = function() {
     }
 
     this.getClosedFacets = function () {
-        return element.all(by.css("div[aria-expanded=false][style='height: 0px;']"));
+        return element.all(by.css(".facet-panel button.collapsed"));
     }
 
     this.getFacetById = function (idx) {
-        return element(by.id("fc-heading-" + idx));
+        return element(by.css(".fc-" + idx));
     }
 
     this.getFacetHeaderById = function (idx) {
-        return element(by.id("fc-heading-" + idx)).element(by.css('.facet-header-text'));
+        return element(by.css(".fc-heading-" + idx)).element(by.css('.facet-header-text'));
     };
 
+    this.getFacetHeaderButtonById = function (idx) {
+        return this.getFacetById(idx).element(by.css('.facet-heading-' + idx + ' button'))
+    }
+
     this.getFacetSearchBoxById = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css("chaise-search-input"));
+        return element(by.css(".fc-" + idx)).element(by.css(".chaise-search-input"));
     }
 
     this.getFacetSearchPlaceholderById = function (idx) {
@@ -1050,7 +1054,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetCollapse = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css("div[aria-expanded=true]"));
+        return element(by.css(".fc-" + idx)).element(by.css("div[aria-expanded=true]"));
     }
 
     this.getFacetTitles = function () {
@@ -1082,45 +1086,45 @@ var recordsetPage = function() {
     };
 
     this.getFacetOptions = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox label"));
+        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox label"));
     }
 
     this.getCheckedFacetOptions = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[checked=]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[checked]"));
     }
 
     this.getFacetOptionsText = function (idx) {
-        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     // just getting the text content returns a stringified JSON value (that is not properly stringified) with hidden characters, stringifying that shows the hidden characters
     // but if we parse the odd stringfied version to JSON then stringify it, we can effectively clean up those hidden characters and get a simple string reprsentation
     this.getJsonbFacetOptionsText = function (idx) {
-        return browser.executeScript("return $('#fc-" + idx + " .chaise-checkbox label').map(function(i, a) { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} });");
+        return browser.executeScript("return $('.fc-" + idx + " .chaise-checkbox label').map(function(i, a) { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} });");
     }
 
     this.getFacetOption = function (idx, option) {
-        return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
+        return element(by.css(".fc-" + idx)).element(by.css(".checkbox-" + option));
     }
 
     this.getFacetSearchBox = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".facet-search-input"));
+        return element(by.css(".fc-" + idx)).element(by.css(".facet-search-input"));
     }
 
     this.getFacetSearchBoxClear = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".remove-search-btn"));
+        return element(by.css(".fc-" + idx)).element(by.css(".remove-search-btn"));
     }
 
     this.getHistogram = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.tagName("plotly"));
+        return element(by.css(".fc-" + idx)).element(by.tagName("plotly"));
     }
 
     this.getList = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".chaise-list-container"));
+        return element(by.css(".fc-" + idx)).element(by.css(".chaise-list-container"));
     }
 
     this.getShowMore = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.id("show-more"));
+        return element(by.css(".fc-" + idx)).element(by.id("show-more"));
     }
 
     this.getCheckedModalOptions = function () {
@@ -1156,28 +1160,28 @@ var recordsetPage = function() {
     }
 
     this.getRangeFacetForm = function (idx) {
-        return element(by.id("fc-"+ idx)).element(by.css("fieldset"));
+        return element(by.css(".fc-"+ idx)).element(by.css("fieldset"));
     };
 
     // there's integer/float/date/timestamp inputs
     this.getRangeMinInput = function (idx, className) {
-        return element(by.id("fc-" + idx)).element(by.css("." + className));
+        return element(by.css(".fc-" + idx)).element(by.css("." + className));
     }
 
     this.getRangeMaxInput = function (idx, className) {
-        return element(by.id("fc-" + idx)).element(by.css("." + className));
+        return element(by.css(".fc-" + idx)).element(by.css("." + className));
     }
 
     this.getInputClear = function (idx, className) {
-        return element(by.id("fc-" + idx)).element(by.css("." + className));
+        return element(by.css(".fc-" + idx)).element(by.css("." + className));
     }
 
     this.getValidationError = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".validation-error div:not(.ng-hide)"));
+        return element(by.css(".fc-" + idx)).element(by.css(".validation-error div:not(.ng-hide)"));
     }
 
     this.getRangeSubmit = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css("button[type=submit]"));
+        return element(by.css(".fc-" + idx)).element(by.css("button[type=submit]"));
     }
 
     this.getModalMatchNotNullInput = function () {
@@ -1193,35 +1197,35 @@ var recordsetPage = function() {
     };
 
     this.getFacetSpinner = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".spinner"));
+        return element(by.css(".fc-" + idx)).element(by.css(".spinner"));
     };
 
     this.getDisabledFacetOptions = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
     };
 
     this.getHistogram = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".js-plotly-plot"));
+        return element(by.css(".fc-" + idx)).element(by.css(".js-plotly-plot"));
     };
 
     this.getPlotlyZoom = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".zoom-plotly-button"));
+        return element(by.css(".fc-" + idx)).element(by.css(".zoom-plotly-button"));
     };
 
     this.getPlotlyZoomDisabled = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".zoom-plotly-button[disabled=disabled]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".zoom-plotly-button[disabled=disabled]"));
     };
 
     this.getPlotlyUnzoom = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".unzoom-plotly-button"));
+        return element(by.css(".fc-" + idx)).element(by.css(".unzoom-plotly-button"));
     };
 
     this.getPlotlyUnzoomDisabled = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled=disabled]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled=disabled]"));
     };
 
     this.getPlotlyReset = function (idx) {
-        return element(by.id("fc-" + idx)).element(by.css(".reset-plotly-button"));
+        return element(by.css(".fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 
     this.getWarningAlert = function () {
