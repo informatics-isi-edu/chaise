@@ -1,3 +1,4 @@
+const { element } = require('protractor');
 var Q = require('q');
 
 var recordEditPage = function() {
@@ -815,7 +816,7 @@ var recordsetPage = function() {
     };
 
     this.getPageTitleTooltip = function () {
-        return this.getPageTitleElement().all(by.css("span")).first().getAttribute('uib-tooltip');
+        return this.getPageTitleElement().element(by.css(".chaise-icon-for-tooltip"));
     };
 
     this.getPageTitleInlineComment = function () {
@@ -888,7 +889,7 @@ var recordsetPage = function() {
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('span.table-column-displayname[uib-tooltip]')");
+        return element.all(by.css("span.table-column-displayname.chaise-icon-for-tooltip"));
     };
 
     this.getColumnComment = function(el) {
@@ -1021,7 +1022,7 @@ var recordsetPage = function() {
     }
 
     this.getAllFacets = function (){
-        return element.all(by.css(".panel-group")).all(by.repeater("fc in vm.reference.facetColumns"));
+        return element.all(by.css(".panel-group")).all(by.css(".facet-panel"));
     }
 
     this.getOpenFacets = function () {
@@ -1030,10 +1031,6 @@ var recordsetPage = function() {
 
     this.getClosedFacets = function () {
         return element.all(by.css("div[aria-expanded=false][style='height: 0px;']"));
-    }
-
-    this.getOpenFacets = function () {
-        return element.all(by.css("div[aria-expanded=true]"));
     }
 
     this.getFacetById = function (idx) {
@@ -1057,11 +1054,11 @@ var recordsetPage = function() {
     }
 
     this.getFacetTitles = function () {
-        return browser.executeScript("return $('.panel-title .facet-header-text').map(function(i, a) { return a.textContent.trim(); });");
+        return element.all(by.css(".panel-title .facet-header-text"));
     }
 
     this.getOpenFacetTitles = function () {
-        return browser.executeScript("return $('.panel-open .facet-header-text').map(function(i, a) { return a.textContent.trim(); });");
+        return element.all(by.css(".panel-open .facet-header-text"));
     }
 
     this.getSelectedRowsFilters = function () {
@@ -1089,7 +1086,7 @@ var recordsetPage = function() {
     }
 
     this.getCheckedFacetOptions = function (idx) {
-        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[checked=checked]"));
+        return element(by.id("fc-" + idx)).all(by.css(".chaise-checkbox input[checked=]"));
     }
 
     this.getFacetOptionsText = function (idx) {
@@ -1301,7 +1298,7 @@ function chaisePage() {
     this.navbar = new navbar();
 
     this.clickButton = function(button) {
-        return browser.executeScript("$(arguments[0]).click();", button);
+        return browser.executeScript("arguments[0].click();", button);
     };
 
     /**

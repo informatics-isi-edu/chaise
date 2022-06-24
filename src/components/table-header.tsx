@@ -20,6 +20,12 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const { colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
+  if (pageLimits.indexOf(pageLimit) === -1) {
+    pageLimits.push(pageLimit);
+    pageLimits.sort((a, b) => {
+      return a - b;
+    });
+  }
 
   const renderPageLimits = () => pageLimits.map((limit: number, index: number) => {
     return (<Dropdown.Item
@@ -39,6 +45,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
 
     update(null, value, true, false, false, false, cause);
   }
+  
 
   // the text that we should display before the page-size-dropdown
   const prependLabel = () => {
@@ -57,7 +64,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const renderPageSizeDropdown = () => {
     return (
       <Dropdown>
-        <Dropdown.Toggle className='page-size-dropdown chaise-btn chaise-btn-secondary'>{pageLimit}</Dropdown.Toggle>
+        <Dropdown.Toggle className='page-size-dropdown chaise-btn chaise-btn-secondary'>{page ? page.tuples.length : pageLimit}</Dropdown.Toggle>
         <Dropdown.Menu as='ul'>{renderPageLimits()}</Dropdown.Menu>
       </Dropdown>
     )

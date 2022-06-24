@@ -560,7 +560,7 @@ const RecordsetInner = ({
                     </OverlayTrigger>
                   } */}
                   {reference.commentDisplay === 'inline' && reference.comment &&
-                    <span className='inline-tooltip'>reference.comment</span>
+                    <span className='inline-tooltip'>{reference.comment}</span>
                   }
                 </h1>
               </div>
