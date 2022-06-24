@@ -236,6 +236,9 @@ const RecordsetInner = ({
     });
   };
 
+  /**
+   * On window focus, remove request and update the page
+   */
   const updateRecords = () => {
     let completed = 0; 
     const allCookies = getAllCookies();
