@@ -199,7 +199,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
               }
             >
               <Button
-                className='chaise-btn chaise-btn-primary'
+                className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'}`}
                 onClick={addRecord}
               >
                 <span className='chaise-btn-icon fa-solid fa-plus' />
