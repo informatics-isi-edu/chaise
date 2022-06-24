@@ -12,55 +12,69 @@
         flex-direction: column;
         margin-top: 5px;
 
-        label {
-            font-weight: 700;
-        }
-    }
-
-    .range-input-field {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        position: relative;
-    }
-
-    .range-input-datetime {
-        flex-direction: column;
-
-        #range-to-val-date,
-        #range-from-val-date {
-            margin-bottom: 5px;
-        }
-    }
-
-
-
-    .range-input-clear {
-        position: absolute;
-        right: 6px;
-        cursor: pointer;
-    }
-
-    .range-input {
         margin-right: 5px;
         flex-shrink: 0;
-        max-width: 180px;
+        max-width: 160px;
 
         &.numeric-width,
-        &.date-width {
+        &.date-width,
+        &.time-width {
             min-width: 140px;
         }
 
-        &.time-width {
-            min-width: 160px;
+        label {
+            font-weight: 700;
+        }
+
+        .chaise-input-control {
+
+            &.has-feedback {
+                height: unset;
+                min-height: auto;
+            }
+
+            .range-input-clear {
+                top: 2px;
+            }
+        }
+
+        .range-input-field {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            position: relative;
+        }
+
+        .range-input-datetime {
+            flex-direction: column;
+
+            .chaise-input-control:first-child {
+                margin-bottom: 5px;
+            }
+        }
+
+        #range-from-val-date,
+        #range-to-val-date,
+        #range-from-val-time,
+        #range-from-val-time,
+        #range-from-val,
+        #range-to-val {
+            padding-right: 0;
+            height: auto;
+        }
+
+        .range-input-clear {
+            position: absolute;
+            right: 6px;
+            cursor: pointer;
         }
     }
 
     .range-input-submit-btn {
         margin-top: 5px;
     }
-}
 
-.range-input-error {
-    color: #a94442;
+    .range-input-error {
+        color: #a94442;
+    }
 }

@@ -3,6 +3,7 @@ interface ICustomWindow extends Window {
   name: string;
   // ERMrset object that is attached to window in ermrestjs:
   ERMrest: any;
+  // momentJS library object attached for easy access
   moment: any;
   chaiseBuildVariables: any;
   // chaiseConfig is attached to the window with the chaise-config.js file
@@ -24,8 +25,6 @@ interface ICustomWindow extends Window {
       openLinksInTab: boolean
     }
   }
-  // momentJS library object attached for easy access
-  moment: any;
 }
 
 declare let window: ICustomWindow;

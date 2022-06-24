@@ -789,7 +789,7 @@ const FacetRangePicker = ({
       <div>
         List goes here
       </div>
-      <RangeInputs type={3} classes='facet-range-input' />
+      <RangeInputs inputType={facetColumn.column.type.rootName} classes='facet-range-input' />
       {renderHistogram()}
     </div>
   )
