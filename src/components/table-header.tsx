@@ -18,11 +18,10 @@ import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 
 type TableHeaderProps = {
-  config: RecordsetConfig,
-  onRecordRequest: (id: string) => void
+  config: RecordsetConfig
 }
 
-const TableHeader = ({ config, onRecordRequest }: TableHeaderProps): JSX.Element => {
+const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const { logRecordsetClientAction, colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
@@ -108,8 +107,6 @@ const TableHeader = ({ config, onRecordRequest }: TableHeaderProps): JSX.Element
     if (appLink) {
       appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
       'invalidate=' + fixedEncodeURIComponent(referrer_id);
-
-      onRecordRequest(referrer_id);
 
       if (config.displayMode !== RecordsetDisplayMode.FULLSCREEN) {
         logRecordsetClientAction(LogActions.ADD_INTEND);

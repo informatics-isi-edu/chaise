@@ -10,7 +10,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard, deleteCookie, getAllCookies, getCookieName } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -122,11 +122,6 @@ const RecordsetInner = ({
    * We have to validate the facets first, and then we can show them.
    */
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
-
-  /**
-   * State variable to hold newly created referrer ids
-   */
-  const [recordRequests, setRecordRequests] = useState<any[]>([]);
 
   const mainContainer = useRef<HTMLDivElement>(null);
 
@@ -242,29 +237,22 @@ const RecordsetInner = ({
   };
 
   const updateRecords = () => {
-    let completed = 1; 
+    let completed = 0; 
+    const allCookies = getAllCookies();
 
-    for (const referrerId in recordRequests) {
-      // TODO: ask
-      // const cookie = $cookies.getObject(referrerId);
-      // if (cookie) {
-        delete recordRequests[referrerId];
-        // $cookies.remove(referrerId);
+    const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
+
+    for (const referrerId of recordRequests) {
+        deleteCookie(getCookieName(referrerId));
         completed += 1;
-      // }
     }
 
     if (completed > 0) {
       const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
 
-      // TODO: ask
       update(null, null, true, true, true, false, cause);
     }
   };
-
-  const onRecordRequest = (referrerId: string) => {
-    setRecordRequests([...recordRequests, referrerId]);
-  }
 
   //------------------- UI related functions: --------------------//
 
@@ -474,7 +462,7 @@ const RecordsetInner = ({
             </div>
             {renderSelectedFacetFilters()}
             {renderShowFilterPanelBtn()}
-            <TableHeader config={config} onRecordRequest={onRecordRequest} />
+            <TableHeader config={config} />
           </div>
 
         </div>

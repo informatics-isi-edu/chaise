@@ -317,3 +317,45 @@ export function convertVWToPixel(value: number) {
   const result = (x * value) / 100;
   return result;
 }
+
+/**
+ * Delete cookie helper function
+ * @param name name of the cookie
+ * @param path Indicates a URL path, defaults to '/'
+ * @param domain domain/host of the cookie
+ */
+export function deleteCookie(name:string, path = '/', domain?:string) {
+  if (getCookie(name)) {
+    document.cookie = name + '=' +
+      ((path) ? ';path=' + path : '') +
+      ((domain) ? ';domain=' + domain : '') +
+      ';expires=Thu, 01 Jan 1970 00:00:01 GMT';
+  }
+}
+
+/**
+ * Get cookie helper function
+ * @param name name of the cookie
+ * @returns cookie 
+ */
+export function getCookie(name:string){
+  return document.cookie.split(';').some(c => {
+      return c.trim().startsWith(name + '=');
+  });
+}
+
+/**
+ * Returns cookie list
+ */
+export function getAllCookies() {
+  return document.cookie.split(';');
+}
+
+/**
+ * 
+ * @param cookie accpets cookie in format of <cookieName>=<value>
+ * @returns cookie name
+ */
+export function getCookieName(cookie:string) {
+  return cookie.split('=')[0].trim()
+}
