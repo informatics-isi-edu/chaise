@@ -199,7 +199,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                 </Tooltip>
               }
             >
-              <span className='d-inline-block' tabIndex={0} data-toggle='tooltip'>
+              <span className='chaise-table-header-buttons-span'>
                 <Button
                   className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'}`}
                   onClick={addRecord}
@@ -221,7 +221,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                 </Tooltip>
               }
             >
-              <span className='d-inline-block' tabIndex={0} data-toggle='tooltip'>
+              <span>
                 <Button
                   className='chaise-btn chaise-btn-primary'
                   onClick={editRecord}
