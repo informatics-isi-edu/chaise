@@ -1,7 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var Q = require('q');
-const { browser } = require('protractor');
 var EC = protractor.ExpectedConditions;
 var testParams = {
     schema_name: "faceting",

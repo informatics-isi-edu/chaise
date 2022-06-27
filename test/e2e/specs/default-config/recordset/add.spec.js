@@ -2,7 +2,6 @@
 
 var chaisePage = require('../../../utils/chaise.page.js');
 var moment = require('moment');
-const { browser } = require('protractor');
 var testParams = {
     schemaName: "product-recordset-add",
     table_name: "accommodation",

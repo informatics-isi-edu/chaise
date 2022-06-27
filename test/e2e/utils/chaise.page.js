@@ -1,4 +1,3 @@
-const { element } = require('protractor');
 var Q = require('q');
 
 var recordEditPage = function() {
