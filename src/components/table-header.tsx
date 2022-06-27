@@ -15,7 +15,7 @@ import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log
 import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 type TableHeaderProps = {
@@ -101,7 +101,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
    * on click of create button generate referrer id, construct the link and open in new tab
    */
   const addRecord = () => {
-    const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+    const referrer_id = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
     const newRef = reference.table?.reference?.contextualize?.entryCreate;
     let appLink = newRef.appLink;
 
