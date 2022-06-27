@@ -22,10 +22,10 @@ function uuidS4() {
 }
 
 /**
- * 
+ * Generate random number between min and max range
  * @param min minimum number 
  * @param max maximum number
- * @returns random number generated
+ * @returns {number} random number generated
  */
 export function getRandomInt(min: number, max: number) {
   min = Math.ceil(min);

@@ -10,7 +10,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
-import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard, deleteCookie, getAllCookies, getCookieName } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -26,6 +26,7 @@ import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/provid
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -205,10 +206,10 @@ const RecordsetInner = ({
     }) as EventListener;
 
     document.addEventListener('resizable-width-change', handleResizeEvent);
-    window.addEventListener('focus', updateRecords);
+    window.addEventListener('focus', onFocus);
     return () => {
       document.removeEventListener('resizable-width-change', handleResizeEvent);
-      window.removeEventListener('focus', updateRecords);
+      window.removeEventListener('focus', onFocus);
     }
   }, []);
 
@@ -239,15 +240,16 @@ const RecordsetInner = ({
   /**
    * On window focus, remove request and update the page
    */
-  const updateRecords = () => {
+  const onFocus = () => {
     let completed = 0; 
-    const allCookies = getAllCookies();
+    const allCookies = CookieService.getAllCookies();
 
     const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
 
     for (const referrerId of recordRequests) {
-        deleteCookie(getCookieName(referrerId));
-        completed += 1;
+      const cookieName =  CookieService.getCookieName(referrerId);
+      CookieService.deleteCookie(cookieName);
+      completed += 1;
     }
 
     if (completed > 0) {

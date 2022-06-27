@@ -16,6 +16,7 @@ import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-util
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 type TableHeaderProps = {
   config: RecordsetConfig
@@ -186,7 +187,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
       </div>
       <div className='col-xs-12 col-sm-6'>
         <div
-          className='pull-right'
+          className='chaise-table-header-buttons'
         >
           {shouldShowCreateButton() && (
             <OverlayTrigger
@@ -194,17 +195,19 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
               overlay={
                 <Tooltip>
                   Create new{' '}
-                  {reference.displayname && reference.displayname.value}
+                  <DisplayValue value={reference.displayname} />
                 </Tooltip>
               }
             >
-              <Button
-                className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'}`}
-                onClick={addRecord}
-              >
-                <span className='chaise-btn-icon fa-solid fa-plus' />
-                <span>{config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}</span>
-              </Button>
+              <span className='d-inline-block' tabIndex={0} data-toggle='tooltip'>
+                <Button
+                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'}`}
+                  onClick={addRecord}
+                >
+                  <span className='chaise-btn-icon fa-solid fa-plus' />
+                  <span>{config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}</span>
+                </Button>
+              </span>
             </OverlayTrigger>
           )}
 
@@ -218,14 +221,16 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
                 </Tooltip>
               }
             >
-              <Button
-                className='chaise-btn chaise-btn-primary'
-                onClick={editRecord}
-                disabled={shouldEditButtonDisabled()}
-              >
-                <span className='chaise-btn-icon fa-solid fa-pen' />
-                <span>Bulk Edit</span>
-              </Button>
+              <span className='d-inline-block' tabIndex={0} data-toggle='tooltip'>
+                <Button
+                  className='chaise-btn chaise-btn-primary'
+                  onClick={editRecord}
+                  disabled={shouldEditButtonDisabled()}
+                >
+                  <span className='chaise-btn-icon fa-solid fa-pen' />
+                  <span>Bulk Edit</span>
+                </Button>
+              </span>
             </OverlayTrigger>
           )}
         </div>
