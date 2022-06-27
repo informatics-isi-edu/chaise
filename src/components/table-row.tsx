@@ -6,7 +6,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -14,6 +14,9 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src//utils/window-ref';
+import useRecordset from '@isrd-isi-edu/chaise/src//hooks/recordset';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src//utils/math-utils';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -47,6 +50,7 @@ const TableRow = ({
   })
 
   const rowContainer = useRef<any>(null);
+  const { logRecordsetClientAction } = useRecordset();
 
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
@@ -132,25 +136,21 @@ const TableRow = ({
   if (config.editable && tuple.canUpdate) {
     editCallback = function () {
       $log.debug('edit clicked!');
-      // TODO edit functionality
-      // var id = MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      
+      const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      const newRef = tupleReference.contextualize?.entryEdit;
 
-      // var editLink = editLink = tupleReference.contextualize.entryEdit.appLink;
-      // var qCharacter = editLink.indexOf("?") !== -1 ? "&" : "?";
-      // $window.open(editLink + qCharacter + 'invalidate=' + UriUtils.fixedEncodeURIComponent(id), '_blank');
+      if (newRef) {
+        const editLink = addQueryParamsToURL(newRef.appLink, {
+          invalidate: referrer_id
+        });
 
-      // var args = {};
-      // if (isRelated) {
-      //   args = containerDetails(scope);
-      // }
-      // args.id = id;
-      // scope.$emit("edit-request", args);
+        windowRef.open(editLink, '_blank');
 
-      // TODO log support (can be ignored for now)
-      // logService.logClientAction({
-      //   action: getLogAction(scope, logService.logActions.EDIT_INTEND),
-      //   stack: scope.logStack
-      // }, tupleReference.defaultLogInfo);
+        logRecordsetClientAction(LogActions.EDIT_INTEND);
+      } else {
+        $log.debug('Error: reference is undefined or null');
+      }
     };
   }
 
