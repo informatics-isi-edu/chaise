@@ -247,7 +247,7 @@ const RecordsetInner = ({
     const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
 
     for (const referrerId of recordRequests) {
-      const cookieName =  CookieService.getCookieName(referrerId);
+      const cookieName =  referrerId.split('=')[0].trim();
       CookieService.deleteCookie(cookieName);
       completed += 1;
     }

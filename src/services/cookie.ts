@@ -8,7 +8,7 @@ export class CookieService {
    * @param domain domain/host of the cookie
    * @returns {boolean} deletes cookie with matching name parameter and returns true or false
    */
-  static deleteCookie(name: string, path = DEFAULT_COOKIE_PATH, domain?: string) {
+  static deleteCookie(name: string, path = DEFAULT_COOKIE_PATH, domain?: string): boolean {
     if (this.checkIfCookieExists(name)) {
       document.cookie =
         name +
@@ -27,7 +27,7 @@ export class CookieService {
    * @param name name of the cookie
    * @returns {boolean} return true if exists, else false
    */
-  static checkIfCookieExists(name: string) {
+  static checkIfCookieExists(name: string): boolean {
     return document.cookie.split(';').some((c) => {
       return c.trim().startsWith(name + '=');
     });
@@ -35,18 +35,9 @@ export class CookieService {
 
   /**
    * Returns cookie list
-   * @returns {array} list of cookies
+   * @returns {string[]} list of cookies
    */
-  static getAllCookies() {
+  static getAllCookies(): string[] {
     return document.cookie.split(';');
-  }
-
-  /**
-   *
-   * @param cookie accpets cookie in format of <cookieName>=<value>
-   * @returns {string} cookie name
-   */
-  static getCookieName(cookie: string) {
-    return cookie.split('=')[0].trim();
   }
 }
