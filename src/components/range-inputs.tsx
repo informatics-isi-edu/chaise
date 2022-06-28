@@ -8,7 +8,7 @@ const INTEGER_REGEXP = /^\-?\d+$/;
 
 const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
 
-const TIMESTAMP_FPRMAT = 'YYYY-MM-DDTHH:mm';
+const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -258,7 +258,7 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
         if (type === 'timestamp' && !value) return true;
 
         /**type is either date or timestamp */
-        const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FPRMAT;
+        const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FORMAT;
         const date = momentJS(value, formatString, true);
         return date.isValid();
     }
@@ -269,7 +269,7 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
         if (type === 'float') return parseInt(fromVal) < parseInt(toVal);
 
         /**type is either date or timestamp */
-        const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FPRMAT;
+        const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FORMAT;
         const fromDate = momentJS(fromVal, formatString, true);
         const toDate = momentJS(toVal, formatString, true);
         return toDate.diff(fromDate) > 0
