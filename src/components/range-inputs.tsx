@@ -8,7 +8,7 @@ const INTEGER_REGEXP = /^\-?\d+$/;
 
 const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
 
-const TIME_FORMAT = 'YYYY-MM-DDTHH:mm';
+const TIMESTAMP_FPRMAT = 'YYYY-MM-DDTHH:mm';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -27,42 +27,60 @@ const errorMsgMap: {
 };
 
 type DateTimePickerProps = {
+    /**
+     * classes for styling the input element
+     */
     classes?: string,
+    /**
+     * id for the input element
+     */
     id: string,
+    /**
+     * the default date value being used
+     */
     value: string,
+    /**
+     * the react ref object referencing the date input element
+     */
     dateRef: React.RefObject<HTMLInputElement>,
+    /**
+     * the react ref object referencing the time input element
+     */
     timeRef: React.RefObject<HTMLInputElement>,
-    handleChange: ((value: string) => void)
+    /**
+     * the handler function called on input change
+     */
+    handleChange: (() => void)
 };
 
 const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: DateTimePickerProps): JSX.Element => {
 
-    const changeHandler = () => {
-        const dateVal = dateRef?.current?.value;
-        let timeVal = timeRef?.current?.value;
+    // const changeHandler = () => {
+    //     const dateVal = dateRef?.current?.value;
+    //     let timeVal = timeRef?.current?.value;
 
-        console.log({ dateVal, timeVal });
+    //     console.log({ dateVal, timeVal });
 
-        if (dateVal && !timeVal) timeVal = '00:00';
+    //     if (dateVal && !timeVal) timeVal = '00:00';
 
-        handleChange(`${dateVal || ''}T${timeVal}`);
-    }
+    //     handleChange(dateVal || timeVal ? `${dateVal || ''}T${timeVal}` : '');
+    // }
 
     const handleTimeClear = () => {
         if (timeRef?.current) timeRef.current.value = '';
-        changeHandler();
+        handleChange();
     }
 
     const handleDateClear = () => {
         if (dateRef?.current) dateRef.current.value = '';
-        changeHandler();
+        handleChange();
     }
 
     return (
         <div className='range-input-datetime'>
             <div className='chaise-input-control has-feedback'>
                 <input id={`${id}-date`} className={classes} type='date' ref={dateRef}
-                    placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} onChange={changeHandler} />
+                    placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} onChange={handleChange} />
                 <ClearInputBtn
                     btnClassName='range-input-clear'
                     clickCallback={handleDateClear}
@@ -71,7 +89,7 @@ const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: 
             </div>
             <div className='chaise-input-control has-feedback'>
                 <input id={`${id}-time`} className={classes} type='time' ref={timeRef}
-                    placeholder='HH:MM' min='00:00' max='23:59' defaultValue='00:00' onChange={changeHandler} />
+                    placeholder='HH:MM' min='00:00' max='23:59' defaultValue='00:00' onChange={handleChange} />
                 <ClearInputBtn
                     btnClassName='range-input-clear'
                     clickCallback={handleTimeClear}
@@ -83,35 +101,58 @@ const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: 
 };
 
 type RangeInputProps = {
+    /** 
+     * placeholder text for int and float input types
+    */
     placeholder?: string,
+    /**
+     * classes for styling the input element
+     */
     classes?: string,
+    /** 
+     * the react ref object referencing the input element
+    */
     reference: React.RefObject<HTMLInputElement>,
+    /** 
+     * the react ref object referencing the input time element in case of timestamp type
+    */
     timeRef: React.RefObject<HTMLInputElement>,
+    /** 
+     * the type of input*/
     type: string,
+    /**
+     * id for the input element
+     */
     id: string,
+    /** 
+     * the default date value being used in case of date and timestamp types
+    */
     value: string,
-    handleChange: ((value: string) => void)
+    /** 
+     * the handler function called on input change
+    */
+    handleChange: (() => void)
 };
 
-const RangeInput = ({ placeholder = 'Enter', classes = '', reference, timeRef, type, value, id, handleChange }: RangeInputProps): JSX.Element => {
+const RangeInput = ({ placeholder = 'Enter', classes = '', id, reference, timeRef, type, value, handleChange }: RangeInputProps): JSX.Element => {
 
-    const changeHandler = () => handleChange(reference?.current?.value || '');
+    // const changeHandler = () => handleChange(reference?.current?.value || '');
 
     const clearInput = () => {
         if (reference?.current) reference.current.value = '';
-        changeHandler();
+        handleChange();
     }
 
     return (
         type === 'timestamp' ? (
-            <DateTimePicker classes={classes} id={id} value={value} dateRef={reference} timeRef={timeRef} handleChange={handleChange} />
+            <DateTimePicker classes={classes} value={value} id={id} dateRef={reference} timeRef={timeRef} handleChange={handleChange} />
         ) : (
             <div className='chaise-input-control has-feedback'>
                 {
                     type === 'int' || type === 'float' ? <input id={id} type='number' placeholder={placeholder} className={classes}
-                        ref={reference} onChange={changeHandler} />
+                        ref={reference} onChange={handleChange} />
                         : <input id={id} type='date' className={classes} ref={reference} step='1'
-                            defaultValue={value} pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' onChange={changeHandler} />
+                            defaultValue={value} pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' onChange={handleChange} />
                 }
                 <ClearInputBtn
                     btnClassName='range-input-clear'
@@ -170,13 +211,9 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
 
     const [disableSubmit, setDisableSubmit] = useState<boolean>(type === 'int' || type === 'float');
 
-    const disableSubmitBtn = () => {
-        if (!disableSubmit) setDisableSubmit(true);
-    }
-
-    const enableSubmitBtn = () => {
-        if (disableSubmit) setDisableSubmit(false);
-    }
+    const toggleSubmitBtn = (value: boolean) => {
+        if (disableSubmit !== value) setDisableSubmit(value);
+    };
 
     const formatTimeValues = () => {
         const fromDateVal = fromRef?.current?.value;
@@ -196,20 +233,18 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
     }
 
     /**checks if both inputs are empty and disables the submit button */
-    const handleChange = (value: string) => {
+    const handleChange = () => {
         const formatedValues = type === 'timestamp' ? formatTimeValues()
             : { fromVal: fromRef?.current?.value || '', toVal: toRef?.current?.value || '' };
 
         console.log(formatedValues);
 
-        if (!formatedValues.fromVal && !formatedValues.toVal) disableSubmitBtn();
-        else enableSubmitBtn();
+        toggleSubmitBtn(!formatedValues.fromVal && !formatedValues.toVal);
 
-        const validatedResult = validateValue(value);
+        const validatedResult = validateValue(formatedValues.fromVal) && validateValue(formatedValues.toVal);
 
-        if (!validatedResult) setError(errorMsgMap[type]);
-
-        if (validatedResult && !error) setError(null);
+        if (!validatedResult) setError(errorMsgMap[type])
+        else setError(null);
     }
 
     const validateValue = (value: string): boolean => {
@@ -219,8 +254,11 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
 
         if (type === 'float') return FLOAT_REGEXP.test(value);
 
+        /**in case of timestamp and both date n time value are null */
+        if (type === 'timestamp' && !value) return true;
+
         /**type is either date or timestamp */
-        const formatString = type === 'date' ? DATE_FORMAT : TIME_FORMAT;
+        const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FPRMAT;
         const date = momentJS(value, formatString, true);
         return date.isValid();
     }
@@ -231,7 +269,7 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
         if (type === 'float') return parseInt(fromVal) < parseInt(toVal);
 
         /**type is either date or timestamp */
-        const formatString = type === 'date' ? DATE_FORMAT : TIME_FORMAT;
+        const formatString = type === 'date' ? DATE_FORMAT : TIMESTAMP_FPRMAT;
         const fromDate = momentJS(fromVal, formatString, true);
         const toDate = momentJS(toVal, formatString, true);
         return toDate.diff(fromDate) > 0
