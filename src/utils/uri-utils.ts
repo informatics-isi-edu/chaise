@@ -526,3 +526,19 @@ export function getAbsoluteURL(uri: string, origin?: string) {
 export function transformCustomFilter(filter: string) {
   return filter.replace(/&/g, '& ').replace(/;/g, '; ');
 }
+
+/**
+ * Given a url string and object, add the object properties as query parameter
+ * @param url
+ * @param queryParams
+ * @param urlEncode whether we should url encode or not
+ */
+export function addQueryParamsToURL(url: string, queryParams: {[key: string]: string}, urlEncode?: boolean) {
+  let qCharacter = url.indexOf('?') !== -1 ? '&' : '?';
+  return Object.keys(queryParams).reduce((prev: string, currKey: string, currIndex: number) => {
+    if (currIndex > 0) qCharacter = '&';
+    const usedKey = urlEncode ? fixedEncodeURIComponent(currKey) : currKey;
+    const usedValue = urlEncode ? fixedEncodeURIComponent(queryParams[currKey]) : queryParams[currKey];
+    return prev + qCharacter + usedKey + '=' + usedValue;
+  }, url);
+}
