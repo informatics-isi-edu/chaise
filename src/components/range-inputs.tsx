@@ -3,7 +3,6 @@ import { useState, useRef } from 'react';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 
-
 const INTEGER_REGEXP = /^\-?\d+$/;
 
 const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
@@ -13,7 +12,7 @@ const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm';
 const DATE_FORMAT = 'YYYY-MM-DD';
 
 /**
- * an object for mapping the error codes to the error messages
+ * an object for mapping the error types to error messages
  */
 const errorMsgMap: {
     [key: string]: string;
@@ -232,7 +231,10 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
         };
     }
 
-    /**checks if both inputs are empty and disables the submit button */
+    /**
+     * checks if both inputs are empty and disables the submit button 
+     * validates both fields and shows/hides validation errors
+    */
     const handleChange = () => {
         const formatedValues = type === 'timestamp' ? formatTimeValues()
             : { fromVal: fromRef?.current?.value || '', toVal: toRef?.current?.value || '' };
@@ -247,6 +249,9 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
         else setError(null);
     }
 
+    /**
+     * performs input format validation based on input type
+    */
     const validateValue = (value: string): boolean => {
         if (!value) return true;
 
@@ -254,7 +259,7 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
 
         if (type === 'float') return FLOAT_REGEXP.test(value);
 
-        /**in case of timestamp and both date n time value are null */
+        /**in case type is timestamp and both date n time values are null */
         if (type === 'timestamp' && !value) return true;
 
         /**type is either date or timestamp */
@@ -263,6 +268,9 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
         return date.isValid();
     }
 
+    /**
+     * performs basic range validation : from_value > to_value
+    */
     const rangeCheck = (fromVal: string, toVal: string): boolean => {
         if (type === 'int') return parseInt(fromVal) < parseInt(toVal);
 
