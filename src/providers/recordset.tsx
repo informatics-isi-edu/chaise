@@ -26,6 +26,9 @@ export const RecordsetContext = createContext<{
   pageLimit: any,
   page: any,
   colValues: any,
+  disabledRows: any,
+  selectedRows: any,
+  setSelectedRows: any, // TODO
   columnModels: any,
   totalRowCount: number|null,
   registerFacetCallbacks: any, // TODO
@@ -50,6 +53,8 @@ type RecordsetProviderProps = {
   logInfo: any, // TODO
   getFavorites?: Function,
   getDisabledTuples?: Function,
+  onSelectedRowsChanged?: Function,
+  onFavoritesChanged?: Function
 }
 
 export default function RecordsetProvider({
@@ -59,7 +64,8 @@ export default function RecordsetProvider({
   config,
   logInfo,
   getFavorites,
-  getDisabledTuples
+  getDisabledTuples,
+  onSelectedRowsChanged
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
@@ -98,6 +104,11 @@ export default function RecordsetProvider({
   const [totalRowCount, setTotalRowCount] = useState<number|null>(null);
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
+  const [selectedRows, setStateSelectedRows] = useState<any>([]);
+  const setSelectedRows = (newVal: any) => {
+
+    setStateSelectedRows(newVal);
+  };
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
@@ -784,13 +795,16 @@ export default function RecordsetProvider({
       pageLimit,
       page,
       colValues,
+      disabledRows,
+      selectedRows,
+      setSelectedRows,
       columnModels,
       totalRowCount,
       registerFacetCallbacks,
       printDebugMessage,
       checkReferenceURL
     };
-  }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);
+  }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
 
   return (
     <RecordsetContext.Provider value={providerValue}>

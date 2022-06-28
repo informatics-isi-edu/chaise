@@ -127,8 +127,10 @@ const ProfileModal = ({
 
   return (
     <Modal
-      contentClassName='profile-popup'
+      className='profile-popup'
       show={showProfile}
+      keyboard={true}
+      backdrop={true}
     >
       <Modal.Header className='center-aligned-title'>
         <Modal.Title>{userDisplay}</Modal.Title>

@@ -23,7 +23,9 @@ type TableRowProps = {
   /**
    * Added to make sure the parent and this comp are using the same boolean
    */
-  showActionButtons: boolean
+  showActionButtons: boolean,
+  selected: boolean,
+  disabled: boolean
 }
 
 const TableRow = ({
@@ -31,7 +33,9 @@ const TableRow = ({
   rowIndex,
   rowValues,
   tuple,
-  showActionButtons
+  showActionButtons,
+  selected,
+  disabled
 }: TableRowProps): JSX.Element => {
 
   const tdPadding = 10, // +10 to account for padding on <td>
@@ -208,7 +212,9 @@ const TableRow = ({
             placement='bottom-start'
             tooltip='Select'
           >
-            <button type='button' className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
+            <button
+              type='button' disabled={disabled}
+              className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
             // ng-disabled="selectDisabled" ng-click="onSelect($event)"
             >
               <span className='chaise-btn-icon fa-solid fa-check'></span>
@@ -217,8 +223,8 @@ const TableRow = ({
         )
       case RecordsetSelectMode.MULTI_SELECT:
         return (
-          <>
-            <input type='checkbox' />
+          <div className='chaise-checkbox'>
+            <input type='checkbox' checked={selected || disabled} disabled={disabled} />
             {/* ng-checked="selected || selectDisabled" ng-click="onSelect($event)" ng-disabled="selectDisabled" */}
             <label />
             {/* TODO favorites */}
@@ -229,7 +235,7 @@ const TableRow = ({
               <span ng-if="config.enableFavorites && !isFavoriteLoading && tuple.isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="callToggleFavorite()"></span>
               <span ng-if="config.enableFavorites && !isFavoriteLoading && !tuple.isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="callToggleFavorite()"></span>
             */}
-          </>
+          </div>
         );
       default:
         const ApplySavedQueryTag = (applySavedQuery === false) ? 'span' : 'a';
@@ -338,7 +344,7 @@ const TableRow = ({
   }
 
   return (<tr
-    className='chaise-table-row'
+    className={`chaise-table-row${disabled ? ' disabled-row' : ''}`}
     ref={rowContainer}
     style={{ 'position': 'relative' }}
   >

@@ -45,6 +45,10 @@ export type RecordsetProps = {
   initialPageLimit?: number,
   getFavorites?: Function,
   getDisabledTuples?: Function,
+  onSelectedRowsChanged?: Function,
+  onFavoritesChanged?: Function,
+  parentReference?: any,
+  parentTuple?: any
 };
 
 const Recordset = ({
@@ -54,6 +58,8 @@ const Recordset = ({
   initialPageLimit,
   getFavorites,
   getDisabledTuples,
+  onSelectedRowsChanged,
+  onFavoritesChanged
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -64,6 +70,8 @@ const Recordset = ({
         initialPageLimit={initialPageLimit}
         getDisabledTuples={getDisabledTuples}
         getFavorites={getFavorites}
+        onSelectedRowsChanged={onSelectedRowsChanged}
+        onFavoritesChanged={onFavoritesChanged}
       >
         <RecordsetInner
           initialReference={initialReference}

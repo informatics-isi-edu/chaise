@@ -32,6 +32,7 @@ export type RecordsetConfig = {
   disableFaceting: boolean,
   displayMode: RecordsetDisplayMode,
   // TODO enable favorites
+  // enableFavorites: boolean
 }
 
 export type SortColumn = {

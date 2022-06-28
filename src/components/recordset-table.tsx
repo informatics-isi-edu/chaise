@@ -11,6 +11,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import TableRow from '@isrd-isi-edu/chaise/src/components/table-row';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { isAccordionItemSelected } from 'react-bootstrap/esm/AccordionContext';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -29,6 +30,9 @@ const RecordsetTable = ({
     page,
     columnModels,
     colValues,
+    selectedRows,
+    setSelectedRows,
+    disabledRows,
     update
   } = useRecordset();
 
@@ -55,15 +59,15 @@ const RecordsetTable = ({
     const ref = reference.sort([currSortColumn]);
     // if (checkReferenceURL(ref)) {
 
-      //  TODO
-      // printDebugMessage('change sort');
+    //  TODO
+    // printDebugMessage('change sort');
 
-      // LogService.logClientAction({
-      //   action: flowControl.current.getTableLogAction(LogActions.SORT),
-      //   stack: flowControl.current.getTableLogStack()
-      // }, ref.defaultLogInfo);
+    // LogService.logClientAction({
+    //   action: flowControl.current.getTableLogAction(LogActions.SORT),
+    //   stack: flowControl.current.getTableLogStack()
+    // }, ref.defaultLogInfo);
 
-      update(ref, null, true, false, false, false, LogReloadCauses.SORT);
+    update(ref, null, true, false, false, false, LogReloadCauses.SORT);
     // }
   }, [currSortColumn]);
 
@@ -75,7 +79,7 @@ const RecordsetTable = ({
      */
     const desc = currSortColumn?.column === col.column.name && !currSortColumn?.descending;
     setCurrSortColumn({ 'column': col.column.name, 'descending': desc });
-  }
+  };
 
   const changePage = (isNext: boolean) => {
     const ref = isNext ? page.next : page.previous;
@@ -84,19 +88,53 @@ const RecordsetTable = ({
     // TODO
     // if (ref && checkReferenceURL(ref)) {
 
-      //  TODO
-      // printDebugMessage('request for previous page');
+    //  TODO
+    // printDebugMessage('request for previous page');
 
-      // LogService.logClientAction(
-      //   {
-      //     action: flowControl.current.getTableLogAction(action),
-      //     stack: flowControl.current.getTableLogStack()
-      //   },
-      //   reference.defaultLogInfo
-      // );
+    // LogService.logClientAction(
+    //   {
+    //     action: flowControl.current.getTableLogAction(action),
+    //     stack: flowControl.current.getTableLogStack()
+    //   },
+    //   reference.defaultLogInfo
+    // );
 
-      update(ref, null, true, false, false, false, cause);
+    update(ref, null, true, false, false, false, cause);
     // }
+  };
+
+  const selectAllOnPage = () => {
+    // logService.logClientAction(
+    //   {
+    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_SELECT_ALL),
+    //     stack: getTableLogStack(scope.vm)
+    //   },
+    //   scope.vm.reference.defaultLogInfo
+    // );
+
+    return;
+  };
+
+  const selectNoneOnPage = () => {
+    return;
+  };
+
+  const isSelected = (tuple: any) => {
+    if (!tuple || !Array.isArray(selectedRows) || selectedRows.length === 0) {
+      return false;
+    }
+    return selectedRows.some((obj) => {
+        return obj.uniqueId === tuple.uniqueId;
+    });
+  };
+
+  const isDisabled = (tuple: any) => {
+    if (!tuple || !Array.isArray(disabledRows) || disabledRows.length === 0) {
+      return false;
+    }
+    return disabledRows.some((obj) => {
+      return obj.uniqueId === tuple.uniqueId;
+    });
   }
 
   // whether we should show the action buttons or not (used in multiple places)
@@ -116,17 +154,33 @@ const RecordsetTable = ({
       case RecordsetSelectMode.MULTI_SELECT:
         headerClassName = 'multi-select-header';
         inner = (
-          <></>
-          // TODO multi select buttons
-          //   <button id="table-select-all-rows" type="button" ng-click="::selectAll($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Select all rows on this page" ng-disabled="vm.matchNotNull">
-          //     <span class="icon-btn glyphicon glyphicon-check"></span>
-          //     <span>All on page</span>
-          // </button>
-          // <button type="button" ng-click="::selectNone($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Deselect all rows on this page" ng-disabled="vm.matchNotNull">
-          //     <span class="icon-btn glyphicon glyphicon-unchecked"></span>
-          //     <span>None on page</span>
-          // </button>
+          <>
+            {/* TODO test id changes to class */}
+            <ChaiseTooltip
+              placement='right'
+              tooltip={'Select all rows on this page'}
+            >
+              <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
+                type='button' onClick={selectAllOnPage}
+              >
+                <span className='chaise-btn-icon fa-regular fa-square-check'></span>
+                <span>All on page</span>
+              </button>
+            </ChaiseTooltip>
+            <ChaiseTooltip
+              placement='right'
+              tooltip={'Deselect all rows on this page'}
+            >
+              <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
+                type='button' onClick={selectNoneOnPage}
+              >
+                <span className='chaise-btn-icon fa-regular fa-square'></span>
+                <span>None on page</span>
+              </button>
+            </ChaiseTooltip>
+          </>
         );
+        break;
       default:
         let innerTooltip, innerText;
         // TODO this seems wrong, what about unlink? (it's the same as master)
@@ -248,6 +302,8 @@ const RecordsetTable = ({
           rowValues={rowValues}
           tuple={tuple}
           showActionButtons={showActionButtons}
+          selected={isSelected(tuple)}
+          disabled={isDisabled(tuple)}
         />)
     })
   }

@@ -147,7 +147,9 @@ const Faceting = ({
     if (!displayFacets) return;
     let firstOpen = 0;
     reference.facetColumns.some((fc: any, index: number) => {
-      firstOpen = index;
+      if (fc.isOpen) {
+        firstOpen = index;
+      }
       return fc.isOpen;
     });
     setTimeout(() => {

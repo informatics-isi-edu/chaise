@@ -16,7 +16,7 @@ const ErrorModal = (): JSX.Element | null => {
 
   return (
     <Modal
-      contentClassName={'error-modal'}
+      className='error-modal'
       show={true}
       onHide={handleClose}
     >

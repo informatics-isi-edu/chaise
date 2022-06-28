@@ -428,7 +428,7 @@ const FacetChoicePicker = ({
       initialReference: facetReference,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
-      logInfo,
+      logInfo
     });
   };
 
@@ -547,9 +547,11 @@ const FacetChoicePicker = ({
       {
         recordsetModalProps &&
         <RecordsetModal
-          contentClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
+          modalClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
           recordsetProps={recordsetModalProps}
           onHide={hideRecordsetModal}
+          displayname={facetColumn.displayname}
+          comment={facetColumn.comment}
         />
       }
     </div>

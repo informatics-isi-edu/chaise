@@ -176,14 +176,12 @@ body.error-open loading-spinner {
 
 /************** search popup **************/
 .search-popup {
-  #multi-select-submit-btn {
-    margin-right: 5px;
-  }
-
   .modal-content {
     height: 95vh;
     .modal-header {
       padding: 0;
+      // we don't want it to be flex, since we're doing flex ourselves
+      display: block;
     }
     .modal-body {
       padding: 0;
