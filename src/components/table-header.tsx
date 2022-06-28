@@ -201,7 +201,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
             >
               <span className='chaise-table-header-buttons-span'>
                 <Button
-                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'}`}
+                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-edit-link`}
                   onClick={addRecord}
                 >
                   <span className='chaise-btn-icon fa-solid fa-plus' />
@@ -217,13 +217,13 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
               placement='bottom-end'
               overlay={
                 <Tooltip>
-                  {shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page for records.'}
+                  {shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page of records.'}
                 </Tooltip>
               }
             >
               <span>
                 <Button
-                  className='chaise-btn chaise-btn-primary'
+                  className='chaise-btn chaise-btn-primary chaise-table-header-edit-link'
                   onClick={editRecord}
                   disabled={shouldEditButtonDisabled()}
                 >
