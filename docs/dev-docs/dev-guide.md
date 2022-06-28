@@ -20,7 +20,7 @@ This is a guide for people who develop Chaise.
   * [How it works](#how-it-works)
   * [Guidelines](#guidelines)
   * [Guidelines for promise chains](#guidelines-for-promise-chains)
-- [End-to-end testing](#end-to-end-testing)
+- [End-to-end testing migration](#end-to-end-testing-migration)
 
 
 ## Reading Material
