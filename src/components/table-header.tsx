@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 import Dropdown from 'react-bootstrap/Dropdown';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-// models 
+// models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // providers
@@ -176,7 +176,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         }
       >
         <span className='displaying-text'>Displaying {prependLabel()}</span>
-        {renderPageSizeDropdown()}
+        {page && page.length > 0 && renderPageSizeDropdown()}
         <span className='total-count-text'>
           {appendLabel()}
           {/* TODO: error handling for table data. Requests timed out (alert icon) and push more rows pending (loader icon)

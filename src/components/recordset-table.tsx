@@ -1,16 +1,16 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { SortColumn, RecordsetConfig, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import TableRow from '@isrd-isi-edu/chaise/src/components/table-row';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type RecordsetTableProps = {
   config: RecordsetConfig,
@@ -99,6 +99,60 @@ const RecordsetTable = ({
     // }
   }
 
+  // whether we should show the action buttons or not (used in multiple places)
+  const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
+
+  /**
+   * render the header for the action(s) column
+   */
+  const renderActionsHeader = () => {
+    let inner, headerClassName;
+
+    switch (config.selectMode) {
+      case RecordsetSelectMode.SINGLE_SELECT:
+        headerClassName = 'single-select-header';
+        inner = (<span>Select </span>);
+        break;
+      case RecordsetSelectMode.MULTI_SELECT:
+        headerClassName = 'multi-select-header';
+        inner = (
+          <></>
+          // TODO multi select buttons
+          //   <button id="table-select-all-rows" type="button" ng-click="::selectAll($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Select all rows on this page" ng-disabled="vm.matchNotNull">
+          //     <span class="icon-btn glyphicon glyphicon-check"></span>
+          //     <span>All on page</span>
+          // </button>
+          // <button type="button" ng-click="::selectNone($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Deselect all rows on this page" ng-disabled="vm.matchNotNull">
+          //     <span class="icon-btn glyphicon glyphicon-unchecked"></span>
+          //     <span>None on page</span>
+          // </button>
+        );
+      default:
+        let innerTooltip, innerText;
+        // TODO this seems wrong, what about unlink? (it's the same as master)
+        if (reference.canUpdate || reference.canDelete) {
+          innerText = 'Actions ';
+          innerTooltip = MESSAGE_MAP.tooltip.actionCol;
+        } else {
+          headerClassName = 'view-header';
+          innerText = 'View ';
+          innerTooltip = MESSAGE_MAP.tooltip.viewCol;
+        }
+        inner = (
+          <ChaiseTooltip
+            placement='top'
+            tooltip={innerTooltip}
+          >
+            <span className='chaise-icon-for-tooltip'>{innerText}</span>
+          </ChaiseTooltip>
+        )
+        break;
+    }
+    return (
+      <th className={`actions-header ${headerClassName}`}>{inner}</th>
+    )
+  }
+
   const renderColumnError = () => {
     <OverlayTrigger
       placement='bottom'
@@ -140,14 +194,14 @@ const RecordsetTable = ({
           className={'c_' + makeSafeIdAttr(col.column.name) + (canSort ? ' clickable' : '')}
           {...(canSort && { onClick: () => changeSort(col) })}
         >
-          {col.column.comment ? 
+          {col.column.comment ?
             // if comment, show tooltip
             <OverlayTrigger
               placement='top'
               overlay={<Tooltip>{col.column.comment}</Tooltip>}
             >
               {renderDisplayValue(col.column)}
-            </OverlayTrigger> : 
+            </OverlayTrigger> :
             // no comment, no tooltip
             renderDisplayValue(col.column)
           }
@@ -187,12 +241,13 @@ const RecordsetTable = ({
       });
 
       return (
-        <TableRow 
+        <TableRow
           key={tuple.uniqueId}
           config={config}
           rowIndex={index}
           rowValues={rowValues}
           tuple={tuple}
+          showActionButtons={showActionButtons}
         />)
     })
   }
@@ -235,9 +290,7 @@ const RecordsetTable = ({
         <table className='table chaise-table table-hover'>
           <thead className='table-heading'>
             <tr>
-              <th className='actions-header view-header'>
-                <span className='chaise-icon-for-tooltip'>View </span>
-              </th>
+              {showActionButtons && renderActionsHeader()}
               {renderColumnHeaders()}
             </tr>
           </thead>

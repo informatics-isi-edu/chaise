@@ -27,6 +27,7 @@ import {
   onDropdownToggle, onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = getCatalogId();
@@ -34,11 +35,11 @@ const ChaiseNavbar = (): JSX.Element => {
   const ERMrest = ConfigService.ERMrest; // TODO: ERMrestJS typing
   const settings = ConfigService.appSettings;
 
-  const [formModel, setFormModel]           = useState({ ridSearchTerm: '' });
-  const [menu, setMenu]                     = useState<MenuOption[] | null>(null);
+  const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
+  const [menu, setMenu] = useState<MenuOption[] | null>(null);
   const [showRidSpinner, setShowRidSpinner] = useState(false);
-  const [topBanners, setTopBanners]         = useState<NavbarBanner[]>([]);
-  const [bottomBanners, setBottomBanners]   = useState<NavbarBanner[]>([]);
+  const [topBanners, setTopBanners] = useState<NavbarBanner[]>([]);
+  const [bottomBanners, setBottomBanners] = useState<NavbarBanner[]>([]);
 
   const dropdownWrapper = useRef<any>(null);
 
@@ -109,6 +110,61 @@ const ChaiseNavbar = (): JSX.Element => {
     setBottomBanners(tempBottomBanners);
   }, []);
 
+  // Register window resize event for navbar menus and submenus
+  useEffect(() => {
+    // when resize event is called, it will call debounce function with 500ms timeout
+    const debouncedFunc = debounce(setHeight, 500);
+
+    // Call when there is resize event
+    window.addEventListener('resize', debouncedFunc);
+  }, []);
+
+  /**
+   * Function is responsible for adjusting height of submenus.
+   * Function is called when there is resize event or when user opens submenu
+   * Set the height of Dropdown.Menu (inline style)
+   * 1. Check for subMenuRef. If it is not null get x, y, and width positions
+   * 2. calculate the available height (window height - Elements's y position)
+   */
+  const setHeight = (event: any) => {
+    const winHeight = windowRef.innerHeight;
+    const padding = 15;
+
+    // When multiple submenus are open on the window, and resize event happens,
+    // it should calculate height of all submenus & update.
+    // Checking all dropdown menu with show class to recalculate height on resize event
+    const menubar = document.getElementById('menubarHeader');
+    if (menubar) {
+      const allElementswithShow = menubar.getElementsByClassName('dropdown-menu');
+      for (let i = 0; i < allElementswithShow.length; i++) {
+        const ele: any = allElementswithShow[i];
+        const y = ele.getBoundingClientRect().y;
+        ele.style.maxHeight = winHeight - y - padding + 'px';
+      }
+    }
+  }
+
+  /**
+   * Responsible for adjusting height of navbar based on available height
+   * @param event Current target i.e., navbar
+   * @returns None
+   */
+  const adjustNavBarHeight = (event: any) => {
+    event.preventDefault();
+    const winHeight = windowRef.innerHeight;
+    const padding = 15;
+
+    if (event && event.target) {
+      // Get Closest div with classname: nav-item
+      const parent = event.target.closest('.nav-item.dropdown');
+      // Get Menu div from parent
+      const menu = parent.querySelector('.dropdown-menu');
+      const y = parent.getBoundingClientRect().y;
+      const height = parent.getBoundingClientRect().height;
+      menu.style.maxHeight = winHeight - y - height - padding + 'px';
+    }
+  }
+
   const handleToLiveClick = () => {
     const url = windowRef.location.href.replace(catalogId, catalogId.split('@')[0]);
     windowRef.location = addLogParams(url, ConfigService.contextHeaderParams);
@@ -123,8 +179,8 @@ const ChaiseNavbar = (): JSX.Element => {
   const handleOnLinkClick = (event: MouseEvent<HTMLElement>, item: MenuOption) => onLinkClick(event, item);
 
   const handleOnBrandingClick = () => LogService.logClientAction({
-      action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', '')
-    });
+    action: LogService.getActionString(LogActions.NAVBAR_BRANDING, '', '')
+  });
 
 
   const handleRidSearchEnter = (e: KeyboardEvent) => {
@@ -227,7 +283,7 @@ const ChaiseNavbar = (): JSX.Element => {
     if (cc.resolverImplicitCatalog === null || cc.hideGoToRID === true) return;
 
     return (
-      <span className='rid-search'>
+      <span className='nav navbar-nav navbar-right rid-search'>
         <div className='chaise-search-box chaise-input-group'>
           <input
             id='rid-search-input'
@@ -276,8 +332,10 @@ const ChaiseNavbar = (): JSX.Element => {
             ref={dropdownWrapper}
             title={renderDropdownName(item)}
             onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
+            onClick={adjustNavBarHeight}
+            renderMenuOnMount
           >
-            <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper}></ChaiseLoginDropdown>
+            <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></ChaiseLoginDropdown>
           </NavDropdown>
         );
       }
@@ -290,22 +348,25 @@ const ChaiseNavbar = (): JSX.Element => {
   return (
     <header id='navheader'>
       {renderBanners(topBanners)}
-      <Navbar variant='dark' expand='lg' className='navbar-inverse'>
-        <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
-          {renderBrandImage()}
-          {' '}
-          {renderBrandingHTML()}
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls='navbar-dark-example' />
-        <Navbar.Collapse id='navbar-dark-example'>
-          <Nav className='navbar-menu-options'>
-            {renderNavbarMenuDropdowns()}
-          </Nav>
-          {renderRidSearch()}
-          {renderLiveButton()}
-          <ChaiseLogin />
-        </Navbar.Collapse>
-      </Navbar>
+      {!ConfigService.appSettings.hideNavbar &&
+        <Navbar collapseOnSelect expand='lg' variant='dark' className='navbar-inverse' id='mainnav' >
+          <Navbar.Brand href={(cc.navbarBrandUrl ? cc.navbarBrandUrl : '/')} onClick={handleOnBrandingClick}>
+            {renderBrandImage()}
+            {' '}
+            {renderBrandingHTML()}
+          </Navbar.Brand>
+          <Navbar.Toggle aria-controls='navbar-dark-example'>Menu</Navbar.Toggle>
+          <Navbar.Collapse id='navbar-dark-example'>
+            <Nav className='navbar-menu-options nav' id='menubarHeader'>
+              {renderNavbarMenuDropdowns()}
+            </Nav>
+            {/* Since we are using float: right for divs, position for chaise login comes first */}
+            <ChaiseLogin />
+            {renderRidSearch()}
+            {renderLiveButton()}
+          </Navbar.Collapse>
+        </Navbar>
+      }
       {renderBanners(bottomBanners)}
     </header>
   );

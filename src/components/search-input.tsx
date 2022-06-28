@@ -1,56 +1,70 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
-import { ResizeSensor } from 'css-element-queries';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type SearchInputProps = {
-  searchCallback: Function,
+  /**
+   * Will be called after search is triggered
+   */
+  searchCallback: (searchTerm: string | null, action: LogActions) => void,
+  /**
+   * The search columns
+   */
   searchColumns: any,
+  /**
+   * The initial search term
+   */
   initialSearchTerm: string,
+  /**
+   * The custom class that will be attached to the input
+   */
   inputClass?: string,
+  /**
+   * Whether input should be focused
+   */
   focus?: boolean,
-  disabled?: boolean
+  /**
+   * Whether input should be disabled
+   */
+  disabled?: boolean,
+  /**
+   * A ref that can be used from the parent to clear the search
+   * This component is going to register this function when it renders
+   */
+  forceClearSearch?: any
 }
 
+/**
+ * Creates a search input that allows users to type a search text and calls
+ * the given callback.
+ */
 const SearchInput = ({
   initialSearchTerm,
   searchCallback,
   inputClass,
   searchColumns,
   focus,
-  disabled
+  disabled,
+  forceClearSearch
 }: SearchInputProps): JSX.Element => {
 
   const inputEl = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
-  const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(true);
+  const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(false);
   const inputContainer = useRef<HTMLDivElement>(null);
-  const inputChangedTimeout = useRef<number|null>(null);
+  const inputChangedTimeout = useRef<number | null>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
 
-  // conditionally add tooltip for the placeholder
-  // TODO can we improve this?
-  useLayoutEffect(()=> {
-    if (!inputContainer.current) return;
-    new ResizeSensor(
-      inputContainer.current,
-      () => {
-        if (!inputContainer.current) return;
-        const el = inputContainer.current.querySelector('.chaise-input-placeholder') as HTMLElement;
-        if (!el) return;
-
-        // placeholder should be displayed if we're showing ellipsis
-        const show = el.scrollWidth > el.offsetWidth;
-        setShowPlaceholderTooltip(show);
-      }
-    )
-  }, []);
+  useEffect(() => {
+    if (forceClearSearch) {
+      forceClearSearch.current = clearSearch;
+    }
+  }, [])
 
   const changeFocus = () => {
     if (disabled) return;
@@ -124,16 +138,20 @@ const SearchInput = ({
     }
 
     return (
-      <ConditionalWrapper
-        condition={showPlaceholderTooltip}
-        wrapper={children => (
-          <OverlayTrigger
-            placement='bottom-start'
-            overlay={<Tooltip>{inner}</Tooltip>}
-          >
-            {children}
-          </OverlayTrigger>
-        )}
+      <OverlayTrigger
+        trigger={['hover', 'focus']}
+        placement='bottom-start'
+        overlay={<Tooltip>{inner}</Tooltip>}
+        onToggle={(nextshow: boolean) => {
+          if (!inputContainer.current) return;
+
+          const el = inputContainer.current.querySelector('.chaise-input-placeholder') as HTMLElement;
+          const overflow = el && el.scrollWidth > el.offsetWidth;
+
+          // placeholder should be displayed if we're showing ellipsis
+          setShowPlaceholderTooltip(nextshow && overflow);
+        }}
+        show={showPlaceholderTooltip}
       >
         <span
           className='chaise-input-placeholder'
@@ -141,7 +159,7 @@ const SearchInput = ({
         >
           {inner}
         </span>
-      </ConditionalWrapper>
+      </OverlayTrigger>
     );
   }
   return (

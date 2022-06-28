@@ -1,5 +1,6 @@
 import { createContext, useMemo, useState } from 'react';
 import { Variant } from 'react-bootstrap/esm/types';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 // TODO should we move the types to somewhere else?
 
@@ -43,7 +44,9 @@ type RemoveAlertFunction = (
 export const AlertsContext = createContext<{
   alerts: ChaiseAlert[],
   addAlert: AddAlertFunction,
-  removeAlert: RemoveAlertFunction
+  removeAlert: RemoveAlertFunction,
+  addURLLimitAlert: () => void,
+  removeURLLimitAlert: () => void,
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -62,6 +65,7 @@ type AlertsProviderProps = {
  */
 export default function AlertsProvider({ children }: AlertsProviderProps): JSX.Element {
   const [alerts, setAlerts] = useState<ChaiseAlert[]>([]);
+  const [urlLimitAlert, setURLLimitAlert] = useState<ChaiseAlert|null>(null);
 
   /**
    * create add an alert
@@ -91,12 +95,34 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
     )
   };
 
+  /**
+   * Display the URL limit alert
+   * (we want to ensure only one alert is displayed at the time)
+   */
+  const addURLLimitAlert = () => {
+    if (urlLimitAlert) return;
+    setURLLimitAlert(
+      addAlert(MESSAGE_MAP.URLLimitMessage, ChaiseAlertType.WARNING)
+    );
+  };
+
+  /**
+   * Remove the URL limit alert
+   */
+  const removeURLLimitAlert = () => {
+    if (!urlLimitAlert) return;
+    removeAlert(urlLimitAlert);
+    setURLLimitAlert(null);
+  }
+
 
   const providerValue = useMemo(() => {
     return {
       alerts,
       addAlert,
-      removeAlert
+      removeAlert,
+      addURLLimitAlert,
+      removeURLLimitAlert
     }
   }, [alerts]);
 

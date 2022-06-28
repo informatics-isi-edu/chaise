@@ -100,9 +100,11 @@ describe('View existing record,', function() {
         });
 
         // test that no citation appears in share modal when no citation is defined on table
+        // and also version link is not displayed when the table doesn't support history
         recordHelpers.testSharePopup({
             permalink: testParams.html_table_name_record_url,
-            verifyVersionedLink: false,
+
+            hasVersionedLink: true,
             citation: null,
             bibtextFile: null,
             title: "Share"

@@ -17,17 +17,17 @@ const DisplayValue = ({
 }: DisplayValueProps): JSX.Element => {
   if (specialNullEmpty) {
     if (value?.value === '') {
-      return <span>{DEFAULT_DISPLAYNAME.empty}</span>;
+      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.empty }}></span>;
     }
 
     if (value?.value == null) {
-      return <span>{DEFAULT_DISPLAYNAME.null}</span>;
+      return <span dangerouslySetInnerHTML={{ __html: DEFAULT_DISPLAYNAME.null }}></span>;
     }
   }
 
   const usedClassName = className ? className : (addClass ? 'markdown-container': '');
 
-  if (value?.isHTML) {
+  if (value?.isHTML && value?.value) {
     return (
       <span
         dangerouslySetInnerHTML={{ __html: value.value }}
