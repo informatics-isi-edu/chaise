@@ -124,7 +124,7 @@ const SearchInput = ({
 
     // create a placeholder in the format of 'Search <col1>, <col2>'
     if (Array.isArray(searchColumns)) {
-      inner = [<span key={0} style={{ marginRight: '3px' }}>Search</span>];
+      inner = [<span key={0}>Search </span>];
 
       // list all the column displaynames
       inner.push(...searchColumns.map((col, i, arr) => {
