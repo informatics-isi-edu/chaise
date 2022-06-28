@@ -201,7 +201,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
             >
               <span className='chaise-table-header-buttons-span'>
                 <Button
-                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-edit-link`}
+                  className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-create-link`}
                   onClick={addRecord}
                 >
                   <span className='chaise-btn-icon fa-solid fa-plus' />
