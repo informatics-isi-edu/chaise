@@ -279,8 +279,8 @@ const RecordsetTable = ({
     if (page.length === 0) {
       return (
         <tr>
-          <td colSpan={columnModels.length + 1} style={{ textAlign: 'center' }}>
-            <span>No results found</span>
+          <td id='no-results-row' colSpan={columnModels.length + 1} style={{ textAlign: 'center' }}>
+            <span>No Results Found</span>
           </td>
         </tr>
       )

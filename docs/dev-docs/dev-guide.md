@@ -5,7 +5,7 @@ This is a guide for people who develop Chaise.
 
 - [Reading Material](#reading-material)
 - [Idioms](#idioms)
-  * [Naming convensions](#naming-convensions)
+  * [Naming conventions](#naming-conventions)
   * [General](#general-1)
   * [React/TypeScript](#reacttypescript-1)
   * [Lint](#lint)
@@ -55,7 +55,7 @@ for learning different concepts.
 
 The rules that should be followed while writing code.
 
-### Naming convensions
+### Naming conventions
 
 - Use kebab-case for filenames (all lower case with `-` for breaking words).
 - Related to React/Typescript,

@@ -26,6 +26,7 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -226,8 +227,10 @@ const RecordsetInner = ({
     }) as EventListener;
 
     document.addEventListener('resizable-width-change', handleResizeEvent);
+    window.addEventListener('focus', onFocus);
     return () => {
       document.removeEventListener('resizable-width-change', handleResizeEvent);
+      window.removeEventListener('focus', onFocus);
     }
   }, []);
 
@@ -255,6 +258,29 @@ const RecordsetInner = ({
     });
   };
 
+  /**
+   * On window focus, remove request and update the page
+   */
+  const onFocus = () => {
+    let completed = 0;
+    const allCookies = CookieService.getAllCookies();
+
+    const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
+
+    for (const referrerId of recordRequests) {
+      const cookieName =  referrerId.split('=')[0].trim();
+      CookieService.deleteCookie(cookieName);
+      completed += 1;
+    }
+
+    if (completed > 0) {
+      const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
+
+      update(null, null, true, true, true, false, cause);
+    }
+  };
+
+  //------------------- UI related functions: --------------------//
 
   /**
    * The callbacks from faceting.tsx that are used in this component
@@ -568,7 +594,7 @@ const RecordsetInner = ({
                     </OverlayTrigger>
                   } */}
                   {reference.commentDisplay === 'inline' && reference.comment &&
-                    <span className='inline-tooltip'>reference.comment</span>
+                    <span className='inline-tooltip'>{reference.comment}</span>
                   }
                 </h1>
               </div>

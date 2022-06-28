@@ -560,7 +560,7 @@ const Faceting = ({
 
       return (
         // TODO TESTING id changed to class (test cases need to be updated)
-        <Accordion.Item eventKey={index + ''} key={index} className={`facet-panel fc-${index}`}>
+        <Accordion.Item eventKey={index + ''} key={index} className={`facet-panel fc-${index}${facetModel.isOpen ? ' panel-open' : ''}`}>
           {/* TODO TESTING id changed to class */}
           <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
             <FacetHeader
