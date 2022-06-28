@@ -2496,7 +2496,7 @@
             // angular configurations
             // allows unsafe prefixes to be downloaded
             // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
-            compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
+            compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob|mailto):/);
             cookiesProvider.defaults.path = '/';
             logProvider.debugEnabled(getConfigJSON().debug === true);
             // Configure all tooltips to be attached to the body by default. To attach a
