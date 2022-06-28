@@ -5,7 +5,7 @@ This is a guide for people who develop Chaise.
 
 - [Reading Material](#reading-material)
 - [Idioms](#idioms)
-  * [Naming convensions](#naming-convensions)
+  * [Naming conventions](#naming-conventions)
   * [General](#general-1)
   * [React/TypeScript](#reacttypescript-1)
   * [Lint](#lint)
@@ -20,6 +20,7 @@ This is a guide for people who develop Chaise.
   * [How it works](#how-it-works)
   * [Guidelines](#guidelines)
   * [Guidelines for promise chains](#guidelines-for-promise-chains)
+- [End-to-end testing migration](#end-to-end-testing-migration)
 
 
 ## Reading Material
@@ -54,7 +55,7 @@ for learning different concepts.
 
 The rules that should be followed while writing code.
 
-### Naming convensions
+### Naming conventions
 
 - Use kebab-case for filenames (all lower case with `-` for breaking words).
 - Related to React/Typescript,
@@ -661,3 +662,28 @@ promise.then(
   }
 );
 ```
+
+## End-to-end testing migration
+
+This section is intended for migrating existing test cases to work with the React application that were initially written for the AngularJS application. For setting up the testing environment and writing new tests, please see the [e2e test setup](e2e-test.md) and the [e2e test writing](e2e-test-writing.md) guides.
+
+When a test case is failing, the output in the terminal will tell you information about which test case and why it's failing. It could be failing for any number of reasons, most commonly either an expectation will fail or an error/timeout will be thrown during a `browser.wait` call. When an expectation fails, look at the failure message associated with the expectation and find the associated `it(...)` case with that message. Expectations might fail for a number of reasons:
+ - Trying to count elements on the page and the count is different
+ - Text being displayed is not the same, either because of spelling, capitalization, or HTML structure changing
+ - Element selector is for a different element now, might not have been specific enough
+
+When an error or timeout occur, the output (usually a stack trace) will generally be multiple lines and have a line that points to one of our `.spec.js` files. It will look similar to this:
+`    at /Users/jchudy/workspace/chaise/test/e2e/specs/delete-prohibited/recordset/ind-facet.spec.js:667:29`
+
+This tells you the line number in the listed file where the error can be debugged from. The error could be for different reasons, but often they are one of the following cases:
+ - The element we selected fails the "wait" condition (for instance wating for x rows but only x-1 are present)
+ - an error occurred in the app that caused a modal error dialog to popup and blocks interaction between selenium and the browser
+ - functions in test environment throw errors
+
+When fixing failing tests, evaluate what might be wrong and decide if a change to the tests or code needs to take place:
+ - `browser.get()` won't work properly, so all of these calls need to be replaced by `chaisePage.navigate()`
+ - Update the text in the code or expect condition depending on if the functionality in the browser looks nice
+   - For instance, one text case expected "Displaying\nall X records" but the UI was showing "Displaying all\nX\nrecords". In this case, the old test case was testing that the text was correct but not the "spacing". I decided to update the test expectation instead of changing the UI to remove the whitespace character between "Displaying" and "all".
+ - Check how specific the selector was, if it relied on a specific HTML structure or an id/class that changed or isn't present
+   - Some selectors were written with jQuery (`$`). We removed jQuery from the react application so these selectors need to be rewritten with protractor/selenium selectors
+ - Add a `browser.wait()` to verify the content we are testing has loaded/rendered
