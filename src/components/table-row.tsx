@@ -19,6 +19,7 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -60,6 +61,13 @@ const TableRow = ({
    * state variable to hold logObj reference which will be used on Delete confirmation.
    */
   const [logObj, setLogObj] = useState<any>(null);
+
+  /**
+   * state variable to determine whether user is trying to unlink tuple
+   */
+  const [isUnlink, setIsUnlink] = useState<boolean>(false);
+
+  const { dispatchError } = useError();
 
   const rowContainer = useRef<any>(null);
   const { logRecordsetClientAction } = useRecordset();
@@ -103,6 +111,10 @@ const TableRow = ({
       // stack: logStack
     }
 
+    if (isUnlink) {
+      setIsUnlink(true);
+    }
+
     setLogObj(logObj);
 
     if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
@@ -118,8 +130,7 @@ const TableRow = ({
         // tell parent controller data updated
         // scope.$emit('record-deleted', emmitedMessageArgs);
       }).catch(function (error: any) {
-        // TODO: ask
-        // ErrorService.handleException(response, true);
+        dispatchError({ error, isGlobal: true });
       });
     }
 
@@ -132,29 +143,19 @@ const TableRow = ({
       tuple.reference.delete(logObj).then(function deleteSuccess() {
         // tell parent controller data updated
         // scope.$emit('record-deleted', emmitedMessageArgs);
-        
-        // Later uncomment
-        // setShowDeleteConfirmationModal(false);
       }).catch(function (error: any) {
-        // TODO: ask
-        // ErrorService.handleException(response, true);
-        onDeleteError(error);
+        // log the opening of cancelation modal
+        LogService.logClientAction({
+          action: LogService.getActionString(isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL),
+          // TODO: ask
+          // stack: logStack
+        }, tuple.reference.defaultLogInfo);
+        
+        // if response is string, the modal has been dismissed
+        if (typeof error !== 'string') {
+          dispatchError({ error: error, isGlobal: true });
+        }
       });
-    }
-  }
-
-  const onDeleteError = (error: any) => {
-    // log the opening of cancelation modal
-    LogService.logClientAction({
-      action: LogService.getActionString(isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL),
-      // TODO: ask
-      // stack: logStack
-    }, tuple.reference.defaultLogInfo);
-    
-    // if response is string, the modal has been dismissed
-    if (typeof response !== "string") {
-      // TODO: ask
-      // ErrorService.logTerminalError(response); 
     }
   }
 

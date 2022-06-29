@@ -15,19 +15,23 @@ type DeleteConfirmationModalProps = {
    * prop to trigger on cancel
    */
   onCancel: () => void;
+  /**
+   * children passed to the component
+   */
+  children: any
 };
 
 /**
  * returns Modal Component - Component that renders delete comfirmation dialog
  */
-const DeleteConfirmationModal = ({ show, onDeleteConfirmation, onCancel, ...props }: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ show, onDeleteConfirmation, onCancel, children }: DeleteConfirmationModalProps) => {
   return (
     <Modal show={show} onHide={onCancel} keyboard={false}>
       <Modal.Header>
         <Modal.Title>Confirm Delete</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className='modal-text'>{props && props.children}</div>
+        <div className='modal-text'>{children}</div>
       </Modal.Body>
       <Modal.Footer>
         <Button
