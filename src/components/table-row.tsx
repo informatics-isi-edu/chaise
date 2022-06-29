@@ -14,9 +14,11 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src//utils/window-ref';
-import useRecordset from '@isrd-isi-edu/chaise/src//hooks/recordset';
-import { getRandomInt } from '@isrd-isi-edu/chaise/src//utils/math-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -48,6 +50,13 @@ const TableRow = ({
     linkText: 'more',
     maxHeightStyle: defaultMaxHeightStyle
   })
+
+  /**
+   * state variable to open and close delete confirmation modal window
+   */
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<boolean>(false);
+
+  const [logObj, setLogObj] = useState<any>(null);
 
   const rowContainer = useRef<any>(null);
   const { logRecordsetClientAction } = useRecordset();
@@ -83,8 +92,70 @@ const TableRow = ({
 
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     $log.debug('deleting tuple!');
+
+    const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
+    const logObj = {
+      action: LogService.getActionString(actionVerb),
+      // TODO: ask
+      // stack: logStack
+    }
+
+    setLogObj(logObj);
+
+    if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+      // log the opening of delete modal
+      const actionVerb = isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND;
+      LogService.logClientAction({
+        action: LogService.getActionString(actionVerb)
+      });
+      
+      setShowDeleteConfirmationModal(true);
+    } else {
+      reference.delete(logObj).then(function deleteSuccess() {
+        // tell parent controller data updated
+        // scope.$emit('record-deleted', emmitedMessageArgs);
+      }).catch(function (error: any) {
+        // TODO: ask
+        // ErrorService.handleException(response, true);
+      });
+    }
+
     return;
   };
+
+  const onDeleteConfirmation = () => {
+    setShowDeleteConfirmationModal(false);
+    tuple.reference.delete(logObj).then(function deleteSuccess() {
+      // tell parent controller data updated
+      // scope.$emit('record-deleted', emmitedMessageArgs);
+      
+      // Later uncomment
+      // setShowDeleteConfirmationModal(false);
+    }).catch(function (error: any) {
+      // TODO: ask
+      // ErrorService.handleException(response, true);
+      onDeleteError(error);
+    });
+  }
+
+  const onDeleteError = (error: any) => {
+    // log the opening of cancelation modal
+    LogService.logClientAction({
+      action: LogService.getActionString(isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL),
+      // TODO: ask
+      // stack: logStack
+    }, tuple.reference.defaultLogInfo);
+    
+    // if response is string, the modal has been dismissed
+    if (typeof response !== "string") {
+      // TODO: ask
+      // ErrorService.logTerminalError(response); 
+    }
+  }
+
+  const onCancel = () => {
+    setShowDeleteConfirmationModal(false);
+  }
 
   const tupleReference = tuple.reference,
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
@@ -182,6 +253,9 @@ const TableRow = ({
       };
     }
   }
+  deleteCallback = function () {
+    deleteOrUnlink(tupleReference, isRelated);
+  };
 
   const readMore = () => {
     if (readMoreObj.hideContent) {
@@ -337,18 +411,28 @@ const TableRow = ({
     });
   }
 
-  return (<tr
-    className='chaise-table-row'
-    ref={rowContainer}
-    style={{ 'position': 'relative' }}
-  >
-    {showActionButtons &&
-      <td className='block action-btns'>
-        {renderActionButtons()}
-      </td>
-    }
-    {renderCells()}
-  </tr>
+  return (
+  <>
+    <tr
+      className='chaise-table-row'
+      ref={rowContainer}
+      style={{ 'position': 'relative' }}
+    >
+      {showActionButtons &&
+        <td className='block action-btns'>
+          {renderActionButtons()}
+        </td>
+      }
+      {renderCells()}
+    </tr>
+    <DeleteConfirmationModal 
+      show={showDeleteConfirmationModal} 
+      onDeleteConfirmation={onDeleteConfirmation}
+      onCancel={onCancel}
+    >
+      Are you sure you want to delete <DisplayValue value={tuple.displayname} />?
+    </DeleteConfirmationModal >
+  </>
   )
 }
 
