@@ -55,7 +55,10 @@ const TableRow = ({
    * state variable to open and close delete confirmation modal window
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<boolean>(false);
-
+  
+  /**
+   * state variable to hold logObj reference which will be used on Delete confirmation.
+   */
   const [logObj, setLogObj] = useState<any>(null);
 
   const rowContainer = useRef<any>(null);
@@ -125,17 +128,19 @@ const TableRow = ({
 
   const onDeleteConfirmation = () => {
     setShowDeleteConfirmationModal(false);
-    tuple.reference.delete(logObj).then(function deleteSuccess() {
-      // tell parent controller data updated
-      // scope.$emit('record-deleted', emmitedMessageArgs);
-      
-      // Later uncomment
-      // setShowDeleteConfirmationModal(false);
-    }).catch(function (error: any) {
-      // TODO: ask
-      // ErrorService.handleException(response, true);
-      onDeleteError(error);
-    });
+    if (logObj) {
+      tuple.reference.delete(logObj).then(function deleteSuccess() {
+        // tell parent controller data updated
+        // scope.$emit('record-deleted', emmitedMessageArgs);
+        
+        // Later uncomment
+        // setShowDeleteConfirmationModal(false);
+      }).catch(function (error: any) {
+        // TODO: ask
+        // ErrorService.handleException(response, true);
+        onDeleteError(error);
+      });
+    }
   }
 
   const onDeleteError = (error: any) => {
@@ -253,9 +258,6 @@ const TableRow = ({
       };
     }
   }
-  deleteCallback = function () {
-    deleteOrUnlink(tupleReference, isRelated);
-  };
 
   const readMore = () => {
     if (readMoreObj.hideContent) {
