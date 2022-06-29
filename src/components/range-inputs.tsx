@@ -1,7 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 import { useState, useRef } from 'react';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 
 const INTEGER_REGEXP = /^\-?\d+$/;
 
@@ -21,151 +21,11 @@ const errorMsgMap: {
     'range': 'From value cannot be greater than the To value',
     'int': 'Please enter an integer value',
     'float': 'Please enter a decimal value',
-    'date': 'Please enter a date value in YYYY-MM-DD format',
-    'timestamp': 'Please enter a time value in YYYY-MM-DD HH:MM format'
-};
-
-type DateTimePickerProps = {
-    /**
-     * classes for styling the input element
-     */
-    classes?: string,
-    /**
-     * id for the input element
-     */
-    id: string,
-    /**
-     * the default date value being used
-     */
-    value: string,
-    /**
-     * the react ref object referencing the date input element
-     */
-    dateRef: React.RefObject<HTMLInputElement>,
-    /**
-     * the react ref object referencing the time input element
-     */
-    timeRef: React.RefObject<HTMLInputElement>,
-    /**
-     * the handler function called on input change
-     */
-    handleChange: (() => void)
-};
-
-const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: DateTimePickerProps): JSX.Element => {
-
-    // const changeHandler = () => {
-    //     const dateVal = dateRef?.current?.value;
-    //     let timeVal = timeRef?.current?.value;
-
-    //     console.log({ dateVal, timeVal });
-
-    //     if (dateVal && !timeVal) timeVal = '00:00';
-
-    //     handleChange(dateVal || timeVal ? `${dateVal || ''}T${timeVal}` : '');
-    // }
-
-    const handleTimeClear = () => {
-        if (timeRef?.current) timeRef.current.value = '';
-        handleChange();
-    }
-
-    const handleDateClear = () => {
-        if (dateRef?.current) dateRef.current.value = '';
-        handleChange();
-    }
-
-    return (
-        <div className='range-input-datetime'>
-            <div className='chaise-input-control has-feedback'>
-                <input id={`${id}-date`} className={classes} type='date' ref={dateRef}
-                    placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} onChange={handleChange} />
-                <ClearInputBtn
-                    btnClassName='range-input-clear'
-                    clickCallback={handleDateClear}
-                    show
-                />
-            </div>
-            <div className='chaise-input-control has-feedback'>
-                <input id={`${id}-time`} className={classes} type='time' ref={timeRef}
-                    placeholder='HH:MM' min='00:00' max='23:59' defaultValue='00:00' onChange={handleChange} />
-                <ClearInputBtn
-                    btnClassName='range-input-clear'
-                    clickCallback={handleTimeClear}
-                    show
-                />
-            </div>
-        </div>
-    );
+    'date': 'Please enter a date value',
+    'timestamp': 'Please enter a valid date and time value'
 };
 
 type RangeInputProps = {
-    /** 
-     * placeholder text for int and float input types
-    */
-    placeholder?: string,
-    /**
-     * classes for styling the input element
-     */
-    classes?: string,
-    /** 
-     * the react ref object referencing the input element
-    */
-    reference: React.RefObject<HTMLInputElement>,
-    /** 
-     * the react ref object referencing the input time element in case of timestamp type
-    */
-    timeRef: React.RefObject<HTMLInputElement>,
-    /** 
-     * the type of input*/
-    type: string,
-    /**
-     * id for the input element
-     */
-    id: string,
-    /** 
-     * the default date value being used in case of date and timestamp types
-    */
-    value: string,
-    /** 
-     * the handler function called on input change
-    */
-    handleChange: (() => void)
-};
-
-const RangeInput = ({ placeholder = 'Enter', classes = '', id, reference, timeRef, type, value, handleChange }: RangeInputProps): JSX.Element => {
-
-    // const changeHandler = () => handleChange(reference?.current?.value || '');
-
-    const clearInput = () => {
-        if (reference?.current) reference.current.value = '';
-        handleChange();
-    }
-
-    return (
-        type === 'timestamp' ? (
-            <DateTimePicker classes={classes} value={value} id={id} dateRef={reference} timeRef={timeRef} handleChange={handleChange} />
-        ) : (
-            <div className='chaise-input-control has-feedback'>
-                {
-                    type === 'int' || type === 'float' ? <input id={id} type='number' placeholder={placeholder} className={classes}
-                        ref={reference} onChange={handleChange} />
-                        : <input id={id} type='date' className={classes} ref={reference} step='1'
-                            defaultValue={value} pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' onChange={handleChange} />
-                }
-                <ClearInputBtn
-                    btnClassName='range-input-clear'
-                    clickCallback={clearInput}
-                    show
-                />
-            </div>
-        )
-
-    )
-};
-
-
-type RangeInputHOCProps = {
     /**
      * an string for the type of input expected:
      * int
@@ -193,7 +53,7 @@ const getType = (inputType: string): string => {
     return 'Invalid_Type';
 }
 
-const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
+const RangeInput = ({ inputType, classes }: RangeInputProps) => {
     const momentJS = windowRef.moment;
 
     const fromRef = useRef<HTMLInputElement>(null);
@@ -241,9 +101,11 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
 
         console.log(formatedValues);
 
-        toggleSubmitBtn(!formatedValues.fromVal && !formatedValues.toVal);
-
         const validatedResult = validateValue(formatedValues.fromVal) && validateValue(formatedValues.toVal);
+
+        const areBothFieldsEmpty = !formatedValues.fromVal && !formatedValues.toVal;
+
+        toggleSubmitBtn(areBothFieldsEmpty || !validatedResult);
 
         if (!validatedResult) setError(errorMsgMap[type])
         else setError(null);
@@ -325,13 +187,13 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
             <div className='range-input-container'>
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor={`range-from-val-${type}`}>From:</label>
-                    <RangeInput id={`range-from-val-${type}`} reference={fromRef} timeRef={fromTimeRef} type={type} value='2015-06-01'
+                    <InputSwitch id={`range-from-val-${type}`} reference={fromRef} timeRef={fromTimeRef} type={type} value='2015-06-01'
                         handleChange={handleChange} />
                 </div>
 
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor={`range-to-val-${type}`}>To:</label>
-                    <RangeInput id={`range-to-val-${type}`} reference={toRef} timeRef={toTimeRef} type={type} value='2018-08-29'
+                    <InputSwitch id={`range-to-val-${type}`} reference={toRef} timeRef={toTimeRef} type={type} value='2018-08-29'
                         handleChange={handleChange} />
                 </div>
 
@@ -346,4 +208,4 @@ const RangeInputHOC = ({ inputType, classes }: RangeInputHOCProps) => {
     );
 };
 
-export default RangeInputHOC;
+export default RangeInput;
