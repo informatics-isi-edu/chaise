@@ -103,7 +103,7 @@ const TableRow = ({
       // }, reference.defaultLogInfo);
 
       setShowDeleteConfirmationModal(true);
-      
+
     } else {
 
       // TODO: setting logObj
@@ -142,8 +142,8 @@ const TableRow = ({
           // scope.$emit('record-deleted', emmitedMessageArgs);
         }).catch(function (error: any) {
           // TODO: log the opening of cancelation modal
-          // LogService.logClientAction({
           // const actionVerb = tuple.canUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+          // LogService.logClientAction({
           //   action: LogService.getActionString(actionVerb),
           //   // TODO: ask
           //   // stack: logStack
