@@ -3,7 +3,9 @@ import { SortColumn, RecordsetConfig, RecordsetSelectMode } from '@isrd-isi-edu/
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Spinner from 'react-bootstrap/Spinner';
+import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -261,7 +263,7 @@ const RecordsetTable = ({
           }
           <span className='table-heading-icons'>
             {col.hasError && renderColumnError()}
-            {!col.hasError && col.isLoading && <span className='fa-solid fa-rotate fa-spin aggregate-col-loader' />}
+            {!col.hasError && col.isLoading && <Spinner animation='border' className='aggregate-col-loader' />}
             {
               canSort &&
               <span className='column-sort-icon'>{renderColumnSortIcon(col)}</span>

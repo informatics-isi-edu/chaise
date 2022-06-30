@@ -273,6 +273,11 @@ export default function RecordsetProvider({
       updateTotalRowCount(updatePage);
     }
 
+    // TODO does this make sense?
+    if (!isLoading && page && page.length > 0) {
+      fetchSecondaryRequests(updatePage);
+    }
+
     // fetch the facets
     if (flowControl.current.updateFacetsCallback) {
       flowControl.current.updateFacetsCallback(flowControl, updatePage);
