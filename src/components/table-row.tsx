@@ -56,16 +56,6 @@ const TableRow = ({
    * state variable to open and close delete confirmation modal window
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<boolean>(false);
-  
-  /**
-   * state variable to hold logObj reference which will be used on Delete confirmation.
-   */
-  const [logObj, setLogObj] = useState<any>(null);
-
-  /**
-   * state variable to determine whether user is trying to unlink tuple
-   */
-  const [isUnlink, setIsUnlink] = useState<boolean>(false);
 
   const { dispatchError } = useError();
 
@@ -104,57 +94,65 @@ const TableRow = ({
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     $log.debug('deleting tuple!');
 
-    const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
-    const logObj = {
-      action: LogService.getActionString(actionVerb),
-      // TODO: ask
-      // stack: logStack
-    }
-
-    if (isUnlink) {
-      setIsUnlink(true);
-    }
-
-    setLogObj(logObj);
-
     if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-      // log the opening of delete modal
-      const actionVerb = isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND;
-      LogService.logClientAction({
-        action: LogService.getActionString(actionVerb)
-      });
       
+      // TODO: log the opening of delete modal
+      // LogService.logClientAction({
+      //   action: LogService.getActionString(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
+      //   stack: logStack
+      // }, reference.defaultLogInfo);
+
       setShowDeleteConfirmationModal(true);
+      
     } else {
-      reference.delete(logObj).then(function deleteSuccess() {
-        // tell parent controller data updated
-        // scope.$emit('record-deleted', emmitedMessageArgs);
-      }).catch(function (error: any) {
-        dispatchError({ error, isGlobal: true });
-      });
+
+      // TODO: setting logObj
+      const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
+      const logObj = {
+        action: LogService.getActionString(actionVerb),
+        // stack: logStack
+      }
+
+      if (logObj) {
+        reference.delete(logObj).then(function deleteSuccess() {
+          // TODO: tell parent controller data updated
+          // scope.$emit('record-deleted', emmitedMessageArgs);
+        }).catch(function (error: any) {
+          dispatchError({ error, isGlobal: true });
+        });
+      }
     }
 
     return;
   };
 
-  const onDeleteConfirmation = () => {
+  const onDeleteConfirmation = (tuple: any) => {
     setShowDeleteConfirmationModal(false);
+
+    const actionVerb = tuple.canUnlink ? LogActions.UNLINK : LogActions.DELETE;
+    const logObj = {
+      action: LogService.getActionString(actionVerb),
+      // stack: logStack
+    }
+    
     if (logObj) {
-      tuple.reference.delete(logObj).then(function deleteSuccess() {
-        // tell parent controller data updated
-        // scope.$emit('record-deleted', emmitedMessageArgs);
-      }).catch(function (error: any) {
-        // log the opening of cancelation modal
-        LogService.logClientAction({
-          action: LogService.getActionString(isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL),
-          // TODO: ask
-          // stack: logStack
-        }, tuple.reference.defaultLogInfo);
-        
-        // if response is string, the modal has been dismissed
-        if (typeof error !== 'string') {
-          dispatchError({ error: error, isGlobal: true });
-        }
+      tuple.reference.delete(logObj)
+        .then(function deleteSuccess() {
+          // TODO: tell parent controller data updated
+          // scope.$emit('record-deleted', emmitedMessageArgs);
+        }).catch(function (error: any) {
+          // TODO: log the opening of cancelation modal
+          // LogService.logClientAction({
+          // const actionVerb = tuple.canUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+          //   action: LogService.getActionString(actionVerb),
+          //   // TODO: ask
+          //   // stack: logStack
+          // }, tuple.reference.defaultLogInfo);
+          
+          // if response is string, the modal has been dismissed
+          if (typeof error !== 'string') {
+            dispatchError({ error: error, isGlobal: true });
+          }
       });
     }
   }
@@ -432,9 +430,8 @@ const TableRow = ({
       show={showDeleteConfirmationModal} 
       onDeleteConfirmation={onDeleteConfirmation}
       onCancel={onCancel}
-    >
-      Are you sure you want to delete <DisplayValue value={tuple.displayname} />?
-    </DeleteConfirmationModal >
+      tuple={tuple}
+    />
   </>
   )
 }

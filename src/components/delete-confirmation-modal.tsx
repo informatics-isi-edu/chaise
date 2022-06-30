@@ -1,6 +1,9 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 
-import { Button, Modal } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 type DeleteConfirmationModalProps = {
   /**
@@ -10,34 +13,36 @@ type DeleteConfirmationModalProps = {
   /**
    * prop to trigger on delete confirmation
    */
-  onDeleteConfirmation: () => void;
+  onDeleteConfirmation: (tuple: any) => void;
   /**
    * prop to trigger on cancel
    */
   onCancel: () => void;
   /**
-   * children passed to the component
+   * tuple reference
    */
-  children: any
+  tuple: any
 };
 
 /**
  * returns Modal Component - Component that renders delete comfirmation dialog
  */
-const DeleteConfirmationModal = ({ show, onDeleteConfirmation, onCancel, children }: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ show, onDeleteConfirmation, onCancel, tuple }: DeleteConfirmationModalProps) => {
   return (
     <Modal show={show} onHide={onCancel} keyboard={false}>
       <Modal.Header>
         <Modal.Title>Confirm Delete</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className='modal-text'>{children}</div>
+        <div className='modal-text'>
+          Are you sure you want to delete <DisplayValue value={tuple.displayname} />?
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button
           className='chaise-btn chaise-btn-danger'
           variant='outline-primary'
-          onClick={onDeleteConfirmation}
+          onClick={() => onDeleteConfirmation(tuple)}
         >
           Delete
         </Button>
