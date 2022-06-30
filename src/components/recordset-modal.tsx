@@ -8,25 +8,45 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 export type RecordestModalProps = {
   recordsetProps: RecordsetProps,
   modalClassName?: string,
-  onHide?: () => void,
   displayname?: Displayname,
   comment?: string,
+  onSubmit?: Function,
+  onClose?: () => void
 }
 
 const RecordsetModal = ({
   recordsetProps,
   modalClassName,
-  onHide,
   displayname,
-  comment
+  comment,
+  onSubmit,
+  onClose
 }: RecordestModalProps) => {
   const [show, setShow] = useState(true);
+  const [submittedRows, setSubmittedRows] = useState<any>();
 
   const displayMode = recordsetProps.config.displayMode;
+
+  //-------------------  UI related callbacks:   --------------------//
+  const submit = () => {
+    setShow(false);
+    if (onSubmit) {
+      onSubmit(submittedRows);
+    }
+  };
+
+  const onSelectedRowsChangedWrapper = (selectedRows: any) => {
+    
+    $log.debug('on selected rows changed called');
+    // TODO call the given function and if it passes return true
+  };
+
+  //-------------------  render logic:   --------------------//
 
   let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records';
   switch (displayMode) {
@@ -127,7 +147,7 @@ const RecordsetModal = ({
       className={`search-popup ${modalClassName}`}
       size={'lg'}
       show={show}
-      onHide={onHide}
+      onHide={onClose}
     >
       <Modal.Header>
         <div className='top-panel-container'>
@@ -142,7 +162,7 @@ const RecordsetModal = ({
                   >
                     <button
                       id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
-                      type='button' ng-click='ctrl.submit()'>
+                      type='button' onClick={submit}>
                       <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                       <span>{submitText}</span>
                     </button>
@@ -169,12 +189,7 @@ const RecordsetModal = ({
         </div>
       </Modal.Header>
       <Modal.Body>
-        <Recordset
-          initialReference={recordsetProps.initialReference}
-          config={recordsetProps.config}
-          logInfo={recordsetProps.logInfo}
-          initialPageLimit={recordsetProps.initialPageLimit}
-        />
+        <Recordset {...recordsetProps}/>
       </Modal.Body>
     </Modal>
   )

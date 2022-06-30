@@ -80,3 +80,11 @@ export type FacetRequestModel = {
   // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
   // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
 }
+
+export type SelectedChiclet = {
+  displayname: Displayname;
+  uniqueId: string | null;
+  data?: any; // TODO
+  // the following is added for plot app and might require change:
+  cannotBeRemoved?: boolean;
+}

@@ -51,19 +51,17 @@
           // }
         }
 
-        .recordset-chiclets-container {
+        .chiclets-container {
           margin-bottom: 10px;
 
-          &.recordset-chiclets {
+          .filter-chiclets {
             padding-right: 250px;
           }
 
-          $filter-chiclet-margin: 5px;
-
           .filter-chiclet {
             max-width: 350px;
-            margin-right: $filter-chiclet-margin;
-            margin-bottom: $filter-chiclet-margin;
+            margin-right: 5px;
+            margin-bottom: 5px;
 
             .chaise-btn:focus {
               background-color: $white-color;
@@ -121,42 +119,6 @@
               color: $primary-color;
               cursor: pointer;
             }
-          }
-
-          .selected-chiclet {
-            border: none;
-            margin-right: 8px;
-            margin-bottom: 5px;
-            padding-right: 0;
-            display: inline-block;
-
-            .selected-chiclet-name {
-              cursor: default;
-              user-select: text;
-              -webkit-user-select: text;
-              -moz-user-select: text;
-              -ms-user-select: text;
-            }
-
-            .selected-chiclet-remove {
-              cursor: pointer;
-              margin-right: -3px;
-
-              i {
-                top: 2px;
-              }
-            }
-          }
-
-          .clear-all-btn {
-            padding-left: 0;
-            margin-bottom: $filter-chiclet-margin;
-          }
-
-          // in this case the selected chiclets are not button anymore
-          &.recordset-selected-rows .clear-all-btn {
-            height: auto;
-            padding: 0;
           }
         }
 

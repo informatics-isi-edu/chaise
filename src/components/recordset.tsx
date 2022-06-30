@@ -11,7 +11,7 @@ import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -27,6 +27,7 @@ import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import SelectedChiclets from '@isrd-isi-edu/chaise/src/components/selected-chiclets';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -46,6 +47,7 @@ export type RecordsetProps = {
   initialPageLimit?: number,
   getFavorites?: Function,
   getDisabledTuples?: Function,
+  initialSelectedRows?: any, // TODO
   onSelectedRowsChanged?: Function,
   onFavoritesChanged?: Function,
   parentReference?: any,
@@ -59,6 +61,7 @@ const Recordset = ({
   initialPageLimit,
   getFavorites,
   getDisabledTuples,
+  initialSelectedRows,
   onSelectedRowsChanged,
   onFavoritesChanged
 }: RecordsetProps): JSX.Element => {
@@ -71,6 +74,7 @@ const Recordset = ({
         initialPageLimit={initialPageLimit}
         getDisabledTuples={getDisabledTuples}
         getFavorites={getFavorites}
+        initialSelectedRows={initialSelectedRows}
         onSelectedRowsChanged={onSelectedRowsChanged}
         onFavoritesChanged={onFavoritesChanged}
       >
@@ -107,6 +111,7 @@ const RecordsetInner = ({
     page,
     isInitialized,
     initialize,
+    selectedRows,
     update
   } = useRecordset();
 
@@ -265,10 +270,10 @@ const RecordsetInner = ({
     let completed = 0;
     const allCookies = CookieService.getAllCookies();
 
-    const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
+    const recordRequests = allCookies.filter(c => c.trim().startsWith('recordset-'));
 
     for (const referrerId of recordRequests) {
-      const cookieName =  referrerId.split('=')[0].trim();
+      const cookieName = referrerId.split('=')[0].trim();
       CookieService.deleteCookie(cookieName);
       completed += 1;
     }
@@ -346,11 +351,15 @@ const RecordsetInner = ({
     // }
   };
 
+  const clearSelectedRow = (row: any, event: any) => {
+    // if row is undefined, we're clearing all of them
+    $log.debug('clearing selected row');
+  }
+
+  //-------------------  render logics:   --------------------//
+
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
-  const renderSelectedRows = () => {
-    return <></>
-  };
 
   const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
@@ -360,7 +369,7 @@ const RecordsetInner = ({
 
     if (!loc) return;
     const hasFilter = loc.filter;
-    const hasFacets = loc.facets && loc.facets.hasNonSearchBoxVisibleFacets;
+    const hasFacets = loc.facets && loc.facets.hasNonSearchBoxVisibleFilters;
     const hasCustomFacets = loc.customFacets && loc.customFacets.displayname;
     // don't show clear all filters when the custom facet is not removable
     const showClearAll = hasFilter || hasFacets || (hasCustomFacets && loc.customFacets.removable);
@@ -449,7 +458,7 @@ const RecordsetInner = ({
     }
 
     return (
-      <div className='recordset-chiclets-container recordset-chiclets'>
+      <div className='chiclets-container filter-chiclets'>
         {chiclets}
         {showClearAll &&
           <OverlayTrigger
@@ -600,7 +609,9 @@ const RecordsetInner = ({
               </div>
             }
             <div className='recordset-controls-container'>
-              {renderSelectedRows()}
+              {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows &&
+                <SelectedChiclets rows={selectedRows} removeCallback={clearSelectedRow} />
+              }
               <div className='row'>
                 <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
                   <SearchInput

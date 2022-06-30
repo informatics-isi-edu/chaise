@@ -39,7 +39,8 @@ export const RecordsetContext = createContext<{
    *   - will return false
    * otherwise it will return true.
    */
-  checkReferenceURL: (ref: any) => boolean
+  checkReferenceURL: (ref: any) => boolean,
+  onSelectedRowsChanged: any
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -53,6 +54,7 @@ type RecordsetProviderProps = {
   logInfo: any, // TODO
   getFavorites?: Function,
   getDisabledTuples?: Function,
+  initialSelectedRows?: any,
   onSelectedRowsChanged?: Function,
   onFavoritesChanged?: Function
 }
@@ -65,7 +67,9 @@ export default function RecordsetProvider({
   logInfo,
   getFavorites,
   getDisabledTuples,
-  onSelectedRowsChanged
+  initialSelectedRows,
+  onSelectedRowsChanged,
+  onFavoritesChanged
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
@@ -104,7 +108,7 @@ export default function RecordsetProvider({
   const [totalRowCount, setTotalRowCount] = useState<number|null>(null);
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
-  const [selectedRows, setStateSelectedRows] = useState<any>([]);
+  const [selectedRows, setStateSelectedRows] = useState<any>(initialSelectedRows);
   const setSelectedRows = (newVal: any) => {
 
     setStateSelectedRows(newVal);
@@ -807,7 +811,8 @@ export default function RecordsetProvider({
       totalRowCount,
       registerFacetCallbacks,
       printDebugMessage,
-      checkReferenceURL
+      checkReferenceURL,
+      onSelectedRowsChanged
     };
   }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
 

@@ -1065,7 +1065,7 @@ var recordsetPage = function() {
     }
 
     this.getSelectedRowsFilters = function () {
-        return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
+        return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet"));
     }
 
     this.getFacetFilters = function () {

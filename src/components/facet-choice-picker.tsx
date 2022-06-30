@@ -353,7 +353,7 @@ const FacetChoicePicker = ({
   const removeAppliedFilters = () => {
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        return {...curr, selected: false}
+        return { ...curr, selected: false }
       });
     });
   }
@@ -424,11 +424,33 @@ const FacetChoicePicker = ({
       logStackPath: LogStackTypes.SET,
     };
 
+    const initialSelectedRows: any = [];
+    checkboxRows.forEach(function (row) {
+      if (!row.selected) return;
+      const newRow : any = {};
+
+      // TODO might wan to create a proper type for this
+      // mimic the same structure as tuples
+      // - row.uniqueId will return the filter's uniqueId and not
+      //    the tuple's. We need tuple's uniqueId in here
+      //    (it will be used in the logic of isSelected in modal).
+      // - data is needed for the post process that we do on the data.
+      if (row.tuple && row.tuple.data && facetColumn.isEntityMode) {
+        newRow.uniqueId = row.tuple.uniqueId;
+        newRow.data = row.tuple.data;
+      } else {
+        newRow.uniqueId = row.uniqueId;
+      }
+      newRow.displayname = (newRow.uniqueId === null) ? { value: null, isHTML: false } : row.displayname;
+      initialSelectedRows.push(newRow);
+    });
+
     setRecordsetModalProps({
       initialReference: facetReference,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
-      logInfo
+      logInfo,
+      initialSelectedRows
     });
   };
 
@@ -468,9 +490,9 @@ const FacetChoicePicker = ({
 
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        if (curr === row) return {...curr, selected: checked};
+        if (curr === row) return { ...curr, selected: checked };
         // if not-null is selected, remove all the other filters
-        else if (row.isNotNull && checked) return {...curr, selected: false}
+        else if (row.isNotNull && checked) return { ...curr, selected: false }
         else return curr;
       });
     });
@@ -486,7 +508,7 @@ const FacetChoicePicker = ({
   const renderPickerContainer = () => {
     return (
       <div className='picker-container'>
-        {facetColumn.column.type.name !== 'boolean' && 
+        {facetColumn.column.type.name !== 'boolean' &&
           <SearchInput
             // NOTE the initial search term is always empty
             initialSearchTerm={''}
@@ -552,7 +574,7 @@ const FacetChoicePicker = ({
         <RecordsetModal
           modalClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
           recordsetProps={recordsetModalProps}
-          onHide={hideRecordsetModal}
+          onClose={hideRecordsetModal}
           displayname={facetColumn.displayname}
           comment={facetColumn.comment}
         />
