@@ -57,6 +57,11 @@ const TableRow = ({
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<boolean>(false);
 
+  /**
+   * state variable to identify delete or unlink
+   */
+  const [isUnlink, setIsUnlink] = useState<boolean>(false);
+
   const { dispatchError } = useError();
 
   const rowContainer = useRef<any>(null);
@@ -94,6 +99,10 @@ const TableRow = ({
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     $log.debug('deleting tuple!');
 
+    if (isUnlink) {
+      setIsUnlink(true);
+    }
+
     if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
       
       // TODO: log the opening of delete modal
@@ -126,10 +135,10 @@ const TableRow = ({
     return;
   };
 
-  const onDeleteConfirmation = (tuple: any) => {
+  const onDeleteUnlinkConfirmation = (tuple: any, isUnlink: boolean) => {
     setShowDeleteConfirmationModal(false);
 
-    const actionVerb = tuple.canUnlink ? LogActions.UNLINK : LogActions.DELETE;
+    const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
     const logObj = {
       action: LogService.getActionString(actionVerb),
       // stack: logStack
@@ -142,7 +151,7 @@ const TableRow = ({
           // scope.$emit('record-deleted', emmitedMessageArgs);
         }).catch(function (error: any) {
           // TODO: log the opening of cancelation modal
-          // const actionVerb = tuple.canUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+          // const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
           // LogService.logClientAction({
           //   action: LogService.getActionString(actionVerb),
           //   // TODO: ask
@@ -428,9 +437,10 @@ const TableRow = ({
     </tr>
     <DeleteConfirmationModal 
       show={showDeleteConfirmationModal} 
-      onDeleteConfirmation={onDeleteConfirmation}
+      onDeleteUnlinkConfirmation={onDeleteUnlinkConfirmation}
       onCancel={onCancel}
       tuple={tuple}
+      isUnlink={isUnlink}
     />
   </>
   )
