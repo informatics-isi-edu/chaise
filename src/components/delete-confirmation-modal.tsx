@@ -13,7 +13,7 @@ type DeleteConfirmationModalProps = {
   /**
    * prop to trigger on delete confirmation
    */
-  onDeleteUnlinkConfirmation: (tuple: any, isUnlink: boolean) => void;
+  onConfirm: (tuple: any, isRelatable?: boolean, isUnlink?: boolean) => void;
   /**
    * prop to trigger on cancel
    */
@@ -23,15 +23,15 @@ type DeleteConfirmationModalProps = {
    */
   tuple: any;
   /**
-   * prop to determine unlink or delete
+   * button label prop
    */
-  isUnlink: boolean;
+  buttonLabel: string;
 };
 
 /**
  * returns Modal Component - Component that renders delete comfirmation dialog
  */
-const DeleteConfirmationModal = ({ show, onDeleteUnlinkConfirmation, onCancel, tuple, isUnlink }: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ show, onConfirm, onCancel, tuple, buttonLabel }: DeleteConfirmationModalProps) => {
   return (
     <Modal show={show} onHide={onCancel} keyboard={false}>
       <Modal.Header>
@@ -46,9 +46,9 @@ const DeleteConfirmationModal = ({ show, onDeleteUnlinkConfirmation, onCancel, t
         <Button
           className='chaise-btn chaise-btn-danger'
           variant='outline-primary'
-          onClick={() => onDeleteUnlinkConfirmation(tuple, isUnlink)}
+          onClick={onConfirm}
         >
-          {isUnlink ? 'Unlink' : 'Delete'}
+          {buttonLabel}
         </Button>
         <Button
           className='chaise-btn chaise-btn-secondary'

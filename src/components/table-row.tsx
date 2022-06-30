@@ -55,17 +55,18 @@ const TableRow = ({
   /**
    * state variable to open and close delete confirmation modal window
    */
-  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<boolean>(false);
-
-  /**
-   * state variable to identify delete or unlink
-   */
-  const [isUnlink, setIsUnlink] = useState<boolean>(false);
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<any>({
+    onConfirm: null,
+    buttonLabel: '',
+    show: false
+  });
 
   const { dispatchError } = useError();
 
   const rowContainer = useRef<any>(null);
-  const { logRecordsetClientAction } = useRecordset();
+  
+  // TODO: logging
+  // const { logRecordsetClientAction } = useRecordset();
 
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
@@ -99,10 +100,6 @@ const TableRow = ({
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     $log.debug('deleting tuple!');
 
-    if (isUnlink) {
-      setIsUnlink(true);
-    }
-
     if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
       
       // TODO: log the opening of delete modal
@@ -111,7 +108,11 @@ const TableRow = ({
       //   stack: logStack
       // }, reference.defaultLogInfo);
 
-      setShowDeleteConfirmationModal(true);
+      setShowDeleteConfirmationModal({
+        buttonLabel: isUnlink ? 'Unlink' : 'Delete',
+        onConfirm: isUnlink ? onUnlinkConfirm : onDeleteConfirm,
+        show: true
+      });
 
     } else {
 
@@ -135,8 +136,11 @@ const TableRow = ({
     return;
   };
 
-  const onDeleteUnlinkConfirmation = (tuple: any, isUnlink: boolean) => {
-    setShowDeleteConfirmationModal(false);
+  const onDeleteUnlinkConfirmation = (reference: any, isRelatable?:boolean, isUnlink?: boolean) => {
+    setShowDeleteConfirmationModal({
+      ...showDeleteConfirmationModal,
+      show: false
+    });
 
     const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
     const logObj = {
@@ -145,7 +149,7 @@ const TableRow = ({
     }
     
     if (logObj) {
-      tuple.reference.delete(logObj)
+      reference.delete(logObj)
         .then(function deleteSuccess() {
           // TODO: tell parent controller data updated
           // scope.$emit('record-deleted', emmitedMessageArgs);
@@ -167,7 +171,11 @@ const TableRow = ({
   }
 
   const onCancel = () => {
-    setShowDeleteConfirmationModal(false);
+    setShowDeleteConfirmationModal({
+      onConfirm: null,
+      show: false,
+      buttonLabel: ''
+    });
   }
 
   const tupleReference = tuple.reference,
@@ -231,7 +239,8 @@ const TableRow = ({
 
         windowRef.open(editLink, '_blank');
 
-        logRecordsetClientAction(LogActions.EDIT_INTEND);
+        // TODO: logging
+        // logRecordsetClientAction(LogActions.EDIT_INTEND);
       } else {
         $log.debug('Error: reference is undefined or null');
       }
@@ -241,6 +250,8 @@ const TableRow = ({
   // delete/unlink button
   let deleteCallback: null | (() => void) = null;
   let unlinkCallback: null | (() => void) = null, unlinkTooltip: string;
+  let onUnlinkConfirm: null | (() => void) = null;
+  let onDeleteConfirm: null | (() => void) = null;
   if (config.deletable) {
     // unlink button should only show up in related mode
     let associationRef: any;
@@ -257,6 +268,10 @@ const TableRow = ({
         unlinkCallback = function () {
           deleteOrUnlink(associationRef, isRelated, true);
         };
+
+        onUnlinkConfirm = function() {
+          onDeleteUnlinkConfirmation(associationRef, isRelated, true);
+        }
       }
     }
     else if (tuple.canDelete) {
@@ -264,6 +279,10 @@ const TableRow = ({
       deleteCallback = function () {
         deleteOrUnlink(tupleReference, isRelated);
       };
+
+      onDeleteConfirm = function() {
+        onDeleteUnlinkConfirmation(tupleReference, isRelated);
+      }
     }
   }
 
@@ -435,13 +454,15 @@ const TableRow = ({
       }
       {renderCells()}
     </tr>
-    <DeleteConfirmationModal 
-      show={showDeleteConfirmationModal} 
-      onDeleteUnlinkConfirmation={onDeleteUnlinkConfirmation}
-      onCancel={onCancel}
-      tuple={tuple}
-      isUnlink={isUnlink}
-    />
+    {showDeleteConfirmationModal && 
+      <DeleteConfirmationModal 
+        show={showDeleteConfirmationModal.show} 
+        onConfirm={showDeleteConfirmationModal.onConfirm}
+        onCancel={onCancel}
+        tuple={tuple}
+        buttonLabel={showDeleteConfirmationModal.buttonLabel}
+      />
+    }
   </>
   )
 }
