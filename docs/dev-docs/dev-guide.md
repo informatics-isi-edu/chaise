@@ -128,6 +128,15 @@ The rules that should be followed while writing code.
 
 - Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues, we should make sure that we are always using production mode.
 
+- While importing `react-bootstrap` components, import individual components using `react-bootstrap/Button` rather than the entire library ([source](https://react-bootstrap.github.io/getting-started/introduction/#importing-components)).
+  ```ts
+  // ❌ bad
+  import { Button } from 'react-bootstrap';
+
+  // ✅ good
+  import Button from 'react-bootstrap/Button';
+  ```
+
 ### Lint
 - Make sure the `ESLint` extension is installed for Visual Studio Code.
 
