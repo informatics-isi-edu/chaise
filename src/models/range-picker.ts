@@ -1,5 +1,8 @@
-import { PlotData, PlotlyDataLayoutConfig } from 'plotly.js'
+import { PlotData, PlotlyDataLayoutConfig } from 'plotly.js-basic-dist-min'
 import { FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset'
+
+type PlotData = typeof PlotData;
+type PlotlyDataLayoutConfig = typeof PlotlyDataLayoutConfig;
 
 export type FacetRangePickerProps = {
   /**
