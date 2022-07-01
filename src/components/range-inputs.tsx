@@ -17,15 +17,14 @@ const DATE_FORMAT = 'YYYY-MM-DD';
 const errorMsgMap: {
     [key: string]: string;
 } = {
-    'empty': 'Please enter either From or To value',
     'range': 'From value cannot be greater than the To value',
-    'int': 'Please enter an integer value',
-    'float': 'Please enter a decimal value',
-    'date': 'Please enter a date value',
+    'int': 'Please enter a valid integer value',
+    'float': 'Please enter a valid decimal value',
+    'date': 'Please enter a valid date value',
     'timestamp': 'Please enter a valid date and time value'
 };
 
-type RangeInputProps = {
+type RangeInputsProps = {
     /**
      * an string for the type of input expected:
      * int
@@ -53,7 +52,7 @@ const getType = (inputType: string): string => {
     return 'Invalid_Type';
 }
 
-const RangeInput = ({ inputType, classes }: RangeInputProps) => {
+const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
     const momentJS = windowRef.moment;
 
     const fromRef = useRef<HTMLInputElement>(null);
@@ -70,9 +69,16 @@ const RangeInput = ({ inputType, classes }: RangeInputProps) => {
 
     const [disableSubmit, setDisableSubmit] = useState<boolean>(type === 'int' || type === 'float');
 
+    const [showClearInputs, setShowClearInput] = useState({
+        from: type === 'date' || type === 'timestamp',
+        fromTime: true,
+        to: type === 'date' || type === 'timestamp',
+        toTime: true
+    });
+
     const toggleSubmitBtn = (value: boolean) => {
         if (disableSubmit !== value) setDisableSubmit(value);
-    };
+    }
 
     const formatTimeValues = () => {
         const fromDateVal = fromRef?.current?.value;
@@ -92,14 +98,18 @@ const RangeInput = ({ inputType, classes }: RangeInputProps) => {
     }
 
     /**
-     * checks if both inputs are empty and disables the submit button 
      * validates both fields and shows/hides validation errors
     */
     const handleChange = () => {
+        setShowClearInput({
+            from: Boolean(fromRef?.current?.value),
+            to: Boolean(toRef?.current?.value),
+            fromTime: Boolean(fromTimeRef?.current?.value),
+            toTime: Boolean(toTimeRef?.current?.value),
+        });
+
         const formatedValues = type === 'timestamp' ? formatTimeValues()
             : { fromVal: fromRef?.current?.value || '', toVal: toRef?.current?.value || '' };
-
-        console.log(formatedValues);
 
         const validatedResult = validateValue(formatedValues.fromVal) && validateValue(formatedValues.toVal);
 
@@ -145,7 +155,6 @@ const RangeInput = ({ inputType, classes }: RangeInputProps) => {
         return toDate.diff(fromDate) > 0
     }
 
-
     const validateValues = (fromVal: string, toVal: string): string => {
         const isfromValid = validateValue(fromVal);
 
@@ -187,16 +196,30 @@ const RangeInput = ({ inputType, classes }: RangeInputProps) => {
             <div className='range-input-container'>
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor={`range-from-val-${type}`}>From:</label>
-                    <InputSwitch id={`range-from-val-${type}`} reference={fromRef} timeRef={fromTimeRef} type={type} value='2015-06-01'
-                        handleChange={handleChange} />
+                    <InputSwitch
+                        id={`range-from-val-${type}`}
+                        reference={fromRef}
+                        timeRef={fromTimeRef}
+                        type={type}
+                        value='2015-06-01'
+                        showClearBtn={showClearInputs.from}
+                        showClearnTimeBtn={showClearInputs.fromTime}
+                        handleChange={handleChange}
+                    />
                 </div>
-
                 <div className={`range-input ${classTypeName}`}>
                     <label htmlFor={`range-to-val-${type}`}>To:</label>
-                    <InputSwitch id={`range-to-val-${type}`} reference={toRef} timeRef={toTimeRef} type={type} value='2018-08-29'
-                        handleChange={handleChange} />
+                    <InputSwitch
+                        id={`range-to-val-${type}`}
+                        reference={toRef}
+                        timeRef={toTimeRef}
+                        type={type}
+                        value='2018-08-29'
+                        showClearBtn={showClearInputs.to}
+                        showClearnTimeBtn={showClearInputs.toTime}
+                        handleChange={handleChange}
+                    />
                 </div>
-
                 <button className='chaise-btn chaise-btn-primary range-input-submit-btn' disabled={disableSubmit} onClick={handleSubmit}>
                     <span className='chaise-btn-icon fa-solid fa-check' />
                 </button>
@@ -208,4 +231,4 @@ const RangeInput = ({ inputType, classes }: RangeInputProps) => {
     );
 };
 
-export default RangeInput;
+export default RangeInputs;

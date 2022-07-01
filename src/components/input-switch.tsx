@@ -22,23 +22,21 @@ type DateTimePickerProps = {
      */
     timeRef?: React.RefObject<HTMLInputElement>,
     /**
+     * flag for showing clear button on date field
+     */
+    showClearDateBtn: boolean,
+    /**
+     * flag for showing clear button on time field
+     */
+    showClearnTimeBtn: boolean,
+    /**
      * the handler function called on input change
      */
     handleChange: (() => void)
 };
 
-const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: DateTimePickerProps): JSX.Element => {
-
-    // const changeHandler = () => {
-    //     const dateVal = dateRef?.current?.value;
-    //     let timeVal = timeRef?.current?.value;
-
-    //     console.log({ dateVal, timeVal });
-
-    //     if (dateVal && !timeVal) timeVal = '00:00';
-
-    //     handleChange(dateVal || timeVal ? `${dateVal || ''}T${timeVal}` : '');
-    // }
+const DateTimePicker = ({ classes, id, value, handleChange, dateRef,
+    timeRef, showClearDateBtn, showClearnTimeBtn }: DateTimePickerProps): JSX.Element => {
 
     const handleTimeClear = () => {
         if (timeRef?.current) timeRef.current.value = '';
@@ -58,7 +56,7 @@ const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: 
                 <ClearInputBtn
                     btnClassName='range-input-clear'
                     clickCallback={handleDateClear}
-                    show={Boolean(dateRef?.current?.value)}
+                    show={showClearDateBtn}
                 />
             </div>
             <div className='chaise-input-control has-feedback'>
@@ -67,7 +65,7 @@ const DateTimePicker = ({ classes, id, value, handleChange, dateRef, timeRef }: 
                 <ClearInputBtn
                     btnClassName='range-input-clear'
                     clickCallback={handleTimeClear}
-                    show={Boolean(timeRef?.current?.value)}
+                    show={showClearnTimeBtn}
                 />
             </div>
         </div>
@@ -105,17 +103,25 @@ type InputSwitchProps = {
     id: string,
     /** 
      * the default date value being used in case of date and timestamp types
-    */
+     */
     value: string,
-    /** 
+    /**
+     * flag for showing clear button on input field
+     */
+    showClearBtn: boolean,
+    /**
+     * flag for showing clear button on time field in case type is timestamp
+     */
+    showClearnTimeBtn: boolean,
+    /**
      * the handler function called on input change
-    */
-    handleChange: (() => void)
+     */
+    handleChange: (() => void),
+
 };
 
-const InputSwitch = ({ placeholder = 'Enter', classes = '', id, reference, timeRef, type, value, handleChange }: InputSwitchProps): JSX.Element => {
-
-    // const changeHandler = () => handleChange(reference?.current?.value || '');
+const InputSwitch = ({ placeholder = 'Enter', classes = '', id, reference, timeRef,
+    type, value, handleChange, showClearBtn, showClearnTimeBtn }: InputSwitchProps): JSX.Element => {
 
     const clearInput = () => {
         if (reference?.current) reference.current.value = '';
@@ -124,7 +130,8 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', id, reference, timeR
 
     return (
         type === 'timestamp' ? (
-            <DateTimePicker classes={classes} value={value} id={id} dateRef={reference} timeRef={timeRef} handleChange={handleChange} />
+            <DateTimePicker classes={classes} value={value} id={id} dateRef={reference}
+                timeRef={timeRef} showClearDateBtn={showClearBtn} showClearnTimeBtn={showClearnTimeBtn} handleChange={handleChange} />
         ) : (
             <div className='chaise-input-control has-feedback'>
                 {
@@ -136,12 +143,11 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', id, reference, timeR
                 <ClearInputBtn
                     btnClassName='range-input-clear'
                     clickCallback={clearInput}
-                    show={Boolean(reference?.current?.value)}
+                    show={showClearBtn}
                 />
             </div>
         )
-
-    )
+    );
 };
 
 
