@@ -780,11 +780,13 @@ html {
 
     .selected-chiclet {
       border: none;
-      margin-right: 8px;
-      // margin-bottom: 5px;
-      padding-top: 8px;
+      margin-right: 10px;
       padding-right: 0;
       display: inline-block;
+
+      height: 25px;
+      padding: 0;
+      vertical-align: middle;
 
       /* forces one line chiclet */
       max-width: 240px;
@@ -798,20 +800,21 @@ html {
         -webkit-user-select: text;
         -moz-user-select: text;
         -ms-user-select: text;
+        vertical-align: -1px;
       }
 
       .selected-chiclet-remove {
         cursor: pointer;
         padding-right: 3px;
         color: black;
-        font-size: 1.2em;
+        font-size: 1.3em;
         vertical-align: middle;
       }
-    }
 
-    &.selected-chiclets .clear-all-btn {
-      padding: 0;
-      padding-top: 3px;
+      .selected-chiclet-btn {
+        padding: 0;
+        margin-top: -2px;
+      }
     }
   }
 }
