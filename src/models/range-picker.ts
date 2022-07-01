@@ -10,13 +10,17 @@ export type FacetRangePickerProps = {
    */
   facetColumn: any,
   /**
-   * The facet model that has the UI state variables
-   */
-   facetModel: FacetModel,
-  /**
    * The index of facet in the list of facetColumns
    */
   facetIndex: number,
+  /**
+   * The facet model that has the UI state variables
+   */
+  facetModel: FacetModel,
+  /**
+   * Whether the facet panel is open or not
+   */
+  facetPanelOpen: boolean,
   /**
   * Allows registering flow-control related function in the faceting component
   */
