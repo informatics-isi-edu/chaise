@@ -13,7 +13,7 @@ type DeleteConfirmationModalProps = {
   /**
    * prop to trigger on delete confirmation
    */
-  onConfirm: (tuple: any, isRelatable?: boolean, isUnlink?: boolean) => void;
+  onConfirm: ((tuple: any, isRelatable?: boolean, isUnlink?: boolean) => void) | null;
   /**
    * prop to trigger on cancel
    */
@@ -33,7 +33,7 @@ type DeleteConfirmationModalProps = {
  */
 const DeleteConfirmationModal = ({ show, onConfirm, onCancel, tuple, buttonLabel }: DeleteConfirmationModalProps) => {
   return (
-    <Modal show={show} onHide={onCancel} keyboard={false}>
+    <Modal size='sm' show={show} onHide={onCancel}>
       <Modal.Header>
         <Modal.Title>Confirm Delete</Modal.Title>
       </Modal.Header>
@@ -55,7 +55,7 @@ const DeleteConfirmationModal = ({ show, onConfirm, onCancel, tuple, buttonLabel
           variant='outline-primary'
           onClick={onCancel}
         >
-          cancel
+          Cancel
         </Button>
       </Modal.Footer>
     </Modal>

@@ -55,11 +55,10 @@ const TableRow = ({
   /**
    * state variable to open and close delete confirmation modal window
    */
-  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<any>({
-    onConfirm: null,
-    buttonLabel: '',
-    show: false
-  });
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
+    onConfirm: (() => void) | null,
+    buttonLabel: string
+  } | null>(null);
 
   const { dispatchError } = useError();
 
@@ -111,7 +110,6 @@ const TableRow = ({
       setShowDeleteConfirmationModal({
         buttonLabel: isUnlink ? 'Unlink' : 'Delete',
         onConfirm: isUnlink ? onUnlinkConfirm : onDeleteConfirm,
-        show: true
       });
 
     } else {
@@ -137,10 +135,7 @@ const TableRow = ({
   };
 
   const onDeleteUnlinkConfirmation = (reference: any, isRelatable?:boolean, isUnlink?: boolean) => {
-    setShowDeleteConfirmationModal({
-      ...showDeleteConfirmationModal,
-      show: false
-    });
+    setShowDeleteConfirmationModal(null);
 
     const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
     const logObj = {
@@ -171,11 +166,7 @@ const TableRow = ({
   }
 
   const onCancel = () => {
-    setShowDeleteConfirmationModal({
-      onConfirm: null,
-      show: false,
-      buttonLabel: ''
-    });
+    setShowDeleteConfirmationModal(null);
   }
 
   const tupleReference = tuple.reference,
@@ -456,7 +447,7 @@ const TableRow = ({
     </tr>
     {showDeleteConfirmationModal && 
       <DeleteConfirmationModal 
-        show={showDeleteConfirmationModal.show} 
+        show={!!showDeleteConfirmationModal} 
         onConfirm={showDeleteConfirmationModal.onConfirm}
         onCancel={onCancel}
         tuple={tuple}
