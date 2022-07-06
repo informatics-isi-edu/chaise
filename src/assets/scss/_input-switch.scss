@@ -1,0 +1,26 @@
+.chaise-input-control {
+    .input-switch {
+        padding-right: 0;
+        height: auto;
+    }
+
+    &.has-feedback {
+        height: unset;
+        min-height: auto;
+    }
+
+    .input-switch-clear {
+        position: absolute;
+        top: 3px;
+        right: 6px;
+        cursor: pointer;
+    }
+}
+
+.input-switch-datetime {
+    flex-direction: column;
+
+    .chaise-input-control:first-child {
+        margin-bottom: 5px;
+    }
+}

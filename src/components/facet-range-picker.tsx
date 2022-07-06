@@ -1,9 +1,10 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
 import Tooltip from 'react-bootstrap/Tooltip';
 
 // customizable method: use your own `Plotly` object to use minified basic distribution of plotlyjs
@@ -13,8 +14,11 @@ const Plot = createPlotlyComponent(Plotly);
 
 import { ResizeSensor } from 'css-element-queries';
 
+// hooks
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
 // models
-import { LogActions, LogReloadCauses, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import {
   FacetRangePickerProps,
@@ -22,11 +26,14 @@ import {
   RangePickerState,
   TimeStamp
 } from '@isrd-isi-edu/chaise/src/models/range-picker';
+import { PlotlyLayout, HTMLPlotElement } from 'plotly.js-basic-dist-min';
+type PlotlyLayout = typeof PlotlyLayout;
+type HTMLPlotElement = typeof HTMLPlotElement;
 
 // services
 import Q from 'q';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+// import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -49,7 +56,7 @@ const FacetRangePicker = ({
     return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
   }
 
-  const defaultPlotLayout: any = {
+  const defaultPlotLayout: PlotlyLayout = {
     autosize: true,
     height: 150,
     margin: {
@@ -110,7 +117,7 @@ const FacetRangePicker = ({
 
   const rangePickerContainer = useRef<HTMLDivElement>(null);
   const listContainer = useRef<HTMLDivElement>(null);
-  const plotlyRef = useRef<any>(null);
+  const plotlyRef = useRef<HTMLPlotElement>(null);
 
   const numBuckets = facetColumn.histogramBucketCount;
 
@@ -126,21 +133,15 @@ const FacetRangePicker = ({
   }, []);
 
   useEffect(() => {
-    (function (uri, reloadCauses, reloadStartTime) {
-      if (compState.relayout) {
-        // TODO: trigger flow control
-        // histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime)
+    if (compState.relayout) {
+      // make sure the callbacks with latest scope are used
+      callRegister();
 
-        // make sure the callbacks with latest scope are used
-        callRegister();
+      $log.debug(`faceting: request for facet (index=${facetIndex} update. relayout triggered`);
 
-        $log.debug(`faceting: request for facet (index=${facetIndex} update. relayout triggered`);
-
-        // ask the parent to update the facet column
-        dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_PLOT_RELAYOUT);
-      }
-    })(facetColumn.sourceReference.uri);
-    // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
+      // ask the parent to update the facet column
+      dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_PLOT_RELAYOUT);
+    }
   }, [compState.relayout])
 
   /**
@@ -175,8 +176,6 @@ const FacetRangePicker = ({
       if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
 
       // TODO: any rows selected based on facet criteria
-
-      console.log('preprocess null row added unchecked');
       setRanges(updatedRows);
       defer.resolve();
     }
@@ -344,7 +343,7 @@ const FacetRangePicker = ({
         histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime).then((response: any) => {
           // TODO: ??
           // setRanges(updatedRows);
-  
+
           defer.resolve(response);
         }).catch(function (err: any) {
           defer.reject(err);
@@ -923,9 +922,7 @@ const FacetRangePicker = ({
             </OverlayTrigger>
           </div>
         </div>
-        <div>
-          {renderPlot()}
-        </div>
+        {renderPlot()}
       </>)
     }
 
@@ -935,9 +932,7 @@ const FacetRangePicker = ({
   return (
     <div className='range-picker' ref={rangePickerContainer}>
       {!facetModel.facetError && renderPickerContainer()}
-      <div>
-        Range inputs here
-      </div>
+      <RangeInputs inputType={facetColumn.column.type.rootName} classes='facet-range-input' />
       {renderHistogram()}
     </div>
   )
