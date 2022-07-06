@@ -1,3 +1,5 @@
+@import "variables";
+
 .range-input-container {
     display: flex;
     flex-direction: row;
@@ -25,49 +27,6 @@
         label {
             font-weight: 700;
         }
-
-        .chaise-input-control {
-
-            &.has-feedback {
-                height: unset;
-                min-height: auto;
-            }
-
-            .range-input-clear {
-                top: 3px;
-            }
-        }
-
-        .range-input-field {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            position: relative;
-        }
-
-        .range-input-datetime {
-            flex-direction: column;
-
-            .chaise-input-control:first-child {
-                margin-bottom: 5px;
-            }
-        }
-
-        #range-from-val-date,
-        #range-to-val-date,
-        #range-from-val-time,
-        #range-from-val-time,
-        #range-from-val,
-        #range-to-val {
-            padding-right: 0;
-            height: auto;
-        }
-
-        .range-input-clear {
-            position: absolute;
-            right: 6px;
-            cursor: pointer;
-        }
     }
 
     .range-input-submit-btn {
@@ -77,5 +36,5 @@
 }
 
 .range-input-error {
-    color: #a94442;
+    color: $danger-color;
 }
