@@ -23,10 +23,7 @@ import Q from 'q';
 
 // models
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-<<<<<<< HEAD
-=======
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
->>>>>>> react
 import {
   FacetRangePickerProps,
   RangeOptions,
