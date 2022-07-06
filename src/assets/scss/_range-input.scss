@@ -1,0 +1,40 @@
+@import "variables";
+
+.range-input-container {
+    display: flex;
+    flex-direction: row;
+    align-items: end;
+    width: 100%;
+    flex-wrap: wrap;
+    margin-top: -5px;
+
+    .range-input {
+        width: 40%;
+        display: flex;
+        flex-direction: column;
+        margin-top: 5px;
+
+        margin-right: 5px;
+        flex-shrink: 0;
+        max-width: 160px;
+
+        &.numeric-width,
+        &.date-width,
+        &.time-width {
+            min-width: 140px;
+        }
+
+        label {
+            font-weight: 700;
+        }
+    }
+
+    .range-input-submit-btn {
+        margin-top: 5px;
+    }
+
+}
+
+.range-input-error {
+    color: $danger-color;
+}

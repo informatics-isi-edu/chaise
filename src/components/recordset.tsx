@@ -617,7 +617,7 @@ const RecordsetInner = ({
       <SplitView
         left={facetingSection}
         right={renderMainContainer}
-        minWidth={170}
+        minWidth={200}
         maxWidth={40}
         initialWidth={21}
         className='bottom-panel-container'
