@@ -5,7 +5,7 @@ This is a guide for people who develop Chaise.
 
 - [Reading Material](#reading-material)
 - [Idioms](#idioms)
-  * [Naming convensions](#naming-convensions)
+  * [Naming conventions](#naming-conventions)
   * [General](#general-1)
   * [React/TypeScript](#reacttypescript-1)
   * [Lint](#lint)
@@ -55,7 +55,7 @@ for learning different concepts.
 
 The rules that should be followed while writing code.
 
-### Naming convensions
+### Naming conventions
 
 - Use kebab-case for filenames (all lower case with `-` for breaking words).
 - Related to React/Typescript,
@@ -127,6 +127,15 @@ The rules that should be followed while writing code.
 - Take a look at `example.tsx` for a sample react component.
 
 - Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues, we should make sure that we are always using production mode.
+
+- While importing `react-bootstrap` components, import individual components using `react-bootstrap/Button` rather than the entire library ([source](https://react-bootstrap.github.io/getting-started/introduction/#importing-components)).
+  ```ts
+  // ❌ bad
+  import { Button } from 'react-bootstrap';
+
+  // ✅ good
+  import Button from 'react-bootstrap/Button';
+  ```
 
 ### Lint
 - Make sure the `ESLint` extension is installed for Visual Studio Code.

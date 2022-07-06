@@ -1,0 +1,35 @@
+@import "variables";
+
+.export-menu-item {
+    color: $black-color !important;
+}
+
+.modal-text {
+    margin: 8px 0px;
+}
+
+.progress {
+    height: 1.5rem;
+}
+
+.progress-bar {
+    background-size: 1.75rem 1.75rem;
+    background-color: #4674A7;
+}
+
+.alertbox {
+    margin-left: 20px;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+    background-color: unset;
+}
+
+.btn-success.dropdown-toggle {
+    // CSS to override default box shadow for bootstrap button
+    box-shadow: none !important;
+}
+
+.modal-body {
+    padding-top: 0;
+}

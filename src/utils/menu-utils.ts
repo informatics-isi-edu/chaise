@@ -139,7 +139,7 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
     const option: MenuOption = {
       acls: menuOpt.acls || acls,
       isValid: false,
-      nameMarkdownPattern: menuOpt.nameMarkdownPattern || menuOpt.markdownPattern || menuOpt.name,
+      nameMarkdownPattern: menuOpt.nameMarkdownPattern || menuOpt.markdownPattern || menuOpt.markdownName || menuOpt.name,
       newTab: openNewTab,
       type: menuOpt.type,
       ...menuOpt

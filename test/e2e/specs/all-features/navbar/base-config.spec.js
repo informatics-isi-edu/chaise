@@ -1,11 +1,11 @@
-var chaisePage = require('../../../utils/chaise.page.js');
+let chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {
-    var navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
+    let navbar, menu, chaiseConfig, EC = protractor.ExpectedConditions;
 
     beforeAll(function () {
-        browser.ignoreSynchronization=true;
-        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
+        chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
+        
         navbar = element(by.id('mainnav'));
         menu = element(by.id('navbar-menu'));
         browser.executeScript('return chaiseConfig;').then(function(config) {
@@ -20,13 +20,13 @@ describe('Navbar ', function() {
 
     it('should display the right title from chaiseConfig', function() {
         var actualTitle = element(by.id('brand-text'));
-        var expectedTitle = chaiseConfig.navbarBrandText;
+        let expectedTitle = chaiseConfig.navbarBrandText;
         expect(actualTitle.getText()).toEqual(expectedTitle);
     });
 
     it('should use the brand image/logo specified in chaiseConfig', function() {
         var actualLogo = element(by.id('brand-image'));
-        var expectedLogo = chaiseConfig.navbarBrandImage;
+        let expectedLogo = chaiseConfig.navbarBrandImage;
         expect(actualLogo.isDisplayed()).toBeTruthy();
         expect(actualLogo.getAttribute('src')).toMatch(expectedLogo);
     });

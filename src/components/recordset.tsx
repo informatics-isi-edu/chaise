@@ -13,19 +13,20 @@ import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table'
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { createRedirectLinkFromPath, getRecordsetLink } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-
+import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import Faceting from '@isrd-isi-edu/chaise/src/components/faceting';
 import TableHeader from '@isrd-isi-edu/chaise/src/components/table-header';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
-import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import AlertsProvider, { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
+import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -74,6 +75,11 @@ const Recordset = ({
   );
 };
 
+type RecordsetInnerProps = {
+  initialReference: any,
+  config: RecordsetConfig
+};
+
 /**
  * based on my understanding provider and the usage of context cannot be on the
  * same level, that's why the Recordset comp is just a wrapper that has all the
@@ -82,7 +88,7 @@ const Recordset = ({
 const RecordsetInner = ({
   initialReference,
   config
-}: any): JSX.Element => {
+}: RecordsetInnerProps): JSX.Element => {
 
   const { dispatchError } = useError();
 
@@ -95,10 +101,6 @@ const RecordsetInner = ({
     initialize,
     update
   } = useRecordset();
-
-  const {
-    addAlert
-  } = useAlert();
 
   /**
    * whether the facet panel should be open or closed
@@ -124,8 +126,20 @@ const RecordsetInner = ({
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
-
   const topLeftContainer = useRef<HTMLDivElement>(null);
+
+  /**
+   * The callbacks from faceting.tsx that we will use here
+   */
+  const facetCallbacks = useRef<{
+    getAppliedFilters: Function,
+    removeAppliedFilters: Function,
+    focusOnFacet: Function,
+  } | null>(null);
+
+  const clearSearch = useRef<() => void>(null);
+
+
 
   // initialize the recordset if it has not been done yet.
   useEffect(() => {
@@ -159,8 +173,7 @@ const RecordsetInner = ({
 
       setFacetColumnsReady(true);
 
-      // initialize the data
-      initialize();
+      // facet will call initialize when it's fully loaded
 
       /**
        * When there are issues in the given facet,
@@ -196,6 +209,7 @@ const RecordsetInner = ({
 
   }, [isInitialized]);
 
+  // after data loads, scroll to top and change the browser location
   useEffect(() => {
     const handleResizeEvent = ((event: CustomEvent) => {
       event.preventDefault();
@@ -205,8 +219,10 @@ const RecordsetInner = ({
     }) as EventListener;
 
     document.addEventListener('resizable-width-change', handleResizeEvent);
+    window.addEventListener('focus', onFocus);
     return () => {
       document.removeEventListener('resizable-width-change', handleResizeEvent);
+      window.removeEventListener('focus', onFocus);
     }
   }, []);
 
@@ -234,7 +250,47 @@ const RecordsetInner = ({
     });
   };
 
+  /**
+   * On window focus, remove request and update the page
+   */
+  const onFocus = () => {
+    let completed = 0;
+    const allCookies = CookieService.getAllCookies();
+
+    const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
+
+    for (const referrerId of recordRequests) {
+      const cookieName =  referrerId.split('=')[0].trim();
+      CookieService.deleteCookie(cookieName);
+      completed += 1;
+    }
+
+    if (completed > 0) {
+      const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
+
+      update(null, null, true, true, true, false, cause);
+    }
+  };
+
   //------------------- UI related functions: --------------------//
+
+  /**
+   * The callbacks from faceting.tsx that are used in this component
+   */
+  const registerCallbacksFromFaceting = (getAppliedFilters: Function, removeAppliedFilters: Function, focusOnFacet: Function) => {
+    facetCallbacks.current = { getAppliedFilters, removeAppliedFilters, focusOnFacet };
+  }
+
+  const clearAllFilters = () => {
+    if (clearSearch && clearSearch.current) {
+      clearSearch.current();
+    }
+
+    // ask flow control to remove all the applied filters
+    facetCallbacks.current!.removeAppliedFilters();
+  }
+
+  //-------------------  UI related functions:   --------------------//
 
   const recordsetLink = getRecordsetLink();
 
@@ -259,11 +315,6 @@ const RecordsetInner = ({
    * @param action string the log action
    */
   const changeSearch = (term: string | null, action: LogActions) => {
-    // TODO added for test, should be removed
-    $log.info('adding alert!!');
-    addAlert('Search initiated', ChaiseAlertType.INFO, () => {
-      $log.info('removed!');
-    });
     $log.log(`search with term: ${term}, action : ${action}`);
     if (term) term = term.trim();
 
@@ -293,8 +344,120 @@ const RecordsetInner = ({
     return <></>
   };
 
-  const renderSelectedFacetFilters = () => {
-    return <></>
+  const renderSelectedFilterChiclets = () => {
+    if (!facetCallbacks.current) {
+      return;
+    }
+    const loc = reference.location;
+
+    if (!loc) return;
+    const hasFilter = loc.filter;
+    const hasFacets = loc.facets && loc.facets.hasNonSearchBoxVisibleFacets;
+    const hasCustomFacets = loc.customFacets && loc.customFacets.displayname;
+    // don't show clear all filters when the custom facet is not removable
+    const showClearAll = hasFilter || hasFacets || (hasCustomFacets && loc.customFacets.removable);
+
+    // if there aren't any filters, don't show the container at all
+    if (!hasFilter && !hasCustomFacets && !hasFacets) return;
+
+    // the displayed chiclets
+    const chiclets: JSX.Element[] = [];
+
+    // filters
+    if (hasFilter) {
+      chiclets.push(
+        <FilterChiclet
+          key='filters'
+          identifier={'filters'}
+          iconTooltip={'Clear custom filter applied'}
+          title={'Custom Filter'}
+          value={transformCustomFilter(loc.filtersString)}
+          onRemove={(identifier) => facetCallbacks.current!.removeAppliedFilters(identifier)}
+        />
+      );
+    }
+
+    // cfacets
+    if (hasCustomFacets) {
+      const cFacetRemovable = loc.customFacets.removable;
+      chiclets.push(
+        <FilterChiclet
+          key='cfacets'
+          identifier={'cfacets'}
+          iconTooltip={cFacetRemovable ? 'Clear custom filter applied' : 'Predefined filter(s)'}
+          // when it's not removable we're showing the icon and that's enough
+          title={cFacetRemovable ? 'Custom Filter' : undefined}
+          value={transformCustomFilter(loc.filter)}
+          onRemove={cFacetRemovable ? (identifier) => facetCallbacks.current!.removeAppliedFilters(identifier) : undefined}
+        />
+      );
+    }
+
+    // facets
+    if (hasFacets) {
+      const facetAppliedFilters = facetCallbacks.current.getAppliedFilters();
+      if (Array.isArray(facetAppliedFilters)) {
+        facetAppliedFilters.forEach((faf: any, facetIndex: number) => {
+          if (faf.length === 0) return;
+
+          const facetDisplayname = reference.facetColumns[facetIndex].displayname;
+          const chicletValue: JSX.Element[] = [];
+          const chicletValueTooltip: JSX.Element[] = [];
+
+          faf.forEach((f: any, filterIndex: number) => {
+            // comma-separated values
+            chicletValue.push(
+              <span key={f.uniqueId}>
+                <DisplayValue value={f.displayname} specialNullEmpty={true} />
+                {(filterIndex !== faf.length - 1) && <span>, </span>}
+              </span>
+            );
+
+            // tooltip is using bullet icon as a separator
+            chicletValueTooltip.push(
+              <span key={f.uniqueId}>
+                <span style={{ 'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke' }}>&bull;</span>
+                <DisplayValue value={f.displayname} specialNullEmpty={true} />
+              </span>
+            )
+          });
+
+          chiclets.push(
+            <FilterChiclet
+              key={`facet-${facetIndex}`}
+              identifier={facetIndex}
+              iconTooltip={'Clear filter applied'}
+              title={facetDisplayname}
+              titleTooltip={<span>Go to <DisplayValue value={facetDisplayname} /> filter</span>}
+              value={chicletValue}
+              valueTooltip={chicletValueTooltip}
+              onRemove={(identifier) => facetCallbacks.current!.removeAppliedFilters(identifier)}
+              // we cannot just pass the callback in the following since it's causing staleness state issue
+              onTitleClick={(identifier) => facetCallbacks.current!.focusOnFacet(identifier)}
+            />
+          );
+        });
+      }
+    }
+
+    return (
+      <div className='recordset-chiclets-container recordset-chiclets'>
+        {chiclets}
+        {showClearAll &&
+          <OverlayTrigger
+            placement='bottom-start'
+            overlay={<Tooltip>Clear all filters applied</Tooltip>}
+          >
+            <button
+              className='clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn'
+              onClick={() => clearAllFilters()}
+            >
+              <span>Clear all filters</span>
+            </button>
+          </OverlayTrigger>
+        }
+      </div>
+    )
   }
 
   const renderShowFilterPanelBtn = () => {
@@ -319,7 +482,10 @@ const RecordsetInner = ({
           ref={leftRef}
         >
           <div className='side-panel-container'>
-            <Faceting reference={reference} />
+            <Faceting
+              facetPanelOpen={facetPanelOpen}
+              registerRecordsetCallbacks={registerCallbacksFromFaceting}
+            />
           </div>
         </div>
       }
@@ -420,7 +586,7 @@ const RecordsetInner = ({
                     </OverlayTrigger>
                   } */}
                   {reference.commentDisplay === 'inline' && reference.comment &&
-                    <span className='inline-tooltip'>reference.comment</span>
+                    <span className='inline-tooltip'>{reference.comment}</span>
                   }
                 </h1>
               </div>
@@ -436,11 +602,12 @@ const RecordsetInner = ({
                     searchColumns={initialReference.searchColumns}
                     disabled={false}
                     focus={true}
+                    forceClearSearch={clearSearch}
                   />
                 </div>
               </div>
             </div>
-            {renderSelectedFacetFilters()}
+            {facetColumnsReady && renderSelectedFilterChiclets()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
           </div>

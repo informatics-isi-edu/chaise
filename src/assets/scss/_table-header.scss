@@ -28,4 +28,13 @@
     padding-bottom: 2px;
     margin-right: 4px;
   }
+
+  .chaise-table-header-buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .chaise-table-header-buttons-span {
+    margin: 0px 5px;
+  }
 }
