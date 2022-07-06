@@ -100,6 +100,15 @@ html {
     color: $link-color;
   }
 
+  // make sure the code style is consistent with old bootstrap styles
+  code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 4px;
+  }
+
   .caret {
     border-top: 5px solid;
     border-right: 5px solid transparent;

@@ -13,15 +13,15 @@ type DeleteConfirmationModalProps = {
   /**
    * prop to trigger on delete confirmation
    */
-  onConfirm: ((tuple: any, isRelatable?: boolean, isUnlink?: boolean) => void) | null;
+  onConfirm: () => void;
   /**
    * prop to trigger on cancel
    */
   onCancel: () => void;
   /**
-   * tuple reference
+   * The confimration message
    */
-  tuple: any;
+   message?: JSX.Element;
   /**
    * button label prop
    */
@@ -31,16 +31,16 @@ type DeleteConfirmationModalProps = {
 /**
  * returns Modal Component - Component that renders delete comfirmation dialog
  */
-const DeleteConfirmationModal = ({ show, onConfirm, onCancel, tuple, buttonLabel }: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLabel }: DeleteConfirmationModalProps) => {
+  const renderedMessage = message ? message : <>Are you sure you want to delete this record?</>;
+
   return (
     <Modal size='sm' show={show} onHide={onCancel}>
       <Modal.Header>
         <Modal.Title>Confirm Delete</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className='modal-text'>
-          Are you sure you want to delete <DisplayValue value={tuple.displayname} />?
-        </div>
+        <div className='modal-text'>{renderedMessage}</div>
       </Modal.Body>
       <Modal.Footer>
         <Button

@@ -56,14 +56,15 @@ const TableRow = ({
    * state variable to open and close delete confirmation modal window
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
-    onConfirm: (() => void) | null,
-    buttonLabel: string
+    onConfirm: () => void,
+    buttonLabel: string,
+    message: JSX.Element
   } | null>(null);
 
   const { dispatchError } = useError();
 
   const rowContainer = useRef<any>(null);
-  
+
   // TODO: logging
   // const { logRecordsetClientAction } = useRecordset();
 
@@ -100,41 +101,35 @@ const TableRow = ({
     $log.debug('deleting tuple!');
 
     if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-      
       // TODO: log the opening of delete modal
       // LogService.logClientAction({
       //   action: LogService.getActionString(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
       //   stack: logStack
       // }, reference.defaultLogInfo);
 
+      // TODO unlink should say disconnect...
+      const confirmMessage: JSX.Element = (
+        <>
+          Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+          <span>: </span>
+          <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
+        </>
+      );
+
       setShowDeleteConfirmationModal({
         buttonLabel: isUnlink ? 'Unlink' : 'Delete',
-        onConfirm: isUnlink ? onUnlinkConfirm : onDeleteConfirm,
+        onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
+        message: confirmMessage
       });
 
     } else {
-
-      // TODO: setting logObj
-      const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
-      const logObj = {
-        action: LogService.getActionString(actionVerb),
-        // stack: logStack
-      }
-
-      if (logObj) {
-        reference.delete(logObj).then(function deleteSuccess() {
-          // TODO: tell parent controller data updated
-          // scope.$emit('record-deleted', emmitedMessageArgs);
-        }).catch(function (error: any) {
-          dispatchError({ error, isGlobal: true });
-        });
-      }
+      onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
     }
 
     return;
   };
 
-  const onDeleteUnlinkConfirmation = (reference: any, isRelatable?:boolean, isUnlink?: boolean) => {
+  const onDeleteUnlinkConfirmation = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     setShowDeleteConfirmationModal(null);
 
     const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
@@ -142,32 +137,28 @@ const TableRow = ({
       action: LogService.getActionString(actionVerb),
       // stack: logStack
     }
-    
-    if (logObj) {
-      reference.delete(logObj)
-        .then(function deleteSuccess() {
-          // TODO: tell parent controller data updated
-          // scope.$emit('record-deleted', emmitedMessageArgs);
-        }).catch(function (error: any) {
-          // TODO: log the opening of cancelation modal
-          // const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
-          // LogService.logClientAction({
-          //   action: LogService.getActionString(actionVerb),
-          //   // TODO: ask
-          //   // stack: logStack
-          // }, tuple.reference.defaultLogInfo);
-          
-          // if response is string, the modal has been dismissed
-          if (typeof error !== 'string') {
-            dispatchError({ error: error, isGlobal: true });
-          }
-      });
-    }
+
+    reference.delete(logObj).then(function deleteSuccess() {
+      // TODO show some sort of indicator? in master branch we're updating the
+      //      whole page and therefore relying on the main page loader to show
+      //       and indicate something is happening
+      // TODO: tell parent controller data updated
+      // scope.$emit('record-deleted', emmitedMessageArgs);
+    }).catch(function (error: any) {
+      dispatchError({ error: error, isDismissible: true });
+    });
   }
 
   const onCancel = () => {
     setShowDeleteConfirmationModal(null);
-  }
+    // TODO: log the opening of cancelation modal
+    // const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+    // LogService.logClientAction({
+    //   action: LogService.getActionString(actionVerb),
+    //   // TODO: ask
+    //   // stack: logStack
+    // }, tuple.reference.defaultLogInfo);
+  };
 
   const tupleReference = tuple.reference,
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
@@ -218,8 +209,6 @@ const TableRow = ({
   let editCallback: null | (() => void) = null;
   if (config.editable && tuple.canUpdate) {
     editCallback = function () {
-      $log.debug('edit clicked!');
-      
       const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
       const newRef = tupleReference.contextualize?.entryEdit;
 
@@ -241,8 +230,6 @@ const TableRow = ({
   // delete/unlink button
   let deleteCallback: null | (() => void) = null;
   let unlinkCallback: null | (() => void) = null, unlinkTooltip: string;
-  let onUnlinkConfirm: null | (() => void) = null;
-  let onDeleteConfirm: null | (() => void) = null;
   if (config.deletable) {
     // unlink button should only show up in related mode
     let associationRef: any;
@@ -259,10 +246,6 @@ const TableRow = ({
         unlinkCallback = function () {
           deleteOrUnlink(associationRef, isRelated, true);
         };
-
-        onUnlinkConfirm = function() {
-          onDeleteUnlinkConfirmation(associationRef, isRelated, true);
-        }
       }
     }
     else if (tuple.canDelete) {
@@ -270,10 +253,6 @@ const TableRow = ({
       deleteCallback = function () {
         deleteOrUnlink(tupleReference, isRelated);
       };
-
-      onDeleteConfirm = function() {
-        onDeleteUnlinkConfirmation(tupleReference, isRelated);
-      }
     }
   }
 
@@ -432,29 +411,29 @@ const TableRow = ({
   }
 
   return (
-  <>
-    <tr
-      className='chaise-table-row'
-      ref={rowContainer}
-      style={{ 'position': 'relative' }}
-    >
-      {showActionButtons &&
-        <td className='block action-btns'>
-          {renderActionButtons()}
-        </td>
+    <>
+      <tr
+        className='chaise-table-row'
+        ref={rowContainer}
+        style={{ 'position': 'relative' }}
+      >
+        {showActionButtons &&
+          <td className='block action-btns'>
+            {renderActionButtons()}
+          </td>
+        }
+        {renderCells()}
+      </tr>
+      {showDeleteConfirmationModal &&
+        <DeleteConfirmationModal
+          show={!!showDeleteConfirmationModal}
+          message={showDeleteConfirmationModal.message}
+          buttonLabel={showDeleteConfirmationModal.buttonLabel}
+          onConfirm={showDeleteConfirmationModal.onConfirm}
+          onCancel={onCancel}
+        />
       }
-      {renderCells()}
-    </tr>
-    {showDeleteConfirmationModal && 
-      <DeleteConfirmationModal 
-        show={!!showDeleteConfirmationModal} 
-        onConfirm={showDeleteConfirmationModal.onConfirm}
-        onCancel={onCancel}
-        tuple={tuple}
-        buttonLabel={showDeleteConfirmationModal.buttonLabel}
-      />
-    }
-  </>
+    </>
   )
 }
 
