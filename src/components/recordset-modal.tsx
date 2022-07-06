@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap';
 import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
@@ -27,10 +27,57 @@ const RecordsetModal = ({
   onSubmit,
   onClose
 }: RecordestModalProps) => {
-  const [show, setShow] = useState(true);
-  const [submittedRows, setSubmittedRows] = useState<any>();
+
+  /**
+   * We should disable the submit button if we start with no rows and ended up
+   * with no rows. So we need to capture the initial state.
+   */
+   const hasSelectedRowsOnLoad = Array.isArray(recordsetProps.initialSelectedRows) && recordsetProps.initialSelectedRows.length > 0;
 
   const displayMode = recordsetProps.config.displayMode;
+  const selectMode = recordsetProps.config.selectMode;
+
+  /**
+   * Whether to show the modal or not
+   * TODO is this even needed?
+   */
+  const [show, setShow] = useState(true);
+
+  /**
+   * we have to keep a copy of submitted rows, because we don't have access
+   * to the provider and therefore cannot get the selectedRows.
+   * This will also allow us to set the state of submit button
+   */
+  const [submittedRows, setSubmittedRows] = useState<any>([]);
+
+  /**
+   * Whether the submit button should be disabled or not
+   */
+  const [disableSubmit, setDisableSubmit] = useState(() => {
+    return !hasSelectedRowsOnLoad;
+  });
+
+  useEffect(() => {
+    if (selectMode === RecordsetSelectMode.SINGLE_SELECT) {
+      submit();
+    }
+    else {
+      let cannotSubmit = false;
+      if (recordsetProps.onSelectedRowsChanged) {
+        cannotSubmit = recordsetProps.onSelectedRowsChanged(submittedRows) === false;
+      }
+
+      /**
+       * Disable the submit button if,
+       * - The onSelectedRowsChanged returned false
+       * - or we started with 0 selected rows and now we have 0 selected rows
+       */
+      setDisableSubmit(
+        cannotSubmit || (!hasSelectedRowsOnLoad && (!submittedRows || submittedRows.length === 0))
+      );
+    }
+
+  }, [submittedRows]);
 
   //-------------------  UI related callbacks:   --------------------//
   const submit = () => {
@@ -41,10 +88,18 @@ const RecordsetModal = ({
   };
 
   const onSelectedRowsChangedWrapper = (selectedRows: any) => {
-    
     $log.debug('on selected rows changed called');
-    // TODO call the given function and if it passes return true
+    setSubmittedRows(selectedRows);
+    // allow the selected rows to change and UI shows the selected
+    return true;
   };
+
+  const closeTheModal = () => {
+    setShow(false);
+    if (onClose) {
+      onClose();
+    }
+  }
 
   //-------------------  render logic:   --------------------//
 
@@ -114,8 +169,8 @@ const RecordsetModal = ({
             <span>Link </span>
             <Title reference={recordsetProps.initialReference} />
             <span> to </span>
-            <Title reference={recordsetProps.parentReference}/><span>:</span>
-            <Title displayname={recordsetProps.parentTuple?.displayname}/>
+            <Title reference={recordsetProps.parentReference} /><span>:</span>
+            <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
       case RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK:
@@ -124,8 +179,8 @@ const RecordsetModal = ({
             <span>Unlink </span>
             <Title reference={recordsetProps.initialReference} />
             <span> from </span>
-            <Title reference={recordsetProps.parentReference}/><span>:</span>
-            <Title displayname={recordsetProps.parentTuple?.displayname}/>
+            <Title reference={recordsetProps.parentReference} /><span>:</span>
+            <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
       case RecordsetDisplayMode.FACET_POPUP:
@@ -156,24 +211,28 @@ const RecordsetModal = ({
             <div className='top-right-panel'>
               <div className='recordset-title-container title-container'>
                 <div className='search-popup-controls recordset-title-buttons title-buttons'>
-                  <ChaiseTooltip
-                    placement='bottom'
-                    tooltip={submitTooltip}
-                  >
-                    <button
-                      id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
-                      type='button' onClick={submit}>
-                      <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
-                      <span>{submitText}</span>
-                    </button>
-                  </ChaiseTooltip>
+                  {selectMode === RecordsetSelectMode.MULTI_SELECT &&
+                    <ChaiseTooltip
+                      placement='bottom'
+                      tooltip={submitTooltip}
+                    >
+                      <button
+                        id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
+                        type='button' onClick={submit}
+                        disabled={disableSubmit}
+                      >
+                        <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
+                        <span>{submitText}</span>
+                      </button>
+                    </ChaiseTooltip>
+                  }
                   <ChaiseTooltip
                     placement='bottom'
                     tooltip='Close the dialog.'
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
-                      onClick={() => setShow(false)}
+                      onClick={closeTheModal}
                     >
                       <strong className='chaise-btn-icon'>X</strong>
                       <span>Cancel</span>
@@ -189,7 +248,10 @@ const RecordsetModal = ({
         </div>
       </Modal.Header>
       <Modal.Body>
-        <Recordset {...recordsetProps}/>
+        <Recordset
+          {...recordsetProps}
+          onSelectedRowsChanged={onSelectedRowsChangedWrapper}
+        />
       </Modal.Body>
     </Modal>
   )

@@ -11,7 +11,7 @@ import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedChiclet } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -112,6 +112,7 @@ const RecordsetInner = ({
     isInitialized,
     initialize,
     selectedRows,
+    setSelectedRows,
     update
   } = useRecordset();
 
@@ -351,10 +352,21 @@ const RecordsetInner = ({
     // }
   };
 
-  const clearSelectedRow = (row: any, event: any) => {
-    // if row is undefined, we're clearing all of them
-    $log.debug('clearing selected row');
-  }
+  /**
+   * The callback to clear selected rows
+   * @param row the selected row. If null, we will clear all the selected rows
+   * @param event the event object
+   */
+  const clearSelectedRow = (row: SelectedChiclet | null, event: any) => {
+    if (!row) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows((currRows: any) => {
+        const res = Array.isArray(currRows) ? [...currRows] : [];
+        return res.filter((obj: any) => obj.uniqueId !== row.uniqueId);
+      });
+    }
+  };
 
   //-------------------  render logics:   --------------------//
 

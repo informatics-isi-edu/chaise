@@ -105,28 +105,13 @@ const RecordsetTable = ({
     // }
   };
 
-  const selectAllOnPage = () => {
-    // logService.logClientAction(
-    //   {
-    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_SELECT_ALL),
-    //     stack: getTableLogStack(scope.vm)
-    //   },
-    //   scope.vm.reference.defaultLogInfo
-    // );
-
-    return;
-  };
-
-  const selectNoneOnPage = () => {
-    return;
-  };
 
   const isSelected = (tuple: any) => {
     if (!tuple || !Array.isArray(selectedRows) || selectedRows.length === 0) {
       return false;
     }
     return selectedRows.some((obj) => {
-        return obj.uniqueId === tuple.uniqueId;
+      return obj.uniqueId === tuple.uniqueId;
     });
   };
 
@@ -138,6 +123,81 @@ const RecordsetTable = ({
       return obj.uniqueId === tuple.uniqueId;
     });
   }
+
+  const selectAllOnPage = () => {
+    // TODO logs
+    // logService.logClientAction(
+    //   {
+    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_SELECT_ALL),
+    //     stack: getTableLogStack(scope.vm)
+    //   },
+    //   scope.vm.reference.defaultLogInfo
+    // );
+
+    // const tuples = [];
+    // let tuple;
+
+    // page.tuples.forEach((tuple: any) => {
+    //   // TODO can we improve this? these two are scanning the list multiple times
+    //   if (isDisabled(tuple)) return;
+    //   if (!isSelected(tuple)) {
+
+    //   }
+    // })
+    // for (let i = 0; i < page.tuples.length; i++) {
+    //   tuple = scope.vm.page.tuples[i];
+
+    //   if (scope.isDisabled(tuple)) continue;
+
+    //   if (!scope.isSelected(tuple)) {
+    //     scope.vm.selectedRows.push(tuple);
+    //     tuples.push(tuple);
+    //   }
+    // }
+
+    // if (tuples.length > 0) {
+    //   _callonSelectedRowsChanged(scope, tuples, true);
+    // }
+  };
+
+  const selectNoneOnPage = () => {
+    // logService.logClientAction(
+    //   {
+    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_DESELECT_ALL),
+    //     stack: getTableLogStack(scope.vm)
+    //   },
+    //   scope.vm.reference.defaultLogInfo
+    // );
+
+    setSelectedRows((currRows: any) => {
+      const res = Array.isArray(currRows) ? [...currRows] : [];
+      page.tuples.forEach((tuple: any) => {
+        const rowIndex = res.findIndex((obj: any) => obj.uniqueId === tuple.uniqueId);
+        if (rowIndex !== -1) res.splice(rowIndex, 1);
+      });
+      return res;
+    });
+  };
+
+  /**
+   * Called when the row is selected or deselected
+   */
+  const onSelectChange = (tuple: any) => {
+    $log.debug(`on select chagne called for ${tuple.uniqueId}`);
+    setSelectedRows((currRows: any) => {
+      const res = Array.isArray(currRows) ? [...currRows] : [];
+      // see if the tuple is list of selected rows or not
+      const rowIndex = res.findIndex((obj: any) => obj.uniqueId === tuple.uniqueId);
+      // if it's currently selected, then we should deselect (and vice versa)
+      const isSelected = rowIndex !== -1;
+      if (!isSelected) {
+        res.push(tuple);
+      } else {
+        res.splice(rowIndex, 1);
+      }
+      return res;
+    });
+  };
 
   // whether we should show the action buttons or not (used in multiple places)
   const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
@@ -305,6 +365,7 @@ const RecordsetTable = ({
           tuple={tuple}
           showActionButtons={showActionButtons}
           selected={isSelected(tuple)}
+          onSelectChange={onSelectChange}
           disabled={isDisabled(tuple)}
         />)
     })

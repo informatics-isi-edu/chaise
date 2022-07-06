@@ -406,6 +406,9 @@ const FacetChoicePicker = ({
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       showFaceting: false,
       disableFaceting: true,
+      // TODO: can be uncommented for testing popups:
+      // showFaceting: true,
+      // disableFaceting: !facetColumn.isEntityMode,
       displayMode: RecordsetDisplayMode.FACET_POPUP,
       // TODO
       // enableFavorites
@@ -427,7 +430,7 @@ const FacetChoicePicker = ({
     const initialSelectedRows: any = [];
     checkboxRows.forEach(function (row) {
       if (!row.selected) return;
-      const newRow : any = {};
+      const newRow: any = {};
 
       // TODO might wan to create a proper type for this
       // mimic the same structure as tuples
@@ -450,9 +453,66 @@ const FacetChoicePicker = ({
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
-      initialSelectedRows
+      initialSelectedRows,
+      onSelectedRowsChanged: modalDataChanged(false)
     });
   };
+
+  const modalDataChanged = (isSubmit: boolean) => {
+    return (selectedRows: any) => {
+      // create the list of choice filters
+      let hasNull = false;
+      const filters = selectedRows.map(function (t: any) {
+        const val =  getFilterUniqueId(t, columnName);
+        hasNull = hasNull || (val === null);
+        return val;
+      });
+
+      // create the reference using filters
+      const ref = facetColumn.replaceAllChoiceFilters(filters);
+
+      // update the reference
+      if (!updateRecordsetReference(ref, -1, LogReloadCauses.FACET_MODIFIED, !isSubmit)) {
+        return false;
+      }
+
+      if (isSubmit) {
+        // we will set the checkboxRows to the value of this variable at the end
+        const updatedRows: FacetCheckBoxRow[] = [];
+        // add not-null filter
+        if (!facetColumn.hideNotNullChoice) {
+          updatedRows.push(getNotNullFacetCheckBoxRow());
+        }
+        // add null filter
+        if (!facetColumn.hideNullChoice || hasNull) {
+          updatedRows.push(getNullFacetCheckBoxRow(hasNull));
+        }
+
+        selectedRows.forEach((row: any) => {
+          // filter and tuple uniqueId might be different
+          const value = getFilterUniqueId(row, columnName);
+
+          updatedRows.push({
+            selected: true,
+            uniqueId: value,
+            displayname: row.displayname,
+            tuple: row
+          });
+        });
+
+        hideRecordsetModal();
+        setCheckboxRows(updatedRows);
+
+        //   // make sure to update all the opened facets
+        //   scope.parentCtrl.setInitialized();
+
+        //   // focus on the current facet
+        //   scope.parentCtrl.focusOnFacet(scope.index, true);
+      }
+
+      return true;
+    };
+  }
 
   const hideRecordsetModal = () => {
     setRecordsetModalProps(null);
@@ -526,8 +586,9 @@ const FacetChoicePicker = ({
           />
         </div>
         <div className='button-container'>
+          {/* TODO id='show-more' removed */}
           <button
-            id='show-more' className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
+            className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
             disabled={facetColumn.hasNotNullFilter}
             onClick={() => openRecordsetModal()}
           >
@@ -575,6 +636,7 @@ const FacetChoicePicker = ({
           modalClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
           recordsetProps={recordsetModalProps}
           onClose={hideRecordsetModal}
+          onSubmit={modalDataChanged(true)}
           displayname={facetColumn.displayname}
           comment={facetColumn.comment}
         />

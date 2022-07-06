@@ -342,10 +342,15 @@ const Faceting = ({
    * @param keepRef if true, we will not change the reference (the function is used for url length check)
    * @returns
    */
-  const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean) => {
+  const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean, clearAllInitialized?: boolean) => {
     if (!checkReferenceURL(newRef)) {
       return false;
     }
+
+    // TODO scroll to the facet and set everything as initialized..
+    // if (clearAllInitialized) {
+    //   scrollToFacet(index, true);
+    // }
 
     if (!keepRef) {
       update(newRef, null, true, true, true, false, cause, index);

@@ -25,6 +25,7 @@ type TableRowProps = {
    */
   showActionButtons: boolean,
   selected: boolean,
+  onSelectChange: (tuple: any) => void,
   disabled: boolean
 }
 
@@ -35,6 +36,7 @@ const TableRow = ({
   tuple,
   showActionButtons,
   selected,
+  onSelectChange,
   disabled
 }: TableRowProps): JSX.Element => {
 
@@ -224,8 +226,7 @@ const TableRow = ({
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
-            <input type='checkbox' checked={selected || disabled} disabled={disabled} />
-            {/* ng-checked="selected || selectDisabled" ng-click="onSelect($event)" ng-disabled="selectDisabled" */}
+            <input type='checkbox' checked={selected || disabled} disabled={disabled} onChange={() => onSelectChange(tuple)} />
             <label />
             {/* TODO favorites */}
             {/*

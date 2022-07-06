@@ -39,8 +39,7 @@ export const RecordsetContext = createContext<{
    *   - will return false
    * otherwise it will return true.
    */
-  checkReferenceURL: (ref: any) => boolean,
-  onSelectedRowsChanged: any
+  checkReferenceURL: (ref: any) => boolean
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -109,9 +108,16 @@ export default function RecordsetProvider({
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
   const [selectedRows, setStateSelectedRows] = useState<any>(initialSelectedRows);
-  const setSelectedRows = (newVal: any) => {
-
-    setStateSelectedRows(newVal);
+  const setSelectedRows = (fn: any) => {
+    $log.debug('set selected rows called!');
+    setStateSelectedRows((prevRows: any) => {
+      const res = typeof fn === 'function' ? fn(prevRows) : fn;
+      $log.debug(`there are ${res.length} rows selected`);
+      if (onSelectedRowsChanged && onSelectedRowsChanged(res) === false) {
+        return prevRows
+      }
+      return res;
+    });
   };
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
@@ -811,8 +817,7 @@ export default function RecordsetProvider({
       totalRowCount,
       registerFacetCallbacks,
       printDebugMessage,
-      checkReferenceURL,
-      onSelectedRowsChanged
+      checkReferenceURL
     };
   }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
 
