@@ -8,7 +8,9 @@ var config = pConfig.getConfig({
    * Comment above 2 lines
    * Empty configuration will run test cases against catalog 1 and default schema
    */
-
+    specs: [
+      "base-config.spec.js",
+    ],
     // testConfiguration: {},
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL;
