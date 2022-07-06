@@ -534,6 +534,7 @@ const Faceting = ({
     switch (fc.preferredMode) {
       case 'ranges':
         return <FacetRangePicker
+          dispatchFacetUpdate={dispatchFacetUpdate}
           facetColumn={fc} facetIndex={index} facetModel={fm}
           facetPanelOpen={facetPanelOpen}
           register={registerFacet} updateRecordsetReference={updateRecordsetReference}

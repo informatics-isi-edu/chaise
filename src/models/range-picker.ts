@@ -6,6 +6,10 @@ type PlotlyDataLayoutConfig = typeof PlotlyDataLayoutConfig;
 
 export type FacetRangePickerProps = {
   /**
+   * ask flow-control to update the data
+   */
+  dispatchFacetUpdate: Function,
+  /**
    * model for this specific facet with column attached to it
    */
   facetColumn: any,

@@ -14,7 +14,7 @@ const Plot = createPlotlyComponent(Plotly);
 import { ResizeSensor } from 'css-element-queries';
 
 // models
-import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import {
   FacetRangePickerProps,
@@ -35,6 +35,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
 const FacetRangePicker = ({
+  dispatchFacetUpdate,
   facetColumn,
   facetIndex,
   facetModel,
@@ -113,6 +114,7 @@ const FacetRangePicker = ({
 
   const numBuckets = facetColumn.histogramBucketCount;
 
+  // set the resize sensor to call the plot resize fucntion
   useLayoutEffect(() => {
     if (!rangePickerContainer.current) return;
     new ResizeSensor(
@@ -127,7 +129,15 @@ const FacetRangePicker = ({
     (function (uri, reloadCauses, reloadStartTime) {
       if (compState.relayout) {
         // TODO: trigger flow control
-        histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime)
+        // histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime)
+
+        // make sure the callbacks with latest scope are used
+        callRegister();
+
+        $log.debug(`faceting: request for facet (index=${facetIndex} update. relayout triggered`);
+
+        // ask the parent to update the facet column
+        dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_PLOT_RELAYOUT);
       }
     })(facetColumn.sourceReference.uri);
     // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
@@ -157,17 +167,19 @@ const FacetRangePicker = ({
 
     // TODO
     // if we have the not-null filter, other filters are not important and can be ignored
-    // if (facetColumn.hasNotNullFilter) {
-    //   // facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
-    //   setRanges([getNotNullFacetCheckBoxRow(true)]);
-    //   defer.resolve();
-    // } else {
-    //   const updatedRows: FacetCheckBoxRow[] = [];
-    //   if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
+    if (facetColumn.hasNotNullFilter) {
+      setRanges([getNotNullFacetCheckBoxRow(true)]);
+      defer.resolve();
+    } else {
+      const updatedRows: FacetCheckBoxRow[] = [];
+      if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
 
-    //   setRanges(updatedRows);
-    //   defer.resolve();
-    // }
+      // TODO: any rows selected based on facet criteria
+
+      console.log('preprocess null row added unchecked');
+      setRanges(updatedRows);
+      defer.resolve();
+    }
 
     return defer.promise;
   }
@@ -178,21 +190,22 @@ const FacetRangePicker = ({
   const processFacet = () => {
     const defer = Q.defer();
 
-    if (facetColumn.hasNotNullFilter) {
-      setRanges([getNotNullFacetCheckBoxRow(true)]);
-    } else {
-      const updatedRows: FacetCheckBoxRow[] = [];
-      if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
+    // if (facetColumn.hasNotNullFilter) {
+    //   setRanges([getNotNullFacetCheckBoxRow(true)]);
+    // } else {
+    //   const updatedRows: FacetCheckBoxRow[] = [];
+    //   if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
 
-      // TODO: any preselected ranges
-
-      setRanges(updatedRows);
-    }
+    //   // TODO: any previously set ranges
+    //   console.log(updatedRows);
+    //   setRanges(updatedRows);
+    // }
 
     updateFacetData().then((result: any) => {
 
       // setRanges(updatedRows);
 
+      console.log('facet data and histogram data fetched');
       defer.resolve(result);
     }).catch(function (err: any) {
       defer.reject(err);
@@ -216,15 +229,49 @@ const FacetRangePicker = ({
     // TODO
     setRanges((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        return {...curr, selected: false}
+        return { ...curr, selected: false }
       });
     });
   }
 
   /***** UI related callbacks *****/
-  const onRowClick = () => {
-    // do something
-    // setRanges(ranges)
+  const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
+    const checked = !row.selected;
+
+    const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
+    // get the new reference based on the operation
+    let ref;
+    if (row.isNotNull) {
+      if (checked) {
+        ref = facetColumn.addNotNullFilter();
+      } else {
+        ref = facetColumn.removeNotNullFilter();
+      }
+      $log.debug(`faceting: request for facet (index=${facetIndex}) choice add. Not null filter.`);
+    } else {
+      if (checked) {
+        ref = facetColumn.addChoiceFilters([row.uniqueId]);
+      } else {
+        ref = facetColumn.removeChoiceFilters([row.uniqueId]);
+      }
+      $log.debug(`faceting: request for facet (index=${facetIndex}) choice ${row.selected ? 'add' : 'remove'}. uniqueId='${row.uniqueId}`);
+    }
+
+    // this function checks the URL length as well and might fails
+    if (!updateRecordsetReference(ref, facetIndex, cause)) {
+      $log.debug('faceting: URL limit reached. Reverting the change.');
+      event.preventDefault();
+      return;
+    }
+
+    setRanges((prev: FacetCheckBoxRow[]) => {
+      return prev.map((curr: FacetCheckBoxRow) => {
+        if (curr === row) return { ...curr, selected: checked };
+        // if not-null is selected, remove all the other filters
+        else if (row.isNotNull && checked) return { ...curr, selected: false }
+        else return curr;
+      });
+    });
   }
 
 
@@ -233,73 +280,76 @@ const FacetRangePicker = ({
     const defer = Q.defer();
 
     (function (uri, reloadCauses, reloadStartTime) {
-      // if (!scope.relayout) {
-      // the captured uri is not the same as the initial data uri so we need to refetch the min/max
-      // this happens when another facet adds a filter that affects the facett object in the uri
-      const agg = facetColumn.column.aggregate;
-      const aggregateList = [
-        agg.minAgg,
-        agg.maxAgg
-      ];
+      if (!compState.relayout) {
+        // the captured uri is not the same as the initial data uri so we need to refetch the min/max
+        // this happens when another facet adds a filter that affects the facett object in the uri
+        const agg = facetColumn.column.aggregate;
+        const aggregateList = [
+          agg.minAgg,
+          agg.maxAgg
+        ];
 
-      const facetLog = getDefaultLogInfo();
-      let action = LogActions.FACET_RANGE_LOAD;
-      // if (reloadCauses.length > 0) {
-      //   action = LogActions.FACET_RANGE_RELOAD;
-      //   // add causes
-      //   facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
-      // }
-      // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
-      facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
-        if (facetColumn.sourceReference.uri !== uri) {
-          // return false to defer.resolve() in .then() callback
-          // return false;
-        }
+        const facetLog = getDefaultLogInfo();
+        let action = LogActions.FACET_RANGE_LOAD;
+        // if (reloadCauses.length > 0) {
+        //   action = LogActions.FACET_RANGE_RELOAD;
+        //   // add causes
+        //   facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
+        // }
+        // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
+        $log.debug('fetch aggregates')
+        facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
+          if (facetColumn.sourceReference.uri !== uri) {
+            // return false to defer.resolve() in .then() callback
+            // return false;
+          }
 
-        // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
-        const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
+          // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
+          const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
 
-        // if - the max/min are null
-        //    - bar_plot in annotation is 'false'
-        //    - histogram not supported for column type
-        // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
-        if (!(facetColumn.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
-          // TODO: resolve use of defer?
-          // return true to defer.resolve() in .then() callback
+          // if - the max/min are null
+          //    - bar_plot in annotation is 'false'
+          //    - histogram not supported for column type
+          // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
+          if (!(facetColumn.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
+            setCompState({
+              ...compState,
+              rangeOptions: minMaxRangeOptions
+            });
+            return defer.resolve(true);
+          }
+
           setCompState({
             ...compState,
-            rangeOptions: minMaxRangeOptions
+            disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
+            histogramDataStack: [],
+            rangeOptions: minMaxRangeOptions,
+            relayout: false
           });
-          return true;
-        }
+          // get initial histogram data
 
-        setCompState({
-          ...compState,
-          disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
-          histogramDataStack: [],
-          rangeOptions: minMaxRangeOptions,
-          relayout: false
+          return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
+        }).then((response: any) => {
+
+          // facetModel.reloadCauses = [];
+          // facetModel.reloadStartTime = -1;
+
+          defer.resolve(response);
+        }).catch((err: any) => {
+          console.log('catch facet data: ', err);
+          defer.reject(err);
         });
-        // get initial histogram data
-        return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
-      }).then((response: any) => {
-
-        // facetModel.reloadCauses = [];
-        // facetModel.reloadStartTime = -1;
-
-        defer.resolve(response);
-      }).catch((err: any) => {
-        console.log('catch facet data: ', err);
-        defer.reject(err);
-      });
-      // relayout case
-      // } else {
-      //     histogramData(reloadCauses, reloadStartTime).then(function (response) {
-      //         defer.resolve(response);
-      //     }).catch(function (err) {
-      //         defer.reject(err);
-      //     });
-      // }
+        // relayout case
+      } else {
+        histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime).then((response: any) => {
+          // TODO: ??
+          // setRanges(updatedRows);
+  
+          defer.resolve(response);
+        }).catch(function (err: any) {
+          defer.reject(err);
+        });
+      }
     })(facetColumn.sourceReference.uri);
     // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
 
@@ -327,6 +377,7 @@ const FacetRangePicker = ({
       // }
 
       // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
+      $log.debug('fetch histogram data')
       facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
         if (facetColumn.sourceReference.uri !== uri) {
           // return breaks out of the current callback function
@@ -573,8 +624,7 @@ const FacetRangePicker = ({
       disableZoomIn: disableZoomIn(rangeMinMax.absMin, rangeMinMax.absMax),
       relayout: true,
       rangeOptions: rangeMinMax
-    })
-    // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
+    });
   }
 
   // disable zoom in if histogram has been zoomed 20+ times or the current range is <= the number of buckets
@@ -732,8 +782,6 @@ const FacetRangePicker = ({
             absMax: minMaxRangeOptions.absMax,
           }
         });
-
-        // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
       });
     } catch (err) {
       const plotLayout = { ...compState.plot.layout }
