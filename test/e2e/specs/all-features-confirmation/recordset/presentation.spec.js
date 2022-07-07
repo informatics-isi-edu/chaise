@@ -436,76 +436,84 @@ describe('View recordset,', function () {
                 });
             });
 
-            // TODO: uncomment after merging Ravish's branch
-            // it("should display the Export dropdown button with proper tooltip.", function(done) {
-            //     var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
-            //     expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
-            //     browser.actions().mouseMove(exportDropdown).perform();
-            //     var tooltip = chaisePage.getTooltipDiv();
-            //     chaisePage.waitForElement(tooltip).then(function () {
-            //         expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
-            //         browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-            //         done();
-            //     }).catch(function (err) {
-            //         console.log(err);
-            //         done.fail();
-            //     });
-            // });
-            // 
-            // it("should have '2' options in the dropdown menu.", function (done) {
-            //     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-            //         expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
-            //         // close the dropdown
-            //         return chaisePage.recordsetPage.getExportDropdown().click();
-            //     }).then(function () {
-            //         done();
-            //     }).catch(function (err) {
-            //         console.log(err);
-            //         done.fail();
-            //     });
-            // });
-            // 
-            // if (!process.env.CI) {
-            //     it("should have 'CSV' as a download option and download the file.", function(done) {
-            //         chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-            //             var csvOption = chaisePage.recordsetPage.getExportOption("Search results (CSV)");
-            //             expect(csvOption.getText()).toBe("Search results (CSV)");
-            //             return csvOption.click();
-            //         }).then(function () {
-            //             browser.wait(function() {
-            //                 return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
-            //             }, browser.params.defaultTimeout).then(function () {
-            //                 done();
-            //             }, function () {
-            //                 expect(false).toBeTruthy("Accommodations.csv was not downloaded");
-            //             });
-            //         }).catch(function (err) {
-            //             console.log(err);
-            //             done.fail();
-            //         });
-            //     });
+            it("should display the Export dropdown button with proper tooltip.", function(done) {
+                // var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                const exportDropdown = element(by.css('.export-menu'));
+                expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
+                browser.actions().mouseMove(exportDropdown).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+            
+            it("should have '2' options in the dropdown menu.", function (done) {
+                const exportDropdown = element(by.css('.export-menu'));
+                exportDropdown.click().then(function () {
+                    const exportMenuItems = element.all(by.css('.export-menu-item'));
+                    expect(exportMenuItems.count()).toBe(2, "incorrect number of export options");
+                    // close the dropdown
+                    return exportDropdown.click();
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
+            
+            if (!process.env.CI) {
+                it("should have 'CSV' as a download option and download the file.", function(done) {
+                    const exportDropdown = element(by.css('.export-menu'));
+                    exportDropdown.click().then(function () {
+                        const exportMenuItems = element.all(by.css('.export-menu-item')); 
+                        const csvOption = exportMenuItems.get(0);
+                        expect(csvOption.getText()).toBe("Search results (CSV)");
+                        return csvOption.click();
+                    }).then(function () {
+                        browser.wait(function() {
+                            return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
+                        }, browser.params.defaultTimeout).then(function () {
+                            done();
+                        }, function () {
+                            expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
 
-            //     it("should have 'BDBag' as a download option and download the file.", function(done) {
-            //         chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-            //             var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
-            //             expect(bagOption.getText()).toBe("BDBag");
-            //             return bagOption.click();
-            //         }).then(function () {
-            //             return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
-            //         }).then(function () {
-            //             return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
-            //         }).then(function () {
-            //             return browser.wait(function() {
-            //                 return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
-            //             }, browser.params.defaultTimeout);
-            //         }).then(function () {
-            //             chaisePage.waitForElementInverse(element(by.css(".export-progress")));
-            //             done();
-            //         }).catch(function (err) {
-            //             done.fail(err);
-            //         });
-            //     });
-            // }
+                it("should have 'BDBag' as a download option and download the file.", function(done) {
+                    const exportDropdown = element(by.css('.export-menu'));
+                    let modalDialog;
+                    exportDropdown.click().then(function () {
+                        const exportMenuItems = element.all(by.css('.export-menu-item')); 
+                        const bagOption = exportMenuItems.get(1);
+                        expect(bagOption.getText()).toBe("BDBag");
+                        return bagOption.click();
+                    }).then(function () {
+                        modalDailog = element(by.css('.modal-dialog'));
+                        return chaisePage.waitForElement(modalDailog);
+                    }).then(function () {
+                        return chaisePage.waitForElementInverse(modalDailog);
+                    }).then(function () {
+                        return browser.wait(function() {
+                            return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
+                        }, browser.params.defaultTimeout);
+                    }).then(function () {
+                        chaisePage.waitForElementInverse(element(by.css(".export-progress")));
+                        done();
+                    }).catch(function (err) {
+                        done.fail(err);
+                    });
+                });
+            }
 
             it("should show line under columns which have a comment and inspect the comment value too", function () {
                 var columns = accommodationParams.columns.filter(function (c) {
