@@ -7,7 +7,6 @@ describe('Navbar ', function() {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         
         navbar = element(by.id('mainnav'));
-        // menu = element(by.id('navbar-menu'));
         menu = element(by.css('.navbar-menu-options'));
         browser.executeScript('return chaiseConfig;').then(function(config) {
             chaiseConfig = config;
@@ -44,18 +43,23 @@ describe('Navbar ', function() {
         });
     });
 
-    // TODO: 
-    // it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
-    //     var nodesInDOM = menu.all(by.tagName('li'));
-    //     // Count the number of nodes that are being shown (top level and submenus)
-    //     //   - Local: config has 13 but 1 is hidden by ACLs
-    //     //   - CI: config has 13 but 7 are hidden based on ACLs
-    //     var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
+    it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
+        const nodesInDOM = menu.all(by.css('a'));
+        const headers = menu.all(by.css('.chaise-dropdown-header'));
+        // Count the number of nodes that are being shown (top level and submenus)
+        //   - Local: config has 13 but 1 is hidden by ACLs
+        //   - CI: config has 13 but 7 are hidden based on ACLs
+        var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
+        let totalNodes = 0;
 
-    //     nodesInDOM.count().then(function(count) {
-    //         expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
-    //     });
-    // });
+        nodesInDOM.count().then(function(count) {
+            totalNodes += count;
+        });
+        headers.count().then(function(count) {
+            totalNodes += count;
+            expect(totalNodes).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
+        });
+    });
 
     it('should prefer markdownName over name when both are defined', function () {
         // option #2 has both name and markdownName defined
@@ -114,21 +118,20 @@ describe('Navbar ', function() {
         var link = element(by.css('.username-display'));
 
         link.click();
-        let profileLink = element(by.css('#profile-link'));
+        const profileLink = element(by.css('#profile-link'));
         profileLink.click();
-        let modalContent = element(by.css('.profile-popup'));
+        const modalContent = element(by.css('.profile-popup'));
         chaisePage.waitForElement(modalContent);
         expect(modalContent.isDisplayed()).toBeTruthy();
         done();
     });
 
     it('should close the profile card on click of X on the modal window', function(done) {
-         var closeLink = element(by.css('.modal-close'));
-         var modalContent = element(by.css('.modal-content'));
+        const closeLink = element(by.css('.modal-close'));
+        const modalContent = element(by.css('.profile-popup'));
 
-        //  PENDING: TimeoutError: Wait timed out after 15058ms
          chaisePage.clickButton(closeLink).then(function(){
-            browser.wait(EC.not(EC.presenceOf(modalContent)), browser.params.defaultTimeout);
+            chaisePage.waitForElementInverse(modalContent, 2000);
             expect(modalContent.isPresent()).toEqual(false);
             done();
         }).catch(function (err) {
