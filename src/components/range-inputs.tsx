@@ -38,25 +38,43 @@ type RangeInputsProps = {
   /**
    * use for applying custom styles on the component
    */
-  classes?: string
+  classes?: string,
+  /**
+   * callback for applying the range inputs
+   */
+  addRange: Function
 };
 
 const getType = (inputType: string): string => {
+  let type: string;
+  switch (inputType) {
+    case 'int2':
+    case 'int4':
+    case 'int8':
+      type = 'int';
+      break;
+    case 'float4':
+    case 'float8':
+      type = 'float'
+      break;
+    case 'numeric':
+      type = 'numeric';
+      break;
+    case 'date':
+      type = 'date';
+      break;
+    case 'timestamp':
+    case 'timestamptz':
+      type = 'timestamp';
+      break;
+    default:
+      type = 'invalid_type'
+  }
 
-  if (inputType.indexOf('int') > -1) return 'int';
-
-  if (inputType.indexOf('float') > -1) return 'float';
-
-  if (inputType.indexOf('numeric') > -1) return 'numeric';
-
-  if (inputType.indexOf('date') > -1) return 'date';
-
-  if (inputType.indexOf('timestamp') > -1) return 'timestamp';
-
-  return 'invalid_type';
+  return type;
 }
 
-const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
+const RangeInputs = ({ inputType, classes, addRange }: RangeInputsProps) => {
   const momentJS = windowRef.moment;
 
   const fromRef = useRef<HTMLInputElement>(null);
@@ -187,6 +205,7 @@ const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
 
       /* eslint-disable  @typescript-eslint/no-non-null-assertion */
       console.log('values sent to server', formatedValues);
+      addRange(formatedValues.fromVal, formatedValues.toVal);
       /* eslint-enable  @typescript-eslint/no-non-null-assertion */
     } else {
       setError(errorMsgMap[validatedResult]);

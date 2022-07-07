@@ -18,17 +18,18 @@ import { ResizeSensor } from 'css-element-queries';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import {
   FacetRangePickerProps,
+  HTMLPlotElement,
+  PlotData,
+  PlotlyLayout,
   RangeOptions,
   RangePickerState,
   TimeStamp
 } from '@isrd-isi-edu/chaise/src/models/range-picker';
-import { PlotlyLayout, HTMLPlotElement } from 'plotly.js-basic-dist-min';
-type PlotlyLayout = typeof PlotlyLayout;
-type HTMLPlotElement = typeof HTMLPlotElement;
+
 
 // services
 import Q from 'q';
@@ -50,7 +51,9 @@ const FacetRangePicker = ({
   register,
   updateRecordsetReference
 }: FacetRangePickerProps): JSX.Element => {
-  const [ranges, setRanges] = useState<FacetCheckBoxRow[]>([]);
+  const [ranges, setRanges] = useState<FacetCheckBoxRow[]>(
+    (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) ? [getNotNullFacetCheckBoxRow(false)] : []
+  );
 
   const isColumnOfType = (columnType: string) => {
     return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
@@ -170,14 +173,27 @@ const FacetRangePicker = ({
     // if we have the not-null filter, other filters are not important and can be ignored
     if (facetColumn.hasNotNullFilter) {
       setRanges([getNotNullFacetCheckBoxRow(true)]);
-      defer.resolve();
+      defer.resolve(true);
     } else {
       const updatedRows: FacetCheckBoxRow[] = [];
       if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
 
-      // TODO: any rows selected based on facet criteria
+      // TODO: any rows selected based on facet blob criteria
+      // for (let i = 0; i < facetColumn.rangeFilters.length; i++) {
+      //   const filter = facetColumn.rangeFilters[i];
+
+      //   const rowIndex = ranges.findIndex(function (obj) {
+      //     return obj.uniqueId === filter.uniqueId;
+      //   });
+
+      //   // if the row is not in the set of choices, add it
+      //   if (rowIndex === -1) {
+      //     updatedRows.push(createChoiceDisplay(filter, true));
+      //     // scope.facetModel.appliedFilters.push(createAppliedFilter(filter));
+      //   }
+      // }
       setRanges(updatedRows);
-      defer.resolve();
+      defer.resolve(true);
     }
 
     return defer.promise;
@@ -189,22 +205,8 @@ const FacetRangePicker = ({
   const processFacet = () => {
     const defer = Q.defer();
 
-    // if (facetColumn.hasNotNullFilter) {
-    //   setRanges([getNotNullFacetCheckBoxRow(true)]);
-    // } else {
-    //   const updatedRows: FacetCheckBoxRow[] = [];
-    //   if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
-
-    //   // TODO: any previously set ranges
-    //   console.log(updatedRows);
-    //   setRanges(updatedRows);
-    // }
-
     updateFacetData().then((result: any) => {
 
-      // setRanges(updatedRows);
-
-      console.log('facet data and histogram data fetched');
       defer.resolve(result);
     }).catch(function (err: any) {
       defer.reject(err);
@@ -225,7 +227,6 @@ const FacetRangePicker = ({
    * The registered callback to remove all the selected filters
    */
   const removeAppliedFilters = () => {
-    // TODO
     setRanges((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
         return { ...curr, selected: false }
@@ -234,30 +235,85 @@ const FacetRangePicker = ({
   }
 
   /***** UI related callbacks *****/
+  const addFilter = (min: RangeOptions['absMin'], max: RangeOptions['absMin']) => {
+    console.log('add range callback');
+    // TODO: export types in ermrestJS
+    // let res: {filter: RangeFacetFilter, reference: Reference};
+    let res: { filter: any, reference: any };
+    const cause = LogReloadCauses.FACET_SELECT;
+    if (isColumnOfType('float')) {
+      res = facetColumn.addRangeFilter(formatFloatMin(min as number), false, formatFloatMax(max as number), false);
+    } else {
+      res = facetColumn.addRangeFilter(min, false, max, false);
+    }
+
+    if (!res) {
+      return; // duplicate filter
+    }
+
+    // this function checks the URL length as well and might fail
+    if (!updateRecordsetReference(res.reference, facetIndex, cause)) {
+      $log.debug('faceting: URL limit reached. Reverting the change.');
+      return;
+    }
+
+    const rowIndex = ranges.findIndex(function (obj: any) {
+      return obj.uniqueId === res.filter.uniqueId;
+    });
+
+    $log.debug('faceting: request for facet (index=' + facetIndex + ') range add. min=' + min + ', max=' + max);
+
+    const updatedRows: FacetCheckBoxRow[] = [...ranges];
+
+    if (rowIndex === -1) {
+      // we should create a new filter
+      updatedRows.push({
+        uniqueId: res.filter.uniqueId,
+        displayname: { value: res.filter.toString(), isHTML: false },
+        selected: true,
+        // disabled: facetColumn.hasNotNullFilter,
+        metaData: {
+          min: res.filter.min,
+          minExclusive: res.filter.minExclusive,
+          max: res.filter.max,
+          maxExclusive: res.filter.maxExclusive
+        }
+      });
+    } else {
+      // filter already exists, we should just change it to selected
+      updatedRows[rowIndex].selected = true;
+    }
+
+    setRanges(updatedRows);
+  }
+
   const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
     const checked = !row.selected;
 
     const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
     // get the new reference based on the operation
-    let ref;
+    let res: { filter: any, reference: any } = {filter: {}, reference: {}};
     if (row.isNotNull) {
       if (checked) {
-        ref = facetColumn.addNotNullFilter();
+        res = facetColumn.addNotNullFilter();
       } else {
-        ref = facetColumn.removeNotNullFilter();
+        res = facetColumn.removeNotNullFilter();
       }
       $log.debug(`faceting: request for facet (index=${facetIndex}) choice add. Not null filter.`);
     } else {
-      if (checked) {
-        ref = facetColumn.addChoiceFilters([row.uniqueId]);
-      } else {
-        ref = facetColumn.removeChoiceFilters([row.uniqueId]);
+      if (row.metaData) {
+        if (checked) {
+          res = facetColumn.addRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
+        } else {
+          res = facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
+        }
+        $log.debug(`faceting: request for facet (index=${facetColumn.index}) range ${row.selected ? 'add' : 'remove'}. 
+        min=${row.metaData.min}, max=${row.metaData.max}`);
       }
-      $log.debug(`faceting: request for facet (index=${facetIndex}) choice ${row.selected ? 'add' : 'remove'}. uniqueId='${row.uniqueId}`);
     }
 
     // this function checks the URL length as well and might fails
-    if (!updateRecordsetReference(ref, facetIndex, cause)) {
+    if (!updateRecordsetReference(res.reference, facetIndex, cause)) {
       $log.debug('faceting: URL limit reached. Reverting the change.');
       event.preventDefault();
       return;
@@ -272,7 +328,6 @@ const FacetRangePicker = ({
       });
     });
   }
-
 
   /***** API call functions *****/
   const updateFacetData = () => {
@@ -289,7 +344,7 @@ const FacetRangePicker = ({
         ];
 
         const facetLog = getDefaultLogInfo();
-        let action = LogActions.FACET_RANGE_LOAD;
+        // let action = LogActions.FACET_RANGE_LOAD;
         // if (reloadCauses.length > 0) {
         //   action = LogActions.FACET_RANGE_RELOAD;
         //   // add causes
@@ -367,7 +422,7 @@ const FacetRangePicker = ({
         requestMax = isColumnOfType('timestamp') ? dateTimeToTimestamp(max as TimeStamp) : max;
 
       const facetLog = getDefaultLogInfo();
-      let action = LogActions.FACET_HISTOGRAM_LOAD;
+      // let action = LogActions.FACET_HISTOGRAM_LOAD;
       // if (reloadCauses.length > 0) {
       //   action = LogActions.FACET_HISTOGRAM_RELOAD;
 
@@ -393,7 +448,7 @@ const FacetRangePicker = ({
           shouldRelayout = false;
         }
 
-        const plotData = [...compState.plot.data] as any[];
+        const plotData = [...compState.plot.data] as PlotData[];
         plotData[0].x = response.x;
         plotData[0].y = response.y;
 
@@ -599,7 +654,7 @@ const FacetRangePicker = ({
   const zoomInPlot = () => {
     // NOTE: x[x.length-1] may not be representative of the absolute max
     // range is based on the index of the bucket representing the max value
-    const plotData = compState.plot.data as any[];
+    const plotData = compState.plot.data as PlotData[];
     let maxIndex = plotData[0].x.findIndex((value: any) => {
       return compState.rangeOptions.absMax !== null ? value >= compState.rangeOptions.absMax : 0;
     });
@@ -681,8 +736,8 @@ const FacetRangePicker = ({
     updatePreviousPlotValues(initialData, histogramDataStack);
   }
 
-  const updatePreviousPlotValues = (data: any, histogramDataStack: any[]) => {
-    const plotData = [...compState.plot.data] as any[];
+  const updatePreviousPlotValues = (data: PlotData, histogramDataStack: PlotData[]) => {
+    const plotData = [...compState.plot.data] as PlotData[];
     plotData[0].x = data.x;
     plotData[0].y = data.y;
 
@@ -814,9 +869,10 @@ const FacetRangePicker = ({
       <div className='picker-container'>
         <div ref={listContainer}>
           <FacetCheckList
-            setHeight={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
-            rows={ranges} hasNotNullFilter={facetColumn.hasNotNullFilter}
+            hasNotNullFilter={facetColumn.hasNotNullFilter}
             onRowClick={onRowClick}
+            rows={ranges}
+            setHeight={false}
           />
         </div>
       </div>
@@ -824,7 +880,7 @@ const FacetRangePicker = ({
   };
 
   const renderPlot = () => {
-    const plotData = compState.plot.data as any[];
+    const plotData = compState.plot.data as PlotData[];
     if (plotData[0].x.length < 1 || plotData[0].y.length < 1) return;
     return (<Plot
       config={compState.plot.config}
@@ -932,7 +988,11 @@ const FacetRangePicker = ({
   return (
     <div className='range-picker' ref={rangePickerContainer}>
       {!facetModel.facetError && renderPickerContainer()}
-      <RangeInputs inputType={facetColumn.column.type.rootName} classes='facet-range-input' />
+      <RangeInputs
+        inputType={facetColumn.column.type.rootName}
+        classes='facet-range-input'
+        addRange={addFilter}
+      />
       {renderHistogram()}
     </div>
   )
