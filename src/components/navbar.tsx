@@ -318,7 +318,7 @@ const ChaiseNavbar = (): JSX.Element => {
             href={item.url}
             target={item.newTab ? '_blank' : '_self'}
             onClick={(event) => handleOnLinkClick(event, item)}
-            className={menuItemClasses(item, false)}
+            className={'chaise-nav-item ' + menuItemClasses(item, false)}
             dangerouslySetInnerHTML={{ __html: renderName(item) }}
           />
         );
@@ -334,6 +334,7 @@ const ChaiseNavbar = (): JSX.Element => {
             onToggle={(isOpen, event) => handleNavbarDropdownToggle(isOpen, event, item)}
             onClick={adjustNavBarHeight}
             renderMenuOnMount
+            className='chaise-nav-item'
           >
             <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></ChaiseLoginDropdown>
           </NavDropdown>

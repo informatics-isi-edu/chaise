@@ -45,33 +45,27 @@ describe('Navbar ', function() {
 
     it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
         const nodesInDOM = menu.all(by.css('a'));
-        const headers = menu.all(by.css('.chaise-dropdown-header'));
         // Count the number of nodes that are being shown (top level and submenus)
         //   - Local: config has 13 but 1 is hidden by ACLs
         //   - CI: config has 13 but 7 are hidden based on ACLs
         var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
-        let totalNodes = 0;
 
         nodesInDOM.count().then(function(count) {
-            totalNodes += count;
-        });
-        headers.count().then(function(count) {
-            totalNodes += count;
-            expect(totalNodes).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
+            expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
         });
     });
 
     it('should prefer markdownName over name when both are defined', function () {
         // option #2 has both name and markdownName defined
-        let secondMenuItem = menu.all(by.css('div.nav-item'));
-        expect(secondMenuItem.get(0).getText()).toBe("Test Recordsets", "name was used instead of markdownName");
+        let secondMenuItem = menu.all(by.css('.chaise-nav-item'));
+        expect(secondMenuItem.get(1).getText()).toBe("Test Recordsets", "name was used instead of markdownName");
     });
 
     it('should render a markdown pattern using proper HTML', function () {
         // in ci we don't have the same globus groups so the "show" ACL hides the 3rd link ("Records")
         var idx = (!process.env.CI ? 3 : 2);
         // option #4 has only markdownName defined
-        let lastMenuItem = menu.all(by.css('div.nav-item')).get(1);
+        let lastMenuItem = menu.all(by.css('.chaise-nav-item')).get(idx);
         lastMenuItem.element(by.css('a')).getAttribute('innerHTML').then(function (aInnerHTML) {
             expect(aInnerHTML.indexOf("<strong>")).toBeGreaterThan(-1, "name was used instead of markdownName");
         });
@@ -81,7 +75,7 @@ describe('Navbar ', function() {
         var menuDropdowns, disabledSubMenuOptions;
         
         it("should have 4 top level dropdown menus", function() {
-            expect(menu.all(by.css('.nav-link')).count()).toBe(4, "number of top level dropdown menus is wrong");
+            expect(menu.all(by.css('.chaise-nav-item')).count()).toBe(4, "number of top level dropdown menus is wrong");
         });
 
         it('should have a disabled "Records" link.', function () {
@@ -91,7 +85,8 @@ describe('Navbar ', function() {
 
         it('should have a header and a disabled "Edit Existing Record" submenu link (no children).', function () {
             //menu should still be open from previous test case
-            let editMenu = menu.all(by.css('.nav-item')).get(1);
+            // chaise-nav-item represents top menus in the navbar.
+            let editMenu = menu.all(by.css('.chaise-nav-item')).get(3);
             editMenu.click().then(function() {
                 expect(editMenu.all(by.css('.chaise-dropdown-header')).get(0).getText()).toBe("For Mutating Data", "Sub menu header is incorrect or not showing");
                 return editMenu.all(by.css("a.disable-link"));
@@ -115,15 +110,19 @@ describe('Navbar ', function() {
 
 
     it('should open the profile card on click of My Profile link', function(done) {
+        // Get My Profile link element using className username-display
         var link = element(by.css('.username-display'));
 
-        link.click();
-        const profileLink = element(by.css('#profile-link'));
-        profileLink.click();
-        const modalContent = element(by.css('.profile-popup'));
-        chaisePage.waitForElement(modalContent);
-        expect(modalContent.isDisplayed()).toBeTruthy();
-        done();
+        link.click().then(function() {
+            const profileLink = element(by.css('#profile-link'));
+            return profileLink.click();
+        }).then(function() {
+            // Get profile card modal element using className profile-popup
+            const modalContent = element(by.css('.profile-popup'));
+            chaisePage.waitForElement(modalContent);
+            expect(modalContent.isDisplayed()).toBeTruthy();
+            done();
+        });
     });
 
     it('should close the profile card on click of X on the modal window', function(done) {
