@@ -26,30 +26,56 @@ const SelectedChiclets = ({
   // 3 rows where each row has the height of 25px
   const maxHeight = 25 * 3;
 
+  /**
+   * Depending on the height of the selected chiclets, we should trigger the
+   * show more/less logic
+   */
   useLayoutEffect(() => {
     if (!container || !container.current) return;
 
-    setOverflow(container.current.scrollHeight > maxHeight);
-
-  }, [rows]);
-
-  // TODO it should be dynamic
-  const checkHeight = () => {
-    let cachedHeight : number = -1, tm : any;
-    return new ResizeSensor(container.current as Element, (dimension) => {
-      if (dimension.height === cachedHeight) return;
+    let cachedHeight = -1, tm: any;
+    const sensor = new ResizeSensor(container.current as Element, (dimension) => {
+      if (dimension.height === cachedHeight || !container.current) return;
       cachedHeight = dimension.height;
       if (tm) clearTimeout(tm);
       tm = setTimeout(() => {
-        setOverflow(container.current!.scrollHeight > maxHeight);
-      }, 500);
+        if (container.current) {
+          setOverflow(container.current.scrollHeight > maxHeight);
+        }
+      }, 200);
     });
-  };
+
+    return () => {
+      sensor.detach();
+    }
+  }, []);
+
+  const renderSelectedChiclet = (row: any) => {
+    const val = <DisplayValue specialNullEmpty={true} value={row.displayname} />;
+    return (
+      <>
+        <ChaiseTooltip
+          placement='bottom-start'
+          tooltip='Clear selected row'
+        >
+          <span className='selected-chiclet-remove' onClick={(event) => removeCallback(row, event)}>
+            <i className='fa-solid fa-xmark selected-chiclet-remove-icon' />
+          </span>
+        </ChaiseTooltip>
+        <ChaiseTooltip
+          placement='bottom-start'
+          tooltip={val}
+        >
+          <span className='selected-chiclet-name'>{val}</span>
+        </ChaiseTooltip>
+      </>
+    )
+  }
 
   const renderShowMoreLessBtn = (isMoreBtn: boolean) => (
     <ChaiseTooltip
       placement='bottom-start'
-      tooltip={isMoreBtn? 'Click to show all selected values.' : 'Click to hide some selected values.'}
+      tooltip={isMoreBtn ? 'Click to show all selected values.' : 'Click to hide some selected values.'}
     >
       <button
         className={`chaise-btn chaise-btn-tertiary selected-chiclet-btn ${isMoreBtn ? 'show-more-btn' : 'show-less-btn'}`}
@@ -60,7 +86,7 @@ const SelectedChiclets = ({
     </ChaiseTooltip>
   )
 
-  const renderClearBtn = () => (
+  const renderClearAllBtn = () => (
     <ChaiseTooltip
       placement='bottom-start'
       tooltip='Clear all selected rows'
@@ -74,39 +100,32 @@ const SelectedChiclets = ({
     </ChaiseTooltip>
   )
 
-  if (rows.length === 0) {
-    return <></>;
-  }
-
   let containerStyles = {};
   if (overflow && !showMore) {
-    containerStyles = {maxHeight, overflowY: 'hidden'};
+    containerStyles = { maxHeight, overflowY: 'hidden' };
   }
 
+  /**
+   * Note: given that we neeed the container ref to always be defined,
+   *       we are going to created the container even if there aren't any rows
+   */
   return (
     <div className='chiclets-container'>
       <div className='selected-chiclets' ref={container} style={containerStyles}>
-        {rows.map((row: any, index: number) => (
+        {rows && rows.map((row: any) => (
           <div key={row.uniqueId} className='selected-chiclet'>
-            <ChaiseTooltip
-              placement='bottom-start'
-              tooltip='Clear selected row'
-            >
-              <span className='selected-chiclet-remove' onClick={(event) => removeCallback(row, event)}>
-                <i className='fa-solid fa-xmark' />
-              </span>
-            </ChaiseTooltip>
-            <DisplayValue specialNullEmpty={true} value={row.displayname} />
+            {renderSelectedChiclet(row)}
           </div>
         ))}
-        {!overflow &&
-          <div className='selected-chiclet'>{renderClearBtn()}</div>
+        {rows && rows.length > 0 && !overflow &&
+          <div className='selected-chiclet'>{renderClearAllBtn()}</div>
         }
       </div>
-      {overflow &&
+      {rows && rows.length > 0 && overflow &&
+        // we want to push the show more/less button to the next line
         <div>
           <div className='selected-chiclet'>{renderShowMoreLessBtn(!showMore)}</div>
-          <div className='selected-chiclet'>{renderClearBtn()}</div>
+          <div className='selected-chiclet'>{renderClearAllBtn()}</div>
         </div>
       }
     </div>

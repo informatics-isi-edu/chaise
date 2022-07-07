@@ -11,11 +11,29 @@ import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 export type RecordestModalProps = {
+  /**
+   * The props that will be passed ot the recordset
+   */
   recordsetProps: RecordsetProps,
+  /**
+   * The modal's class name
+   */
   modalClassName?: string,
+  /**
+   * The displayname used for the title
+   */
   displayname?: Displayname,
+  /**
+   * The comment used for the title
+   */
   comment?: string,
+  /**
+   * The function that will be called on submit
+   */
   onSubmit?: Function,
+  /**
+   * The function that will be called on closing the modal
+   */
   onClose?: () => void
 }
 
@@ -39,7 +57,6 @@ const RecordsetModal = ({
 
   /**
    * Whether to show the modal or not
-   * TODO is this even needed?
    */
   const [show, setShow] = useState(true);
 

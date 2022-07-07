@@ -621,7 +621,7 @@ const RecordsetInner = ({
               </div>
             }
             <div className='recordset-controls-container'>
-              {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows &&
+              {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows && selectedRows.length > 0 &&
                 <SelectedChiclets rows={selectedRows} removeCallback={clearSelectedRow} />
               }
               <div className='row'>

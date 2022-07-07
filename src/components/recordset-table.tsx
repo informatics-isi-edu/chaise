@@ -47,6 +47,23 @@ const RecordsetTable = ({
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
   );
 
+  /**
+   * capture the state of selected and disabled of rows in here so
+   * we don't have to populate this multiple times
+   */
+  let isRowSelected = Array(page ? page.length : 0).fill(false);
+  if (page && page.length && Array.isArray(selectedRows) && selectedRows.length > 0) {
+    isRowSelected = page.tuples.map((tuple: any) => (
+      selectedRows.some((obj) => obj.uniqueId === tuple.uniqueId)
+    ));
+  }
+  let isRowDisabled = Array(page ? page.length : 0).fill(false);
+  if (page && page.length && Array.isArray(disabledRows) && disabledRows.length > 0) {
+    isRowDisabled = page.tuples.map((tuple: any) => (
+      disabledRows.some((obj) => obj.uniqueId === tuple.uniqueId)
+    ));
+  }
+
   useLayoutEffect(() => {
     if (tableContainer.current) {
       addTopHorizontalScroll(tableContainer.current);
@@ -105,25 +122,6 @@ const RecordsetTable = ({
     // }
   };
 
-
-  const isSelected = (tuple: any) => {
-    if (!tuple || !Array.isArray(selectedRows) || selectedRows.length === 0) {
-      return false;
-    }
-    return selectedRows.some((obj) => {
-      return obj.uniqueId === tuple.uniqueId;
-    });
-  };
-
-  const isDisabled = (tuple: any) => {
-    if (!tuple || !Array.isArray(disabledRows) || disabledRows.length === 0) {
-      return false;
-    }
-    return disabledRows.some((obj) => {
-      return obj.uniqueId === tuple.uniqueId;
-    });
-  }
-
   const selectAllOnPage = () => {
     // TODO logs
     // logService.logClientAction(
@@ -134,30 +132,14 @@ const RecordsetTable = ({
     //   scope.vm.reference.defaultLogInfo
     // );
 
-    // const tuples = [];
-    // let tuple;
-
-    // page.tuples.forEach((tuple: any) => {
-    //   // TODO can we improve this? these two are scanning the list multiple times
-    //   if (isDisabled(tuple)) return;
-    //   if (!isSelected(tuple)) {
-
-    //   }
-    // })
-    // for (let i = 0; i < page.tuples.length; i++) {
-    //   tuple = scope.vm.page.tuples[i];
-
-    //   if (scope.isDisabled(tuple)) continue;
-
-    //   if (!scope.isSelected(tuple)) {
-    //     scope.vm.selectedRows.push(tuple);
-    //     tuples.push(tuple);
-    //   }
-    // }
-
-    // if (tuples.length > 0) {
-    //   _callonSelectedRowsChanged(scope, tuples, true);
-    // }
+    setSelectedRows((currRows: any) => {
+      const res = Array.isArray(currRows) ? [...currRows] : [];
+      page.tuples.forEach((tuple: any, index: number) => {
+        if (isRowDisabled[index]) return;
+        if (!isRowDisabled[index]) res.push(tuple);
+      });
+      return res;
+    });
   };
 
   const selectNoneOnPage = () => {
@@ -364,9 +346,9 @@ const RecordsetTable = ({
           rowValues={rowValues}
           tuple={tuple}
           showActionButtons={showActionButtons}
-          selected={isSelected(tuple)}
+          selected={isRowSelected[index]}
           onSelectChange={onSelectChange}
-          disabled={isDisabled(tuple)}
+          disabled={isRowDisabled[index]}
         />)
     })
   }
