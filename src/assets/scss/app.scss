@@ -201,6 +201,12 @@ html {
     display: none;
   }
 
+  .remove-input-btn {
+    /*the button used to clear an input field - clear-input-btn.tsx*/
+    cursor: pointer;
+    pointer-events: all;
+  }
+
   .disabled-form .btn.btn-inverted[disabled]:hover {
     background-color: white !important;
     border-color: $border-color  !important;

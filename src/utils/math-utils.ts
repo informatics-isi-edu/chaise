@@ -1,4 +1,9 @@
-
+/**
+ * Generate random number between min and max range
+ * @param min minimum number
+ * @param max maximum number
+ * @returns {number} random number generated
+ */
 export function generateRandomInteger(min: number, max: number): number {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -22,12 +27,12 @@ function uuidS4() {
 }
 
 /**
- * 
- * @param min minimum number 
+ *
+ * @param min minimum number
  * @param max maximum number
  * @returns random number generated
  */
- export function getRandomInt(min: number, max: number) {
+export function getRandomInt(min: number, max: number) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min;

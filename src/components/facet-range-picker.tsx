@@ -1,5 +1,14 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
+
+// import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+// import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+// import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+// import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
+
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -848,9 +857,7 @@ const FacetRangePicker = ({
       <div>
         List goes here
       </div>
-      <div>
-        Range inputs here
-      </div>
+      <RangeInputs inputType={facetColumn.column.type.rootName} classes='facet-range-input' />
       {renderHistogram()}
     </div>
   )
