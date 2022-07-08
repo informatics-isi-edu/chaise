@@ -49,9 +49,9 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     // const action = LogActions.PAGE_SIZE_SELECT;
     const cause = LogReloadCauses.PAGE_LIMIT;
 
-    update(null, value, true, false, false, false, cause);
+    update({updateResult: true}, {pageLimit: value}, {cause});
   }
-  
+
 
   // the text that we should display before the page-size-dropdown
   const prependLabel = () => {
@@ -140,7 +140,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
    * whether to display create button
    */
   const shouldShowCreateButton = () => {
-    const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 
+    const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0
       && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
 
     return isAddableDisplayMode && config.editable && reference && reference.canCreate;

@@ -4,7 +4,7 @@ import Q from 'q';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions, LogReloadCauses, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -353,7 +353,7 @@ const FacetChoicePicker = ({
   const removeAppliedFilters = () => {
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        return {...curr, selected: false}
+        return { ...curr, selected: false }
       });
     });
   }
@@ -406,6 +406,9 @@ const FacetChoicePicker = ({
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       showFaceting: false,
       disableFaceting: true,
+      // TODO: can be uncommented for testing popups:
+      // showFaceting: true,
+      // disableFaceting: !facetColumn.isEntityMode,
       displayMode: RecordsetDisplayMode.FACET_POPUP,
       // TODO
       // enableFavorites
@@ -424,13 +427,96 @@ const FacetChoicePicker = ({
       logStackPath: LogStackTypes.SET,
     };
 
+    const initialSelectedRows: SelectedRow[] = [];
+    checkboxRows.forEach(function (row) {
+      if (!row.selected) return;
+      let rowUniqueId, rowData;
+
+      // mimic the same structure as tuples
+      // - row.uniqueId will return the filter's uniqueId and not
+      //    the tuple's. We need tuple's uniqueId in here
+      //    (it will be used in the logic of isSelected in modal).
+      // - data is needed for the post process that we do on the data.
+      if (row.tuple && row.tuple.data && facetColumn.isEntityMode) {
+        rowUniqueId = row.tuple.uniqueId;
+        rowData = row.tuple.data;
+      } else {
+        rowUniqueId = row.uniqueId;
+      }
+      initialSelectedRows.push({
+        uniqueId: rowUniqueId,
+        displayname: (rowUniqueId.uniqueId === null) ? { value: null, isHTML: false } : row.displayname,
+        data: rowData,
+      });
+    });
+
     setRecordsetModalProps({
       initialReference: facetReference,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
+      initialSelectedRows
     });
   };
+
+  const modalDataChanged = (isSubmit: boolean) => {
+    return (selectedRows: SelectedRow[]) => {
+      // create the list of choice filters
+      let hasNull = false;
+      const filters = selectedRows.map(function (t: any) {
+        const val =  getFilterUniqueId(t, columnName);
+        hasNull = hasNull || (val === null);
+        return val;
+      });
+
+      // create the reference using filters
+      const ref = facetColumn.replaceAllChoiceFilters(filters);
+
+      // update the reference
+      if (!updateRecordsetReference(ref, facetIndex, LogReloadCauses.FACET_MODIFIED, !isSubmit, true)) {
+        return false;
+      }
+
+      if (isSubmit) {
+        // we will set the checkboxRows to the value of this variable at the end
+        const updatedRows: FacetCheckBoxRow[] = [];
+        // add not-null filter
+        if (!facetColumn.hideNotNullChoice) {
+          updatedRows.push(getNotNullFacetCheckBoxRow());
+        }
+        // add null filter
+        if (!facetColumn.hideNullChoice || hasNull) {
+          updatedRows.push(getNullFacetCheckBoxRow(hasNull));
+        }
+
+        selectedRows.forEach((row: any) => {
+          // filter and tuple uniqueId might be different
+          const value = getFilterUniqueId(row, columnName);
+
+          updatedRows.push({
+            selected: true,
+            uniqueId: value,
+            displayname: row.displayname,
+            tuple: row
+          });
+        });
+
+        // hide the modal
+        hideRecordsetModal();
+
+        // set the selected rows
+        setCheckboxRows(updatedRows);
+
+        //   // make sure to update all the opened facets
+        //   scope.parentCtrl.setInitialized();
+
+        //   // focus on the current facet
+        //   scope.parentCtrl.focusOnFacet(scope.index, true);
+      }
+
+      return true;
+    };
+  }
 
   const hideRecordsetModal = () => {
     setRecordsetModalProps(null);
@@ -468,9 +554,9 @@ const FacetChoicePicker = ({
 
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        if (curr === row) return {...curr, selected: checked};
+        if (curr === row) return { ...curr, selected: checked };
         // if not-null is selected, remove all the other filters
-        else if (row.isNotNull && checked) return {...curr, selected: false}
+        else if (row.isNotNull && checked) return { ...curr, selected: false }
         else return curr;
       });
     });
@@ -486,7 +572,7 @@ const FacetChoicePicker = ({
   const renderPickerContainer = () => {
     return (
       <div className='picker-container'>
-        {facetColumn.column.type.name !== 'boolean' && 
+        {facetColumn.column.type.name !== 'boolean' &&
           <SearchInput
             // NOTE the initial search term is always empty
             initialSearchTerm={''}
@@ -504,8 +590,9 @@ const FacetChoicePicker = ({
           />
         </div>
         <div className='button-container'>
+          {/* TODO id='show-more' removed */}
           <button
-            id='show-more' className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
+            className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
             disabled={facetColumn.hasNotNullFilter}
             onClick={() => openRecordsetModal()}
           >
@@ -550,9 +637,13 @@ const FacetChoicePicker = ({
       {
         recordsetModalProps &&
         <RecordsetModal
-          contentClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
+          modalClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
           recordsetProps={recordsetModalProps}
-          onHide={hideRecordsetModal}
+          onClose={hideRecordsetModal}
+          onSubmit={modalDataChanged(true)}
+          displayname={facetColumn.displayname}
+          onSelectedRowsChanged={modalDataChanged(false)}
+          comment={facetColumn.comment}
         />
       }
     </div>

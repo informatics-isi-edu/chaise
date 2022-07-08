@@ -1,5 +1,4 @@
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type ClearInputBtnProps = {
   btnClassName?: string,
@@ -18,16 +17,15 @@ export const ClearInputBtn = ({
 
   return (
     <div className='chaise-input-control-feedback'>
-      <OverlayTrigger placement='bottom' overlay={
-        <Tooltip>Clear input</Tooltip>
-      }
+      <ChaiseTooltip
+        placement='bottom'
+        tooltip='Clear input'
       >
         <span
           className={'remove-input-btn fa-solid fa-xmark ' + btnClassName}
           {... (clickCallback && { onClick: () => clickCallback() })}
         ></span>
-      </OverlayTrigger>
-
+      </ChaiseTooltip>
     </div>
   )
 }

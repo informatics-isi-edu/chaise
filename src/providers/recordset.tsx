@@ -1,6 +1,6 @@
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
@@ -14,22 +14,122 @@ import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NormalModule } from 'webpack';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
-// TODO more comments and proper types
+/**
+ * types related to the update function
+ */
+type UpdatePageStates = {
+  /**
+   * whether we should trigger update for main result
+   */
+  updateResult?: boolean,
+  /**
+   * whether we should trigger update for main count
+   */
+  updateCount?: boolean,
+  /**
+   * whether we should trigger update for open facets
+   */
+  updateFacets?: boolean
+};
+type UpdateNewValues = {
+  /**
+   * The new reference value that should be used
+   */
+  reference?: any,
+  /**
+   * The new page limit value that should be used
+   */
+  pageLimit?: number
+};
+type UpdateOptions = {
+  /**
+   * Whether we should use the same flow-control counter
+   * Note: Use this when the update is just a refresh and not because of updated state
+   */
+  sameCounter?: boolean,
+  /**
+   * The reload cause
+   */
+  cause?: string,
+  /**
+   * The last active facet that should not be updated
+   * (if it's an invalid value like -1, we will update all the open facets)
+   */
+  lastActiveFacet?: number,
+  /**
+   * reset the initialized state of all the open facets
+   * (when we wnat to reset the state of the page completely, .e.g.  page update after search-popup submit)
+   */
+  resetAllOpenFacets?: boolean
+}
+type UpdateFunction = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => boolean;
 
 export const RecordsetContext = createContext<{
   logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any) => void,
+  /**
+   * The displayed reference
+   */
   reference: any,
+  /**
+   * Whether the main data is loading or not (and therefore we need spinner or not)
+   */
   isLoading: boolean,
+  /**
+   * Whether the main data has been initialized or not
+   */
   isInitialized: boolean,
+  /**
+   * Call this function to initialize the recordset data
+   */
   initialize: () => void,
-  update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
+  /**
+   * Can be used to trigger update on any parts of the page
+   */
+  update: UpdateFunction,
+  // update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
+  /**
+   * The page limit (number of rows that we're fetching for each page)
+   */
   pageLimit: any,
+  /**
+   * The displayed page
+   */
   page: any,
+  /**
+   * An array of column values
+   * NOTE we're using colValues instead of rowValues to make the aggregate logic easier.
+   */
   colValues: any,
+  /**
+   * The rows that should be disabled
+   */
+  disabledRows: any,
+  /**
+   * The rows that are selected
+   */
+  selectedRows: SelectedRow[],
+  /**
+   * A function that can be used for setting the selected rows.
+   * You can either pass an array, or a function that returns an array.
+   */
+  setSelectedRows: (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])) => void,
+  /**
+   * The columns that are displayed
+   */
   columnModels: any,
-  totalRowCount: number|null,
-  registerFacetCallbacks: any, // TODO
-  printDebugMessage: any, // TODO
+  /**
+   * The total row count number (if null, we don't want to show the total count)
+   */
+  totalRowCount: number | null,
+  /**
+   * A function that can be used to register the facet callbacks
+   */
+  registerFacetCallbacks: (updateFacetStatesCallback: Function, updateFacetsCallback: Function) => void,
+  /**
+   * Can be used for printing debug messages related to flow-control logic
+   * (will append the proper count)
+   */
+  printDebugMessage: (message: string, counter?: number) => void,
   /**
    * given a reference will check the url length, and if it's above the limit:
    *   - will show an alert
@@ -43,13 +143,47 @@ export const RecordsetContext = createContext<{
   | null>(null);
 
 type RecordsetProviderProps = {
+  /**
+   * The inner element (will be the recordset component)
+   */
   children: JSX.Element,
+  /**
+   * The initial reference
+   */
   initialReference: any,
+  /**
+   * The initial page limit
+   */
   initialPageLimit: any,
-  config: RecordsetConfig, // TODO
+  /**
+   * The recordset config
+   */
+  config: RecordsetConfig,
+  /**
+   * log related props
+   */
   logInfo: any, // TODO
+  /**
+   * A callback to get the favorites (used in facet popup)
+   */
   getFavorites?: Function,
+  /**
+   * A callback to get the disabeld tuples (used in p&b popup)
+   */
   getDisabledTuples?: Function,
+  /**
+   * The initially selected rows (used in facet popup)
+   */
+  initialSelectedRows?: SelectedRow[],
+  /**
+   * The callback that should be called when selected rows changes
+   * If it returns a false, the selected rows won't change.
+   */
+  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  /**
+   * The callback that should be called when favorites changed
+   */
+  onFavoritesChanged?: Function
 }
 
 export default function RecordsetProvider({
@@ -59,7 +193,10 @@ export default function RecordsetProvider({
   config,
   logInfo,
   getFavorites,
-  getDisabledTuples
+  getDisabledTuples,
+  initialSelectedRows,
+  onSelectedRowsChanged,
+  onFavoritesChanged
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
@@ -95,9 +232,29 @@ export default function RecordsetProvider({
     )
   };
 
-  const [totalRowCount, setTotalRowCount] = useState<number|null>(null);
+  const [totalRowCount, setTotalRowCount] = useState<number | null>(null);
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
+
+  /**
+   * The selected rows
+   */
+  const [selectedRows, setStateSelectedRows] = useState<SelectedRow[]>(() => {
+    return Array.isArray(initialSelectedRows) ? initialSelectedRows : [];
+  });
+  /**
+   * A wrapper for the set state function to first call the onSelectedRowsChanged
+   * and see whether we actually want to update it or not.
+   */
+  const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
+    setStateSelectedRows((prevRows: SelectedRow[]) => {
+      const res = typeof param === 'function' ? param(prevRows) : param;
+      if (onSelectedRowsChanged && onSelectedRowsChanged(res) === false) {
+        return prevRows;
+      }
+      return res;
+    });
+  };
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
@@ -120,7 +277,7 @@ export default function RecordsetProvider({
     }, reference.defaultLogInfo)
   };
 
-  const checkReferenceURL = (ref: any) : boolean => {
+  const checkReferenceURL = (ref: any): boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
     if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
 
@@ -142,7 +299,7 @@ export default function RecordsetProvider({
     return true;
   };
 
-  const printDebugMessage = (message: string, counter?: number) => {
+  const printDebugMessage = (message: string, counter?: number): void => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
     $log.debug(`counter ${counter}: ` + message);
   };
@@ -156,7 +313,8 @@ export default function RecordsetProvider({
     flowControl.current.dirtyCount = true;
     flowControl.current.queue.counter = 0;
 
-    update(null, null, false, false, false, false);
+    // just initiate the flow control without providing an new values
+    update(null, null);
   };
 
   /**
@@ -177,7 +335,24 @@ export default function RecordsetProvider({
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => {
+  // const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => {
+  const update = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => {
+
+    // page state variables:
+    const updateResult = pageStates && pageStates.updateResult === true;
+    const updateCount = pageStates && pageStates.updateCount === true;
+    const updateFacets = pageStates && pageStates.updateFacets === true;
+
+    // new values:
+    const newRef = (newValues && newValues.reference) ? newValues.reference : undefined;
+    const limit = (newValues && newValues.pageLimit) ? newValues.pageLimit : undefined;
+
+    // options:
+    const sameCounter = options && options.sameCounter === true;
+    const cause = options && typeof options.cause === 'string' ?  options.cause : undefined;
+    const resetAllOpenFacets = options && options.resetAllOpenFacets === true;
+
+
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
@@ -185,13 +360,13 @@ export default function RecordsetProvider({
       return false;
     }
 
-    if (typeof lastActiveFacet === 'number') {
-      flowControl.current.lastActiveFacet = lastActiveFacet;
+    if (options && typeof options.lastActiveFacet === 'number') {
+      flowControl.current.lastActiveFacet = options.lastActiveFacet;
     }
 
     if (updateFacets) {
       if (flowControl.current.updateFacetStatesCallback) {
-        flowControl.current.updateFacetStatesCallback(flowControl, cause);
+        flowControl.current.updateFacetStatesCallback(flowControl, resetAllOpenFacets, cause);
       }
     }
 
@@ -260,6 +435,11 @@ export default function RecordsetProvider({
     if (!reference.display || !reference.display.hideRowCount) {
       // update the count
       updateTotalRowCount(updatePage);
+    }
+
+    // TODO does this make sense?
+    if (!isLoading && page && page.length > 0) {
+      fetchSecondaryRequests(updatePage);
     }
 
     // fetch the facets
@@ -784,13 +964,16 @@ export default function RecordsetProvider({
       pageLimit,
       page,
       colValues,
+      disabledRows,
+      selectedRows,
+      setSelectedRows,
       columnModels,
       totalRowCount,
       registerFacetCallbacks,
       printDebugMessage,
       checkReferenceURL
     };
-  }, [reference, isLoading, isInitialized, page, colValues, columnModels, totalRowCount]);
+  }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
 
   return (
     <RecordsetContext.Provider value={providerValue}>
