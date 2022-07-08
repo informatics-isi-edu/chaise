@@ -473,7 +473,7 @@ const FacetChoicePicker = ({
       const ref = facetColumn.replaceAllChoiceFilters(filters);
 
       // update the reference
-      if (!updateRecordsetReference(ref, -1, LogReloadCauses.FACET_MODIFIED, !isSubmit)) {
+      if (!updateRecordsetReference(ref, facetIndex, LogReloadCauses.FACET_MODIFIED, !isSubmit, true)) {
         return false;
       }
 
@@ -501,7 +501,10 @@ const FacetChoicePicker = ({
           });
         });
 
+        // hide the modal
         hideRecordsetModal();
+
+        // set the selected rows
         setCheckboxRows(updatedRows);
 
         //   // make sure to update all the opened facets

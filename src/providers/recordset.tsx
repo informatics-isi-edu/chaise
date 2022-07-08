@@ -14,7 +14,55 @@ import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import { NormalModule } from 'webpack';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
-// TODO more comments and proper types
+/**
+ * types related to the update function
+ */
+type UpdatePageStates = {
+  /**
+   * whether we should trigger update for main result
+   */
+  updateResult?: boolean,
+  /**
+   * whether we should trigger update for main count
+   */
+  updateCount?: boolean,
+  /**
+   * whether we should trigger update for open facets
+   */
+  updateFacets?: boolean
+};
+type UpdateNewValues = {
+  /**
+   * The new reference value that should be used
+   */
+  reference?: any,
+  /**
+   * The new page limit value that should be used
+   */
+  pageLimit?: number
+};
+type UpdateOptions = {
+  /**
+   * Whether we should use the same flow-control counter
+   * Note: Use this when the update is just a refresh and not because of updated state
+   */
+  sameCounter?: boolean,
+  /**
+   * The reload cause
+   */
+  cause?: string,
+  /**
+   * The last active facet that should not be updated
+   * (if it's an invalid value like -1, we will update all the open facets)
+   */
+  lastActiveFacet?: number,
+  /**
+   * reset the initialized state of all the open facets
+   * (when we wnat to reset the state of the page completely, .e.g.  page update after search-popup submit)
+   */
+  resetAllOpenFacets?: boolean
+}
+type UpdateFunction = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => boolean;
 
 export const RecordsetContext = createContext<{
   logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any) => void,
@@ -37,7 +85,8 @@ export const RecordsetContext = createContext<{
   /**
    * Can be used to trigger update on any parts of the page
    */
-  update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
+  update: UpdateFunction,
+  // update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
   /**
    * The page limit (number of rows that we're fetching for each page)
    */
@@ -264,7 +313,8 @@ export default function RecordsetProvider({
     flowControl.current.dirtyCount = true;
     flowControl.current.queue.counter = 0;
 
-    update(null, null, false, false, false, false);
+    // just initiate the flow control without providing an new values
+    update(null, null);
   };
 
   /**
@@ -285,7 +335,24 @@ export default function RecordsetProvider({
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => {
+  // const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => {
+  const update = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => {
+
+    // page state variables:
+    const updateResult = pageStates && pageStates.updateResult === true;
+    const updateCount = pageStates && pageStates.updateCount === true;
+    const updateFacets = pageStates && pageStates.updateFacets === true;
+
+    // new values:
+    const newRef = (newValues && newValues.reference) ? newValues.reference : undefined;
+    const limit = (newValues && newValues.pageLimit) ? newValues.pageLimit : undefined;
+
+    // options:
+    const sameCounter = options && options.sameCounter === true;
+    const cause = options && typeof options.cause === 'string' ?  options.cause : undefined;
+    const resetAllOpenFacets = options && options.resetAllOpenFacets === true;
+
+
     // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
@@ -293,13 +360,13 @@ export default function RecordsetProvider({
       return false;
     }
 
-    if (typeof lastActiveFacet === 'number') {
-      flowControl.current.lastActiveFacet = lastActiveFacet;
+    if (options && typeof options.lastActiveFacet === 'number') {
+      flowControl.current.lastActiveFacet = options.lastActiveFacet;
     }
 
     if (updateFacets) {
       if (flowControl.current.updateFacetStatesCallback) {
-        flowControl.current.updateFacetStatesCallback(flowControl, cause);
+        flowControl.current.updateFacetStatesCallback(flowControl, resetAllOpenFacets, cause);
       }
     }
 

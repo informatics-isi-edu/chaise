@@ -47,8 +47,8 @@ export type RecordsetProps = {
   initialPageLimit?: number,
   getFavorites?: Function,
   getDisabledTuples?: Function,
-  initialSelectedRows?: any, // TODO
-  onSelectedRowsChanged?: Function,
+  initialSelectedRows?: SelectedRow[],
+  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
   onFavoritesChanged?: Function,
   parentReference?: any,
   parentTuple?: any
@@ -282,7 +282,7 @@ const RecordsetInner = ({
     if (completed > 0) {
       const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
 
-      update(null, null, true, true, true, false, cause);
+      update({updateResult: true, updateFacets: true, updateCount: true}, null, {cause});
     }
   };
 
@@ -348,7 +348,11 @@ const RecordsetInner = ({
     //   stack: flowControl.current.getTableLogStack(null, extraInfo)
     // }, ref.defaultLogInfo);
 
-    update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
+    update(
+      {updateResult: true, updateCount: true, updateFacets: true},
+      {reference: ref},
+      {cause: LogReloadCauses.SEARCH_BOX}
+    );
     // }
   };
 

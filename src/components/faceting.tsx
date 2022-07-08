@@ -177,7 +177,7 @@ const Faceting = ({
 
   //-------------------  flow-control related functions:   --------------------//
 
-  const updateFacetStates = (flowControl: any, cause?: string) => {
+  const updateFacetStates = (flowControl: any, resetAllOpenFacets?: boolean, cause?: string) => {
     // batch all the state changes into one
     const modifiedAttrs: { [index: number]: { [key: string]: boolean } } = {};
 
@@ -198,7 +198,11 @@ const Faceting = ({
           frm.reloadCauses.push(cause);
         }
         frm.processed = false;
-        modifiedAttrs[index] = { isLoading: true };
+        if (resetAllOpenFacets) {
+          modifiedAttrs[index] = { isLoading: true, initialized: false };
+        } else {
+          modifiedAttrs[index] = { isLoading: true };
+        }
       }
       // otherwise we don't need to process it and should just mark
       // it as "not initialized"
@@ -330,7 +334,7 @@ const Faceting = ({
     }
 
     // call the flow-control, so the update of facet is queued properly
-    update(null, null, false, false, false, true);
+    update(null, null, {sameCounter: true});
   };
 
   /**
@@ -342,18 +346,25 @@ const Faceting = ({
    * @param keepRef if true, we will not change the reference (the function is used for url length check)
    * @returns
    */
-  const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean, clearAllInitialized?: boolean) => {
+  const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean, resetAllOpenFacets?: boolean) => {
     if (!checkReferenceURL(newRef)) {
       return false;
     }
 
-    // TODO scroll to the facet and set everything as initialized..
-    // if (clearAllInitialized) {
-    //   scrollToFacet(index, true);
-    // }
-
     if (!keepRef) {
-      update(newRef, null, true, true, true, false, cause, index);
+      // if we should restart every facet or not
+      // reset everything and then focus on the facet that triggered this update
+      let lastActiveFacet = index;
+      if (resetAllOpenFacets) {
+        lastActiveFacet = -1;
+        scrollToFacet(index, true);
+      }
+
+      update(
+        {updateResult: true, updateCount: true, updateFacets: true},
+        {reference: newRef},
+        {cause, lastActiveFacet, resetAllOpenFacets}
+      )
     }
     return true;
   };
@@ -363,7 +374,7 @@ const Faceting = ({
    * it will return an array of arrays
    */
   const getAppliedFiltersFromRS = () => {
-    return facetRequestModels.current.map((frm: any) => {
+    return facetRequestModels.current.map((frm: FacetRequestModel) => {
       return frm.getAppliedFilters();
     });
   };

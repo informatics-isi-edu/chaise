@@ -89,7 +89,7 @@ const RecordsetTable = ({
     //   stack: flowControl.current.getTableLogStack()
     // }, ref.defaultLogInfo);
 
-    update(ref, null, true, false, false, false, LogReloadCauses.SORT);
+    update({updateResult: true}, {reference: ref}, {cause: LogReloadCauses.SORT});
     // }
   }, [currSortColumn]);
 
@@ -121,7 +121,7 @@ const RecordsetTable = ({
     //   reference.defaultLogInfo
     // );
 
-    update(ref, null, true, false, false, false, cause);
+    update({updateResult: true}, {reference: ref}, {cause: cause});
     // }
   };
 
