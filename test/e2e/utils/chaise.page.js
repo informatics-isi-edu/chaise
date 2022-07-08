@@ -977,11 +977,11 @@ var recordsetPage = function() {
     };
 
     this.getExportDropdown = function () {
-        return element(by.tagName("export")).element(by.tagName("button"));
+        return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
     this.getExportOptions = function () {
-        return element(by.tagName("export")).all(by.tagName("li"));
+        return element.all(by.css(".export-menu-item"));
     };
 
     this.getExportOption = function (optionName) {

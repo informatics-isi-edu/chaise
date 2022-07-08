@@ -437,8 +437,7 @@ describe('View recordset,', function () {
             });
 
             it("should display the Export dropdown button with proper tooltip.", function(done) {
-                // var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
-                const exportDropdown = element(by.css('.export-menu'));
+                const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                 expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
                 browser.actions().mouseMove(exportDropdown).perform();
                 var tooltip = chaisePage.getTooltipDiv();
@@ -453,9 +452,9 @@ describe('View recordset,', function () {
             });
             
             it("should have '2' options in the dropdown menu.", function (done) {
-                const exportDropdown = element(by.css('.export-menu'));
+                const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                 exportDropdown.click().then(function () {
-                    const exportMenuItems = element.all(by.css('.export-menu-item'));
+                    const exportMenuItems = chaisePage.recordsetPage.getExportOptions();
                     expect(exportMenuItems.count()).toBe(2, "incorrect number of export options");
                     // close the dropdown
                     return exportDropdown.click();
@@ -469,10 +468,9 @@ describe('View recordset,', function () {
             
             if (!process.env.CI) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
-                    const exportDropdown = element(by.css('.export-menu'));
+                    const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                     exportDropdown.click().then(function () {
-                        const exportMenuItems = element.all(by.css('.export-menu-item')); 
-                        const csvOption = exportMenuItems.get(0);
+                        const csvOption = element(by.partialLinkText('Search results (CSV)'));
                         expect(csvOption.getText()).toBe("Search results (CSV)");
                         return csvOption.click();
                     }).then(function () {
@@ -490,11 +488,10 @@ describe('View recordset,', function () {
                 });
 
                 it("should have 'BDBag' as a download option and download the file.", function(done) {
-                    const exportDropdown = element(by.css('.export-menu'));
+                    const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                     let modalDialog;
                     exportDropdown.click().then(function () {
-                        const exportMenuItems = element.all(by.css('.export-menu-item')); 
-                        const bagOption = exportMenuItems.get(1);
+                        const bagOption = element(by.partialLinkText('BDBag'));
                         expect(bagOption.getText()).toBe("BDBag");
                         return bagOption.click();
                     }).then(function () {
@@ -507,7 +504,6 @@ describe('View recordset,', function () {
                             return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
                         }, browser.params.defaultTimeout);
                     }).then(function () {
-                        chaisePage.waitForElementInverse(element(by.css(".export-progress")));
                         done();
                     }).catch(function (err) {
                         done.fail(err);
