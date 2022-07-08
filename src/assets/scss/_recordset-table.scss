@@ -165,6 +165,10 @@
       min-height: 25px; // make sure the button has default height
     }
 
+    .chaise-view-details {
+      font-size: 1.1em;
+    }
+
     .apply-saved-query-button.disabled {
       cursor: not-allowed;
       color: $disabled-color;

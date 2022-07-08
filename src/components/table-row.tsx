@@ -6,7 +6,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -14,6 +14,11 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -52,7 +57,20 @@ const TableRow = ({
     maxHeightStyle: defaultMaxHeightStyle
   })
 
+  /**
+   * state variable to open and close delete confirmation modal window
+   */
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
+    onConfirm: () => void,
+    buttonLabel: string,
+    message: JSX.Element
+  } | null>(null);
+
+  const { dispatchError } = useError();
+
   const rowContainer = useRef<any>(null);
+
+  // TODO: logging
 
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
@@ -85,7 +103,65 @@ const TableRow = ({
 
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
     $log.debug('deleting tuple!');
+
+    if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+      // TODO: log the opening of delete modal
+      // LogService.logClientAction({
+      //   action: LogService.getActionString(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
+      //   stack: logStack
+      // }, reference.defaultLogInfo);
+
+      // TODO unlink should say disconnect...
+      const confirmMessage: JSX.Element = (
+        <>
+          Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+          <span>: </span>
+          <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
+        </>
+      );
+
+      setShowDeleteConfirmationModal({
+        buttonLabel: isUnlink ? 'Unlink' : 'Delete',
+        onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
+        message: confirmMessage
+      });
+
+    } else {
+      onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
+    }
+
     return;
+  };
+
+  const onDeleteUnlinkConfirmation = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
+    setShowDeleteConfirmationModal(null);
+
+    const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
+    const logObj = {
+      action: LogService.getActionString(actionVerb),
+      // stack: logStack
+    }
+
+    reference.delete(logObj).then(function deleteSuccess() {
+      // TODO show some sort of indicator? in master branch we're updating the
+      //      whole page and therefore relying on the main page loader to show
+      //       and indicate something is happening
+      // TODO: tell parent controller data updated
+      // scope.$emit('record-deleted', emmitedMessageArgs);
+    }).catch(function (error: any) {
+      dispatchError({ error: error, isDismissible: true });
+    });
+  }
+
+  const onCancel = () => {
+    setShowDeleteConfirmationModal(null);
+    // TODO: log the opening of cancelation modal
+    // const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+    // LogService.logClientAction({
+    //   action: LogService.getActionString(actionVerb),
+    //   // TODO: ask
+    //   // stack: logStack
+    // }, tuple.reference.defaultLogInfo);
   };
 
   const tupleReference = tuple.reference,
@@ -137,26 +213,21 @@ const TableRow = ({
   let editCallback: null | (() => void) = null;
   if (config.editable && tuple.canUpdate) {
     editCallback = function () {
-      $log.debug('edit clicked!');
-      // TODO edit functionality
-      // var id = MathUtils.getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      const newRef = tupleReference.contextualize?.entryEdit;
 
-      // var editLink = editLink = tupleReference.contextualize.entryEdit.appLink;
-      // var qCharacter = editLink.indexOf("?") !== -1 ? "&" : "?";
-      // $window.open(editLink + qCharacter + 'invalidate=' + UriUtils.fixedEncodeURIComponent(id), '_blank');
+      if (newRef) {
+        const editLink = addQueryParamsToURL(newRef.appLink, {
+          invalidate: referrer_id
+        });
 
-      // var args = {};
-      // if (isRelated) {
-      //   args = containerDetails(scope);
-      // }
-      // args.id = id;
-      // scope.$emit("edit-request", args);
+        windowRef.open(editLink, '_blank');
 
-      // TODO log support (can be ignored for now)
-      // logService.logClientAction({
-      //   action: getLogAction(scope, logService.logActions.EDIT_INTEND),
-      //   stack: scope.logStack
-      // }, tupleReference.defaultLogInfo);
+        // TODO: logging
+        // logRecordsetClientAction(LogActions.EDIT_INTEND);
+      } else {
+        $log.debug('Error: reference is undefined or null');
+      }
     };
   }
 
@@ -344,18 +415,30 @@ const TableRow = ({
     });
   }
 
-  return (<tr
-    className={`chaise-table-row${disabled ? ' disabled-row' : ''}`}
-    ref={rowContainer}
-    style={{ 'position': 'relative' }}
-  >
-    {showActionButtons &&
-      <td className='block action-btns'>
-        {renderActionButtons()}
-      </td>
-    }
-    {renderCells()}
-  </tr>
+  return (
+    <>
+      <tr
+        className={`chaise-table-row${disabled ? ' disabled-row' : ''}`}
+        ref={rowContainer}
+        style={{ 'position': 'relative' }}
+      >
+        {showActionButtons &&
+          <td className='block action-btns'>
+            {renderActionButtons()}
+          </td>
+        }
+        {renderCells()}
+      </tr>
+      {showDeleteConfirmationModal &&
+        <DeleteConfirmationModal
+          show={!!showDeleteConfirmationModal}
+          message={showDeleteConfirmationModal.message}
+          buttonLabel={showDeleteConfirmationModal.buttonLabel}
+          onConfirm={showDeleteConfirmationModal.onConfirm}
+          onCancel={onCancel}
+        />
+      }
+    </>
   )
 }
 

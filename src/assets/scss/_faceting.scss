@@ -19,16 +19,19 @@
       &:hover {
         border-color: rgb(51, 122, 183) !important;
         animation-duration: 4s;
-        + .facet-panel {
+
+        +.facet-panel {
           margin-top: 0;
           border-top: 0;
         }
       }
+
       :focus {
         outline: none;
       }
+
       // override bootstrap default
-      + .facet-panel {
+      +.facet-panel {
         margin-top: -1px;
         // border-top: 0;
       }
@@ -106,6 +109,12 @@
       line-height: 20px;
       vertical-align: middle;
       margin: 4px;
+    }
+  }
+
+  .range-picker {
+    .facet-range-input {
+      margin: 12px 0;
     }
   }
 }
