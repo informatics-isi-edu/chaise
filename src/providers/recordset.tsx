@@ -1,6 +1,6 @@
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
@@ -18,21 +18,69 @@ import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
 export const RecordsetContext = createContext<{
   logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any) => void,
+  /**
+   * The displayed reference
+   */
   reference: any,
+  /**
+   * Whether the main data is loading or not (and therefore we need spinner or not)
+   */
   isLoading: boolean,
+  /**
+   * Whether the main data has been initialized or not
+   */
   isInitialized: boolean,
+  /**
+   * Call this function to initialize the recordset data
+   */
   initialize: () => void,
+  /**
+   * Can be used to trigger update on any parts of the page
+   */
   update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
+  /**
+   * The page limit (number of rows that we're fetching for each page)
+   */
   pageLimit: any,
+  /**
+   * The displayed page
+   */
   page: any,
+  /**
+   * An array of column values
+   * NOTE we're using colValues instead of rowValues to make the aggregate logic easier.
+   */
   colValues: any,
+  /**
+   * The rows that should be disabled
+   */
   disabledRows: any,
-  selectedRows: any,
-  setSelectedRows: any, // TODO
+  /**
+   * The rows that are selected
+   */
+  selectedRows: SelectedRow[],
+  /**
+   * A function that can be used for setting the selected rows.
+   * You can either pass an array, or a function that returns an array.
+   */
+  setSelectedRows: (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])) => void,
+  /**
+   * The columns that are displayed
+   */
   columnModels: any,
-  totalRowCount: number|null,
-  registerFacetCallbacks: any, // TODO
-  printDebugMessage: any, // TODO
+  /**
+   * The total row count number (if null, we don't want to show the total count)
+   */
+  totalRowCount: number | null,
+  /**
+   * A function that can be used to register the facet callbacks
+   */
+  registerFacetCallbacks: (updateFacetStatesCallback: Function, updateFacetsCallback: Function) => void,
+  /**
+   * Can be used for printing debug messages related to flow-control logic
+   * (will append the proper count)
+   */
+  printDebugMessage: (message: string, counter?: number) => void,
   /**
    * given a reference will check the url length, and if it's above the limit:
    *   - will show an alert
@@ -46,15 +94,46 @@ export const RecordsetContext = createContext<{
   | null>(null);
 
 type RecordsetProviderProps = {
+  /**
+   * The inner element (will be the recordset component)
+   */
   children: JSX.Element,
+  /**
+   * The initial reference
+   */
   initialReference: any,
+  /**
+   * The initial page limit
+   */
   initialPageLimit: any,
-  config: RecordsetConfig, // TODO
+  /**
+   * The recordset config
+   */
+  config: RecordsetConfig,
+  /**
+   * log related props
+   */
   logInfo: any, // TODO
+  /**
+   * A callback to get the favorites (used in facet popup)
+   */
   getFavorites?: Function,
+  /**
+   * A callback to get the disabeld tuples (used in p&b popup)
+   */
   getDisabledTuples?: Function,
-  initialSelectedRows?: any,
-  onSelectedRowsChanged?: Function,
+  /**
+   * The initially selected rows (used in facet popup)
+   */
+  initialSelectedRows?: SelectedRow[],
+  /**
+   * The callback that should be called when selected rows changes
+   * If it returns a false, the selected rows won't change.
+   */
+  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  /**
+   * The callback that should be called when favorites changed
+   */
   onFavoritesChanged?: Function
 }
 
@@ -104,17 +183,25 @@ export default function RecordsetProvider({
     )
   };
 
-  const [totalRowCount, setTotalRowCount] = useState<number|null>(null);
+  const [totalRowCount, setTotalRowCount] = useState<number | null>(null);
 
   const [disabledRows, setDisabledRows] = useState<any>([]);
-  const [selectedRows, setStateSelectedRows] = useState<any>(initialSelectedRows);
-  const setSelectedRows = (fn: any) => {
-    $log.debug('set selected rows called!');
-    setStateSelectedRows((prevRows: any) => {
-      const res = typeof fn === 'function' ? fn(prevRows) : fn;
-      $log.debug(`there are ${res.length} rows selected`);
+
+  /**
+   * The selected rows
+   */
+  const [selectedRows, setStateSelectedRows] = useState<SelectedRow[]>(() => {
+    return Array.isArray(initialSelectedRows) ? initialSelectedRows : [];
+  });
+  /**
+   * A wrapper for the set state function to first call the onSelectedRowsChanged
+   * and see whether we actually want to update it or not.
+   */
+  const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
+    setStateSelectedRows((prevRows: SelectedRow[]) => {
+      const res = typeof param === 'function' ? param(prevRows) : param;
       if (onSelectedRowsChanged && onSelectedRowsChanged(res) === false) {
-        return prevRows
+        return prevRows;
       }
       return res;
     });
@@ -141,7 +228,7 @@ export default function RecordsetProvider({
     }, reference.defaultLogInfo)
   };
 
-  const checkReferenceURL = (ref: any) : boolean => {
+  const checkReferenceURL = (ref: any): boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
     if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
 
@@ -163,7 +250,7 @@ export default function RecordsetProvider({
     return true;
   };
 
-  const printDebugMessage = (message: string, counter?: number) => {
+  const printDebugMessage = (message: string, counter?: number): void => {
     counter = typeof counter !== 'number' ? flowControl.current.queue.counter : counter;
     $log.debug(`counter ${counter}: ` + message);
   };

@@ -1,5 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
@@ -64,6 +64,9 @@ const RecordsetTable = ({
     ));
   }
 
+  /**
+   * add the top horizontal scroll if needed
+   */
   useLayoutEffect(() => {
     if (tableContainer.current) {
       addTopHorizontalScroll(tableContainer.current);
@@ -122,6 +125,9 @@ const RecordsetTable = ({
     // }
   };
 
+  /**
+   * select all the rows that are displayed and are not disabled
+   */
   const selectAllOnPage = () => {
     // TODO logs
     // logService.logClientAction(
@@ -132,17 +138,24 @@ const RecordsetTable = ({
     //   scope.vm.reference.defaultLogInfo
     // );
 
-    setSelectedRows((currRows: any) => {
-      const res = Array.isArray(currRows) ? [...currRows] : [];
+    setSelectedRows((currRows: SelectedRow[]) => {
+      const res : SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       page.tuples.forEach((tuple: any, index: number) => {
         if (isRowDisabled[index]) return;
-        if (!isRowDisabled[index]) res.push(tuple);
+        if (!isRowDisabled[index]) res.push({
+          displayname: tuple.displayname,
+          uniqueId: tuple.uniqueId,
+          data: tuple.data
+        });
       });
       return res;
     });
   };
 
-  const selectNoneOnPage = () => {
+  /**
+   * deselect all the rows that are displayed and are not disabled
+   */
+  const DeselectAllOnPage = () => {
     // logService.logClientAction(
     //   {
     //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_DESELECT_ALL),
@@ -151,10 +164,10 @@ const RecordsetTable = ({
     //   scope.vm.reference.defaultLogInfo
     // );
 
-    setSelectedRows((currRows: any) => {
-      const res = Array.isArray(currRows) ? [...currRows] : [];
+    setSelectedRows((currRows: SelectedRow[]) => {
+      const res : SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       page.tuples.forEach((tuple: any) => {
-        const rowIndex = res.findIndex((obj: any) => obj.uniqueId === tuple.uniqueId);
+        const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
         if (rowIndex !== -1) res.splice(rowIndex, 1);
       });
       return res;
@@ -165,15 +178,14 @@ const RecordsetTable = ({
    * Called when the row is selected or deselected
    */
   const onSelectChange = (tuple: any) => {
-    $log.debug(`on select chagne called for ${tuple.uniqueId}`);
-    setSelectedRows((currRows: any) => {
-      const res = Array.isArray(currRows) ? [...currRows] : [];
+    setSelectedRows((currRows: SelectedRow[]) => {
+      const res : SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       // see if the tuple is list of selected rows or not
-      const rowIndex = res.findIndex((obj: any) => obj.uniqueId === tuple.uniqueId);
+      const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
       // if it's currently selected, then we should deselect (and vice versa)
       const isSelected = rowIndex !== -1;
       if (!isSelected) {
-        res.push(tuple);
+        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data });
       } else {
         res.splice(rowIndex, 1);
       }
@@ -202,7 +214,7 @@ const RecordsetTable = ({
             {/* TODO test id changes to class */}
             <ChaiseTooltip
               placement='right'
-              tooltip={'Select all rows on this page'}
+              tooltip={'Select all rows on this page.'}
             >
               <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={selectAllOnPage}
@@ -213,10 +225,10 @@ const RecordsetTable = ({
             </ChaiseTooltip>
             <ChaiseTooltip
               placement='right'
-              tooltip={'Deselect all rows on this page'}
+              tooltip={'Deselect all rows on this page.'}
             >
               <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
-                type='button' onClick={selectNoneOnPage}
+                type='button' onClick={DeselectAllOnPage}
               >
                 <span className='chaise-btn-icon fa-regular fa-square'></span>
                 <span>None on page</span>

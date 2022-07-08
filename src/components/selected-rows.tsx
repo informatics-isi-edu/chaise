@@ -1,23 +1,30 @@
-import { SelectedChiclet } from '@isrd-isi-edu/chaise/src/models/recordset'
+import { SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset'
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { useLayoutEffect, useRef, useState } from 'react';
 import { ResizeSensor } from 'css-element-queries';
 
 
-type SelectedChicletProps = {
-  rows: SelectedChiclet[];
-  removeCallback: (row: SelectedChiclet | null, event: any) => void;
+type SelectedRowProps = {
+  /**
+   * The selected-chiclet rows
+   */
+  rows: SelectedRow[];
+  /**
+   * The callback that will be called when users click on remove
+   * If the first parameter is null, users clicked on "clear-all" button.
+   */
+  removeCallback: (row: SelectedRow | null, event: any) => void;
 };
 
 /**
  * Can be used to show the selected chiclets
  * Note: since plot is using the same functionlaity we created a seaprate component for it.
  */
-const SelectedChiclets = ({
+const SelectedRows = ({
   rows,
   removeCallback
-}: SelectedChicletProps): JSX.Element => {
+}: SelectedRowProps): JSX.Element => {
   const [overflow, setOverflow] = useState(false);
   const [showMore, setShowMore] = useState(false);
 
@@ -50,7 +57,7 @@ const SelectedChiclets = ({
     }
   }, []);
 
-  const renderSelectedChiclet = (row: any) => {
+  const renderSelectedRow = (row: any) => {
     const val = <DisplayValue specialNullEmpty={true} value={row.displayname} />;
     return (
       <>
@@ -65,6 +72,7 @@ const SelectedChiclets = ({
         <ChaiseTooltip
           placement='bottom-start'
           tooltip={val}
+          tooltipAlwaysOnLeft={true}
         >
           <span className='selected-chiclet-name'>{val}</span>
         </ChaiseTooltip>
@@ -114,7 +122,7 @@ const SelectedChiclets = ({
       <div className='selected-chiclets' ref={container} style={containerStyles}>
         {rows && rows.map((row: any) => (
           <div key={row.uniqueId} className='selected-chiclet'>
-            {renderSelectedChiclet(row)}
+            {renderSelectedRow(row)}
           </div>
         ))}
         {rows && rows.length > 0 && !overflow &&
@@ -132,4 +140,4 @@ const SelectedChiclets = ({
   )
 };
 
-export default SelectedChiclets;
+export default SelectedRows;

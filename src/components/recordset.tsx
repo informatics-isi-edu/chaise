@@ -11,7 +11,7 @@ import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedChiclet } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -27,7 +27,7 @@ import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
-import SelectedChiclets from '@isrd-isi-edu/chaise/src/components/selected-chiclets';
+import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -357,7 +357,7 @@ const RecordsetInner = ({
    * @param row the selected row. If null, we will clear all the selected rows
    * @param event the event object
    */
-  const clearSelectedRow = (row: SelectedChiclet | null, event: any) => {
+  const clearSelectedRow = (row: SelectedRow | null, event: any) => {
     if (!row) {
       setSelectedRows([]);
     } else {
@@ -622,7 +622,7 @@ const RecordsetInner = ({
             }
             <div className='recordset-controls-container'>
               {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows && selectedRows.length > 0 &&
-                <SelectedChiclets rows={selectedRows} removeCallback={clearSelectedRow} />
+                <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
               }
               <div className='row'>
                 <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>

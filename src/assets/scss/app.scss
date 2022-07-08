@@ -158,6 +158,12 @@ html {
     max-width: none;
     white-space: pre-wrap;
   }
+  // ensure arrow is always displayed at the left edge
+  .tooltip-w-arrow-always-on-left .tooltip-arrow {
+    transform: none !important;
+    left: 5px !important;
+  }
+
 
   // disabled row and form
   .disabled-form,
@@ -814,7 +820,7 @@ html {
       .selected-chiclet-btn {
         padding: 0;
         height: auto;
-        margin-top: 2px;
+        margin-top: 3px;
       }
     }
   }

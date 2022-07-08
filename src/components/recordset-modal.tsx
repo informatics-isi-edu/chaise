@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap';
 import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
-import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
-import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
@@ -28,9 +26,17 @@ export type RecordestModalProps = {
    */
   comment?: string,
   /**
+   * The function that will be called on each row change.
+   * if it returns "false", the submit button will be disabled.
+   * NOTE The actual callback that we're sending to recordset is not this one,
+   * and instead is just going to call this function. This is done this way
+   * so we can apply the logic to disable the submit button
+   */
+  onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean,
+  /**
    * The function that will be called on submit
    */
-  onSubmit?: Function,
+  onSubmit?: (selectedRows: SelectedRow[]) => void,
   /**
    * The function that will be called on closing the modal
    */
@@ -42,6 +48,7 @@ const RecordsetModal = ({
   modalClassName,
   displayname,
   comment,
+  onSelectedRowsChanged,
   onSubmit,
   onClose
 }: RecordestModalProps) => {
@@ -80,8 +87,8 @@ const RecordsetModal = ({
     }
     else {
       let cannotSubmit = false;
-      if (recordsetProps.onSelectedRowsChanged) {
-        cannotSubmit = recordsetProps.onSelectedRowsChanged(submittedRows) === false;
+      if (onSelectedRowsChanged) {
+        cannotSubmit = onSelectedRowsChanged(submittedRows) === false;
       }
 
       /**
@@ -104,7 +111,7 @@ const RecordsetModal = ({
     }
   };
 
-  const onSelectedRowsChangedWrapper = (selectedRows: any) => {
+  const onSelectedRowsChangedWrapper = (selectedRows: SelectedRow[]) => {
     $log.debug('on selected rows changed called');
     setSubmittedRows(selectedRows);
     // allow the selected rows to change and UI shows the selected

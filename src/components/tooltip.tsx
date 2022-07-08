@@ -3,22 +3,40 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
 import Tooltip from 'react-bootstrap/Tooltip'
 
 type ChaiseTooltipProps = {
+  /**
+   * The displayed tooltip.
+   */
   tooltip: string | JSX.Element,
+  /**
+   * where the tooltip should be
+   */
   placement: Placement,
-  children: JSX.Element
+  /**
+   * The inner element
+   */
+  children: JSX.Element,
+  /**
+   * Whether we want the tooltip to always be on left
+   */
+   tooltipAlwaysOnLeft?: boolean,
 }
 
 
 const ChaiseTooltip = ({
   tooltip,
   children,
-  placement
-}: ChaiseTooltipProps) : JSX.Element => {
-
+  placement,
+  tooltipAlwaysOnLeft,
+}: ChaiseTooltipProps): JSX.Element => {
+  const className = tooltipAlwaysOnLeft ? 'tooltip-w-arrow-always-on-left' : '';
   return (
     <OverlayTrigger
       placement={placement}
-      overlay={<Tooltip>{tooltip}</Tooltip>}
+      overlay={
+        <Tooltip className={className}>
+          {tooltip}
+        </Tooltip>
+      }
     >
       {children}
     </OverlayTrigger>

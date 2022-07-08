@@ -81,10 +81,16 @@ export type FacetRequestModel = {
   // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
 }
 
-export type SelectedChiclet = {
+/**
+ * The selected row in recordset
+ * NOTE while we could just use "tuple" type, in case of
+ * faceting we don't necessarily have the "tuple" object and
+ * therefore we're creating this object ourselves.
+ */
+export type SelectedRow = {
   displayname: Displayname;
   uniqueId: string | null;
   data?: any; // TODO
-  // the following is added for plot app and might require change:
-  cannotBeRemoved?: boolean;
+  // the following can be added for plot app and might require change:
+  // cannotBeRemoved?: boolean;
 }

@@ -4,7 +4,7 @@ import Q from 'q';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { LogActions, LogReloadCauses, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -427,25 +427,27 @@ const FacetChoicePicker = ({
       logStackPath: LogStackTypes.SET,
     };
 
-    const initialSelectedRows: any = [];
+    const initialSelectedRows: SelectedRow[] = [];
     checkboxRows.forEach(function (row) {
       if (!row.selected) return;
-      const newRow: any = {};
+      let rowUniqueId, rowData;
 
-      // TODO might wan to create a proper type for this
       // mimic the same structure as tuples
       // - row.uniqueId will return the filter's uniqueId and not
       //    the tuple's. We need tuple's uniqueId in here
       //    (it will be used in the logic of isSelected in modal).
       // - data is needed for the post process that we do on the data.
       if (row.tuple && row.tuple.data && facetColumn.isEntityMode) {
-        newRow.uniqueId = row.tuple.uniqueId;
-        newRow.data = row.tuple.data;
+        rowUniqueId = row.tuple.uniqueId;
+        rowData = row.tuple.data;
       } else {
-        newRow.uniqueId = row.uniqueId;
+        rowUniqueId = row.uniqueId;
       }
-      newRow.displayname = (newRow.uniqueId === null) ? { value: null, isHTML: false } : row.displayname;
-      initialSelectedRows.push(newRow);
+      initialSelectedRows.push({
+        uniqueId: rowUniqueId,
+        displayname: (rowUniqueId.uniqueId === null) ? { value: null, isHTML: false } : row.displayname,
+        data: rowData,
+      });
     });
 
     setRecordsetModalProps({
@@ -453,13 +455,12 @@ const FacetChoicePicker = ({
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
-      initialSelectedRows,
-      onSelectedRowsChanged: modalDataChanged(false)
+      initialSelectedRows
     });
   };
 
   const modalDataChanged = (isSubmit: boolean) => {
-    return (selectedRows: any) => {
+    return (selectedRows: SelectedRow[]) => {
       // create the list of choice filters
       let hasNull = false;
       const filters = selectedRows.map(function (t: any) {
@@ -638,6 +639,7 @@ const FacetChoicePicker = ({
           onClose={hideRecordsetModal}
           onSubmit={modalDataChanged(true)}
           displayname={facetColumn.displayname}
+          onSelectedRowsChanged={modalDataChanged(false)}
           comment={facetColumn.comment}
         />
       }
