@@ -14,6 +14,7 @@ module.exports = (env) => [
   // chaise apps:
   getAppConfig('login', 'Login', mode, env),
   getAppConfig('recordset', 'Recordset', mode, env),
+  getAppConfig('record', 'Record', mode, env),
 
   // chaise libs:
   // TODO should be updated and tested before adding it back:

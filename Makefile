@@ -677,14 +677,14 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 .PHONY: deploy
 deploy: dont_deploy_in_root
 	$(info - deploying the package)
-	@rsync -avz --exclude='src' --exclude='webpack' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -avz --exclude='src' --exclude='webpack' --exclude='dist/react' --exclude='recordset' --exclude='record' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
 	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # rsync the build and config files to the location
 .PHONY: deploy-w-config
 deploy-w-config: dont_deploy_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
 	$(info - deploying the package with the existing default config files)
-	@rsync -avz --exclude='src' --exclude='webpack' --exclude='dist/react' --exclude='recordset' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+	@rsync -avz --exclude='src' --exclude='webpack' --exclude='dist/react' --exclude='recordset' --exclude='record' --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
 	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # Rule to create version.txt

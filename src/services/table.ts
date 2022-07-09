@@ -56,6 +56,7 @@ export class RecordsetFlowControl {
       logStackPath: string,
       logAppMode?: string
     },
+    queue?: any
   ) {
     if (reference.activeList) {
       reference.activeList.requests.forEach((activeListModel: any) => {
@@ -88,7 +89,7 @@ export class RecordsetFlowControl {
     // can be used to refer to this current instance of table
     this.internalID = generateUUID();
 
-    this.queue = new FlowControlQueueInfo();
+    this.queue = queue ? queue : new FlowControlQueueInfo();
 
     this.logStack = logInfo.logStack;
     this.logStackPath = logInfo.logStackPath;
