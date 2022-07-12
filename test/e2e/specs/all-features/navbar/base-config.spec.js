@@ -94,6 +94,8 @@ describe('Navbar ', function() {
                 disabledSubMenuOptions = options;
                 expect(options.length).toBe(4, "some options are not shown properly");
                 expect(disabledSubMenuOptions[0].getText()).toBe("Edit Existing Record", "the wrong link is disabled or none were selected");
+            }).catch(function (err) {
+                console.log(err);
             });
         });
 
@@ -122,6 +124,9 @@ describe('Navbar ', function() {
             chaisePage.waitForElement(modalContent);
             expect(modalContent.isDisplayed()).toBeTruthy();
             done();
+        }).catch(function (err) {
+            done.fail();
+            console.log(err);
         });
     });
 
@@ -130,7 +135,7 @@ describe('Navbar ', function() {
         const modalContent = element(by.css('.profile-popup'));
 
          chaisePage.clickButton(closeLink).then(function(){
-            chaisePage.waitForElementInverse(modalContent, 2000);
+            chaisePage.waitForElementInverse(modalContent, browser.params.defaultTimeout);
             expect(modalContent.isPresent()).toEqual(false);
             done();
         }).catch(function (err) {
