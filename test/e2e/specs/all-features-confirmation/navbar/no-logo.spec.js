@@ -190,7 +190,7 @@ describe('Navbar ', function() {
             var loginDropdown = element(by.css('.username-display'));
 
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
-            loginDropdown.click().then(function() {
+            chaisePage.clickButton(loginDropdown).then(function() {
                 var profileLink = element(by.css('#profile-link'));
                 expect(profileLink.getText()).toBe("User Profile", "my_profile link shows wrong name");
 
@@ -218,7 +218,7 @@ describe('Navbar ', function() {
 
             // Click is needed because profile menu dropdown will not be present in the DOM initially
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
-            loginDropdown.click().then(function() {
+            chaisePage.clickButton(loginDropdown).then(function() {
                 let menuItems = loginDropdown.all(by.css('div.dropdown-menu')).get(0);
                 var nodesInDOM = menuItems.all(by.css('a'));
         
