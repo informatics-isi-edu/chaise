@@ -1,4 +1,4 @@
-const { browser, element } = require('protractor');
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {
@@ -9,7 +9,7 @@ describe('Navbar ', function() {
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         navbar = element(by.id('mainnav'));
         menu = element(by.css('.navbar-menu-options'));
-        loginMenu = element(by.css('.login-menu-options'));
+        loginMenu = element(by.css('.username-display > div.dropdown-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
@@ -148,7 +148,9 @@ describe('Navbar ', function() {
                 expect(recordsetsMenu.getText()).toBe("RecordSets", "Second top level menu option text is incorrect");
 
                 recordsetsMenu.click().then(function () {
-                    var datasetOption = recordsetsMenu.all(by.css('.dropdown-item')).get(0);
+                    // Since, main menu also contains <a> tag, dropdown-item class gives the correct dropdown items present under the main menu.
+                    // Structure: <div class='chiase-nav-item'> <a> RecordSets </a> <div> **DROPDOWN MENUS** </div>
+                    var datasetOption = recordsetsMenu.all(by.tagName('a')).get(1);
                     expect(datasetOption.getText()).toBe("Dataset", "First 2nd level option for 'RecordSets' is in incorrect");
 
                     return datasetOption.click();
@@ -190,7 +192,7 @@ describe('Navbar ', function() {
             var loginDropdown = element(by.css('.username-display'));
 
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
-            chaisePage.clickButton(loginDropdown).then(function() {
+            loginDropdown.click().then(function() {
                 var profileLink = element(by.css('#profile-link'));
                 expect(profileLink.getText()).toBe("User Profile", "my_profile link shows wrong name");
 
@@ -205,11 +207,13 @@ describe('Navbar ', function() {
         });
 
         it('should have a disabled link named "Disabled Link".', function () {
+            // .dropdown-menu > * is needed as we can have multiple nested submenu 
+            // inside login dropdown (including div, a, etc). This selector will select all first level children under login dropdown
             var dropdownOptions = element.all(by.css('.username-display > div.dropdown-menu > *'));
 
             expect(dropdownOptions.count()).toBe(4, "number of top level dropdown menu options is wrong");
             
-            var disabledEle = element(by.css('.username-display > div.dropdown-menu > a.disable-link'));
+            const disabledEle = loginMenu.all(by.css('a.disable-link')).get(0);
             expect(disabledEle.getText()).toBe("Disabled Link", "text for disabled link is incorrect");
         });
 
@@ -218,9 +222,8 @@ describe('Navbar ', function() {
 
             // Click is needed because profile menu dropdown will not be present in the DOM initially
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
-            chaisePage.clickButton(loginDropdown).then(function() {
-                let menuItems = loginDropdown.all(by.css('div.dropdown-menu')).get(0);
-                var nodesInDOM = menuItems.all(by.css('a'));
+            loginDropdown.click().then(function() {
+                var nodesInDOM = loginMenu.all(by.tagName('a'));
         
                 return nodesInDOM.count();
             }).then(function(count) {
