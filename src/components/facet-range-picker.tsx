@@ -175,8 +175,8 @@ const FacetRangePicker = ({
       setRanges([getNotNullFacetCheckBoxRow(true)]);
       defer.resolve(true);
     } else {
-      const updatedRows: FacetCheckBoxRow[] = [];
-      if (!facetColumn.hideNotNullChoice) updatedRows.push(getNotNullFacetCheckBoxRow(false));
+      // default handles whether notNull option should be present
+      const updatedRows: FacetCheckBoxRow[] = [...ranges];
 
       // TODO: any rows selected based on facet blob criteria
       // for (let i = 0; i < facetColumn.rangeFilters.length; i++) {
