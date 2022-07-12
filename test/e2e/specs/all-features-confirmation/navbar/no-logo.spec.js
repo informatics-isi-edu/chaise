@@ -1,4 +1,4 @@
-const { browser, element } = require('protractor');
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {
@@ -8,8 +8,8 @@ describe('Navbar ', function() {
         browser.ignoreSynchronization=true;
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         navbar = element(by.id('mainnav'));
-        menu = element(by.css('.navbar-menu-options'));
-        loginMenu = element(by.css('.login-menu-options'));
+        menu = element(by.id('navbar-menu'));
+        loginMenu = element(by.css('.chaise-login-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
@@ -84,15 +84,13 @@ describe('Navbar ', function() {
             chaisePage.clickButton(banner1Dismiss).then(function () {
                 chaisePage.waitForElementInverse(banner1);
 
-                // IsPresent(): Returns TRUE if element exists in DOM(may or may not be hidden) else returns false
-                expect(banner1.isPresent()).toBeFalsy("banner 1 didn't close");
+                expect(banner1.isDisplayed()).toBeFalsy("banner 1 didn't close");
 
                 return chaisePage.clickButton(banner4Dismiss);
             }).then(function () {
                 chaisePage.waitForElementInverse(banner4);
 
-                // IsPresent(): Returns TRUE if element exists in DOM(may or may not be hidden) else returns false
-                expect(banner4.isPresent()).toBeFalsy("banner 4 didn't close");
+                expect(banner4.isDisplayed()).toBeFalsy("banner 4 didn't close");
 
                 done();
             }).catch(function (err) {
@@ -105,8 +103,7 @@ describe('Navbar ', function() {
         var allWindows;
 
         it('should generate the correct # of list items', function() {
-            // Now we have all the menu items as anchor tag
-            var nodesInDOM = menu.all(by.tagName('a'));
+            var nodesInDOM = menu.all(by.tagName('li'));
             var counter = 7; // counted from chaise config doc rather than having code count
 
             nodesInDOM.count().then(function(count) {
@@ -117,7 +114,7 @@ describe('Navbar ', function() {
         if (!process.env.CI){
             // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
             it('top level menu with no children should use default "newTab" value and navigate in a new tab', function (done) {
-                var searchOption = menu.all(by.tagName('a')).get(0);
+                var searchOption = menu.all(by.tagName('li')).get(0);
                 expect(searchOption.getText()).toBe("Search", "First top level menu option text is incorrect");
 
                 searchOption.click().then(function () {
@@ -143,12 +140,11 @@ describe('Navbar ', function() {
             });
 
             it('first level nested link should inherit newTab value from parent when newTab is undefined and navigate in new tab', function (done) {
-                // Added chaise-nav-item class to get all first level menu item in navbar
-                var recordsetsMenu = menu.all(by.css('.chaise-nav-item')).get(1);
+                var recordsetsMenu = menu.all(by.tagName('li')).get(1);
                 expect(recordsetsMenu.getText()).toBe("RecordSets", "Second top level menu option text is incorrect");
 
                 recordsetsMenu.click().then(function () {
-                    var datasetOption = recordsetsMenu.all(by.css('.dropdown-item')).get(0);
+                    var datasetOption = recordsetsMenu.all(by.tagName('li')).get(0);
                     expect(datasetOption.getText()).toBe("Dataset", "First 2nd level option for 'RecordSets' is in incorrect");
 
                     return datasetOption.click();
@@ -181,20 +177,35 @@ describe('Navbar ', function() {
 
         it('should show the "Display Name" of the logged in user in the top right based on chaise-config property', function () {
             var name = browser.params.client.display_name;
-            // Removing login tagName as we are not using it anymore
-            expect(element(by.css('.username-display')).getText()).toBe(name, "user's displayed name is incorrect");
+            expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
+        });
+
+        it('should generate the correct # of list items', function(done) {
+            var nodesInDOM = loginMenu.all(by.tagName('li'));
+            // counted from chaise config doc rather than having code count
+            // 7 menu options defined in chaise-config
+            // accounts for 2 broken menu options that are set as invalid
+            var counter = 5;
+
+            nodesInDOM.count().then(function(count) {
+                expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
+
+                done();
+            }).catch(function (err) {
+                done.fail();
+                console.log(err);
+            });
         });
 
         it('should change the name of the "My Profile" and "Log Out" links', function(done) {
-            // Now class name has changed to username-display
-            var loginDropdown = element(by.css('.username-display'));
+            var loginDropdown = element(by.css('login .dropdown-toggle'));
 
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
             chaisePage.clickButton(loginDropdown).then(function() {
-                var profileLink = element(by.css('#profile-link'));
+                var profileLink = element(by.id('profile-link'));
                 expect(profileLink.getText()).toBe("User Profile", "my_profile link shows wrong name");
 
-                var logoutLink = element(by.css('#logout-link'));
+                var logoutLink = element(by.id('logout-link'));
                 expect(logoutLink.getText()).toBe("Logout", "logout link shows wrong name");
 
                 done();
@@ -205,35 +216,12 @@ describe('Navbar ', function() {
         });
 
         it('should have a disabled link named "Disabled Link".', function () {
-            var dropdownOptions = element.all(by.css('.username-display > div.dropdown-menu > *'));
+            var dropdownOptions = element.all(by.css('.chaise-login-menu > li'));
 
             expect(dropdownOptions.count()).toBe(4, "number of top level dropdown menu options is wrong");
-            
-            var disabledEle = element(by.css('.username-display > div.dropdown-menu > a.disable-link'));
+
+            var disabledEle = element(by.css('.chaise-login-menu > li a.disable-link'));
             expect(disabledEle.getText()).toBe("Disabled Link", "text for disabled link is incorrect");
-        });
-
-        it('should generate the correct # of list items', function(done) {
-            let loginDropdown = element(by.css('.username-display'));
-
-            // Click is needed because profile menu dropdown will not be present in the DOM initially
-            browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
-            chaisePage.clickButton(loginDropdown).then(function() {
-                let menuItems = loginDropdown.all(by.css('div.dropdown-menu')).get(0);
-                var nodesInDOM = menuItems.all(by.css('a'));
-        
-                return nodesInDOM.count();
-            }).then(function(count) {
-                // counted from chaise config doc rather than having code count
-                // 7 menu options defined in chaise-config
-                // accounts for 2 broken menu options that are set as invalid
-                var counter = 5;
-                expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
-
-                done();
-            }).catch(function(err) {
-                done.fail(err);
-            });
         });
     });
 
