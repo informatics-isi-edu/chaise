@@ -22,7 +22,7 @@ type ExportModalProps = {
  */
 const ExportModal = ({ title, show, closeModal }: ExportModalProps) => {
   return (
-    <Modal show={show} onHide={closeModal} backdrop='static' keyboard={false}>
+    <Modal className='export-progress' show={show} onHide={closeModal} backdrop='static' keyboard={false}>
       <Modal.Header>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>

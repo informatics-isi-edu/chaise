@@ -489,16 +489,14 @@ describe('View recordset,', function () {
 
                 it("should have 'BDBag' as a download option and download the file.", function(done) {
                     const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
-                    let modalDialog;
                     exportDropdown.click().then(function () {
-                        const bagOption = element(by.partialLinkText('BDBag'));
+                        const bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                         expect(bagOption.getText()).toBe("BDBag");
                         return bagOption.click();
                     }).then(function () {
-                        modalDailog = element(by.css('.modal-dialog'));
-                        return chaisePage.waitForElement(modalDailog);
+                        return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
                     }).then(function () {
-                        return chaisePage.waitForElementInverse(modalDailog);
+                        return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
                     }).then(function () {
                         return browser.wait(function() {
                             return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
