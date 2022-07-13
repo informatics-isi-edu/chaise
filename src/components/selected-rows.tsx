@@ -65,16 +65,15 @@ const SelectedRows = ({
           placement='bottom-start'
           tooltip='Clear selected row'
         >
-          <span className='selected-chiclet-remove' onClick={(event) => removeCallback(row, event)}>
+          <div className='selected-chiclet-remove' onClick={(event) => removeCallback(row, event)}>
             <i className='fa-solid fa-xmark selected-chiclet-remove-icon' />
-          </span>
+          </div>
         </ChaiseTooltip>
         <ChaiseTooltip
           placement='bottom-start'
           tooltip={val}
-          tooltipAlwaysOnLeft={true}
         >
-          <span className='selected-chiclet-name'>{val}</span>
+          <div className='selected-chiclet-name'>{val}</div>
         </ChaiseTooltip>
       </>
     )
@@ -86,7 +85,7 @@ const SelectedRows = ({
       tooltip={isMoreBtn ? 'Click to show all selected values.' : 'Click to hide some selected values.'}
     >
       <button
-        className={`chaise-btn chaise-btn-tertiary selected-chiclet-btn ${isMoreBtn ? 'show-more-btn' : 'show-less-btn'}`}
+        className={`chaise-btn chaise-btn-tertiary selected-chiclets-btn ${isMoreBtn ? 'show-more-btn' : 'show-less-btn'}`}
         onClick={() => setShowMore(isMoreBtn)}
       >
         ...Show {isMoreBtn ? 'more' : 'less'}
@@ -100,7 +99,7 @@ const SelectedRows = ({
       tooltip='Clear all selected rows'
     >
       <button
-        className='chaise-btn chaise-btn-tertiary clear-all-btn selected-chiclet-btn'
+        className='chaise-btn chaise-btn-tertiary clear-all-btn selected-chiclets-btn'
         onClick={(event) => removeCallback(null, event)}
       >
         <span>Clear selection</span>

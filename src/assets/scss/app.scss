@@ -167,12 +167,6 @@ html {
     max-width: none;
     white-space: pre-wrap;
   }
-  // ensure arrow is always displayed at the left edge
-  .tooltip-w-arrow-always-on-left .tooltip-arrow {
-    transform: none !important;
-    left: 5px !important;
-  }
-
 
   // disabled row and form
   .disabled-form,
@@ -807,24 +801,9 @@ html {
 
       height: 25px;
       padding: 0;
-      vertical-align: middle;
-
-      /* forces one line chiclet */
-      max-width: 240px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      .selected-chiclet-name {
-        cursor: default;
-        user-select: text;
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        vertical-align: -1px;
-      }
 
       .selected-chiclet-remove {
+        display: inline-block;
         cursor: pointer;
         padding-right: 3px;
         color: black;
@@ -832,10 +811,30 @@ html {
         vertical-align: middle;
       }
 
-      .selected-chiclet-btn {
+      .selected-chiclet-name {
+        display: inline-block;
+        cursor: default;
+        user-select: text;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+
+        /* forces one line chiclet */
+        max-width: 240px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      // show-more/less and clear-all
+      .selected-chiclets-btn {
         padding: 0;
         height: auto;
-        margin-top: 3px;
+      }
+
+      .selected-chiclet-name, .selected-chiclets-btn{
+        vertical-align: middle;
+        margin-top: -3px;
       }
     }
   }
