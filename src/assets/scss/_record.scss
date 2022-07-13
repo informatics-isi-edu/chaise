@@ -1,1 +1,120 @@
 // record component rules
+.top-panel-container {
+    padding-top: 20px;
+    padding-right: 20px;
+    padding-bottom: 10px;
+
+    .top-flex-panel {
+        .top-right-panel {
+            .show-toc-btn {
+                margin-top: 10px;
+                padding-left: 2px;
+                padding-bottom: 0px;
+            }
+
+            .page-action-btns {
+                div {
+                    display: flex;
+                }
+
+                height: 30px;
+                margin: 0;
+            }
+        }
+    }
+}
+
+.bottom-panel-container {
+    .main-container {
+        padding-right: 20px;
+    }
+    
+    table {
+
+        tr {
+            border-top: 1px solid #ccc;
+        }
+    
+        tr > td {
+            border-top: 0;
+            padding: 5px;
+        }
+        
+        .entity-key {
+            padding-left: 40px;
+            min-width: 150px;
+        }
+
+        .entity-value {
+            overflow-wrap: break-word;
+        }
+    }
+
+    #rt-container {
+        .related-table-accordion {
+            box-shadow: none;
+            border-radius: 0;
+            border: 0;
+        }
+
+        .accordion-button {
+            height: 44px;
+            text-transform: inherit;
+            padding: 8px 8px 8px 8px;
+            color: #fff;
+            border: none;
+            border-radius: inherit;
+            background: #747474;   
+            // Overriding accordian-button css to align right angle bracket icon to left
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+
+            &:focus {
+                box-shadow: none;
+            }
+
+            // Overriding accordian-button css to align right angle bracket icon to left
+            &::after {
+                margin: 0px 8px;
+                background-image: none;
+                content: '\f054'; // fa-solid fa-chevron-right
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                transform: unset;
+                font-size: 1.25rem;
+                height: unset;
+            }
+    
+            &:not(.collapsed)::after {
+                content: '\f078'; // fa-solid fa-chevron-down
+            }
+        }
+    }
+}
+
+.top-flex-panel {
+    position: relative;
+    display: flex;
+    flex: 1;
+    -webkit-box-flex: 1;
+}
+
+.chaise-btn-icon {
+    margin-right: 4px;
+}
+
+.pull-right {
+    float: right;
+}
+
+.chaise-btn-primary {
+    margin: 0px 4px;
+}
+
+.page-action-btns {
+    height: 40px;
+}
+
+.title {
+    padding-top: 20px;
+}

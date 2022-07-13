@@ -98,6 +98,11 @@ html {
   a {
     cursor: pointer;
     color: $link-color;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
   }
 
   // make sure the code style is consistent with old bootstrap styles
