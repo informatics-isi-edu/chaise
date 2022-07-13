@@ -177,17 +177,17 @@ html {
   // disabled row and form
   .disabled-form,
   .disabled-row {
-    color: $disabled-color;
+    color: $disabled-color !important;
   }
 
   .disabled-form *,
   .disabled-row * {
-    color: inherit;
+    color: inherit !important;
   }
 
   .disabled-form a,
   .disabled-row a {
-    color: $disabled-color;
+    color: $disabled-color !important;
   }
 
   .disabled-form .remove-input-btn {

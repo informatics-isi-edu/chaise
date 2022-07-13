@@ -169,8 +169,12 @@
       font-size: 1.1em;
     }
 
-    .apply-saved-query-button.disabled {
+    .disabled {
       cursor: not-allowed;
+      color: $disabled-color;
+    }
+
+    .delete-loader {
       color: $disabled-color;
     }
   }

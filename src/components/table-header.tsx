@@ -23,7 +23,7 @@ type TableHeaderProps = {
 }
 
 const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
-  const { logRecordsetClientAction, colValues, page, pageLimit, reference, totalRowCount, update } = useRecordset();
+  const { logRecordsetClientAction, colValues, page, pageLimit, reference, totalRowCount, update, addRecordRequests } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
   if (pageLimits.indexOf(pageLimit) === -1) {
@@ -111,6 +111,10 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     const referrer_id = 'recordset-' + generateRandomInteger(0, Number.MAX_SAFE_INTEGER);
     const newRef = reference.table?.reference?.contextualize?.entryCreate;
     let appLink = newRef.appLink;
+
+    // add to the list of requests so when we focus, we know whether we need
+    // to update the page or not
+    addRecordRequests.current[referrer_id] = 1;
 
     if (appLink) {
       appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +

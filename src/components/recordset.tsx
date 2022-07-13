@@ -102,7 +102,7 @@ const RecordsetInner = ({
   config
 }: RecordsetInnerProps): JSX.Element => {
 
-  const { dispatchError } = useError();
+  const { dispatchError, error } = useError();
 
   const {
     logRecordsetClientAction,
@@ -113,7 +113,9 @@ const RecordsetInner = ({
     initialize,
     selectedRows,
     setSelectedRows,
-    update
+    update,
+    addRecordRequests,
+    forceShowSpinner
   } = useRecordset();
 
   /**
@@ -153,7 +155,10 @@ const RecordsetInner = ({
 
   const clearSearch = useRef<() => void>(null);
 
-
+  /**
+   * used to figure out if we need to update the page after edit request or not
+   */
+  const editRequestIsDone = useRef(false);
 
   // initialize the recordset if it has not been done yet.
   useEffect(() => {
@@ -268,23 +273,43 @@ const RecordsetInner = ({
    * On window focus, remove request and update the page
    */
   const onFocus = () => {
+    /**
+     * see if any of the create requests has been completed or not
+     */
     let completed = 0;
-    const allCookies = CookieService.getAllCookies();
-
-    const recordRequests = allCookies.filter(c => c.trim().startsWith('recordset-'));
-
-    for (const referrerId of recordRequests) {
-      const cookieName = referrerId.split('=')[0].trim();
-      CookieService.deleteCookie(cookieName);
-      completed += 1;
+    const addReqs = addRecordRequests ? addRecordRequests.current : {};
+    for (const id in addReqs) {
+      if (CookieService.checkIfCookieExists(id)) {
+        // remove it from the captured requests
+        delete addRecordRequests.current[id];
+        // remove the cookie
+        CookieService.deleteCookie(id);
+        completed++;
+      }
     }
 
-    if (completed > 0) {
+    /**
+     * see if the edit request is done or not
+     */
+    const updateDone = editRequestIsDone && editRequestIsDone.current;
+
+    // call flow-control if the create or edit requests are done
+    if (completed > 0 || updateDone) {
       const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
 
-      update({updateResult: true, updateFacets: true, updateCount: true}, null, {cause});
+      // clear the value
+      editRequestIsDone.current = false;
+
+      update({updateResult: true, updateFacets: true, updateCount: true}, null, {cause, lastActiveFacet: -1});
     }
   };
+
+  /**
+   * The callback that recoredit app expects and calls after edit is done.
+   */
+  windowRef.updated = () => {
+    editRequestIsDone.current = true;
+  }
 
   //------------------- UI related functions: --------------------//
 
@@ -542,9 +567,8 @@ const RecordsetInner = ({
 
   return (
     <div className='recordset-container app-content-container'>
-      {/* TODO what about $root.error and $root.showSpinner */}
       {
-        isLoading &&
+        !error && (isLoading || forceShowSpinner) &&
         <ChaiseSpinner />
       }
       <div className='top-panel-container'>

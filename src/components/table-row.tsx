@@ -3,21 +3,23 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Spinner from 'react-bootstrap/Spinner';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogActions, LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 type TableRowProps = {
@@ -45,6 +47,14 @@ const TableRow = ({
   disabled
 }: TableRowProps): JSX.Element => {
 
+  /**
+   * TODO this seems wrong, each row is not going to update on each recordset change..
+   * while it should be only through recordset-table
+   * But if this was in recordset-table then we would need to pass these and
+   * it wouldn't make any difference in terms of number of renders
+   */
+  const {setForceShowSpinner, update} = useRecordset();
+
   const tdPadding = 10, // +10 to account for padding on <td>
     moreButtonHeight = 20,
     maxHeight = ConfigService.chaiseConfig.maxRecordsetRowHeight || 160,
@@ -65,10 +75,21 @@ const TableRow = ({
     buttonLabel: string,
     message: JSX.Element
   } | null>(null);
+  /**
+   * used to show loading indicator in the delete button
+   */
+  const [waitingForDelete, setWaitingForDelete] = useState(false);
 
   const { dispatchError } = useError();
 
   const rowContainer = useRef<any>(null);
+
+  /**
+   * Disable the row if,
+   *   - the parent says that it should be disabled
+   *   - we're waiting for the delete request
+   */
+  const rowDisabled = disabled || waitingForDelete;
 
   // TODO: logging
 
@@ -134,6 +155,11 @@ const TableRow = ({
   };
 
   const onDeleteUnlinkConfirmation = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
+    // make sure the main spinner is displayed (it's a state variable in recordset provider)
+    setForceShowSpinner(true);
+    // disable the buttons and row
+    setWaitingForDelete(true);
+    // close the confirmation modal if it exists
     setShowDeleteConfirmationModal(null);
 
     const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
@@ -143,13 +169,15 @@ const TableRow = ({
     }
 
     reference.delete(logObj).then(function deleteSuccess() {
-      // TODO show some sort of indicator? in master branch we're updating the
-      //      whole page and therefore relying on the main page loader to show
-      //       and indicate something is happening
-      // TODO: tell parent controller data updated
-      // scope.$emit('record-deleted', emmitedMessageArgs);
+      // ask flow-control to update the page
+      // this will also make sure to remove the "disabled" row
+      update({updateResult: true, updateCount: true, updateFacets: true}, null, {cause:LogReloadCauses.ENTITY_DELETE});
     }).catch(function (error: any) {
+      setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });
+    }).finally(() => {
+      // hide the spinner
+      setForceShowSpinner(false);
     });
   }
 
@@ -286,9 +314,9 @@ const TableRow = ({
             tooltip='Select'
           >
             <button
-              type='button' disabled={disabled}
+              type='button' disabled={rowDisabled}
               className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
-            // ng-disabled="selectDisabled" ng-click="onSelect($event)"
+              onClick={() => onSelectChange(tuple)}
             >
               <span className='chaise-btn-icon fa-solid fa-check'></span>
             </button>
@@ -297,7 +325,7 @@ const TableRow = ({
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
-            <input type='checkbox' checked={selected || disabled} disabled={disabled} onChange={() => onSelectChange(tuple)} />
+            <input type='checkbox' checked={selected || rowDisabled} disabled={rowDisabled} onChange={() => onSelectChange(tuple)} />
             <label />
             {/* TODO favorites */}
             {/*
@@ -310,9 +338,9 @@ const TableRow = ({
           </div>
         );
       default:
-        const ApplySavedQueryTag = (applySavedQuery === false) ? 'span' : 'a';
+        const ApplySavedQueryTag = (applySavedQuery === false || rowDisabled) ? 'span' : 'a';
         let applySavedQueryBtnClass = 'apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-        if (applySavedQuery === false) {
+        if (applySavedQuery === false || rowDisabled) {
           applySavedQueryBtnClass += ' disabled';
         }
 
@@ -338,8 +366,8 @@ const TableRow = ({
               >
                 <a
                   type='button'
-                  className='view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  href={viewLink}
+                  className={`view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn ${rowDisabled ? ' disabled': ''}`}
+                  href={!rowDisabled ? viewLink : undefined}
                 >
                   <span className='chaise-btn-icon chaise-icon chaise-view-details'></span>
                 </a>
@@ -352,7 +380,7 @@ const TableRow = ({
               >
                 <button
                   type='button' className='edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  onClick={editCallback}
+                  disabled={rowDisabled} onClick={editCallback}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pencil'></span>
                 </button>
@@ -360,14 +388,15 @@ const TableRow = ({
             }
             {deleteCallback &&
               <ChaiseTooltip
-                tooltip='Delete'
+                tooltip={'Delete'}
                 placement='bottom'
               >
                 <button
                   type='button' className='delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  onClick={deleteCallback}
+                  disabled={rowDisabled} onClick={deleteCallback}
                 >
-                  <span className='chaise-btn-icon fa-regular fa-trash-can'></span>
+                  {waitingForDelete && <Spinner size='sm' animation='border' className='delete-loader' />}
+                  {!waitingForDelete && <span className='chaise-btn-icon fa-regular fa-trash-can'></span>}
                 </button>
               </ChaiseTooltip>
             }
@@ -378,10 +407,11 @@ const TableRow = ({
               >
                 <button
                   type='button' className='delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn'
-                  onClick={unlinkCallback}
+                  disabled={rowDisabled} onClick={unlinkCallback}
                 >
+                  {waitingForDelete && <Spinner size='sm' animation='border' className='delete-loader' />}
                   {/* TODO record the icon must be reviewed*/}
-                  <span className='chaise-btn-icon fa-solid fa-link-slash'></span>
+                  {!waitingForDelete && <span className='chaise-btn-icon fa-regular fa-link-slash'></span>}
                 </button>
               </ChaiseTooltip>
             }
@@ -396,7 +426,7 @@ const TableRow = ({
     // rowValues is an array of values for each column. Does not include action column
     return rowValues.map((value: any, colIndex: number) => {
       return (
-        <td key={rowIndex + '-' + colIndex}>
+        <td key={rowIndex + '-' + colIndex} className={rowDisabled ? 'disabled-cell' : ''}>
           <div className={readMoreObj.hideContent === true ? 'hideContent' : 'showContent'} style={readMoreObj.maxHeightStyle}>
             <DisplayValue addClass={true} value={value} />
           </div>
@@ -418,7 +448,7 @@ const TableRow = ({
   return (
     <>
       <tr
-        className={`chaise-table-row${disabled ? ' disabled-row' : ''}`}
+        className={`chaise-table-row${rowDisabled ? ' disabled-row' : ''}`}
         ref={rowContainer}
         style={{ 'position': 'relative' }}
       >

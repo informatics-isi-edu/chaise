@@ -136,7 +136,20 @@ export const RecordsetContext = createContext<{
    *   - will return false
    * otherwise it will return true.
    */
-  checkReferenceURL: (ref: any) => boolean
+  checkReferenceURL: (ref: any) => boolean,
+  /**
+   * the ref for the addRecordRequests
+   * can be used to see if there are any pending create requests
+   */
+  addRecordRequests: any
+  /**
+   * if true, we have to forcefully show the spinner
+   */
+  forceShowSpinner: boolean,
+  /**
+   * can be used to fore showing of the spinner
+   */
+  setForceShowSpinner: Function
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -256,7 +269,11 @@ export default function RecordsetProvider({
     });
   };
 
+  const [forceShowSpinner, setForceShowSpinner] = useState(false);
+
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
+
+  const addRecordRequests = useRef<any>({});
 
   // call the flow-control after each reference object
   useEffect(() => {
@@ -971,7 +988,10 @@ export default function RecordsetProvider({
       totalRowCount,
       registerFacetCallbacks,
       printDebugMessage,
-      checkReferenceURL
+      checkReferenceURL,
+      addRecordRequests,
+      forceShowSpinner,
+      setForceShowSpinner
     };
   }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
 

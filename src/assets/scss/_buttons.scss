@@ -55,7 +55,7 @@
 
     // the link color is more prominent than our button/control color,
     // we should use this class if we want to make the button to be as prominent as links
-    &.chaise-btn-link {
+    &.chaise-btn-link:not([disabled]):not(.disabled) {
       color: $link-color;
     }
   }
