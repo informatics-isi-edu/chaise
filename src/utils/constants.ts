@@ -121,6 +121,8 @@ export const BODY_CLASS_NAMES = {
   iframe: 'chaise-iframe',
 };
 
+export const APP_ROOT_ID_NAME = 'chaise-app-root';
+
 export const DEFAULT_DISPLAYNAME = {
   null: '<i>No value </i>',
   empty: '<i>Empty</i>',

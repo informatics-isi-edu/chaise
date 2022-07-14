@@ -114,6 +114,10 @@ html {
   a {
     cursor: pointer;
     color: $link-color;
+    text-decoration: none;
+  }
+  a:focus, a:hover {
+    text-decoration: underline;
   }
 
   // make sure the code style is consistent with old bootstrap styles
@@ -427,7 +431,7 @@ html {
 
         &.open-panel {
           flex: 0;
-          flex-basis: $left-panel-width-lg;
+          flex-basis: unset;
           min-width: 170px;
 
           & + .top-right-panel {
@@ -493,13 +497,13 @@ html {
 
       &.open-panel {
         flex: 0;
-        flex-basis: $left-panel-width-lg;
+        flex-basis: unset;
         min-width: 170px;
 
-        & + .main-container {
+        & ~ .main-container {
           padding-left: $main-alley;
 
-          footer.position-relative {
+          .footer-container.position-relative {
             margin-left: -$main-alley;
           }
         }
@@ -514,14 +518,14 @@ html {
           width: 0;
         }
 
-        & + .main-container {
+        & ~ .main-container {
           // NOTE the padding is here and not on the parent because
           // of the footer behaviour that we want.
           // If we move it up, then the footer won't be displayed properly
           // when the side-panel is closed
           padding-left: $viewport-margin;
 
-          footer.position-relative {
+          .footer-container.position-relative {
             margin-left: -$viewport-margin;
           }
         }
@@ -543,8 +547,7 @@ html {
 
   // NOTE general rule that applies to record and recordset
   // TODO duplicate or simplify
-  .side-panel-resizable.close-panel .rg-left,
-  .side-panel-resizable.close-panel .rg-right {
+  .side-panel-resizable.close-panel + .divider-hitbox {
     display: none;
   }
 
