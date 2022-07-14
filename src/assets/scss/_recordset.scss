@@ -120,6 +120,12 @@
               cursor: pointer;
             }
           }
+
+          .clear-all-filters {
+            padding: 0;
+            height: unset;
+            margin-bottom: 5px;
+          }
         }
 
         .recordset-main-search {

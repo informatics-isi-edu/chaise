@@ -2,7 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
-import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -18,12 +18,17 @@ import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
+
 type TableHeaderProps = {
   config: RecordsetConfig
 }
 
 const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
-  const { logRecordsetClientAction, colValues, page, pageLimit, reference, totalRowCount, update, addRecordRequests } = useRecordset();
+  const {
+    logRecordsetClientAction,
+    colValues, page, pageLimit,
+    reference, totalRowCount, update, addRecordRequests, isLoading
+  } = useRecordset();
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
   if (pageLimits.indexOf(pageLimit) === -1) {
@@ -49,7 +54,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     // const action = LogActions.PAGE_SIZE_SELECT;
     const cause = LogReloadCauses.PAGE_LIMIT;
 
-    update({updateResult: true}, {pageLimit: value}, {cause});
+    update({ updateResult: true }, { pageLimit: value }, { cause });
   }
 
 
@@ -70,7 +75,12 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const renderPageSizeDropdown = () => {
     return (
       <Dropdown>
-        <Dropdown.Toggle className='page-size-dropdown chaise-btn chaise-btn-secondary'>{page ? page.tuples.length : pageLimit}</Dropdown.Toggle>
+        <Dropdown.Toggle
+          className='page-size-dropdown chaise-btn chaise-btn-secondary'
+          disabled={isLoading}
+        >
+          {page ? page.tuples.length : pageLimit}
+        </Dropdown.Toggle>
         <Dropdown.Menu as='ul'>{renderPageLimits()}</Dropdown.Menu>
       </Dropdown>
     )
@@ -118,7 +128,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
 
     if (appLink) {
       appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
-      'invalidate=' + fixedEncodeURIComponent(referrer_id);
+        'invalidate=' + fixedEncodeURIComponent(referrer_id);
 
       if (config.displayMode !== RecordsetDisplayMode.FULLSCREEN) {
         logRecordsetClientAction(LogActions.ADD_INTEND);
@@ -201,48 +211,39 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
           className='chaise-table-header-buttons'
         >
           {shouldShowCreateButton() && (
-            <OverlayTrigger
+            <ChaiseTooltip
               placement='bottom-end'
-              overlay={
-                <Tooltip>
-                  Create new{' '}
-                  <DisplayValue value={reference.displayname} />
-                </Tooltip>
-              }
+              tooltip={<>Create new{' '}<DisplayValue value={reference.displayname} /></>}
             >
               <span className='chaise-table-header-buttons-span'>
-                <Button
+                <button
                   className={`chaise-btn  ${config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'chaise-btn-primary' : 'chaise-btn-secondary'} chaise-table-header-create-link`}
                   onClick={addRecord}
                 >
                   <span className='chaise-btn-icon fa-solid fa-plus' />
                   <span>{config.displayMode === RecordsetDisplayMode.FULLSCREEN ? 'Create' : 'Create new'}</span>
-                </Button>
+                </button>
               </span>
-            </OverlayTrigger>
+            </ChaiseTooltip>
           )}
 
           {/* Edit Button */}
           {shouldShowEditButton() && (
-            <OverlayTrigger
+            <ChaiseTooltip
               placement='bottom-end'
-              overlay={
-                <Tooltip>
-                  {shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page of records.'}
-                </Tooltip>
-              }
+              tooltip={shouldEditButtonDisabled() ? `Editing disabled when items per page > ${RECORDEDIT_MAX_ROWS}` : 'Edit this page of records.'}
             >
               <span>
-                <Button
+                <button
                   className='chaise-btn chaise-btn-primary chaise-table-header-edit-link'
                   onClick={editRecord}
                   disabled={shouldEditButtonDisabled()}
                 >
                   <span className='chaise-btn-icon fa-solid fa-pen' />
                   <span>Bulk Edit</span>
-                </Button>
+                </button>
               </span>
-            </OverlayTrigger>
+            </ChaiseTooltip>
           )}
         </div>
       </div>

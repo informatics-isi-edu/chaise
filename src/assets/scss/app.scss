@@ -82,6 +82,22 @@ html {
     line-height: 1.2;
   }
 
+  // the bootstrap 3 style that is missing from boostrap 5
+  h1 .small,
+  h1 small,
+  h2 .small,
+  h2 small,
+  h3 .small,
+  h3 small,
+  .h1-class small,
+  .h2-class small,
+  .h3-class small,
+  .h4-class small {
+    font-weight: 400;
+    line-height: 1;
+    color: #777;
+  }
+
   li {
     list-style-type: none;
   }
@@ -109,10 +125,17 @@ html {
     border-radius: 4px;
   }
 
+  // TODO this is most probably not needed:
   .caret {
     border-top: 5px solid;
     border-right: 5px solid transparent;
     border-left: 5px solid transparent;
+  }
+
+  // modify the position of caret to be in the middle
+  .dropdown-toggle::after {
+    vertical-align: 0.12em;
+    margin-left: 0.4em;
   }
 
   a.external-link-icon:not(:empty):not(.external-link-no-icon),
@@ -231,6 +254,10 @@ html {
   // bookmark container start
   #page-title {
     margin: -7px 0 0;
+
+    small {
+      margin-left: 10px;
+    }
   }
 
   #page-subtitle {
@@ -832,7 +859,8 @@ html {
         height: auto;
       }
 
-      .selected-chiclet-name, .selected-chiclets-btn{
+      .selected-chiclet-name,
+      .selected-chiclets-btn {
         vertical-align: middle;
         margin-top: -3px;
       }

@@ -127,6 +127,25 @@ const RecordsetModal = ({
 
   //-------------------  render logic:   --------------------//
 
+  /**
+   * figure out the modal size.
+   *  - if #columns <= 3 : undefiend (medium)
+   *  - if #columns <= 6 : large
+   *  - else             : xlarge
+   */
+  let modalSize : undefined | 'lg' | 'xl';
+  let numCols = recordsetProps.initialReference.columns.length;
+  if (recordsetProps.config.showFaceting) {
+    numCols++;
+  }
+  if (numCols > 3) {
+    if (numCols <= 6) {
+      modalSize = 'lg';
+    } else {
+      modalSize = 'xl';
+    }
+  }
+
   let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records';
   switch (displayMode) {
     case RecordsetDisplayMode.FACET_POPUP:
@@ -224,7 +243,7 @@ const RecordsetModal = ({
   return (
     <Modal
       className={`search-popup ${modalClassName}`}
-      size={'lg'}
+      size={modalSize}
       show={show}
       onHide={onClose}
     >

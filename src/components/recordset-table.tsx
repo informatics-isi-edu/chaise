@@ -2,9 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
 import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Spinner from 'react-bootstrap/Spinner';
-import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -87,7 +85,7 @@ const RecordsetTable = ({
     //   stack: flowControl.current.getTableLogStack()
     // }, ref.defaultLogInfo);
 
-    update({updateResult: true}, {reference: ref}, {cause: LogReloadCauses.SORT});
+    update({ updateResult: true }, { reference: ref }, { cause: LogReloadCauses.SORT });
     // }
   }, [currSortColumn]);
 
@@ -119,7 +117,7 @@ const RecordsetTable = ({
     //   reference.defaultLogInfo
     // );
 
-    update({updateResult: true}, {reference: ref}, {cause: cause});
+    update({ updateResult: true }, { reference: ref }, { cause: cause });
     // }
   };
 
@@ -137,7 +135,7 @@ const RecordsetTable = ({
     // );
 
     setSelectedRows((currRows: SelectedRow[]) => {
-      const res : SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       page.tuples.forEach((tuple: any, index: number) => {
         if (isRowDisabled[index]) return;
         if (!isRowDisabled[index]) res.push({
@@ -163,7 +161,7 @@ const RecordsetTable = ({
     // );
 
     setSelectedRows((currRows: SelectedRow[]) => {
-      const res : SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       page.tuples.forEach((tuple: any) => {
         const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
         if (rowIndex !== -1) res.splice(rowIndex, 1);
@@ -177,7 +175,7 @@ const RecordsetTable = ({
    */
   const onSelectChange = (tuple: any) => {
     setSelectedRows((currRows: SelectedRow[]) => {
-      const res : SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       // see if the tuple is list of selected rows or not
       const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
       // if it's currently selected, then we should deselect (and vice versa)
@@ -261,17 +259,6 @@ const RecordsetTable = ({
     )
   }
 
-  const renderColumnError = () => {
-    <OverlayTrigger
-      placement='bottom'
-      overlay={
-        <Tooltip>{MESSAGE_MAP.queryTimeoutTooltip}</Tooltip>
-      }
-    >
-      <span className='fa-solid fa-triangle-exclamation' />
-    </OverlayTrigger>
-  };
-
   const renderColumnSortIcon = (col: any) => {
     if (!currSortColumn || currSortColumn.column != col.column.name) {
       return <span className='not-sorted-icon fas fa-arrows-alt-v'></span>;
@@ -304,20 +291,28 @@ const RecordsetTable = ({
         >
           {col.column.comment ?
             // if comment, show tooltip
-            <OverlayTrigger
+            <ChaiseTooltip
               placement='top'
-              overlay={<Tooltip>{col.column.comment}</Tooltip>}
+              tooltip={col.column.comment}
             >
               {renderDisplayValue(col.column)}
-            </OverlayTrigger> :
+            </ChaiseTooltip> :
             // no comment, no tooltip
             renderDisplayValue(col.column)
           }
           <span className='table-heading-icons'>
-            {col.hasError && renderColumnError()}
-            {!col.hasError && col.isLoading && <Spinner animation='border' className='aggregate-col-loader' />}
-            {
-              canSort &&
+            {col.hasError &&
+              <ChaiseTooltip
+                placement='bottom'
+                tooltip={MESSAGE_MAP.queryTimeoutTooltip}
+              >
+                <span className='fa-solid fa-triangle-exclamation' />
+              </ChaiseTooltip>
+            }
+            {!col.hasError && col.isLoading &&
+              <span className='table-column-spinner'><Spinner animation='border' /></span>
+            }
+            {!col.hasError && !col.isLoading && canSort &&
               <span className='column-sort-icon'>{renderColumnSortIcon(col)}</span>
             }
           </span>

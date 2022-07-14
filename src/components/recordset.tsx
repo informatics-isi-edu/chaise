@@ -2,7 +2,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
 import React, { useEffect, useRef, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -28,6 +27,8 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -164,7 +165,7 @@ const RecordsetInner = ({
   useEffect(() => {
     if (isInitialized) {
       // must be done after the data has been loaded
-      attachMainContainerPaddingSensor();
+      // attachMainContainerPaddingSensor();
       return;
     }
 
@@ -401,6 +402,17 @@ const RecordsetInner = ({
 
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
+  /**
+   * version info
+   */
+  let versionInfo : {[key: string]: string} | null = null;
+  if (reference && reference.location.version) {
+    versionInfo = {
+      date: getVersionDate(reference.location),
+      humanized: getHumanizeVersionDate(reference.location)
+    }
+  }
+
 
   const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
@@ -502,9 +514,9 @@ const RecordsetInner = ({
       <div className='chiclets-container filter-chiclets'>
         {chiclets}
         {showClearAll &&
-          <OverlayTrigger
+          <ChaiseTooltip
             placement='bottom-start'
-            overlay={<Tooltip>Clear all filters applied</Tooltip>}
+            tooltip={'Clear all filters applied'}
           >
             <button
               className='clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn'
@@ -512,7 +524,7 @@ const RecordsetInner = ({
             >
               <span>Clear all filters</span>
             </button>
-          </OverlayTrigger>
+          </ChaiseTooltip>
         }
       </div>
     )
@@ -552,7 +564,8 @@ const RecordsetInner = ({
 
 
   const renderMainContainer = () => (
-    <div className='main-container dynamic-padding' ref={mainContainer}>
+    // TODO styles should be removed and should be dynamic
+    <div className='main-container dynamic-padding' ref={mainContainer} style={{paddingRight: '5px'}}>
       <div className='main-body'>
         <RecordsetTable
           config={config}
@@ -600,10 +613,7 @@ const RecordsetInner = ({
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
                   />
-                  <OverlayTrigger placement='bottom' overlay={
-                    <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
-                  }
-                  >
+                  <ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.tooltip.permalink}>
                     <a
                       id='permalink'
                       className='chaise-btn chaise-btn-primary'
@@ -613,7 +623,7 @@ const RecordsetInner = ({
                       <span className='chaise-btn-icon fa-solid fa-bookmark' />
                       <span>Permalink</span>
                     </a>
-                  </OverlayTrigger>
+                  </ChaiseTooltip>
                   {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
                             <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
                                 <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
@@ -633,15 +643,11 @@ const RecordsetInner = ({
                 </div>
                 <h1 id='page-title'>
                   <Title addLink={false} reference={initialReference} />
-                  {/* TODO requires moment or something similar */}
-                  {/* {reference && reference.location.version &&
-                    <OverlayTrigger placement='bottom' overlay={
-                      <Tooltip>{MESSAGE_MAP.tooltip.versionTime + versionDisplay()}</Tooltip>
-                    }
-                    >
-                      <small className='h3-class'>({{versionDisplay()}})</small>
-                    </OverlayTrigger>
-                  } */}
+                  {versionInfo &&
+                    <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
+                      <small className='h3-class'>({versionInfo.humanized})</small>
+                    </ChaiseTooltip>
+                  }
                   {reference.commentDisplay === 'inline' && reference.comment &&
                     <span className='inline-tooltip'>{reference.comment}</span>
                   }
