@@ -5,7 +5,7 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Button from 'react-bootstrap/Button';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
@@ -13,6 +13,8 @@ import RecordMainSection from '@isrd-isi-edu/chaise/src/components/record/record
 import RecordRelatedSection from '@isrd-isi-edu/chaise/src/components/record/record-related-section';
 import RecordActionButtons, { ACTION_TYPES } from '@isrd-isi-edu/chaise/src/components/record/record-action-buttons';
 import RecordPageActionButtons, { PAGE_ACTION_TYPES } from '@isrd-isi-edu/chaise/src/components/record/record-page-action-buttons';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import RecordFooter from '@isrd-isi-edu/chaise/src/components/record/record-footer';
 
 
 export type RecordProps = {
@@ -41,10 +43,31 @@ const RecordInner = () : JSX.Element => {
    */
   const [ showPanel, setShowPanel ] = useState<boolean>(true);
 
+  const [containerHeight, setContainerHeight] = useState<number>(0);
+
+  /**
+   * Function calculates available height in the window to fit record container
+   */
+   const calculateAvailableHeight = () => {
+    const windowHeight = window.innerHeight;
+    const container = document.getElementsByClassName('main-container')?.[0];
+    if (container) {
+      const containerTop = container.getBoundingClientRect().y;
+
+      const availableHeight = (100 - (containerTop / windowHeight) * 100);
+
+      setContainerHeight(availableHeight);
+    }
+  }
+
   useEffect(() => {
     // get the data
     readMainEntity();
   }, []);
+
+  useLayoutEffect(() => {
+    calculateAvailableHeight();
+  });
 
   // TODO does this make sense?
   if (!page) {
@@ -103,10 +126,15 @@ const RecordInner = () : JSX.Element => {
                 </h3>
               </div>
               <div className='pull-right'>
-                <Button className='chaise-btn chaise-btn-tertiary' onClick={hidePanel}>
-                <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
-                  Hide panel
-                </Button>
+                <ChaiseTooltip
+                  placement='top'
+                  tooltip='Click to hide table of contents'
+                >
+                  <Button className='chaise-btn chaise-btn-tertiary' onClick={hidePanel}>
+                  <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
+                    Hide panel
+                  </Button>
+                </ChaiseTooltip>
               </div>
             </div> 
           </div>
@@ -138,10 +166,17 @@ const RecordInner = () : JSX.Element => {
                     />
 
                   </h1>
-                  {!showPanel && <Button onClick={hidePanel} className='chaise-btn chaise-btn-tertiary show-toc-btn'>
-                    <span className='chaise-btn-icon chaise-icon chaise-sidebar-open'></span>
-                    Show side panel
-                  </Button>}
+                  {!showPanel && (
+                    <ChaiseTooltip
+                      placement='top'
+                      tooltip='Click to show table of contents'
+                    >
+                      <Button onClick={hidePanel} className='chaise-btn chaise-btn-tertiary show-toc-btn'>
+                        <span className='chaise-btn-icon chaise-icon chaise-sidebar-open'></span>
+                        Show side panel
+                      </Button>
+                    </ChaiseTooltip>
+                  )}
                 </div>
               </div>
             </div>
@@ -156,7 +191,13 @@ const RecordInner = () : JSX.Element => {
             {/* TODO table of contents */}
             Table Content Goes here
         </div>
-        <div className='main-container dynamic-padding'>
+        <div 
+          className='main-container dynamic-padding' 
+          style={{
+            height: containerHeight + 'vh',
+            overflow: 'scroll'
+          }}
+        >
           <div className='main-body'>
             <RecordMainSection 
               reference={reference}
@@ -168,6 +209,7 @@ const RecordInner = () : JSX.Element => {
               tuple={page.tuples[0]}
             />
           </div>
+          <RecordFooter />
         </div>
       </div>
     </div>

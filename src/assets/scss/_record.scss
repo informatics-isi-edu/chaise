@@ -57,6 +57,17 @@
             border: 0;
         }
 
+        .related-table-accordion {
+            margin-top: 5px;
+        }
+        
+        .record-accordion-title {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 1.75rem;
+        }
+
         .accordion-button {
             height: 44px;
             text-transform: inherit;
@@ -81,7 +92,7 @@
                 font-family: "Font Awesome 6 Free";
                 font-weight: 900;
                 transform: unset;
-                font-size: 1.25rem;
+                font-size: 1.75rem;
                 height: unset;
             }
     
@@ -89,6 +100,23 @@
                 content: '\f078'; // fa-solid fa-chevron-down
             }
         }
+    }
+}
+
+.footer-container {
+    position: relative !important;
+    background-color: #ededed;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+    color: #595757;
+    font-size: 11px;
+    margin-right: -20px;
+}
+
+.page-action-btns {
+    .chaise-btn {
+        margin-left: 5px;
     }
 }
 
@@ -105,10 +133,6 @@
 
 .pull-right {
     float: right;
-}
-
-.chaise-btn-primary {
-    margin: 0px 4px;
 }
 
 .page-action-btns {
