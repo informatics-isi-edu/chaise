@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
@@ -24,11 +24,12 @@ import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
+import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
+import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -52,7 +53,21 @@ export type RecordsetProps = {
   onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
   onFavoritesChanged?: Function,
   parentReference?: any,
-  parentTuple?: any
+  parentTuple?: any,
+  /**
+   * The parent container that recordset will be part of
+   * (used for scrollbar logic)
+   */
+  parentContainer?: HTMLElement,
+  /**
+   * The sticky area of the parent container
+   * (used for scrollbar logic)
+   */
+  parentStickyArea?: HTMLElement,
+  /**
+   *
+   */
+  onFacetPanelOpenChanged?: (newState: boolean) => void
 };
 
 const Recordset = ({
@@ -64,7 +79,10 @@ const Recordset = ({
   getDisabledTuples,
   initialSelectedRows,
   onSelectedRowsChanged,
-  onFavoritesChanged
+  onFavoritesChanged,
+  parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
+  parentStickyArea,
+  onFacetPanelOpenChanged
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -82,6 +100,9 @@ const Recordset = ({
         <RecordsetInner
           initialReference={initialReference}
           config={config}
+          parentContainer={parentContainer}
+          parentStickyArea={parentStickyArea}
+          onFacetPanelOpenChanged={onFacetPanelOpenChanged}
         />
       </RecordsetProvider>
     </AlertsProvider>
@@ -90,7 +111,10 @@ const Recordset = ({
 
 type RecordsetInnerProps = {
   initialReference: any,
-  config: RecordsetConfig
+  config: RecordsetConfig,
+  parentContainer?: HTMLElement,
+  parentStickyArea?: HTMLElement,
+  onFacetPanelOpenChanged?: (newState: boolean) => void
 };
 
 /**
@@ -100,7 +124,10 @@ type RecordsetInnerProps = {
  */
 const RecordsetInner = ({
   initialReference,
-  config
+  config,
+  parentContainer,
+  parentStickyArea,
+  onFacetPanelOpenChanged
 }: RecordsetInnerProps): JSX.Element => {
 
   const { dispatchError, error } = useError();
@@ -121,21 +148,14 @@ const RecordsetInner = ({
 
   /**
    * whether the facet panel should be open or closed
-   * NOTE: will return false if faceting is disabled or should be hidden
-   * default value is based on reference.display.facetPanelOpen
-   * and if it's not defined, it will be:
-   * - true: in fullscreen mode
-   * - false: in any other modes
    */
-  const [facetPanelOpen, setFacetPanelOpen] = useState<boolean>(() => {
-    if (config.disableFaceting || !config.showFaceting) return false;
-
-    let res = initialReference.display.facetPanelOpen;
-    if (typeof res !== 'boolean') {
-      res = config.displayMode === RecordsetDisplayMode.FULLSCREEN;
-    }
-    return res;
+  const [facetPanelOpen, setStateFacetPanelOpen] = useState<boolean>(() => {
+    return getInitialFacetPanelOpen(config, initialReference);
   });
+  const setFacetPanelOpen = (val: boolean) => {
+    setStateFacetPanelOpen(val);
+    if (onFacetPanelOpenChanged) onFacetPanelOpenChanged(val);
+  }
 
   /**
    * We have to validate the facets first, and then we can show them.
@@ -161,24 +181,13 @@ const RecordsetInner = ({
    */
   const editRequestIsDone = useRef(false);
 
+
   // initialize the recordset if it has not been done yet.
   useEffect(() => {
     if (isInitialized) {
       // must be done after the data has been loaded
       // attachMainContainerPaddingSensor();
       return;
-    }
-
-    // TODO pass the proper values
-    attachContainerHeightSensors();
-
-    // capture and log the right click event on the permalink button
-    // TODO
-    const permalink = document.getElementById('permalink');
-    if (permalink) {
-      permalink.addEventListener('contextmenu', () => {
-        logRecordsetClientAction(LogActions.PERMALINK_RIGHT);
-      });
     }
 
     // if the faceting feature is disabled, then we don't need to generate facets
@@ -229,23 +238,37 @@ const RecordsetInner = ({
 
   }, [isInitialized]);
 
-  // after data loads, scroll to top and change the browser location
+  /**
+   * attach the event listener and resize sensors
+   */
   useEffect(() => {
-    const handleResizeEvent = ((event: CustomEvent) => {
-      event.preventDefault();
-      if (topLeftContainer?.current && event?.detail?.width) {
-        topLeftContainer.current.style.width = `${event.detail.width}px`;
-      }
-    }) as EventListener;
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0) {
+      return;
+    }
 
-    document.addEventListener('resizable-width-change', handleResizeEvent);
+    // handle the scrollable container
+    const resizeSensors = attachContainerHeightSensors(parentContainer, parentStickyArea);
+
+    // log the right click event on the permalink button
+    const permalink = document.getElementById('permalink');
+    const logPermalink = () => (logRecordsetClientAction(LogActions.PERMALINK_RIGHT));
+    if (config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
+      permalink?.addEventListener('contextmenu', logPermalink);
+    }
+
+    // add the onFocus handler (for updating the page on focus)
     window.addEventListener('focus', onFocus);
+
     return () => {
-      document.removeEventListener('resizable-width-change', handleResizeEvent);
+      resizeSensors?.forEach((rs) => rs.detach());
+      if (config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
+        permalink?.removeEventListener('contextmenu', logPermalink);
+      }
       window.removeEventListener('focus', onFocus);
     }
   }, []);
 
+  // after data loads, scroll to top and change the browser location
   useEffect(() => {
     if (isLoading) return;
 
@@ -301,7 +324,7 @@ const RecordsetInner = ({
       // clear the value
       editRequestIsDone.current = false;
 
-      update({updateResult: true, updateFacets: true, updateCount: true}, null, {cause, lastActiveFacet: -1});
+      update({ updateResult: true, updateFacets: true, updateCount: true }, null, { cause, lastActiveFacet: -1 });
     }
   };
 
@@ -375,9 +398,9 @@ const RecordsetInner = ({
     // }, ref.defaultLogInfo);
 
     update(
-      {updateResult: true, updateCount: true, updateFacets: true},
-      {reference: ref},
-      {cause: LogReloadCauses.SEARCH_BOX}
+      { updateResult: true, updateCount: true, updateFacets: true },
+      { reference: ref },
+      { cause: LogReloadCauses.SEARCH_BOX }
     );
     // }
   };
@@ -405,7 +428,7 @@ const RecordsetInner = ({
   /**
    * version info
    */
-  let versionInfo : {[key: string]: string} | null = null;
+  let versionInfo: { [key: string]: string } | null = null;
   if (reference && reference.location.version) {
     versionInfo = {
       date: getVersionDate(reference.location),
@@ -543,29 +566,24 @@ const RecordsetInner = ({
   }
 
   const facetingSection = (leftRef: React.RefObject<HTMLDivElement>) => (
-    <>
-      {
-        facetColumnsReady &&
-        <div
-          className={`side-panel-resizable ${panelClassName}`}
-          style={{ visibility: config.showFaceting ? 'visible' : 'hidden' }}
-          ref={leftRef}
-        >
-          <div className='side-panel-container'>
-            <Faceting
-              facetPanelOpen={facetPanelOpen}
-              registerRecordsetCallbacks={registerCallbacksFromFaceting}
-            />
-          </div>
+    <div
+      className={`side-panel-resizable ${panelClassName}`}
+      ref={leftRef}
+    >
+      {facetColumnsReady &&
+        <div className='side-panel-container'>
+          <Faceting
+            facetPanelOpen={facetPanelOpen}
+            registerRecordsetCallbacks={registerCallbacksFromFaceting}
+          />
         </div>
       }
-    </>
+    </div>
   );
-
 
   const renderMainContainer = () => (
     // TODO styles should be removed and should be dynamic
-    <div className='main-container dynamic-padding' ref={mainContainer} style={{paddingRight: '5px'}}>
+    <div className='main-container dynamic-padding' ref={mainContainer} style={{ paddingRight: '5px' }}>
       <div className='main-body'>
         <RecordsetTable
           config={config}
@@ -576,7 +594,15 @@ const RecordsetInner = ({
     </div>
   );
 
-
+  /**
+   * The left panels that should be resized together
+   * This will take care of the resizing the modal header as well
+   * TODO can this be optimized?
+   */
+  const leftPartners: HTMLElement[] = [];
+  parentContainer?.querySelectorAll('.top-left-panel').forEach((el) => {
+    leftPartners.push(el as HTMLElement);
+  });
 
   return (
     <div className='recordset-container app-content-container'>
@@ -654,24 +680,26 @@ const RecordsetInner = ({
                 </h1>
               </div>
             }
-            <div className='recordset-controls-container'>
-              {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows && selectedRows.length > 0 &&
-                <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
-              }
-              <div className='row'>
-                <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
-                  <SearchInput
-                    initialSearchTerm={initialReference.location.searchTerm}
-                    searchCallback={changeSearch}
-                    inputClass={'main-search-input'}
-                    searchColumns={initialReference.searchColumns}
-                    disabled={false}
-                    focus={true}
-                    forceClearSearch={clearSearch}
-                  />
+            {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0 &&
+              <div className='recordset-controls-container'>
+                {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows && selectedRows.length > 0 &&
+                  <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
+                }
+                <div className='row'>
+                  <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
+                    <SearchInput
+                      initialSearchTerm={initialReference.location.searchTerm}
+                      searchCallback={changeSearch}
+                      inputClass={'main-search-input'}
+                      searchColumns={initialReference.searchColumns}
+                      disabled={false}
+                      focus={true}
+                      forceClearSearch={clearSearch}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            }
             {facetColumnsReady && renderSelectedFilterChiclets()}
             {renderShowFilterPanelBtn()}
             <TableHeader config={config} />
@@ -680,7 +708,9 @@ const RecordsetInner = ({
         </div>
       </div>
       <SplitView
+        parentContainer={parentContainer}
         left={facetingSection}
+        leftPartners={leftPartners}
         right={renderMainContainer}
         minWidth={200}
         maxWidth={40}

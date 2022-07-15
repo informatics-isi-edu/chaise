@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Modal } from 'react-bootstrap';
 import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -7,6 +7,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 export type RecordestModalProps = {
   /**
@@ -36,13 +37,22 @@ export type RecordestModalProps = {
   /**
    * The function that will be called on submit
    */
-  onSubmit?: (selectedRows: SelectedRow[]) => void,
+  onSubmit: (selectedRows: SelectedRow[]) => void,
   /**
    * The function that will be called on closing the modal
    */
-  onClose?: () => void
+  onClose: () => void
 }
 
+/**
+ * recordset.tsx on modal. It will add proper title and will handle row selection.
+ *
+ * NOTE:
+ * - We're not handling show/hide logic here to avoid multiple render calls, therefore,
+ *   - As soon as the component is used, we will show the modal
+ *   - You have to handle closing the modal on the `onClose` callback otherwise the
+ *     modal will stay open.
+ */
 const RecordsetModal = ({
   recordsetProps,
   modalClassName,
@@ -57,15 +67,26 @@ const RecordsetModal = ({
    * We should disable the submit button if we start with no rows and ended up
    * with no rows. So we need to capture the initial state.
    */
-   const hasSelectedRowsOnLoad = Array.isArray(recordsetProps.initialSelectedRows) && recordsetProps.initialSelectedRows.length > 0;
+  const hasSelectedRowsOnLoad = Array.isArray(recordsetProps.initialSelectedRows) && recordsetProps.initialSelectedRows.length > 0;
 
   const displayMode = recordsetProps.config.displayMode;
   const selectMode = recordsetProps.config.selectMode;
 
+  // these attributes are used for handling the scrollbar in recordset:
+  const modalContainer = useRef<any>(null);
+  const modalHeader = useRef<HTMLDivElement>(null);
+  const [showRecordset, setShowRecordset] = useState(false);
+
   /**
-   * Whether to show the modal or not
+   * the split-view logic will make sure the all the left panels have the same size,
+   * but it won't take care of the cases when the left panel is closed.
+   * We're handling the close UI by just adding a class and setting the display:none
+   * So I had to make sure I'm doing the same thing for the modal-header's left panel as well.
    */
-  const [show, setShow] = useState(true);
+  const [facetPanelOpen, setFacetPanelOpen] = useState<boolean>(() => {
+    return getInitialFacetPanelOpen(recordsetProps.config, recordsetProps.initialReference);
+  });
+  const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
   /**
    * we have to keep a copy of submitted rows, because we don't have access
@@ -80,6 +101,15 @@ const RecordsetModal = ({
   const [disableSubmit, setDisableSubmit] = useState(() => {
     return !hasSelectedRowsOnLoad;
   });
+
+  /**
+   * Delay showing the recordset component until we have the modal structure read
+   * This is to make sure we can pass parentContainer and parentStickyArea
+   * so we can properly create the scrollable area.
+   */
+  useLayoutEffect(() => {
+    setShowRecordset(true);
+  }, []);
 
   useEffect(() => {
     if (selectMode === RecordsetSelectMode.SINGLE_SELECT) {
@@ -104,13 +134,6 @@ const RecordsetModal = ({
   }, [submittedRows]);
 
   //-------------------  UI related callbacks:   --------------------//
-  const submit = () => {
-    setShow(false);
-    if (onSubmit) {
-      onSubmit(submittedRows);
-    }
-  };
-
   const onSelectedRowsChangedWrapper = (selectedRows: SelectedRow[]) => {
     $log.debug('on selected rows changed called');
     setSubmittedRows(selectedRows);
@@ -118,14 +141,19 @@ const RecordsetModal = ({
     return true;
   };
 
+  const submit = () => {
+    onSubmit(submittedRows);
+  };
+
   const closeTheModal = () => {
-    setShow(false);
-    if (onClose) {
-      onClose();
-    }
-  }
+    onClose();
+  };
 
   //-------------------  render logic:   --------------------//
+
+  // get the modal elements based on the available ref
+  const modalContainerEl = modalContainer.current ? modalContainer.current.dialog.querySelector('.modal-content') as HTMLDivElement : undefined;
+  const modalHeaderEl = modalHeader.current ? modalHeader.current : undefined;
 
   /**
    * figure out the modal size.
@@ -133,7 +161,7 @@ const RecordsetModal = ({
    *  - if #columns <= 6 : large
    *  - else             : xlarge
    */
-  let modalSize : undefined | 'lg' | 'xl';
+  let modalSize: undefined | 'lg' | 'xl';
   let numCols = recordsetProps.initialReference.columns.length;
   if (recordsetProps.config.showFaceting) {
     numCols++;
@@ -244,13 +272,14 @@ const RecordsetModal = ({
     <Modal
       className={`search-popup ${modalClassName}`}
       size={modalSize}
-      show={show}
+      show={true}
       onHide={onClose}
+      ref={modalContainer}
     >
-      <Modal.Header>
+      <Modal.Header ref={modalHeader}>
         <div className='top-panel-container'>
           <div className='top-flex-panel'>
-            <div className='top-left-panel also-resizable'></div>
+            <div className={`top-left-panel also-resizable ${panelClassName}`}></div>
             <div className='top-right-panel'>
               <div className='recordset-title-container title-container'>
                 <div className='search-popup-controls recordset-title-buttons title-buttons'>
@@ -271,7 +300,7 @@ const RecordsetModal = ({
                   }
                   <ChaiseTooltip
                     placement='bottom'
-                    tooltip='Close the dialog.'
+                    tooltip='Close the dialog'
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
@@ -291,10 +320,15 @@ const RecordsetModal = ({
         </div>
       </Modal.Header>
       <Modal.Body>
-        <Recordset
-          {...recordsetProps}
-          onSelectedRowsChanged={onSelectedRowsChangedWrapper}
-        />
+        {showRecordset &&
+          <Recordset
+            {...recordsetProps}
+            onSelectedRowsChanged={onSelectedRowsChangedWrapper}
+            parentContainer={modalContainerEl}
+            parentStickyArea={modalHeaderEl}
+            onFacetPanelOpenChanged={setFacetPanelOpen}
+          />
+        }
       </Modal.Body>
     </Modal>
   )

@@ -406,7 +406,7 @@ const FacetChoicePicker = ({
       selectMode: RecordsetSelectMode.MULTI_SELECT,
       showFaceting: false,
       disableFaceting: true,
-      // TODO: can be uncommented for testing popups:
+      // NOTE: can be uncommented for testing popups:
       // showFaceting: true,
       // disableFaceting: !facetColumn.isEntityMode,
       displayMode: RecordsetDisplayMode.FACET_POPUP,

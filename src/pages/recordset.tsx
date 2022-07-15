@@ -16,7 +16,7 @@ import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
-import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -144,5 +144,5 @@ ReactDOM.render(
   >
     <RecordsetApp />
   </AppWrapper>,
-  document.getElementById('chaise-app-root'),
+  document.getElementById(APP_ROOT_ID_NAME),
 );
