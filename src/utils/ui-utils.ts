@@ -279,7 +279,7 @@ export function copyToClipboard(text: string) {
 }
 
 /**
- * 
+ *
  * @param callback function that needs to be invoked after the delay
  * @param timeout delay
  * @returns debounced function
@@ -292,8 +292,9 @@ export function debounce(callback: Function, timeout: number) {
     clearTimeout(timer);
     timer = setTimeout(() => {
       timer = null;
+      // @ts-ignore:
       callback.apply(this, args);
-    }, timeout);  
+    }, timeout);
   }
 }
 

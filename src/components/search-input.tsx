@@ -56,7 +56,7 @@ const SearchInput = ({
   const inputEl = useRef<HTMLInputElement>(null);
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [showPlaceholderTooltip, setShowPlaceholderTooltip] = useState(false);
-  const inputContainer = useRef<HTMLDivElement>(null);
+  const placeholderEl = useRef<HTMLSpanElement>(null);
   const inputChangedTimeout = useRef<number | null>(null);
   const AUTO_SEARCH_TIMEOUT = 2000;
 
@@ -143,9 +143,9 @@ const SearchInput = ({
         placement='bottom-start'
         overlay={<Tooltip>{inner}</Tooltip>}
         onToggle={(nextshow: boolean) => {
-          if (!inputContainer.current) return;
+          if (!placeholderEl.current) return;
 
-          const el = inputContainer.current.querySelector('.chaise-input-placeholder') as HTMLElement;
+          const el = placeholderEl.current;
           const overflow = el && el.scrollWidth > el.offsetWidth;
 
           // placeholder should be displayed if we're showing ellipsis
@@ -154,6 +154,7 @@ const SearchInput = ({
         show={showPlaceholderTooltip}
       >
         <span
+          ref={placeholderEl}
           className='chaise-input-placeholder'
           onClick={() => changeFocus()}
         >
@@ -164,7 +165,7 @@ const SearchInput = ({
   }
   return (
     <div className={'chaise-search-box chaise-input-group ' + (disabled ? 'disabled-element' : '')}>
-      <div className='chaise-input-control has-feedback' ref={inputContainer}>
+      <div className='chaise-input-control has-feedback'>
         <input
           type='text'
           ref={inputEl}

@@ -2,7 +2,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
 import React, { useEffect, useRef, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -11,7 +10,7 @@ import Export from '@isrd-isi-edu/chaise/src/components/export';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -27,6 +26,9 @@ import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import SplitView from '@isrd-isi-edu/chaise/src/components/resizable';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 /**
  * TODO
  * how should I do the client log stuff now?
@@ -46,6 +48,11 @@ export type RecordsetProps = {
   initialPageLimit?: number,
   getFavorites?: Function,
   getDisabledTuples?: Function,
+  initialSelectedRows?: SelectedRow[],
+  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  onFavoritesChanged?: Function,
+  parentReference?: any,
+  parentTuple?: any
 };
 
 const Recordset = ({
@@ -55,6 +62,9 @@ const Recordset = ({
   initialPageLimit,
   getFavorites,
   getDisabledTuples,
+  initialSelectedRows,
+  onSelectedRowsChanged,
+  onFavoritesChanged
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -65,6 +75,9 @@ const Recordset = ({
         initialPageLimit={initialPageLimit}
         getDisabledTuples={getDisabledTuples}
         getFavorites={getFavorites}
+        initialSelectedRows={initialSelectedRows}
+        onSelectedRowsChanged={onSelectedRowsChanged}
+        onFavoritesChanged={onFavoritesChanged}
       >
         <RecordsetInner
           initialReference={initialReference}
@@ -90,7 +103,7 @@ const RecordsetInner = ({
   config
 }: RecordsetInnerProps): JSX.Element => {
 
-  const { dispatchError } = useError();
+  const { dispatchError, error } = useError();
 
   const {
     logRecordsetClientAction,
@@ -99,7 +112,11 @@ const RecordsetInner = ({
     page,
     isInitialized,
     initialize,
-    update
+    selectedRows,
+    setSelectedRows,
+    update,
+    addRecordRequests,
+    forceShowSpinner
   } = useRecordset();
 
   /**
@@ -139,13 +156,16 @@ const RecordsetInner = ({
 
   const clearSearch = useRef<() => void>(null);
 
-
+  /**
+   * used to figure out if we need to update the page after edit request or not
+   */
+  const editRequestIsDone = useRef(false);
 
   // initialize the recordset if it has not been done yet.
   useEffect(() => {
     if (isInitialized) {
       // must be done after the data has been loaded
-      attachMainContainerPaddingSensor();
+      // attachMainContainerPaddingSensor();
       return;
     }
 
@@ -254,23 +274,43 @@ const RecordsetInner = ({
    * On window focus, remove request and update the page
    */
   const onFocus = () => {
+    /**
+     * see if any of the create requests has been completed or not
+     */
     let completed = 0;
-    const allCookies = CookieService.getAllCookies();
-
-    const recordRequests = allCookies.filter(c=> c.trim().startsWith('recordset-'));
-
-    for (const referrerId of recordRequests) {
-      const cookieName =  referrerId.split('=')[0].trim();
-      CookieService.deleteCookie(cookieName);
-      completed += 1;
+    const addReqs = addRecordRequests ? addRecordRequests.current : {};
+    for (const id in addReqs) {
+      if (CookieService.checkIfCookieExists(id)) {
+        // remove it from the captured requests
+        delete addRecordRequests.current[id];
+        // remove the cookie
+        CookieService.deleteCookie(id);
+        completed++;
+      }
     }
 
-    if (completed > 0) {
+    /**
+     * see if the edit request is done or not
+     */
+    const updateDone = editRequestIsDone && editRequestIsDone.current;
+
+    // call flow-control if the create or edit requests are done
+    if (completed > 0 || updateDone) {
       const cause = completed ? LogReloadCauses.ENTITY_CREATE : LogReloadCauses.ENTITY_UPDATE;
 
-      update(null, null, true, true, true, false, cause);
+      // clear the value
+      editRequestIsDone.current = false;
+
+      update({updateResult: true, updateFacets: true, updateCount: true}, null, {cause, lastActiveFacet: -1});
     }
   };
+
+  /**
+   * The callback that recoredit app expects and calls after edit is done.
+   */
+  windowRef.updated = () => {
+    editRequestIsDone.current = true;
+  }
 
   //------------------- UI related functions: --------------------//
 
@@ -334,15 +374,45 @@ const RecordsetInner = ({
     //   stack: flowControl.current.getTableLogStack(null, extraInfo)
     // }, ref.defaultLogInfo);
 
-    update(ref, null, true, true, true, false, LogReloadCauses.SEARCH_BOX);
+    update(
+      {updateResult: true, updateCount: true, updateFacets: true},
+      {reference: ref},
+      {cause: LogReloadCauses.SEARCH_BOX}
+    );
     // }
   };
 
+  /**
+   * The callback to clear selected rows
+   * @param row the selected row. If null, we will clear all the selected rows
+   * @param event the event object
+   */
+  const clearSelectedRow = (row: SelectedRow | null, event: any) => {
+    if (!row) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows((currRows: any) => {
+        const res = Array.isArray(currRows) ? [...currRows] : [];
+        return res.filter((obj: any) => obj.uniqueId !== row.uniqueId);
+      });
+    }
+  };
+
+  //-------------------  render logics:   --------------------//
+
   const panelClassName = facetPanelOpen ? 'open-panel' : 'close-panel';
 
-  const renderSelectedRows = () => {
-    return <></>
-  };
+  /**
+   * version info
+   */
+  let versionInfo : {[key: string]: string} | null = null;
+  if (reference && reference.location.version) {
+    versionInfo = {
+      date: getVersionDate(reference.location),
+      humanized: getHumanizeVersionDate(reference.location)
+    }
+  }
+
 
   const renderSelectedFilterChiclets = () => {
     if (!facetCallbacks.current) {
@@ -352,7 +422,7 @@ const RecordsetInner = ({
 
     if (!loc) return;
     const hasFilter = loc.filter;
-    const hasFacets = loc.facets && loc.facets.hasNonSearchBoxVisibleFacets;
+    const hasFacets = loc.facets && loc.facets.hasNonSearchBoxVisibleFilters;
     const hasCustomFacets = loc.customFacets && loc.customFacets.displayname;
     // don't show clear all filters when the custom facet is not removable
     const showClearAll = hasFilter || hasFacets || (hasCustomFacets && loc.customFacets.removable);
@@ -441,12 +511,12 @@ const RecordsetInner = ({
     }
 
     return (
-      <div className='recordset-chiclets-container recordset-chiclets'>
+      <div className='chiclets-container filter-chiclets'>
         {chiclets}
         {showClearAll &&
-          <OverlayTrigger
+          <ChaiseTooltip
             placement='bottom-start'
-            overlay={<Tooltip>Clear all filters applied</Tooltip>}
+            tooltip={'Clear all filters applied'}
           >
             <button
               className='clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn'
@@ -454,7 +524,7 @@ const RecordsetInner = ({
             >
               <span>Clear all filters</span>
             </button>
-          </OverlayTrigger>
+          </ChaiseTooltip>
         }
       </div>
     )
@@ -494,7 +564,8 @@ const RecordsetInner = ({
 
 
   const renderMainContainer = () => (
-    <div className='main-container dynamic-padding' ref={mainContainer}>
+    // TODO styles should be removed and should be dynamic
+    <div className='main-container dynamic-padding' ref={mainContainer} style={{paddingRight: '5px'}}>
       <div className='main-body'>
         <RecordsetTable
           config={config}
@@ -509,9 +580,8 @@ const RecordsetInner = ({
 
   return (
     <div className='recordset-container app-content-container'>
-      {/* TODO what about $root.error and $root.showSpinner */}
       {
-        isLoading &&
+        !error && (isLoading || forceShowSpinner) &&
         <ChaiseSpinner />
       }
       <div className='top-panel-container'>
@@ -543,10 +613,7 @@ const RecordsetInner = ({
                     reference={reference}
                     disabled={isLoading || !page || page.length === 0}
                   />
-                  <OverlayTrigger placement='bottom' overlay={
-                    <Tooltip>{MESSAGE_MAP.tooltip.permalink}</Tooltip>
-                  }
-                  >
+                  <ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.tooltip.permalink}>
                     <a
                       id='permalink'
                       className='chaise-btn chaise-btn-primary'
@@ -556,7 +623,7 @@ const RecordsetInner = ({
                       <span className='chaise-btn-icon fa-solid fa-bookmark' />
                       <span>Permalink</span>
                     </a>
-                  </OverlayTrigger>
+                  </ChaiseTooltip>
                   {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
                             <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
                                 <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
@@ -576,15 +643,11 @@ const RecordsetInner = ({
                 </div>
                 <h1 id='page-title'>
                   <Title addLink={false} reference={initialReference} />
-                  {/* TODO requires moment or something similar */}
-                  {/* {reference && reference.location.version &&
-                    <OverlayTrigger placement='bottom' overlay={
-                      <Tooltip>{MESSAGE_MAP.tooltip.versionTime + versionDisplay()}</Tooltip>
-                    }
-                    >
-                      <small className='h3-class'>({{versionDisplay()}})</small>
-                    </OverlayTrigger>
-                  } */}
+                  {versionInfo &&
+                    <ChaiseTooltip placement='bottom-start' tooltip={`${MESSAGE_MAP.tooltip.versionTime} ${versionInfo.date}`}>
+                      <small className='h3-class'>({versionInfo.humanized})</small>
+                    </ChaiseTooltip>
+                  }
                   {reference.commentDisplay === 'inline' && reference.comment &&
                     <span className='inline-tooltip'>{reference.comment}</span>
                   }
@@ -592,7 +655,9 @@ const RecordsetInner = ({
               </div>
             }
             <div className='recordset-controls-container'>
-              {renderSelectedRows()}
+              {config.selectMode === RecordsetSelectMode.MULTI_SELECT && selectedRows && selectedRows.length > 0 &&
+                <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
+              }
               <div className='row'>
                 <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
                   <SearchInput

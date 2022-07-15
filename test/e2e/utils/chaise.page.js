@@ -1066,7 +1066,7 @@ var recordsetPage = function() {
     }
 
     this.getSelectedRowsFilters = function () {
-        return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
+        return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet"));
     }
 
     this.getFacetFilters = function () {
@@ -1508,7 +1508,7 @@ function chaisePage() {
     };
 
     this.waitForAggregates = function (timeout) {
-        var locator = element.all(by.css('.aggregate-col-loader'));
+        var locator = element.all(by.css('.table-column-spinner'));
         return browser.wait(function () {
             return locator.isDisplayed().then(function (arr) {
                 return arr.includes(true) === false;

@@ -106,6 +106,11 @@ export class ConfigService {
       openLinksInTab
     };
 
+    // TODO added for backwards compatibility.. is it needed?
+    windowRef.dcctx = {
+      contextHeaderParams: ConfigService._contextHeaderParams
+    };
+
     // set chaise configuration based on what is in `chaise-config.js` first
     ConfigService._setChaiseConfig();
 

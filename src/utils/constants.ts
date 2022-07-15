@@ -1,3 +1,5 @@
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
 export const APP_TAG_MAPPING = {
   'tag:isrd.isi.edu,2016:chaise:record': 'record',
   'tag:isrd.isi.edu,2016:chaise:detailed': 'detailed',
@@ -153,3 +155,6 @@ declare let CHAISE_BUILD_VARIABLES: {
 };
 
 export const BUILD_VARIABLES = CHAISE_BUILD_VARIABLES;
+
+// attach build variables to the window object (ermrestjs uses this value)
+windowRef.chaiseBuildVariables = CHAISE_BUILD_VARIABLES;

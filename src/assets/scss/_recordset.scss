@@ -51,19 +51,17 @@
           // }
         }
 
-        .recordset-chiclets-container {
+        .chiclets-container {
           margin-bottom: 10px;
 
-          &.recordset-chiclets {
+          .filter-chiclets {
             padding-right: 250px;
           }
 
-          $filter-chiclet-margin: 5px;
-
           .filter-chiclet {
             max-width: 350px;
-            margin-right: $filter-chiclet-margin;
-            margin-bottom: $filter-chiclet-margin;
+            margin-right: 5px;
+            margin-bottom: 5px;
 
             .chaise-btn:focus {
               background-color: $white-color;
@@ -123,67 +121,15 @@
             }
           }
 
-          .selected-chiclet {
-            border: none;
-            margin-right: 8px;
-            margin-bottom: 5px;
-            padding-right: 0;
-            display: inline-block;
-
-            .selected-chiclet-name {
-              cursor: default;
-              user-select: text;
-              -webkit-user-select: text;
-              -moz-user-select: text;
-              -ms-user-select: text;
-            }
-
-            .selected-chiclet-remove {
-              cursor: pointer;
-              margin-right: -3px;
-
-              i {
-                top: 2px;
-              }
-            }
-          }
-
-          .clear-all-btn {
-            padding-left: 0;
-            margin-bottom: $filter-chiclet-margin;
-          }
-
-          // in this case the selected chiclets are not button anymore
-          &.recordset-selected-rows .clear-all-btn {
-            height: auto;
+          .clear-all-filters {
             padding: 0;
+            height: unset;
+            margin-bottom: 5px;
           }
         }
 
         .recordset-main-search {
           min-width: 250px;
-        }
-      }
-    }
-
-    .recordset-title-container.title-container {
-      margin: 0;
-      padding-bottom: 20px;
-
-      h1 {
-        margin: 0;
-      }
-
-      .recordset-title-buttons.title-buttons {
-        padding-left: 20px;
-        min-width: 220px;
-
-        .search-popup & {
-          min-width: 190px;
-        }
-
-        .foreignkey-popup & {
-          min-width: 95px;
         }
       }
     }
@@ -197,6 +143,29 @@
       // we're going to adjust this dynamically for dynamic-padding
       &:not(.dynamic-padding) {
         padding-right: $viewport-margin;
+      }
+    }
+  }
+
+  // must be here, since it applies to the modal as well
+  .recordset-title-container.title-container {
+    margin: 0;
+    padding-bottom: 20px;
+
+    h1 {
+      margin: 0;
+    }
+
+    .recordset-title-buttons.title-buttons {
+      padding-left: 20px;
+      min-width: 220px;
+
+      .search-popup & {
+        min-width: 190px;
+      }
+
+      .foreignkey-popup & {
+        min-width: 95px;
       }
     }
   }
