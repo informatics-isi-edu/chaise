@@ -67,28 +67,27 @@ export type RangePickerState = {
  *   date           - string
  *   timestamp[tz]  - {date: string, time: string}
  **/
- export type RangeOptions = {
+export type RangeOption = number | string | TimeStamp | null
+export type RangeOptions = {
   /**
    * the minimum value of the set of data based on all facet criteria
    */
-  absMin: number | string | TimeStamp | null,
+  absMin: RangeOption,
   /**
    * the maximum value of the set of data based on all facet criteria
    */
-  absMax: number | string | TimeStamp | null,
+  absMax: RangeOption,
   model: {
     /**
      * the value of the min input
      */
-    min: number | string | TimeStamp | null,
+    min: RangeOption,
     /**
      * the value of the max input
      */
-    max: number | string | TimeStamp | null
+    max: RangeOption
   }
 }
-
-export type RangeOption = number | string | TimeStamp | null
 
 export type TimeStamp = {
   /**

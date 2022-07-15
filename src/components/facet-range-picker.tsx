@@ -183,7 +183,6 @@ const FacetRangePicker = ({
   const preProcessFacet = () => {
     const defer = Q.defer();
 
-    // TODO
     // if we have the not-null filter, other filters are not important and can be ignored
     if (facetColumn.hasNotNullFilter) {
       setRanges([getNotNullFacetCheckBoxRow(true)]);
@@ -232,7 +231,6 @@ const FacetRangePicker = ({
    * The registered callback to get the selected filters
    */
   const getAppliedFilters = () => {
-    // TODO
     return ranges.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
@@ -249,7 +247,6 @@ const FacetRangePicker = ({
 
   /***** UI related callbacks *****/
   const addFilter = (min: RangeOptions['absMin'], max: RangeOptions['absMin']) => {
-    console.log('add range callback');
     // TODO: export types in ermrestJS
     // let res: {filter: RangeFacetFilter, reference: Reference};
     let res: { filter: any, reference: any };
@@ -398,9 +395,6 @@ const FacetRangePicker = ({
         // relayout case
       } else {
         histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime).then((response: any) => {
-          // TODO: ??
-          // setRanges(updatedRows);
-
           defer.resolve(response);
         }).catch(function (err: any) {
           defer.reject(err);

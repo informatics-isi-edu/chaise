@@ -1,5 +1,5 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
-import { TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker'
+import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import React from 'react'
 
 export enum RecordsetSelectMode {
@@ -49,9 +49,9 @@ export type FacetCheckBoxRow = {
   tuple?: any,
   isFavorite?: boolean,
   metaData?: {
-    min: number | string | TimeStamp | null,
+    min: RangeOption,
     minExclusive: boolean,
-    max: number | string | TimeStamp | null,
+    max: RangeOption,
     maxExclusive: boolean
   }
 }

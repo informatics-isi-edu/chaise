@@ -157,7 +157,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
-                                    expect(ct).toBe(0, "unzoom button is disbaled still");
+                                    expect(ct).toBe(0, "unzoom button is disabled still");
                                 });
                             });
 
