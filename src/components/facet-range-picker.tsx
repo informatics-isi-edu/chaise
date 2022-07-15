@@ -59,6 +59,20 @@ const FacetRangePicker = ({
     return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
   }
 
+  const createChoiceDisplay = (filter: any, selected: boolean) => {
+    return {
+        uniqueId: filter.uniqueId,
+        displayname: {value: filter.toString(), isHTML: false},
+        selected: selected,
+        metaData: {
+            min: filter.min,
+            minExclusive: filter.minExclusive,
+            max: filter.max,
+            maxExclusive: filter.maxExclusive
+        }
+    }
+  };
+
   const defaultPlotLayout: PlotlyLayout = {
     autosize: true,
     height: 150,
@@ -178,20 +192,19 @@ const FacetRangePicker = ({
       // default handles whether notNull option should be present
       const updatedRows: FacetCheckBoxRow[] = [...ranges];
 
-      // TODO: any rows selected based on facet blob criteria
-      // for (let i = 0; i < facetColumn.rangeFilters.length; i++) {
-      //   const filter = facetColumn.rangeFilters[i];
+      for (let i = 0; i < facetColumn.rangeFilters.length; i++) {
+        const filter = facetColumn.rangeFilters[i];
 
-      //   const rowIndex = ranges.findIndex(function (obj) {
-      //     return obj.uniqueId === filter.uniqueId;
-      //   });
+        const rowIndex = ranges.findIndex(function (obj) {
+          return obj.uniqueId === filter.uniqueId;
+        });
 
-      //   // if the row is not in the set of choices, add it
-      //   if (rowIndex === -1) {
-      //     updatedRows.push(createChoiceDisplay(filter, true));
-      //     // scope.facetModel.appliedFilters.push(createAppliedFilter(filter));
-      //   }
-      // }
+        // if the row is not in the set of choices, add it
+        if (rowIndex === -1) {
+          updatedRows.push(createChoiceDisplay(filter, true));
+        }
+      }
+
       setRanges(updatedRows);
       defer.resolve(true);
     }
@@ -244,7 +257,7 @@ const FacetRangePicker = ({
     if (isColumnOfType('float')) {
       res = facetColumn.addRangeFilter(formatFloatMin(min as number), false, formatFloatMax(max as number), false);
     } else {
-      res = facetColumn.addRangeFilter(min, false, max, false);
+      res = facetColumn.addRangeFilter(min || null, false, max || null, false);
     }
 
     if (!res) {
@@ -267,18 +280,7 @@ const FacetRangePicker = ({
 
     if (rowIndex === -1) {
       // we should create a new filter
-      updatedRows.push({
-        uniqueId: res.filter.uniqueId,
-        displayname: { value: res.filter.toString(), isHTML: false },
-        selected: true,
-        // disabled: facetColumn.hasNotNullFilter,
-        metaData: {
-          min: res.filter.min,
-          minExclusive: res.filter.minExclusive,
-          max: res.filter.max,
-          maxExclusive: res.filter.maxExclusive
-        }
-      });
+      updatedRows.push(createChoiceDisplay(res.filter, true))
     } else {
       // filter already exists, we should just change it to selected
       updatedRows[rowIndex].selected = true;
@@ -599,7 +601,7 @@ const FacetRangePicker = ({
    * @returns {number} formatted float value
    */
   const formatFloatMin = (min: number) => {
-    if (!min) return min;
+    if (!min) return null;
     return Math.floor(min * FLOAT_PRECISION) / FLOAT_PRECISION;
   }
 
@@ -609,7 +611,7 @@ const FacetRangePicker = ({
    * @returns {number} formatted float value
    */
   const formatFloatMax = (max: number) => {
-    if (!max) return max;
+    if (!max) return null;
     return Math.ceil(max * FLOAT_PRECISION) / FLOAT_PRECISION;
   }
 
@@ -953,8 +955,7 @@ const FacetRangePicker = ({
   }
 
   const renderHistogram = () => {
-    // if (facetModel.initialized && facetModel.isOpen && facetPanelOpen && showHistogram()) {
-    if (showHistogram()) {
+    if (facetModel.initialized && facetModel.isOpen && facetPanelOpen && showHistogram()) {
       return (<>
         <div className='plotly-actions'>
           <div className='chaise-btn-group' style={{ 'zIndex': 1 }}>
@@ -992,6 +993,8 @@ const FacetRangePicker = ({
         inputType={facetColumn.column.type.rootName}
         classes='facet-range-input'
         addRange={addFilter}
+        absMin={compState.rangeOptions.absMin}
+        absMax={compState.rangeOptions.absMax}
       />
       {renderHistogram()}
     </div>

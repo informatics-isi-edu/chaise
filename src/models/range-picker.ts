@@ -88,6 +88,8 @@ export type RangePickerState = {
   }
 }
 
+export type RangeOption = number | string | TimeStamp | null
+
 export type TimeStamp = {
   /**
    * the date value for the timestamp[tz]
