@@ -552,7 +552,9 @@ const Faceting = ({
     switch (fc.preferredMode) {
       case 'ranges':
         return <FacetRangePicker
-          facetModel={fm} facetColumn={fc} facetIndex={index}
+          dispatchFacetUpdate={dispatchFacetUpdate}
+          facetColumn={fc} facetIndex={index} facetModel={fm}
+          facetPanelOpen={facetPanelOpen}
           register={registerFacet} updateRecordsetReference={updateRecordsetReference}
         />
       case 'check_presence':

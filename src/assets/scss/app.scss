@@ -744,41 +744,6 @@ html {
     }
   }
 
-  /******* range inputs ***********/
-  range-inputs {
-    .form-inline {
-      padding-left: 5px;
-
-      .icon-btn {
-        padding: 5px 6px;
-      }
-
-      .range-inputs-width {
-        display: inline-block;
-        min-width: 100px;
-
-        .numeric-date-width {
-          max-width: 110px;
-        }
-
-        .datetime-width {
-          max-width: 170px;
-        }
-
-        // timestamp range inputs
-        .input-container.chaise-input-group {
-          width: 100%;
-        }
-      }
-
-      // end .range-inputs-width
-    }
-
-    // end .form-inline
-  }
-
-  // end range-inputs
-
   /* Rule for Chrome */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {

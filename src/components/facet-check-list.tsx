@@ -2,7 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_check-list.scss';
 
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
@@ -152,7 +152,10 @@ const FacetCheckList = ({
       }
 
       return (
-        <li key={`checkbox-${row.uniqueId}`} className={rowClass}>
+        // TODO: row.uniqueId should be sufficient but notNullRow has uniqueId = undefined
+        //    nullRow has uniqueId = null
+        // <li key={`checkbox-${row.uniqueId}`} className={rowClass}>
+        <li key={`checkbox-${index}`} className={rowClass}>
           <input
             // TODO for testing, id was changed to className to be more appropriate
             className={`checkbox-${index}`} type='checkbox'

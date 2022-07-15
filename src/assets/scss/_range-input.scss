@@ -16,12 +16,20 @@
 
         margin-right: 5px;
         flex-shrink: 0;
-        max-width: 160px;
 
-        &.numeric-width,
-        &.date-width,
-        &.time-width {
+        &.numeric-width {
+            min-width: 100px;
+            max-width: 140px;
+        }
+
+        &.date-width {
             min-width: 140px;
+            max-width: 180px;
+        }
+      
+        &.time-width {
+            min-width: 150px;
+            max-width: 180px;
         }
 
         label {
@@ -32,7 +40,6 @@
     .range-input-submit-btn {
         margin-top: 5px;
     }
-
 }
 
 .range-input-error {

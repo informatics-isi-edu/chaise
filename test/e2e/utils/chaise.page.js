@@ -1041,7 +1041,7 @@ var recordsetPage = function() {
     };
 
     this.getFacetHeaderButtonById = function (idx) {
-        return this.getFacetById(idx).element(by.css('.facet-heading-' + idx + ' button'))
+        return this.getFacetById(idx).element(by.css('.fc-heading-' + idx + ' button'))
     }
 
     this.getFacetSearchBoxById = function (idx) {
@@ -1052,12 +1052,13 @@ var recordsetPage = function() {
         return this.getFacetSearchBoxById(idx).element(by.className("chaise-input-placeholder"))
     }
 
+    // get child of accordion group, sibling to accordion heading
     this.getFacetCollapse = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css("div[aria-expanded=true]"));
+        return element(by.css(".fc-" + idx)).element(by.css(".accordion-collapse"));
     }
 
     this.getFacetTitles = function () {
-        return element.all(by.css(".panel-title .facet-header-text"));
+        return element.all(by.css(".accordion-header .facet-header-text"));
     }
 
     this.getOpenFacetTitles = function () {
@@ -1073,7 +1074,7 @@ var recordsetPage = function() {
     }
 
     this.getClearAllFilters = function () {
-        return element(by.className("clear-all-filters"));
+        return element(by.css(".clear-all-filters"));
     }
 
     this.getClearCustomFilters = function () {
@@ -1112,10 +1113,6 @@ var recordsetPage = function() {
 
     this.getFacetSearchBoxClear = function (idx) {
         return element(by.css(".fc-" + idx)).element(by.css(".remove-search-btn"));
-    }
-
-    this.getHistogram = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.tagName("plotly"));
     }
 
     this.getList = function (idx) {
@@ -1180,7 +1177,7 @@ var recordsetPage = function() {
     }
 
     this.getRangeSubmit = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css("button[type=submit]"));
+        return element(by.css(".fc-" + idx)).element(by.css(".range-input-submit-btn"));
     }
 
     this.getModalMatchNotNullInput = function () {
@@ -1200,7 +1197,7 @@ var recordsetPage = function() {
     };
 
     this.getDisabledFacetOptions = function (idx) {
-        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[disabled=disabled]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[disabled]"));
     };
 
     this.getHistogram = function (idx) {
@@ -1212,7 +1209,7 @@ var recordsetPage = function() {
     };
 
     this.getPlotlyZoomDisabled = function (idx) {
-        return element(by.css(".fc-" + idx)).all(by.css(".zoom-plotly-button[disabled=disabled]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".zoom-plotly-button[disabled]"));
     };
 
     this.getPlotlyUnzoom = function (idx) {
@@ -1220,7 +1217,7 @@ var recordsetPage = function() {
     };
 
     this.getPlotlyUnzoomDisabled = function (idx) {
-        return element(by.css(".fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled=disabled]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".unzoom-plotly-button[disabled]"));
     };
 
     this.getPlotlyReset = function (idx) {
@@ -1530,6 +1527,11 @@ function chaisePage() {
       browser.waitForAngularEnabled(false);
       browser.ignoreSynchronization = true;
       return browser.get(url);
+    }
+
+    this.refresh = function (url) {
+      this.navigate(url);
+      return browser.refresh();
     }
 };
 

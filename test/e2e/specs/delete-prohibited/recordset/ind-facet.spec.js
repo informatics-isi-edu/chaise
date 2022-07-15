@@ -500,7 +500,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
             it("boolean facet should not have a search box present", function (done) {
                 // idx 8 is for boolean facet
-                var booleanFacet = chaisePage.recordsetPage.getFacetById(8);
+                var booleanFacet = chaisePage.recordsetPage.getFacetHeaderButtonById(8);
                 
                 booleanFacet.click().then(function () {
                     browser.wait(EC.not(EC.presenceOf(chaisePage.recordsetPage.getFacetSearchBox(8))), browser.params.defaultTimeout);
@@ -662,14 +662,14 @@ describe("Viewing Recordset with Faceting,", function() {
             //   - 12 has open:true in the visible-columns annotaiton under the filter context
             afterAll(function closeDefaultOpenFacets() {
                 // close the facets in opposite order so they dont move when trying to click others
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(11)).then(function() {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(11)).then(function() {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
                             return ct == testParams.totalNumFacets-2;
                         });
                     }, browser.params.defaultTimeout)
 
-                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(1));
+                    return chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(1));
                 }).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {

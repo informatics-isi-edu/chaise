@@ -1,15 +1,24 @@
-import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
+
+// components
+import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+
+// models
+import { RangeOption,TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
 
 type DateTimePickerProps = {
   /**
-   * classes for styling the input element
+   * classes for styling the date input element
    */
-  classes?: string,
+  dateClasses?: string,
+  /**
+   * classes for styling the time input element
+   */
+  timeClasses?: string,
   /**
    * the default date value being used
    */
-  value: string,
+  value?: TimeStamp,
   /**
    * the react ref object referencing the date input element
    */
@@ -32,7 +41,7 @@ type DateTimePickerProps = {
   handleChange: (() => void)
 };
 
-const DateTimePicker = ({ classes, value, handleChange, dateRef,
+const DateTimePicker = ({ dateClasses, timeClasses, value, handleChange, dateRef,
   timeRef, showClearDateBtn, showClearnTimeBtn }: DateTimePickerProps): JSX.Element => {
 
   const handleTimeClear = () => {
@@ -47,18 +56,18 @@ const DateTimePicker = ({ classes, value, handleChange, dateRef,
 
   return (
     <div className='input-switch-datetime'>
-      <div className='chaise-input-control has-feedback'>
-        <input className={classes} type='date' ref={dateRef}
-          placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} onChange={handleChange} />
+      <div className='input-switch-date chaise-input-control has-feedback'>
+        <input className={dateClasses} type='date' ref={dateRef}
+          placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} onChange={handleChange} required />
         <ClearInputBtn
           btnClassName='input-switch-clear'
           clickCallback={handleDateClear}
           show={showClearDateBtn}
         />
       </div>
-      <div className='chaise-input-control has-feedback'>
-        <input className={classes} type='time' ref={timeRef}
-          placeholder='HH:MM' min='00:00' max='23:59' defaultValue='00:00' onChange={handleChange} />
+      <div className='input-switch-time chaise-input-control has-feedback'>
+        <input className={timeClasses} type='time' ref={timeRef}
+          placeholder='HH:mm:ss' min='00:00:00' max='23:59:59' step='1' defaultValue={value?.time} onChange={handleChange} required />
         <ClearInputBtn
           btnClassName='input-switch-clear'
           clickCallback={handleTimeClear}
@@ -78,6 +87,14 @@ type InputSwitchProps = {
    * classes for styling the input element
    */
   classes?: string,
+  /**
+   * classes for styling the date input element
+   */
+  dateClasses?: string,
+   /**
+    * classes for styling the time input element
+    */
+  timeClasses?: string,
   /** 
    * the react ref object referencing the input element
   */
@@ -98,7 +115,7 @@ type InputSwitchProps = {
   /** 
    * the default date value being used in case of date and timestamp types
    */
-  value: string,
+  value?: RangeOption,
   /**
    * flag for showing clear button on input field
    */
@@ -113,7 +130,7 @@ type InputSwitchProps = {
   handleChange: (() => void),
 };
 
-const InputSwitch = ({ placeholder = 'Enter', classes = '', reference, timeRef,
+const InputSwitch = ({ placeholder = 'Enter', classes = '', dateClasses = '', timeClasses = '', reference, timeRef,
   type, value, handleChange, showClearBtn, showClearnTimeBtn }: InputSwitchProps): JSX.Element | null => {
 
   const clearInput = () => {
@@ -124,14 +141,29 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', reference, timeRef,
   return (() => {
     switch (type) {
       case 'timestamp':
-        return <DateTimePicker classes={`${classes} input-switch`} value={value} dateRef={reference}
-          timeRef={timeRef} showClearDateBtn={showClearBtn} showClearnTimeBtn={showClearnTimeBtn} handleChange={handleChange} />
+        return <DateTimePicker 
+          dateClasses={`${dateClasses} input-switch`} 
+          timeClasses={`${timeClasses} input-switch`} 
+          value={value as TimeStamp} 
+          dateRef={reference}
+          timeRef={timeRef} 
+          showClearDateBtn={showClearBtn} 
+          showClearnTimeBtn={showClearnTimeBtn} 
+          handleChange={handleChange} 
+        />
       case 'int':
       case 'float':
       case 'numeric':
         return (
-          <div className='chaise-input-control has-feedback'>
-            <input type='number' placeholder={placeholder} className={`${classes} input-switch`} ref={reference} onChange={handleChange} />
+          <div className='input-switch-numeric chaise-input-control has-feedback'>
+            <input 
+              className={`${classes} input-switch`} 
+              defaultValue={value as number} 
+              onChange={handleChange} 
+              placeholder={placeholder} 
+              ref={reference} 
+              type='number' 
+            />
             <ClearInputBtn
               btnClassName='input-switch-clear'
               clickCallback={clearInput}
@@ -141,9 +173,17 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', reference, timeRef,
         );
       case 'date':
         return (
-          <div className='chaise-input-control has-feedback'>
-            <input type='date' className={`${classes} input-switch`} ref={reference} step='1' defaultValue={value}
-              pattern='\d{4}-\d{2}-\d{2}' min='1970-01-01' max='2999-12-31' onChange={handleChange} />
+          <div className='input-switch-date chaise-input-control has-feedback'>
+            <input 
+              className={`${classes} input-switch`} 
+              defaultValue={value as string}
+              onChange={handleChange} 
+              pattern='\d{4}-\d{2}-\d{2}' 
+              ref={reference} 
+              required
+              step='1' 
+              type='date' 
+            />
             <ClearInputBtn
               btnClassName='input-switch-clear'
               clickCallback={clearInput}
