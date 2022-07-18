@@ -126,6 +126,7 @@ const ChaiseLoginDropdown = ({
   }
 
   const renderHeader = (item: MenuOption, index: number) => <NavDropdown.Header
+    as='a'
     key={index}
     className='chaise-dropdown-header'
     dangerouslySetInnerHTML={{ __html: renderName(item) }}
