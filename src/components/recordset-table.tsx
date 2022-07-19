@@ -138,11 +138,13 @@ const RecordsetTable = ({
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
       page.tuples.forEach((tuple: any, index: number) => {
         if (isRowDisabled[index]) return;
-        if (!isRowDisabled[index]) res.push({
-          displayname: tuple.displayname,
-          uniqueId: tuple.uniqueId,
-          data: tuple.data
-        });
+        if (!isRowSelected[index]) {
+          res.push({
+            displayname: tuple.displayname,
+            uniqueId: tuple.uniqueId,
+            data: tuple.data
+          });
+        }
       });
       return res;
     });
