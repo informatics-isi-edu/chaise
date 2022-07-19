@@ -44,13 +44,13 @@ describe('Navbar ', function() {
     });
 
     it('should show a link for the login information since chaiseConfig.loggedInMenu is an object', function() {
-        expect(element(by.css('login .login-display')).getText()).toBe("Outbound Profile Link", "user's displayed name is incorrect");
+        expect(element(by.css('.login-menu-options')).getText()).toBe("Outbound Profile Link", "user's displayed name is incorrect");
     });
 
     if (!process.env.CI){
         it('should open a new tab when clicking the link for the login information', function(done) {
             var allWindows;
-            var loginElement = element(by.css('login .login-display'));
+            var loginElement = element(by.css('.login-menu-options'));
 
             loginElement.click().then(function () {
                 return browser.getAllWindowHandles();
@@ -74,9 +74,10 @@ describe('Navbar ', function() {
 
     it('should hide the navbar bar if the hideNavbar query parameter is set to true', function () {
         browser.get(url + "?hideNavbar=true");
-        browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
+        browser.refresh();
+        // browser wait for navbar if not needed, only checking recordset table is present is sufficient 
         chaisePage.recordsetPageReady()
 
-        expect(navbar.isDisplayed()).toBeFalsy();
+        expect(navbar.isPresent()).toBeFalsy();
     });
 });
