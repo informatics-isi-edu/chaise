@@ -163,6 +163,7 @@ const RecordsetInner = ({
   const [facetColumnsReady, setFacetColumnsReady] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
+  const topRightContainer = useRef<HTMLDivElement>(null);
   const topLeftContainer = useRef<HTMLDivElement>(null);
 
   /**
@@ -182,11 +183,20 @@ const RecordsetInner = ({
   const editRequestIsDone = useRef(false);
 
 
-  // initialize the recordset if it has not been done yet.
+  /**
+   * if data is not initialized:
+   *   - if we're disabling facets:
+   *     - initialize data
+   *   - otherwise:
+   *     - get the facet columns and let faceting.tsx handle initialization
+   * if data is initialized:
+   *   - make sure the right padding is correct
+   */
   useEffect(() => {
+    let paddingSensor : any;
     if (isInitialized) {
-      // must be done after the data has been loaded
-      // attachMainContainerPaddingSensor();
+      // must be done after the data has been initialized to reduce the jitteriness
+      paddingSensor = attachMainContainerPaddingSensor(parentContainer);
       return;
     }
 
@@ -236,6 +246,10 @@ const RecordsetInner = ({
       dispatchError({ error: exception });
     });
 
+
+    if (paddingSensor && typeof paddingSensor === 'function') {
+      paddingSensor.detach();
+    }
   }, [isInitialized]);
 
   /**
@@ -271,6 +285,13 @@ const RecordsetInner = ({
   // after data loads, scroll to top and change the browser location
   useEffect(() => {
     if (isLoading) return;
+
+    // make sure the right padding is correct after data load
+    // NOTE without this the padding stays the same until we interact with the page
+    if (mainContainer.current && topRightContainer.current) {
+      const padding = mainContainer.current.clientWidth - topRightContainer.current.clientWidth;
+      mainContainer.current.style.paddingRight = padding + 'px';
+    }
 
     // scroll to top after load
     if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
@@ -582,8 +603,7 @@ const RecordsetInner = ({
   );
 
   const renderMainContainer = () => (
-    // TODO styles should be removed and should be dynamic
-    <div className='main-container dynamic-padding' ref={mainContainer} style={{ paddingRight: '5px' }}>
+    <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
         <RecordsetTable
           config={config}
@@ -631,7 +651,7 @@ const RecordsetInner = ({
             </div>
           </div>
 
-          <div className='top-right-panel'>
+          <div className='top-right-panel' ref={topRightContainer}>
             {config.displayMode === RecordsetDisplayMode.FULLSCREEN &&
               <div className='recordset-title-container title-container'>
                 <div className='recordset-title-buttons title-buttons'>
