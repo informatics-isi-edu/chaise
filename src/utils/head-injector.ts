@@ -18,8 +18,7 @@ export async function setupHead() {
   setWindowName(); // will only update if not already set
 
   const settings = ConfigService.appSettings;
-  // TODO
-  // if (settings.openLinksInTab) openLinksInTab();
+  if (settings.openLinksInTab) openLinksInTab();
   // if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
   // if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
   if (settings.overrideHeadTitle) addTitle(settings.appTitle);
@@ -199,32 +198,34 @@ function clickHref(href: string) {
 //   });
 // }
 
-// /**
-// * make sure links open in new tab
-// */
-// function openLinksInTab() {
-//   addClickListener('a[href]', function (e : Event, element) {
-//     element.target = '_blank';
-//   });
-// }
+/**
+* make sure links open in new tab
+*/
+export function openLinksInTab() {
+  addClickListener('a[href]', (e : Event, element: any) => {
+    element.target = '_blank';
+  });
+}
 
-// /**
-// * Will call the handler function upon clicking on the elements represented by selector
-// * @param {string} selector the selector string
-// * @param {function} handler  the handler callback function.
-// * handler parameters are:
-// *  - Event object that is returned.
-// *  - The target (element that is described by the selector)
-// * NOTE since we're checking the closest element to the target, the e.target might
-// * be different from the actual target that we want. That's why we have to send the target too.
-// * We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
-// * the image as the value of e.target and not the link
-// */
-// function addClickListener(selector: string, handler: Function) {
-//   document.querySelector('body')!.addEventListener('click', function (e) {
-//     const target = e.target as HTMLElement;
-//     if (target.closest(selector)) {
-//       handler(e, target.closest(selector));
-//     }
-//   });
-// }
+/**
+* Will call the handler function upon clicking on the elements represented by selector
+* @param {string} selector the selector string
+* @param {function} handler  the handler callback function.
+* handler parameters are:
+*  - Event object that is returned.
+*  - The target (element that is described by the selector)
+* NOTE since we're checking the closest element to the target, the e.target might
+* be different from the actual target that we want. That's why we have to send the target too.
+* We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
+* the image as the value of e.target and not the link
+*/
+function addClickListener(selector: string, handler: Function) {
+  const body = document.querySelector('body');
+  if (!body) return;
+  body.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(selector)) {
+      handler(e, target.closest(selector));
+    }
+  });
+}

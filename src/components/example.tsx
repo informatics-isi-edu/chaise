@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
@@ -58,7 +57,7 @@ const ExampleComponent = ({
   // - Render any dependent items into temporary variables,
   //    such as conditional components or lists
   const conditionalDescription = (isStringAndNotEmpty(description))
-    ? (<Button onClick={onClick}>Show Description</Button>) : null;
+    ? (<button className='chaise-btn chaise-btn-primary' onClick={onClick}>Show Description</button>) : null;
 
   // - Use a single JSX structure filled with content
   return (

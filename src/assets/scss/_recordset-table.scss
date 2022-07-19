@@ -143,17 +143,17 @@
       right: 10px;
       font-size: $h4-font-size;
 
-      // NOTE even though the conditions dictate that we should show one
-      // of these elements under table-heading-icons at a time, but becuase of
-      // the way angularjs is compiling the template sometimes both of the buttons
-      // show up. So this css change will make sure only one of the buttons are
-      // visible at a time.
-      .column-error-icon ~ span, .aggregate-col-loader ~ span {
-        display: none;
-      }
-
-      .aggregate-col-loader {
+      .table-column-spinner {
+        position: absolute;
+        bottom: 2px;
         right: -5px;
+
+        .spinner-border {
+          color: #828282;
+          width: 1.1rem;
+          height: 1.1rem;
+          border-width: .16em;
+        }
       }
     }
   }
@@ -171,8 +171,16 @@
       min-height: 25px; // make sure the button has default height
     }
 
-    .apply-saved-query-button.disabled {
+    .chaise-view-details {
+      font-size: 1.1em;
+    }
+
+    .disabled {
       cursor: not-allowed;
+      color: $disabled-color;
+    }
+
+    .delete-loader {
       color: $disabled-color;
     }
   }

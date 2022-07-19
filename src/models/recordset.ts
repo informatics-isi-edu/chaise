@@ -1,4 +1,5 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
+import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker'
 import React from 'react'
 
 export enum RecordsetSelectMode {
@@ -32,6 +33,7 @@ export type RecordsetConfig = {
   disableFaceting: boolean,
   displayMode: RecordsetDisplayMode,
   // TODO enable favorites
+  // enableFavorites: boolean
 }
 
 export type SortColumn = {
@@ -46,6 +48,12 @@ export type FacetCheckBoxRow = {
   isNotNull?: boolean,
   tuple?: any,
   isFavorite?: boolean,
+  metaData?: {
+    min: RangeOption,
+    minExclusive: boolean,
+    max: RangeOption,
+    maxExclusive: boolean
+  }
 }
 
 export type FacetModel = {
@@ -78,4 +86,18 @@ export type FacetRequestModel = {
   // logStackNode: facetLogStackNode,
   // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
   // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
+}
+
+/**
+ * The selected row in recordset
+ * NOTE while we could just use "tuple" type, in case of
+ * faceting we don't necessarily have the "tuple" object and
+ * therefore we're creating this object ourselves.
+ */
+export type SelectedRow = {
+  displayname: Displayname;
+  uniqueId: string | null;
+  data?: any; // TODO
+  // the following can be added for plot app and might require change:
+  // cannotBeRemoved?: boolean;
 }

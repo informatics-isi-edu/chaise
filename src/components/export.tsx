@@ -13,6 +13,7 @@ import ExportModal from '@isrd-isi-edu/chaise/src/components/export-modal';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type ExportProps = {
   reference: any;
@@ -182,7 +183,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
           <Dropdown.Menu>
             {options.map((option: any, index: number) => (
               <Dropdown.Item
-                className='export-menu-item'
+                className={`export-menu-item export-${makeSafeIdAttr(option.displayname)}`}
                 key={`export-${index}`}
                 onClick={startExporting(option)}
               >

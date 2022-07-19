@@ -7,7 +7,7 @@ describe('Navbar ', function() {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         
         navbar = element(by.id('mainnav'));
-        menu = element(by.id('navbar-menu'));
+        menu = element(by.css('.navbar-menu-options'));
         browser.executeScript('return chaiseConfig;').then(function(config) {
             chaiseConfig = config;
             browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
@@ -44,7 +44,7 @@ describe('Navbar ', function() {
     });
 
     it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
-        var nodesInDOM = menu.all(by.tagName('li'));
+        const nodesInDOM = menu.all(by.css('a'));
         // Count the number of nodes that are being shown (top level and submenus)
         //   - Local: config has 13 but 1 is hidden by ACLs
         //   - CI: config has 13 but 7 are hidden based on ACLs
@@ -57,41 +57,45 @@ describe('Navbar ', function() {
 
     it('should prefer markdownName over name when both are defined', function () {
         // option #2 has both name and markdownName defined
-        expect(element.all(by.css('#navbar-menu > li.dropdown')).get(1).getText()).toBe("Test Recordsets", "name was used instead of markdownName");
+        let secondMenuItem = menu.all(by.css('.chaise-nav-item'));
+        expect(secondMenuItem.get(1).getText()).toBe("Test Recordsets", "name was used instead of markdownName");
     });
 
     it('should render a markdown pattern using proper HTML', function () {
         // in ci we don't have the same globus groups so the "show" ACL hides the 3rd link ("Records")
         var idx = (!process.env.CI ? 3 : 2);
         // option #4 has only markdownName defined
-        element.all(by.css('#navbar-menu > li.dropdown')).get(idx).element(by.css("a")).getAttribute('innerHTML').then(function (aInnerHTML) {
+        let lastMenuItem = menu.all(by.css('.chaise-nav-item')).get(idx);
+        lastMenuItem.element(by.css('a')).getAttribute('innerHTML').then(function (aInnerHTML) {
             expect(aInnerHTML.indexOf("<strong>")).toBeGreaterThan(-1, "name was used instead of markdownName");
         });
     });
 
     if (!process.env.CI) {
         var menuDropdowns, disabledSubMenuOptions;
-        it('should have a disabled "Records" link.', function () {
-            menuDropdowns = element.all(by.css('#navbar-menu > li.dropdown'));
+        
+        it("should have 4 top level dropdown menus", function() {
+            expect(menu.all(by.css('.chaise-nav-item')).count()).toBe(4, "number of top level dropdown menus is wrong");
+        });
 
-            expect(menuDropdowns.count()).toBe(4, "number of top level dropdown menus is wrong");
+        it('should have a disabled "Records" link.', function () {
             // get index 2 (3rd item)
-            expect(menuDropdowns.get(2).element(by.css("a.disable-link")).getText()).toBe("Records", "text is incorrect, may include caret");
+            expect(menu.element(by.css("a.disable-link")).getText()).toBe("Records", "text is incorrect, may include caret");            
         });
 
         it('should have a header and a disabled "Edit Existing Record" submenu link (no children).', function () {
-            var editMenu = menuDropdowns.get(3);
-            // need to open menu so it renders and has a value
-            editMenu.click().then(function () {
-                subMenuHeader = editMenu.all(by.css("span.chaise-dropdown-header"));
-                expect(subMenuHeader.get(0).getText()).toBe("For Mutating Data", "Sub menu header is incorrect or not showing");
-
+            //menu should still be open from previous test case
+            // chaise-nav-item represents top menus in the navbar.
+            let editMenu = menu.all(by.css('.chaise-nav-item')).get(3);
+            editMenu.click().then(function() {
+                expect(editMenu.all(by.css('.chaise-dropdown-header')).get(0).getText()).toBe("For Mutating Data", "Sub menu header is incorrect or not showing");
                 return editMenu.all(by.css("a.disable-link"));
             }).then(function (options) {
                 disabledSubMenuOptions = options;
-
                 expect(options.length).toBe(4, "some options are not shown properly");
                 expect(disabledSubMenuOptions[0].getText()).toBe("Edit Existing Record", "the wrong link is disabled or none were selected");
+            }).catch(function (err) {
+                console.log(err);
             });
         });
 
@@ -103,37 +107,35 @@ describe('Navbar ', function() {
 
     it('should show the "Full Name" of the logged in user in the top right', function () {
         var name = (!process.env.CI ? browser.params.client.full_name : browser.params.client.display_name);
-        expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
+        expect(element(by.css('.username-display')).getText()).toBe(name, "user's displayed name is incorrect");
     });
 
 
     it('should open the profile card on click of My Profile link', function(done) {
-        var link = element(by.css('login .dropdown-toggle'));
+        // Get My Profile link element using className username-display
+        var link = element(by.css('.username-display'));
 
-        browser.wait(EC.elementToBeClickable(link), browser.params.defaultTimeout);
-        chaisePage.clickButton(link).then(function() {
-            var profileLink = element(by.id('profile-link'));
-            browser.wait(EC.elementToBeClickable(profileLink), browser.params.defaultTimeout);
-            chaisePage.clickButton(profileLink).then(function() {
-                var modalContent = element(by.css('.modal-content'));
-
-                chaisePage.waitForElement(modalContent);
-                expect(modalContent.isDisplayed()).toBeTruthy();
-                done();
-            }).catch(function (err) {
-                done.fail();
-                console.log(err);
-            });
+        link.click().then(function() {
+            const profileLink = element(by.css('#profile-link'));
+            return profileLink.click();
+        }).then(function() {
+            // Get profile card modal element using className profile-popup
+            const modalContent = element(by.css('.profile-popup'));
+            chaisePage.waitForElement(modalContent);
+            expect(modalContent.isDisplayed()).toBeTruthy();
+            done();
+        }).catch(function (err) {
+            done.fail();
+            console.log(err);
         });
     });
 
     it('should close the profile card on click of X on the modal window', function(done) {
-         var closeLink = element(by.css('.modal-close'));
-         var modalContent = element(by.css('.modal-content'));
-         browser.wait(EC.elementToBeClickable(closeLink), browser.params.defaultTimeout);
-         chaisePage.clickButton(closeLink).then(function(){
+        const closeLink = element(by.css('.modal-close'));
+        const modalContent = element(by.css('.profile-popup'));
 
-            browser.wait(EC.not(EC.presenceOf(modalContent)), browser.params.defaultTimeout);
+         chaisePage.clickButton(closeLink).then(function(){
+            chaisePage.waitForElementInverse(modalContent, browser.params.defaultTimeout);
             expect(modalContent.isPresent()).toEqual(false);
             done();
         }).catch(function (err) {

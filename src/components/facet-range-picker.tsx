@@ -1,8 +1,11 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // components
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 // customizable method: use your own `Plotly` object to use minified basic distribution of plotlyjs
 import Plotly from 'plotly.js-basic-dist-min';
@@ -10,21 +13,28 @@ import createPlotlyComponent from 'react-plotly.js/factory';
 const Plot = createPlotlyComponent(Plotly);
 
 import { ResizeSensor } from 'css-element-queries';
-import Q from 'q';
+
+// hooks
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
-import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import {
   FacetRangePickerProps,
+  HTMLPlotElement,
+  PlotData,
+  PlotlyLayout,
   RangeOptions,
   RangePickerState,
   TimeStamp
 } from '@isrd-isi-edu/chaise/src/models/range-picker';
 
+
 // services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import Q from 'q';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+// import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -33,13 +43,74 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
 const FacetRangePicker = ({
+  dispatchFacetUpdate,
   facetColumn,
-  facetModel,
   facetIndex,
+  facetModel,
+  facetPanelOpen,
   register,
   updateRecordsetReference
 }: FacetRangePickerProps): JSX.Element => {
-  const [ranges, setRanges] = useState<FacetCheckBoxRow[]>([]);
+  const [ranges, setRanges] = useState<FacetCheckBoxRow[]>(
+    (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) ? [getNotNullFacetCheckBoxRow(false)] : []
+  );
+
+  const isColumnOfType = (columnType: string) => {
+    return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
+  }
+
+  const createChoiceDisplay = (filter: any, selected: boolean) => {
+    return {
+        uniqueId: filter.uniqueId,
+        displayname: {value: filter.toString(), isHTML: false},
+        selected: selected,
+        metaData: {
+            min: filter.min,
+            minExclusive: filter.minExclusive,
+            max: filter.max,
+            maxExclusive: filter.maxExclusive
+        }
+    }
+  };
+
+  const defaultPlotLayout: PlotlyLayout = {
+    autosize: true,
+    height: 150,
+    margin: {
+      l: 40,
+      r: 0,
+      b: 80,
+      t: 20,
+      pad: 2
+    },
+    xaxis: {
+      fixedrange: false,
+      ticks: 'inside',
+      tickangle: 45,
+      // set to "linear" for int/float graphs
+      // set to "date" for date/timestamp graphs
+      type: '-'
+      // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
+      // autorange: true // default is true. if range is provided, set to false.
+      // rangemode: "normal"/"tozero"/"nonnegative"
+    },
+    yaxis: {
+      fixedrange: true,
+      zeroline: true,
+      tickformat: ',d'
+    },
+    bargap: 0
+  }
+
+  // isColumnOfType relies on `facetColumn` being defined. This component won't load unles there's a facetColumn
+  if (isColumnOfType('int')) {
+    defaultPlotLayout.margin.b = 40;
+    defaultPlotLayout.xaxis.tickformat = ',d';
+  } else if (isColumnOfType('date')) {
+    defaultPlotLayout.xaxis.tickformat = '%Y-%m-%d';
+  } else if (isColumnOfType('timestamp')) {
+    defaultPlotLayout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
+  }
 
   const [compState, setCompState] = useState<RangePickerState>({
     disableZoomIn: false,
@@ -56,94 +127,45 @@ const FacetRangePicker = ({
         displayModeBar: false,
         responsive: true
       },
-      layout: {
-        autosize: true,
-        height: 150,
-        margin: {
-          l: 40,
-          r: 0,
-          b: 80,
-          t: 20,
-          pad: 2
-        },
-        xaxis: {
-          fixedrange: false,
-          ticks: 'inside',
-          tickangle: 45,
-          // set to "linear" for int/float graphs
-          // set to "date" for date/timestamp graphs
-          type: '-'
-          // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
-          // autorange: true // default is true. if range is provided, set to false.
-          // rangemode: "normal"/"tozero"/"nonnegative"
-        },
-        yaxis: {
-          fixedrange: true,
-          zeroline: true,
-          tickformat: ',d'
-        },
-        bargap: 0
-      }
+      layout: defaultPlotLayout
     }
   })
 
 
-  const facetContainer = useRef<HTMLDivElement>(null);
-  const plotlyRef = useRef<any>(null);
+  const rangePickerContainer = useRef<HTMLDivElement>(null);
+  const listContainer = useRef<HTMLDivElement>(null);
+  const plotlyRef = useRef<HTMLPlotElement>(null);
 
   const numBuckets = facetColumn.histogramBucketCount;
 
+  // set the resize sensor to call the plot resize fucntion
   useLayoutEffect(() => {
-    if (!facetContainer.current) return;
+    if (!rangePickerContainer.current) return;
     new ResizeSensor(
-      facetContainer.current,
+      rangePickerContainer.current,
       () => {
-        if (facetContainer.current && plotlyRef.current) plotlyRef.current.resizeHandler();
+        if (rangePickerContainer.current && plotlyRef.current) plotlyRef.current.resizeHandler();
       }
     )
   }, []);
 
   useEffect(() => {
-    if (facetColumn.hideNotNullChoice) {
-      setRanges([getNotNullFacetCheckBoxRow(false)]);
+    if (compState.relayout) {
+      // make sure the callbacks with latest scope are used
+      callRegister();
+
+      $log.debug(`faceting: request for facet (index=${facetIndex} update. relayout triggered`);
+
+      // ask the parent to update the facet column
+      dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_PLOT_RELAYOUT);
     }
-
-    const layout = { ...compState.plot.layout };
-    if (isColumnOfType('int')) {
-      if (layout.margin && typeof layout.margin === 'object') layout.margin.b = 40;
-      if (layout.xaxis && typeof layout.xaxis === 'object') layout.xaxis.tickformat = ',d';
-    } else if (isColumnOfType('date')) {
-      if (layout.xaxis && typeof layout.xaxis === 'object') layout.xaxis.tickformat = '%Y-%m-%d';
-    } else if (isColumnOfType('timestamp')) {
-      if (layout.xaxis && typeof layout.xaxis === 'object') layout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
-    }
-
-    setCompState({
-      ...compState,
-      plot: {
-        ...compState.plot,
-        layout: layout
-      }
-    });
-
-    // NOTE: temporary
-    updateFacetData();
-  }, [facetColumn]);
-
-  useEffect(() => {
-    (function (uri, reloadCauses, reloadStartTime) {
-      if (compState.relayout) {
-        histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime)
-      }
-    })(facetColumn.sourceReference.uri);
-    // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
   }, [compState.relayout])
 
   /**
    * register the flow-control related functions for the facet
    * this will ensure the functions are registerd based on the latest facet changes
    */
-   useEffect(() => {
+  useEffect(() => {
     callRegister();
   }, [facetModel, ranges]);
 
@@ -151,7 +173,7 @@ const FacetRangePicker = ({
   /**
    * register the callbacks (this should be called after related state variables changed)
    */
-   const callRegister = () => {
+  const callRegister = () => {
     register(facetIndex, processFacet, preProcessFacet, getAppliedFilters, removeAppliedFilters);
   };
 
@@ -160,9 +182,33 @@ const FacetRangePicker = ({
    */
   const preProcessFacet = () => {
     const defer = Q.defer();
-    // TODO
 
-    return defer.resolve(true), defer.promise;
+    // if we have the not-null filter, other filters are not important and can be ignored
+    if (facetColumn.hasNotNullFilter) {
+      setRanges([getNotNullFacetCheckBoxRow(true)]);
+      defer.resolve(true);
+    } else {
+      // default handles whether notNull option should be present
+      const updatedRows: FacetCheckBoxRow[] = [...ranges];
+
+      for (let i = 0; i < facetColumn.rangeFilters.length; i++) {
+        const filter = facetColumn.rangeFilters[i];
+
+        const rowIndex = ranges.findIndex(function (obj) {
+          return obj.uniqueId === filter.uniqueId;
+        });
+
+        // if the row is not in the set of choices, add it
+        if (rowIndex === -1) {
+          updatedRows.push(createChoiceDisplay(filter, true));
+        }
+      }
+
+      setRanges(updatedRows);
+      defer.resolve(true);
+    }
+
+    return defer.promise;
   }
 
   /**
@@ -171,16 +217,20 @@ const FacetRangePicker = ({
   const processFacet = () => {
     const defer = Q.defer();
 
-    // TODO
+    updateFacetData().then((result: any) => {
 
-    return defer.resolve(true), defer.promise;
+      defer.resolve(result);
+    }).catch(function (err: any) {
+      defer.reject(err);
+    });
+
+    return defer.promise;
   };
 
   /**
    * The registered callback to get the selected filters
    */
   const getAppliedFilters = () => {
-    // TODO
     return ranges.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
@@ -188,106 +238,187 @@ const FacetRangePicker = ({
    * The registered callback to remove all the selected filters
    */
   const removeAppliedFilters = () => {
-    // TODO
     setRanges((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        return {...curr, selected: false}
+        return { ...curr, selected: false }
       });
     });
   }
 
+  /***** UI related callbacks *****/
+  const addFilter = (min: RangeOptions['absMin'], max: RangeOptions['absMin']) => {
+    // TODO: export types in ermrestJS
+    // let res: {filter: RangeFacetFilter, reference: Reference};
+    let res: { filter: any, reference: any };
+    const cause = LogReloadCauses.FACET_SELECT;
+    if (isColumnOfType('float')) {
+      res = facetColumn.addRangeFilter(formatFloatMin(min as number), false, formatFloatMax(max as number), false);
+    } else {
+      res = facetColumn.addRangeFilter(min || null, false, max || null, false);
+    }
+
+    if (!res) {
+      return; // duplicate filter
+    }
+
+    // this function checks the URL length as well and might fail
+    if (!updateRecordsetReference(res.reference, facetIndex, cause)) {
+      $log.debug('faceting: URL limit reached. Reverting the change.');
+      return;
+    }
+
+    const rowIndex = ranges.findIndex(function (obj: any) {
+      return obj.uniqueId === res.filter.uniqueId;
+    });
+
+    $log.debug('faceting: request for facet (index=' + facetIndex + ') range add. min=' + min + ', max=' + max);
+
+    const updatedRows: FacetCheckBoxRow[] = [...ranges];
+
+    if (rowIndex === -1) {
+      // we should create a new filter
+      updatedRows.push(createChoiceDisplay(res.filter, true))
+    } else {
+      // filter already exists, we should just change it to selected
+      updatedRows[rowIndex].selected = true;
+    }
+
+    setRanges(updatedRows);
+  }
+
+  const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
+    const checked = !row.selected;
+
+    const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
+    // get the new reference based on the operation
+    let res: { filter: any, reference: any } = {filter: {}, reference: {}};
+    if (row.isNotNull) {
+      if (checked) {
+        res = facetColumn.addNotNullFilter();
+      } else {
+        res = facetColumn.removeNotNullFilter();
+      }
+      $log.debug(`faceting: request for facet (index=${facetIndex}) choice add. Not null filter.`);
+    } else {
+      if (row.metaData) {
+        if (checked) {
+          res = facetColumn.addRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
+        } else {
+          res = facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
+        }
+        $log.debug(`faceting: request for facet (index=${facetColumn.index}) range ${row.selected ? 'add' : 'remove'}. 
+        min=${row.metaData.min}, max=${row.metaData.max}`);
+      }
+    }
+
+    // this function checks the URL length as well and might fails
+    if (!updateRecordsetReference(res.reference, facetIndex, cause)) {
+      $log.debug('faceting: URL limit reached. Reverting the change.');
+      event.preventDefault();
+      return;
+    }
+
+    setRanges((prev: FacetCheckBoxRow[]) => {
+      return prev.map((curr: FacetCheckBoxRow) => {
+        if (curr === row) return { ...curr, selected: checked };
+        // if not-null is selected, remove all the other filters
+        else if (row.isNotNull && checked) return { ...curr, selected: false }
+        else return curr;
+      });
+    });
+  }
 
   /***** API call functions *****/
   const updateFacetData = () => {
-    // var defer = $q.defer();
+    const defer = Q.defer();
 
     (function (uri, reloadCauses, reloadStartTime) {
-      // if (!scope.relayout) {
-      // the captured uri is not the same as the initial data uri so we need to refetch the min/max
-      // this happens when another facet adds a filter that affects the facett object in the uri
-      const agg = facetColumn.column.aggregate;
-      const aggregateList = [
-        agg.minAgg,
-        agg.maxAgg
-      ];
+      if (!compState.relayout) {
+        // the captured uri is not the same as the initial data uri so we need to refetch the min/max
+        // this happens when another facet adds a filter that affects the facett object in the uri
+        const agg = facetColumn.column.aggregate;
+        const aggregateList = [
+          agg.minAgg,
+          agg.maxAgg
+        ];
 
-      const facetLog = getDefaultLogInfo();
-      let action = LogActions.FACET_RANGE_LOAD;
-      // if (reloadCauses.length > 0) {
-      //   action = LogActions.FACET_RANGE_RELOAD;
-      //   // add causes
-      //   facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
-      // }
-      // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
-      facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
-        if (facetColumn.sourceReference.uri !== uri) {
-          // return false to defer.resolve() in .then() callback
-          // return false;
-        }
+        const facetLog = getDefaultLogInfo();
+        // let action = LogActions.FACET_RANGE_LOAD;
+        // if (reloadCauses.length > 0) {
+        //   action = LogActions.FACET_RANGE_RELOAD;
+        //   // add causes
+        //   facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
+        // }
+        // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
+        $log.debug('fetch aggregates')
+        facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
+          if (facetColumn.sourceReference.uri !== uri) {
+            // return false to defer.resolve() in .then() callback
+            // return false;
+          }
 
-        // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
-        const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
+          // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
+          const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
 
-        // if - the max/min are null
-        //    - bar_plot in annotation is 'false'
-        //    - histogram not supported for column type
-        // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
-        if (!(facetColumn.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
-          // TODO: resolve use of defer?
-          // return true to defer.resolve() in .then() callback
+          // if - the max/min are null
+          //    - bar_plot in annotation is 'false'
+          //    - histogram not supported for column type
+          // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
+          if (!(facetColumn.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
+            setCompState({
+              ...compState,
+              rangeOptions: minMaxRangeOptions
+            });
+            return defer.resolve(true);
+          }
+
           setCompState({
             ...compState,
-            rangeOptions: minMaxRangeOptions
+            disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
+            histogramDataStack: [],
+            rangeOptions: minMaxRangeOptions,
+            relayout: false
           });
-          return true;
-        }
+          // get initial histogram data
 
-        setCompState({
-          ...compState,
-          disableZoomIn: disableZoomIn(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax),
-          histogramDataStack: [],
-          rangeOptions: minMaxRangeOptions,
-          relayout: false
+          return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
+        }).then((response: any) => {
+
+          // facetModel.reloadCauses = [];
+          // facetModel.reloadStartTime = -1;
+
+          defer.resolve(response);
+        }).catch((err: any) => {
+          console.log('catch facet data: ', err);
+          defer.reject(err);
         });
-        // get initial histogram data
-        histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
-      }).then((response: any) => {
-
-        // facetModel.reloadCauses = [];
-        // facetModel.reloadStartTime = -1;
-
-        // defer.resolve(response);
-      }).catch((err: any) => {
-        console.log('catch facet data: ', err);
-        // defer.reject(err);
-      });
-      // relayout case
-      // } else {
-      //     histogramData(reloadCauses, reloadStartTime).then(function (response) {
-      //         defer.resolve(response);
-      //     }).catch(function (err) {
-      //         defer.reject(err);
-      //     });
-      // }
+        // relayout case
+      } else {
+        histogramData(compState.rangeOptions.absMin, compState.rangeOptions.absMax, reloadCauses, reloadStartTime).then((response: any) => {
+          defer.resolve(response);
+        }).catch(function (err: any) {
+          defer.reject(err);
+        });
+      }
     })(facetColumn.sourceReference.uri);
     // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
 
     // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
     // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
 
-    // return defer.promise;
+    return defer.promise;
   };
 
   // NOTE: min and max are passed as parameters since we don't want to rely on state values being set/updated before sending this request
   const histogramData = (min: RangeOptions['absMin'], max: RangeOptions['absMax'], reloadCauses: any, reloadStartTime: any) => {
-    // var defer = $q.defer();
+    const defer = Q.defer();
 
     (function (uri) {
       const requestMin = isColumnOfType('timestamp') ? dateTimeToTimestamp(min as TimeStamp) : min,
         requestMax = isColumnOfType('timestamp') ? dateTimeToTimestamp(max as TimeStamp) : max;
 
       const facetLog = getDefaultLogInfo();
-      let action = LogActions.FACET_HISTOGRAM_LOAD;
+      // let action = LogActions.FACET_HISTOGRAM_LOAD;
       // if (reloadCauses.length > 0) {
       //   action = LogActions.FACET_HISTOGRAM_RELOAD;
 
@@ -296,11 +427,12 @@ const FacetRangePicker = ({
       // }
 
       // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
+      $log.debug('fetch histogram data')
       facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
         if (facetColumn.sourceReference.uri !== uri) {
           // return breaks out of the current callback function
-          // defer.resolve(false);
-          // return defer.promise;
+          defer.resolve(false);
+          return defer.promise;
         }
 
         let shouldRelayout = compState.relayout;
@@ -312,7 +444,7 @@ const FacetRangePicker = ({
           shouldRelayout = false;
         }
 
-        const plotData = [...compState.plot.data] as any[];
+        const plotData = [...compState.plot.data] as PlotData[];
         plotData[0].x = response.x;
         plotData[0].y = response.y;
 
@@ -345,22 +477,18 @@ const FacetRangePicker = ({
             }
           }
         });
-        // defer.resolve(true);
+        defer.resolve(true);
       }).catch((err: any) => {
-        // defer.reject(err);
+        defer.reject(err);
         console.log('catch histogram data: ', err);
       });
     })(facetColumn.sourceReference.uri);
 
-    // return defer.promise;
+    return defer.promise;
   }
 
 
   /***** Helpers and Setter functions *****/
-  const isColumnOfType = (columnType: string) => {
-    return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
-  }
-
   const getDefaultLogInfo = () => {
     const res = facetColumn.sourceReference.defaultLogInfo;
 
@@ -467,7 +595,7 @@ const FacetRangePicker = ({
    * @returns {number} formatted float value
    */
   const formatFloatMin = (min: number) => {
-    if (!min) return min;
+    if (!min) return null;
     return Math.floor(min * FLOAT_PRECISION) / FLOAT_PRECISION;
   }
 
@@ -477,7 +605,7 @@ const FacetRangePicker = ({
    * @returns {number} formatted float value
    */
   const formatFloatMax = (max: number) => {
-    if (!max) return max;
+    if (!max) return null;
     return Math.ceil(max * FLOAT_PRECISION) / FLOAT_PRECISION;
   }
 
@@ -522,7 +650,7 @@ const FacetRangePicker = ({
   const zoomInPlot = () => {
     // NOTE: x[x.length-1] may not be representative of the absolute max
     // range is based on the index of the bucket representing the max value
-    const plotData = compState.plot.data as any[];
+    const plotData = compState.plot.data as PlotData[];
     let maxIndex = plotData[0].x.findIndex((value: any) => {
       return compState.rangeOptions.absMax !== null ? value >= compState.rangeOptions.absMax : 0;
     });
@@ -546,8 +674,7 @@ const FacetRangePicker = ({
       disableZoomIn: disableZoomIn(rangeMinMax.absMin, rangeMinMax.absMax),
       relayout: true,
       rangeOptions: rangeMinMax
-    })
-    // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
+    });
   }
 
   // disable zoom in if histogram has been zoomed 20+ times or the current range is <= the number of buckets
@@ -605,8 +732,8 @@ const FacetRangePicker = ({
     updatePreviousPlotValues(initialData, histogramDataStack);
   }
 
-  const updatePreviousPlotValues = (data: any, histogramDataStack: any[]) => {
-    const plotData = [...compState.plot.data] as any[];
+  const updatePreviousPlotValues = (data: PlotData, histogramDataStack: PlotData[]) => {
+    const plotData = [...compState.plot.data] as PlotData[];
     plotData[0].x = data.x;
     plotData[0].y = data.y;
 
@@ -705,8 +832,6 @@ const FacetRangePicker = ({
             absMax: minMaxRangeOptions.absMax,
           }
         });
-
-        // scope.parentCtrl.updateFacetColumn(scope.index, logService.reloadCauses.FACET_PLOT_RELAYOUT);
       });
     } catch (err) {
       const plotLayout = { ...compState.plot.layout }
@@ -735,8 +860,23 @@ const FacetRangePicker = ({
 
 
   /***** render functions *****/
+  const renderPickerContainer = () => {
+    return (
+      <div className='picker-container'>
+        <div ref={listContainer}>
+          <FacetCheckList
+            hasNotNullFilter={facetColumn.hasNotNullFilter}
+            onRowClick={onRowClick}
+            rows={ranges}
+            setHeight={false}
+          />
+        </div>
+      </div>
+    )
+  };
+
   const renderPlot = () => {
-    const plotData = compState.plot.data as any[];
+    const plotData = compState.plot.data as PlotData[];
     if (plotData[0].x.length < 1 || plotData[0].y.length < 1) return;
     return (<Plot
       config={compState.plot.config}
@@ -809,8 +949,7 @@ const FacetRangePicker = ({
   }
 
   const renderHistogram = () => {
-    // if (facetModel.initialized && facetModel.isOpen && facetPanelOpen && showHistogram()) {
-    if (showHistogram()) {
+    if (facetModel.initialized && facetModel.isOpen && facetPanelOpen && showHistogram()) {
       return (<>
         <div className='plotly-actions'>
           <div className='chaise-btn-group' style={{ 'zIndex': 1 }}>
@@ -834,9 +973,7 @@ const FacetRangePicker = ({
             </OverlayTrigger>
           </div>
         </div>
-        <div>
-          {renderPlot()}
-        </div>
+        {renderPlot()}
       </>)
     }
 
@@ -844,13 +981,15 @@ const FacetRangePicker = ({
   }
 
   return (
-    <div className='range-picker' ref={facetContainer}>
-      <div>
-        List goes here
-      </div>
-      <div>
-        Range inputs here
-      </div>
+    <div className='range-picker' ref={rangePickerContainer}>
+      {!facetModel.facetError && renderPickerContainer()}
+      <RangeInputs
+        inputType={facetColumn.column.type.rootName}
+        classes='facet-range-input'
+        addRange={addFilter}
+        absMin={compState.rangeOptions.absMin}
+        absMax={compState.rangeOptions.absMax}
+      />
       {renderHistogram()}
     </div>
   )

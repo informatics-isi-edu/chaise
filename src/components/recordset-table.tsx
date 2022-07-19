@@ -1,9 +1,8 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Spinner from 'react-bootstrap/Spinner';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -29,6 +28,9 @@ const RecordsetTable = ({
     page,
     columnModels,
     colValues,
+    selectedRows,
+    setSelectedRows,
+    disabledRows,
     update
   } = useRecordset();
 
@@ -41,6 +43,26 @@ const RecordsetTable = ({
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
   );
 
+  /**
+   * capture the state of selected and disabled of rows in here so
+   * we don't have to populate this multiple times
+   */
+  let isRowSelected = Array(page ? page.length : 0).fill(false);
+  if (page && page.length && Array.isArray(selectedRows) && selectedRows.length > 0) {
+    isRowSelected = page.tuples.map((tuple: any) => (
+      selectedRows.some((obj) => obj.uniqueId === tuple.uniqueId)
+    ));
+  }
+  let isRowDisabled = Array(page ? page.length : 0).fill(false);
+  if (page && page.length && Array.isArray(disabledRows) && disabledRows.length > 0) {
+    isRowDisabled = page.tuples.map((tuple: any) => (
+      disabledRows.some((obj) => obj.uniqueId === tuple.uniqueId)
+    ));
+  }
+
+  /**
+   * add the top horizontal scroll if needed
+   */
   useLayoutEffect(() => {
     if (tableContainer.current) {
       addTopHorizontalScroll(tableContainer.current);
@@ -55,15 +77,15 @@ const RecordsetTable = ({
     const ref = reference.sort([currSortColumn]);
     // if (checkReferenceURL(ref)) {
 
-      //  TODO
-      // printDebugMessage('change sort');
+    //  TODO
+    // printDebugMessage('change sort');
 
-      // LogService.logClientAction({
-      //   action: flowControl.current.getTableLogAction(LogActions.SORT),
-      //   stack: flowControl.current.getTableLogStack()
-      // }, ref.defaultLogInfo);
+    // LogService.logClientAction({
+    //   action: flowControl.current.getTableLogAction(LogActions.SORT),
+    //   stack: flowControl.current.getTableLogStack()
+    // }, ref.defaultLogInfo);
 
-      update(ref, null, true, false, false, false, LogReloadCauses.SORT);
+    update({ updateResult: true }, { reference: ref }, { cause: LogReloadCauses.SORT });
     // }
   }, [currSortColumn]);
 
@@ -75,7 +97,7 @@ const RecordsetTable = ({
      */
     const desc = currSortColumn?.column === col.column.name && !currSortColumn?.descending;
     setCurrSortColumn({ 'column': col.column.name, 'descending': desc });
-  }
+  };
 
   const changePage = (isNext: boolean) => {
     const ref = isNext ? page.next : page.previous;
@@ -84,20 +106,88 @@ const RecordsetTable = ({
     // TODO
     // if (ref && checkReferenceURL(ref)) {
 
-      //  TODO
-      // printDebugMessage('request for previous page');
+    //  TODO
+    // printDebugMessage('request for previous page');
 
-      // LogService.logClientAction(
-      //   {
-      //     action: flowControl.current.getTableLogAction(action),
-      //     stack: flowControl.current.getTableLogStack()
-      //   },
-      //   reference.defaultLogInfo
-      // );
+    // LogService.logClientAction(
+    //   {
+    //     action: flowControl.current.getTableLogAction(action),
+    //     stack: flowControl.current.getTableLogStack()
+    //   },
+    //   reference.defaultLogInfo
+    // );
 
-      update(ref, null, true, false, false, false, cause);
+    update({ updateResult: true }, { reference: ref }, { cause: cause });
     // }
-  }
+  };
+
+  /**
+   * select all the rows that are displayed and are not disabled
+   */
+  const selectAllOnPage = () => {
+    // TODO logs
+    // logService.logClientAction(
+    //   {
+    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_SELECT_ALL),
+    //     stack: getTableLogStack(scope.vm)
+    //   },
+    //   scope.vm.reference.defaultLogInfo
+    // );
+
+    setSelectedRows((currRows: SelectedRow[]) => {
+      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      page.tuples.forEach((tuple: any, index: number) => {
+        if (isRowDisabled[index]) return;
+        if (!isRowDisabled[index]) res.push({
+          displayname: tuple.displayname,
+          uniqueId: tuple.uniqueId,
+          data: tuple.data
+        });
+      });
+      return res;
+    });
+  };
+
+  /**
+   * deselect all the rows that are displayed and are not disabled
+   */
+  const DeselectAllOnPage = () => {
+    // logService.logClientAction(
+    //   {
+    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_DESELECT_ALL),
+    //     stack: getTableLogStack(scope.vm)
+    //   },
+    //   scope.vm.reference.defaultLogInfo
+    // );
+
+    setSelectedRows((currRows: SelectedRow[]) => {
+      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      page.tuples.forEach((tuple: any) => {
+        const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
+        if (rowIndex !== -1) res.splice(rowIndex, 1);
+      });
+      return res;
+    });
+  };
+
+  /**
+   * Called when the row is selected or deselected
+   */
+  const onSelectChange = (tuple: any) => {
+    setSelectedRows((currRows: SelectedRow[]) => {
+      const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      // see if the tuple is list of selected rows or not
+      const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
+      // if it's currently selected, then we should deselect (and vice versa)
+      const isSelected = rowIndex !== -1;
+      if (!isSelected) {
+        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data });
+      } else {
+        res.splice(rowIndex, 1);
+      }
+      return res;
+    });
+  };
 
   // whether we should show the action buttons or not (used in multiple places)
   const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
@@ -116,17 +206,33 @@ const RecordsetTable = ({
       case RecordsetSelectMode.MULTI_SELECT:
         headerClassName = 'multi-select-header';
         inner = (
-          <></>
-          // TODO multi select buttons
-          //   <button id="table-select-all-rows" type="button" ng-click="::selectAll($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Select all rows on this page" ng-disabled="vm.matchNotNull">
-          //     <span class="icon-btn glyphicon glyphicon-check"></span>
-          //     <span>All on page</span>
-          // </button>
-          // <button type="button" ng-click="::selectNone($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Deselect all rows on this page" ng-disabled="vm.matchNotNull">
-          //     <span class="icon-btn glyphicon glyphicon-unchecked"></span>
-          //     <span>None on page</span>
-          // </button>
+          <>
+            {/* TODO test id changes to class */}
+            <ChaiseTooltip
+              placement='right'
+              tooltip={'Select all rows on this page.'}
+            >
+              <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
+                type='button' onClick={selectAllOnPage}
+              >
+                <span className='chaise-btn-icon fa-regular fa-square-check'></span>
+                <span>All on page</span>
+              </button>
+            </ChaiseTooltip>
+            <ChaiseTooltip
+              placement='right'
+              tooltip={'Deselect all rows on this page.'}
+            >
+              <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
+                type='button' onClick={DeselectAllOnPage}
+              >
+                <span className='chaise-btn-icon fa-regular fa-square'></span>
+                <span>None on page</span>
+              </button>
+            </ChaiseTooltip>
+          </>
         );
+        break;
       default:
         let innerTooltip, innerText;
         // TODO this seems wrong, what about unlink? (it's the same as master)
@@ -152,17 +258,6 @@ const RecordsetTable = ({
       <th className={`actions-header ${headerClassName}`}>{inner}</th>
     )
   }
-
-  const renderColumnError = () => {
-    <OverlayTrigger
-      placement='bottom'
-      overlay={
-        <Tooltip>{MESSAGE_MAP.queryTimeoutTooltip}</Tooltip>
-      }
-    >
-      <span className='fa-solid fa-triangle-exclamation' />
-    </OverlayTrigger>
-  };
 
   const renderColumnSortIcon = (col: any) => {
     if (!currSortColumn || currSortColumn.column != col.column.name) {
@@ -196,20 +291,28 @@ const RecordsetTable = ({
         >
           {col.column.comment ?
             // if comment, show tooltip
-            <OverlayTrigger
+            <ChaiseTooltip
               placement='top'
-              overlay={<Tooltip>{col.column.comment}</Tooltip>}
+              tooltip={col.column.comment}
             >
               {renderDisplayValue(col.column)}
-            </OverlayTrigger> :
+            </ChaiseTooltip> :
             // no comment, no tooltip
             renderDisplayValue(col.column)
           }
           <span className='table-heading-icons'>
-            {col.hasError && renderColumnError()}
-            {!col.hasError && col.isLoading && <span className='fa-solid fa-rotate fa-spin aggregate-col-loader' />}
-            {
-              canSort &&
+            {col.hasError &&
+              <ChaiseTooltip
+                placement='bottom'
+                tooltip={MESSAGE_MAP.queryTimeoutTooltip}
+              >
+                <span className='fa-solid fa-triangle-exclamation' />
+              </ChaiseTooltip>
+            }
+            {!col.hasError && col.isLoading &&
+              <span className='table-column-spinner'><Spinner animation='border' /></span>
+            }
+            {!col.hasError && !col.isLoading && canSort &&
               <span className='column-sort-icon'>{renderColumnSortIcon(col)}</span>
             }
           </span>
@@ -248,6 +351,9 @@ const RecordsetTable = ({
           rowValues={rowValues}
           tuple={tuple}
           showActionButtons={showActionButtons}
+          selected={isRowSelected[index]}
+          onSelectChange={onSelectChange}
+          disabled={isRowDisabled[index]}
         />)
     })
   }

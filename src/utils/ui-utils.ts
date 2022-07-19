@@ -5,6 +5,7 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
@@ -20,10 +21,12 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  */
 export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
   try {
+    const appRootId = `#${APP_ROOT_ID_NAME}`;
+
     // get the parentContainer and its usable height
-    if (parentContainer == null || parentContainer === document.querySelector('body')) {
+    if (!parentContainer || parentContainer === document.querySelector(appRootId)) {
       useDocHeight = true;
-      parentContainer = document;
+      parentContainer = document.querySelector(appRootId);
     }
 
     // get the parent sticky
@@ -103,7 +106,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     };
 
     //watch for the parent container height (this act as resize event)
-    new ResizeSensor(appContent, function (dimension) {
+    const appContentSensor = new ResizeSensor(appContent, function (dimension) {
       if (appContent.offsetHeight != cache.appContentHeight) {
         cache.appContentHeight = appContent.offsetHeight;
         setContainerHeight();
@@ -111,7 +114,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     });
 
     // watch for size of the parent sticky section
-    new ResizeSensor(parentContainerSticky, function (dimension) {
+    const parentContaienrStickySensor = new ResizeSensor(parentContainerSticky, function (dimension) {
       if (parentContainerSticky.offsetHeight != cache.parentContainerStickyHeight) {
         cache.parentContainerStickyHeight = parentContainerSticky.offsetHeight;
         setContainerHeight();
@@ -119,13 +122,14 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     });
 
     // watch for size of the sticky section
-    new ResizeSensor(containerSticky, function (dimension) {
+    const containerStickySensor = new ResizeSensor(containerSticky, function (dimension) {
       if (containerSticky.offsetHeight != cache.containerStickyHeight) {
         cache.containerStickyHeight = containerSticky.offsetHeight;
         setContainerHeight();
       }
     });
 
+    return [appContentSensor, parentContaienrStickySensor, containerStickySensor];
 
   } catch (err) {
     $log.warn(err);
@@ -279,7 +283,7 @@ export function copyToClipboard(text: string) {
 }
 
 /**
- * 
+ *
  * @param callback function that needs to be invoked after the delay
  * @param timeout delay
  * @returns debounced function
@@ -292,8 +296,9 @@ export function debounce(callback: Function, timeout: number) {
     clearTimeout(timer);
     timer = setTimeout(() => {
       timer = null;
+      // @ts-ignore:
       callback.apply(this, args);
-    }, timeout);  
+    }, timeout);
   }
 }
 
