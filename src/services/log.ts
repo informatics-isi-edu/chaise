@@ -1,6 +1,6 @@
 import { LogAppModes } from '@isrd-isi-edu/chaise/src/models/log';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 const APP_MODE_STACKPATH_SEPARATOR = ':';
 const STACKPATH_CLIENTPATH_SEPARATOR = ',';
@@ -133,8 +133,7 @@ export class LogService {
       stack = LogService._logStack;
     }
 
-    // TODO test this
-    const newStack = { ...stack };
+    const newStack = simpleDeepCopy(stack);
     const lastStackElement = newStack[stack.length - 1];
     lastStackElement.causes = causes;
     lastStackElement.start_ms = startTime;
@@ -152,8 +151,7 @@ export class LogService {
       stack = LogService._logStack;
     }
 
-    // TODO test this
-    const newStack = { ...stack };
+    const newStack = simpleDeepCopy(stack);
     const lastStackElement = newStack[stack.length - 1];
 
     for (const f in extraInfo) {
