@@ -1,4 +1,5 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_record_related_container.scss';
+
 import { Accordion, Button } from 'react-bootstrap';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -24,19 +25,30 @@ const RecordRelatedSection = ({
    */
    const getTitle = (reference: any) => {
     return (
-      <div className='record-accordion-title'>
-        <DisplayValue value={reference.displayname}></DisplayValue>
-        <ChaiseTooltip
-          placement='top'
-          tooltip={`Explore more ${reference?.displayname?.value} records related to this collection.`}
-        >
-          <Button className='chaise-btn chaise-btn-secondary more-results-link'>
-            <span className='chaise-btn-icon fa fa-search'></span>
-            Explore
-          </Button>
-        </ChaiseTooltip>
+      <div className='rt-section-header'>
+        <span className='rt-displayname'>
+          <DisplayValue value={reference.displayname}></DisplayValue>
+          {reference?.comment && (
+            <ChaiseTooltip placement='right' tooltip={reference?.comment}>
+              <span className='chaise-icon-for-tooltip align-center-icon'></span>
+            </ChaiseTooltip>
+          )}
+        </span>
+
+        {/* TODO: ACTION BUTTONS */}
+        {/* <span style={{ float: 'right' }}> */}
+          <ChaiseTooltip
+            placement='top'
+            tooltip={`Explore more ${reference?.displayname?.value} records related to this collection.`}
+          >
+            <Button className='chaise-btn chaise-btn-secondary more-results-link' style={{ float: 'right' }}>
+              <span className='chaise-btn-icon fa fa-search'></span>
+              Explore
+            </Button>
+          </ChaiseTooltip>
+        {/* </span> */}
       </div>
-    )
+    );
   };
 
   return (
@@ -52,12 +64,13 @@ const RecordRelatedSection = ({
               <Accordion.Item
                 key={`record-related-${index}`}
                 eventKey={'record-related-' + index}
-                className='related-table-accordion'
+                className='related-table-accordion panel'
                 id='rt-heading-Gene'
+                as='div'
               >
                 <Accordion.Header
-                  as='h4'
-                  className='panel-heading'
+                  as='div'
+                  className='panel-heading panel-title'
                 >
                   {getTitle(ref)}
                 </Accordion.Header>

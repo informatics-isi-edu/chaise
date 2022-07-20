@@ -98,11 +98,6 @@ html {
   a {
     cursor: pointer;
     color: $link-color;
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
   }
 
   // make sure the code style is consistent with old bootstrap styles
@@ -272,6 +267,13 @@ html {
     }
   }
 
+  .chaise-btn-icon {
+      margin-right: 4px;
+  }
+
+  .float-right {
+      float: right;
+  }
   // bookmark container end
 
   /* used to replace the margin with padding on h1-4 elements */
