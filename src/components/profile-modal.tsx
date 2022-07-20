@@ -129,8 +129,7 @@ const ProfileModal = ({
     <Modal
       className='profile-popup'
       show={showProfile}
-      keyboard={true}
-      backdrop={true}
+      onHide={handleClose}
     >
       <Modal.Header className='center-aligned-title'>
         <Modal.Title>{userDisplay}</Modal.Title>
