@@ -31,13 +31,19 @@ const RecordMainSection = ({
   const getKey = (value: any) => {
     return (
       <>
-        <span className='column-displayname'>
-          <DisplayValue value={value.displayname}></DisplayValue>
-        </span>
-        {value?.comment && (
+        {value?.comment ? (
           <ChaiseTooltip placement='right' tooltip={value?.comment}>
-            <span className='chaise-icon-for-tooltip align-center-icon'></span>
+            <span>
+              <span className='column-displayname'>
+                <DisplayValue value={value.displayname}></DisplayValue>
+              </span>
+              <span className='chaise-icon-for-tooltip align-center-icon'></span>
+            </span>
           </ChaiseTooltip>
+        ) : (
+          <span className='column-displayname'>
+            <DisplayValue value={value.displayname}></DisplayValue>
+          </span>
         )}
       </>
     );
@@ -58,12 +64,17 @@ const RecordMainSection = ({
   };
 
   return (
-    <div className='record-display'>
+    <div className='record-display entity-container'>
       <table className='table table-fixed-layout' id='tblRecord'>
         <tbody>
           {reference.columns.map((column: any, index: any) => {
             return (
-              <tr key={`col-${index}`}>
+              <tr 
+                key={`col-${index}`}
+                // TODO: id attr
+                id={`row-${index}`}
+                className='row'
+              >
                 <td className='entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2'>
                   {getKey(column)}
                 </td>

@@ -27,32 +27,34 @@ const RecordRelatedSection = ({
     return (
       <div className='rt-section-header'>
         <span className='rt-displayname'>
-          <DisplayValue value={reference.displayname}></DisplayValue>
-          {reference?.comment && (
+          {reference?.comment ? (
             <ChaiseTooltip placement='right' tooltip={reference?.comment}>
-              <span className='chaise-icon-for-tooltip align-center-icon'></span>
+              <span>
+                <DisplayValue value={reference.displayname}></DisplayValue>
+                <span className='chaise-icon-for-tooltip align-center-icon'></span>
+              </span>
             </ChaiseTooltip>
-          )}
+          ) : <DisplayValue value={reference.displayname}></DisplayValue>}
         </span>
 
         {/* TODO: ACTION BUTTONS */}
-        {/* <span style={{ float: 'right' }}> */}
+        <span className='action-buttons'>
           <ChaiseTooltip
             placement='top'
             tooltip={`Explore more ${reference?.displayname?.value} records related to this collection.`}
           >
-            <Button className='chaise-btn chaise-btn-secondary more-results-link' style={{ float: 'right' }}>
+            <Button className='chaise-btn chaise-btn-secondary more-results-link'>
               <span className='chaise-btn-icon fa fa-search'></span>
               Explore
             </Button>
           </ChaiseTooltip>
-        {/* </span> */}
+        </span>
       </div>
     );
   };
 
   return (
-    <div className='side-panel-container' id='rt-container'>
+    <div id='rt-container'>
       <div className='faceting-columns-container'>
         <Accordion
           className='panel-group'

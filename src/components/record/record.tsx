@@ -283,13 +283,15 @@ const RecordInner = (): JSX.Element => {
           }`}
         >
           {/* TODO table of contents */}
-          Table Content Goes here
+          <div className='side-panel-container'>
+              <div className='columns-container'>
+                Table Content Goes here
+              </div>
+          </div>
+        
         </div>
         <div
           className='main-container dynamic-padding'
-          style={{
-            overflow: 'scroll',
-          }}
         >
           <div className='main-body'>
             <RecordMainSection reference={reference} tuple={page.tuples[0]} />
