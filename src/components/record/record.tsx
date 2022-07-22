@@ -132,7 +132,7 @@ const RecordInner = (): JSX.Element => {
                     className='chaise-btn chaise-btn-tertiary'
                     onClick={hidePanel}
                   >
-                    <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
+                    <span className='record-app-action-icon chaise-icon chaise-sidebar-close'></span>
                     Hide panel
                   </Button>
                 </ChaiseTooltip>
@@ -152,7 +152,7 @@ const RecordInner = (): JSX.Element => {
                       onPageAction(PAGE_ACTION_TYPES.SHOW_EMPTY, event)
                     }
                   >
-                    <span className='chaise-btn-icon fa fa-th-list'></span>
+                    <span className='record-app-action-icon  fa fa-th-list'></span>
                     Show empty sections
                   </Button>
                 </ChaiseTooltip>
@@ -177,7 +177,7 @@ const RecordInner = (): JSX.Element => {
                       onPageAction(PAGE_ACTION_TYPES.SHARE_CITE, event)
                     }
                   >
-                    <span className='chaise-btn-icon fa fa-share-square'></span>
+                    <span className='record-app-action-icon  fa fa-share-square'></span>
                     Share and cite
                   </Button>
                 </ChaiseTooltip>
@@ -206,7 +206,7 @@ const RecordInner = (): JSX.Element => {
                             onRecordAction(ACTION_TYPES.CREATE, event)
                           }
                         >
-                          <span className='chaise-btn-icon fa fa-plus'></span>
+                          <span className='record-app-action-icon fa fa-plus'></span>
                           Create
                         </Button>
                       </ChaiseTooltip>
@@ -220,7 +220,7 @@ const RecordInner = (): JSX.Element => {
                             onRecordAction(ACTION_TYPES.COPY, event)
                           }
                         >
-                          <span className='chaise-btn-icon fa fa-clipboard'></span>
+                          <span className='record-app-action-icon  fa fa-clipboard'></span>
                           Copy
                         </Button>
                       </ChaiseTooltip>
@@ -234,7 +234,7 @@ const RecordInner = (): JSX.Element => {
                             onRecordAction(ACTION_TYPES.EDIT, event)
                           }
                         >
-                          <span className='chaise-btn-icon fa fa-pencil'></span>
+                          <span className='record-app-action-icon  fa fa-pencil'></span>
                           Edit
                         </Button>
                       </ChaiseTooltip>
@@ -248,7 +248,7 @@ const RecordInner = (): JSX.Element => {
                             onRecordAction(ACTION_TYPES.DELETE, event)
                           }
                         >
-                          <span className='chaise-btn-icon fa fa-trash-alt'></span>
+                          <span className='record-app-action-icon fa fa-trash-alt'></span>
                           Delete
                         </Button>
                       </ChaiseTooltip>
@@ -263,7 +263,7 @@ const RecordInner = (): JSX.Element => {
                         onClick={hidePanel}
                         className='chaise-btn chaise-btn-tertiary show-toc-btn'
                       >
-                        <span className='chaise-btn-icon chaise-icon chaise-sidebar-open'></span>
+                        <span className='record-app-action-icon chaise-icon chaise-sidebar-open'></span>
                         Show side panel
                       </Button>
                     </ChaiseTooltip>
