@@ -130,7 +130,7 @@ const RecordsetInner = ({
   onFacetPanelOpenChanged
 }: RecordsetInnerProps): JSX.Element => {
 
-  const { dispatchError, error } = useError();
+  const { dispatchError, errors } = useError();
 
   const {
     logRecordsetClientAction,
@@ -633,7 +633,7 @@ const RecordsetInner = ({
   return (
     <div className='recordset-container app-content-container'>
       {
-        !error && (isLoading || forceShowSpinner) &&
+        errors.length === 0 && (isLoading || forceShowSpinner) &&
         <ChaiseSpinner />
       }
       <div className='top-panel-container'>

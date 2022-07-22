@@ -16,7 +16,7 @@ import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // utilities
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -28,12 +28,15 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = getCatalogId();
   const cc = ConfigService.chaiseConfig; // TODO: chaise-config typing
   const ERMrest = ConfigService.ERMrest; // TODO: ERMrestJS typing
   const settings = ConfigService.appSettings;
+
+  const { dispatchError } = useError();
 
   const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
   const [menu, setMenu] = useState<MenuOption[] | null>(null);
@@ -229,11 +232,10 @@ const ChaiseNavbar = (): JSX.Element => {
     }).catch((err: any) => {
       setShowRidSpinner(false);
       if (err.status === 404) {
-        err = new NoRecordError({
-          filters: [{ column: 'RID', operator: '=', value: formModel.ridSearchTerm }],
-        }, '', '', '');
+        err = new NoRecordRidError();
       }
-      throw err;
+
+      dispatchError({error: err, isDismissible: true});
     });
   };
 

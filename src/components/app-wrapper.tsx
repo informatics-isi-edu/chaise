@@ -36,7 +36,7 @@ const AppWrapperInner = ({
   includeNavbar,
   displaySpinner
 }: AppWrapperProps): JSX.Element => {
-  const { dispatchError, error } = useError();
+  const { dispatchError, logTerminalError, errors } = useError();
   const [configDone, setConfigDone] = useState(false);
   const [externalLink, setExternalLink] = useState<string>('');
 
@@ -79,8 +79,7 @@ const AppWrapperInner = ({
   const errorFallback = ({ error }: FallbackProps) => {
     $log.log('error fallback of the main error boundary');
 
-    // TODO uncomment
-    // ErrorService.logTerminalError(error);
+    logTerminalError(error);
     dispatchError({ error: error, isGlobal: true });
 
     // the error modal will be displayed so there's no need for the fallback
@@ -143,7 +142,7 @@ const AppWrapperInner = ({
 
   // if there was an error during configuration, hide the spinner
   // if it's a library, we don't want any spinners
-  if (!configDone && (error || !displaySpinner)) {
+  if (!configDone && (errors.length > 0 || !displaySpinner)) {
     return <></>
   }
 

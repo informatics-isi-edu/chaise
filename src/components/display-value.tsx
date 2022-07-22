@@ -7,6 +7,11 @@ type DisplayValueProps = {
   specialNullEmpty?: boolean,
   addClass?: boolean,
   className?: string,
+  /**
+   * Whether this is something that we're doing internally,
+   * or is based on annotation-provided values.
+   */
+  internal?: boolean
 };
 
 const DisplayValue = ({

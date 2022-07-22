@@ -27,7 +27,7 @@ const recordsetSettings = {
 };
 
 const RecordsetApp = (): JSX.Element => {
-  const { dispatchError, error } = useError();
+  const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ const RecordsetApp = (): JSX.Element => {
   }, []);
 
   // if there was an error during setup, hide the spinner
-  if (!recordsetProps && error) {
+  if (!recordsetProps && errors.length > 0) {
     return <></>;
   }
 
