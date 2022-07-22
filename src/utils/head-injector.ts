@@ -19,8 +19,6 @@ export async function setupHead() {
 
   const settings = ConfigService.appSettings;
   if (settings.openLinksInTab) openLinksInTab();
-  // if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
-  // if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
   if (settings.overrideHeadTitle) addTitle(settings.appTitle);
 
   return addCustomCSS(); // controlled by chaise-config value to attach
@@ -121,83 +119,6 @@ function addCanonicalTag() {
   }
 }
 
-function clickHref(href: string) {
-  // fetch the file for the user
-  const downloadLink = document.createElement('a');
-  downloadLink.setAttribute('href', href);
-  downloadLink.setAttribute('download', '');
-  downloadLink.setAttribute('visibility', 'hidden');
-  downloadLink.setAttribute('display', 'none');
-  downloadLink.setAttribute('target', '_blank');
-  // Append to page
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-}
-
-// TODO requires proper error handler and modal
-// function overrideDownloadClickBehavior() {
-//   addClickListener('a.asset-permission', function (e, element) {
-
-//     function hideSpinner() {
-//       element.innerHTML = element.innerHTML.slice(0, element.innerHTML.indexOf(spinnerHTML));
-//     }
-
-//     e.preventDefault();
-
-//     var spinnerHTML = ' <span class='glyphicon glyphicon-refresh glyphicon-refresh-animate'></span>';
-//     //show spinner
-//     element.innerHTML += spinnerHTML;
-
-//     // if same origin, verify authorization
-//     if (isSameOrigin(element.href)) {
-//       var config = { skipRetryBrowserError: true, skipHTTP401Handling: true };
-
-//       // make a HEAD request to check if the user can fetch the file
-//       ConfigService.http.head(element.href, config).then(function () {
-//         clickHref(element.href);
-//       }).catch(function (exception: any) {
-//         // error/login modal was closed
-//         if (typeof exception == 'string') return;
-//         var ermrestError = ConfigService.ERMrest.responseToError(exception);
-
-//         if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
-//           ermrestError = new Errors.UnauthorizedAssetAccess();
-//         } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
-//           ermrestError = new Errors.ForbiddenAssetAccess();
-//         }
-
-//         // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-//         ErrorService.handleException(ermrestError, true);
-//       }).finally(function () {
-//         // remove the spinner
-//         hideSpinner();
-//       });
-//     }
-//   });
-// }
-
-// function overrideExternalLinkBehavior() {
-//   addClickListener('a.external-link', function (e, element) {
-//     e.preventDefault();
-
-//     // asset-permission will be appended via display annotation or by heuristic if no annotation
-//     // this else case should only occur if display annotation contains asset-permission and asset is not the same host
-//     var modalProperties = {
-//       windowClass: 'modal-redirect',
-//       templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/externalLink.modal.html',
-//       controller: 'RedirectController',
-//       controllerAs: 'ctrl',
-//       animation: false,
-//       size: 'sm',
-//     }
-//     // show modal dialog with countdown before redirecting to 'asset'
-//     modalUtils.showModal(modalProperties, function () {
-//       clickHref(element.href);
-//     }, false);
-//   });
-// }
-
 /**
 * make sure links open in new tab
 */
@@ -219,7 +140,7 @@ export function openLinksInTab() {
 * We observerd this behavior in Firefox were clicking on an image wrapped by link (a tag), returned
 * the image as the value of e.target and not the link
 */
-function addClickListener(selector: string, handler: Function) {
+export function addClickListener(selector: string, handler: Function) {
   const body = document.querySelector('body');
   if (!body) return;
   body.addEventListener('click', (e) => {

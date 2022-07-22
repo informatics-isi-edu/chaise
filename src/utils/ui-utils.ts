@@ -340,3 +340,21 @@ export function convertVWToPixel(value: number) {
   const result = (x * value) / 100;
   return result;
 }
+
+/**
+ * mimic the same behavior as clicking on a link and opening it in a new tab
+ * @param href the link
+ */
+export function clickHref(href: string) {
+  // fetch the file for the user
+  const downloadLink = document.createElement('a');
+  downloadLink.setAttribute('href', href);
+  downloadLink.setAttribute('download', '');
+  downloadLink.setAttribute('visibility', 'hidden');
+  downloadLink.setAttribute('display', 'none');
+  downloadLink.setAttribute('target', '_blank');
+  // Append to page
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
+}

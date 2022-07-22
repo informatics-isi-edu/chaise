@@ -115,7 +115,7 @@ body.error-open loading-spinner {
 
 // NOTE in bootstrap3 this used to be modal-md,
 // but we don't have that notion anymore and therefore this is just the default size
-.chaise-body .modal-dialog {
+.chaise-body .modal-dialog:not(.modal-sm) {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
@@ -213,7 +213,7 @@ body.error-open loading-spinner {
 }
 
 @media (min-width: 768px) {
-  .modal-dialog {
+  .modal-dialog:not(.modal-sm) {
     max-width: unset;
     width: 600px;
     margin: 30px auto;

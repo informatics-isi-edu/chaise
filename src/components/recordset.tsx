@@ -270,9 +270,6 @@ const RecordsetInner = ({
       permalink?.addEventListener('contextmenu', logPermalink);
     }
 
-    // add the onFocus handler (for updating the page on focus)
-    window.addEventListener('focus', onFocus);
-
     return () => {
       resizeSensors?.forEach((rs) => rs.detach());
       if (config.displayMode === RecordsetDisplayMode.FULLSCREEN) {
@@ -281,6 +278,19 @@ const RecordsetInner = ({
       window.removeEventListener('focus', onFocus);
     }
   }, []);
+
+  /**
+   * attach the onFocus event listener
+   * NOTE: we have to make sure the event listener is updated when the
+   * update function changes
+   */
+  useEffect(() => {
+    window.removeEventListener('focus', onFocus);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [update]);
 
   // after data loads, scroll to top and change the browser location
   useEffect(() => {
@@ -318,9 +328,7 @@ const RecordsetInner = ({
    * On window focus, remove request and update the page
    */
   const onFocus = () => {
-    /**
-     * see if any of the create requests has been completed or not
-     */
+    // see if any of the create requests has been completed or not
     let completed = 0;
     const addReqs = addRecordRequests ? addRecordRequests.current : {};
     for (const id in addReqs) {
@@ -333,9 +341,7 @@ const RecordsetInner = ({
       }
     }
 
-    /**
-     * see if the edit request is done or not
-     */
+    // see if the edit request is done or not
     const updateDone = editRequestIsDone && editRequestIsDone.current;
 
     // call flow-control if the create or edit requests are done
