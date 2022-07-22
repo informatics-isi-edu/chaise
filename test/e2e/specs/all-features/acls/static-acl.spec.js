@@ -1,3 +1,4 @@
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 describe("regarding static ACL support, ", function () {
     it("anonymous user should be shown login modal", function(done) {
@@ -31,7 +32,7 @@ describe("regarding static ACL support, ", function () {
 
     // navigate away from the recordedit page so it doesn't interfere with other tests
     afterAll(function (done) {
-        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:main_update_table");
+        chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:main_update_table");
         browser.switchTo().alert().then(function (alert) {
             alert.accept();
         }).catch(function () {}).finally(function () {

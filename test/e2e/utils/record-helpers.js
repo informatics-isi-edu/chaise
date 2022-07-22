@@ -56,7 +56,8 @@ exports.testPresentation = function (tableParams) {
         var editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
-            exportButton = chaisePage.recordsetPage.getExportDropdown(),
+            // TODO: change once record app migrated
+            exportButton = chaisePage.recordsetPage.getAngularExportDropdown(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
             shareButton = chaisePage.recordPage.getShareButton();
 
@@ -95,13 +96,15 @@ exports.testPresentation = function (tableParams) {
     exports.testSharePopup(tableParams.sharePopupParams);
 
     it("should have '2' options in the dropdown menu.", function (done) {
-        var exportButton = chaisePage.recordsetPage.getExportDropdown();
+        // TODO: change once record app migrated
+        var exportButton = chaisePage.recordsetPage.getAngularExportDropdown();
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
         chaisePage.clickButton(exportButton).then(function () {
-            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
+            // TODO: change once record app migrated
+            expect(chaisePage.recordsetPage.getAngularExportOptions().count()).toBe(2, "incorrect number of export options");
             // close the dropdown
-            return chaisePage.recordsetPage.getExportDropdown().click();
+            return exportButton.click();
         }).then(function () {
             done();
         }).catch(function (err) {
@@ -112,7 +115,8 @@ exports.testPresentation = function (tableParams) {
 
     if (!process.env.CI) {
         it("should have 'This record (CSV)' as a download option and download the file.", function(done) {
-            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+            // TODO: change once record app migrated
+            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
                 var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
                 expect(csvOption.getText()).toBe("This record (CSV)");
                 return csvOption.click();
@@ -132,7 +136,8 @@ exports.testPresentation = function (tableParams) {
         });
 
         it("should have 'BDBag' as a download option and download the file.", function(done) {
-            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+            // TODO: change once record app migrated
+            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
                 var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                 expect(bagOption.getText()).toBe("BDBag");
                 return bagOption.click();
@@ -701,7 +706,13 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         return chaisePage.recordsetPageReady()
                     }).then(function() {
                         expect(chaisePage.recordsetPage.getPageTitleElement().getText()).toBe(params.viewMore.displayname, "title missmatch.");
-                        expect(chaisePage.recordsetPage.getFacetFilters().isPresent()).toBe(true, "filter was not present");
+
+                        browser.wait(function () {
+                            return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                                return ct == 1;
+                            });
+                        }, browser.params.defaultTimeout);
+
                         expect(chaisePage.recordsetPage.getFacetFilters().first().getText()).toEqual(params.viewMore.filter, "filter missmatch.");
                         browser.navigate().back();
                         pageReadyCondition();
@@ -1120,15 +1131,16 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
         }
 
         it ("user should be able to select new values and submit.", function (done) {
-            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1);
+            var modal = chaisePage.searchPopup.getAddPureBinaryPopup();
+            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 1);
             chaisePage.clickButton(inp).then(function (){
-                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(2);
+                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 2);
                 return chaisePage.clickButton(inp2);
             }).then(function (){
-                var inp3 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(3);
+                var inp3 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 3);
                 return chaisePage.clickButton(inp3);
             }).then(function (){
-                var inp4 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(4);
+                var inp4 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 4);
                 return chaisePage.clickButton(inp4);
             }).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Link", "Submit button text for add pure and binary popup is incorrect");
@@ -1190,10 +1202,11 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
         });
 
         it ("user should be able to select values to unlink and submit.", function (done) {
+            var modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
             // select rows 2 and 4, then remove them
-            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(1);
+            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 1);
             chaisePage.clickButton(inp).then(function (){
-                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(3);
+                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 3);
                 return chaisePage.clickButton(inp2);
             }).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");
@@ -1352,6 +1365,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
         });
 
         it("should fail to unlink rows that can't be unlinked with an error message in the batch remove summary", function (done) {
+            var modal;
             var unlinkBtn = chaisePage.recordPage.getUnlinkRecordsLink(params.relatedDisplayname);
             browser.wait(EC.elementToBeClickable(unlinkBtn), browser.params.defaultTimeout);
             unlinkBtn.click().then(function () {
@@ -1373,12 +1387,13 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
                 expect(totalCountText).toBe("Displaying\nall " + params.countAfterUnlink +"\nof " + params.countAfterUnlink + " records", "association count display missmatch.");
 
+                modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
                 // select "Television" (not deletable)
-                var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
+                var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 0);
                 return chaisePage.clickButton(inp)
             }).then(function (){
                 // select "Space Heater" (deletable)
-                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(2);
+                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 2);
                 return chaisePage.clickButton(inp2)
             }).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");
@@ -1434,12 +1449,13 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
         });
 
         it("should have rows still selected after failed delete", function () {
-            expect(chaisePage.recordsetPage.getSelectedRowsFilters().count()).toBe(2);
+            expect(chaisePage.recordsetPage.getAngularSelectedRowsFilters().count()).toBe(2);
         });
 
         it("should deselect the 2nd row and resubmit delete", function (done) {
+            var modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
             // deselect "Television"
-            var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
+            var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 0);
 
             chaisePage.clickButton(inp2).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");

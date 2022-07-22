@@ -985,8 +985,18 @@ var recordsetPage = function() {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
+    // TODO: remove once record app migrated
+    this.getAngularExportDropdown = function () {
+        return element(by.tagName("export")).element(by.tagName("button"));
+    };
+
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
+    };
+
+    // TODO: remove once record app migrated
+    this.getAngularExportOptions = function () {
+        return element(by.tagName("export")).all(by.tagName("li"));
     };
 
     this.getExportOption = function (optionName) {
@@ -1072,6 +1082,11 @@ var recordsetPage = function() {
 
     this.getSelectedRowsFilters = function () {
         return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet"));
+    }
+
+    //TODO: remove when record app migrated
+    this.getAngularSelectedRowsFilters = function () {
+        return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
     }
 
     this.getAngularSelectedRowsFilters = function () {
@@ -1265,6 +1280,10 @@ var SearchPopup = function () {
         return element(by.className("add-pure-and-binary-popup"));
     };
 
+    this.getUnlinkPureBinaryPopup = function () {
+        return element(by.className("unlink-pure-and-binary-popup"));
+    }
+
     this.getFacetPopup = function () {
         return element(by.className("faceting-show-details-popup"));
     };
@@ -1326,6 +1345,10 @@ function chaisePage() {
 
     this.clickButton = function(button) {
         return browser.executeScript("arguments[0].click();", button);
+    };
+
+    this.jqueryClickButton = function(button) {
+        return browser.executeScript("$(arguments[0]).click();", button);
     };
 
     /**
