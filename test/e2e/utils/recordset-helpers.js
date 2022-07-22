@@ -11,13 +11,13 @@ var EC = protractor.ExpectedConditions;
  */
 exports.openFacetAndTestFilterOptions = function (name, facetIdx, filterOptions, done) {
     // open facet
-    chaisePage.recordsetPage.getFacetById(facetIdx).click().then(function() {
+    chaisePage.recordsetPage.getFacetHeaderButtonById(facetIdx).click().then(function () {
         // wait for facet to open
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(facetIdx)), browser.params.defaultTimeout);
 
         // wait for facet checkboxes to load
         browser.wait(function () {
-            return chaisePage.recordsetPage.getFacetOptions(facetIdx).count().then(function(ct) {
+            return chaisePage.recordsetPage.getFacetOptions(facetIdx).count().then(function (ct) {
                 return ct == filterOptions.length;
             });
         }, browser.params.defaultTimeout);
@@ -25,10 +25,13 @@ exports.openFacetAndTestFilterOptions = function (name, facetIdx, filterOptions,
         // wait for list to be fully visible
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(facetIdx)), browser.params.defaultTimeout);
 
-        return chaisePage.recordsetPage.getFacetOptionsText(facetIdx);
-    }).then(function (text) {
-            expect(text).toEqual(filterOptions, "facet options are incorrect for '" + name + "' facet");
-            done();
+        return chaisePage.recordsetPage.getFacetOptions(facetIdx);
+    }).then(function (opts) {
+        opts.forEach(function (option, idx) {
+            expect(option.getText()).toEqual(filterOptions[idx], "facet options are incorrect for '" + name + "' facet");
+        });
+
+        done();
     }).catch(function (err) {
         done.fail(err);
     });
@@ -53,20 +56,27 @@ exports.testSelectFacetOption = function (facetIdx, filterIdx, facetName, filter
     chaisePage.clickButton(facetOption).then(function () {
         // wait for table rows to load
         browser.wait(function () {
-            return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                 return ct == numRowsAfter;
             });
         }, browser.params.defaultTimeout);
 
         return chaisePage.recordsetPage.getRows().count();
-    }).then(function(ct) {
+    }).then(function (ct) {
         expect(ct).toBe(numRowsAfter, "number of rows is incorrect for '" + facetName + "' facet");
 
-        //should only be one
+        // wait for filters to load
+        browser.wait(function () {
+            return chaisePage.recordsetPage.getFacetFilters().count().then(function (ct) {
+                return ct == 1;
+            });
+        }, browser.params.defaultTimeout);
+
+        // should only be one
         return chaisePage.recordsetPage.getFacetFilters();
     }).then(function (filters) {
         return filters[0].getText();
-    }).then(function(text) {
+    }).then(function (text) {
         expect(text).toBe(filterName, "filter name is incorrect for '" + facetName + "' facet");
         return clearAll.click();
     }).then(function () {
@@ -97,14 +107,14 @@ exports.deleteDownloadedFiles = function (fileNames) {
  * @param  {Array}   filterOptions   array of filter titles
  * @param  {Array}   modalOptions   array of the first value of modal
  */
- exports.testFacetOptions = function (facetIdx, filterOptions, modalOptions) {
-    it ("the facet options should be correct", function (done) {
+exports.testFacetOptions = function (facetIdx, filterOptions, modalOptions) {
+    it("the facet options should be correct", function (done) {
         // wait for facet to open
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(facetIdx)), browser.params.defaultTimeout);
 
         // wait for facet checkboxes to load
         browser.wait(function () {
-            return chaisePage.recordsetPage.getFacetOptions(facetIdx).count().then(function(ct) {
+            return chaisePage.recordsetPage.getFacetOptions(facetIdx).count().then(function (ct) {
                 return ct == filterOptions.length;
             });
         }, browser.params.defaultTimeout);
@@ -112,28 +122,34 @@ exports.deleteDownloadedFiles = function (fileNames) {
         // wait for list to be fully visible
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(facetIdx)), browser.params.defaultTimeout);
 
-        chaisePage.recordsetPage.getFacetOptionsText(facetIdx).then(function (text) {
-            expect(text).toEqual(filterOptions, "facet options are incorrect");
+        chaisePage.recordsetPage.getFacetOptions(facetIdx).then(function (opts) {
+            opts.forEach(function (option, idx) {
+                expect(option.getText()).toEqual(filterOptions[idx], "facet options are incorrect");
+            });
+            
             done();
         }).catch(function (err) {
             done.fail(err);
         });
     });
 
-    it ("opening the facet modal should show the correct rows.", function (done) {
+    it("opening the facet modal should show the correct rows.", function (done) {
         // click on show more
         var showMore = chaisePage.recordsetPage.getShowMore(facetIdx);
         chaisePage.clickButton(showMore).then(function () {
             chaisePage.recordsetPage.waitForInverseModalSpinner();
             browser.wait(function () {
-                return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                return chaisePage.recordsetPage.getModalFirstColumn().then(function (values) {
                     return values.length == modalOptions.length;
                 });
             }, browser.params.defaultTimeout);
 
-            return chaisePage.recordsetPage.getModalFirstColumnValues();
+            return chaisePage.recordsetPage.getModalFirstColumn();
         }).then(function (values) {
-            expect(values).toEqual(modalOptions, "modal options missmatch");
+            values.forEach(function (value, idx) {
+                expect(value.getText()).toEqual(modalOptions[idx], "modal options missmatch");
+            });
+            
             return chaisePage.recordsetPage.getModalCloseBtn().click();
         }).then(function () {
             done();

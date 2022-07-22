@@ -52,7 +52,7 @@ const FilterChiclet = ({
   value,
   onRemove,
   iconTooltip,
-  removeClass,
+  removeClass = '',
   onTitleClick,
   valueTooltip
 }: FilterChicletProps): JSX.Element => {

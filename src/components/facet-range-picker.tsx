@@ -294,9 +294,9 @@ const FacetRangePicker = ({
     let res: { filter: any, reference: any } = {filter: {}, reference: {}};
     if (row.isNotNull) {
       if (checked) {
-        res = facetColumn.addNotNullFilter();
+        res.reference = facetColumn.addNotNullFilter();
       } else {
-        res = facetColumn.removeNotNullFilter();
+        res.reference = facetColumn.removeNotNullFilter();
       }
       $log.debug(`faceting: request for facet (index=${facetIndex}) choice add. Not null filter.`);
     } else {
@@ -989,6 +989,7 @@ const FacetRangePicker = ({
         addRange={addFilter}
         absMin={compState.rangeOptions.absMin}
         absMax={compState.rangeOptions.absMax}
+        disabled={facetColumn.hasNotNullFilter}
       />
       {renderHistogram()}
     </div>

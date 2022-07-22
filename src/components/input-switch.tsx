@@ -16,6 +16,14 @@ type DateTimePickerProps = {
    */
   timeClasses?: string,
   /**
+   * classes for styling the clear button in the date input
+   */
+  dateClearClasses?: string,
+  /**
+   * classes for styling the clear button in the time input
+   */
+  timeClearClasses?: string,
+  /**
    * the default date value being used
    */
   value?: TimeStamp,
@@ -34,15 +42,25 @@ type DateTimePickerProps = {
   /**
    * flag for showing clear button on time field
    */
-  showClearnTimeBtn: boolean,
+  showClearTimeBtn: boolean,
   /**
    * the handler function called on input change
    */
   handleChange: (() => void)
 };
 
-const DateTimePicker = ({ dateClasses, timeClasses, value, handleChange, dateRef,
-  timeRef, showClearDateBtn, showClearnTimeBtn }: DateTimePickerProps): JSX.Element => {
+const DateTimePicker = ({ 
+  dateClasses, 
+  timeClasses, 
+  dateClearClasses,
+  timeClearClasses,
+  value, 
+  handleChange, 
+  dateRef,
+  timeRef, 
+  showClearDateBtn, 
+  showClearTimeBtn 
+}: DateTimePickerProps): JSX.Element => {
 
   const handleTimeClear = () => {
     if (timeRef?.current) timeRef.current.value = '';
@@ -60,7 +78,7 @@ const DateTimePicker = ({ dateClasses, timeClasses, value, handleChange, dateRef
         <input className={dateClasses} type='date' ref={dateRef}
           placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} onChange={handleChange} required />
         <ClearInputBtn
-          btnClassName='input-switch-clear'
+          btnClassName={'input-switch-clear' + (dateClearClasses ? ' ' + dateClearClasses : '') }
           clickCallback={handleDateClear}
           show={showClearDateBtn}
         />
@@ -69,9 +87,9 @@ const DateTimePicker = ({ dateClasses, timeClasses, value, handleChange, dateRef
         <input className={timeClasses} type='time' ref={timeRef}
           placeholder='HH:mm:ss' min='00:00:00' max='23:59:59' step='1' defaultValue={value?.time} onChange={handleChange} required />
         <ClearInputBtn
-          btnClassName='input-switch-clear'
+          btnClassName={'input-switch-clear' + (timeClearClasses ? ' ' + timeClearClasses : '') }
           clickCallback={handleTimeClear}
-          show={showClearnTimeBtn}
+          show={showClearTimeBtn}
         />
       </div>
     </div>
@@ -91,10 +109,22 @@ type InputSwitchProps = {
    * classes for styling the date input element
    */
   dateClasses?: string,
-   /**
-    * classes for styling the time input element
-    */
+  /**
+  * classes for styling the time input element
+  */
   timeClasses?: string,
+  /**
+   * classes for styling the clear button in the input
+   */
+  clearClasses?: string,
+  /**
+   * classes for styling the clear button in the date input
+   */
+  dateClearClasses?: string,
+  /**
+   * classes for styling the clear button in the time input
+   */
+  timeClearClasses?: string,
   /** 
    * the react ref object referencing the input element
   */
@@ -123,15 +153,29 @@ type InputSwitchProps = {
   /**
    * flag for showing clear button on time field in case type is timestamp
    */
-  showClearnTimeBtn: boolean,
+  showClearTimeBtn: boolean,
   /**
    * the handler function called on input change
    */
   handleChange: (() => void),
 };
 
-const InputSwitch = ({ placeholder = 'Enter', classes = '', dateClasses = '', timeClasses = '', reference, timeRef,
-  type, value, handleChange, showClearBtn, showClearnTimeBtn }: InputSwitchProps): JSX.Element | null => {
+const InputSwitch = ({ 
+  placeholder = 'Enter', 
+  classes = '', 
+  dateClasses = '', 
+  timeClasses = '', 
+  reference, 
+  timeRef,
+  type, 
+  value, 
+  handleChange, 
+  clearClasses = '', 
+  dateClearClasses = '', 
+  timeClearClasses = '', 
+  showClearBtn, 
+  showClearTimeBtn,
+}: InputSwitchProps): JSX.Element | null => {
 
   const clearInput = () => {
     if (reference?.current) reference.current.value = '';
@@ -147,8 +191,10 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', dateClasses = '', ti
           value={value as TimeStamp} 
           dateRef={reference}
           timeRef={timeRef} 
+          dateClearClasses={dateClearClasses}
+          timeClearClasses={timeClearClasses}
           showClearDateBtn={showClearBtn} 
-          showClearnTimeBtn={showClearnTimeBtn} 
+          showClearTimeBtn={showClearTimeBtn} 
           handleChange={handleChange} 
         />
       case 'int':
@@ -162,10 +208,9 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', dateClasses = '', ti
               onChange={handleChange} 
               placeholder={placeholder} 
               ref={reference} 
-              type='number' 
             />
             <ClearInputBtn
-              btnClassName='input-switch-clear'
+              btnClassName={'input-switch-clear' + (clearClasses ? ' ' + clearClasses : '') }
               clickCallback={clearInput}
               show={showClearBtn}
             />
@@ -185,7 +230,7 @@ const InputSwitch = ({ placeholder = 'Enter', classes = '', dateClasses = '', ti
               type='date' 
             />
             <ClearInputBtn
-              btnClassName='input-switch-clear'
+              btnClassName={'input-switch-clear' + (clearClasses ? ' ' + clearClasses : '') }
               clickCallback={clearInput}
               show={showClearBtn}
             />

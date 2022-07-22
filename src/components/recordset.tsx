@@ -487,6 +487,7 @@ const RecordsetInner = ({
           title={'Custom Filter'}
           value={transformCustomFilter(loc.filtersString)}
           onRemove={(identifier) => facetCallbacks.current!.removeAppliedFilters(identifier)}
+          removeClass='clear-custom-filters'
         />
       );
     }
@@ -501,8 +502,9 @@ const RecordsetInner = ({
           iconTooltip={cFacetRemovable ? 'Clear custom filter applied' : 'Predefined filter(s)'}
           // when it's not removable we're showing the icon and that's enough
           title={cFacetRemovable ? 'Custom Filter' : undefined}
-          value={transformCustomFilter(loc.filter)}
+          value={transformCustomFilter(loc.customFacets.displayname.value)}
           onRemove={cFacetRemovable ? (identifier) => facetCallbacks.current!.removeAppliedFilters(identifier) : undefined}
+          removeClass='clear-custom-facets'
         />
       );
     }

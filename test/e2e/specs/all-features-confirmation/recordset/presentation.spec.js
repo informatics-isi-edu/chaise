@@ -1,6 +1,7 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var fs = require('fs');
+const { browser } = require('protractor');
 var testParams = {
     accommodation_tuple: {
         schemaName: "product-recordset",
@@ -255,66 +256,66 @@ describe('View recordset,', function () {
         fileParams = testParams.file_tuple;
 
 
-    // TODO: currently failing because no new aggregate requests are sent when flow control slots open up
-    // if (!process.env.CI) {
-    //     describe("For recordset with columns with waitfor, ", function () {
-    //         var activeListParams = testParams.activeList;
-    //         var activeListData = activeListParams.data;
+    if (!process.env.CI) {
+        describe("For recordset with columns with waitfor, ", function () {
+            var activeListParams = testParams.activeList;
+            var activeListData = activeListParams.data;
 
-    //         beforeAll(function () {
-    //             chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
+            beforeAll(function () {
+                chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
 
-    //             chaisePage.recordsetPageReady();
-    //             chaisePage.waitForAggregates();
-    //         });
+                chaisePage.recordsetPageReady();
+                chaisePage.waitForAggregates();
+            });
 
-    //         it ("should not show the total count if hide_row_count is true.", function () {
-    //             expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n"+ activeListData.length + "\nrecords", "hide_row_count not honored");
-    //         });
-    //         it ("should show correct table rows.", function (done) {
-    //             chaisePage.recordsetPage.getRows().then(function (rows) {
-    //                 expect(rows.length).toBe(activeListData.length, "row length missmatch.");
-    //                 rows.forEach(function (row, rowIndex) {
-    //                     var expectedRow = activeListData[rowIndex];
-    //                     chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
-    //                         expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
+            it ("should not show the total count if hide_row_count is true.", function () {
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n"+ activeListData.length + "\nrecords", "hide_row_count not honored");
+            });
 
-    //                         var expectedCell
-    //                         for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
-    //                             expectedCell = expectedRow[cellIndex];
-    //                             // the first cell is the action columns
-    //                             expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
-    //                         }
+            // TODO: uncomment when ellipsis logic fixed
+            //       some content has '...more' showing when it shouldn't
+            // it ("should show correct table rows.", function (done) {
+            //     chaisePage.recordsetPage.getRows().then(function (rows) {
+            //         expect(rows.length).toBe(activeListData.length, "row length missmatch.");
+            //         rows.forEach(function (row, rowIndex) {
+            //             var expectedRow = activeListData[rowIndex];
+            //             chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
+            //                 expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
 
-    //                         if (rowIndex === rows.length - 1) {
-    //                             done();
-    //                         }
+            //                 var expectedCell
+            //                 for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
+            //                     expectedCell = expectedRow[cellIndex];
+            //                     // the first cell is the action columns
+            //                     expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
+            //                 }
 
-    //                     }).catch(chaisePage.catchTestError(done));
-    //                 });
-    //             }).catch(chaisePage.catchTestError(done));
-    //         });
+            //                 if (rowIndex === rows.length - 1) {
+            //                     done();
+            //                 }
 
-    //         it ("going to a page with no results, the loader for columns should hide.", function (done) {
-    //             chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
-    //             chaisePage.recordsetPageReady()
-    //             chaisePage.waitForAggregates();
-    //             done();
-    //         })
-    //     });
-    // }
+            //             }).catch(chaisePage.catchTestError(done));
+            //         });
+            //     }).catch(chaisePage.catchTestError(done));
+            // });
+
+            it ("going to a page with no results, the loader for columns should hide.", function (done) {
+                chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
+                chaisePage.recordsetPageReady()
+                chaisePage.waitForAggregates();
+                done();
+            })
+        });
+    }
 
     describe("For table " + accommodationParams.table_name + ",", function () {
 
         beforeAll(function () {
             var keys = [];
             keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
-            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
+            chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
-            chaisePage.recordsetPageReady()
-            // TODO: currently failing because no new aggregate requests are sent when flow control slots open up
-            // chaisePage.waitForAggregates();
-            browser.sleep(1000);
+            chaisePage.recordsetPageReady();
+            chaisePage.waitForAggregates();
         });
 
         describe("Presentation ,", function () {
@@ -395,37 +396,36 @@ describe('View recordset,', function () {
                 });
             });
 
-            // TODO: currently failing because no new aggregate requests are sent when flow control slots open up
-            // it("should show correct table rows", function() {
-            //     chaisePage.recordsetPage.getRows().then(function(rows) {
-            //         expect(rows.length).toBe(4, "rows length missmatch.");
-            //         for (var i = 0; i < rows.length; i++) {
-            //             (function(index) {
-            //                 rows[index].all(by.tagName("td")).then(function (cells) {
-            //                     expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
-            //                     expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
-            //                     expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
-            //                     expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
-            //                     expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
-            //                     expect(cells[4].getText()).toBe(accommodationParams.data[index].no_of_rooms, "no_of_rooms column missmatch for row=" + index);
-            //                     expect(cells[5].getText()).toContain(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
-            //                     expect(cells[6].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
-            //                     expect(cells[7].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
-            //                     expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
-            //                     expect(cells[9].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
-            //                     expect(cells[10].getText()).toBe(accommodationParams.data[index].no_of_beds, "no_of_beds column missmatch for row=" + index);
-            //                     expect(cells[11].getText()).toBe(accommodationParams.data[index].no_of_baths, "no_of_baths column missmatch for row=" + index);
-            //                     expect(cells[12].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
-            //                     expect(cells[13].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
-            //                     expect(cells[14].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
-            //                     expect(cells[15].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
-            //                     expect(cells[16].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
-            //                     expect(cells[17].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
-            //                 });
-            //             }(i))
-            //         }
-            //     });
-            // });
+            it("should show correct table rows", function() {
+                chaisePage.recordsetPage.getRows().then(function(rows) {
+                    expect(rows.length).toBe(4, "rows length missmatch.");
+                    for (var i = 0; i < rows.length; i++) {
+                        (function(index) {
+                            rows[index].all(by.tagName("td")).then(function (cells) {
+                                expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
+                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
+                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
+                                expect(cells[4].getText()).toBe(accommodationParams.data[index].no_of_rooms, "no_of_rooms column missmatch for row=" + index);
+                                expect(cells[5].getText()).toContain(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
+                                expect(cells[6].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
+                                expect(cells[7].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
+                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
+                                expect(cells[9].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
+                                expect(cells[10].getText()).toBe(accommodationParams.data[index].no_of_beds, "no_of_beds column missmatch for row=" + index);
+                                expect(cells[11].getText()).toBe(accommodationParams.data[index].no_of_baths, "no_of_baths column missmatch for row=" + index);
+                                expect(cells[12].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
+                                expect(cells[13].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
+                                expect(cells[14].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
+                                expect(cells[15].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
+                                expect(cells[16].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
+                                expect(cells[17].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
+                            });
+                        }(i))
+                    }
+                });
+            });
 
             it("should have " + accommodationParams.columns.length + " columns", function () {
                 chaisePage.recordsetPage.getColumnNames().then(function (columns) {
@@ -509,45 +509,44 @@ describe('View recordset,', function () {
                 });
             }
 
-            it("should show line under columns which have a comment and inspect the comment value too", function () {
+            it("should show information icon next in column headers which have a comment and inspect the comment value", function () {
                 var columns = accommodationParams.columns.filter(function (c) {
                     return typeof c.comment == 'string';
                 });
-
-                chaisePage.recordsetPage.getColumnsWithUnderline().then(function (pageColumns) {
+                chaisePage.recordsetPage.getColumnsWithTooltipIcon().then(function (pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);
                     var index = 0;
                     pageColumns.forEach(function (c) {
                         var comment = columns[index++].comment;
 
-                        // hover over pageTitle
+                        // hover over column header
                         browser.actions().mouseMove(c).perform();
 
                         var tooltip = chaisePage.getTooltipDiv();
                         chaisePage.waitForElement(tooltip).then(function () {
                             expect(tooltip.getText()).toBe(comment);
                             // move cursor to hide tooltip
-                            browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                            return browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                        }).then(function () {
+                            chaisePage.waitForElementInverse(tooltip);
                         }).catch(function (err) {
                             console.log(err);
                         });
                     });
                 });
 
-                // TODO: implement displaying Action || View header
-                //    add proper comment based on display value
                 // Check tooltip of Action column
-                // var actionCol = chaisePage.recordsetPage.getActionHeaderSpan();
-                // browser.actions().mouseMove(actionCol).perform();
+                var actionCol = chaisePage.recordsetPage.getActionHeaderSpan();
+                browser.actions().mouseMove(actionCol).perform();
 
-                // var tooltip = chaisePage.getTooltipDiv();
-                // chaisePage.waitForElement(tooltip).then(function () {
-                //     expect(tooltip.getText()).toBe(testParams.tooltip.actionCol);
-                //     // move cursor to hide tooltip
-                //     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                // }).catch(function (err) {
-                //     console.log(err);
-                // });
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.actionCol);
+                    // move cursor to hide tooltip
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                }).catch(function (err) {
+                    console.log(err);
+                });
             });
 
             it("apply different searches, ", function (done) {
@@ -684,38 +683,37 @@ describe('View recordset,', function () {
                 });
             });
 
-            // TODO: uncomment when recordedit is implemented
-            // it("action columns should show edit button that redirects to the recordedit page", function () {
-            //     var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-            //         return entity.id == accommodationParams.data[0].id;
-            //     });
-            //     var filter = accommodationParams.shortest_key_filter + dataRow.RID;
-            //     var allWindows;
+            it("action columns should show edit button that redirects to the recordedit page", function () {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[0].id;
+                });
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+                var allWindows;
 
-            //     browser.wait(function () {
-            //         return chaisePage.recordsetPage.getEditActionButtons().count().then(function (ct) {
-            //             return (ct == 4);
-            //         });
-            //     }, browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getEditActionButtons().count().then(function (ct) {
+                        return (ct == 4);
+                    });
+                }, browser.params.defaultTimeout);
 
-            //     chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
-            //         return editButtons[0].click();
-            //     }).then(function () {
-            //         return browser.getAllWindowHandles();
-            //     }).then(function (handles) {
-            //         allWindows = handles;
-            //         return browser.switchTo().window(allWindows[1]);
-            //     }).then(function () {
-            //         var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
-            //         browser.driver.getCurrentUrl().then(function (url) {
-            //             // Store this for use in later spec.
-            //             recEditUrl = url;
-            //         });
-            //         expect(browser.driver.getCurrentUrl()).toContain(result);
-            //         browser.close();
-            //         browser.switchTo().window(allWindows[0]);
-            //     });
-            // });
+                chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
+                    return editButtons[0].click();
+                }).then(function () {
+                    return browser.getAllWindowHandles();
+                }).then(function (handles) {
+                    allWindows = handles;
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
+                    browser.driver.getCurrentUrl().then(function (url) {
+                        // Store this for use in later spec.
+                        recEditUrl = url;
+                    });
+                    expect(browser.driver.getCurrentUrl()).toContain(result);
+                    browser.close();
+                    browser.switchTo().window(allWindows[0]);
+                });
+            });
 
             xit('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function () {
                 var EC = protractor.ExpectedConditions, allWindows, config;
@@ -776,7 +774,7 @@ describe('View recordset,', function () {
                 });
             }).pend("412 support has been dropped from ermestjs.");
 
-            // TODO: uncomment when delete action is implemented
+            // TODO: uncomment when page is updated after a row is deleted
             // it("action columns should show delete button that deletes record", function () {
             //     var deleteButton;
             //     var EC = protractor.ExpectedConditions;
@@ -817,7 +815,7 @@ describe('View recordset,', function () {
 
         });
 
-        // TODO: uncomment once delete button is implemented for actions column
+        // TODO: uncomment when page is updated after a row is deleted
         //       relies on a row being deleted from above for all expectations to work as expected
         // describe("testing sorting and paging features, ", function () {
         //     var rowCount = chaisePage.recordsetPage.getTotalCount();
@@ -1008,7 +1006,7 @@ describe('View recordset,', function () {
         var EC = protractor.ExpectedConditions;
 
         beforeAll(function () {
-            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
+            chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
             chaisePage.recordsetPageReady();
         });
 
@@ -1100,63 +1098,62 @@ describe('View recordset,', function () {
                 return chaisePage.getWindowName();
             }).then(function (name) {
                 windowId = name;
-            //     return chaisePage.getPageId();
-            // }).then(function (id) {
-            //     pageId = id;
+                return chaisePage.getPageId();
+            }).then(function (id) {
+                pageId = id;
             });
         });
 
-        // TODO: uncomment when record app implemented and dcctx alterative is added to the window
-        // it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
-        //     var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-        //         return entity.id == accommodationParams.data[0].id;
-        //     });
+        it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
 
-        //     chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
-        //         return viewButtons[0].click();
-        //     }).then(function () {
-        //         return chaisePage.recordPageReady();
-        //     }).then(function () {
-        //         expect(chaisePage.getWindowName()).toBe(windowId);
-        //         // pageId should change when the window changes page
-        //         expect(chaisePage.getPageId()).not.toBe(pageId);
-        //         done();
-        //     }).catch(function (err) {
-        //         done.fail(err);
-        //     })
-        // });
+            chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
+                return viewButtons[0].click();
+            }).then(function () {
+                return chaisePage.recordPageReady();
+            }).then(function () {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should change when the window changes page
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
+        });
 
         // TODO: uncomment when recordedit app implemented and dcctx alterative is added to the window
-        // it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
-        //     var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-        //         return entity.id == accommodationParams.data[0].id;
-        //     });
-        //     var allWindows;
+        it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
+            var allWindows;
 
-        //     chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
-        //         return editButtons[0].click();
-        //     }).then(function () {
-        //         return browser.getAllWindowHandles();
-        //     }).then(function (handles) {
-        //         allWindows = handles;
-        //         return browser.switchTo().window(allWindows[1]);
-        //     }).then(function () {
-        //         return chaisePage.recordeditPageReady();
-        //     }).finally(function () {
-        //         expect(chaisePage.getWindowName()).not.toBe(windowId);
-        //         // pageId should change when a new window is opened
-        //         expect(chaisePage.getPageId()).not.toBe(pageId);
-        //         browser.close();
-        //         return browser.switchTo().window(allWindows[0]);
-        //     }).then(function () {
-        //         expect(chaisePage.getWindowName()).toBe(windowId);
-        //         // pageId should not have changed when a new window was opened
-        //         expect(chaisePage.getPageId()).toBe(pageId);
-        //         done();
-        //     }).catch(function (err) {
-        //         done.fail(err);
-        //     })
-        // });
+            chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
+                return editButtons[0].click();
+            }).then(function () {
+                return browser.getAllWindowHandles();
+            }).then(function (handles) {
+                allWindows = handles;
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function () {
+                return chaisePage.recordeditPageReady();
+            }).finally(function () {
+                expect(chaisePage.getWindowName()).not.toBe(windowId);
+                // pageId should change when a new window is opened
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+                browser.close();
+                return browser.switchTo().window(allWindows[0]);
+            }).then(function () {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should not have changed when a new window was opened
+                expect(chaisePage.getPageId()).toBe(pageId);
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
+        });
     });
 
     describe("For chaise config properties", function () {
@@ -1256,56 +1253,53 @@ describe('View recordset,', function () {
                     });
                 });
 
-                // TODO: uncomment when record app is implemented
-                // it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
-                //     chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
-                //         expect(buttons.length).toBe(1);
-                //         return buttons[0].click();
-                //     }).then(function () {
-                //         return chaisePage.recordPageReady();
-                //     }).then(function () {
-                //         browser.wait(function () {
-                //             return chaisePage.recordPage.getColumns().count().then(function (ct) {
-                //                 return ct == systemColumnsParams.detailedColumns.length;
-                //             });
-                //         });
+                it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                    chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
+                        expect(buttons.length).toBe(1);
+                        return buttons[0].click();
+                    }).then(function () {
+                        return chaisePage.recordPageReady();
+                    }).then(function () {
+                        browser.wait(function () {
+                            return chaisePage.recordPage.getColumns().count().then(function (ct) {
+                                return ct == systemColumnsParams.detailedColumns.length;
+                            });
+                        });
 
-                //         return chaisePage.recordPage.getColumns();
-                //     }).then(function (columns) {
-                //         expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
-                //         for (var i = 0; i < columns.length; i++) {
-                //             expect(columns[i].getText()).toEqual(systemColumnsParams.detailedColumns[i]);
-                //         }
-                //     });
-                // });
+                        return chaisePage.recordPage.getColumns();
+                    }).then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.detailedColumns[i]);
+                        }
+                    });
+                });
 
-                // TODO: uncomment when record app is implemented
-                // it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
-                //     chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
-                //         expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
-                //         for (var i = 0; i < columns.length; i++) {
-                //             expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
-                //         }
-                //     });
-                // });
+                it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
+                    });
+                });
 
-                // TODO: uncomment when recordedit app is implemented
-                // it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
-                //     // click create
-                //     chaisePage.recordPage.getCreateRecordButton().click().then(function () {
-                //         // test columns length
+                it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
+                    // click create
+                    chaisePage.recordPage.getCreateRecordButton().click().then(function () {
+                        // test columns length
 
-                //         chaisePage.recordeditPageReady();
-                //         return chaisePage.recordEditPage.getAllColumnCaptions();
-                //     }).then(function (pageColumns) {
-                //         expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
+                        chaisePage.recordeditPageReady();
+                        return chaisePage.recordEditPage.getAllColumnCaptions();
+                    }).then(function (pageColumns) {
+                        expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
 
-                //         // test each column
-                //         for (var i = 0; i < pageColumns.length; i++) {
-                //             expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
-                //         }
-                //     });
-                // });
+                        // test each column
+                        for (var i = 0; i < pageColumns.length; i++) {
+                            expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
+                        }
+                    });
+                });
             });
         }
     });

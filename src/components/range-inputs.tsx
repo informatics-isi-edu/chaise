@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 
 // hooks
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
 import { RangeOptions, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
@@ -26,12 +26,12 @@ const DATE_FORMAT = 'YYYY-MM-DD';
 const errorMsgMap: {
   [key: string]: string;
 } = {
-  'range': 'From value cannot be greater than the To value',
-  'int': 'Please enter a valid integer value',
-  'float': 'Please enter a valid decimal value',
-  'numeric': 'Please enter a valid decimal value',
-  'date': 'Please enter a valid date value',
-  'timestamp': 'Please enter a valid date and time value'
+  'range': 'From value cannot be greater than the To value.',
+  'int': 'Please enter a valid integer value.',
+  'float': 'Please enter a valid decimal value.',
+  'numeric': 'Please enter a valid decimal value.',
+  'date': 'Please enter a valid date value.',
+  'timestamp': 'Please enter a valid date and time value.'
 };
 
 type RangeInputsProps = {
@@ -59,7 +59,11 @@ type RangeInputsProps = {
   /**
    * the max value for the full dataset to show on load
    */
-  absMax: RangeOptions['absMax']
+  absMax: RangeOptions['absMax'],
+  /**
+   * whether the form should be disabled
+   */
+  disabled?: boolean
 };
 
 const getType = (inputType: string): string => {
@@ -91,7 +95,7 @@ const getType = (inputType: string): string => {
   return type;
 }
 
-const RangeInputs = ({ inputType, classes, addRange, absMin, absMax }: RangeInputsProps) => {
+const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }: RangeInputsProps) => {
   const momentJS = windowRef.moment;
 
   const fromRef = useRef<HTMLInputElement>(null);
@@ -102,7 +106,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax }: RangeInpu
   const type = getType(inputType);
 
   const [error, setError] = useState<string | null>(null);
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(type === 'int' || type === 'float' || type === 'numeric');
+  const [disableSubmit, setDisableSubmit] = useState<boolean>(disabled || (type === 'int' || type === 'float' || type === 'numeric'));
   const [showClearInputs, setShowClearInput] = useState({
     from: type === 'date' || type === 'timestamp',
     fromTime: true,
@@ -146,6 +150,8 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax }: RangeInpu
       });
     } 
   }, [absMin, absMax]);
+
+  useEffect(() => toggleSubmitBtn(!!disabled), [disabled])
 
   const toggleSubmitBtn = (value: boolean) => {
     if (disableSubmit !== value) setDisableSubmit(value);
@@ -269,11 +275,14 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax }: RangeInpu
               type={type}
               value={absMin}
               showClearBtn={showClearInputs.from}
-              showClearnTimeBtn={showClearInputs.fromTime}
+              showClearTimeBtn={showClearInputs.fromTime}
               handleChange={handleChange}
               classes='range-min'
               dateClasses='ts-date-range-min'
               timeClasses='ts-time-range-min'
+              clearClasses='min-clear'
+              dateClearClasses='min-date-clear'
+              timeClearClasses='min-time-clear'
             />
           </label>
         </div>
@@ -285,11 +294,14 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax }: RangeInpu
               type={type}
               value={absMax}
               showClearBtn={showClearInputs.to}
-              showClearnTimeBtn={showClearInputs.toTime}
+              showClearTimeBtn={showClearInputs.toTime}
               handleChange={handleChange}
               classes='range-max'
               dateClasses='ts-date-range-max'
               timeClasses='ts-time-range-max'
+              clearClasses='max-clear'
+              dateClearClasses='max-date-clear'
+              timeClearClasses='max-time-clear'
             />
           </label>
         </div>

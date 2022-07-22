@@ -95,58 +95,58 @@ describe('Recordset add record,', function() {
 
     var allWindows;
     // TODO: uncomment when recordedit is implemented
-    // it("click on the add button should open a new tab to recordedit", function(done) {
+    it("click on the add button should open a new tab to recordedit", function(done) {
 
-    //     var EC = protractor.ExpectedConditions;
-    //     var addRecordLink = chaisePage.recordsetPage.getAddRecordLink();
-    //     browser.wait(EC.presenceOf(addRecordLink), browser.params.defaultTimeout);
+        var EC = protractor.ExpectedConditions;
+        var addRecordLink = chaisePage.recordsetPage.getAddRecordLink();
+        browser.wait(EC.presenceOf(addRecordLink), browser.params.defaultTimeout);
 
-    //     addRecordLink.click().then(function() {
-    //         return browser.getAllWindowHandles();
-    //     }).then(function (handles) {
-    //         allWindows = handles;
-    //         return browser.switchTo().window(allWindows[1]);
-    //     }).then(function () {
-    //         chaisePage.waitForElement(element(by.id('submit-record-button')));
-    //         return browser.driver.getCurrentUrl();
-    //     }).then(function (url) {
+        addRecordLink.click().then(function() {
+            return browser.getAllWindowHandles();
+        }).then(function (handles) {
+            allWindows = handles;
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function () {
+            chaisePage.waitForElement(element(by.id('submit-record-button')));
+            return browser.driver.getCurrentUrl();
+        }).then(function (url) {
 
-    //         var recordeditUrl = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
-    //         expect(url).toContain(recordeditUrl, "url missmatch");
+            var recordeditUrl = '/recordedit/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
+            expect(url).toContain(recordeditUrl, "url missmatch");
 
-    //         // set the required fields
-    //         return chaisePage.recordsetPage.getInputForAColumn("title");
-    //     }).then(function(input) {
-    //         input.sendKeys(testParams.title);
-    //         return chaisePage.recordsetPage.getModalPopupBtn();
-    //     }).then(function(btn) {
-    //         return btn.click();
-    //     }).then(function() {
-    //         return chaisePage.recordsetPageReady();
-    //     }).then(function() {
-    //         var rows = chaisePage.recordsetPage.getRows();
-    //         return rows.get(0).all(by.css(".select-action-button"));
-    //     }).then(function(selectButtons) {
-    //         selectButtons[0].click();
-    //     }).then(function() {
-    //         return chaisePage.recordsetPage.getInputForAColumn("rating");
-    //     }).then(function(input) {
-    //         input.sendKeys(testParams.rating);
-    //         return chaisePage.recordEditPage.getTextAreaForAcolumn("summary");
-    //     }).then(function(input) {
-    //         input.sendKeys(testParams.summary);
-    //         var nowBtn = element.all(by.css('button[name="opened_on-now"]')).get(0);
-    //         return nowBtn.click();
-    //     }).then(function() {
-    //         return chaisePage.recordEditPage.submitForm();
-    //     }).then(function() {
-    //         // wait until redirected to record page
-    //         chaisePage.waitForElement(element(by.id("tblRecord")));
-    //         done();
-    //     }).catch(function (err) {
-    //         done.fail(err);
-    //     })
-    // });
+            // set the required fields
+            return chaisePage.recordsetPage.getInputForAColumn("title");
+        }).then(function(input) {
+            input.sendKeys(testParams.title);
+            return chaisePage.recordsetPage.getModalPopupBtn();
+        }).then(function(btn) {
+            return btn.click();
+        }).then(function() {
+            return chaisePage.recordsetPageReady();
+        }).then(function() {
+            var rows = chaisePage.recordsetPage.getRows();
+            return rows.get(0).all(by.css(".select-action-button"));
+        }).then(function(selectButtons) {
+            selectButtons[0].click();
+        }).then(function() {
+            return chaisePage.recordsetPage.getInputForAColumn("rating");
+        }).then(function(input) {
+            input.sendKeys(testParams.rating);
+            return chaisePage.recordEditPage.getTextAreaForAcolumn("summary");
+        }).then(function(input) {
+            input.sendKeys(testParams.summary);
+            var nowBtn = element.all(by.css('button[name="opened_on-now"]')).get(0);
+            return nowBtn.click();
+        }).then(function() {
+            return chaisePage.recordEditPage.submitForm();
+        }).then(function() {
+            // wait until redirected to record page
+            chaisePage.waitForElement(element(by.id("tblRecord")));
+            done();
+        }).catch(function (err) {
+            done.fail(err);
+        })
+    });
     // 
     // it("go back to recordset should refresh the table with the new record", function() {
     //     // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly

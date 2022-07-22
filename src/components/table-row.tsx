@@ -325,7 +325,13 @@ const TableRow = ({
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
-            <input type='checkbox' checked={selected || rowDisabled} disabled={rowDisabled} onChange={() => onSelectChange(tuple)} />
+            <input 
+              className={(selected || rowDisabled) ? 'checked' : ''} 
+              type='checkbox' 
+              checked={selected || rowDisabled} 
+              disabled={rowDisabled} 
+              onChange={() => onSelectChange(tuple)} 
+            />
             <label />
             {/* TODO favorites */}
             {/*
