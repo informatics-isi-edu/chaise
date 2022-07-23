@@ -1,5 +1,4 @@
 // TODO can be combined with recordset/edit.spec.js
-
 var chaisePage = require('../../../utils/chaise.page.js');
 var moment = require('moment');
 var testParams = {
@@ -94,7 +93,6 @@ describe('Recordset add record,', function() {
     });
 
     var allWindows;
-    // TODO: uncomment when recordedit is implemented
     it("click on the add button should open a new tab to recordedit", function(done) {
 
         var EC = protractor.ExpectedConditions;
@@ -147,7 +145,8 @@ describe('Recordset add record,', function() {
             done.fail(err);
         })
     });
-    // 
+
+    // TODO: uncomment when page updated after create/update/create
     // it("go back to recordset should refresh the table with the new record", function() {
     //     // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
     //     /**

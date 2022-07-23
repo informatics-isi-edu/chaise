@@ -24,6 +24,14 @@ type DateTimePickerProps = {
    */
   timeClearClasses?: string,
   /**
+   * placeholder for the date input of datetime
+   */
+  datePlaceholder?: string,
+  /**
+   * placeholder for the time input of datetime
+   */
+  timePlaceholder?: string,
+  /**
    * the default date value being used
    */
   value?: TimeStamp,
@@ -44,6 +52,10 @@ type DateTimePickerProps = {
    */
   showClearTimeBtn: boolean,
   /**
+   * flag for disbaling the inputs
+   */
+  disableInput?: boolean,
+  /**
    * the handler function called on input change
    */
   handleChange: (() => void)
@@ -54,12 +66,15 @@ const DateTimePicker = ({
   timeClasses, 
   dateClearClasses,
   timeClearClasses,
+  datePlaceholder,
+  timePlaceholder,
   value, 
   handleChange, 
   dateRef,
   timeRef, 
   showClearDateBtn, 
-  showClearTimeBtn 
+  showClearTimeBtn,
+  disableInput,
 }: DateTimePickerProps): JSX.Element => {
 
   const handleTimeClear = () => {
@@ -74,18 +89,18 @@ const DateTimePicker = ({
 
   return (
     <div className='input-switch-datetime'>
-      <div className='input-switch-date chaise-input-control has-feedback'>
-        <input className={dateClasses} type='date' ref={dateRef}
-          placeholder='YYYY-MM-DD' min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} onChange={handleChange} required />
+      <div className={'input-switch-date chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
+        <input className={dateClasses} type='date' ref={dateRef} disabled={disableInput}
+          placeholder={datePlaceholder} min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} onChange={handleChange} required />
         <ClearInputBtn
           btnClassName={'input-switch-clear' + (dateClearClasses ? ' ' + dateClearClasses : '') }
           clickCallback={handleDateClear}
           show={showClearDateBtn}
         />
       </div>
-      <div className='input-switch-time chaise-input-control has-feedback'>
-        <input className={timeClasses} type='time' ref={timeRef}
-          placeholder='HH:mm:ss' min='00:00:00' max='23:59:59' step='1' defaultValue={value?.time} onChange={handleChange} required />
+      <div className={'input-switch-time chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
+        <input className={timeClasses} type='time' ref={timeRef} disabled={disableInput}
+          placeholder={timePlaceholder} min='00:00:00' max='23:59:59' step='1' defaultValue={value?.time} onChange={handleChange} required />
         <ClearInputBtn
           btnClassName={'input-switch-clear' + (timeClearClasses ? ' ' + timeClearClasses : '') }
           clickCallback={handleTimeClear}
@@ -98,9 +113,17 @@ const DateTimePicker = ({
 
 type InputSwitchProps = {
   /** 
-   * placeholder text for int and float input types
+   * placeholder text for inputs
   */
-  placeholder?: string,
+  placeholder?: RangeOption,
+  /**
+   * placeholder for the date input of datetime
+   */
+  datePlaceholder?: string,
+  /**
+   * placeholder for the time input of datetime
+   */
+  timePlaceholder?: string,
   /**
    * classes for styling the input element
    */
@@ -155,13 +178,19 @@ type InputSwitchProps = {
    */
   showClearTimeBtn: boolean,
   /**
+   * flag for disabling the input
+   */
+  disableInput?: boolean,
+  /**
    * the handler function called on input change
    */
   handleChange: (() => void),
 };
 
 const InputSwitch = ({ 
-  placeholder = 'Enter', 
+  placeholder = 'Enter',
+  datePlaceholder= 'YYYY-MM-DD',
+  timePlaceholder= 'HH:mm:ss',
   classes = '', 
   dateClasses = '', 
   timeClasses = '', 
@@ -175,6 +204,7 @@ const InputSwitch = ({
   timeClearClasses = '', 
   showClearBtn, 
   showClearTimeBtn,
+  disableInput
 }: InputSwitchProps): JSX.Element | null => {
 
   const clearInput = () => {
@@ -196,18 +226,22 @@ const InputSwitch = ({
           showClearDateBtn={showClearBtn} 
           showClearTimeBtn={showClearTimeBtn} 
           handleChange={handleChange} 
+          disableInput={disableInput}
+          datePlaceholder={datePlaceholder}
+          timePlaceholder={timePlaceholder}
         />
       case 'int':
       case 'float':
       case 'numeric':
         return (
-          <div className='input-switch-numeric chaise-input-control has-feedback'>
+          <div className={'input-switch-date chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
             <input 
               className={`${classes} input-switch`} 
               defaultValue={value as number} 
               onChange={handleChange} 
-              placeholder={placeholder} 
+              placeholder={placeholder as string} 
               ref={reference} 
+              disabled={disableInput}
             />
             <ClearInputBtn
               btnClassName={'input-switch-clear' + (clearClasses ? ' ' + clearClasses : '') }
@@ -218,16 +252,18 @@ const InputSwitch = ({
         );
       case 'date':
         return (
-          <div className='input-switch-date chaise-input-control has-feedback'>
+          <div className={'input-switch-date chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
             <input 
               className={`${classes} input-switch`} 
               defaultValue={value as string}
               onChange={handleChange} 
               pattern='\d{4}-\d{2}-\d{2}' 
+              placeholder={placeholder as string}
               ref={reference} 
               required
               step='1' 
               type='date' 
+              disabled={disableInput}
             />
             <ClearInputBtn
               btnClassName={'input-switch-clear' + (clearClasses ? ' ' + clearClasses : '') }

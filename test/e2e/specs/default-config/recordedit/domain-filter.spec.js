@@ -139,7 +139,7 @@ describe("Domain filter pattern support,", function () {
                     }).then(function (text) {
                         expect(text.indexOf("Select")).toBeGreaterThan(-1);
 
-                        // make sure the number of displayed rows ar ecorrect
+                        // make sure the number of displayed rows are correct
                         browser.wait(function () {
                             return chaisePage.recordsetPage.getRows().count().then(function (ct) {
                                 return ct === 3;

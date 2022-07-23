@@ -37,6 +37,7 @@ describe('View existing record,', function() {
             describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
+                    // TODO: change after record app migrated
                     exportBtn = chaisePage.recordsetPage.getAngularExportDropdown();
                     // delete files that may have been downloaded before
                     console.log("delete existing files");

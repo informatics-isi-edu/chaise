@@ -256,6 +256,7 @@ describe('When editing a record', function() {
                         var inpt = chaisePage.recordEditPage.getInputForAColumn(name, 0);
                         var clearBtn = chaisePage.recordEditPage.getClearButton(inpt);
                         // clear the asset
+                        // TODO: change after recordedit app migrated
                         chaisePage.jqueryClickButton(clearBtn).then(function () {
                             // select new file
                             if (newValue && !process.env.CI) {

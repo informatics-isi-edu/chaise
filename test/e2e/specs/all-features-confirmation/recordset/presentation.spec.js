@@ -1,7 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
 var fs = require('fs');
-const { browser } = require('protractor');
 var testParams = {
     accommodation_tuple: {
         schemaName: "product-recordset",
@@ -1123,7 +1122,6 @@ describe('View recordset,', function () {
             })
         });
 
-        // TODO: uncomment when recordedit app implemented and dcctx alterative is added to the window
         it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
             var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
                 return entity.id == accommodationParams.data[0].id;

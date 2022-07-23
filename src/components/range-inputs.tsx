@@ -119,7 +119,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }:
     if ((!absMin && !absMax) || (!fromRef.current || !toRef.current)) return;
 
     // enable the submit button if we have a min/max
-    toggleSubmitBtn(false);
+    setDisableSubmit(!!disabled);
 
     if (type === 'timestamp') {
       if (!fromTimeRef.current || !toTimeRef.current) return;
@@ -151,11 +151,9 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }:
     } 
   }, [absMin, absMax]);
 
-  useEffect(() => toggleSubmitBtn(!!disabled), [disabled])
-
-  const toggleSubmitBtn = (value: boolean) => {
-    if (disableSubmit !== value) setDisableSubmit(value);
-  }
+  useEffect(() => {
+    setDisableSubmit(!!disabled || (!fromRef?.current?.value && !toRef?.current?.value));
+  }, [disabled])
 
   const formatTimeValues = () => {
     const fromDateVal = fromRef?.current?.value;
@@ -192,7 +190,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }:
 
     const areBothFieldsEmpty = !formatedValues.fromVal && !formatedValues.toVal;
 
-    toggleSubmitBtn(areBothFieldsEmpty || !validatedResult);
+    setDisableSubmit(!!disabled || areBothFieldsEmpty || !validatedResult);
 
     if (!validatedResult) setError(errorMsgMap[type])
     else setError(null);
@@ -274,8 +272,12 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }:
               timeRef={fromTimeRef}
               type={type}
               value={absMin}
-              showClearBtn={showClearInputs.from}
-              showClearTimeBtn={showClearInputs.fromTime}
+              placeholder={absMin}
+              datePlaceholder={(absMin as TimeStamp)?.date}
+              timePlaceholder={(absMin as TimeStamp)?.time}
+              showClearBtn={showClearInputs.from && !disabled}
+              showClearTimeBtn={showClearInputs.fromTime && !disabled}
+              disableInput={disabled}
               handleChange={handleChange}
               classes='range-min'
               dateClasses='ts-date-range-min'
@@ -293,8 +295,12 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }:
               timeRef={toTimeRef}
               type={type}
               value={absMax}
-              showClearBtn={showClearInputs.to}
-              showClearTimeBtn={showClearInputs.toTime}
+              placeholder={absMax}
+              datePlaceholder={(absMax as TimeStamp)?.date}
+              timePlaceholder={(absMax as TimeStamp)?.time}
+              showClearBtn={showClearInputs.to && !disabled}
+              showClearTimeBtn={showClearInputs.toTime && !disabled}
+              disableInput={disabled}
               handleChange={handleChange}
               classes='range-max'
               dateClasses='ts-date-range-max'

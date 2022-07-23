@@ -1,4 +1,3 @@
-const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 describe("regarding static ACL support, ", function () {
     it("anonymous user should be shown login modal", function(done) {

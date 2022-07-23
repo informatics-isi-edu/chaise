@@ -1,4 +1,3 @@
-const { element } = require('protractor');
 var Q = require('q');
 
 var recordEditPage = function() {
@@ -1085,10 +1084,6 @@ var recordsetPage = function() {
     }
 
     //TODO: remove when record app migrated
-    this.getAngularSelectedRowsFilters = function () {
-        return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
-    }
-
     this.getAngularSelectedRowsFilters = function () {
         return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
     }

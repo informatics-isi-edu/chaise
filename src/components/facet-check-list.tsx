@@ -142,7 +142,6 @@ const FacetCheckList = ({
       )
     }
 
-    console.log(rows);
     return rows.map((row: FacetCheckBoxRow, index: number) => {
       let rowClass = 'chaise-checkbox ellipsis-text';
       // if there's a not-null, all the other options should be disabled

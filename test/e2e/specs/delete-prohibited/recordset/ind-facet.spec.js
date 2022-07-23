@@ -327,8 +327,7 @@ describe("Viewing Recordset with Faceting,", function () {
             uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name + testParams.sort;
 
         beforeAll(function () {
-            browser.ignoreSynchronization = true;
-            browser.get(uri);
+            chaisePage.navigate(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
             chaisePage.recordsetPageReady();
         });
@@ -1136,7 +1135,7 @@ describe("Viewing Recordset with Faceting,", function () {
                                         return chaisePage.recordsetPage.getRows().count();
                                     }).then(function (ct) {
                                         expect(ct).toBe(facetParams.notNullNumRows, "number of rows (for not-null) is incorrect for '" + facetParams.name + "' facet");
-                                        expect(chaisePage.recordsetPage.getRangeSubmit(idx).getAttribute('disabled')).toEqual('true', "form enabled after selecting not-null for '" + facetParams.name + "' facet");
+                                        expect(chaisePage.recordsetPage.getRangeSubmit(idx).getAttribute('disabled')).toEqual('true', "submit button enabled after selecting not-null for '" + facetParams.name + "' facet");
 
                                         return clearAll.click();
                                     }).then(function () {
