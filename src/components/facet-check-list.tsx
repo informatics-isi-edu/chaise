@@ -157,8 +157,7 @@ const FacetCheckList = ({
         // <li key={`checkbox-${row.uniqueId}`} className={rowClass}>
         <li key={`checkbox-${index}`} className={rowClass}>
           <input
-            // TODO for testing, id was changed to className to be more appropriate
-            className={`checkbox-${index}`} type='checkbox'
+            className={`checkbox-${index}${row.selected ? ' checked' : ''}`} type='checkbox'
             checked={row.selected} disabled={disabled}
             onChange={(event) => onRowClick(row, index, event)}
           />

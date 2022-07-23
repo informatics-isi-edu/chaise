@@ -286,8 +286,7 @@ var getRecordEditURL = function (filter) {
 
 var testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, expectedEditable, expectedDeletable) {
     beforeAll(function () {
-        browser.ignoreSynchronization = true;
-        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + uriFilter + "@sort(id)");
+        chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + uriFilter + "@sort(id)");
         chaisePage.recordsetPageReady();
         browser.wait(function () {
             return chaisePage.recordsetPage.getRows().count().then(function (ct) {
@@ -535,7 +534,7 @@ describe("regarding dynamic ACL support, ", function () {
 
         // navigate away from the recordedit page so it doesn't interfere with other tests
         afterAll(function (done) {
-            browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table");
+            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table");
             browser.switchTo().alert().then(function (alert) {
                 alert.accept();
             }).catch(function () {}).finally(function () {

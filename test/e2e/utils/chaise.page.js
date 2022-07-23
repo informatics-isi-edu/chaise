@@ -879,6 +879,10 @@ var recordsetPage = function() {
         return browser.executeScript('return $(".modal-body .chaise-table-row td:nth-child(2)").map(function (i, a) { return a.textContent.trim(); });');
     };
 
+    this.getModalFirstColumn = function () {
+        return element.all(by.css(".modal-body .chaise-table-row td:nth-child(2)"));
+    };
+
     this.getModalCloseBtn = function() {
         return element(by.css(".modal-close"));
     };
@@ -887,7 +891,7 @@ var recordsetPage = function() {
         return element(by.id("no-results-row"));
     };
 
-    this.getColumnsWithUnderline = function() {
+    this.getColumnsWithTooltipIcon = function() {
         return element.all(by.css("span.table-column-displayname.chaise-icon-for-tooltip"));
     };
 
@@ -980,8 +984,18 @@ var recordsetPage = function() {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
+    // TODO: remove once record app migrated
+    this.getAngularExportDropdown = function () {
+        return element(by.tagName("export")).element(by.tagName("button"));
+    };
+
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
+    };
+
+    // TODO: remove once record app migrated
+    this.getAngularExportOptions = function () {
+        return element(by.tagName("export")).all(by.tagName("li"));
     };
 
     this.getExportOption = function (optionName) {
@@ -1045,7 +1059,7 @@ var recordsetPage = function() {
     }
 
     this.getFacetSearchBoxById = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css(".chaise-search-input"));
+        return element(by.css(".fc-" + idx)).element(by.css(".chaise-search-box"));
     }
 
     this.getFacetSearchPlaceholderById = function (idx) {
@@ -1069,7 +1083,17 @@ var recordsetPage = function() {
         return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet"));
     }
 
+    //TODO: remove when record app migrated
+    this.getAngularSelectedRowsFilters = function () {
+        return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
+    }
+
     this.getFacetFilters = function () {
+        return element(by.css(".chiclets-container")).all(by.css(".filter-chiclet"));
+    }
+
+    // NOTE: keeping around until angular apps are rewritten
+    this.getAngularFacetFilters = function () {
         return element(by.css(".recordset-chiclets")).all(by.css(".filter-chiclet"));
     }
 
@@ -1090,7 +1114,7 @@ var recordsetPage = function() {
     }
 
     this.getCheckedFacetOptions = function (idx) {
-        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input[checked]"));
+        return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input.checked"));
     }
 
     this.getFacetOptionsText = function (idx) {
@@ -1103,6 +1127,11 @@ var recordsetPage = function() {
         return browser.executeScript("return $('.fc-" + idx + " .chaise-checkbox label').map(function(i, a) { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} });");
     }
 
+    // NOTE: keeping around until angular apps are rewritten
+    this.getAngularFacetOption = function (idx, option) {
+        return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
+    }
+    
     this.getFacetOption = function (idx, option) {
         return element(by.css(".fc-" + idx)).element(by.css(".checkbox-" + option));
     }
@@ -1120,31 +1149,31 @@ var recordsetPage = function() {
     }
 
     this.getShowMore = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.id("show-more"));
+        return element(by.css(".fc-" + idx)).element(by.css(".show-more-btn"));
     }
 
     this.getCheckedModalOptions = function () {
-        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input[checked=checked]"));
+        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input.checked"));
     }
 
     this.getModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
-    this.getModalTotalCount = function () {
-        return element(by.css(".modal-body")).element(by.css('.chaise-table-header-total-count'));
+    this.getModalTotalCount = function (popup) {
+        return popup.element(by.css('.chaise-table-header-total-count'));
     };
 
     this.getRecordsetTableModalOptions = function () {
         return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input"));
     };
 
-    this.getModalRecordsetTableOptionByIndex = function (index) {
-        return element(by.css(".modal-body .recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
+    this.getModalRecordsetTableOptionByIndex = function (popup, index) {
+        return popup.element(by.css(".recordset-table")).all(by.css(".chaise-checkbox input")).get(index);
     };
 
-    this.getModalClearSelection = function () {
-        return element(by.css(".modal-body")).element(by.css(".clear-all-btn"));
+    this.getModalClearSelection = function (popup) {
+        return popup.element(by.css(".clear-all-btn"));
     }
 
     this.getModalSubmit = function () {
@@ -1172,8 +1201,8 @@ var recordsetPage = function() {
         return element(by.css(".fc-" + idx)).element(by.css("." + className));
     }
 
-    this.getValidationError = function (idx) {
-        return element(by.css(".fc-" + idx)).element(by.css(".validation-error div:not(.ng-hide)"));
+    this.getRangeInputValidationError = function (idx) {
+        return element(by.css(".fc-" + idx)).element(by.css(".range-input-error"));
     }
 
     this.getRangeSubmit = function (idx) {
@@ -1224,6 +1253,10 @@ var recordsetPage = function() {
         return element(by.css(".fc-" + idx)).element(by.css(".reset-plotly-button"));
     };
 
+    this.getModalWarningAlert = function (popup) {
+        return popup.element(by.css(".alert-warning"));
+    };
+
     this.getWarningAlert = function () {
         return element(by.css(".alert-warning"));
     };
@@ -1233,7 +1266,7 @@ var recordsetPage = function() {
     };
 
     this.getSelectAllBtn = function () {
-        return element(by.id("table-select-all-rows"));
+        return element(by.css(".table-select-all-rows"));
     };
 };
 
@@ -1242,8 +1275,16 @@ var SearchPopup = function () {
         return element(by.className("add-pure-and-binary-popup"));
     };
 
+    this.getUnlinkPureBinaryPopup = function () {
+        return element(by.className("unlink-pure-and-binary-popup"));
+    }
+
     this.getFacetPopup = function () {
         return element(by.className("faceting-show-details-popup"));
+    };
+
+    this.getScalarPopup = function () {
+        return element(by.className("scalar-show-details-popup"));
     };
 
     this.getForeignKeyPopup = function () {
@@ -1299,6 +1340,10 @@ function chaisePage() {
 
     this.clickButton = function(button) {
         return browser.executeScript("arguments[0].click();", button);
+    };
+
+    this.jqueryClickButton = function(button) {
+        return browser.executeScript("$(arguments[0]).click();", button);
     };
 
     /**
