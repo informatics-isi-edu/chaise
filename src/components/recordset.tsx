@@ -130,7 +130,7 @@ const RecordsetInner = ({
   onFacetPanelOpenChanged
 }: RecordsetInnerProps): JSX.Element => {
 
-  const { dispatchError, error } = useError();
+  const { dispatchError, errors } = useError();
 
   const {
     logRecordsetClientAction,
@@ -227,11 +227,10 @@ const RecordsetInner = ({
        * - Dismissing the error should change the browser location.
        */
       if (res.issues) {
-        // TODO change the
-        // var cb = function () {
-        // updateLocation();
-        // };
-        // ErrorService.handleException(res.issues, false, false, cb, cb);
+        const cb = function () {
+          windowRef.history.replaceState({}, '', getRecordsetLink(reference));
+        };
+        dispatchError({error: res.issues, closeBtnCallback: cb, okBtnCallback: cb})
       } else {
         // TODO save query should just return a promise
       }
@@ -635,7 +634,7 @@ const RecordsetInner = ({
   return (
     <div className='recordset-container app-content-container'>
       {
-        !error && (isLoading || forceShowSpinner) &&
+        errors.length === 0 && (isLoading || forceShowSpinner) &&
         <ChaiseSpinner />
       }
       <div className='top-panel-container'>

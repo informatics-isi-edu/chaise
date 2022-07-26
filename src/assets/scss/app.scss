@@ -111,12 +111,14 @@ html {
     cursor: pointer;
   }
 
-  a {
+  // the last selector is added to override bootstrap default behavior
+  a, a:not([href]):not([class]) {
     cursor: pointer;
     color: $link-color;
     text-decoration: none;
   }
-  a:focus, a:hover {
+  // the last selector is added to override bootstrap default behavior
+  a:focus, a:hover, a:not([href]):not([class]):hover {
     text-decoration: underline;
   }
 
@@ -126,6 +128,20 @@ html {
     font-size: 90%;
     color: #c7254e;
     background-color: #f9f2f4;
+    border-radius: 4px;
+  }
+  // make sure the pre style is consistent with old bootstrap styles
+  pre {
+    display: block;
+    padding: 9.5px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #333;
+    word-break: break-all;
+    word-wrap: break-word;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
     border-radius: 4px;
   }
 

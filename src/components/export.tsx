@@ -55,14 +55,14 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
           type: 'DIRECT',
         });
       }
-  
+
       const templates = reference.getExportTemplates(
         !ConfigService.chaiseConfig.disableDefaultExport
       );
-      
+
       // Update the list of templates in UI
       options.push(...templates);
-  
+
       setOptions(options);
     }
 
@@ -81,7 +81,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
         location.href = reference.csvDownloadLink;
         break;
       case 'BAG':
-      case 'FILE': 
+      case 'FILE':
         setSelectedOption(option);
         const bagName = reference.table.name;
         const exporter = new ConfigService.ERMrest.Exporter(
@@ -125,21 +125,17 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
               setExporterObj(null);
 
               console.timeEnd('External export duration');
-              
+
               error.subMessage = error.message;
               error.message = 'Export failed. Please report this problem to your system administrators.';
-              
-              dispatchError({ 
-                error: error,
-                isGlobal: true 
-              });
+
+              dispatchError({ error: error });
             });
         }
         break;
       default:
-        dispatchError({ 
-          error: new Error('Unsupported export format: ' + formatType + '. Please report this problem to your system administrators.'),
-          isGlobal: true 
+        dispatchError({
+          error: new Error(`Unsupported export format: ${formatType}. Please report this problem to your system administrators.`)
         });
     }
   };
@@ -173,7 +169,6 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
           >
             <Dropdown.Toggle
               disabled={disabled || !!selectedOption || options.length === 0}
-              variant='success'
               className='chaise-btn chaise-btn-primary'
             >
               {renderExportIcon()}
@@ -192,11 +187,11 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
             ))}
           </Dropdown.Menu>
         </Dropdown>
-      
-      <ExportModal 
+
+      <ExportModal
         title={`Exporting ${selectedOption ? selectedOption.displayname : ''}`}
-        show={!!selectedOption} 
-        closeModal={closeModal} 
+        show={!!selectedOption}
+        closeModal={closeModal}
       />
     </>
   );

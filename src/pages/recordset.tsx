@@ -27,7 +27,7 @@ const recordsetSettings = {
 };
 
 const RecordsetApp = (): JSX.Element => {
-  const { dispatchError, error } = useError();
+  const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
   useEffect(() => {
@@ -111,12 +111,12 @@ const RecordsetApp = (): JSX.Element => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
-      dispatchError({ error: err, isGlobal: true });
+      dispatchError({ error: err });
     });
   }, []);
 
   // if there was an error during setup, hide the spinner
-  if (!recordsetProps && error) {
+  if (!recordsetProps && errors.length > 0) {
     return <></>;
   }
 

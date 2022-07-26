@@ -275,8 +275,8 @@ export function copyToClipboard(text: string) {
   }
   else if (navigator && navigator.clipboard) {
     navigator.clipboard.writeText(text).catch((err) => {
-      $log.error('failed to copy with the following error:')
-      $log.error(err);
+      $log.warn('failed to copy with the following error:')
+      $log.warn(err);
     });
   }
 }

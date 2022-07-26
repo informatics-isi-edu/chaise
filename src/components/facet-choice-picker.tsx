@@ -223,8 +223,6 @@ const FacetChoicePicker = ({
   const processFacet = () => {
     const defer = Q.defer();
 
-    $log.debug(facetReference.uri);
-
     // we will set the checkboxRows to the value of this variable at the end
     const updatedRows: FacetCheckBoxRow[] = [];
 

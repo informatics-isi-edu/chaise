@@ -1,9 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 
-import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 type DeleteConfirmationModalProps = {
   /**
@@ -43,20 +40,21 @@ const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLab
         <div className='modal-text'>{renderedMessage}</div>
       </Modal.Body>
       <Modal.Footer>
-        <Button
+        <button
+          id='delete-confirmation'
           className='chaise-btn chaise-btn-danger'
-          variant='outline-primary'
           onClick={onConfirm}
+          type='button'
         >
           {buttonLabel}
-        </Button>
-        <Button
+        </button>
+        <button
           className='chaise-btn chaise-btn-secondary'
-          variant='outline-primary'
           onClick={onCancel}
+          type='button'
         >
           Cancel
-        </Button>
+        </button>
       </Modal.Footer>
     </Modal>
   );

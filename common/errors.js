@@ -516,6 +516,7 @@
                 if (okBtnCallback) {
                     okBtnCallback();
                 } else if ((errorStatus == errorNames.unauthorized && !providedLink) || (actionBtnIdentifier === "login")) {
+                    // TODO this code path is not used at all
                     Session.loginInAPopUp(logService.logActions.LOGIN_ERROR_MODAL);
                 } else {
                     if(actionBtnIdentifier == "reload"){
