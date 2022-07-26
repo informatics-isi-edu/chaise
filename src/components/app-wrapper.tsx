@@ -19,6 +19,8 @@ import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import ExternalLinkModal from '@isrd-isi-edu/chaise/src/components/modals/external-link-modal';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { ForbiddenAssetAccess, UnauthorizedAssetAccess } from '@isrd-isi-edu/chaise/src/models/errors';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
 type AppWrapperProps = {
@@ -44,13 +46,18 @@ const AppWrapperInner = ({
     /**
      * global error handler for uncaught errors
      */
-    window.addEventListener('error', (event) => {
-      $log.log('got the error in catch-all');
-      dispatchError({ error: event.error, isGlobal: true });
+    windowRef.addEventListener('error', (event) => {
+      dispatchError({ error: event.error });
     });
-    window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-      $log.log('got the error in catch-all (unhandled rejection)');
-      dispatchError({ error: event.reason, isGlobal: true });
+    windowRef.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+      dispatchError({ error: event.reason });
+    });
+
+    /**
+     * reload the page when users change the hash portion of the URL
+     */
+    windowRef.addEventListener('hashchange', () => {
+      windowRef.location.reload();
     });
 
     AuthnService.getSession('').then(() => {
@@ -58,7 +65,7 @@ const AppWrapperInner = ({
     }).then(() => {
       setConfigDone(true);
     }).catch((err: any) => {
-      dispatchError({ error: err, isGlobal: true });
+      dispatchError({ error: err });
     });
 
   }, []); // run it only once on load
@@ -77,10 +84,8 @@ const AppWrapperInner = ({
   }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {
-    $log.log('error fallback of the main error boundary');
-
     logTerminalError(error);
-    dispatchError({ error: error, isGlobal: true });
+    dispatchError({ error: error });
 
     // the error modal will be displayed so there's no need for the fallback
     return null;
@@ -120,14 +125,12 @@ const AppWrapperInner = ({
         ConfigService.http.head(element.href, config).then(function () {
           clickHref(element.href);
         }).catch(function (exception: any) {
-          const ermrestError = ConfigService.ERMrest.responseToError(exception);
-
-          // TODO requires error mapping
-          // if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
-          //   ermrestError = new Errors.UnauthorizedAssetAccess();
-          // } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
-          //   ermrestError = new Errors.ForbiddenAssetAccess();
-          // }
+          let ermrestError = ConfigService.ERMrest.responseToError(exception);
+          if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
+            ermrestError = new UnauthorizedAssetAccess();
+          } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
+            ermrestError = new ForbiddenAssetAccess();
+          }
 
           // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
           // ErrorService.handleException(ermrestError, true);
@@ -140,27 +143,21 @@ const AppWrapperInner = ({
     });
   }
 
-  // if there was an error during configuration, hide the spinner
-  // if it's a library, we don't want any spinners
-  if (!configDone && (errors.length > 0 || !displaySpinner)) {
-    return <></>
-  }
-
-  if (!configDone) {
-    return <ChaiseSpinner />
-  }
-
   return (
     <StrictMode>
       <ErrorBoundary
         FallbackComponent={errorFallback}
       >
-        <div className='app-container'>
-          {includeNavbar && <ChaiseNavbar />}
-          {includeAlerts && <Alerts />}
-          {externalLink && <ExternalLinkModal link={externalLink} onClose={() => setExternalLink('')} />}
-          {children}
-        </div>
+        {/* show spinner if we're waiting for configuration and there are no error during configuration */}
+        {(displaySpinner && !configDone && errors.length === 0) && <ChaiseSpinner />}
+        {configDone &&
+          <div className='app-container'>
+            {includeNavbar && <ChaiseNavbar />}
+            {includeAlerts && <Alerts />}
+            {externalLink && <ExternalLinkModal link={externalLink} onClose={() => setExternalLink('')} />}
+            {children}
+          </div>
+        }
       </ErrorBoundary>
       <ErrorModal />
     </StrictMode>

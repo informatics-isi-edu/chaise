@@ -227,11 +227,10 @@ const RecordsetInner = ({
        * - Dismissing the error should change the browser location.
        */
       if (res.issues) {
-        // TODO change the
-        // var cb = function () {
-        // updateLocation();
-        // };
-        // ErrorService.handleException(res.issues, false, false, cb, cb);
+        const cb = function () {
+          windowRef.history.replaceState({}, '', getRecordsetLink(reference));
+        };
+        dispatchError({error: res.issues, closeBtnCallback: cb, okBtnCallback: cb})
       } else {
         // TODO save query should just return a promise
       }

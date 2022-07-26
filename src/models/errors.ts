@@ -3,6 +3,7 @@
 import { errorNames, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
+import { chaiseDeploymentPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 // TODO eventually we might want to use this type instead of any
 interface ChaiseERMrestJSError {
@@ -27,7 +28,7 @@ interface ChaiseERMrestJSError {
     gotoTableDisplayname?: string;
   }
 }
-class ChaiseError {
+export class ChaiseError {
   constructor(
     public status: string,
     public message: string,
@@ -53,7 +54,6 @@ class ChaiseError {
        */
       continueBtnText?: string,
       continueCB?: Function,
-      continueMessage?: string,
 
       /**
        * the error stack
@@ -167,10 +167,7 @@ export class NoRecordRidError extends ChaiseError {
       errorNames.notFound,
       message || errorMessages.noDataMessage,
       undefined,
-      true,
-      {
-        clickActionMessage: MESSAGE_MAP.clickActionMessage.dismissDialog
-      }
+      true
     )
   }
 }
@@ -184,10 +181,7 @@ export class UnauthorizedAssetAccess extends ChaiseError {
       MESSAGE_MAP.loginRequired,
       errorMessages.unauthorizedAssetRetrieval,
       undefined,
-      true,
-      {
-        clickActionMessage: MESSAGE_MAP.clickActionMessage.loginOrDismissDialog
-      }
+      true
     )
   }
 }
@@ -205,10 +199,7 @@ export class ForbiddenAssetAccess extends ChaiseError {
       MESSAGE_MAP.permissionDenied,
       userName + errorMessages.forbiddenAssetRetrieval,
       undefined,
-      true,
-      {
-        clickActionMessage: MESSAGE_MAP.clickActionMessage.dismissDialog
-      }
+      true
     )
   }
 }
@@ -218,7 +209,7 @@ export class ForbiddenAssetAccess extends ChaiseError {
  */
 export class DifferentUserConflictError extends ChaiseError {
   constructor(sessionInfo: any, prevSessionInfo: any, continueCB?: Function) {
-    let message, clickActionMessage, continueMessage, continueBtnText;
+    let message, clickActionMessage, continueBtnText;
 
     let prevUser;
     if (prevSessionInfo.client.full_name) {
@@ -237,17 +228,22 @@ export class DifferentUserConflictError extends ChaiseError {
 
       message = errorMessages.differentUserConflict1 + prevUser + errorMessages.differentUserConflict2 + currUser + '.';
 
+      // TODO can we improve this?
+      const link = `
+        <a id='switch-user-accounts-link' target='_blank' href='${chaiseDeploymentPath()}'lib/switchUserAccounts.html'>
+          Switch User Accounts Document
+        </a>
+      `;
       clickActionMessage = MESSAGE_MAP.clickActionMessage.continueMessageReload + currUser + '; or';
-
-      continueMessage = MESSAGE_MAP.clickActionMessage.continueMessage1 + prevUser + MESSAGE_MAP.clickActionMessage.continueMessage2;
+      clickActionMessage += '<br/>' + MESSAGE_MAP.clickActionMessage.continueMessage1 + prevUser + MESSAGE_MAP.clickActionMessage.continueMessage2;
+      clickActionMessage += ` Instructions on how to restore login is in the ${link}.`
 
       continueBtnText = 'Continue';
     } else {
       message = errorMessages.anonUserConflict + prevUser + '.';
 
       clickActionMessage = MESSAGE_MAP.clickActionMessage.anonContinueMessageReload;
-
-      continueMessage = MESSAGE_MAP.clickActionMessage.anonContinueMessage + prevUser + '.';
+      clickActionMessage += '<br/>' + MESSAGE_MAP.clickActionMessage.anonContinueMessage + prevUser + '.';
 
       continueBtnText = 'Login';
     }
@@ -262,7 +258,6 @@ export class DifferentUserConflictError extends ChaiseError {
       {
         clickActionMessage,
         continueBtnText,
-        continueMessage,
         continueCB
       }
     )

@@ -19,6 +19,7 @@
   // don't show the default blue outline on focus
   &:focus {
     outline: none;
+    box-shadow: none;
   }
 
   // show not-allowed cursor and not allow click
@@ -92,4 +93,13 @@
 //TODO
 .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
   color: #ccc !important;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: unset;
+}
+
+// override the default behavior of dropdowns in bootstrap
+.show > button.chaise-btn.btn.dropdown-toggle:focus {
+  box-shadow: none;
 }

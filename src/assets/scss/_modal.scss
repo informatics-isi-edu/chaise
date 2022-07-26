@@ -31,7 +31,7 @@
 }
 
 /******** Popup modal for login instructions ********/
-.modal-login .modal-backdrop {
+.modal-login-instruction-backdrop {
   opacity: 0.7 !important;
 }
 
@@ -57,21 +57,24 @@
   text-align: justify;
 }
 
-.modal-login .modal-title {
+.modal-login-instruction .modal-title {
   font-size: 22px !important;
 }
 
 /******* Popup modal for error ********/
-/* hide the loading spinner if we have the error dialog open */
-// TODO is this needed? if it's we need to adjust it as loading-spinner is not
-// a valid tag anymore.
-body.error-open loading-spinner {
-  display: none !important;
-}
 
 .modal-error {
+  overflow: hidden;
   .no-word-break {
     white-space: nowrap;
+  }
+
+  .toggle-error-details {
+    display: block;
+    padding-left: 0;
+    i {
+      padding-right: 3px;
+    }
   }
 
   .modal-footer .chaise-btn {
@@ -81,6 +84,10 @@ body.error-open loading-spinner {
       width: unset;
     }
   }
+}
+
+.modal-footer .chaise-btn {
+  margin-left: 5px;
 }
 
 /******* Popup modal for share ********/
@@ -115,7 +122,7 @@ body.error-open loading-spinner {
 
 // NOTE in bootstrap3 this used to be modal-md,
 // but we don't have that notion anymore and therefore this is just the default size
-.chaise-body .modal-dialog:not(.modal-sm) {
+.chaise-body .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
@@ -212,10 +219,29 @@ body.error-open loading-spinner {
   }
 }
 
+.export-progress {
+  .modal-body {
+    padding-top: 0;
+  }
+
+  .modal-text {
+    margin: 8px 0px;
+  }
+
+  .progress {
+    height: 1.5rem;
+  }
+
+  .progress-bar {
+    background-size: 1.75rem 1.75rem;
+    background-color: #4674a7;
+  }
+}
+
 @media (min-width: 768px) {
-  .modal-dialog:not(.modal-sm) {
-    max-width: unset;
-    width: 600px;
-    margin: 30px auto;
+  .chaise-body .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+    max-width: unset !important;
+    width: 600px !important;
+    margin: 30px auto !important;
   }
 }

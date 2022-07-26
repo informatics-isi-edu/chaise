@@ -2,18 +2,13 @@ import { createContext, useMemo, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { CustomError, NoRecordError, NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 
 
 interface ChaiseError {
   error: any; // TODO what would be a proper type?
   isDismissible?: boolean;
-  isGlobal?: boolean;
+  isGlobal?: boolean; // TODO should be removed
   skipLogging?: boolean;
   okBtnCallback?: Function;
   closeBtnCallback?: Function;
@@ -45,21 +40,23 @@ type ErrorProviderProps = {
 export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Element {
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
+  const [requireLogin, setRequireLogin] = useState(false);
 
   const hideError = (error: ChaiseError) => {
-    setErrors((errors: ChaiseError[]) => errors.filter((e) => e === error));
+    setErrors((errors: ChaiseError[]) => errors.filter((e) => e !== error));
   }
 
   const dispatchError = (payload: ChaiseError) => {
-    const chaiseConfig = ConfigService.chaiseConfig;
-    $log.error(payload.error);
-
     if (dontAllowOtherErrors) {
-      $log.error('cannot display multiple errors');
+      $log.warn('cannot display multiple errors');
       return;
     }
 
+    $log.warn(payload.error);
+
     // If not authorized, ask user to sign in first
+    // NOTE this is for 401 errors that are manually thrown
+    //      401 errors that are thrown from ermrestjs are handled by setting the 401Handler
     if (payload.error instanceof windowRef.ERMrest.UnauthorizedError) {
       // TODO 401 handling
       // Unauthorized (needs to login)
@@ -74,11 +71,15 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
     }
 
     // if not a dismissible error then exception should be suppressed
-    if (!payload.isDismissible && !payload.error.showContinueBtn && !payload.error.clickOkToDismiss) {
+    const canShowOtherErrors = (
+      // in this case ok is behaving like a dissmiss
+      payload.error instanceof windowRef.ERMrest.UnsupportedFilters
+    );
+    if (!payload.isDismissible && !payload.error.showContinueBtn && !payload.error.clickOkToDismiss && !canShowOtherErrors) {
       setDontAllowOtherErrors(true);
     }
 
-    setErrors((errors) => [payload, ...errors])
+    setErrors((errors) => [...errors, payload])
   };
 
   /**
@@ -108,7 +109,8 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
       errors,
       dispatchError,
       hideError,
-      logTerminalError
+      logTerminalError,
+
     };
   }, [errors])
 
