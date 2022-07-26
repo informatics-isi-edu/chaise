@@ -54,7 +54,8 @@ describe('View existing record,', function() {
         });
 
         it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
-            var options = chaisePage.recordsetPage.getExportOptions();
+            // TODO: change after record app migrated
+            var options = chaisePage.recordsetPage.getAngularExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
         });
 
@@ -89,7 +90,8 @@ describe('View existing record,', function() {
 
         // we're not using default tempaltes and csv option is disabled
         it ("export button should be disabled", function () {
-            expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
+            // TODO: change after record app migrated
+            expect(chaisePage.recordsetPage.getAngularExportDropdown().getAttribute("disabled")).toBeTruthy();
         });
 
         it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
@@ -181,10 +183,12 @@ describe('View existing record,', function() {
         });
 
         it ("should not have the default csv export option and only the defined template should be available", function (done) {
-            var options = chaisePage.recordsetPage.getExportOptions();
+            // TODO: change after record app migrated
+            var options = chaisePage.recordsetPage.getAngularExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
 
-            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+            // TODO: change after record app migrated
+            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
                 var csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
                 expect(csvOption.getText()).toBe("Defined template");
                 done();

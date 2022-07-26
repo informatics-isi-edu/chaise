@@ -9,102 +9,127 @@ var testParams = {
 
 describe('Recordset edit records,', function() {
 
-    // TODO: uncomment when recoredit multi edit is implemented
-    // describe("recordset shows results with no limit defined,", function() {
-    //     beforeAll(function() {
-    //         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
-    //     });
+    describe("recordset shows results with no limit defined,", function() {
+        beforeAll(function() {
+            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
 
-    //     it("clicking edit will show forms based on the default page size of " + testParams.default_page_limit + ".", function() {
-    //         chaisePage.recordsetPageReady().then(function() {
-    //             return chaisePage.recordsetPage.getRows().count();
-    //         }).then(function(ct) {
-    //             expect(ct).toBe(testParams.default_page_limit);
+            chaisePage.recordsetPageReady()
+        });
 
-    //             return chaisePage.recordsetPage.getEditRecordLink().click();
-    //         }).then(function() {
-    //             browser.wait(function() {
-    //                 return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-    //                     return (ct == testParams.default_page_limit);
-    //                 });
-    //             }, browser.params.defaultTimeout);
+        it("clicking edit will show forms based on the default page size of " + testParams.default_page_limit + ".", function() {
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == testParams.default_page_limit);
+                });
+            }, browser.params.defaultTimeout);
 
-    //             return chaisePage.recordEditPage.getForms().count();
-    //         }).then(function(count) {
-    //             expect(count).toBe(testParams.default_page_limit);
-    //         });
-    //     });
-    // });
+            chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                expect(ct).toBe(testParams.default_page_limit);
 
-    // describe("recordset url includes a limit,", function() {
-    //     beforeAll(function() {
-    //         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "?limit=" + testParams.limit);
-    //     });
+                return chaisePage.recordsetPage.getEditRecordLink().click();
+            }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return (ct == testParams.default_page_limit);
+                    });
+                }, browser.params.defaultTimeout);
 
-    //     it("clicking edit will show forms based on the limit of " + testParams.limit + " in the uri.", function() {
-    //         chaisePage.recordsetPageReady().then(function() {
-    //             return chaisePage.recordsetPage.getRows().count();
-    //         }).then(function(ct) {
-    //             expect(ct).toBe(testParams.limit);
+                return chaisePage.recordEditPage.getForms().count();
+            }).then(function(count) {
+                expect(count).toBe(testParams.default_page_limit);
+            });
+        });
+    });
 
-    //             return chaisePage.recordsetPage.getEditRecordLink().click();
-    //         }).then(function() {
-    //             browser.wait(function() {
-    //                 return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-    //                     return (ct == testParams.limit);
-    //                 });
-    //             }, browser.params.defaultTimeout);
+    describe("recordset url includes a limit,", function() {
+        beforeAll(function() {
+            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "?limit=" + testParams.limit);
 
-    //             return chaisePage.recordEditPage.getForms().count();
-    //         }).then(function(count) {
-    //             expect(count).toBe(testParams.limit);
-    //         });
-    //     });
-    // });
+            chaisePage.recordsetPageReady()
+        });
 
-    // describe("recordset url includes a filter of int=23", function() {
-    //     it("without a limit, clicking edit will show all forms with int=23.", function() {
-    //         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/int=23");
+        it("clicking edit will show forms based on the limit of " + testParams.limit + " in the uri.", function() {
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == testParams.limit);
+                });
+            }, browser.params.defaultTimeout);
 
-    //         chaisePage.recordsetPageReady().then(function() {
-    //             return chaisePage.recordsetPage.getRows().count();
-    //         }).then(function(ct) {
-    //             expect(ct).toBe(testParams.int_23_count);
+            chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                expect(ct).toBe(testParams.limit);
 
-    //             return chaisePage.recordsetPage.getEditRecordLink().click();
-    //         }).then(function() {
-    //             browser.wait(function() {
-    //                 return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-    //                     return (ct == testParams.int_23_count);
-    //                 });
-    //             }, browser.params.defaultTimeout);
+                return chaisePage.recordsetPage.getEditRecordLink().click();
+            }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return (ct == testParams.limit);
+                    });
+                }, browser.params.defaultTimeout);
 
-    //             return chaisePage.recordEditPage.getForms().count();
-    //         }).then(function(count) {
-    //             expect(count).toBe(testParams.int_23_count);
-    //         });
-    //     });
+                return chaisePage.recordEditPage.getForms().count();
+            }).then(function(count) {
+                expect(count).toBe(testParams.limit);
+            });
+        });
+    });
 
-    //     it("with a limit of " + testParams.limit + ", clicking edit will show all forms with int=23.", function() {
-    //         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/int=23?limit=" + testParams.limit);
+    describe("recordset url includes a filter of int=23", function() {
+        beforeAll(function() {
+            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/int=23");
 
-    //         chaisePage.recordsetPageReady().then(function() {
-    //             return chaisePage.recordsetPage.getRows().count();
-    //         }).then(function(ct) {
-    //             expect(ct).toBe(testParams.limit);
+            chaisePage.recordsetPageReady()
+        });
 
-    //             return chaisePage.recordsetPage.getEditRecordLink().click();
-    //         }).then(function() {
-    //             browser.wait(function() {
-    //                 return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-    //                     return (ct == testParams.limit);
-    //                 });
-    //             }, browser.params.defaultTimeout);
+        it("without a limit, clicking edit will show all forms with int=23.", function() {
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == testParams.int_23_count);
+                });
+            }, browser.params.defaultTimeout);
 
-    //             return chaisePage.recordEditPage.getForms().count();
-    //         }).then(function(count) {
-    //             expect(count).toBe(testParams.limit);
-    //         });
-    //     });
-    // });
+            chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                expect(ct).toBe(testParams.int_23_count);
+
+                return chaisePage.recordsetPage.getEditRecordLink().click();
+            }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return (ct == testParams.int_23_count);
+                    });
+                }, browser.params.defaultTimeout);
+
+                return chaisePage.recordEditPage.getForms().count();
+            }).then(function(count) {
+                expect(count).toBe(testParams.int_23_count);
+            });
+        });
+
+        it("with a limit of " + testParams.limit + ", clicking edit will show all forms with int=23.", function() {
+            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/int=23?limit=" + testParams.limit);
+
+            chaisePage.recordsetPageReady()
+
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == testParams.limit);
+                });
+            }, browser.params.defaultTimeout);
+            
+            chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                expect(ct).toBe(testParams.limit);
+
+                return chaisePage.recordsetPage.getEditRecordLink().click();
+            }).then(function() {
+                browser.wait(function() {
+                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return (ct == testParams.limit);
+                    });
+                }, browser.params.defaultTimeout);
+
+                return chaisePage.recordEditPage.getForms().count();
+            }).then(function(count) {
+                expect(count).toBe(testParams.limit);
+            });
+        });
+    });
 });
