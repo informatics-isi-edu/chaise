@@ -6,6 +6,8 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Spinner from 'react-bootstrap/Spinner';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
 
+import { ResizeSensor } from 'css-element-queries';
+
 // models
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -36,6 +38,12 @@ type TableRowProps = {
   disabled: boolean
 }
 
+type ReadMoreStateProps = {
+  hideContent: boolean,
+  linkText: string,
+  maxHeightStyle: { maxHeight?: string }
+}
+
 const TableRow = ({
   config,
   rowIndex,
@@ -61,7 +69,7 @@ const TableRow = ({
     defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
   const [overflow, setOverflow] = useState<boolean[]>([]);
-  const [readMoreObj, setReadMoreObj] = useState<any>({
+  const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
     hideContent: true,
     linkText: 'more',
     maxHeightStyle: defaultMaxHeightStyle
@@ -96,17 +104,18 @@ const TableRow = ({
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
     const tempOverflow: boolean[] = [];
-    for (let i = 0; i < rowContainer.current.children.length; i++) {
+    for (let i = 0; i < rowContainer.current.children.length-1; i++) {
       let hasOverflow = overflow[i] || false;
 
-      const currentElement = rowContainer.current.children[i].querySelector('.markdown-container');
+      // children is each <td>, span is the cell wrapping the content
+      const dataCell = rowContainer.current.children[i].querySelector('.display-value > span');
 
-      // currentElement must be defined and the previous overflow was false so check again to make sure it hasn't changed
-      if (currentElement && !hasOverflow) {
-        // console.log('col index: ' + i + ' height: ', currentElement.offsetHeight);
+      // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
+      if (dataCell && !hasOverflow) {
         // overflow is true if the content overflows the cell
-        hasOverflow = (currentElement.offsetHeight + tdPadding) > maxHeight;
+        hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
       }
+
       tempOverflow[i] = hasOverflow;
     }
 
@@ -114,12 +123,19 @@ const TableRow = ({
   }
 
   // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
+  // NOTE: if the tuple changes, the table-row component isn't destroyed so the overflows need to be reset
   useEffect(() => {
-    setOverflow([])
+    setOverflow([]);
   }, [tuple]);
 
   useLayoutEffect(() => {
-    initializeOverflows();
+    if (!rowContainer.current) return;
+    new ResizeSensor(
+      rowContainer.current,
+      () => {
+        initializeOverflows();
+      }
+    )
   }, [rowValues]);
 
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
@@ -433,11 +449,11 @@ const TableRow = ({
     return rowValues.map((value: any, colIndex: number) => {
       return (
         <td key={rowIndex + '-' + colIndex} className={rowDisabled ? 'disabled-cell' : ''}>
-          <div className={readMoreObj.hideContent === true ? 'hideContent' : 'showContent'} style={readMoreObj.maxHeightStyle}>
+          <div className={'display-value ' + (readMoreObj.hideContent === true ? 'hideContent' : 'showContent')} style={readMoreObj.maxHeightStyle}>
             <DisplayValue addClass={true} value={value} />
           </div>
           {overflow[colIndex + 1] && <div style={{ 'display': 'inline' }}>
-            ...
+            {' ... '}
             <span
               className='text-primary readmore'
               style={{ 'display': 'inline-block', 'textDecoration': 'underline', 'cursor': 'pointer' }}

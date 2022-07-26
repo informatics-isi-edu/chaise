@@ -348,32 +348,31 @@ describe("Viewing Recordset with Faceting,", function () {
 
             });
 
-            // TODO: fix overflow logic in ellipsis
-            // it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function () {
-            //     // default config: maxRecordsetRowHeight = 100
-            //     // 100 for max height, 10 for padding, 1 for border
-            //     var testCell, cellHeight = 111;
-            //     chaisePage.recordsetPage.getRows().then(function (rows) {
-            //         return chaisePage.recordsetPage.getRowCells(rows[0]);
-            //     }).then(function (cells) {
-            //         testCell = cells[2];
-            //         expect(testCell.getText()).toContain("... more");
+            it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function () {
+                // default config: maxRecordsetRowHeight = 100
+                // 100 for max height, 10 for padding, 1 for border
+                var testCell, cellHeight = 110;
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    return chaisePage.recordsetPage.getRowCells(rows[0]);
+                }).then(function (cells) {
+                    testCell = cells[2];
+                    expect(testCell.getText()).toContain("... more");
 
-            //         return testCell.getSize();
-            //     }).then(function (dimensions) {
-            //         expect(dimensions.height).toBe(cellHeight);
+                    return testCell.getSize();
+                }).then(function (dimensions) {
+                    expect(dimensions.height).toBe(cellHeight);
 
-            //         return testCell.element(by.css(".readmore")).click();
-            //     }).then(function () {
-            //         expect(testCell.getText()).toContain("... less");
+                    return testCell.element(by.css(".readmore")).click();
+                }).then(function () {
+                    expect(testCell.getText()).toContain("... less");
 
-            //         return testCell.getSize();
-            //     }).then(function (tallerDimensions) {
-            //         expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
-            //     }).catch(function (err) {
-            //         console.log(err);
-            //     });
-            // });
+                    return testCell.getSize();
+                }).then(function (tallerDimensions) {
+                    expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+                }).catch(function (err) {
+                    console.log(err);
+                });
+            });
 
             it("should have 3 facets open", function (done) {
                 chaisePage.recordsetPage.getOpenFacets().count().then(function (ct) {
@@ -460,7 +459,6 @@ describe("Viewing Recordset with Faceting,", function () {
                     return chaisePage.recordsetPage.getModalSubmit().click();
                 }).then(function () {
 
-                    // TODO: checked not updating on input properly
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function(ct) {
                             return ct == 2;

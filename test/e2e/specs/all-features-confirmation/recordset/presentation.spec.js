@@ -271,31 +271,29 @@ describe('View recordset,', function () {
                 expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n"+ activeListData.length + "\nrecords", "hide_row_count not honored");
             });
 
-            // TODO: uncomment when ellipsis logic fixed
-            //       some content has '...more' showing when it shouldn't
-            // it ("should show correct table rows.", function (done) {
-            //     chaisePage.recordsetPage.getRows().then(function (rows) {
-            //         expect(rows.length).toBe(activeListData.length, "row length missmatch.");
-            //         rows.forEach(function (row, rowIndex) {
-            //             var expectedRow = activeListData[rowIndex];
-            //             chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
-            //                 expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
+            it ("should show correct table rows.", function (done) {
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    expect(rows.length).toBe(activeListData.length, "row length missmatch.");
+                    rows.forEach(function (row, rowIndex) {
+                        var expectedRow = activeListData[rowIndex];
+                        chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
+                            expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
 
-            //                 var expectedCell
-            //                 for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
-            //                     expectedCell = expectedRow[cellIndex];
-            //                     // the first cell is the action columns
-            //                     expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
-            //                 }
+                            var expectedCell
+                            for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
+                                expectedCell = expectedRow[cellIndex];
+                                // the first cell is the action columns
+                                expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
+                            }
 
-            //                 if (rowIndex === rows.length - 1) {
-            //                     done();
-            //                 }
+                            if (rowIndex === rows.length - 1) {
+                                done();
+                            }
 
-            //             }).catch(chaisePage.catchTestError(done));
-            //         });
-            //     }).catch(chaisePage.catchTestError(done));
-            // });
+                        }).catch(chaisePage.catchTestError(done));
+                    });
+                }).catch(chaisePage.catchTestError(done));
+            });
 
             it ("going to a page with no results, the loader for columns should hide.", function (done) {
                 chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");

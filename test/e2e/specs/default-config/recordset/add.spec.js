@@ -28,34 +28,33 @@ describe('Recordset add record,', function() {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
 
-    // TODO: fix overflow logic in ellipsis
-    // it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function (done) {
-    //     // default config: maxRecordsetRowHeight = 160
-    //     // 160 for max height, 10 for padding
-    //     var testCell, cellHeight = 170;
-    //     chaisePage.recordsetPage.getRows().then(function (rows) {
-    //         return chaisePage.recordsetPage.getRowCells(rows[0]);
-    //     }).then(function (cells) {
-    //         testCell = cells[4];
-    //         expect(testCell.getText()).toContain("... more");
+    it("verify the text is truncated properly based on the default config, then not truncated after clicking 'more'", function (done) {
+        // default config: maxRecordsetRowHeight = 160
+        // 160 for max height, 10 for padding
+        var testCell, cellHeight = 170;
+        chaisePage.recordsetPage.getRows().then(function (rows) {
+            return chaisePage.recordsetPage.getRowCells(rows[0]);
+        }).then(function (cells) {
+            testCell = cells[4];
+            expect(testCell.getText()).toContain("... more");
 
-    //         return testCell.getSize();
-    //     }).then(function (dimensions) {
-    //         // the calculations might be one pixel off
-    //         expect(Math.abs(dimensions.height - cellHeight) <= 1).toBeTruthy();
-    //         return testCell.element(by.css(".readmore")).click();
-    //     }).then(function () {
-    //         expect(testCell.getText()).toContain("... less");
+            return testCell.getSize();
+        }).then(function (dimensions) {
+            // the calculations might be one pixel off
+            expect(Math.abs(dimensions.height - cellHeight) <= 1).toBeTruthy();
+            return testCell.element(by.css(".readmore")).click();
+        }).then(function () {
+            expect(testCell.getText()).toContain("... less");
 
-    //         return testCell.getSize();
-    //     }).then(function (tallerDimensions) {
-    //         expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
-    //         done();
-    //     }).catch(function (err) {
-    //         console.log(err);
-    //         done.fail(err);
-    //     });
-    // });
+            return testCell.getSize();
+        }).then(function (tallerDimensions) {
+            expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
+            done();
+        }).catch(function (err) {
+            console.log(err);
+            done.fail(err);
+        });
+    });
 
     it("verify view details link, search for a term, then verify view details link has changed", function () {
         var baseUrl = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/RID=";
@@ -123,6 +122,13 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPageReady();
         }).then(function() {
             var rows = chaisePage.recordsetPage.getRows();
+
+            browser.wait(function () {
+                return rows.count().then(function (ct) {
+                    return (ct == 5)
+                });
+            });
+            
             return rows.get(0).all(by.css(".select-action-button"));
         }).then(function(selectButtons) {
             selectButtons[0].click();
