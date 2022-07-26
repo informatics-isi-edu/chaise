@@ -35,30 +35,31 @@
   opacity: 0.7 !important;
 }
 
-.modal-login-instruction .modal-dialog {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-left: -300px;
-  margin-top: -100px;
-}
+.modal-login-instruction {
+  .modal-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -100px;
 
-.modal-login-instruction .modal-dialog .modal-content {
-  width: 600px;
-}
+    .modal-content {
+      width: 600px;
+    }
 
-.modal-login-instruction .modal-dialog ol li {
-  list-style-type: decimal;
-}
-
-.modal-login-instruction .modal-dialog pre {
-  white-space: pre-line;
-  word-break: inherit;
-  text-align: justify;
-}
-
-.modal-login-instruction .modal-title {
-  font-size: 22px !important;
+    .modal-header {
+      justify-content: space-around;
+      .modal-title {
+        font-size: 22px !important;
+      }
+    }
+    .modal-body {
+      text-align: center;
+      button {
+        margin-left: 5px;
+      }
+    }
+  }
 }
 
 /******* Popup modal for error ********/
@@ -122,7 +123,7 @@
 
 // NOTE in bootstrap3 this used to be modal-md,
 // but we don't have that notion anymore and therefore this is just the default size
-.chaise-body .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+.chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
@@ -239,7 +240,7 @@
 }
 
 @media (min-width: 768px) {
-  .chaise-body .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+  .chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
     max-width: unset !important;
     width: 600px !important;
     margin: 30px auto !important;

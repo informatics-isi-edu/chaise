@@ -3,7 +3,9 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-
+type LoginModalProps = {
+  title: string;
+};
 
 interface ChaiseError {
   error: any; // TODO what would be a proper type?
@@ -23,6 +25,9 @@ export const ErrorContext = createContext<{
   dispatchError: (payload: ChaiseError) => void;
   hideError: (error: ChaiseError) => void;
   logTerminalError: (error: any) => void;
+  loginModal: LoginModalProps | null;
+  showLoginModal: (props: LoginModalProps) => void;
+  hideLoginModal: () => void;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -40,11 +45,21 @@ type ErrorProviderProps = {
 export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Element {
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
-  const [requireLogin, setRequireLogin] = useState(false);
+  const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);
+
+  const showLoginModal = (props: LoginModalProps)  => {
+    if (!loginModal) {
+      setLoginModal(props);
+    }
+  };
+
+  const hideLoginModal = () => {
+    setLoginModal(null);
+  };
 
   const hideError = (error: ChaiseError) => {
     setErrors((errors: ChaiseError[]) => errors.filter((e) => e !== error));
-  }
+  };
 
   const dispatchError = (payload: ChaiseError) => {
     if (dontAllowOtherErrors) {
@@ -110,9 +125,11 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
       dispatchError,
       hideError,
       logTerminalError,
-
+      loginModal,
+      showLoginModal,
+      hideLoginModal
     };
-  }, [errors])
+  }, [errors, loginModal])
 
   return (
     <ErrorContext.Provider value={providerValue} >

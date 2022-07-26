@@ -6,8 +6,8 @@ import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import ErrorPorvider from '@isrd-isi-edu/chaise/src/providers/error';
 import { StrictMode, useEffect, useState } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import ErrorModal from '@isrd-isi-edu/chaise/src/components/error-modal';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import ErrorModal from '@isrd-isi-edu/chaise/src/components/modals/error-modal';
+import LoginModal from '@isrd-isi-edu/chaise/src/components/modals/login-modal';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
 import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
@@ -158,6 +158,7 @@ const AppWrapperInner = ({
           </div>
         }
       </ErrorBoundary>
+      <LoginModal />
       <ErrorModal />
     </StrictMode>
   )
