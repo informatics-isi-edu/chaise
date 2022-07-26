@@ -55,8 +55,8 @@ describe('Error related test cases,', function() {
         beforeAll(function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=11223312121";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('An error modal window should appear with Record Not Found title', function(){
@@ -100,8 +100,8 @@ describe('Error related test cases,', function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.tableNotFound +  "/id=10007";
             browser.refresh();
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('An error modal window should appear with Item Not Found title', function(){
@@ -135,8 +135,8 @@ describe('Error related test cases,', function() {
         beforeAll(function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable +  "/id=10007";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('An error modal window should appear with Multiple Records Found title', function(){
@@ -178,8 +178,8 @@ describe('Error related test cases,', function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable;
             browser.refresh();
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('An error modal window should appear with Invalid Input title', function(){
@@ -193,7 +193,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to Home page', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+            chaisePage.recordPage.getErrorModalOkButton().click().then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
@@ -208,13 +208,12 @@ describe('Error related test cases,', function() {
         });
     });
 
-
     describe("For reload button to start over in Recordedit app", function() {
 
         beforeAll(function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +"/id=2002";
-            browser.get(url);
+            chaisePage.navigate(url);
             chaisePage.waitForElement(chaisePage.recordEditPage.getEntityTitleElement());
         });
 
@@ -254,8 +253,8 @@ describe('Error related test cases,', function() {
         beforeAll(function() {
             browser.ignoreSynchronization = true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=269111";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('After clicking back button initial page should appear', function(done){
@@ -284,7 +283,7 @@ describe('Error related test cases,', function() {
         beforeAll(function() {
             browser.ignoreSynchronization = true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002";
-            browser.get(url);
+            chaisePage.navigate(url);
             deleteBtn  = chaisePage.recordPage.getDeleteRecordButton();
         });
 
@@ -319,7 +318,7 @@ describe('Error related test cases,', function() {
         beforeAll(function() {
             browser.ignoreSynchronization = true;
             var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.fileTable;
-            browser.get(url);
+            chaisePage.navigate(url);
             deleteBtnEllipses  = chaisePage.recordsetPage.getDeleteActionButtons().first();
             chaisePage.waitForElement(deleteBtnEllipses);
         });
@@ -344,7 +343,7 @@ describe('Error related test cases,', function() {
       beforeAll(function() {
           browser.ignoreSynchronization = true;
           pageTestUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id::gt:2002@after()";
-          browser.get(pageTestUrl);
+          chaisePage.navigate(pageTestUrl);
           modalTitle = chaisePage.recordEditPage.getModalTitle();
           modalActionBody = chaisePage.recordEditPage.getModalActionBody();
       });
@@ -399,9 +398,9 @@ describe('Error related test cases,', function() {
         browser.ignoreSynchronization = true;
         pageTestUrl = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002@after()";
         browser.refresh();
-        browser.get(pageTestUrl);
+        chaisePage.navigate(pageTestUrl);
         modalTitle = chaisePage.errorModal.getTitle();
-        chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
       });
 
       it("should be returned Invalid Page Criteria", function (done) {
@@ -436,7 +435,7 @@ describe('Error related test cases,', function() {
       beforeAll(function() {
         browser.ignoreSynchronization = true;
           pageTestUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=2002@after()";
-          browser.get(pageTestUrl);
+          chaisePage.navigate(pageTestUrl);
       });
 
       it("should be returned Invalid Page Criteria", function (done) {
@@ -472,11 +471,11 @@ describe('Error related test cases,', function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=11223312121";
             browser.refresh();
-            browser.get(url);
+            chaisePage.navigate(url);
         });
 
         it('An error modal window should appear with Record Not Found title', function(done){
-          chaisePage.waitForElement(element(by.css('.modal-dialog '))).then(function() {
+          chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog'))).then(function() {
               return chaisePage.errorModal.getTitle();
             }).then(function(modalTitle) {
               expect(modalTitle.getText()).toBe("Record Not Found", "The title of no record error pop is not correct");
@@ -509,8 +508,8 @@ describe('Error related test cases,', function() {
           browser.ignoreSynchronization = true;
             url = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable +"/?limit=-1";
             browser.refresh();
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('An error modal window should appear with Invalid Input title', function(){
@@ -563,8 +562,8 @@ describe('Error related test cases,', function() {
             var facetBlob = "N4IghgdgJiBcDaoDOB7ArgJwMYFM6JADMBLAGwBccM4RS0APTY9JEAGhBQAcrIoB9LmHKUMEGgEYATCAC+HYjAC6HLAAsUxXKwQgpABn0BmEEtlmgA";
             url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/*::facets::" + facetBlob;
             browser.refresh();
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+            chaisePage.navigate(url);
+            chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
         });
 
         it('An error modal window should appear with proper title', function(){
@@ -594,7 +593,7 @@ describe('Error related test cases,', function() {
         describe("For the expired session alert,", function () {
             var testExpiredSession = function (url, done) {
                 browser.ignoreSynchronization = true;
-                browser.get(url).then(function () {
+                chaisePage.navigate(url).then(function () {
                     // manually remove the cookie
                     return browser.manage().deleteCookie('webauthn');
                 }).then(function () {
@@ -622,12 +621,13 @@ describe('Error related test cases,', function() {
                 );
             });
 
-            it ("should be displayed in recordset app", function (done) {
-                testExpiredSession(
-                    browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name,
-                    done
-                );
-            })
+            // TODO uncomment after the alert is added to recordset
+            // it ("should be displayed in recordset app", function (done) {
+            //     testExpiredSession(
+            //         browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name,
+            //         done
+            //     );
+            // });
         });
     }
 });

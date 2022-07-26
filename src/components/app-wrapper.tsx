@@ -133,7 +133,6 @@ const AppWrapperInner = ({
           }
 
           // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
-          // ErrorService.handleException(ermrestError, true);
           dispatchError({ error: ermrestError, isDismissible: true });
         }).finally(function () {
           // remove the spinner

@@ -31,13 +31,14 @@ const ErrorModal = (): JSX.Element | null => {
   const [showSubMessage, setShowSubMessage] = useState(false);
   const cc = ConfigService.chaiseConfig;
 
-  // only show the last thrown error
+  // only show the first thrown error
   const errorWrapper = errors[0];
   if (!errorWrapper) {
     return null;
   }
   const exception = errorWrapper.error;
   const errorStatus = exception.status ? exception.status : 'Terminal Error';
+  const isDismissibleError = (errorWrapper.isDismissible || exception.clickOkToDismiss);
 
   const isUnknownErrorType = !(
     exception instanceof windowRef.ERMrest.ERMrestError ||
@@ -116,6 +117,7 @@ const ErrorModal = (): JSX.Element | null => {
   //     subMessage = (subMessage && !isChrome) ? (subMessage + "\n   " + stackTrace.split("\n").join("\n   ")) : stackTrace;
   // }
 
+
   // --------------- the click action message -------------------//
   let clickActionMessage = exception.errorData?.clickActionMessage;
   if (!isStringAndNotEmpty(clickActionMessage)) {
@@ -125,7 +127,7 @@ const ErrorModal = (): JSX.Element | null => {
       clickActionMessage = MESSAGE_MAP.clickActionMessage.unsupportedFilters;
     } else if (isErmrestErrorNeedReplace(exception)) {
       clickActionMessage = MESSAGE_MAP.clickActionMessage.messageWReplace.replace('@errorStatus', errorStatus);
-    } else {
+    } else if (!isDismissibleError) {
       clickActionMessage = `${MESSAGE_MAP.clickActionMessage.pageRedirect}${pageName}. `;
     }
   }
@@ -141,7 +143,7 @@ const ErrorModal = (): JSX.Element | null => {
       exception instanceof DifferentUserConflictError ||
       exception instanceof windowRef.ERMrest.BatchUnlinkResponse
     ) &&
-    !(errorWrapper.isDismissible || exception.clickOkToDismiss)
+    !(isDismissibleError)
   );
 
   /**
@@ -170,7 +172,7 @@ const ErrorModal = (): JSX.Element | null => {
    *  - batch unlink (NOTE we might want to improve this later by having clickOkToDismiss in ermrestjs)
    */
   const showCloseBtn = (
-    cc.allowErrorDismissal || errorWrapper.isDismissible || exception.clickOkToDismiss ||
+    cc.allowErrorDismissal || isDismissibleError ||
     (exception instanceof windowRef.ERMrest.BatchUnlinkResponse)
   );
 
@@ -215,7 +217,7 @@ const ErrorModal = (): JSX.Element | null => {
       show={true}
       onHide={closeCallback}
       // mark the modal as static if the error cannot be dismissed
-      {... (showCloseBtn && { backdrop: 'static', keyboard: false })}
+      {... (!showCloseBtn && { backdrop: 'static', keyboard: false })}
     >
       <Modal.Header>
         <Modal.Title as='h2'>{errorStatus}</Modal.Title>
