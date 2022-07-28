@@ -447,7 +447,7 @@ html {
 
         &.open-panel {
           flex: 0;
-          flex-basis: unset;
+          flex-basis:  $left-panel-width-lg;
           min-width: 170px;
 
           & + .top-right-panel {
@@ -513,7 +513,7 @@ html {
 
       &.open-panel {
         flex: 0;
-        flex-basis: unset;
+        flex-basis:  $left-panel-width-lg;
         min-width: 170px;
 
         & ~ .main-container {

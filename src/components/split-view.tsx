@@ -1,6 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_split-view.scss';
 import { useRef, useEffect, useState } from 'react';
-import { fireCustomEvent, convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { convertVWToPixel } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 
 type LeftPaneProps = {
   children: (ref: React.RefObject<HTMLDivElement>) => JSX.Element,
@@ -10,15 +11,26 @@ type LeftPaneProps = {
 
 const LeftPane = ({ children, leftWidth, leftPartners }: LeftPaneProps): JSX.Element => {
   const leftRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useIsFirstRender();
 
   useEffect(() => {
+    /**
+     *  The initial width (flex-basis) must be handled by CSS and we're not going
+     *  to set the initial values.
+     *
+     * NOTE: I had to do this because leftPartners are not defined on the initial render,
+     * so we have to delay doing this until all of them are available.
+     * TODO can we improve this?
+     */
+    if (isFirstRender) return;
+
     if (leftRef?.current) {
       // NOTE while this is not needed, I left this in case we might need it later:
       // fireCustomEvent('resizable-width-change', '.split-view', { width: leftWidth });
-      leftRef.current.style.width = `${leftWidth}px`;
+      leftRef.current.style.flexBasis = `${leftWidth}px`;
 
       if (leftPartners) {
-        leftPartners.forEach((el) => el.style.width = `${leftWidth}px`);
+        leftPartners.forEach((el) => el.style.flexBasis = `${leftWidth}px`);
       }
     }
 
