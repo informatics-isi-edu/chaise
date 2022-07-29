@@ -11,14 +11,18 @@ const LoginModal = (): JSX.Element => {
 
   const login = () => {
     // TODO
-    popupLogin(LogActions.LOGIN_LOGIN_MODAL)
+    popupLogin(LogActions.LOGIN_LOGIN_MODAL, loginModal?.onModalCloseSuccess);
   };
 
   const cancel = () => {
-    hideLoginModal();
-    // TODO needs discussion
-    // https://github.com/informatics-isi-edu/chaise/issues/2091#issuecomment-868144407
-    dispatchError({ error: new Error('You cannot proceed without logging in.') })
+    if (loginModal?.onModalClose) {
+      loginModal?.onModalClose();
+    } else {
+      hideLoginModal();
+      // TODO needs discussion
+      // https://github.com/informatics-isi-edu/chaise/issues/2091#issuecomment-868144407
+      dispatchError({ error: new Error('You cannot proceed without logging in.') })
+    }
   };
 
   if (!loginModal) {

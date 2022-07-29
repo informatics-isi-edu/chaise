@@ -6,6 +6,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { DifferentUserConflictError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
+import { LoginModalProps } from '@isrd-isi-edu/chaise/src/providers/error';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -19,9 +20,17 @@ import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
+type GetSessionFunction = (
+  context: string
+) => Promise<Session | null>;
+
+type LogoutFunction = (
+  action: string
+) => void;
+
 export const AuthnContext = createContext<{
-  getSession: Function,
-  logout: Function,
+  getSession: GetSessionFunction,
+  logout: LogoutFunction,
   logoutWithoutRedirect: Function,
   popupLogin: Function,
   refreshLogin: Function,
@@ -43,9 +52,11 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
+  const { hideLoginModal, showLoginModal } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
-  const [sameSessionAsPrevious, setSameSessionAsPrevious] = useState<boolean>(false);
+  // const [sameSessionAsPrevious, setSameSessionAsPrevious] = useState<boolean>(false);
+  let sameSessionAsPrevious = false;
   const _changeCbs: any = {};
   let _counter = 0;
 
@@ -113,6 +124,10 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
   };
 
+  const _isSameSessionAsPrevious = () => {
+    return (prevSession?.client.id === session?.client.id);
+  }
+
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
   //  can become null if getSession is called and the session has timed out or the user logged out
@@ -130,7 +145,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         if (!shouldReloadPageAfterLogin()) {
           // fetches the session of the user that just logged in
           getSession('').then((response: any) => {
-            // if (modalInstance) modalInstance.close();
             alert(`${response.client.full_name} logged in`);
           });
         } else {
@@ -227,27 +241,22 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   // post login callback function
   const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) => {
     if (type.indexOf('modal') !== -1) {
-      if (session) {
-        params.title = MESSAGE_MAP.sessionExpired.title;
-      } else {
-        params.title = MESSAGE_MAP.noSession.title;
-      }
-      let closed = false;
+      const title = session ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
+      const loginModalProps: LoginModalProps = { title: title};
 
       // var cleanupModal = function (message) {
       //   $interval.cancel(intervalId);
       //   $cookies.remove("chaise-" + referrerId, { path: "/" });
-      //   closed = true;
       // }
-      const onModalCloseSuccess = () => {
+
+      loginModalProps.onModalCloseSuccess = () => {
         // cleanupModal("login refreshed");
-        closed = true;
+        hideLoginModal();
         cb();
       };
 
-      const onModalClose = (response: any) => {
+      loginModalProps.onModalClose = (response: any) => {
         // cleanupModal("no login");
-        closed = true;
         if (rejectCb) {
           //  ermrestJS throws error if 'response' is not formatted as an Error
           if (typeof response === 'string') {
@@ -257,21 +266,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         }
       };
 
-      const loginModalProps = { title: ''};
-      // showLoginModal(loginModalProps);
-      // TODO: implement modalUtils
-      // modalInstance = modalUtils.showModal({
-      //   windowClass: "modal-login-instruction",
-      //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/loginDialog.modal.html",
-      //   controller: 'LoginDialogController',
-      //   controllerAs: 'ctrl',
-      //   resolve: {
-      //     params: params
-      //   },
-      //   openedClass: 'modal-login',
-      //   backdrop: 'const',
-      //   keyboard: false
-      // }, onModalCloseSuccess, onModalClose, false);
+      showLoginModal(loginModalProps);
     }
 
     /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
@@ -325,7 +320,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
    *
    * @param  {string=} context undefined or "401"
    */
-  const getSession = (context: string) => {
+  const getSession: GetSessionFunction = (context: string) => {
     const config = {
       skipHTTP401Handling: true,
       headers: {} as any,
@@ -364,9 +359,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
       // keep track of only the first session, so when a timeout occurs, we can compare the sessions
       // when a new session is fetched after timeout, check if the identities are the same
-      if (prevSession) {
-        setSameSessionAsPrevious(prevSession.client.id === response.data.client.id);
-      } else {
+      if (!prevSession) {
         setPrevSession(response.data);
       }
 
@@ -386,7 +379,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     });
   };
 
-  const logout = (action: string) => {
+  const logout: LogoutFunction = (action: string) => {
     const cc = ConfigService.chaiseConfig;
     const logoutURL = cc['logoutURL'] ? cc['logoutURL'] : '/';
 
@@ -528,7 +521,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         modalInstance.dismiss('continue');
         // check if login state resolved
         getSession('').then((response: any) => {
-          if (!response || !sameSessionAsPrevious) {
+          if (!response || !_isSameSessionAsPrevious()) {
             handleDiffUser()
           } else {
             cb();
@@ -553,7 +546,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
     // a session must exist before calling this function
     const validateSessionSubmit = () => {
-      if (!sameSessionAsPrevious) {
+      if (!_isSameSessionAsPrevious()) {
         handleDiffUser();
       } else {
         // we have a session now and it's the same as when the app started
@@ -596,7 +589,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       // addURLLimitAlert,
       // removeURLLimitAlert
     }
-  }, []);
+  }, [session]);
 
   return (
     <AuthnContext.Provider value={providerValue}>

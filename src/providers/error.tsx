@@ -3,8 +3,10 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-type LoginModalProps = {
+export type LoginModalProps = {
   title: string;
+  onModalCloseSuccess?: Function,
+  onModalClose?: Function
 };
 
 interface ChaiseError {

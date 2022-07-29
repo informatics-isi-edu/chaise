@@ -205,7 +205,7 @@ const ChaiseLoginDropdown = ({
           <NavDropdown.Item
             id='logout-link'
             key={index}
-            onClick={() => logout}
+            onClick={() => logout(LogActions.LOGOUT_NAVBAR)}
             dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? renderName(child) : 'Log Out' }}
           />
         )

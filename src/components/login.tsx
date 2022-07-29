@@ -133,6 +133,7 @@ const ChaiseLogin = (): JSX.Element => {
           setReplaceDropdown(newOption.isValid);
         }
 
+        console.log('new login menu, new session')
         setLoggedInMenu(menuConfig);
       }
     }
@@ -177,7 +178,7 @@ const ChaiseLogin = (): JSX.Element => {
     return (
       <>
         <NavDropdown.Item id='profile-link' onClick={handleOpenProfileClick}>My Profile</NavDropdown.Item>
-        <NavDropdown.Item id='logout-link' onClick={() => logout}>Log Out</NavDropdown.Item>
+        <NavDropdown.Item id='logout-link' onClick={() => logout(LogActions.LOGOUT_NAVBAR)}>Log Out</NavDropdown.Item>
       </>
     );
   }
@@ -238,7 +239,7 @@ const ChaiseLogin = (): JSX.Element => {
           return (
             <Nav.Link
               id='logout-link'
-              onClick={() => logout}
+              onClick={() => logout(LogActions.LOGOUT_NAVBAR)}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out' }}
             />
           )
