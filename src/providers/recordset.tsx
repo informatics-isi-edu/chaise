@@ -136,7 +136,7 @@ export const RecordsetContext = createContext<{
    *   - will return false
    * otherwise it will return true.
    */
-  checkReferenceURL: (ref: any) => boolean,
+  checkReferenceURL: (ref: any, showAlert?: boolean) => boolean,
   /**
    * the ref for the addRecordRequests
    * can be used to see if there are any pending create requests
@@ -257,13 +257,26 @@ export default function RecordsetProvider({
   });
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
-   * and see whether we actually want to update it or not.
+   *
+   * if case of facet popup, "false" means:
+   *   - show the url length error
+   * in other cases it means stop changing the selected rows
    */
   const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
     setStateSelectedRows((prevRows: SelectedRow[]) => {
       const res = typeof param === 'function' ? param(prevRows) : param;
-      if (onSelectedRowsChanged && onSelectedRowsChanged(res) === false) {
-        return prevRows;
+      if (onSelectedRowsChanged) {
+        const temp = onSelectedRowsChanged(res);
+        if (config.displayMode === RecordsetDisplayMode.FACET_POPUP) {
+          if (temp === false) {
+            addURLLimitAlert();
+          } else {
+            removeURLLimitAlert();
+          }
+        } else {
+          return prevRows;
+        }
+
       }
       return res;
     });
@@ -294,14 +307,16 @@ export default function RecordsetProvider({
     }, reference.defaultLogInfo)
   };
 
-  const checkReferenceURL = (ref: any): boolean => {
+  const checkReferenceURL = (ref: any, showAlert = true): boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
     if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
 
       $log.warn('url length limit will be reached!');
 
       // show the alert (the function will handle just showing one alert)
-      addURLLimitAlert();
+      if (showAlert) {
+        addURLLimitAlert();
+      }
 
       // TODO I should be able to pass the function from the comp to this provider
       // // scroll to top of the container so users can see the alert
@@ -312,7 +327,9 @@ export default function RecordsetProvider({
     }
 
     // remove the alert if it's present since we don't need it anymore
-    removeURLLimitAlert();
+    if (showAlert) {
+      removeURLLimitAlert();
+    }
     return true;
   };
 

@@ -15,6 +15,7 @@ import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 
 type FacetChoicePickerProps = {
   /**
@@ -63,6 +64,8 @@ const FacetChoicePicker = ({
 }: FacetChoicePickerProps): JSX.Element => {
 
   const isFirstRender = useIsFirstRender();
+
+  const { removeURLLimitAlert  } = useAlert();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
@@ -448,6 +451,9 @@ const FacetChoicePicker = ({
       });
     });
 
+    // if url limitation alert exists, remove it.
+    removeURLLimitAlert();
+
     setRecordsetModalProps({
       initialReference: facetReference,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
@@ -635,7 +641,7 @@ const FacetChoicePicker = ({
       {
         recordsetModalProps &&
         <RecordsetModal
-          modalClassName={facetColumn.isEntityMode ? 'faceting-show-details-popup' : 'scalar-show-details-popup'}
+          modalClassName={`faceting-show-details-popup ${!facetColumn.isEntityMode ? 'scalar-show-details-popup' : ''}`}
           recordsetProps={recordsetModalProps}
           onClose={hideRecordsetModal}
           onSubmit={modalDataChanged(true)}

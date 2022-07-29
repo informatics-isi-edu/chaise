@@ -225,7 +225,7 @@ const RecordsetTable = ({
               placement='right'
               tooltip={'Deselect all rows on this page.'}
             >
-              <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
+              <button className='chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={DeselectAllOnPage}
               >
                 <span className='chaise-btn-icon fa-regular fa-square'></span>
