@@ -2,7 +2,6 @@
 
 import { errorNames, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 import { chaiseDeploymentPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 // TODO eventually we might want to use this type instead of any
@@ -191,8 +190,8 @@ export class UnauthorizedAssetAccess extends ChaiseError {
  */
 export class ForbiddenAssetAccess extends ChaiseError {
 
-  constructor() {
-    const authnRes = AuthnService.session;
+  constructor(sessionInfo: any) {
+    const authnRes = sessionInfo;
     const userName = authnRes?.client.full_name || authnRes?.client.display_name || authnRes?.client.email || authnRes?.client.id;
 
     super(

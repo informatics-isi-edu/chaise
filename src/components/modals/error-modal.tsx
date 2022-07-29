@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import Modal from 'react-bootstrap/Modal';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
@@ -28,6 +28,7 @@ function isErmrestErrorNeedReplace(error: any) {
 
 const ErrorModal = (): JSX.Element | null => {
   const { errors, hideError, logTerminalError } = useError();
+  const { popupLogin, session } = useAuthn();
   const [showSubMessage, setShowSubMessage] = useState(false);
   const cc = ConfigService.chaiseConfig;
 
@@ -57,7 +58,7 @@ const ErrorModal = (): JSX.Element | null => {
 
   // ----------- map error to proper modal properties ------------------//
 
-  const showLogin = !AuthnService.session && !(
+  const showLogin = !session && !(
     exception instanceof DifferentUserConflictError
   );
 
@@ -98,7 +99,7 @@ const ErrorModal = (): JSX.Element | null => {
   /**
    * if user is not logged in add info that they might need to login
    */
-  if (!AuthnService.session) {
+  if (!session) {
     if (exception instanceof NoRecordError || exception instanceof NoRecordRidError) {
       // if no logged in user, change the message
       const messageReplacement = (exception instanceof NoRecordError ? MESSAGE_MAP.noRecordForFilter : MESSAGE_MAP.noRecordForRid);
@@ -203,7 +204,7 @@ const ErrorModal = (): JSX.Element | null => {
   };
 
   const login = () => {
-    AuthnService.popupLogin(LogActions.LOGIN_ERROR_MODAL);
+    popupLogin(LogActions.LOGIN_ERROR_MODAL);
   };
 
   const toggleSubMessage = () => {

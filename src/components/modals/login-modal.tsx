@@ -1,16 +1,17 @@
 import Modal from 'react-bootstrap/Modal';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 
 const LoginModal = (): JSX.Element => {
   const { dispatchError, loginModal, hideLoginModal } = useError();
+  const { popupLogin } = useAuthn();
 
   const login = () => {
     // TODO
-    AuthnService.popupLogin(LogActions.LOGIN_LOGIN_MODAL)
+    popupLogin(LogActions.LOGIN_LOGIN_MODAL)
   };
 
   const cancel = () => {

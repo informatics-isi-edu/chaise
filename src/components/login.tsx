@@ -9,16 +9,18 @@ import ProfileModal from '@isrd-isi-edu/chaise/src/components/profile-modal';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
+// hooks
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 
 // utilities
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { getCatalogId } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, addLogParams, createMenuList,
-  isChaise, isOptionValid, logout,
+  isChaise, isOptionValid,
   onDropdownToggle, onLinkClick, openProfileModal,
   renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
@@ -30,7 +32,7 @@ const ChaiseLogin = (): JSX.Element => {
   const settings = ConfigService.appSettings;
 
   // get the user from the session service (assumption: it's populated by the app wrapper)
-  const authnRes = AuthnService.session;
+  const { logout, popupLogin, session } = useAuthn();
 
   const [displayName, setDisplayName]             = useState('');
   const [loggedInMenu, setLoggedInMenu]           = useState(cc.loggedInMenu);
@@ -48,17 +50,17 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   useEffect(() => {
-    if (authnRes) {
-      const userName = authnRes.client.full_name || authnRes.client.display_name || authnRes.client.email || authnRes.client.id
+    if (session) {
+      const userName = session.client.full_name || session.client.display_name || session.client.email || session.client.id
       setDisplayName(userName);
-      if (authnRes.client.full_name) {
+      if (session.client.full_name) {
         // - some users could have the same full_name for multiple globus identities
         //   having display_name included in tooltip can help differentiate which user is logged in at a glance
         // - display_name should always be defined
         setEnableUserTooltip(true);
         // dropdown isn't open on page load so show
         setShowUserTooltip(true);
-        setUserTooltip(authnRes.client.full_name + '\n' + authnRes.client.display_name);
+        setUserTooltip(session.client.full_name + '\n' + session.client.display_name);
       }
 
       if (loggedInMenu) {
@@ -134,11 +136,11 @@ const ChaiseLogin = (): JSX.Element => {
         setLoggedInMenu(menuConfig);
       }
     }
-  }, []);
+  }, [session]);
 
   // click handlers
   const handleLoginClick = () => {
-    AuthnService.popupLogin(LogActions.LOGIN_NAVBAR);
+    popupLogin(LogActions.LOGIN_NAVBAR);
   };
 
   const handleOpenProfileClick = () => {
@@ -175,7 +177,7 @@ const ChaiseLogin = (): JSX.Element => {
     return (
       <>
         <NavDropdown.Item id='profile-link' onClick={handleOpenProfileClick}>My Profile</NavDropdown.Item>
-        <NavDropdown.Item id='logout-link' onClick={logout}>Log Out</NavDropdown.Item>
+        <NavDropdown.Item id='logout-link' onClick={() => logout}>Log Out</NavDropdown.Item>
       </>
     );
   }
@@ -197,7 +199,7 @@ const ChaiseLogin = (): JSX.Element => {
   }
 
   const renderLoginMenu = () => {
-    if (!authnRes) {
+    if (!session) {
       return (
         <>
           {renderSignupLink()}
@@ -236,7 +238,7 @@ const ChaiseLogin = (): JSX.Element => {
           return (
             <Nav.Link
               id='logout-link'
-              onClick={logout}
+              onClick={() => logout}
               dangerouslySetInnerHTML={{ __html: oneOption.nameMarkdownPattern ? renderName(oneOption) : 'Log Out' }}
             />
           )

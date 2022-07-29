@@ -1,4 +1,5 @@
 import { MouseEvent, MouseEventHandler, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // components
 import NavDropdown from 'react-bootstrap/NavDropdown';
@@ -8,7 +9,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   MenuOption, canEnable, canShow,
-  logout, menuItemClasses, onDropdownToggle,
+  menuItemClasses, onDropdownToggle,
   onLinkClick, renderName
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -23,7 +24,7 @@ interface ChaiseLoginDropdownProps {
    * based on parent's alignment. (eg: if parent alignment is right, child will continue to align
    * right till it reaches end of the screen)
    */
-  alignRight: boolean
+  alignRight?: boolean
 }
 
 // NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax
@@ -31,6 +32,7 @@ interface ChaiseLoginDropdownProps {
 const ChaiseLoginDropdown = ({
   menu, openProfileCb, parentDropdown, alignRight
 }: ChaiseLoginDropdownProps): JSX.Element => {
+  const { logout, session } = useAuthn();
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
   /**
@@ -146,7 +148,7 @@ const ChaiseLoginDropdown = ({
         <Dropdown.Toggle
           as='a'
           variant='dark'
-          className={menuItemClasses(item, true)}
+          className={menuItemClasses(item, session, true)}
           dangerouslySetInnerHTML={{ __html: renderName(item) }}
         />
         <Dropdown.Menu 
@@ -175,12 +177,12 @@ const ChaiseLoginDropdown = ({
     href={item.url}
     target={item.newTab ? '_blank' : '_self'}
     onClick={(event) => handleOnLinkClick(event, item)}
-    className={menuItemClasses(item, true)}
+    className={menuItemClasses(item, session, true)}
     dangerouslySetInnerHTML={{ __html: renderName(item) }}
   />
 
   const renderDropdownOptions = () => menu.map((child: MenuOption, index: number) => {
-    if (!canShow(child) || !child.isValid) return;
+    if (!canShow(child, session) || !child.isValid) return;
 
     switch (child.type) {
       case 'header':
@@ -203,7 +205,7 @@ const ChaiseLoginDropdown = ({
           <NavDropdown.Item
             id='logout-link'
             key={index}
-            onClick={logout}
+            onClick={() => logout}
             dangerouslySetInnerHTML={{ __html: child.nameMarkdownPattern ? renderName(child) : 'Log Out' }}
           />
         )
@@ -213,11 +215,11 @@ const ChaiseLoginDropdown = ({
           return (renderHeader(child, index));
         }
 
-        if ((!child.children && child.url) || !canEnable(child)) {
+        if ((!child.children && child.url) || !canEnable(child, session)) {
           return (renderDropdownMenu(child, index));
         }
 
-        if (child.children && canEnable(child)) {
+        if (child.children && canEnable(child, session)) {
           return (renderDropdownMenu(child, index));
         }
 

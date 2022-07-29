@@ -42,7 +42,7 @@ type ErrorProviderProps = {
  * The whole app should be wrapped in this provider, and then we should
  * use the error hooks for catching or showing errors
  */
-export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Element {
+export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Element {
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
   const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);

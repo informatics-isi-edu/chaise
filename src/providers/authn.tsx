@@ -1,41 +1,57 @@
-import axios from 'axios';
+// hooks
+import { createContext, useMemo, useState } from 'react';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
-import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+// models
+import { DifferentUserConflictError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
+
+// utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 
-export default class AuthnService {
+export const AuthnContext = createContext<{
+  getSession: Function,
+  logout: Function,
+  logoutWithoutRedirect: Function,
+  popupLogin: Function,
+  refreshLogin: Function,
+  session: Session | null,
+  validateSessionBeforeMutation: Function
+} |
+  // NOTE: since it can be null, to make sure the context is used properly with
+  //       a provider, the useRecordset hook will throw an error if it's null.
+  null>(null);
+
+type AuthnProviderProps = {
+  children: React.ReactNode,
+}
+
+export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Element {
   // authn API no longer communicates through ermrest, removing the need to check for ermrest location
-  static serviceURL: string = windowRef.location.origin;
+  const serviceURL: string = windowRef.location.origin;
+  const LOCAL_STORAGE_KEY = 'session'; // name of object session information is stored under
+  const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
+  const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
-  static LOCAL_STORAGE_KEY = 'session'; // name of object session information is stored under
+  const [session, setSession] = useState<Session | null>(null); // current session object
+  const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
+  const [sameSessionAsPrevious, setSameSessionAsPrevious] = useState<boolean>(false);
+  const _changeCbs: any = {};
+  let _counter = 0;
 
-  static PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
-
-  static PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
-
-  // TODO: how to make these as private variables and private functions
-  private static _session: Session | null = null; // current session object
-
-  private static _prevSession: any | null = null; // previous session object
-
-  private static _sameSessionAsPrevious = false;
-
-  private static _changeCbs: any = {};
-
-  private static _counter = 0;
-
-  private static _executeListeners = function () {
-    for (const k in AuthnService._changeCbs) {
-      AuthnService._changeCbs[k]();
+  const _executeListeners = () => {
+    for (const k in _changeCbs) {
+      _changeCbs[k]();
     }
   };
 
@@ -45,79 +61,75 @@ export default class AuthnService {
    */
 
   // returns data stored in loacal storage for `keyName`
-  private static _getKeyFromStorage = function (keyName: string) {
-    return StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY)[keyName];
+  const _getKeyFromStorage = (keyName: string) => {
+    return StorageService.getStorage(LOCAL_STORAGE_KEY)[keyName];
   };
 
   // create value in storage with `keyName` and `value`
-  private static _setKeyInStorage = function (keyName: string, value: string | boolean) {
+  const _setKeyInStorage = (keyName: string, value: string | boolean) => {
     const data = {} as any;
 
     data[keyName] = value;
 
-    StorageService.updateStorage(AuthnService.LOCAL_STORAGE_KEY, data);
+    StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
   };
 
   // verifies value exists for `keyName`
-  private static _keyExistsInStorage = function (keyName: string) {
-    const sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
+  const _keyExistsInStorage = (keyName: string) => {
+    const sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
     return (sessionStorage && sessionStorage[keyName]);
   };
 
   // removes the key/value pair at `keyName`
-  private static _removeKeyFromStorage = function (keyName: string) {
-    if (AuthnService._keyExistsInStorage(keyName)) {
-      StorageService.deleteStorageValue(AuthnService.LOCAL_STORAGE_KEY, keyName);
+  const _removeKeyFromStorage = (keyName: string) => {
+    if (_keyExistsInStorage(keyName)) {
+      StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
     }
   };
 
   // creates an expiration token with `keyName`
-  private static _createToken = function (keyName: string) {
+  const _createToken = (keyName: string) => {
     const data = {} as any;
     const hourFromNow = new Date();
     hourFromNow.setHours(hourFromNow.getHours() + 1);
 
     data[keyName] = hourFromNow.getTime();
 
-    StorageService.updateStorage(AuthnService.LOCAL_STORAGE_KEY, data);
+    StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
   };
 
   // checks if the expiration token with `keyName` has expired
-  private static _expiredToken = function (keyName: string) {
-    const sessionStorage = StorageService.getStorage(AuthnService.LOCAL_STORAGE_KEY);
+  const _expiredToken = (keyName: string) => {
+    const sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
 
     return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
   };
 
   // extends the expiration token with `keyName` if it hasn't expired
-  private static _extendToken = function (keyName: string) {
-    if (AuthnService._keyExistsInStorage(keyName) && !AuthnService._expiredToken(keyName)) {
-      AuthnService._createToken(keyName);
+  const _extendToken = (keyName: string) => {
+    if (_keyExistsInStorage(keyName) && !_expiredToken(keyName)) {
+      _createToken(keyName);
     }
   };
 
-  static get session() {
-    return AuthnService._session;
-  }
-
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
-  // _session can become null if getSession is called and the session has timed out or the user logged out
-  static shouldReloadPageAfterLogin = function () {
-    if (AuthnService._session === null && AuthnService._prevSession === null) return true;
+  //  can become null if getSession is called and the session has timed out or the user logged out
+  const shouldReloadPageAfterLogin = () => {
+    if (session === null && prevSession === null) return true;
     return false;
   };
 
   /**
    * opens a window dialog for logging in
    */
-  static popupLogin = function (logAction: string | null, postLoginCB?: Function) {
+  const popupLogin = (logAction: string | null, postLoginCB?: Function) => {
     if (!postLoginCB) {
-      postLoginCB = function () {
-        if (!AuthnService.shouldReloadPageAfterLogin()) {
+      postLoginCB = () => {
+        if (!shouldReloadPageAfterLogin()) {
           // fetches the session of the user that just logged in
-          AuthnService.getSession('').then((response: any) => {
+          getSession('').then((response: any) => {
             // if (modalInstance) modalInstance.close();
             alert(`${response.client.full_name} logged in`);
           });
@@ -143,16 +155,16 @@ export default class AuthnService {
     // focus on the opened window
     win?.focus();
 
-    AuthnService.logInHelper(AuthnService.loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
+    logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };
 
-  static logInHelper = function (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) {
+  const logInHelper = (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) => {
     const referrerId = (new Date().getTime());
 
     const cc = ConfigService.chaiseConfig;
 
     const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
-    const url = `${AuthnService.serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
+    const url = `${serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
     const config: any = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -211,11 +223,11 @@ export default class AuthnService {
       throw ConfigService.ERMrest.responseToError(error);
     });
   };
-
+   
   // post login callback function
-  static loginWindowCb = function (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) {
+  const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) => {
     if (type.indexOf('modal') !== -1) {
-      if (AuthnService._session) {
+      if (session) {
         params.title = MESSAGE_MAP.sessionExpired.title;
       } else {
         params.title = MESSAGE_MAP.noSession.title;
@@ -227,13 +239,13 @@ export default class AuthnService {
       //   $cookies.remove("chaise-" + referrerId, { path: "/" });
       //   closed = true;
       // }
-      const onModalCloseSuccess = function () {
+      const onModalCloseSuccess = () => {
         // cleanupModal("login refreshed");
         closed = true;
         cb();
       };
 
-      const onModalClose = function (response: any) {
+      const onModalClose = (response: any) => {
         // cleanupModal("no login");
         closed = true;
         if (rejectCb) {
@@ -245,6 +257,8 @@ export default class AuthnService {
         }
       };
 
+      const loginModalProps = { title: ''};
+      // showLoginModal(loginModalProps);
       // TODO: implement modalUtils
       // modalInstance = modalUtils.showModal({
       //   windowClass: "modal-login-instruction",
@@ -255,7 +269,7 @@ export default class AuthnService {
       //     params: params
       //   },
       //   openedClass: 'modal-login',
-      //   backdrop: 'static',
+      //   backdrop: 'const',
       //   keyboard: false
       // }, onModalCloseSuccess, onModalClose, false);
     }
@@ -287,8 +301,8 @@ export default class AuthnService {
       window.addEventListener('message', (args) => {
         if (args && args.data && (typeof args.data === 'string')) {
           console.log('do local storage things');
-          AuthnService._setKeyInStorage(AuthnService.PREVIOUS_SESSION_KEY, true);
-          AuthnService._removeKeyFromStorage(AuthnService.PROMPT_EXPIRATION_KEY);
+          _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
+          _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
           const obj = queryStringToJSON(args.data);
           if (obj.referrerid == referrerId && (typeof cb === 'function')) {
             if (type.indexOf('modal') !== -1) {
@@ -306,12 +320,12 @@ export default class AuthnService {
 
   /**
    * Will return a promise that is resolved with the session.
-   * It will also call the _executeListeners() functions and sets the _session.
+   * It will also call the _executeListeners() functions and sets the session.
    * If we couldn't fetch the session, it will resolve with `null`.
    *
    * @param  {string=} context undefined or "401"
    */
-  static getSession = function (context: string) {
+  const getSession = (context: string) => {
     const config = {
       skipHTTP401Handling: true,
       headers: {} as any,
@@ -333,7 +347,7 @@ export default class AuthnService {
      *      - if expired, login flow
      *      - if not expired, use local storage session
      *    - if NOT match, shouldn't happen unless cookie in browser is updated without chaise
-     *  - if match user had a session on this page, make sure _session.expires is not expired
+     *  - if match user had a session on this page, make sure session.expires is not expired
      *    - if not expired, TODO leasing idea
      *    - if expired, login timeout warning
      *
@@ -342,41 +356,41 @@ export default class AuthnService {
      *  - if expired
      * */
 
-    return ConfigService.http.get(`${AuthnService.serviceURL}/authn/session`, config).then((response: any) => {
-      if (context === '401' && AuthnService.shouldReloadPageAfterLogin()) {
+    return ConfigService.http.get(`${serviceURL}/authn/session`, config).then((response: any) => {
+      if (context === '401' && shouldReloadPageAfterLogin()) {
         // window.location.reload();
         return response.data;
       }
 
       // keep track of only the first session, so when a timeout occurs, we can compare the sessions
       // when a new session is fetched after timeout, check if the identities are the same
-      if (AuthnService._prevSession) {
-        AuthnService._sameSessionAsPrevious = AuthnService._prevSession.client.id == response.data.client.id;
+      if (prevSession) {
+        setSameSessionAsPrevious(prevSession.client.id === response.data.client.id);
       } else {
-        AuthnService._prevSession = response.data;
+        setPrevSession(response.data);
       }
 
-      if (!AuthnService._session) {
-        // only update _session if no session is set
-        AuthnService._setSession(response.data);
+      if (!session) {
+        // only update session if no session is set
+        _setSession(response.data);
       }
 
-      AuthnService._executeListeners();
-      return AuthnService._session;
+      _executeListeners();
+      return response.data;
     }).catch((err: any) => {
       // $log.warn(ERMrest.responseToError(err));
 
-      AuthnService._setSession(null);
-      AuthnService._executeListeners();
-      return AuthnService._session;
+      _setSession(null);
+      _executeListeners();
+      return null;
     });
   };
 
-  static logout = (action: string) => {
+  const logout = (action: string) => {
     const cc = ConfigService.chaiseConfig;
     const logoutURL = cc['logoutURL'] ? cc['logoutURL'] : '/';
 
-    let url = AuthnService.serviceURL + '/authn/session';
+    let url = serviceURL + '/authn/session';
     url += '?logout_url=' + fixedEncodeURIComponent(logoutURL);
 
     let config: any = {
@@ -388,16 +402,16 @@ export default class AuthnService {
       action: LogService.getActionString(action, '', '')
     }
 
-    ConfigService.http.delete(url, config).then(function (response: any) {
-      StorageService.deleteStorageNamespace(AuthnService.LOCAL_STORAGE_KEY);
+    ConfigService.http.delete(url, config).then((response: any) => {
+      StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
       windowRef.location = response.data.logout_url;
-    }, function (error: any) {
+    }, (error: any) => {
       // if the logout fails for some reason, send the user to the logout url as defined above
       windowRef.location = logoutURL;
     });
   }
 
-  static logoutWithoutRedirect = (action: string) => {
+  const logoutWithoutRedirect = (action: string) => {
     const logoutConfig: any = {
       skipHTTP401Handling: true,
       headers: {}
@@ -408,8 +422,8 @@ export default class AuthnService {
     };
 
     // logout without redirecting the user
-    ConfigService.http.delete(AuthnService.serviceURL + '/authn/session/', logoutConfig).then((response: any) => {
-      StorageService.deleteStorageNamespace(AuthnService.LOCAL_STORAGE_KEY);
+    ConfigService.http.delete(serviceURL + '/authn/session/', logoutConfig).then((response: any) => {
+      StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
 
     }).catch((error: any) => {
       // this is a 404 error when session doesn't exist and the user tries to logout
@@ -418,28 +432,11 @@ export default class AuthnService {
     });
   }
 
-  //   // groupArray should be the array of globus group
-  static isGroupIncluded = (groupArray: string[]) => {
-    // if no array, assume it wasn't defined and default hasn't been set yet
-    if (!groupArray || groupArray.indexOf('*') > -1) return true; // if "*" acl, show the option
-    if (!AuthnService._session) return false; // no "*" exists and no session, hide the option
-
-    for (let i = 0; i < groupArray.length; i++) {
-      let attribute = groupArray[i];
-
-      const match = AuthnService._session.attributes.some((attr: any) => attr.id === attribute);
-
-      if (match) return true;
-    }
-
-    return false;
-  };
-
-  static refreshLogin = (action: string) => {
+  const refreshLogin = (action: string) => {
     // get referrerid from browser url
     const referrerId = queryStringToJSON(window.location.search).referrerid,
       preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
-      redirectUrl = AuthnService.serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
+      redirectUrl = serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
 
     const loginConfig: any = {
       headers: {
@@ -469,15 +466,15 @@ export default class AuthnService {
 
   }
 
-  private static _setSession(inp: any) {
+  const _setSession = (inp: any) => {
     if (!inp) {
-      AuthnService._session = null;
+      setSession(null);
       return;
     }
 
     // decorate the session
     const attributes: any[] = [];
-    inp.attributes.forEach(function (attr: any) {
+    inp.attributes.forEach((attr: any) => {
       // NOTE: the current assumption is that everything in session.attributes is a globus group or an identity
       // a globus group if:
       //   - display_name is defined
@@ -497,7 +494,7 @@ export default class AuthnService {
 
       let matchIdx = null;
       // determine if 'attr' exists in $session.attributes
-      matchIdx = attributes.findIndex(function (targetAttr) {
+      matchIdx = attributes.findIndex((targetAttr) => {
         return targetAttr.id === attr.id;
       });
 
@@ -510,7 +507,7 @@ export default class AuthnService {
     });
 
     // sort the newly created atrtibutes array by display_name
-    attributes.sort(function (a, b) {
+    attributes.sort((a, b) => {
       if (a.display_name && b.display_name) return a.display_name.localeCompare(b.display_name);
     });
 
@@ -519,9 +516,94 @@ export default class AuthnService {
     // TODO we have to ensure that the given input follows the same type..
     // so the app doesn't blow up
     // (if authn backend service changes its response, chaise should still work)
-    AuthnService._session = inp;
+    setSession(inp)
   }
-} // end class
+
+  // Makes a request to fetch the most recent session from the server
+  // verifies if that is the same as when the page loaded before calling `cb`
+  const validateSessionBeforeMutation = (cb: any) => {
+    const handleDiffUser = () => {
+      // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
+      const checkSession = (modalInstance: any) => {
+        modalInstance.dismiss('continue');
+        // check if login state resolved
+        getSession('').then((response: any) => {
+          if (!response || !sameSessionAsPrevious) {
+            handleDiffUser()
+          } else {
+            cb();
+          }
+        });
+      }
+
+      let errorCB = checkSession;
+
+      if (!session) {
+        // for continuing in the modal if there is a user
+        errorCB = (modalInstance) => {
+          popupLogin(LogActions.SWITCH_USER_ACCOUNTS_LOGIN, () => {
+            checkSession(modalInstance);
+          });
+        }
+      }
+
+      throw new DifferentUserConflictError(session, prevSession, errorCB); // cannot dismiss
+    }
+
+    // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
+    // a session must exist before calling this function
+    const validateSessionSubmit = () => {
+      if (!sameSessionAsPrevious) {
+        handleDiffUser();
+      } else {
+        // we have a session now and it's the same as when the app started
+        cb();
+      }
+    }
+
+    getSession('').then((response: any) => {
+      if (!response) {
+        const onSuccess = () => {
+          validateSessionSubmit();
+        }
+
+        const onError = (err: any) => {
+          // NOTE: user didn't login, what's the error ?
+          // same error message as duplicate user except "anon"
+          handleDiffUser();
+        }
+
+        // should be modal login
+        logInHelper(loginWindowCb, '', onSuccess, 'modal', onError, LogActions.SWITCH_USER_ACCOUNTS_LOGIN);
+      } else {
+        validateSessionSubmit();
+      }
+    });
+  };
+
+  const providerValue = useMemo(() => {
+    return {
+      getSession,
+      logout,
+      logoutWithoutRedirect,
+      popupLogin,
+      refreshLogin,
+      session,
+      validateSessionBeforeMutation
+      // alerts,
+      // addAlert,
+      // removeAlert,
+      // addURLLimitAlert,
+      // removeURLLimitAlert
+    }
+  }, []);
+
+  return (
+    <AuthnContext.Provider value={providerValue}>
+      {children}
+    </AuthnContext.Provider>
+  )
+} // end provider
 
 // // variable so the modal can be passed to another function outside of this scope to close it when appropriate
 // var modalInstance = null;
@@ -542,7 +624,7 @@ export default class AuthnService {
 //     }
 //     return ConfigUtils.getHTTPService().get(serviceURL + "/authn/session", config).then(function (response) {
 //       if (!_session) {
-//         // only update _session if no session is set
+//         // only update session if no session is set
 //         _session = response.data;
 //       }
 //       return _session;
@@ -551,68 +633,6 @@ export default class AuthnService {
 
 //       _session = null;
 //       return _session;
-//     });
-//   },
-
-//   // Makes a request to fetch the most recent session from the server
-//   // verifies if that is the same as when the page loaded before calling `cb`
-//   validateSessionBeforeMutation: function (cb) {
-//     var handleDiffUser = function () {
-//       // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
-//       var checkSession = function (modalInstance) {
-//         modalInstance.dismiss("continue");
-//         // check if login state resolved
-//         _getSession().then(function (session) {
-//           if (!session || !_sameSessionAsPrevious) {
-//             handleDiffUser()
-//           } else {
-//             cb();
-//           }
-//         });
-//       }
-
-//       var errorCB = checkSession;
-
-//       if (!_session) {
-//         // for continuing in the modal if there is a user
-//         errorCB = function (modalInstance) {
-//           popupLogin(logService.logActions.SWITCH_USER_ACCOUNTS_LOGIN, function () {
-//             checkSession(modalInstance);
-//           });
-//         }
-//       }
-
-//       throw new Errors.DifferentUserConflictError(_session, _prevSession, errorCB); // cannot dismiss
-//     }
-
-//     // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
-//     // a session must exist before calling this function
-//     var validateSessionSubmit = function () {
-//       if (!_sameSessionAsPrevious) {
-//         handleDiffUser();
-//       } else {
-//         // we have a session now and it's the same as when the app started
-//         cb();
-//       }
-//     }
-
-//     _getSession().then(function (session) {
-//       if (!session) {
-//         var onSuccess = function () {
-//           validateSessionSubmit();
-//         }
-
-//         var onError = function (err) {
-//           // NOTE: user didn't login, what's the error ?
-//           // same error message as duplicate user except "anon"
-//           handleDiffUser();
-//         }
-
-//         // should be modal login
-//         logInHelper(loginWindowCb, "", onSuccess, 'modal', onError, logService.logActions.SWITCH_USER_ACCOUNTS_LOGIN);
-//       } else {
-//         validateSessionSubmit();
-//       }
 //     });
 //   },
 
