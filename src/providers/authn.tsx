@@ -28,13 +28,19 @@ type LogoutFunction = (
   action: string
 ) => void;
 
+// TODO function types
+
 export const AuthnContext = createContext<{
   getSession: GetSessionFunction,
+  isSameSessionAsPrevious: Function,
+  loginInAModal: Function,
   logout: LogoutFunction,
   logoutWithoutRedirect: Function,
   popupLogin: Function,
+  prevSession: Session | null,
   refreshLogin: Function,
   session: Session | null,
+  shouldReloadPageAfterLogin: Function,
   validateSessionBeforeMutation: Function
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
@@ -124,15 +130,16 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
   };
 
-  const _isSameSessionAsPrevious = (serverSession: any) => {
+  const isSameSessionAsPrevious = (serverSession: any) => {
     return (prevSession?.client.id === serverSession?.client.id);
   }
 
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
   //  can become null if getSession is called and the session has timed out or the user logged out
-  const shouldReloadPageAfterLogin = () => {
-    if (session === null && prevSession === null) return true;
+  const shouldReloadPageAfterLogin = (serverSession: any) => {
+    // TODO: make sure this works how we expect with state variables
+    if (serverSession === null && prevSession === null) return true;
     return false;
   };
 
@@ -142,14 +149,15 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const popupLogin = (logAction: string | null, postLoginCB?: Function) => {
     if (!postLoginCB) {
       postLoginCB = () => {
-        if (!shouldReloadPageAfterLogin()) {
-          // fetches the session of the user that just logged in
-          getSession('').then((response: any) => {
+        // fetches the session of the user that just logged in
+        getSession('').then((response: any) => {
+          // TODO: make sure this works how we expect with state variables
+          if (!shouldReloadPageAfterLogin(response)) {
             alert(`${response.client.full_name} logged in`);
-          });
-        } else {
-          windowRef.location.reload();
-        }
+          } else {
+            windowRef.location.reload();
+          }
+        });
       };
     }
 
@@ -175,12 +183,12 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   // NOTE: serverSession attached so it can be passed back to callbacks for comparisons since functions execute synchronously
   //       and `session` state variable updates asynchronously sometime during or after these functions are executing
   const logInHelper = (
-    logInTypeCb: Function, 
-    win: any, 
-    cb: Function, 
-    type: string, 
-    rejectCb: Function | null, 
-    logAction: string | null, 
+    logInTypeCb: Function,
+    win: any,
+    cb: Function,
+    type: string,
+    rejectCb: Function | null,
+    logAction: string | null,
     serverSession?: Session | null
   ) => {
     const referrerId = (new Date().getTime());
@@ -247,12 +255,12 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       throw ConfigService.ERMrest.responseToError(error);
     });
   };
-   
+
   // post login callback function
   const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null, serverSession?: Session | null) => {
     if (type.indexOf('modal') !== -1) {
       const title = serverSession ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
-      const loginModalProps: LoginModalProps = { title: title};
+      const loginModalProps: LoginModalProps = { title: title };
 
       // var cleanupModal = function (message) {
       //   $interval.cancel(intervalId);
@@ -365,7 +373,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
      * */
 
     return ConfigService.http.get(`${serviceURL}/authn/session`, config).then((response: any) => {
-      if (context === '401' && shouldReloadPageAfterLogin()) {
+      if (context === '401' && shouldReloadPageAfterLogin(response)) {
         // window.location.reload();
         return response.data;
       }
@@ -533,7 +541,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       const checkSession = () => {
         // check if login state resolved
         getSession('').then((response: any) => {
-          if (!response || !_isSameSessionAsPrevious(response)) {
+          if (!response || !isSameSessionAsPrevious(response)) {
             handleDiffUser(response)
           } else {
             cb();
@@ -558,7 +566,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
     // a session must exist before calling this function
     const validateSessionSubmit = (serverSession: any) => {
-      if (!_isSameSessionAsPrevious(serverSession)) {
+      if (!isSameSessionAsPrevious(serverSession)) {
         handleDiffUser(serverSession);
       } else {
         // we have a session now and it's the same as when the app started
@@ -586,20 +594,31 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     });
   };
 
+  /**
+   * TODO technically this function should even ask for preauthn in logInHelper
+   * This function opens a modal dialog which has a link for login
+   * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
+   * that function uses the embedded `reloadCb` as the callback for the actual login window closing.
+   * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
+   * @param {Function} notifyErmrestCB - runs after the login process has been complete
+   */
+  const loginInAModal = (notifyErmrestCB: Function, notifyErmrestRejectCB: Function, logAction: string) => {
+    logInHelper(loginWindowCb, '', notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
+  }
+
   const providerValue = useMemo(() => {
     return {
       getSession,
+      isSameSessionAsPrevious,
+      loginInAModal,
       logout,
       logoutWithoutRedirect,
       popupLogin,
+      prevSession,
       refreshLogin,
       session,
+      shouldReloadPageAfterLogin,
       validateSessionBeforeMutation
-      // alerts,
-      // addAlert,
-      // removeAlert,
-      // addURLLimitAlert,
-      // removeURLLimitAlert
     }
   }, [session]);
 
@@ -609,9 +628,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     </AuthnContext.Provider>
   )
 } // end provider
-
-// // variable so the modal can be passed to another function outside of this scope to close it when appropriate
-// var modalInstance = null;
 
 // return {
 
@@ -641,20 +657,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 //     });
 //   },
 
-//   getSessionValue: function () {
-//     return _session;
-//   },
-
-//   getPrevSessionValue: function () {
-//     return _prevSession;
-//   },
-
-//   isSameSessionAsPrevious: function () {
-//     return _sameSessionAsPrevious;
-//   },
-
-//   shouldReloadPageAfterLogin: shouldReloadPageAfterLogin,
-
 //   // if there's a previous login token AND
 //   // the prompt expiration token does not exist OR it has expired
 //   showPreviousSessionAlert: function () {
@@ -681,18 +683,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
 //   extendPromptExpirationToken: function () {
 //     _extendToken(PROMPT_EXPIRATION_KEY);
-//   },
-
-//   /**
-//    * TODO technically this function should even ask for preauthn in logInHelper
-//    * This function opens a modal dialog which has a link for login
-//    * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
-//    * that function uses the embedded `reloadCb` as the callback for the actual login window closing.
-//    * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
-//    * @param {Function} notifyErmrestCB - runs after the login process has been complete
-//    */
-//   loginInAModal: function (notifyErmrestCB, notifyErmrestRejectCB, logAction) {
-//     logInHelper(loginWindowCb, "", notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
 //   },
 // }
 //     }])

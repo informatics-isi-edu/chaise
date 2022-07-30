@@ -1,7 +1,10 @@
 import { createContext, useMemo, useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn'
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
+import { DifferentUserConflictError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 export type LoginModalProps = {
   title: string;
@@ -45,6 +48,8 @@ type ErrorProviderProps = {
  * use the error hooks for catching or showing errors
  */
 export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Element {
+  // const { isSameSessionAsPrevious, loginInAModal, prevSession, session, shouldReloadPageAfterLogin } = useAuthn();
+
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
   const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);
@@ -75,15 +80,15 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
     // NOTE this is for 401 errors that are manually thrown
     //      401 errors that are thrown from ermrestjs are handled by setting the 401Handler
     if (payload.error instanceof windowRef.ERMrest.UnauthorizedError) {
-      // TODO 401 handling
-      // Unauthorized (needs to login)
-      // Session.loginInAModal(function () {
-      //   if (Session.shouldReloadPageAfterLogin()) {
-      //     window.location.reload();
-      //   } else if (!Session.isSameSessionAsPrevious()) {
-      //     handleException(new Errors.DifferentUserConflictError(Session.getSessionValue(), Session.getPrevSessionValue()), false);
-      //   }
-      // });
+    //   // TODO 401 handling
+    //   // Unauthorized (needs to login)
+    //   loginInAModal(function (response: any) {
+    //     if (shouldReloadPageAfterLogin(response)) {
+    //       window.location.reload();
+    //     } else if (!isSameSessionAsPrevious(response)) {
+    //       dispatchError({ error: new DifferentUserConflictError(session, prevSession) });
+    //     }
+    //   });
       return;
     }
 
