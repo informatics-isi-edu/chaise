@@ -52,7 +52,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
-  const { hideLoginModal, showLoginModal } = useError();
+  const { dispatchError, hideLoginModal, showLoginModal } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
   // const [sameSessionAsPrevious, setSameSessionAsPrevious] = useState<boolean>(false);
@@ -124,8 +124,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
   };
 
-  const _isSameSessionAsPrevious = () => {
-    return (prevSession?.client.id === session?.client.id);
+  const _isSameSessionAsPrevious = (serverSession: any) => {
+    return (prevSession?.client.id === serverSession?.client.id);
   }
 
   // Checks for a session or previous session being set, if neither allow the page to reload
@@ -172,7 +172,17 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };
 
-  const logInHelper = (logInTypeCb: Function, win: any, cb: Function, type: string, rejectCb: Function | null, logAction: string | null) => {
+  // NOTE: serverSession attached so it can be passed back to callbacks for comparisons since functions execute synchronously
+  //       and `session` state variable updates asynchronously sometime during or after these functions are executing
+  const logInHelper = (
+    logInTypeCb: Function, 
+    win: any, 
+    cb: Function, 
+    type: string, 
+    rejectCb: Function | null, 
+    logAction: string | null, 
+    serverSession?: Session | null
+  ) => {
     const referrerId = (new Date().getTime());
 
     const cc = ConfigService.chaiseConfig;
@@ -232,16 +242,16 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       if (win) {
         win.location = params.login_url;
       }
-      logInTypeCb(params, referrerId, cb, type, rejectCb);
+      logInTypeCb(params, referrerId, cb, type, rejectCb, serverSession);
     }, (error: any) => {
       throw ConfigService.ERMrest.responseToError(error);
     });
   };
    
   // post login callback function
-  const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null) => {
+  const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null, serverSession?: Session | null) => {
     if (type.indexOf('modal') !== -1) {
-      const title = session ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
+      const title = serverSession ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
       const loginModalProps: LoginModalProps = { title: title};
 
       // var cleanupModal = function (message) {
@@ -251,12 +261,15 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
       loginModalProps.onModalCloseSuccess = () => {
         // cleanupModal("login refreshed");
-        hideLoginModal();
-        cb();
+        getSession('').then((response: any) => {
+          hideLoginModal();
+          cb(response);
+        });
       };
 
       loginModalProps.onModalClose = (response: any) => {
         // cleanupModal("no login");
+        hideLoginModal();
         if (rejectCb) {
           //  ermrestJS throws error if 'response' is not formatted as an Error
           if (typeof response === 'string') {
@@ -515,14 +528,13 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   // Makes a request to fetch the most recent session from the server
   // verifies if that is the same as when the page loaded before calling `cb`
   const validateSessionBeforeMutation = (cb: any) => {
-    const handleDiffUser = () => {
+    const handleDiffUser = (serverSession: any) => {
       // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
-      const checkSession = (modalInstance: any) => {
-        modalInstance.dismiss('continue');
+      const checkSession = () => {
         // check if login state resolved
         getSession('').then((response: any) => {
-          if (!response || !_isSameSessionAsPrevious()) {
-            handleDiffUser()
+          if (!response || !_isSameSessionAsPrevious(response)) {
+            handleDiffUser(response)
           } else {
             cb();
           }
@@ -531,23 +543,23 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
       let errorCB = checkSession;
 
-      if (!session) {
+      if (!serverSession) {
         // for continuing in the modal if there is a user
-        errorCB = (modalInstance) => {
+        errorCB = () => {
           popupLogin(LogActions.SWITCH_USER_ACCOUNTS_LOGIN, () => {
-            checkSession(modalInstance);
+            checkSession();
           });
         }
       }
 
-      throw new DifferentUserConflictError(session, prevSession, errorCB); // cannot dismiss
+      dispatchError({ error: new DifferentUserConflictError(serverSession, prevSession, errorCB) });
     }
 
     // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
     // a session must exist before calling this function
-    const validateSessionSubmit = () => {
-      if (!_isSameSessionAsPrevious()) {
-        handleDiffUser();
+    const validateSessionSubmit = (serverSession: any) => {
+      if (!_isSameSessionAsPrevious(serverSession)) {
+        handleDiffUser(serverSession);
       } else {
         // we have a session now and it's the same as when the app started
         cb();
@@ -556,20 +568,20 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
     getSession('').then((response: any) => {
       if (!response) {
-        const onSuccess = () => {
-          validateSessionSubmit();
+        const onSuccess = (serverSession: any) => {
+          validateSessionSubmit(serverSession);
         }
 
         const onError = (err: any) => {
           // NOTE: user didn't login, what's the error ?
           // same error message as duplicate user except "anon"
-          handleDiffUser();
+          handleDiffUser(response);
         }
 
         // should be modal login
-        logInHelper(loginWindowCb, '', onSuccess, 'modal', onError, LogActions.SWITCH_USER_ACCOUNTS_LOGIN);
+        logInHelper(loginWindowCb, '', onSuccess, 'modal', onError, LogActions.SWITCH_USER_ACCOUNTS_LOGIN, response);
       } else {
-        validateSessionSubmit();
+        validateSessionSubmit(response);
       }
     });
   };

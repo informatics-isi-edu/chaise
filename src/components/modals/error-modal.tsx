@@ -163,7 +163,7 @@ const ErrorModal = (): JSX.Element | null => {
   /**
    * whether we should show the continue button or not.
    */
-  const showContinueBtn = (typeof exception.contineBtnText === 'string' && typeof exception.errorData?.continueCB === 'function');
+  const showContinueBtn = (typeof exception.errorData?.continueBtnText === 'string' && typeof exception.errorData?.continueCB === 'function');
 
   /**
    * show close button based on:
@@ -283,7 +283,7 @@ const ErrorModal = (): JSX.Element | null => {
               type='button' onClick={() => continueCallback()}
               className='chaise-btn chaise-btn-secondary footer-continue-btn' id='error-continue-button'
             >
-              <span>{exception.contineBtnText}</span>
+              <span>{exception.errorData?.continueBtnText}</span>
             </button>
           </ChaiseTooltip>
         }

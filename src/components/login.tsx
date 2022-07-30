@@ -133,7 +133,6 @@ const ChaiseLogin = (): JSX.Element => {
           setReplaceDropdown(newOption.isValid);
         }
 
-        console.log('new login menu, new session')
         setLoggedInMenu(menuConfig);
       }
     }
