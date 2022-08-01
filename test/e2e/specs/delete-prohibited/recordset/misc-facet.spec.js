@@ -1,4 +1,3 @@
-const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
@@ -887,7 +886,7 @@ describe("Other facet features, ", function() {
             }, browser.params.defaultTimeout);
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
 
-            chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click().then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                 // wait for facet checkboxes to load
@@ -900,10 +899,15 @@ describe("Other facet features, ", function() {
                 // wait for list to be fully visible
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getFacetOptions(idx);
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
             }).then(function (opts) {
-                opts.forEach(function (option, idx) {
-                    expect(option.getText()).toEqual(customFilterParams.options[idx], "options missmatch.");
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFilterParams.options[i], `options missmatch, index=${i}`);
                 });
 
                 // select a new facet
@@ -926,36 +930,39 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        // TODO: facet doesn't resize to show options 8, 9, 10
-        // it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
-        //     expect(chaisePage.recordsetPage.getClearCustomFilters().isDisplayed()).toBeTruthy("`Clear Custom Filters` is not visible.");
+        it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
+            expect(chaisePage.recordsetPage.getClearCustomFilters().isDisplayed()).toBeTruthy("`Clear Custom Filters` is not visible.");
 
-        //     chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
-        //         chaisePage.waitForElementInverse(element(by.id("spinner")));
-        //         browser.wait(function () {
-        //             return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-        //                 return ct == customFilterParams.numRowsWOFilter;
-        //             });
-        //         }, browser.params.defaultTimeout);
+            chaisePage.clickButton(chaisePage.recordsetPage.getClearCustomFilters()).then(function () {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFilterParams.numRowsWOFilter;
+                    });
+                }, browser.params.defaultTimeout);
 
-        //         expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
+                expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
 
-        //         browser.wait(function () {
-        //             return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-        //                 return ct == customFilterParams.optionsWOFilter.length;
-        //             });
-        //         }, browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                        return ct == customFilterParams.optionsWOFilter.length;
+                    });
+                }, browser.params.defaultTimeout);
 
-        //         return chaisePage.recordsetPage.getFacetOptions(idx);
-        //     }).then(function (opts) {
-        //         // TODO: facet doesn't resize to show options 8, 9, 10
-        //         opts.forEach(function (option, idx) {
-        //             expect(option.getText()).toEqual(customFilterParams.optionsWOFilter[idx], "options missmatch.");
-        //         });
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFilterParams.optionsWOFilter[i], `options missmatch, index=${i}`);
+                });
 
-        //         done();
-        //     }).catch(chaisePage.catchTestError(done));
-        // });
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
     });
 
     describe("regarding URL limitation check, ", function () {
@@ -1356,10 +1363,15 @@ describe("Other facet features, ", function() {
                 // wait for list to be fully visible
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getFacetOptions(idx);
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
             }).then(function (opts) {
-                opts.forEach(function (option, idx) {
-                    expect(option.getText()).toEqual(customFacetParams.options[idx], "options missmatch.");
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFacetParams.options[i], `options missmatch, index=${i}`);
                 });
 
                 // select a new facet
@@ -1383,28 +1395,35 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        // TODO: facet doesn't resize to show options 4 - 10
-        // it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
-        //     expect(chaisePage.recordsetPage.getClearCustomFacets().isDisplayed()).toBeTruthy("`Clear Custom Facets` is not visible.");
+        it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
+            expect(chaisePage.recordsetPage.getClearCustomFacets().isDisplayed()).toBeTruthy("`Clear Custom Facets` is not visible.");
 
-        //     chaisePage.recordsetPage.getClearCustomFacets().click().then(function () {
-        //         // wait for table rows to load
-        //         browser.wait(function () {
-        //             return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-        //                 return ct == customFacetParams.numRowsWOCustomFacet;
-        //             });
-        //         }, browser.params.defaultTimeout);
+            chaisePage.recordsetPage.getClearCustomFacets().click().then(function () {
+                // wait for table rows to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFacetParams.numRowsWOCustomFacet;
+                    });
+                }, browser.params.defaultTimeout);
 
-        //         expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRowsWOCustomFacet, "total row count missmatch.");
+                expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRowsWOCustomFacet, "total row count missmatch.");
 
-        //         return chaisePage.recordsetPage.getFacetOptions(idx);
-        //     }).then(function (opts) {
-        //         opts.forEach(function (option, idx) {
-        //             expect(option.getText()).toEqual(customFacetParams.optionsWOCustomFacet[idx], "options missmatch.");
-        //         });
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-        //         done();
-        //     }).catch(chaisePage.catchTestError(done));
-        // });
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFacetParams.optionsWOCustomFacet[i], `options missmatch, index=${i}`);
+                });
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
     });
 });
