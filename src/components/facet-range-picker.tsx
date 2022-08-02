@@ -306,7 +306,7 @@ const FacetRangePicker = ({
         } else {
           res = facetColumn.removeRangeFilter(row.metaData.min, row.metaData.minExclusive, row.metaData.max, row.metaData.maxExclusive);
         }
-        $log.debug(`faceting: request for facet (index=${facetColumn.index}) range ${row.selected ? 'add' : 'remove'}. 
+        $log.debug(`faceting: request for facet (index=${facetColumn.index}) range ${row.selected ? 'add' : 'remove'}.
         min=${row.metaData.min}, max=${row.metaData.max}`);
       }
     }
@@ -982,7 +982,7 @@ const FacetRangePicker = ({
 
   return (
     <div className='range-picker' ref={rangePickerContainer}>
-      {!facetModel.facetError && renderPickerContainer()}
+      {!facetModel.facetHasTimeoutError && renderPickerContainer()}
       <RangeInputs
         inputType={facetColumn.column.type.rootName}
         classes='facet-range-input'

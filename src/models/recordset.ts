@@ -61,7 +61,7 @@ export type FacetModel = {
   isOpen: boolean,
   isLoading: boolean,
   noConstraints: boolean,
-  facetError: boolean,
+  facetHasTimeoutError: boolean,
   // if the stable key is greater than length 1, the favorites won't be supported for now
   // TODO: support this for composite stable keys
   enableFavorites: boolean

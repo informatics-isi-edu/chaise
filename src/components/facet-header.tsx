@@ -29,7 +29,7 @@ type FacetHeaderProps = {
   /**
    * Whether we're showing a timeout error or not
    */
-  facetError: boolean;
+  facetHasTimeoutError: boolean;
   /**
    * Whether the facet is displayed in a non-constrained mode
    */
@@ -44,7 +44,7 @@ const FacetHeader = ({
   showTooltipIcon = false,
   comment,
   isLoading,
-  facetError,
+  facetHasTimeoutError,
   noConstraints
 }: FacetHeaderProps) => {
 
@@ -114,17 +114,17 @@ const FacetHeader = ({
       </OverlayTrigger>
       <span className='facet-header-icon'>
         {
-          (isLoading && (!facetError || noConstraints)) &&
+          (isLoading && (!facetHasTimeoutError || noConstraints)) &&
           <Spinner className='facet-spinner' animation='border' />
         }
         {
-          (facetError || noConstraints) &&
+          (facetHasTimeoutError || noConstraints) &&
           <OverlayTrigger
             placement='right'
             overlay={
               <Tooltip>
                 {noConstraints && <span>showing facet values without any constraints applied.</span>}
-                {facetError && <span>Request timeout: The facet values cannot be retrieved for updates.</span>}
+                {facetHasTimeoutError && <span>Request timeout: The facet values cannot be retrieved for updates.</span>}
               </Tooltip>
             }
           >

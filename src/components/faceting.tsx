@@ -52,7 +52,7 @@ const Faceting = ({
         isOpen: fc.isOpen,
         isLoading: fc.isOpen,
         noConstraints: false,
-        facetError: false,
+        facetHasTimeoutError: false,
         // TODO
         // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1,
         enableFavorites: false,
@@ -242,12 +242,12 @@ const Faceting = ({
           printDebugMessage(`after facet (index=${i}) initialize: ${res ? 'successful.' : 'unsuccessful.'}`);
           flowControl.current.queue.occupiedSlots--;
           facetRequestModels.current[i].preProcessed = true;
-          setFacetModelByIndex(i, { facetError: false });
+          setFacetModelByIndex(i, { facetHasTimeoutError: false });
           updatePage();
         }).catch(function (err: any) {
           // show alert if 400 Query Timeout Error
           if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-            setFacetModelByIndex(i, { facetError: true });
+            setFacetModelByIndex(i, { facetHasTimeoutError: true });
           } else {
             dispatchError({ error: err });
           }
@@ -272,17 +272,18 @@ const Faceting = ({
           //      everything should be handled here eventually
           //      and the processFacet should only use the values and not modify them
           facetRequestModels.current[i].processFacet().then(function (res: any) {
-            setFacetModelByIndex(i, { facetError: false });
+            setFacetModelByIndex(i, { facetHasTimeoutError: false });
             afterFacetUpdate(i, res, flowControl);
             updatePage();
           }).catch(function (err: any) {
-            afterFacetUpdate(i, true, flowControl);
             // show alert if 400 Query Timeout Error
             if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-              setFacetModelByIndex(i, { facetError: true });
+              setFacetModelByIndex(i, { facetHasTimeoutError: true });
             } else {
               dispatchError({ error: err });
             }
+
+            afterFacetUpdate(i, true, flowControl);
           });
         })(index);
       });
@@ -317,11 +318,15 @@ const Faceting = ({
    * @param setIsLoading whether we should also change the spinner status
    * @param cause the cause of update
    */
-  const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string) => {
+  const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string, noConstraints?: boolean) : void => {
     const frm = facetRequestModels.current[index];
     frm.processed = false;
     if (setIsLoading) {
-      setFacetModelByIndex(index, { isLoading: true });
+      const val : {[key: string]: boolean} = { isLoading: true };
+      if (typeof noConstraints === 'boolean') {
+        val.noConstraints = noConstraints;
+      }
+      setFacetModelByIndex(index, val);
     }
 
     $log.debug(`faceting: asking flow control to update facet index=${index}`);
@@ -586,7 +591,7 @@ const Faceting = ({
               showTooltipIcon={fc.comment ? true : false}
               comment={fc.comment}
               isLoading={facetModel.isLoading}
-              facetError={facetModel.facetError}
+              facetHasTimeoutError={facetModel.facetHasTimeoutError}
               noConstraints={facetModel.noConstraints}
             />
           </Accordion.Header>

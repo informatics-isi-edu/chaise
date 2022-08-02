@@ -16,6 +16,7 @@ import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-e
 import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type FacetChoicePickerProps = {
   /**
@@ -41,7 +42,7 @@ type FacetChoicePickerProps = {
   /**
    * ask flow-control to update the data
    */
-  dispatchFacetUpdate: Function,
+  dispatchFacetUpdate: (index: number, setIsLoading: boolean, cause?: string, noConstraints?: boolean) => void,
   /**
    * Allows checking of the reference url and will display an alert if needed
    */
@@ -65,7 +66,7 @@ const FacetChoicePicker = ({
 
   const isFirstRender = useIsFirstRender();
 
-  const { removeURLLimitAlert  } = useAlert();
+  const { removeURLLimitAlert } = useAlert();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
@@ -89,7 +90,6 @@ const FacetChoicePicker = ({
    */
   const [showFindMore, setShowFindMore] = useState(false);
 
-  const choicePickerContainer = useRef<HTMLDivElement>(null);
   const listContainer = useRef<HTMLDivElement>(null);
 
   // populate facetReference and columnName that are used throughout the component
@@ -108,7 +108,7 @@ const FacetChoicePicker = ({
     facetReference = facetReference.search(searchTerm);
   }
 
-  // remove the constraints if scope.facetModel.noConstraints
+  // remove the constraints
   if (facetModel.noConstraints) {
     facetReference = facetReference.unfilteredReference;
     if (facetColumn.isEntityMode) {
@@ -468,7 +468,7 @@ const FacetChoicePicker = ({
       // create the list of choice filters
       let hasNull = false;
       const filters = selectedRows.map(function (t: any) {
-        const val =  getFilterUniqueId(t, columnName);
+        const val = getFilterUniqueId(t, columnName);
         hasNull = hasNull || (val === null);
         return val;
       });
@@ -510,12 +510,6 @@ const FacetChoicePicker = ({
 
         // set the selected rows
         setCheckboxRows(updatedRows);
-
-        //   // make sure to update all the opened facets
-        //   scope.parentCtrl.setInitialized();
-
-        //   // focus on the current facet
-        //   scope.parentCtrl.focusOnFacet(scope.index, true);
       }
 
       return true;
@@ -567,8 +561,9 @@ const FacetChoicePicker = ({
   };
 
   const retryQuery = (noConstraints: boolean) => {
-    // TODO
-    $log.debug(`retrying facet ${facetIndex}`);
+    // TODO this is not working properly (facetModel.noConstraints is one step behind)
+    // ask the parent to update the facet column
+    dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_RETRY, noConstraints);
   }
 
   //-------------------  render logic:   --------------------//
@@ -620,24 +615,37 @@ const FacetChoicePicker = ({
 
   const renderErrorContainer = () => {
     return (
-      {/* <div ng-show='facetModel.facetError'>
-        <p>Request timeout: The facet values cannot be retrieved. Try the following to reduce the query time:
-          <ul class='show-list-style'>
+      <div className='error-container'>
+        <div>
+          Request timeout: The facet values cannot be retrieved. Try the following to reduce the query time:
+          <ul className='show-list-style'>
             <li>Reduce the number of facet constraints.</li>
-            <li>Minimize the use of 'No value' and 'All records with value' filters.</li>
+            <li>Minimize the use of <i>No value</i> and <i>All records with value</i> filters.</li>
           </ul>
-          Click Simplify to retrieve facet values without constraints.
-        </p>
-        <button id='retry-query-btn' class='chaise-btn chaise-btn-primary' ng-click='::retryQuery(false)' tooltip-placement='bottom-left' uib-tooltip='Retry updating the facet values with constraints.'>Retry</button>
-        <button id='remove-constraints-btn' class='chaise-btn chaise-btn-primary' ng-click='::retryQuery(true)' tooltip-placement='bottom-left' uib-tooltip='Provide facet values without any constraints applied.'>Simplify</button>
-      </div> */}
+          Click <strong>Simplify</strong> to retrieve facet values without constraints.
+        </div>
+        <div>
+          <ChaiseTooltip
+            placement='bottom-start'
+            tooltip={'Retry updating the facet values with constraints.'}
+          >
+            <button className='chaise-btn chaise-btn-primary' onClick={() => retryQuery(false)}>Retry</button>
+          </ChaiseTooltip>
+          <ChaiseTooltip
+            placement='bottom-start'
+            tooltip={'Provide facet values without any constraints applied.'}
+          >
+            <button className='chaise-btn chaise-btn-primary' onClick={() => retryQuery(true)}>Simplify</button>
+          </ChaiseTooltip>
+        </div>
+      </div>
     )
   }
 
   return (
-    <div className='choice-picker' ref={choicePickerContainer}>
-      {!facetModel.facetError && renderPickerContainer()}
-      {facetModel.facetError && renderErrorContainer()}
+    <div className='choice-picker'>
+      {!facetModel.facetHasTimeoutError && renderPickerContainer()}
+      {facetModel.facetHasTimeoutError && renderErrorContainer()}
       {
         recordsetModalProps &&
         <RecordsetModal
