@@ -35,7 +35,11 @@ const Faceting = ({
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
-  const { reference, registerFacetCallbacks, initialize, update, printDebugMessage, checkReferenceURL } = useRecordset();
+  const {
+    reference, registerFacetCallbacks, initialize, update,
+    printDebugMessage, checkReferenceURL,
+    logRecordsetClientAction, getLogAction, getLogStack
+  } = useRecordset();
 
   const [displayFacets, setDisplayFacets] = useState(false);
   const [readyToInitialize, setReadyToInitialize] = useState(false);
@@ -123,10 +127,9 @@ const Faceting = ({
         removeAppliedFilters: () => { throw new Error('function not registered') },
         reloadCauses: [], // why the reload request is being sent to the server (might be empty)
         reloadStartTime: -1, //when the facet became dirty
-        // TODO log stuff
         // I could capture the whole logStack,
-        // but only did logStackNode so I can call the recordTableUtils.getTableLogStack with it.
-        // logStackNode: facetLogStackNode,
+        // but only did logStackNode so I can call the recordTableUtils.getLogStack with it.
+        logStackNode: facetLogStackNode,
         // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
         // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
       });
@@ -318,11 +321,11 @@ const Faceting = ({
    * @param setIsLoading whether we should also change the spinner status
    * @param cause the cause of update
    */
-  const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string, noConstraints?: boolean) : void => {
+  const dispatchFacetUpdate = (index: number, setIsLoading: boolean, cause?: string, noConstraints?: boolean): void => {
     const frm = facetRequestModels.current[index];
     frm.processed = false;
     if (setIsLoading) {
-      const val : {[key: string]: boolean} = { isLoading: true };
+      const val: { [key: string]: boolean } = { isLoading: true };
       if (typeof noConstraints === 'boolean') {
         val.noConstraints = noConstraints;
       }
@@ -339,7 +342,7 @@ const Faceting = ({
     }
 
     // call the flow-control, so the update of facet is queued properly
-    update(null, null, {sameCounter: true});
+    update(null, null, { sameCounter: true });
   };
 
   /**
@@ -352,7 +355,7 @@ const Faceting = ({
    * @returns
    */
   const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean, resetAllOpenFacets?: boolean) => {
-    if (!checkReferenceURL(newRef,!keepRef)) {
+    if (!checkReferenceURL(newRef, !keepRef)) {
       return false;
     }
 
@@ -366,13 +369,21 @@ const Faceting = ({
       }
 
       update(
-        {updateResult: true, updateCount: true, updateFacets: true},
-        {reference: newRef},
-        {cause, lastActiveFacet, resetAllOpenFacets}
+        { updateResult: true, updateCount: true, updateFacets: true },
+        { reference: newRef },
+        { cause, lastActiveFacet, resetAllOpenFacets }
       )
     }
     return true;
   };
+
+  const getFacetLogAction = (index: number, actionPath: LogActions) : string => {
+    return getLogAction(actionPath, LogStackPaths.FACET);
+  };
+
+  const getFacetLogStack = (index: number, extraInfo?: any) : any => {
+    return getLogStack(facetRequestModels.current[index].logStackNode, extraInfo);
+  }
 
   //------------------- callbacks that recordset will call: ----------------//
   /**
@@ -389,7 +400,7 @@ const Faceting = ({
    * @param index if number it's a facet index, otherwise it will be cfacets or filters.
    */
   const removeAppliedFiltersFromRS = (index?: number | 'filters' | 'cfacets') => {
-    let newRef, reason = LogReloadCauses.FACET_CLEAR, action = '';
+    let newRef, reason = LogReloadCauses.FACET_CLEAR, action: LogActions | null = null;
     if (index === 'filters') {
       // only remove custom filters on the reference (not the facet)
       // TODO LOG should we log this?
@@ -409,12 +420,11 @@ const Faceting = ({
       facetRequestModels.current[index].removeAppliedFilters();
 
       // log the action
-      // TODO
-      // var fc = scope.vm.reference.facetColumns[index];
-      // logService.logClientAction({
-      //   action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_CLEAR),
-      //   stack: currentCtrl.getFacetLogStack(index)
-      // }, fc.sourceReference.defaultLogInfo);
+      const fc = reference.facetColumns[index];
+      LogService.logClientAction({
+        action: getFacetLogAction(index, LogActions.BREADCRUMB_CLEAR),
+        stack: getFacetLogStack(index)
+      }, fc.sourceReference.defaultLogInfo);
     } else {
       // // delete all filters and facets
       newRef = reference.removeAllFacetFilters();
@@ -422,20 +432,12 @@ const Faceting = ({
       reason = LogReloadCauses.CLEAR_ALL;
 
       // remove all the checkboxes in the UI
-      facetRequestModels.current.forEach((frm) => {frm.removeAppliedFilters()});
+      facetRequestModels.current.forEach((frm) => { frm.removeAppliedFilters() });
     }
 
     // whether we should log the action for the whole page or not
-    if (action) {
-      // TODO
-      // log the action
-      // logService.logClientAction(
-      //   {
-      //     action: recordTableUtils.getTableLogAction(scope.vm, action),
-      //     stack: recordTableUtils.getTableLogStack(scope.vm)
-      //   },
-      //   scope.vm.reference.defaultLogInfo
-      // );
+    if (action && action in LogActions) {
+      logRecordsetClientAction(action);
     }
 
     // removing filter should just reduce the url length limit,
@@ -448,7 +450,7 @@ const Faceting = ({
    * @param index
    * @param dontUpdate whether we should also trigger an update request or not
    */
-   const focusOnFacet = (index: number, dontUpdate?: boolean) => {
+  const focusOnFacet = (index: number, dontUpdate?: boolean) => {
     const fm = facetModels[index];
     if (!fm.isOpen && (dontUpdate !== true)) {
       toggleFacet(index, true);
@@ -470,6 +472,15 @@ const Faceting = ({
       return prevFacetModels.map((fm: FacetModel, fmIndex: number) => {
         if (index !== fmIndex) return fm;
         const isOpen = !fm.isOpen;
+
+        if (!dontLog) {
+          const action = isOpen ? LogActions.OPEN : LogActions.CLOSE;
+          // log the action
+          LogService.logClientAction({
+            action: getFacetLogAction(index, action),
+            stack: getFacetLogStack(index)
+          }, reference.facetColumns[fmIndex].sourceReference.defaultLogInfo);
+        }
 
         // if we're closing it
         if (!isOpen) {
@@ -500,17 +511,6 @@ const Faceting = ({
         return { ...fm, isOpen };
       });
     });
-
-
-    // TODO
-    // if (!dontLog) {
-    //   var action = fm.isOpen ? logService.logActions.OPEN : logService.logActions.CLOSE;
-    //   // log the action
-    //   logService.logClientAction({
-    //     action: currentCtrl.getFacetLogAction(index, action),
-    //     stack: currentCtrl.getFacetLogStack(index)
-    //   }, fc.sourceReference.defaultLogInfo);
-    // }
   };
 
   /**
@@ -524,14 +524,13 @@ const Faceting = ({
     const el = sidePanelContainer.current.querySelectorAll('.facet-panel')[index] as HTMLElement;
     if (!el) return;
 
-    // TODO
-    // if (!dontLog) {
-    //   var const = reference.facetColumns[index];
-    //   logService.logClientAction({
-    //     action: currentCtrl.getFacetLogAction(index, logService.logActions.BREADCRUMB_SCROLL_TO),
-    //     stack: currentCtrl.getFacetLogStack(index)
-    //   }, fc.sourceReference.defaultLogInfo);
-    // }
+    if (!dontLog) {
+      const fc = reference.facetColumns[index];
+      LogService.logClientAction({
+        action: getFacetLogAction(index, LogActions.BREADCRUMB_SCROLL_TO),
+        stack: getFacetLogStack(index)
+      }, fc.sourceReference.defaultLogInfo);
+    }
 
     // TODO delay this event (using debounce from react branch)
     // scroll
@@ -561,6 +560,7 @@ const Faceting = ({
           facetColumn={fc} facetIndex={index} facetModel={fm}
           facetPanelOpen={facetPanelOpen}
           register={registerFacet} updateRecordsetReference={updateRecordsetReference}
+          getFacetLogAction={getFacetLogAction} getFacetLogStack={getFacetLogStack}
         />
       case 'check_presence':
         return <FacetCheckPresence
@@ -573,6 +573,7 @@ const Faceting = ({
           register={registerFacet} updateRecordsetReference={updateRecordsetReference}
           dispatchFacetUpdate={dispatchFacetUpdate} checkReferenceURL={checkReferenceURL}
           facetPanelOpen={facetPanelOpen}
+          getFacetLogAction={getFacetLogAction} getFacetLogStack={getFacetLogStack}
         />
     }
   };

@@ -161,13 +161,25 @@ const Export = ({
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
+  const onDropdownToggle = (nextShow: boolean) => {
+    // hide the tooltip if we're showing the menu + log the action
+    if (nextShow) {
+      setShowTooltip(false);
+
+      LogService.logClientAction({
+        action: LogService.getActionString(LogActions.EXPORT_OPEN),
+        stack: LogService.getStackObject()
+      }, reference.defaultLogInfo)
+    }
+  }
+
   const renderExportIcon = () => {
     return <span className='chaise-btn-icon fa-solid fa-file-export' />;
   };
 
   return (
     <>
-      <Dropdown className='export-menu' onClick={() => setShowTooltip(false)}>
+      <Dropdown className='export-menu' onToggle={onDropdownToggle}>
         <OverlayTrigger
           placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
           overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}

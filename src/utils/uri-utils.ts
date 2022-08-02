@@ -257,7 +257,6 @@ export function createRedirectLinkFromPath(path: string): string {
 
 /**
 * Returns the chaise base url without the trailing slash
-* TODO we might want to find a better way instead of this.
 * @return {String}
 */
 export function chaiseBaseURL(): string {

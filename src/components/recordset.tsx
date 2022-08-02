@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
@@ -30,12 +30,6 @@ import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-/**
- * TODO
- * how should I do the client log stuff now?
- * what about the url length limitation.. it should scroll to top but I cannot do it in provider
- */
-
 
 export type RecordsetProps = {
   initialReference: any,
@@ -237,8 +231,6 @@ const RecordsetInner = ({
 
     }).catch((exception: any) => {
       $log.warn(exception);
-      // TODO
-      // setIsLoading(false);
       if (isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
         exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
       }
@@ -361,7 +353,7 @@ const RecordsetInner = ({
     editRequestIsDone.current = true;
   }
 
-  //------------------- UI related functions: --------------------//
+  //------------------- UI related callbacks: --------------------//
 
   /**
    * The callbacks from faceting.tsx that are used in this component
@@ -379,11 +371,10 @@ const RecordsetInner = ({
     facetCallbacks.current!.removeAppliedFilters();
   }
 
-  //-------------------  UI related functions:   --------------------//
-
   const recordsetLink = getRecordsetLink();
 
   const copyPermalink = () => {
+    // log the action
     logRecordsetClientAction(LogActions.PERMALINK_LEFT);
 
     copyToClipboard(recordsetLink);
@@ -395,6 +386,12 @@ const RecordsetInner = ({
    */
   const changeFacetPanelOpen = (value?: boolean) => {
     const val = typeof value === 'boolean' ? value : !facetPanelOpen;
+
+    // log the action
+    const action = val ? LogActions.FACET_PANEL_SHOW : LogActions.FACET_PANEL_HIDE;
+    logRecordsetClientAction(action);
+
+    // set the state variable
     setFacetPanelOpen(val);
   };
 
@@ -408,27 +405,19 @@ const RecordsetInner = ({
     if (term) term = term.trim();
 
     const ref = reference.search(term); // this will clear previous search first
-    // TODO
-    // if (checkReferenceURL(ref)) {
-    // vm.lastActiveFacet = -1;
-    // printDebugMessage(`new search term=${term}`);
-
-    // TODO
-    // log the client action
-    // const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
-
-    // TODO
-    // LogService.logClientAction({
-    //   action: flowControl.current.getTableLogAction(action),
-    //   stack: flowControl.current.getTableLogStack(null, extraInfo)
-    // }, ref.defaultLogInfo);
-
-    update(
+    const success = update(
       { updateResult: true, updateCount: true, updateFacets: true },
       { reference: ref },
       { cause: LogReloadCauses.SEARCH_BOX }
     );
-    // }
+
+    // log the request if it was successful
+    if (success) {
+      // log the client action
+      const extraInfo = typeof term === 'string' ? { 'search-str': term } : {};
+      // pass the reference to ensure it's using the one based on search
+      logRecordsetClientAction(action, null, extraInfo, ref);
+    }
   };
 
   /**

@@ -14,7 +14,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogParentActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
@@ -63,7 +63,7 @@ const TableRow = ({
    * But if this was in recordset-table then we would need to pass these and
    * it wouldn't make any difference in terms of number of renders
    */
-  const {setForceShowSpinner, update} = useRecordset();
+  const { setForceShowSpinner, update, getLogStack, getLogAction } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
   const tdPadding = 10, // +10 to account for padding on <td>
@@ -83,6 +83,7 @@ const TableRow = ({
    */
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
     onConfirm: () => void,
+    onCancel: () => void,
     buttonLabel: string,
     message: JSX.Element
   } | null>(null);
@@ -107,7 +108,7 @@ const TableRow = ({
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
     const tempOverflow: boolean[] = [];
-    for (let i = 0; i < rowContainer.current.children.length-1; i++) {
+    for (let i = 0; i < rowContainer.current.children.length - 1; i++) {
       let hasOverflow = overflow[i] || false;
 
       // children is each <td>, span is the cell wrapping the content
@@ -141,90 +142,17 @@ const TableRow = ({
     )
   }, [rowValues]);
 
-  const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
-    validateSessionBeforeMutation(() => {
-      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-        // TODO: log the opening of delete modal
-        // LogService.logClientAction({
-        //   action: LogService.getActionString(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
-        //   stack: logStack
-        // }, reference.defaultLogInfo);
-  
-        // TODO unlink should say disconnect...
-        const confirmMessage: JSX.Element = (
-          <>
-            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
-            <span>: </span>
-            <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
-          </>
-        );
-  
-        setShowDeleteConfirmationModal({
-          buttonLabel: isUnlink ? 'Unlink' : 'Delete',
-          onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
-          message: confirmMessage
-        });
-  
-      } else {
-        onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
-      }
-    })
-    $log.debug('deleting tuple!');
-
-    
-
-    return;
-  };
-
-  const onDeleteUnlinkConfirmation = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
-    // make sure the main spinner is displayed (it's a state variable in recordset provider)
-    setForceShowSpinner(true);
-    // disable the buttons and row
-    setWaitingForDelete(true);
-    // close the confirmation modal if it exists
-    setShowDeleteConfirmationModal(null);
-
-    const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
-    const logObj = {
-      action: LogService.getActionString(actionVerb),
-      // stack: logStack
-    }
-
-    reference.delete(logObj).then(function deleteSuccess() {
-      // ask flow-control to update the page
-      // this will also make sure to remove the "disabled" row
-      update({updateResult: true, updateCount: true, updateFacets: true}, null, {cause:LogReloadCauses.ENTITY_DELETE});
-    }).catch(function (error: any) {
-      setWaitingForDelete(false);
-      dispatchError({ error: error, isDismissible: true });
-    }).finally(() => {
-      // hide the spinner
-      setForceShowSpinner(false);
-    });
+  const getRowLogAction = (action: LogActions) => {
+    return getLogAction(action, LogStackPaths.ENTITY);
   }
-
-  const onCancel = () => {
-    setShowDeleteConfirmationModal(null);
-    // TODO: log the opening of cancelation modal
-    // const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
-    // LogService.logClientAction({
-    //   action: LogService.getActionString(actionVerb),
-    //   // TODO: ask
-    //   // stack: logStack
-    // }, tuple.reference.defaultLogInfo);
-  };
 
   const tupleReference = tuple.reference,
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
     isSavedQueryPopup = config.displayMode === RecordsetDisplayMode.SAVED_QUERY_POPUP;
 
-  // TODO log support
+  let logStack : any;
   if (tupleReference) {
-    // all the row level actions should use this stack
-    // logStack = recordTableUtils.getTableLogStack(
-    //   scope.tableModel,
-    //   logService.getStackNode(logService.logStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo)
-    // );
+    logStack = getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo));
   }
 
   // apply saved query link
@@ -273,8 +201,10 @@ const TableRow = ({
 
         windowRef.open(editLink, '_blank');
 
-        // TODO: logging
-        // logRecordsetClientAction(LogActions.EDIT_INTEND);
+        LogService.logClientAction({
+          action: getRowLogAction(LogActions.EDIT_INTEND),
+          stack: logStack
+        }, tupleReference.defaultLogInfo);
       } else {
         $log.debug('Error: reference is undefined or null');
       }
@@ -308,6 +238,74 @@ const TableRow = ({
         deleteOrUnlink(tupleReference, isRelated);
       };
     }
+  }
+
+  const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
+    validateSessionBeforeMutation(() => {
+      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+        LogService.logClientAction({
+          action: getRowLogAction(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
+          stack: logStack
+        }, reference.defaultLogInfo);
+
+        // TODO unlink should say disconnect...
+        const confirmMessage: JSX.Element = (
+          <>
+            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+            <span>: </span>
+            <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
+          </>
+        );
+
+        setShowDeleteConfirmationModal({
+          buttonLabel: isUnlink ? 'Unlink' : 'Delete',
+          onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
+          onCancel: () => {
+            setShowDeleteConfirmationModal(null);
+            const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+            LogService.logClientAction({
+              action: getRowLogAction(actionVerb),
+              stack: logStack
+            }, reference.defaultLogInfo);
+          },
+          message: confirmMessage
+        });
+
+      } else {
+        onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
+      }
+    })
+    $log.debug('deleting tuple!');
+
+
+
+    return;
+  };
+
+  const onDeleteUnlinkConfirmation = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
+    // make sure the main spinner is displayed (it's a state variable in recordset provider)
+    setForceShowSpinner(true);
+    // disable the buttons and row
+    setWaitingForDelete(true);
+    // close the confirmation modal if it exists
+    setShowDeleteConfirmationModal(null);
+
+    const actionVerb = isUnlink ? LogActions.UNLINK : LogActions.DELETE;
+    const logObj = {
+      action: getRowLogAction(actionVerb),
+      stack: logStack
+    };
+    reference.delete(logObj).then(function deleteSuccess() {
+      // ask flow-control to update the page
+      // this will also make sure to remove the "disabled" row
+      update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
+    }).catch(function (error: any) {
+      setWaitingForDelete(false);
+      dispatchError({ error: error, isDismissible: true });
+    }).finally(() => {
+      // hide the spinner
+      setForceShowSpinner(false);
+    });
   }
 
   const readMore = () => {
@@ -347,12 +345,12 @@ const TableRow = ({
       case RecordsetSelectMode.MULTI_SELECT:
         return (
           <div className='chaise-checkbox'>
-            <input 
-              className={(selected || rowDisabled) ? 'checked' : ''} 
-              type='checkbox' 
-              checked={selected || rowDisabled} 
-              disabled={rowDisabled} 
-              onChange={() => onSelectChange(tuple)} 
+            <input
+              className={(selected || rowDisabled) ? 'checked' : ''}
+              type='checkbox'
+              checked={selected || rowDisabled}
+              disabled={rowDisabled}
+              onChange={() => onSelectChange(tuple)}
             />
             <label />
             {/* TODO favorites */}
@@ -394,7 +392,7 @@ const TableRow = ({
               >
                 <a
                   type='button'
-                  className={`view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn ${rowDisabled ? ' disabled': ''}`}
+                  className={`view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn ${rowDisabled ? ' disabled' : ''}`}
                   href={!rowDisabled ? viewLink : undefined}
                 >
                   <span className='chaise-btn-icon chaise-icon chaise-view-details'></span>
@@ -493,7 +491,7 @@ const TableRow = ({
           message={showDeleteConfirmationModal.message}
           buttonLabel={showDeleteConfirmationModal.buttonLabel}
           onConfirm={showDeleteConfirmationModal.onConfirm}
-          onCancel={onCancel}
+          onCancel={showDeleteConfirmationModal.onCancel}
         />
       }
     </>

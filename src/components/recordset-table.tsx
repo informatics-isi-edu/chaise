@@ -32,11 +32,9 @@ const RecordsetTable = ({
     selectedRows,
     setSelectedRows,
     disabledRows,
-    update
+    update,
+    logRecordsetClientAction
   } = useRecordset();
-
-  // TODO needs to be updated to use ellipsis and have all the functionalities,
-  // I only did this to test the overall structure and flow-control logic
 
   const tableContainer = useRef<any>(null);
 
@@ -76,19 +74,15 @@ const RecordsetTable = ({
     if (!currSortColumn || !isInitialized) return;
 
     const ref = reference.sort([currSortColumn]);
-    // if (checkReferenceURL(ref)) {
 
-    //  TODO
-    // printDebugMessage('change sort');
+    const success = update({ updateResult: true }, { reference: ref }, { cause: LogReloadCauses.SORT });
 
-    // LogService.logClientAction({
-    //   action: flowControl.current.getTableLogAction(LogActions.SORT),
-    //   stack: flowControl.current.getTableLogStack()
-    // }, ref.defaultLogInfo);
-
-    update({ updateResult: true }, { reference: ref }, { cause: LogReloadCauses.SORT });
-    // }
+    if (success) {
+      logRecordsetClientAction(LogActions.SORT, null, ref);
+    }
   }, [currSortColumn]);
+
+  //------------------- UI related callbacks: --------------------//
 
   const changeSort = (col: any) => {
     /**
@@ -104,36 +98,23 @@ const RecordsetTable = ({
     const ref = isNext ? page.next : page.previous;
     const action = isNext ? LogActions.PAGE_NEXT : LogActions.PAGE_PREV;
     const cause = isNext ? LogReloadCauses.PAGE_NEXT : LogReloadCauses.PAGE_PREV;
-    // TODO
-    // if (ref && checkReferenceURL(ref)) {
 
-    //  TODO
-    // printDebugMessage('request for previous page');
+    // this shouldn't technically happen but added for sanity check
+    if (!ref) return;
 
-    // LogService.logClientAction(
-    //   {
-    //     action: flowControl.current.getTableLogAction(action),
-    //     stack: flowControl.current.getTableLogStack()
-    //   },
-    //   reference.defaultLogInfo
-    // );
+    const success = update({ updateResult: true }, { reference: ref }, { cause: cause });
 
-    update({ updateResult: true }, { reference: ref }, { cause: cause });
-    // }
+    // log the request if it was successful
+    if (success) {
+      logRecordsetClientAction(action, null, ref);
+    }
   };
 
   /**
    * select all the rows that are displayed and are not disabled
    */
   const selectAllOnPage = () => {
-    // TODO logs
-    // logService.logClientAction(
-    //   {
-    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_SELECT_ALL),
-    //     stack: getTableLogStack(scope.vm)
-    //   },
-    //   scope.vm.reference.defaultLogInfo
-    // );
+    logRecordsetClientAction(LogActions.PAGE_SELECT_ALL);
 
     setSelectedRows((currRows: SelectedRow[]) => {
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
@@ -155,13 +136,7 @@ const RecordsetTable = ({
    * deselect all the rows that are displayed and are not disabled
    */
   const DeselectAllOnPage = () => {
-    // logService.logClientAction(
-    //   {
-    //     action: getTableLogAction(scope.vm, logService.logActions.PAGE_DESELECT_ALL),
-    //     stack: getTableLogStack(scope.vm)
-    //   },
-    //   scope.vm.reference.defaultLogInfo
-    // );
+    logRecordsetClientAction(LogActions.PAGE_DESELECT_ALL);
 
     setSelectedRows((currRows: SelectedRow[]) => {
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
@@ -191,6 +166,8 @@ const RecordsetTable = ({
       return res;
     });
   };
+
+  //-------------------  render logics:   --------------------//
 
   // whether we should show the action buttons or not (used in multiple places)
   const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;

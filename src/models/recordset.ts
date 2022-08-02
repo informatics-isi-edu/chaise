@@ -82,10 +82,8 @@ export type FacetRequestModel = {
   reloadStartTime: number, //when the facet became dirty
   // TODO log stuff
   // I could capture the whole logStack,
-  // but only did logStackNode so I can call the recordTableUtils.getTableLogStack with it.
-  // logStackNode: facetLogStackNode,
-  // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
-  // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
+  // but only did logStackNode so I can call the recordTableUtils.getLogStack with it.
+  logStackNode: any
 }
 
 /**

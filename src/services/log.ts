@@ -58,7 +58,7 @@ export class LogService {
    * @param {Object} childStackElement
    * @param {Object=} logStack if passed, will be used instead of the default value of the app.
    */
-  static getStackObject(childStackNode: any, logStack: any) {
+  static getStackObject(childStackNode?: any, logStack?: any) {
     if (!logStack) {
       logStack = LogService._logStack;
     }

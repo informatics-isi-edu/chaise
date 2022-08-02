@@ -1,5 +1,6 @@
 import { PlotData, PlotlyDataLayoutConfig, PlotlyLayout, HTMLPlotElement } from 'plotly.js-basic-dist-min'
 import { FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset'
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // export plotly types by getting the typeof the interfaces
 export type PlotData = typeof PlotData;
@@ -35,7 +36,15 @@ export type FacetRangePickerProps = {
   /**
    * dispatch the update of reference
    */
-   updateRecordsetReference: Function
+  updateRecordsetReference: Function,
+  /**
+   * get the facet log action
+   */
+  getFacetLogAction: (index: number, actionPath: LogActions) => string,
+  /**
+   * get the facet log stack object
+   */
+  getFacetLogStack: (index: number, extraInfo?: any) => any,
 }
 
 export type RangePickerState = {

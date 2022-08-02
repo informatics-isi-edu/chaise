@@ -65,7 +65,6 @@ type UpdateOptions = {
 type UpdateFunction = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => boolean;
 
 export const RecordsetContext = createContext<{
-  logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any) => void,
   /**
    * The displayed reference
    */
@@ -157,7 +156,21 @@ export const RecordsetContext = createContext<{
   /**
    * can be used to fore showing of the spinner
    */
-  setForceShowSpinner: Function
+  setForceShowSpinner: Function,
+  /**
+   * log client actions
+   * Notes:
+   *   - the optional `ref` parameter can be used to log based on a different reference object
+   */
+  logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => void,
+  /**
+   * get the appropriate log action
+   */
+  getLogAction: (actionPath: LogActions, childStackPath?: any) => string,
+  /**
+   * get the appropriate log stack
+   */
+  getLogStack: (childStackElement?: any, extraInfo?: any) => any,
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -183,7 +196,12 @@ type RecordsetProviderProps = {
   /**
    * log related props
    */
-  logInfo: any, // TODO
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  },
   /**
    * A callback to get the favorites (used in facet popup)
    */
@@ -311,12 +329,21 @@ export default function RecordsetProvider({
     }
   }, [isLoading, page]);
 
-  const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any) => {
+  const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
+    const usedRef = ref ? ref : reference;
     LogService.logClientAction({
-      action: flowControl.current.getTableLogAction(action),
-      stack: flowControl.current.getTableLogStack(childStackElement, extraInfo)
-    }, reference.defaultLogInfo)
+      action: flowControl.current.getLogAction(action),
+      stack: flowControl.current.getLogStack(childStackElement, extraInfo)
+    }, usedRef.defaultLogInfo)
   };
+
+  const getLogAction = (actionPath: LogActions, childStackPath?: any) => {
+    return flowControl.current.getLogAction(actionPath, childStackPath);
+  }
+
+  const getLogStack = (childStackElement?: any, extraInfo?: any) => {
+    return flowControl.current.getLogStack(childStackElement, extraInfo);
+  }
 
   const checkReferenceURL = (ref: any, showAlert = true): boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
@@ -468,7 +495,7 @@ export default function RecordsetProvider({
     }
 
     // TODO does this make sense? it's mutating the logStack
-    LogService.updateStackFilterInfo(flowControl.current.getTableLogStack(), reference.filterLogInfo);
+    LogService.updateStackFilterInfo(flowControl.current.getLogStack(), reference.filterLogInfo);
 
     // update the resultset
     updateMainEntity(updatePage);
@@ -500,7 +527,7 @@ export default function RecordsetProvider({
  * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
-  const updateMainEntity = (updatePageCB: Function, notTerminal=false, cb?: Function) => {
+  const updateMainEntity = (updatePageCB: Function, notTerminal = false, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -536,7 +563,7 @@ export default function RecordsetProvider({
           if (!notTerminal) {
             err.subMessage = err.message;
             err.message = `The result set cannot be retrieved. Try the following to reduce the query time:\n${MESSAGE_MAP.queryTimeoutList}`;
-            dispatchError({error: err, isDismissible: true});
+            dispatchError({ error: err, isDismissible: true });
             return;
           }
         }
@@ -573,13 +600,13 @@ export default function RecordsetProvider({
 
     // add reloadCauses
     if (hasCauses) {
-      logParams.stack = LogService.addCausesToStack(flowControl.current.getTableLogStack(), reloadCauses, flowControl.current.reloadStartTime);
+      logParams.stack = LogService.addCausesToStack(flowControl.current.getLogStack(), reloadCauses, flowControl.current.reloadStartTime);
     } else {
-      logParams.stack = flowControl.current.getTableLogStack();
+      logParams.stack = flowControl.current.getLogStack();
     }
 
     // create the action
-    logParams.action = flowControl.current.getTableLogAction(act);
+    logParams.action = flowControl.current.getLogAction(act);
 
     (function (current, requestCauses, reloadStartTime) {
       // the places that we want to show edit or delete button, we should also ask for trs
@@ -735,13 +762,13 @@ export default function RecordsetProvider({
 
     const hasCauses = Array.isArray(flowControl.current.recountCauses) && flowControl.current.recountCauses.length > 0;
     const action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
-    let stack = flowControl.current.getTableLogStack();
+    let stack = flowControl.current.getLogStack();
     if (hasCauses) {
       stack = LogService.addCausesToStack(stack, flowControl.current.recountCauses, flowControl.current.recountStartTime);
     }
     reference.getAggregates(
       aggList,
-      { action: flowControl.current.getTableLogAction(action), stack: stack }
+      { action: flowControl.current.getLogAction(action), stack: stack }
     ).then((response: any) => {
       if (current !== flowControl.current.queue.counter) {
         defer.resolve(false);
@@ -836,13 +863,13 @@ export default function RecordsetProvider({
     setColumnModelSpinners(updatedColumnModels, !hideSpinner);
 
     // we have to get the stack everytime because the filters might change.
-    let action = LogActions.LOAD, stack = flowControl.current.getTableLogStack(aggModel.logStackNode);
+    let action = LogActions.LOAD, stack = flowControl.current.getLogStack(aggModel.logStackNode);
     if (Array.isArray(aggModel.reloadCauses) && aggModel.reloadCauses.length > 0) {
       action = LogActions.RELOAD;
       stack = LogService.addCausesToStack(stack, aggModel.reloadCauses, aggModel.reloadStartTime);
     }
     const logObj = {
-      action: flowControl.current.getTableLogAction(action, LogStackPaths.PSEUDO_COLUMN),
+      action: flowControl.current.getLogAction(action, LogStackPaths.PSEUDO_COLUMN),
       stack,
     };
     activeListModel.column.getAggregatedValue(page, logObj).then((values: any) => {
@@ -993,7 +1020,6 @@ export default function RecordsetProvider({
 
   const providerValue = useMemo(() => {
     return {
-      logRecordsetClientAction,
       reference,
       isLoading,
       hasTimeoutError,
@@ -1014,7 +1040,10 @@ export default function RecordsetProvider({
       checkReferenceURL,
       addRecordRequests,
       forceShowSpinner,
-      setForceShowSpinner
+      setForceShowSpinner,
+      logRecordsetClientAction,
+      getLogAction,
+      getLogStack
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,

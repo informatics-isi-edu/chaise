@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 import Q from 'q';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { LogActions, LogReloadCauses, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
@@ -17,6 +17,7 @@ import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render
 import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type FacetChoicePickerProps = {
   /**
@@ -50,7 +51,15 @@ type FacetChoicePickerProps = {
   /**
    * dispatch the update of reference
    */
-  updateRecordsetReference: Function
+  updateRecordsetReference: Function,
+  /**
+   * get the facet log action
+   */
+  getFacetLogAction: (index: number, actionPath: LogActions) => string,
+  /**
+   * get the facet log stack object
+   */
+  getFacetLogStack: (index: number, extraInfo?: any) => any,
 }
 
 const FacetChoicePicker = ({
@@ -61,7 +70,9 @@ const FacetChoicePicker = ({
   facetPanelOpen,
   dispatchFacetUpdate,
   checkReferenceURL,
-  updateRecordsetReference
+  updateRecordsetReference,
+  getFacetLogAction,
+  getFacetLogStack,
 }: FacetChoicePickerProps): JSX.Element => {
 
   const isFirstRender = useIsFirstRender();
@@ -130,14 +141,6 @@ const FacetChoicePicker = ({
     // make sure the callbacks with latest scope are used
     callRegister();
 
-    // TODO
-    // log the client action
-    // var extraInfo = typeof term === "string" ? {"search-str": term} : {};
-    // logService.logClientAction({
-    //     action: scope.parentCtrl.getFacetLogAction(scope.index, action),
-    //     stack: scope.parentCtrl.getFacetLogStack(scope.index, extraInfo)
-    // }, scope.facetColumn.sourceReference.defaultLogInfo);
-
     $log.debug(`faceting: request for facet (index=${facetIndex} update. new search=${searchTerm}`);
 
     // ask the parent to update the facet column
@@ -156,6 +159,17 @@ const FacetChoicePicker = ({
       setShowFindMore(listContainer.current.scrollHeight > listContainer.current.offsetHeight);
     }
   }, [facetModel.isOpen, facetModel.isLoading]);
+
+  /**
+   * Generate the object that we want to be logged alongside the action
+   * This function does not attach action, after calling this function
+   * we should attach the action.
+   */
+  const getDefaultLogInfo = () => {
+    let res = facetColumn.sourceReference.defaultLogInfo;
+    res.stack = getFacetLogStack(facetIndex);
+    return res;
+  }
 
   //-------------------  flow-control related functions:   --------------------//
   /**
@@ -186,21 +200,13 @@ const FacetChoicePicker = ({
 
       // getChoiceDisplaynames won't return the null filter, so we need to check for it first
       if (facetColumn.hasNullFilter) {
-        // scope.facetModel.appliedFilters.push(facetingUtils.getNullFilter(true));
         res.push(getNullFacetCheckBoxRow(true));
       }
 
-      // TODO
-      const facetLog = {};
-      // const facetLog = getDefaultLogInfo(scope);
-      // facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, logService.logActions.PRESELECTED_FACETS_LOAD);
+      const facetLog = getDefaultLogInfo();
+      facetLog.action = getFacetLogAction(facetIndex, LogActions.PRESELECTED_FACETS_LOAD);
       facetColumn.getChoiceDisplaynames(facetLog).then(function (filters: any) {
         filters.forEach(function (f: any) {
-          // scope.facetModel.appliedFilters.push({
-          //   uniqueId: f.uniqueId,
-          //   displayname: f.displayname,
-          //   tuple: f.tuple // the returned tuple might be null (in case of scalar)
-          // });
           res.push({
             uniqueId: f.uniqueId,
             displayname: f.displayname,
@@ -270,23 +276,20 @@ const FacetChoicePicker = ({
     }
 
     (function (uri) {
-      // TODO log stuff
       // the reload causes and stuff should be handled by the parent not here
-      const facetLog = {};
-      // var facetLog = getDefaultLogInfo(scope);
+      const facetLog = getDefaultLogInfo();
 
       // // create the action
-      // var action = logService.logActions.FACET_CHOICE_LOAD;
+      const action = LogActions.FACET_CHOICE_LOAD;
       // if (scope.facetModel.reloadCauses.length > 0) {
       //     action = logService.logActions.FACET_CHOICE_RELOAD;
       //     // add causes
       //     facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.reloadCauses, scope.facetModel.reloadStartTime);
       // }
-      // facetLog.action = scope.parentCtrl.getFacetLogAction(scope.index, action);
+      facetLog.action = getFacetLogAction(facetIndex, action);
 
-      // // update the filter log info to stack
-      // logService.updateStackFilterInfo(facetLog.stack, scope.reference.filterLogInfo);
-
+      // update the filter log info to stack
+      LogService.updateStackFilterInfo(facetLog.stack, facetReference.filterLogInfo);
 
       facetReference.read(FACET_PANEL_DEFAULT_PAGE_SIZE, facetLog, true).then((page: any) => {
         // if this is not the result of latest facet change
@@ -373,7 +376,6 @@ const FacetChoicePicker = ({
     return tuple.uniqueId;
   }
 
-  // TODO
   const processFavorites = (rows: any) => {
     const defer = Q.defer();
     // TODO favorites
@@ -394,6 +396,14 @@ const FacetChoicePicker = ({
     // make sure adding the search doesn't go above the URL length limit
     const ref = facetReference.search(term);
     if (checkReferenceURL(ref)) {
+
+      // log the client action
+      const extraInfo = isStringAndNotEmpty(searchTerm) ? { 'search-str': searchTerm } : {};
+      LogService.logClientAction({
+        action: getFacetLogAction(facetIndex, action),
+        stack: getFacetLogStack(facetIndex, extraInfo)
+      }, facetColumn.sourceReference.defaultLogInfo);
+
       setSearchTerm(term);
     }
   }
@@ -415,7 +425,6 @@ const FacetChoicePicker = ({
       // enableFavorites
     };
 
-    // TODO log object should be cached and be proper!
     const logInfo = {
       logObject: null,
       logStack: [
@@ -425,7 +434,8 @@ const FacetChoicePicker = ({
           facetReference.filterLogInfo,
         ),
       ],
-      logStackPath: LogStackTypes.SET,
+      // TODO it should use the parent log path
+      logStackPath: LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FACET_POPUP),
     };
 
     const initialSelectedRows: SelectedRow[] = [];

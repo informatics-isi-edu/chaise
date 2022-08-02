@@ -49,7 +49,9 @@ const FacetRangePicker = ({
   facetModel,
   facetPanelOpen,
   register,
-  updateRecordsetReference
+  updateRecordsetReference,
+  getFacetLogAction,
+  getFacetLogStack,
 }: FacetRangePickerProps): JSX.Element => {
   const [ranges, setRanges] = useState<FacetCheckBoxRow[]>(
     (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) ? [getNotNullFacetCheckBoxRow(false)] : []
@@ -61,15 +63,15 @@ const FacetRangePicker = ({
 
   const createChoiceDisplay = (filter: any, selected: boolean) => {
     return {
-        uniqueId: filter.uniqueId,
-        displayname: {value: filter.toString(), isHTML: false},
-        selected: selected,
-        metaData: {
-            min: filter.min,
-            minExclusive: filter.minExclusive,
-            max: filter.max,
-            maxExclusive: filter.maxExclusive
-        }
+      uniqueId: filter.uniqueId,
+      displayname: { value: filter.toString(), isHTML: false },
+      selected: selected,
+      metaData: {
+        min: filter.min,
+        minExclusive: filter.minExclusive,
+        max: filter.max,
+        maxExclusive: filter.maxExclusive
+      }
     }
   };
 
@@ -291,7 +293,7 @@ const FacetRangePicker = ({
 
     const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
     // get the new reference based on the operation
-    let res: { filter: any, reference: any } = {filter: {}, reference: {}};
+    let res: { filter: any, reference: any } = { filter: {}, reference: {} };
     if (row.isNotNull) {
       if (checked) {
         res.reference = facetColumn.addNotNullFilter();
@@ -489,11 +491,15 @@ const FacetRangePicker = ({
 
 
   /***** Helpers and Setter functions *****/
+
+  /**
+   * Generate the object that we want to be logged alongside the action
+   * This function does not attach action, after calling this function
+   * we should attach the action.
+   */
   const getDefaultLogInfo = () => {
     const res = facetColumn.sourceReference.defaultLogInfo;
-
-    // TODO: res.stack for defaultLogInfo
-    // res.stack = scope.parentCtrl.getFacetLogStack(index);
+    res.stack = getFacetLogStack(facetIndex);
     return res;
   }
 

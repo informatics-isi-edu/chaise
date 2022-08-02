@@ -5,8 +5,6 @@ import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
-// TODO could be part of another utils
-
 /**
 * Will return a promise that is resolved when the setup is done
 *
