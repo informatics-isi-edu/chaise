@@ -1,5 +1,3 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
@@ -7,6 +5,12 @@ import Spinner from 'react-bootstrap/Spinner';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/delete-confirmation-modal';
 
 import { ResizeSensor } from 'css-element-queries';
+
+// hooks
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
@@ -16,13 +20,11 @@ import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/cha
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -62,6 +64,7 @@ const TableRow = ({
    * it wouldn't make any difference in terms of number of renders
    */
   const {setForceShowSpinner, update} = useRecordset();
+  const { validateSessionBeforeMutation } = useAuthn();
 
   const tdPadding = 10, // +10 to account for padding on <td>
     moreButtonHeight = 20,
@@ -139,33 +142,36 @@ const TableRow = ({
   }, [rowValues]);
 
   const deleteOrUnlink = (reference: any, isRelated?: boolean, isUnlink?: boolean) => {
+    validateSessionBeforeMutation(() => {
+      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+        // TODO: log the opening of delete modal
+        // LogService.logClientAction({
+        //   action: LogService.getActionString(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
+        //   stack: logStack
+        // }, reference.defaultLogInfo);
+  
+        // TODO unlink should say disconnect...
+        const confirmMessage: JSX.Element = (
+          <>
+            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+            <span>: </span>
+            <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
+          </>
+        );
+  
+        setShowDeleteConfirmationModal({
+          buttonLabel: isUnlink ? 'Unlink' : 'Delete',
+          onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
+          message: confirmMessage
+        });
+  
+      } else {
+        onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
+      }
+    })
     $log.debug('deleting tuple!');
 
-    if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-      // TODO: log the opening of delete modal
-      // LogService.logClientAction({
-      //   action: LogService.getActionString(isUnlink ? LogActions.UNLINK_INTEND : LogActions.DELETE_INTEND),
-      //   stack: logStack
-      // }, reference.defaultLogInfo);
-
-      // TODO unlink should say disconnect...
-      const confirmMessage: JSX.Element = (
-        <>
-          Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
-          <span>: </span>
-          <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
-        </>
-      );
-
-      setShowDeleteConfirmationModal({
-        buttonLabel: isUnlink ? 'Unlink' : 'Delete',
-        onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
-        message: confirmMessage
-      });
-
-    } else {
-      onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
-    }
+    
 
     return;
   };

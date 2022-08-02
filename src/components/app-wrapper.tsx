@@ -2,25 +2,38 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
-import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
-import ErrorPorvider from '@isrd-isi-edu/chaise/src/providers/error';
-import { StrictMode, useEffect, useState } from 'react';
+// hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import ErrorModal from '@isrd-isi-edu/chaise/src/components/modals/error-modal';
-import LoginModal from '@isrd-isi-edu/chaise/src/components/modals/login-modal';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
+import { StrictMode, useEffect, useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
-import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import ErrorModal from '@isrd-isi-edu/chaise/src/components/modals/error-modal';
 import ExternalLinkModal from '@isrd-isi-edu/chaise/src/components/modals/external-link-modal';
-import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import LoginModal from '@isrd-isi-edu/chaise/src/components/modals/login-modal';
+
+// models
 import { ForbiddenAssetAccess, UnauthorizedAssetAccess } from '@isrd-isi-edu/chaise/src/models/errors';
+
+// providers
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
+import AuthnProvider from '@isrd-isi-edu/chaise/src/providers/authn';
+import ErrorProvider from '@isrd-isi-edu/chaise/src/providers/error';
+
+// services
+import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/services/config';
+
+// utils
+import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
 
 
 type AppWrapperProps = {
@@ -42,6 +55,8 @@ const AppWrapperInner = ({
   const [configDone, setConfigDone] = useState(false);
   const [externalLink, setExternalLink] = useState<string>('');
 
+  const { getSession, session } = useAuthn();
+
   useEffect(() => {
     /**
      * global error handler for uncaught errors
@@ -60,8 +75,8 @@ const AppWrapperInner = ({
       windowRef.location.reload();
     });
 
-    AuthnService.getSession('').then(() => {
-      return ConfigService.configure(appSettings);
+    getSession('').then((response: any) => {
+      return ConfigService.configure(appSettings, response);
     }).then(() => {
       setConfigDone(true);
     }).catch((err: any) => {
@@ -129,7 +144,7 @@ const AppWrapperInner = ({
           if (ermrestError instanceof ConfigService.ERMrest.UnauthorizedError) {
             ermrestError = new UnauthorizedAssetAccess();
           } else if (ermrestError instanceof ConfigService.ERMrest.ForbiddenError) {
-            ermrestError = new ForbiddenAssetAccess();
+            ermrestError = new ForbiddenAssetAccess(session);
           }
 
           // If an error occurs while a user is trying to download the file, allow them to dismiss the dialog
@@ -181,25 +196,27 @@ const AppWrapper = ({
   displaySpinner
 }: AppWrapperProps): JSX.Element => {
   return (
-    <ErrorPorvider>
-      <ConditionalWrapper
-        condition={includeAlerts === true}
-        wrapper={children => (
-          <AlertsProvider>
-            {children}
-          </AlertsProvider>
-        )}
-      >
-        <AppWrapperInner
-          appSettings={appSettings}
-          includeAlerts={includeAlerts}
-          includeNavbar={includeNavbar}
-          displaySpinner={displaySpinner}
+    <ErrorProvider>
+      <AuthnProvider>
+        <ConditionalWrapper
+          condition={includeAlerts === true}
+          wrapper={children => (
+            <AlertsProvider>
+              {children}
+            </AlertsProvider>
+          )}
         >
-          {children}
-        </AppWrapperInner>
-      </ConditionalWrapper>
-    </ErrorPorvider>
+          <AppWrapperInner
+            appSettings={appSettings}
+            includeAlerts={includeAlerts}
+            includeNavbar={includeNavbar}
+            displaySpinner={displaySpinner}
+          >
+            {children}
+          </AppWrapperInner>
+        </ConditionalWrapper>
+      </AuthnProvider>
+    </ErrorProvider>
   );
 };
 

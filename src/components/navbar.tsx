@@ -11,15 +11,21 @@ import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/login';
 import ChaiseLoginDropdown from '@isrd-isi-edu/chaise/src/components/login-dropdown';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/banner';
 
+// hooks
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// models
+import { NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
 // services
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { NoRecordRidError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // utilities
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import { getCatalogId, splitVersionFromCatalog } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import {
   MenuOption, NavbarBanner, addLogParams,
@@ -28,7 +34,6 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = getCatalogId();
@@ -37,6 +42,7 @@ const ChaiseNavbar = (): JSX.Element => {
   const settings = ConfigService.appSettings;
 
   const { dispatchError } = useError();
+  const { session } = useAuthn();
 
   const [formModel, setFormModel] = useState({ ridSearchTerm: '' });
   const [menu, setMenu] = useState<MenuOption[] | null>(null);
@@ -88,7 +94,7 @@ const ChaiseNavbar = (): JSX.Element => {
 
       // if acls.show is defined, process it
       if (isObjectAndNotNull(conf.acls) && Array.isArray(conf.acls.show)) {
-        if (!AuthnService.isGroupIncluded(conf.acls.show)) {
+        if (!isGroupIncluded(conf.acls.show, session)) {
           // don't add the banner because of acls
           return;
         }
@@ -311,16 +317,16 @@ const ChaiseNavbar = (): JSX.Element => {
     if (!menu) return;
 
     return menu.map((item: MenuOption, index: number) => {
-      if (!canShow(item)) return;
+      if (!canShow(item, session)) return;
 
-      if (!item.children || !canEnable(item)) {
+      if (!item.children || !canEnable(item, session)) {
         return (
           <Nav.Link
             key={index}
             href={item.url}
             target={item.newTab ? '_blank' : '_self'}
             onClick={(event) => handleOnLinkClick(event, item)}
-            className={'chaise-nav-item ' + menuItemClasses(item, false)}
+            className={'chaise-nav-item ' + menuItemClasses(item, session, false)}
             dangerouslySetInnerHTML={{ __html: renderName(item) }}
           />
         );

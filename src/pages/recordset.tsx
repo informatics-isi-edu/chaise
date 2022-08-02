@@ -3,6 +3,14 @@ import ReactDOM from 'react-dom';
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
+// hooks
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// model
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
@@ -14,9 +22,9 @@ import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-uti
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -27,6 +35,8 @@ const recordsetSettings = {
 };
 
 const RecordsetApp = (): JSX.Element => {
+  const { addAlert } = useAlert()
+  const { createPromptExpirationToken, session, showPreviousSessionAlert } = useAuthn();
   const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
@@ -47,10 +57,9 @@ const RecordsetApp = (): JSX.Element => {
 
       // TODO saved query?
 
-      // TODO show the session alert
-      // if (!session && Session.showPreviousSessionAlert()) {
-      //   AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
-      // }
+      if (!session && showPreviousSessionAlert()) {
+        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, createPromptExpirationToken, true);
+      }
 
       const logStack = [
         LogService.getStackNode(
