@@ -11,7 +11,7 @@ var EC = protractor.ExpectedConditions;
  */
 exports.openFacetAndTestFilterOptions = function (name, facetIdx, filterOptions, done) {
     // open facet
-    chaisePage.recordsetPage.getFacetHeaderButtonById(facetIdx).click().then(function () {
+    chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(facetIdx)).then(function () {
         // wait for facet to open
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(facetIdx)), browser.params.defaultTimeout);
 
@@ -101,7 +101,7 @@ exports.deleteDownloadedFiles = function (fileNames) {
 
 /**
  * Makes sure the options in the facet panel and modal are correct.
- * Assumptions: 
+ * Assumptions:
  *   - the facet is already open
  * @param  {int}   facetIdx         facet index
  * @param  {Array}   filterOptions   array of filter titles
@@ -126,7 +126,7 @@ exports.testFacetOptions = function (facetIdx, filterOptions, modalOptions) {
             opts.forEach(function (option, idx) {
                 expect(option.getText()).toEqual(filterOptions[idx], "facet options are incorrect");
             });
-            
+
             done();
         }).catch(function (err) {
             done.fail(err);
@@ -149,7 +149,7 @@ exports.testFacetOptions = function (facetIdx, filterOptions, modalOptions) {
             values.forEach(function (value, idx) {
                 expect(value.getText()).toEqual(modalOptions[idx], "modal options missmatch");
             });
-            
+
             return chaisePage.recordsetPage.getModalCloseBtn().click();
         }).then(function () {
             done();

@@ -1,4 +1,3 @@
-const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
@@ -371,7 +370,7 @@ describe("Other facet features, ", function() {
         var clearAll, showMore, sortBtn;
 
         beforeAll(function (done) {
-            
+
             // using browser.get with the same uri doesn't work, so we should just refresh
             chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
@@ -410,7 +409,7 @@ describe("Other facet features, ", function() {
                         values.forEach(function (val, idx) {
                             expect(val.getText()).toEqual(params.modalOptions[idx], "modal options missmatch");
                         });
-                        
+
                         done();
                     }).catch(chaisePage.catchTestError(done));
                 });
@@ -476,7 +475,7 @@ describe("Other facet features, ", function() {
                             values.forEach(function (val, idx) {
                                 expect(val.getText()).toEqual(params.modalOptionsSortedByNumOfOccurences[idx], "modal options missmatch");
                             });
-                            
+
                             done();
                         }).catch(chaisePage.catchTestError(done));
                     });
@@ -530,7 +529,7 @@ describe("Other facet features, ", function() {
                 opts.forEach(function (option, idx) {
                     expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the options are not the same.");
                 });
-                
+
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -553,7 +552,7 @@ describe("Other facet features, ", function() {
                 opts.forEach(function (option, idx) {
                     expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the text of selected faacet missmatch.");
                 });
-                
+
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(testParams.not_null.disabled_rows_w_not_null, "numer of disabled filters missmatch.");
                 expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.not_null.result_num_w_not_null, "number of results missmatch.");
 
@@ -733,58 +732,57 @@ describe("Other facet features, ", function() {
         });
     });
 
-    // TODO: uncomment when unsupported filters error implemented
-    // describe("regarding UnsupportedFilters handling, ", function () {
-    //     var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
-    //     var currParams = testParams.unsupported_filters_error;
+    describe("regarding UnsupportedFilters handling, ", function () {
+        var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var currParams = testParams.unsupported_filters_error;
 
-    //     beforeAll(function() {
-    //         var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
-    //         chaisePage.refresh(uri);
-    //         chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-    //     });
+        beforeAll(function() {
+            var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
+            chaisePage.refresh(uri);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
 
-    //     it('Proper error should be displayed', function(){
-    //         var modalTitle = chaisePage.errorModal.getTitle();
-    //         expect(modalTitle.getText()).toBe("Unsupported Filters");
-    //     });
+        it('Proper error should be displayed', function(){
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe("Unsupported Filters");
+        });
 
-    //     it('Error modal message must summarize the issue', function(){
-    //         var modalText = chaisePage.recordPage.getModalText();
-    //         expect(modalText.getText()).toEqual(currParams.errorMessage, "The message in modal pop is not correct");
-    //     });
+        it('Error modal message must summarize the issue', function(){
+            var modalText = chaisePage.recordPage.getModalText();
+            expect(modalText.getText()).toEqual(currParams.errorMessage, "The message in modal pop is not correct");
+        });
 
-    //     it('Error modal should Show Error Details', function(done){
-    //         var showDetails = chaisePage.errorModal.getToggleDetailsLink();
-    //         var errorDetails = chaisePage.errorModal.getErrorDetails();
-    //         chaisePage.waitForElement(showDetails);
-    //         showDetails.click().then(function(){
-    //             chaisePage.waitForElement(errorDetails);
-    //             expect(showDetails.getText()).toBe("Hide Error Details", "The Show/Hide message in modal pop is not correct");
-    //             expect(errorDetails.getText()).toEqual(currParams.errorDetails, "error missmatch.");
-    //             done();
-    //         }).catch(chaisePage.catchTestError(done));
-    //     });
+        it('Error modal should Show Error Details', function(done){
+            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
+            var errorDetails = chaisePage.errorModal.getErrorDetails();
+            chaisePage.waitForElement(showDetails);
+            showDetails.click().then(function(){
+                chaisePage.waitForElement(errorDetails);
+                expect(showDetails.getText()).toBe("Hide Error Details", "The Show/Hide message in modal pop is not correct");
+                expect(errorDetails.getText()).toEqual(currParams.errorDetails, "error missmatch.");
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
 
-    //     it('On click of OK button the page should dismiss the error and show proper results', function(done){
-    //         chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
-    //             // make sure it's showing proper number of values
-    //             browser.wait(function () {
-    //                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-    //                     return ct == currParams.numRows;
-    //                 });
-    //             }, browser.params.defaultTimeout);
+        it('On click of OK button the page should dismiss the error and show proper results', function(done){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+                // make sure it's showing proper number of values
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == currParams.numRows;
+                    });
+                }, browser.params.defaultTimeout);
 
-    //             return browser.driver.getCurrentUrl();
-    //         }).then (function(currentUrl) {
+                return browser.driver.getCurrentUrl();
+            }).then (function(currentUrl) {
 
-    //             var newURL = uriPrefix + "/*::facets::" + currParams.facetBlobAfterOK;
-    //             expect(currentUrl).toContain(newURL, "The redirection from record page to recordset in case of multiple records failed");
-    //             done();
-    //         }).catch(chaisePage.catchTestError(done));
-    //     });
+                var newURL = uriPrefix + "/*::facets::" + currParams.facetBlobAfterOK;
+                expect(currentUrl).toContain(newURL, "The redirection from record page to recordset in case of multiple records failed");
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
 
-    // });
+    });
 
     describe("regarding hide_row_count support in entity facet popups", function () {
         beforeAll(function (done) {
@@ -888,7 +886,7 @@ describe("Other facet features, ", function() {
             }, browser.params.defaultTimeout);
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
 
-            chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click().then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                 // wait for facet checkboxes to load
@@ -901,10 +899,15 @@ describe("Other facet features, ", function() {
                 // wait for list to be fully visible
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getFacetOptions(idx);
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
             }).then(function (opts) {
-                opts.forEach(function (option, idx) {
-                    expect(option.getText()).toEqual(customFilterParams.options[idx], "options missmatch.");
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFilterParams.options[i], `options missmatch, index=${i}`);
                 });
 
                 // select a new facet
@@ -927,178 +930,178 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        // TODO: facet doesn't resize to show options 8, 9, 10
-        // it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
-        //     expect(chaisePage.recordsetPage.getClearCustomFilters().isDisplayed()).toBeTruthy("`Clear Custom Filters` is not visible.");
+        it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
+            expect(chaisePage.recordsetPage.getClearCustomFilters().isDisplayed()).toBeTruthy("`Clear Custom Filters` is not visible.");
 
-        //     chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
-        //         chaisePage.waitForElementInverse(element(by.id("spinner")));
-        //         browser.wait(function () {
-        //             return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-        //                 return ct == customFilterParams.numRowsWOFilter;
-        //             });
-        //         }, browser.params.defaultTimeout);
+            chaisePage.clickButton(chaisePage.recordsetPage.getClearCustomFilters()).then(function () {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFilterParams.numRowsWOFilter;
+                    });
+                }, browser.params.defaultTimeout);
 
-        //         expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
+                expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRowsWOFilter, "total row count missmatch.");
 
-        //         browser.wait(function () {
-        //             return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
-        //                 return ct == customFilterParams.optionsWOFilter.length;
-        //             });
-        //         }, browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getFacetOptions(idx).count().then(function(ct) {
+                        return ct == customFilterParams.optionsWOFilter.length;
+                    });
+                }, browser.params.defaultTimeout);
 
-        //         return chaisePage.recordsetPage.getFacetOptions(idx);
-        //     }).then(function (opts) {
-        //         // TODO: facet doesn't resize to show options 8, 9, 10
-        //         opts.forEach(function (option, idx) {
-        //             expect(option.getText()).toEqual(customFilterParams.optionsWOFilter[idx], "options missmatch.");  
-        //         });
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFilterParams.optionsWOFilter[i], `options missmatch, index=${i}`);
+                });
 
-        //         done();
-        //     }).catch(chaisePage.catchTestError(done));
-        // });
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
     });
 
-    // TODO: add length limit alert to modal
-    // describe("regarding URL limitation check, ", function () {
-    //     var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
-    //     var clearAll;
-    //     var alert = chaisePage.recordsetPage.getWarningAlert();
-    //     var submitBtn = chaisePage.recordsetPage.getModalSubmit();
-    //     var idx = testParams.maximumLength.facetIdx;
-    //     var facet = chaisePage.recordsetPage.getFacetHeaderButtonById(idx);
+    describe("regarding URL limitation check, ", function () {
+        var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var clearAll;
+        var alert = chaisePage.recordsetPage.getWarningAlert();
+        var submitBtn = chaisePage.recordsetPage.getModalSubmit();
+        var idx = testParams.maximumLength.facetIdx;
+        var facet = chaisePage.recordsetPage.getFacetHeaderButtonById(idx);
 
-    //     var checkAlert = function (al) {
-    //         browser.wait(EC.visibilityOf(al, browser.params.defaultTimeout));
-    //         expect(al.getText()).toContain("WarningMaximum URL length reached. Cannot perform the requested action.", "alert message missmatch.");
-    //     };
+        var checkAlert = function (al) {
+            browser.wait(EC.visibilityOf(al, browser.params.defaultTimeout));
+            expect(al.getText()).toContain("WarningMaximum URL length reached. Cannot perform the requested action.", "alert message missmatch.");
+        };
 
-    //     beforeAll(function (done) {
-    //         chaisePage.refresh(uri);
-    //         chaisePage.waitForElementInverse(element(by.id("spinner")));
+        beforeAll(function (done) {
+            chaisePage.refresh(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-    //         clearAll = chaisePage.recordsetPage.getClearAllFilters();
-    //         browser.wait(EC.elementToBeClickable(clearAll));
+            clearAll = chaisePage.recordsetPage.getClearAllFilters();
+            browser.wait(EC.elementToBeClickable(clearAll));
 
-    //         //close the first facet
-    //         chaisePage.recordsetPage.getFacetHeaderButtonById(0).click().then(function () {
-    //             //close the second facet
-    //             return chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(1));
-    //         }).then(function () {
-    //             return clearAll.click();
-    //         }).then(function () {
-    //             chaisePage.waitForElementInverse(element(by.id("spinner")));
+            //close the first facet
+            chaisePage.recordsetPage.getFacetHeaderButtonById(0).click().then(function () {
+                //close the second facet
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(1));
+            }).then(function () {
+                return clearAll.click();
+            }).then(function () {
+                chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-    //             done();
-    //         }).catch(chaisePage.catchTestError(done));
-    //     });
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
 
-    //     it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
-    //         var mainSearch = chaisePage.recordsetPage.getMainSearchInput();
-    //         mainSearch.sendKeys(chance.string({length: 4000}));
-    //         chaisePage.recordsetPage.waitForInverseMainSpinner();
-    //         expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
-    //         checkAlert(alert);
-    //     });
+        it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
+            var mainSearch = chaisePage.recordsetPage.getMainSearchInput();
+            mainSearch.sendKeys(chance.string({length: 4000}));
+            chaisePage.recordsetPage.waitForInverseMainSpinner();
+            expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
+            checkAlert(alert);
+        });
 
-    //     describe("in facet modal, ", function () {
-    //         var modalAlert = chaisePage.recordsetPage.getModalWarningAlert(chaisePage.searchPopup.getFacetPopup());
-    //         beforeAll(function (done) {
-    //             chaisePage.clickButton(facet).then(function () {
-    //                 // wait for facet to open
-    //                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
+        describe("in facet modal, ", function () {
+            var modalAlert = chaisePage.recordsetPage.getModalWarningAlert(chaisePage.searchPopup.getFacetPopup());
+            beforeAll(function (done) {
+                chaisePage.clickButton(facet).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
-    //                 // click on show more
-    //                 var showMore = chaisePage.recordsetPage.getShowMore(idx);
-    //                 browser.wait(EC.elementToBeClickable(showMore));
-    //                 return chaisePage.clickButton(showMore);
-    //             }).then(function () {
-    //                 chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-    //                 done();
-    //             }).catch(chaisePage.catchTestError(done));
-    //         });
+                    // click on show more
+                    var showMore = chaisePage.recordsetPage.getShowMore(idx);
+                    browser.wait(EC.elementToBeClickable(showMore));
+                    return chaisePage.clickButton(showMore);
+                }).then(function () {
+                    chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
 
-    //         it ('after opening the modal, the existing url limit alert should be removed.', function () {
-    //             expect(modalAlert.isPresent()).toBeFalsy();
-    //         });
+            it ('after opening the modal, the existing url limit alert should be removed.', function () {
+                expect(modalAlert.isPresent()).toBeFalsy();
+            });
 
-    //         it ("alert should be displayed upon reaching the URL limit and submit button should be disabled.", function (done) {
-    //             chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn()).then(function () {
-    //                 // TODO: add length limit alert to modal
-    //                 // checkAlert(modalAlert);
-    //                 expect(submitBtn.getAttribute('disabled')).toBe('true', "submit is not disabled.");
-    //                 done();
-    //             }).catch(chaisePage.catchTestError(done));
-    //         });
+            it ("alert should be displayed upon reaching the URL limit and submit button should be disabled.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn()).then(function () {
+                    checkAlert(modalAlert);
+                    expect(submitBtn.getAttribute('disabled')).toBe('true', "submit is not disabled.");
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
 
-    //         it ("changing filters and going below the URL limit should hide the alert and enable the submit button.", function (done) {
-    //             chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(chaisePage.searchPopup.getFacetPopup(), 0)).then(function () {
-    //                 // TODO: add length limit alert to modal
-    //                 // chaisePage.waitForElementInverse(alert);
-    //                 expect(submitBtn.getAttribute('disabled')).not.toBe('true', "submit is disabled.");
-    //                 return chaisePage.clickButton(submitBtn);
-    //             }).then(function () {
-    //                 browser.wait(function () {
-    //                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-    //                         return ct == testParams.maximumLength.filteredNumRows;
-    //                     });
-    //                 }, browser.params.defaultTimeout);
-    //                 done();
-    //             }).catch(chaisePage.catchTestError(done));
-    //         });
-    //     });
+            it ("changing filters and going below the URL limit should hide the alert and enable the submit button.", function (done) {
+                chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(chaisePage.searchPopup.getFacetPopup(), 0)).then(function () {
+                    chaisePage.waitForElementInverse(alert);
+                    expect(submitBtn.getAttribute('disabled')).not.toBe('true', "submit is disabled.");
+                    return chaisePage.clickButton(submitBtn);
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.maximumLength.filteredNumRows;
+                        });
+                    }, browser.params.defaultTimeout);
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+        });
 
-    //     describe("in main container, ", function () {
-    //         var secondFacetIdx = testParams.maximumLength.secondFacetIdx;
+        describe("in main container, ", function () {
+            var secondFacetIdx = testParams.maximumLength.secondFacetIdx;
 
-    //         it ("alert should be displayed upon reaching the URL limit and the request should not be completed.", function (done) {
-    //             var secondFacet = chaisePage.recordsetPage.getFacetHeaderButtonById(secondFacetIdx);
+            it ("alert should be displayed upon reaching the URL limit and the request should not be completed.", function (done) {
+                var secondFacet = chaisePage.recordsetPage.getFacetHeaderButtonById(secondFacetIdx);
 
-    //             var secondFacetOption = chaisePage.recordsetPage.getFacetOption(
-    //                 secondFacetIdx,
-    //                 testParams.maximumLength.secondFacetOption
-    //             );
+                var secondFacetOption = chaisePage.recordsetPage.getFacetOption(
+                    secondFacetIdx,
+                    testParams.maximumLength.secondFacetOption
+                );
 
-    //             chaisePage.clickButton(secondFacet).then(function () {
-    //                 // wait for facet to open
-    //                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(secondFacetIdx)), browser.params.defaultTimeout);
+                chaisePage.clickButton(secondFacet).then(function () {
+                    // wait for facet to open
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(secondFacetIdx)), browser.params.defaultTimeout);
 
-    //                 browser.wait(function () {
-    //                     return chaisePage.recordsetPage.getFacetOptions(secondFacetIdx).count().then(function(ct) {
-    //                         return ct == testParams.maximumLength.secondFacetNumOptions;
-    //                     });
-    //                 }, browser.params.defaultTimeout);
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getFacetOptions(secondFacetIdx).count().then(function(ct) {
+                            return ct == testParams.maximumLength.secondFacetNumOptions;
+                        });
+                    }, browser.params.defaultTimeout);
 
-    //                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
+                    browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
 
-    //                 return secondFacetOption.click();
-    //             }).then(function () {
-    //                     checkAlert();
-    //                     expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
-    //                     done();
-    //             }).catch(chaisePage.catchTestError(done));
+                    return secondFacetOption.click();
+                }).then(function () {
+                        checkAlert(alert);
+                        expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
+                        done();
+                }).catch(chaisePage.catchTestError(done));
 
-    //         });
+            });
 
-    //         it ("changing filters and going below the URL limit should hide the alert.", function (done) {
-    //             var facetOption = chaisePage.recordsetPage.getFacetOption(
-    //                 idx,
-    //                 testParams.maximumLength.option
-    //             );
+            it ("changing filters and going below the URL limit should hide the alert.", function (done) {
+                var facetOption = chaisePage.recordsetPage.getFacetOption(
+                    idx,
+                    testParams.maximumLength.option
+                );
 
-    //             chaisePage.clickButton(facetOption).then(function () {
-    //                 browser.wait(function () {
-    //                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-    //                         return ct == testParams.maximumLength.filteredNumRows - 1;
-    //                     });
-    //                 }, browser.params.defaultTimeout);
-    //                 expect(alert.isPresent()).toBeFalsy("alert is visible");
-    //                 done();
-    //             }).catch(chaisePage.catchTestError(done));
-    //         });
-    //     });
+                chaisePage.clickButton(facetOption).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                            return ct == testParams.maximumLength.filteredNumRows - 1;
+                        });
+                    }, browser.params.defaultTimeout);
+                    expect(alert.isPresent()).toBeFalsy("alert is visible");
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+            });
+        });
 
-    // });
+    });
 
     describe("navigating to record and recordedit app with facets.", function () {
 
@@ -1347,7 +1350,7 @@ describe("Other facet features, ", function() {
             // main
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
 
-            chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click().then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                 // wait for facet checkboxes to load
@@ -1360,10 +1363,15 @@ describe("Other facet features, ", function() {
                 // wait for list to be fully visible
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-                return chaisePage.recordsetPage.getFacetOptions(idx);
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
             }).then(function (opts) {
-                opts.forEach(function (option, idx) {
-                    expect(option.getText()).toEqual(customFacetParams.options[idx], "options missmatch.");
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFacetParams.options[i], `options missmatch, index=${i}`);
                 });
 
                 // select a new facet
@@ -1387,28 +1395,35 @@ describe("Other facet features, ", function() {
             }).catch(chaisePage.catchTestError(done));
         });
 
-        // TODO: facet doesn't resize to show options 4 - 10
-        // it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
-        //     expect(chaisePage.recordsetPage.getClearCustomFacets().isDisplayed()).toBeTruthy("`Clear Custom Facets` is not visible.");
+        it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
+            expect(chaisePage.recordsetPage.getClearCustomFacets().isDisplayed()).toBeTruthy("`Clear Custom Facets` is not visible.");
 
-        //     chaisePage.recordsetPage.getClearCustomFacets().click().then(function () {
-        //         // wait for table rows to load
-        //         browser.wait(function () {
-        //             return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-        //                 return ct == customFacetParams.numRowsWOCustomFacet;
-        //             });
-        //         }, browser.params.defaultTimeout);
+            chaisePage.recordsetPage.getClearCustomFacets().click().then(function () {
+                // wait for table rows to load
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                        return ct == customFacetParams.numRowsWOCustomFacet;
+                    });
+                }, browser.params.defaultTimeout);
 
-        //         expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRowsWOCustomFacet, "total row count missmatch.");
+                expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRowsWOCustomFacet, "total row count missmatch.");
 
-        //         return chaisePage.recordsetPage.getFacetOptions(idx);
-        //     }).then(function (opts) {
-        //         opts.forEach(function (option, idx) {
-        //             expect(option.getText()).toEqual(customFacetParams.optionsWOCustomFacet[idx], "options missmatch.");
-        //         });
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
-        //         done();
-        //     }).catch(chaisePage.catchTestError(done));
-        // });
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFacetParams.optionsWOCustomFacet[i], `options missmatch, index=${i}`);
+                });
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
+        });
     });
 });

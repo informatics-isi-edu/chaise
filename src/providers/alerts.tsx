@@ -1,5 +1,4 @@
-import { createContext, useMemo, useState } from 'react';
-import { Variant } from 'react-bootstrap/esm/types';
+import { createContext, useMemo, useRef, useState } from 'react';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 // TODO should we move the types to somewhere else?
@@ -66,7 +65,8 @@ type AlertsProviderProps = {
  */
 export default function AlertsProvider({ children }: AlertsProviderProps): JSX.Element {
   const [alerts, setAlerts] = useState<ChaiseAlert[]>([]);
-  const [urlLimitAlert, setURLLimitAlert] = useState<ChaiseAlert|null>(null);
+  // const [urlLimitAlert, setURLLimitAlert] = useState<ChaiseAlert|null>(null);
+  const urlLimitAlert = useRef<ChaiseAlert|null>(null);
 
   /**
    * create add an alert
@@ -75,9 +75,9 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * @param onRemove the callback that will be called when the users remove the alert.
    * @return the newly created alert
    */
-  const addAlert: AddAlertFunction = (message: string, type: ChaiseAlertType, onRemove?: () => void, isSessionExpiredAlert?: boolean,  ) => {
+  const addAlert: AddAlertFunction = (message: string, type: ChaiseAlertType, onRemove?: () => void, isSessionExpiredAlert?: boolean) => {
     const newAlert = { message, type, onRemove, isSessionExpiredAlert };
-    setAlerts(alerts.concat(newAlert));
+    setAlerts((alerts) => [...alerts, newAlert]);
     return newAlert;
   };
 
@@ -101,19 +101,21 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
    * (we want to ensure only one alert is displayed at the time)
    */
   const addURLLimitAlert = () => {
-    if (urlLimitAlert) return;
-    setURLLimitAlert(
-      addAlert(MESSAGE_MAP.URLLimitMessage, ChaiseAlertType.WARNING)
-    );
+    // if (urlLimitAlert) return;
+    if (urlLimitAlert.current) return;
+    // setURLLimitAlert(
+      urlLimitAlert.current = addAlert(MESSAGE_MAP.URLLimitMessage, ChaiseAlertType.WARNING, () => urlLimitAlert.current = null)
+    // );
   };
 
   /**
    * Remove the URL limit alert
    */
   const removeURLLimitAlert = () => {
-    if (!urlLimitAlert) return;
-    removeAlert(urlLimitAlert);
-    setURLLimitAlert(null);
+    if (!urlLimitAlert.current) return;
+    removeAlert(urlLimitAlert.current);
+    urlLimitAlert.current = null;
+    // setURLLimitAlert(null);
   }
 
 

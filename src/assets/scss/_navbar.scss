@@ -18,14 +18,6 @@ body > .container {
     position: relative; // for z-index to work, position must be non-static
 }
 
-// default modal z-index is 1050 (for the first modal)
-// as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
-// we tried to be safe about it before by increasing it by only 1
-// TODO this needs to be adjusted
-.modal-login #navheader, .error-open #navheader {
-    z-index: 1501;
-}
-
 .navbar-inverse {
     background-color: #000;
     border-color: #000;

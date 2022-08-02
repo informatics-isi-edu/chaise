@@ -26,7 +26,7 @@ type TableHeaderProps = {
 const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const {
     logRecordsetClientAction,
-    colValues, page, pageLimit,
+    colValues, page, pageLimit, totalRowCountHasTimeoutError,
     reference, totalRowCount, update, addRecordRequests, isLoading
   } = useRecordset();
 
@@ -200,10 +200,14 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
         {page && page.length > 0 && renderPageSizeDropdown()}
         <span className='total-count-text'>
           {appendLabel()}
-          {/* TODO: error handling for table data. Requests timed out (alert icon) and push more rows pending (loader icon)
-            <span ng-if='vm.countError' className='glyphicon glyphicon-alert' uib-tooltip='Request timeout: total count cannot be retrieved. Refresh the page later to try again.' tooltip-placement='bottom'></span>
-            <span ng-show='vm.pushMoreRowsPending || (vm.config.displayMode.indexOf(recordsetDisplayModes.related) === 0 && !vm.hasLoaded)' className='glyphicon glyphicon-refresh glyphicon-refresh-animate'></span>
-           */}
+          {totalRowCountHasTimeoutError &&
+            <ChaiseTooltip
+              placement='bottom'
+              tooltip={'Request timeout: total count cannot be retrieved. Refresh the page later to try again.'}
+            >
+              <span className='timeout-icon fa-solid fa-triangle-exclamation' />
+            </ChaiseTooltip>
+          }
         </span>
       </div>
       <div className='col-xs-12 col-sm-6'>

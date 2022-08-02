@@ -14,6 +14,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/models/errors';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 function isErmrestErrorNeedReplace(error: any) {
   switch (error.constructor) {
@@ -67,7 +68,6 @@ const ErrorModal = (): JSX.Element | null => {
   let pageName = exception.errorData?.gotoTableDisplayname ? exception.errorData?.gotoTableDisplayname : 'Home Page',
     redirectLink = exception.errorData?.redirectUrl ? exception.errorData?.redirectUrl : cc.dataBrowser,
     subMessage = (exception.subMessage ? exception.subMessage : undefined),
-    stackTrace = ((exception.errorData && exception.errorData.stack) ? exception.errorData.stack : undefined),
     message = exception.message || ''; // initialize message to empty string if not defined
 
 
@@ -108,16 +108,6 @@ const ErrorModal = (): JSX.Element | null => {
       message += ' ' + MESSAGE_MAP.maybeNeedLogin;
     }
   }
-
-  //  TODO
-  // const isFirefox = typeof InstallTrigger !== 'undefined';
-  // const isChrome = !!window.chrome && !!window.chrome.webstore;
-  // // If browser is chrome then use stack trace which has "Error"  appended before the trace
-  // // Else append subMessage before the trace to complete the message as FF does not generate sufficient error text
-  // if (stackTrace) {
-  //     subMessage = (subMessage && !isChrome) ? (subMessage + "\n   " + stackTrace.split("\n").join("\n   ")) : stackTrace;
-  // }
-
 
   // --------------- the click action message -------------------//
   let clickActionMessage = exception.errorData?.clickActionMessage;
@@ -211,9 +201,26 @@ const ErrorModal = (): JSX.Element | null => {
     setShowSubMessage((prev) => !prev);
   }
 
+  /**
+   * move the error down so navbar is visible
+   */
+  const moveErrorModal = (node: HTMLElement) => {
+    const mainnav = document.querySelector('#navheader') as HTMLElement;
+    if (!mainnav) return;
+
+    node.style.top = `${mainnav.offsetHeight}px`;
+
+    // if the size of navbar changed, change the offset
+    new ResizeSensor(mainnav, () => {
+      node.style.top = `${mainnav.offsetHeight}px`;
+    });
+  };
+
   return (
     <Modal
       className='modal-error'
+      backdropClassName='modal-error-backdrop'
+      onEntered={moveErrorModal}
       scrollable
       show={true}
       onHide={closeCallback}

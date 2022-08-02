@@ -347,7 +347,7 @@ const Faceting = ({
    * @returns
    */
   const updateRecordsetReference = (newRef: any, index: number, cause: string, keepRef?: boolean, resetAllOpenFacets?: boolean) => {
-    if (!checkReferenceURL(newRef)) {
+    if (!checkReferenceURL(newRef,!keepRef)) {
       return false;
     }
 

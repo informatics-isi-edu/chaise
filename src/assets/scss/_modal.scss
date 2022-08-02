@@ -33,9 +33,11 @@
 /******** Popup modal for login instructions ********/
 .modal-login-instruction-backdrop {
   opacity: 0.7 !important;
+  z-index: 1035; // less than the modal itself
 }
 
 .modal-login-instruction {
+  z-index: 1036; // less than navbar
   .modal-dialog {
     position: absolute;
     top: 50%;
@@ -63,9 +65,15 @@
 }
 
 /******* Popup modal for error ********/
+// NOTE less than the navbar z-index
+.modal-error-backdrop {
+  z-index: 1035; // less than the modal itself
+}
 
 .modal-error {
+  z-index: 1036; // less than navbar
   overflow: hidden;
+
   .no-word-break {
     white-space: nowrap;
   }

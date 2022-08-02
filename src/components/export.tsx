@@ -23,7 +23,10 @@ type ExportProps = {
   disabled: boolean;
 };
 
-const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
+const Export = ({
+  reference,
+  disabled
+}: ExportProps): JSX.Element => {
   /**
    * State variable to export options
    */
@@ -47,23 +50,28 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
 
   useEffect(() => {
     const options: any = [];
+    try {
+      if (reference) {
+        if (reference.csvDownloadLink) {
+          options.push({
+            displayname: 'Search results (CSV)',
+            type: 'DIRECT',
+          });
+        }
 
-    if (reference) {
-      if (reference.csvDownloadLink) {
-        options.push({
-          displayname: 'Search results (CSV)',
-          type: 'DIRECT',
-        });
+        const templates = reference.getExportTemplates(
+          !ConfigService.chaiseConfig.disableDefaultExport
+        );
+
+        // Update the list of templates in UI
+        options.push(...templates);
+
+        setOptions(options);
       }
-
-      const templates = reference.getExportTemplates(
-        !ConfigService.chaiseConfig.disableDefaultExport
-      );
-
-      // Update the list of templates in UI
-      options.push(...templates);
-
-      setOptions(options);
+    } catch (exp) {
+      // fail silently
+      // if there's something wrong with the reference, other parts
+      // of the page have already thrown an error.
     }
 
   }, [reference]);
@@ -75,8 +83,7 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
    */
   const startExporting = (option: any) => () => {
     const formatType = option.type;
-
-    switch(formatType) {
+    switch (formatType) {
       case 'DIRECT':
         location.href = reference.csvDownloadLink;
         break;
@@ -99,14 +106,14 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
         setExporterObj(exporter);
         if (exporter) {
           const logStack = LogService.addExtraInfoToStack(null, {
-              template: {
-                  displayname: exporter.template.displayname,
-                  type: exporter.template.type
-              }
+            template: {
+              displayname: exporter.template.displayname,
+              type: exporter.template.type
+            }
           });
           const logObj = {
-              action: LogService.getActionString(LogActions.EXPORT),
-              stack: logStack
+            action: LogService.getActionString(LogActions.EXPORT),
+            stack: logStack
           }
           exporter
             .run(logObj)
@@ -155,38 +162,38 @@ const Export = ({ reference, disabled }: ExportProps): JSX.Element => {
   };
 
   const renderExportIcon = () => {
-    return <span className='chaise-btn-icon fa-solid fa-file-export'/>;
+    return <span className='chaise-btn-icon fa-solid fa-file-export' />;
   };
 
   return (
     <>
-        <Dropdown className='export-menu' onClick={() => setShowTooltip(false)}>
-          <OverlayTrigger
-            placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
-            overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
-            onToggle={(next: boolean) => setShowTooltip(next)}
-            show={showTooltip}
+      <Dropdown className='export-menu' onClick={() => setShowTooltip(false)}>
+        <OverlayTrigger
+          placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
+          overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
+          onToggle={(next: boolean) => setShowTooltip(next)}
+          show={showTooltip}
+        >
+          <Dropdown.Toggle
+            disabled={disabled || !!selectedOption || options.length === 0}
+            className='chaise-btn chaise-btn-primary'
           >
-            <Dropdown.Toggle
-              disabled={disabled || !!selectedOption || options.length === 0}
-              className='chaise-btn chaise-btn-primary'
+            {renderExportIcon()}
+            <span>Export</span>
+          </Dropdown.Toggle>
+        </OverlayTrigger>
+        <Dropdown.Menu>
+          {options.map((option: any, index: number) => (
+            <Dropdown.Item
+              className={`export-menu-item export-${makeSafeIdAttr(option.displayname)}`}
+              key={`export-${index}`}
+              onClick={startExporting(option)}
             >
-              {renderExportIcon()}
-              <span>Export</span>
-            </Dropdown.Toggle>
-          </OverlayTrigger>
-          <Dropdown.Menu>
-            {options.map((option: any, index: number) => (
-              <Dropdown.Item
-                className={`export-menu-item export-${makeSafeIdAttr(option.displayname)}`}
-                key={`export-${index}`}
-                onClick={startExporting(option)}
-              >
-                {option.displayname}
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown>
+              {option.displayname}
+            </Dropdown.Item>
+          ))}
+        </Dropdown.Menu>
+      </Dropdown>
 
       <ExportModal
         title={`Exporting ${selectedOption ? selectedOption.displayname : ''}`}

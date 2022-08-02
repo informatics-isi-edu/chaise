@@ -28,7 +28,6 @@ export type RecordestModalProps = {
   comment?: string,
   /**
    * The function that will be called on each row change.
-   * if it returns "false", the submit button will be disabled.
    * NOTE The actual callback that we're sending to recordset is not this one,
    * and instead is just going to call this function. This is done this way
    * so we can apply the logic to disable the submit button
@@ -135,8 +134,10 @@ const RecordsetModal = ({
 
   //-------------------  UI related callbacks:   --------------------//
   const onSelectedRowsChangedWrapper = (selectedRows: SelectedRow[]) => {
-    $log.debug('on selected rows changed called');
     setSubmittedRows(selectedRows);
+    if (onSelectedRowsChanged) {
+      return onSelectedRowsChanged(selectedRows);
+    }
     // allow the selected rows to change and UI shows the selected
     return true;
   };

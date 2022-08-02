@@ -1118,20 +1118,24 @@ var recordsetPage = function() {
     }
 
     this.getFacetOptionsText = function (idx) {
-        return browser.executeScript("return $('.fc-" + idx + " .chaise-checkbox label').map(function(i, a) { return a.textContent.trim(); });");
+      return browser.executeScript(`
+        return Array.from(document.querySelectorAll('.fc-${idx} .chaise-checkbox label')).map((el) => el.textContent.trim())
+      `);
     }
 
     // just getting the text content returns a stringified JSON value (that is not properly stringified) with hidden characters, stringifying that shows the hidden characters
     // but if we parse the odd stringfied version to JSON then stringify it, we can effectively clean up those hidden characters and get a simple string reprsentation
     this.getJsonbFacetOptionsText = function (idx) {
-        return browser.executeScript("return $('.fc-" + idx + " .chaise-checkbox label').map(function(i, a) { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} });");
+      return browser.executeScript(`
+        return Array.from(document.querySelectorAll('.fc-${idx} .chaise-checkbox label')).map((el) =>  { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} })
+      `);
     }
 
     // NOTE: keeping around until angular apps are rewritten
     this.getAngularFacetOption = function (idx, option) {
         return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
     }
-    
+
     this.getFacetOption = function (idx, option) {
         return element(by.css(".fc-" + idx)).element(by.css(".checkbox-" + option));
     }

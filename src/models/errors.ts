@@ -52,12 +52,7 @@ export class ChaiseError {
        * the text that will be displayed for the continue button
        */
       continueBtnText?: string,
-      continueCB?: Function,
-
-      /**
-       * the error stack
-       */
-      stack?: any
+      continueCB?: Function
     }
   ) { }
 }
@@ -109,8 +104,6 @@ export class MultipleRecordError extends ChaiseError {
       {
         redirectUrl,
         gotoTableDisplayname: tableDisplayName,
-        // TODO does this even make sense?
-        stack: (new Error()).stack,
         clickActionMessage: MESSAGE_MAP.clickActionMessage.multipleRecords
       }
     );

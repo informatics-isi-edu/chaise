@@ -11,8 +11,8 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
-import { NormalModule } from 'webpack';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 /**
  * types related to the update function
@@ -75,6 +75,14 @@ export const RecordsetContext = createContext<{
    */
   isLoading: boolean,
   /**
+   * whether we got a timeout error while fetching main entity
+   */
+  hasTimeoutError: boolean,
+  /**
+   * whether we got a timeout error while fetching count
+   */
+  totalRowCountHasTimeoutError: boolean
+  /**
    * Whether the main data has been initialized or not
    */
   isInitialized: boolean,
@@ -136,7 +144,7 @@ export const RecordsetContext = createContext<{
    *   - will return false
    * otherwise it will return true.
    */
-  checkReferenceURL: (ref: any) => boolean,
+  checkReferenceURL: (ref: any, showAlert?: boolean) => boolean,
   /**
    * the ref for the addRecordRequests
    * can be used to see if there are any pending create requests
@@ -257,19 +265,35 @@ export default function RecordsetProvider({
   });
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
-   * and see whether we actually want to update it or not.
+   *
+   * if case of facet popup, "false" means:
+   *   - show the url length error
+   * in other cases it means stop changing the selected rows
    */
   const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
     setStateSelectedRows((prevRows: SelectedRow[]) => {
       const res = typeof param === 'function' ? param(prevRows) : param;
-      if (onSelectedRowsChanged && onSelectedRowsChanged(res) === false) {
-        return prevRows;
+      if (onSelectedRowsChanged) {
+        const temp = onSelectedRowsChanged(res);
+        if (config.displayMode === RecordsetDisplayMode.FACET_POPUP) {
+          if (temp === false) {
+            addURLLimitAlert();
+          } else {
+            removeURLLimitAlert();
+          }
+        } else {
+          return prevRows;
+        }
+
       }
       return res;
     });
   };
 
   const [forceShowSpinner, setForceShowSpinner] = useState(false);
+
+  const [hasTimeoutError, setHasTimeoutError] = useState(false);
+  const [totalRowCountHasTimeoutError, setHasCountTimeoutError] = useState(false);
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
@@ -294,14 +318,16 @@ export default function RecordsetProvider({
     }, reference.defaultLogInfo)
   };
 
-  const checkReferenceURL = (ref: any): boolean => {
+  const checkReferenceURL = (ref: any, showAlert = true): boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
     if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
 
       $log.warn('url length limit will be reached!');
 
       // show the alert (the function will handle just showing one alert)
-      addURLLimitAlert();
+      if (showAlert) {
+        addURLLimitAlert();
+      }
 
       // TODO I should be able to pass the function from the comp to this provider
       // // scroll to top of the container so users can see the alert
@@ -312,7 +338,9 @@ export default function RecordsetProvider({
     }
 
     // remove the alert if it's present since we don't need it anymore
-    removeURLLimitAlert();
+    if (showAlert) {
+      removeURLLimitAlert();
+    }
     return true;
   };
 
@@ -366,7 +394,7 @@ export default function RecordsetProvider({
 
     // options:
     const sameCounter = options && options.sameCounter === true;
-    const cause = options && typeof options.cause === 'string' ?  options.cause : undefined;
+    const cause = options && typeof options.cause === 'string' ? options.cause : undefined;
     const resetAllOpenFacets = options && options.resetAllOpenFacets === true;
 
 
@@ -443,7 +471,7 @@ export default function RecordsetProvider({
     LogService.updateStackFilterInfo(flowControl.current.getTableLogStack(), reference.filterLogInfo);
 
     // update the resultset
-    updateMainEntity(updatePage, false);
+    updateMainEntity(updatePage);
 
     // the aggregates are updated when the main entity request is done
 
@@ -469,11 +497,10 @@ export default function RecordsetProvider({
  * Given the tableModel object, will get the values for main entity and
  * attach them to the model.
  * @param  {function} updatePageCB The update page callback which we will call after getting the result.
- * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
  * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
-  const updateMainEntity = (updatePageCB: Function, hideSpinner: boolean, notTerminal?: boolean, cb?: Function) => {
+  const updateMainEntity = (updatePageCB: Function, notTerminal=false, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -483,7 +510,7 @@ export default function RecordsetProvider({
 
     (function (currentCounter) {
       printDebugMessage('updating result', currentCounter);
-      readMainEntity(hideSpinner, currentCounter).then((res: any) => {
+      readMainEntity(currentCounter).then((res: any) => {
         afterUpdateMainEntity(res, currentCounter);
 
         // TODO
@@ -499,24 +526,21 @@ export default function RecordsetProvider({
         afterUpdateMainEntity(true, currentCounter);
         if (cb) cb(self, true);
 
-        // TODO
         // show modal with different text if 400 Query Timeout Error
-        // if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-        // clear the data shown in the table
-        // self.setPage(null);
-        // self.tableError = true;
+        if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+          // clear the data shown in the table
+          setPage(null);
+          setColValues([]);
 
-        // if (!notTerminal) {
-        //   err.subMessage = err.message;
-        //   err.message = `The result set cannot be retrieved. Try the following to reduce the query time:\n${MESSAGE_MAP.queryTimeoutList}`;
-        //   $log.warn(err);
-        //   // TODO dispatch the error
-        //   // ErrorService.handleException(err, true);
-        // }
-        // } else {
-        // TODO dispatch the error
+          setHasTimeoutError(true);
+          if (!notTerminal) {
+            err.subMessage = err.message;
+            err.message = `The result set cannot be retrieved. Try the following to reduce the query time:\n${MESSAGE_MAP.queryTimeoutList}`;
+            dispatchError({error: err, isDismissible: true});
+            return;
+          }
+        }
         dispatchError({ error: err });
-        // }
       });
     }(flowControl.current.queue.counter));
   }
@@ -536,7 +560,7 @@ export default function RecordsetProvider({
     printDebugMessage(`after result update: ${res ? 'successful.' : 'unsuccessful.'}`, counter);
   }
 
-  const readMainEntity = (hideSpinner: boolean, counterer: number) => {
+  const readMainEntity = (counterer: number) => {
     flowControl.current.dirtyResult = false;
     setIsLoading(true);
 
@@ -718,14 +742,13 @@ export default function RecordsetProvider({
     reference.getAggregates(
       aggList,
       { action: flowControl.current.getTableLogAction(action), stack: stack }
-    ).then(function getAggregateCount(response: any) {
+    ).then((response: any) => {
       if (current !== flowControl.current.queue.counter) {
         defer.resolve(false);
         return defer.promise;
       }
 
-      // TODO
-      // vm.countError = false;
+      setHasCountTimeoutError(false);
       setTotalRowCount(response[0]);
 
 
@@ -739,11 +762,9 @@ export default function RecordsetProvider({
         return defer.promise;
       }
 
-      // TODO
-      // if (err instanceof ERMrest.QueryTimeoutError) {
-      //   // separate from hasError above
-      //   vm.countError = true;
-      // }
+      if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+        setHasCountTimeoutError(true);
+      }
 
       // fail silently
       setTotalRowCount(null);
@@ -975,6 +996,8 @@ export default function RecordsetProvider({
       logRecordsetClientAction,
       reference,
       isLoading,
+      hasTimeoutError,
+      totalRowCountHasTimeoutError,
       isInitialized,
       initialize,
       update,
@@ -993,7 +1016,11 @@ export default function RecordsetProvider({
       forceShowSpinner,
       setForceShowSpinner
     };
-  }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
+  }, [
+    reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
+    isInitialized, page, colValues,
+    disabledRows, selectedRows, columnModels, totalRowCount
+  ]);
 
   return (
     <RecordsetContext.Provider value={providerValue}>

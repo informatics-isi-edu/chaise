@@ -3,26 +3,6 @@
 
 .chaise-body {
   .recordset-container {
-    // customize the default width for recordset
-    .top-panel-container {
-      .top-flex-panel {
-        .top-left-panel {
-          &.open-panel {
-            width: 21vw;
-          }
-        }
-      }
-    }
-    .bottom-panel-container {
-      .side-panel-resizable {
-        &.open-panel {
-          width: 21vw;
-        }
-      }
-    }
-  }
-
-  .recordset-container {
     .top-panel-container {
       .top-flex-panel .top-left-panel div.panel-header {
         bottom: 10px;

@@ -25,6 +25,7 @@ const RecordsetTable = ({
   const {
     reference,
     isInitialized,
+    hasTimeoutError,
     page,
     columnModels,
     colValues,
@@ -225,7 +226,7 @@ const RecordsetTable = ({
               placement='right'
               tooltip={'Deselect all rows on this page.'}
             >
-              <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
+              <button className='chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={DeselectAllOnPage}
               >
                 <span className='chaise-btn-icon fa-regular fa-square'></span>
@@ -324,13 +325,31 @@ const RecordsetTable = ({
   }
 
   const renderRows = () => {
+    if (hasTimeoutError) {
+      return (
+        <tr>
+          <td colSpan={columnModels.length + 1} className='full-col-span-row'>
+            <span>
+              Result Retrieval Failed
+              <ChaiseTooltip
+                placement='bottom'
+                tooltip={MESSAGE_MAP.queryTimeoutTooltip}
+              >
+                <span className='fa-solid fa-triangle-exclamation' style={{paddingLeft: '4px'}} />
+              </ChaiseTooltip>
+            </span>
+          </td>
+        </tr>
+      )
+    }
+
     // we need to check colValues since they might be set in different times
     if (!page) return;
 
     if (page.length === 0) {
       return (
         <tr>
-          <td id='no-results-row' colSpan={columnModels.length + 1} style={{ textAlign: 'center' }}>
+          <td id='no-results-row' colSpan={columnModels.length + 1} className='full-col-span-row'>
             <span>No Results Found</span>
           </td>
         </tr>
