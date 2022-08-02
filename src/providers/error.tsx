@@ -3,8 +3,10 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-type LoginModalProps = {
+export type LoginModalProps = {
   title: string;
+  onModalCloseSuccess?: Function,
+  onModalClose?: Function
 };
 
 interface ChaiseError {
@@ -28,6 +30,7 @@ export const ErrorContext = createContext<{
   loginModal: LoginModalProps | null;
   showLoginModal: (props: LoginModalProps) => void;
   hideLoginModal: () => void;
+  setLoginFunction: Function;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -42,11 +45,12 @@ type ErrorProviderProps = {
  * The whole app should be wrapped in this provider, and then we should
  * use the error hooks for catching or showing errors
  */
-export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Element {
+export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Element {
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
   const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);
 
+  let callLoginFunction: Function;
   const showLoginModal = (props: LoginModalProps)  => {
     if (!loginModal) {
       setLoginModal(props);
@@ -73,15 +77,8 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
     // NOTE this is for 401 errors that are manually thrown
     //      401 errors that are thrown from ermrestjs are handled by setting the 401Handler
     if (payload.error instanceof windowRef.ERMrest.UnauthorizedError) {
-      // TODO 401 handling
       // Unauthorized (needs to login)
-      // Session.loginInAModal(function () {
-      //   if (Session.shouldReloadPageAfterLogin()) {
-      //     window.location.reload();
-      //   } else if (!Session.isSameSessionAsPrevious()) {
-      //     handleException(new Errors.DifferentUserConflictError(Session.getSessionValue(), Session.getPrevSessionValue()), false);
-      //   }
-      // });
+      callLoginFunction();
       return;
     }
 
@@ -96,6 +93,11 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
 
     setErrors((errors) => [...errors, payload])
   };
+
+  // set function registered from child provider (authn provider)
+  const setLoginFunction = (cb: Function) => {
+    callLoginFunction = cb;
+  }
 
   /**
    * Log the given error as a terminal error
@@ -127,7 +129,8 @@ export default function ErrorPorvider({ children }: ErrorProviderProps): JSX.Ele
       logTerminalError,
       loginModal,
       showLoginModal,
-      hideLoginModal
+      hideLoginModal,
+      setLoginFunction
     };
   }, [errors, loginModal])
 

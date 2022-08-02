@@ -1,30 +1,32 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_modal.scss';
 
-import { useEffect, useState } from 'react';
-
 // components
 import Modal from 'react-bootstrap/Modal';
 
+// hooks
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import { useEffect, useState } from 'react';
+
 // models
 import { Client } from '@isrd-isi-edu/chaise/src/models/user';
-
-// utilities
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 
 
 const ProfileModal = ({
   showProfile, setShowProfile,
 }: any): JSX.Element | null => {
-  const user = AuthnService.session;
-  const userDisplay = user ? (user.client.full_name || user.client.display_name || user.client.email || user.client.id) : '';
+  const { session } = useAuthn();
 
   const [initialized, setInitialzed]          = useState<boolean>(false);
   const [identities, setIdentities]           = useState<string[]>([]);
   const [globusGroupList, setGlobusGroupList] = useState<Client[]>([]);
   const [otherGroups, setOtherGroups]         = useState<Client[]>([]);
+  const [userDisplay, setUserDisplay]         = useState<string>('')
 
   useEffect(() => {
-    if (!user || initialized) return;
+    if (!session || initialized) return;
+    const user = session;
+    const userDisplayVar = (user.client.full_name || user.client.display_name || user.client.email || user.client.id)
+    setUserDisplay(userDisplayVar);
 
     const tempIdentities = [];
     for (let i = 0; i < user.client.identities.length; i++) {
@@ -36,7 +38,7 @@ const ProfileModal = ({
       tempOtherGroups = [];
     for (let i = 0; i < user.attributes.length; i++) {
       const tempUserAttr = JSON.parse(JSON.stringify(user.attributes[i]));
-      if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplay && tempIdentities.indexOf(tempUserAttr.id) === -1) {
+      if (tempUserAttr.display_name && tempUserAttr.display_name !== userDisplayVar && tempIdentities.indexOf(tempUserAttr.id) === -1) {
         if (tempUserAttr.id.indexOf('https://auth.globus.org/') === 0) {
           tempUserAttr.truncated_id = tempUserAttr.id.substring(24);
           tempGlobusGroupList.push(tempUserAttr);
@@ -49,10 +51,10 @@ const ProfileModal = ({
     setGlobusGroupList(tempGlobusGroupList);
     setOtherGroups(tempOtherGroups);
     setInitialzed(true);
-  });
+  }, [session]);
 
   // the profile modal only makes sense when we have a user
-  if (!user) {
+  if (!session) {
     return null;
   }
 
@@ -65,19 +67,19 @@ const ProfileModal = ({
     return (<>
       <tr>
         <td className='text-left'>Id</td>
-        <td className='text-left profileValue'>{user.client.id}</td>
+        <td className='text-left profileValue'>{session.client.id}</td>
       </tr>
       <tr>
         <td className='text-left'>Display Name</td>
-        <td className='text-left profileValue'>{user.client.display_name}</td>
+        <td className='text-left profileValue'>{session.client.display_name}</td>
       </tr>
       <tr>
         <td className='text-left'>Full Name</td>
-        <td className='text-left profileValue'>{user.client.full_name}</td>
+        <td className='text-left profileValue'>{session.client.full_name}</td>
       </tr>
       <tr>
         <td className='text-left'>Email</td>
-        <td className='text-left profileValue'>{user.client.email}</td>
+        <td className='text-left profileValue'>{session.client.email}</td>
       </tr>
     </>)
   };

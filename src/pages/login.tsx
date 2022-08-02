@@ -12,10 +12,14 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
-// services
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+// hooks
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+
+// models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
@@ -38,19 +42,19 @@ export type loginForm = {
 const LoginPopupApp = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
 
+  const { logoutWithoutRedirect, refreshLogin, session } = useAuthn();
+
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
-    const authnRes = AuthnService.session;
-
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
     let hasGroup = false;
 
     // only check if the user has the group if the config is valid
-    if (validConfig && authnRes) {
+    if (validConfig && session) {
       // if the user does have the defined group, continue with auto close and reload of the application
-      hasGroup = authnRes.attributes.filter(function (attr) {
+      hasGroup = session.attributes.filter(function (attr) {
         return attr.id === cc.termsAndConditionsConfig.groupId;
       }).length > 0;
     }
@@ -71,12 +75,12 @@ const LoginPopupApp = (): JSX.Element => {
         // ]
         const userProfilePath = '/ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip';
 
-        // if hasGroup is true, then authnRes has to be defined
-        if (validConfig && authnRes) {
+        // if hasGroup is true, then session has to be defined
+        if (validConfig && session) {
           const rows = [{
-            'id': authnRes.client.id,
-            'display_name': authnRes.client.display_name,
-            'full_name': authnRes.client.full_name
+            'id': session.client.id,
+            'display_name': session.client.display_name,
+            'full_name': session.client.full_name
           }]
 
           // we only want to force adding to this group if the termsAndConditionsConfig is defined
@@ -104,13 +108,13 @@ const LoginPopupApp = (): JSX.Element => {
       setShowInstructions(!hasGroup);
       // if this login process is used for verifying group membership, that group is REQUIRED to have an active login
       // log the user out if they don't have the group
-      AuthnService.logoutWithoutRedirect(LogActions.VERIFY_GLOBUS_GROUP_LOGOUT);
+      logoutWithoutRedirect(LogActions.VERIFY_GLOBUS_GROUP_LOGOUT);
     }
   }, []);
 
   const reLogin = () => {
     setShowSpinner(true);
-    AuthnService.refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
+    refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
       setShowSpinner(false);
 
       window.location = redirectUrl;
