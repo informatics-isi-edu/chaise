@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
@@ -20,28 +20,22 @@ import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
-type GetSessionFunction = (
-  context: string
-) => Promise<Session | null>;
-
-type LogoutFunction = (
-  action: string
-) => void;
-
 // TODO function types
 
 export const AuthnContext = createContext<{
-  getSession: GetSessionFunction,
-  isSameSessionAsPrevious: Function,
-  loginInAModal: Function,
-  logout: LogoutFunction,
-  logoutWithoutRedirect: Function,
-  popupLogin: Function,
-  prevSession: Session | null,
-  refreshLogin: Function,
-  session: Session | null,
-  shouldReloadPageAfterLogin: Function,
-  validateSessionBeforeMutation: Function
+  createPromptExpirationToken: () => void;
+  getSession: (context: string) => Promise<Session | null>;
+  isSameSessionAsPrevious: (serverSession: Session | null) => boolean;
+  loginInAModal: (notifyErmrestCB: Function, notifyErmrestRejectCB: Function, logAction: string) => void;
+  logout: (action: string) => void;
+  logoutWithoutRedirect: (action: string) => void;
+  popupLogin: (logAction: string | null, postLoginCB?: Function) => void;
+  prevSession: Session | null;
+  refreshLogin: (action: string) => Promise<string | Error>;
+  session: Session | null;
+  shouldReloadPageAfterLogin: (serverSession: Session | null) => boolean;
+  showPreviousSessionAlert: () => boolean;
+  validateSessionBeforeMutation: (cb: any) => void;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -58,13 +52,23 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
-  const { dispatchError, hideLoginModal, showLoginModal } = useError();
+  const { dispatchError, hideLoginModal, showLoginModal, setLoginFunction } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
-  // const [sameSessionAsPrevious, setSameSessionAsPrevious] = useState<boolean>(false);
-  let sameSessionAsPrevious = false;
   const _changeCbs: any = {};
   let _counter = 0;
+
+  useEffect(() => {
+    setLoginFunction(() => {
+      loginInAModal(function (response: any) {
+        if (shouldReloadPageAfterLogin(session)) {
+          window.location.reload();
+        } else if (!isSameSessionAsPrevious(response)) {
+          dispatchError({ error: new DifferentUserConflictError(session, prevSession) });
+        }
+      }, null, LogActions.LOGIN_LOGIN_MODAL)
+    })
+  }, [setLoginFunction])
 
   const _executeListeners = () => {
     for (const k in _changeCbs) {
@@ -130,16 +134,25 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
   };
 
-  const isSameSessionAsPrevious = (serverSession: any) => {
-    return (prevSession?.client.id === serverSession?.client.id);
+  const createPromptExpirationToken = () => {
+    _createToken(PROMPT_EXPIRATION_KEY);
+  }
+
+  // if there's a previous login token AND
+  // the prompt expiration token does not exist OR it has expired
+  const showPreviousSessionAlert = () => {
+    return (_keyExistsInStorage(PREVIOUS_SESSION_KEY) && (!_keyExistsInStorage(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
+  }
+
+  const isSameSessionAsPrevious = (sessionParam: Session | null) => {
+    return (prevSession?.client.id === sessionParam?.client.id);
   }
 
   // Checks for a session or previous session being set, if neither allow the page to reload
   // the page will reload after login when the page started with no user
   //  can become null if getSession is called and the session has timed out or the user logged out
-  const shouldReloadPageAfterLogin = (serverSession: any) => {
-    // TODO: make sure this works how we expect with state variables
-    if (serverSession === null && prevSession === null) return true;
+  const shouldReloadPageAfterLogin = (sessionParam: Session | null) => {
+    if (sessionParam === null && prevSession === null) return true;
     return false;
   };
 
@@ -152,7 +165,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         // fetches the session of the user that just logged in
         getSession('').then((response: any) => {
           // TODO: make sure this works how we expect with state variables
-          if (!shouldReloadPageAfterLogin(response)) {
+          if (!shouldReloadPageAfterLogin(session)) {
             alert(`${response.client.full_name} logged in`);
           } else {
             windowRef.location.reload();
@@ -180,7 +193,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
   };
 
-  // NOTE: serverSession attached so it can be passed back to callbacks for comparisons since functions execute synchronously
+  // NOTE: sessionParam attached so it can be passed back to callbacks for comparisons since functions execute synchronously
   //       and `session` state variable updates asynchronously sometime during or after these functions are executing
   const logInHelper = (
     logInTypeCb: Function,
@@ -189,7 +202,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     type: string,
     rejectCb: Function | null,
     logAction: string | null,
-    serverSession?: Session | null
+    sessionParam?: Session | null
   ) => {
     const referrerId = (new Date().getTime());
 
@@ -250,16 +263,16 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       if (win) {
         win.location = params.login_url;
       }
-      logInTypeCb(params, referrerId, cb, type, rejectCb, serverSession);
+      logInTypeCb(params, referrerId, cb, type, rejectCb, sessionParam);
     }, (error: any) => {
       throw ConfigService.ERMrest.responseToError(error);
     });
   };
 
   // post login callback function
-  const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null, serverSession?: Session | null) => {
+  const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null, sessionParam?: Session | null) => {
     if (type.indexOf('modal') !== -1) {
-      const title = serverSession ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
+      const title = sessionParam ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
       const loginModalProps: LoginModalProps = { title: title };
 
       // var cleanupModal = function (message) {
@@ -341,7 +354,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
    *
    * @param  {string=} context undefined or "401"
    */
-  const getSession: GetSessionFunction = (context: string) => {
+  const getSession = (context: string) => {
     const config = {
       skipHTTP401Handling: true,
       headers: {} as any,
@@ -400,7 +413,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     });
   };
 
-  const logout: LogoutFunction = (action: string) => {
+  const logout = (action: string) => {
     const cc = ConfigService.chaiseConfig;
     const logoutURL = cc['logoutURL'] ? cc['logoutURL'] : '/';
 
@@ -602,12 +615,13 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
    * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
    * @param {Function} notifyErmrestCB - runs after the login process has been complete
    */
-  const loginInAModal = (notifyErmrestCB: Function, notifyErmrestRejectCB: Function, logAction: string) => {
+  const loginInAModal = (notifyErmrestCB: Function, notifyErmrestRejectCB: Function | null, logAction: string) => {
     logInHelper(loginWindowCb, '', notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
   }
 
   const providerValue = useMemo(() => {
     return {
+      createPromptExpirationToken,
       getSession,
       isSameSessionAsPrevious,
       loginInAModal,
@@ -618,6 +632,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       refreshLogin,
       session,
       shouldReloadPageAfterLogin,
+      showPreviousSessionAlert,
       validateSessionBeforeMutation
     }
   }, [session]);
@@ -657,12 +672,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 //     });
 //   },
 
-//   // if there's a previous login token AND
-//   // the prompt expiration token does not exist OR it has expired
-//   showPreviousSessionAlert: function () {
-//     return (_keyExistsInStorage(PREVIOUS_SESSION_KEY) && (!_keyExistsInStorage(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
-//   },
-
 //   subscribeOnChange: function (fn) {
 //     // To avoid same ids for an instance we add counter
 //     var id = new Date().getTime() + (++_counter);
@@ -675,10 +684,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
 //   unsubscribeOnChange: function (id) {
 //     delete _changeCbs[id];
-//   },
-
-//   createPromptExpirationToken: function () {
-//     _createToken(PROMPT_EXPIRATION_KEY);
 //   },
 
 //   extendPromptExpirationToken: function () {
