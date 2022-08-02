@@ -68,7 +68,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         }
       }, null, LogActions.LOGIN_LOGIN_MODAL)
     })
-  }, [setLoginFunction])
+  }, [])
 
   const _executeListeners = () => {
     for (const k in _changeCbs) {

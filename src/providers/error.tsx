@@ -1,10 +1,7 @@
 import { createContext, useMemo, useState } from 'react';
-import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn'
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
-import { DifferentUserConflictError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 export type LoginModalProps = {
   title: string;
@@ -49,8 +46,6 @@ type ErrorProviderProps = {
  * use the error hooks for catching or showing errors
  */
 export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Element {
-  // const { isSameSessionAsPrevious, loginInAModal, prevSession, session, shouldReloadPageAfterLogin } = useAuthn();
-
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
   const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);
