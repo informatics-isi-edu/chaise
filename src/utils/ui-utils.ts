@@ -9,7 +9,7 @@ import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
- * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#navheader` will be used.
+ * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `.app-header-container` will be used.
  * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
  * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
  * If you don't pass any parentContainer, it will use the body
@@ -31,7 +31,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
 
     // get the parent sticky
     if (parentContainerSticky == null) {
-      parentContainerSticky = document.querySelector('#navheader');
+      parentContainerSticky = document.querySelector('.app-header-container');
     }
 
     let parentUsableHeight: number;

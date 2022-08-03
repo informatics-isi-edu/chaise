@@ -13,9 +13,6 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utils
 import { toTitlecase } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
-import { Variant } from 'react-bootstrap/esm/types';
 
 export const Alerts = (): JSX.Element => {
   const { alerts, removeAlert } = useAlert();
@@ -48,7 +45,7 @@ export const Alerts = (): JSX.Element => {
       return (
         <Alert key={index} variant={variant} dismissible onClose={() => removeAlert(alert)}>
           {/* TODO should it be able to render HTML? */}
-          {alert.isSessionExpiredAlert ? renderSessionExpiredAlert(alert) : 
+          {alert.isSessionExpiredAlert ? renderSessionExpiredAlert(alert) :
             <>
               <strong className='alert-title'>{toTitlecase(alert.type)}</strong>
               <span dangerouslySetInnerHTML={{ __html: alert.message }}></span>

@@ -425,9 +425,16 @@ html {
     }
   }
 
+  // fix the padding issues related to the main alerts container that is outside of apps
+  .app-header-container > .alerts-container {
+    padding: $viewport-margin;
+    padding-bottom: 0;
+  }
+
   // top panel container for record and recordset
   .top-panel-container {
-    padding-top: $viewport-margin;
+    // NOTE the padding top has been moved to the rule above (.app-header-container > .alerts-container)
+    // padding-top: $viewport-margin;
     padding-right: $viewport-margin;
 
     .alerts-container {

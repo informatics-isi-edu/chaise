@@ -166,10 +166,14 @@ const AppWrapperInner = ({
         {(displaySpinner && !configDone && errors.length === 0) && <ChaiseSpinner />}
         {configDone &&
           <div className='app-container'>
-            {includeNavbar && <ChaiseNavbar />}
-            {includeAlerts && <Alerts />}
-            {externalLink && <ExternalLinkModal link={externalLink} onClose={() => setExternalLink('')} />}
+            {(includeNavbar || includeAlerts) &&
+              <div className='app-header-container'>
+                {includeNavbar && <ChaiseNavbar />}
+                {includeAlerts && <Alerts />}
+              </div>
+            }
             {children}
+            {externalLink && <ExternalLinkModal link={externalLink} onClose={() => setExternalLink('')} />}
           </div>
         }
       </ErrorBoundary>
