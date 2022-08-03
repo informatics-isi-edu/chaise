@@ -1,12 +1,22 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Modal } from 'react-bootstrap';
-import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
-import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+// components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import Modal from 'react-bootstrap/Modal';
+import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
+
+// hooks
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+
+// models
+import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// services
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+
+// utils
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 export type RecordestModalProps = {
@@ -146,7 +156,14 @@ const RecordsetModal = ({
     onSubmit(submittedRows);
   };
 
-  const closeTheModal = () => {
+  const onCancelClick = () => {
+    LogService.logClientAction(
+      {
+        action: LogService.getActionString(LogActions.CANCEL, recordsetProps.logInfo.logStackPath),
+        stack: recordsetProps.logInfo.logStack
+      },
+      recordsetProps.initialReference
+    );
     onClose();
   };
 
@@ -305,7 +322,7 @@ const RecordsetModal = ({
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
-                      onClick={closeTheModal}
+                      onClick={() => onCancelClick()}
                     >
                       <strong className='chaise-btn-icon'>X</strong>
                       <span>Cancel</span>

@@ -1,22 +1,31 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 
-import Q from 'q';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+// components
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
 import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
-import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
-import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+
+// hooks
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
-import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// models
+import { LogActions, LogReloadCauses, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode,
+  RecordsetSelectMode, SelectedRow
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+
+// services
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
+// utilities
+import Q from 'q';
+import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type FacetChoicePickerProps = {
@@ -229,7 +238,7 @@ const FacetChoicePicker = ({
   /**
    * The registered callback to process and update facets
    */
-  const processFacet = () => {
+  const processFacet = (reloadCauses: string[], reloadStartTime: number) => {
     const defer = Q.defer();
 
     // we will set the checkboxRows to the value of this variable at the end
@@ -280,12 +289,12 @@ const FacetChoicePicker = ({
       const facetLog = getDefaultLogInfo();
 
       // // create the action
-      const action = LogActions.FACET_CHOICE_LOAD;
-      // if (scope.facetModel.reloadCauses.length > 0) {
-      //     action = logService.logActions.FACET_CHOICE_RELOAD;
-      //     // add causes
-      //     facetLog.stack = logService.addCausesToStack(facetLog.stack, scope.facetModel.reloadCauses, scope.facetModel.reloadStartTime);
-      // }
+      let action = LogActions.FACET_CHOICE_LOAD;
+      if (reloadCauses.length > 0) {
+        action = LogActions.FACET_CHOICE_RELOAD;
+        // add causes
+        facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
+      }
       facetLog.action = getFacetLogAction(facetIndex, action);
 
       // update the filter log info to stack
@@ -297,10 +306,6 @@ const FacetChoicePicker = ({
           defer.resolve(false);
           return defer.promise;
         }
-
-        // TODO handle by the parent
-        // scope.facetModel.reloadCauses = [];
-        // scope.facetModel.reloadStartTime = -1;
 
         setHasMore(page.hasNext);
 
@@ -332,6 +337,11 @@ const FacetChoicePicker = ({
 
         return processFavorites(updatedRows);
       }).then((result: any) => {
+        // if this is not the result of latest facet change
+        if (facetReference.uri !== uri) {
+          defer.resolve(false);
+          return defer.promise;
+        }
 
         setCheckboxRows(updatedRows);
 
@@ -427,15 +437,8 @@ const FacetChoicePicker = ({
 
     const logInfo = {
       logObject: null,
-      logStack: [
-        LogService.getStackNode(
-          LogStackTypes.SET,
-          facetReference.table,
-          facetReference.filterLogInfo,
-        ),
-      ],
-      // TODO it should use the parent log path
-      logStackPath: LogService.getStackPath(LogStackPaths.SET, LogStackPaths.FACET_POPUP),
+      logStack: LogService.addExtraInfoToStack(getDefaultLogInfo().stack, { picker: 1 }),
+      logStackPath: LogService.getStackPath(facetModel.parentLogStackPath, LogStackPaths.FACET_POPUP),
     };
 
     const initialSelectedRows: SelectedRow[] = [];
@@ -609,14 +612,14 @@ const FacetChoicePicker = ({
             <span>{(hasMore || showFindMore) ? 'Show More' : 'Show Details'}</span>
           </button>
           {facetModel.noConstraints &&
-            <OverlayTrigger
+            <ChaiseTooltip
+              tooltip='Retry updating the facet values with constraints.'
               placement='bottom-start'
-              overlay={<Tooltip>Retry updating the facet values with constraints.</Tooltip>}
             >
               <button className='chaise-btn chaise-btn-sm chaise-btn-tertiary retry-btn' onClick={() => retryQuery(false)}>
                 Retry
               </button>
-            </OverlayTrigger>
+            </ChaiseTooltip>
           }
         </div>
       </div>

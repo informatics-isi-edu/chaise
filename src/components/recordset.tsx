@@ -94,6 +94,7 @@ const Recordset = ({
         <RecordsetInner
           initialReference={initialReference}
           config={config}
+          logInfo={logInfo}
           parentContainer={parentContainer}
           parentStickyArea={parentStickyArea}
           onFacetPanelOpenChanged={onFacetPanelOpenChanged}
@@ -106,6 +107,12 @@ const Recordset = ({
 type RecordsetInnerProps = {
   initialReference: any,
   config: RecordsetConfig,
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  },
   parentContainer?: HTMLElement,
   parentStickyArea?: HTMLElement,
   onFacetPanelOpenChanged?: (newState: boolean) => void
@@ -119,6 +126,7 @@ type RecordsetInnerProps = {
 const RecordsetInner = ({
   initialReference,
   config,
+  logInfo,
   parentContainer,
   parentStickyArea,
   onFacetPanelOpenChanged
@@ -426,12 +434,16 @@ const RecordsetInner = ({
    * @param event the event object
    */
   const clearSelectedRow = (row: SelectedRow | null, event: any) => {
+    // log the action
+    logRecordsetClientAction(!row ? LogActions.SELECTION_CLEAR_ALL : LogActions.SELECTION_CLEAR);
+
+    // set the selected rows
     if (!row) {
       setSelectedRows([]);
     } else {
-      setSelectedRows((currRows: any) => {
+      setSelectedRows((currRows: SelectedRow[]) => {
         const res = Array.isArray(currRows) ? [...currRows] : [];
-        return res.filter((obj: any) => obj.uniqueId !== row.uniqueId);
+        return res.filter((obj: SelectedRow) => obj.uniqueId !== row.uniqueId);
       });
     }
   };
@@ -592,6 +604,7 @@ const RecordsetInner = ({
           <Faceting
             facetPanelOpen={facetPanelOpen}
             registerRecordsetCallbacks={registerCallbacksFromFaceting}
+            recordsetLogStackPath={logInfo.logStackPath}
           />
         </div>
       }

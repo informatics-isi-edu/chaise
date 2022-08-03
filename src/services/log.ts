@@ -105,7 +105,7 @@ export class LogService {
    * @param {Object} stack - if not passed, will use the app-wide one
    * @param {Object} filterLogInfo
    */
-  static updateStackFilterInfo(stack: any, filterLogInfo: any) {
+  static updateStackFilterInfo(stack: any, filterLogInfo: any, changeGlobal?: boolean) {
     if (!stack) {
       stack = LogService._logStack;
     }
@@ -119,6 +119,10 @@ export class LogService {
     for (const f in filterLogInfo) {
       if (!filterLogInfo.hasOwnProperty(f)) continue;
       lastStackElement[f] = filterLogInfo[f];
+    }
+
+    if (changeGlobal) {
+      LogService._logStack = stack;
     }
   }
 

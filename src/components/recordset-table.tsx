@@ -78,7 +78,7 @@ const RecordsetTable = ({
     const success = update({ updateResult: true }, { reference: ref }, { cause: LogReloadCauses.SORT });
 
     if (success) {
-      logRecordsetClientAction(LogActions.SORT, null, ref);
+      logRecordsetClientAction(LogActions.SORT, null, null, ref);
     }
   }, [currSortColumn]);
 
@@ -106,7 +106,7 @@ const RecordsetTable = ({
 
     // log the request if it was successful
     if (success) {
-      logRecordsetClientAction(action, null, ref);
+      logRecordsetClientAction(action, null, null, ref);
     }
   };
 

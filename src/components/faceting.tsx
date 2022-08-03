@@ -26,12 +26,17 @@ type FacetingProps = {
    * NOTE we have to make sure this function is called after each update of
    *      state variables that they use. Otherwise we will face a staleness issues.
    */
-  registerRecordsetCallbacks: any
+  registerRecordsetCallbacks: any,
+  /**
+   * the recordset's log stack path
+   */
+  recordsetLogStackPath: string,
 }
 
 const Faceting = ({
   facetPanelOpen,
   registerRecordsetCallbacks,
+  recordsetLogStackPath
 }: FacetingProps) => {
 
   const { dispatchError } = useError();
@@ -60,6 +65,7 @@ const Faceting = ({
         // TODO
         // enableFavorites: $scope.$root.session && facetColumn.isEntityMode && table.favoritesPath && table.stableKey.length == 1,
         enableFavorites: false,
+        parentLogStackPath: recordsetLogStackPath
       });
     });
     // all the facets are closed, open the first one
@@ -121,7 +127,7 @@ const Faceting = ({
         // TODO why??
         // appliedFilters: [],
         registered: false,
-        processFacet: () => { throw new Error('function not registered') },
+        processFacet: (reloadCauses: string[], reloadStartTime: number) => { throw new Error('function not registered') },
         preProcessFacet: () => { throw new Error('function not registered') },
         getAppliedFilters: () => { throw new Error('function not registered') },
         removeAppliedFilters: () => { throw new Error('function not registered') },
@@ -222,6 +228,12 @@ const Faceting = ({
     flowControl.current.queue.occupiedSlots--;
     const currFm = facetRequestModels.current[index];
     currFm.processed = res || currFm.processed;
+
+    if (res) {
+      currFm.reloadCauses = [];
+      currFm.reloadStartTime = -1;
+    }
+
     // currFm.initialized = res || currFm.initialized;
     // currFm.isLoading = !res;
     setFacetModelByIndex(index, { isLoading: !res, initialized: res });
@@ -274,7 +286,7 @@ const Faceting = ({
           //      e.g. reloadCauses, reloadTime, etc..
           //      everything should be handled here eventually
           //      and the processFacet should only use the values and not modify them
-          facetRequestModels.current[i].processFacet().then(function (res: any) {
+          facetRequestModels.current[i].processFacet(frm.reloadCauses, frm.reloadStartTime).then(function (res: any) {
             setFacetModelByIndex(i, { facetHasTimeoutError: false });
             afterFacetUpdate(i, res, flowControl);
             updatePage();
@@ -402,13 +414,10 @@ const Faceting = ({
   const removeAppliedFiltersFromRS = (index?: number | 'filters' | 'cfacets') => {
     let newRef, reason = LogReloadCauses.FACET_CLEAR, action: LogActions | null = null;
     if (index === 'filters') {
-      // only remove custom filters on the reference (not the facet)
-      // TODO LOG should we log this?
       newRef = reference.removeAllFacetFilters(false, true, true);
       action = LogActions.BREADCRUMB_CLEAR_CUSTOM;
       reason = LogReloadCauses.CLEAR_CUSTOM_FILTER;
     } else if (index === 'cfacets') {
-      // only remove custom facets on the reference
       newRef = reference.removeAllFacetFilters(true, false, true);
       action = LogActions.BREADCRUMB_CLEAR_CFACET;
       reason = LogReloadCauses.CLEAR_CFACET;
@@ -436,7 +445,7 @@ const Faceting = ({
     }
 
     // whether we should log the action for the whole page or not
-    if (action && action in LogActions) {
+    if (action) {
       logRecordsetClientAction(action);
     }
 

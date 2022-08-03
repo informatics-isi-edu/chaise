@@ -494,8 +494,14 @@ export default function RecordsetProvider({
       return;
     }
 
-    // TODO does this make sense? it's mutating the logStack
-    LogService.updateStackFilterInfo(flowControl.current.getLogStack(), reference.filterLogInfo);
+    // make sure the logStack has the latest value
+    LogService.updateStackFilterInfo(
+      flowControl.current.getLogStack(),
+      reference.filterLogInfo,
+      // in fullscreen mode, we want the global log stack to have filter info too
+      // (this is for requests outside of recordset component like export)
+      config.displayMode === RecordsetDisplayMode.FULLSCREEN
+    );
 
     // update the resultset
     updateMainEntity(updatePage);

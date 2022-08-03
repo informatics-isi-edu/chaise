@@ -18,7 +18,7 @@ import { ResizeSensor } from 'css-element-queries';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 // models
-import { LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import {
   FacetRangePickerProps,
@@ -34,7 +34,7 @@ import {
 // services
 import Q from 'q';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-// import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -216,10 +216,10 @@ const FacetRangePicker = ({
   /**
    * The registered callback to process and update facets
    */
-  const processFacet = () => {
+  const processFacet = (reloadCauses: string[], reloadStartTime: number) => {
     const defer = Q.defer();
 
-    updateFacetData().then((result: any) => {
+    updateFacetData(reloadCauses, reloadStartTime).then((result: any) => {
 
       defer.resolve(result);
     }).catch(function (err: any) {
@@ -331,7 +331,7 @@ const FacetRangePicker = ({
   }
 
   /***** API call functions *****/
-  const updateFacetData = () => {
+  const updateFacetData = (reloadCauses: string[], reloadStartTime: number) => {
     const defer = Q.defer();
 
     (function (uri, reloadCauses, reloadStartTime) {
@@ -345,18 +345,18 @@ const FacetRangePicker = ({
         ];
 
         const facetLog = getDefaultLogInfo();
-        // let action = LogActions.FACET_RANGE_LOAD;
-        // if (reloadCauses.length > 0) {
-        //   action = LogActions.FACET_RANGE_RELOAD;
-        //   // add causes
-        //   facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
-        // }
-        // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
+        let action = LogActions.FACET_RANGE_LOAD;
+        if (reloadCauses.length > 0) {
+          action = LogActions.FACET_RANGE_RELOAD;
+          // add causes
+          facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
+        }
+        facetLog.action = getFacetLogAction(facetIndex, action);
         $log.debug('fetch aggregates')
         facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
           if (facetColumn.sourceReference.uri !== uri) {
-            // return false to defer.resolve() in .then() callback
-            // return false;
+            defer.resolve(false);
+            return defer.promise;
           }
 
           // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
@@ -386,9 +386,6 @@ const FacetRangePicker = ({
           return histogramData(minMaxRangeOptions.absMin, minMaxRangeOptions.absMax, reloadCauses, reloadStartTime);
         }).then((response: any) => {
 
-          // facetModel.reloadCauses = [];
-          // facetModel.reloadStartTime = -1;
-
           defer.resolve(response);
         }).catch((err: any) => {
           console.log('catch facet data: ', err);
@@ -402,8 +399,7 @@ const FacetRangePicker = ({
           defer.reject(err);
         });
       }
-    })(facetColumn.sourceReference.uri);
-    // })(facetColumn.sourceReference.uri, facetModel.reloadCauses, facetModel.reloadStartTime);
+    })(facetColumn.sourceReference.uri, reloadCauses, reloadStartTime);
 
     // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
     // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
@@ -420,15 +416,15 @@ const FacetRangePicker = ({
         requestMax = isColumnOfType('timestamp') ? dateTimeToTimestamp(max as TimeStamp) : max;
 
       const facetLog = getDefaultLogInfo();
-      // let action = LogActions.FACET_HISTOGRAM_LOAD;
-      // if (reloadCauses.length > 0) {
-      //   action = LogActions.FACET_HISTOGRAM_RELOAD;
+      let action = LogActions.FACET_HISTOGRAM_LOAD;
+      if (reloadCauses.length > 0) {
+        action = LogActions.FACET_HISTOGRAM_RELOAD;
 
-      //   // add causes
-      //   facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
-      // }
+        // add causes
+        facetLog.stack = LogService.addCausesToStack(facetLog.stack, reloadCauses, reloadStartTime);
+      }
 
-      // facetLog.action = scope.parentCtrl.getFacetLogAction(index, action);
+      facetLog.action = getFacetLogAction(facetIndex, action);
       $log.debug('fetch histogram data')
       facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
         if (facetColumn.sourceReference.uri !== uri) {

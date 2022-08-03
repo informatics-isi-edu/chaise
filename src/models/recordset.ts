@@ -1,6 +1,5 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
-import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker'
-import React from 'react'
+import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 
 export enum RecordsetSelectMode {
   NO_SELECT,
@@ -64,7 +63,8 @@ export type FacetModel = {
   facetHasTimeoutError: boolean,
   // if the stable key is greater than length 1, the favorites won't be supported for now
   // TODO: support this for composite stable keys
-  enableFavorites: boolean
+  enableFavorites: boolean,
+  parentLogStackPath: string
 }
 
 export type FacetRequestModel = {

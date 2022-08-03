@@ -51,9 +51,11 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   });
 
   const handlePageLimitChange: any = (value: any) => {
-    // const action = LogActions.PAGE_SIZE_SELECT;
-    const cause = LogReloadCauses.PAGE_LIMIT;
+    // log the action
+    logRecordsetClientAction(LogActions.PAGE_SIZE_SELECT, null, {'page-size': value});
 
+    // ask recordset provider to update the data
+    const cause = LogReloadCauses.PAGE_LIMIT;
     update({ updateResult: true }, { pageLimit: value }, { cause });
   }
 
@@ -74,7 +76,13 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
 
   const renderPageSizeDropdown = () => {
     return (
-      <Dropdown>
+      <Dropdown onToggle={
+        (nextShow: boolean) => {
+          if (!nextShow) return;
+          // log opening of the dropdown
+          logRecordsetClientAction(LogActions.PAGE_SIZE_OPEN);
+        }
+      }>
         <Dropdown.Toggle
           className='page-size-dropdown chaise-btn chaise-btn-secondary'
           disabled={isLoading}

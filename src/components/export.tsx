@@ -1,18 +1,27 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 
-import { useEffect, useState } from 'react';
+// components
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import ExportModal from '@isrd-isi-edu/chaise/src/components/export-modal';
 
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+// hooks
+import { useEffect, useState } from 'react';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// models
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// providers
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+
+// services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import ExportModal from '@isrd-isi-edu/chaise/src/components/export-modal';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+
+// utils
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type ExportProps = {
@@ -39,10 +48,6 @@ const Export = ({
    * State Variable to store exporter object which is used to cancel export.
    */
   const [exporterObj, setExporterObj] = useState<any>(null);
-  /**
-   * State variable to control tooltip visiblity
-   */
-  const [showTooltip, setShowTooltip] = useState<boolean>(false);
 
   const { dispatchError } = useError();
 
@@ -162,10 +167,8 @@ const Export = ({
   };
 
   const onDropdownToggle = (nextShow: boolean) => {
-    // hide the tooltip if we're showing the menu + log the action
+    // log the action
     if (nextShow) {
-      setShowTooltip(false);
-
       LogService.logClientAction({
         action: LogService.getActionString(LogActions.EXPORT_OPEN),
         stack: LogService.getStackObject()
@@ -180,11 +183,9 @@ const Export = ({
   return (
     <>
       <Dropdown className='export-menu' onToggle={onDropdownToggle}>
-        <OverlayTrigger
+        <ChaiseTooltip
           placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
-          overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
-          onToggle={(next: boolean) => setShowTooltip(next)}
-          show={showTooltip}
+          tooltip={MESSAGE_MAP.tooltip.export}
         >
           <Dropdown.Toggle
             disabled={disabled || !!selectedOption || options.length === 0}
@@ -193,7 +194,7 @@ const Export = ({
             {renderExportIcon()}
             <span>Export</span>
           </Dropdown.Toggle>
-        </OverlayTrigger>
+        </ChaiseTooltip>
         <Dropdown.Menu>
           {options.map((option: any, index: number) => (
             <Dropdown.Item
