@@ -1028,6 +1028,12 @@ describe("Other facet features, ", function() {
             });
 
             it ("alert should be displayed upon reaching the URL limit and submit button should be disabled.", function (done) {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == 25);
+                    });
+                });
+
                 chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn()).then(function () {
                     checkAlert(modalAlert);
                     expect(submitBtn.getAttribute('disabled')).toBe('true', "submit is not disabled.");

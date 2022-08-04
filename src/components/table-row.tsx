@@ -104,7 +104,6 @@ const TableRow = ({
   const rowDisabled = disabled || waitingForDelete;
 
   // TODO: logging
-
   const initializeOverflows = () => {
     // Iterate over each <td> in the <tr>
     const tempOverflow: boolean[] = [];
@@ -134,12 +133,16 @@ const TableRow = ({
 
   useLayoutEffect(() => {
     if (!rowContainer.current) return;
-    new ResizeSensor(
+    const sensor = new ResizeSensor(
       rowContainer.current,
       () => {
         initializeOverflows();
       }
     )
+
+    return () => {
+      sensor.detach();
+    }
   }, [rowValues]);
 
   const getRowLogAction = (action: LogActions) => {

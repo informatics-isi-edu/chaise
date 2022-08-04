@@ -4,6 +4,7 @@ var moment = require('moment');
 var testParams = {
     schemaName: "product-recordset-add",
     table_name: "accommodation",
+    num_rows: 6,
     title: "Best Western Plus Amedia Art Salzburg",
     rating: "3.50",
     summary: "The BEST WESTERN PLUS Amedia Art Salzburg is located near the traditional old part of town, near the highway, near the train station and close to the exhibition center of Salzburg.\nBEST WESTERN PLUS Amedia Art Salzburg offers harmony of modern technique and convenient atmosphere to our national and international business guest and tourists."
@@ -11,16 +12,11 @@ var testParams = {
 
 describe('Recordset add record,', function() {
 
-    var rowCount, allWindows;;
+    var  allWindows;;
 
     beforeAll(function () {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
-        chaisePage.recordsetPageReady().then(function() {
-            return chaisePage.recordsetPage.getRows();
-        }).then(function(rows) {
-            rowCount = rows.length;
-        });
-
+        chaisePage.recordsetPageReady();
     });
 
     
@@ -152,33 +148,32 @@ describe('Recordset add record,', function() {
         })
     });
 
-    // TODO: uncomment when page updated after create/update/create
-    // it("go back to recordset should refresh the table with the new record", function() {
-    //     // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
-    //     /**
-    //      * we noticed this test case started failing on saucelabs,
-    //      * that's why we're switching tabs twice to ensure the onfocus is getting called.
-    //      */
-    //     browser.switchTo().window(allWindows[0]).then(function() {
-    //         return browser.switchTo().window(allWindows[1]);
-    //     }).then(function () {
-    //         return browser.switchTo().window(allWindows[0]);
-    //     }).then(function () {
-    //         return chaisePage.waitForElementInverse(element(by.id("spinner")));
-    //     }).then(function() {
-    //         return chaisePage.recordsetPage.getPageTitleElement().click();
-    //     }).then(function () {
+    it("go back to recordset should refresh the table with the new record", function() {
+        // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
+        /**
+         * we noticed this test case started failing on saucelabs,
+         * that's why we're switching tabs twice to ensure the onfocus is getting called.
+         */
+        browser.switchTo().window(allWindows[0]).then(function() {
+            return browser.switchTo().window(allWindows[1]);
+        }).then(function () {
+            return browser.switchTo().window(allWindows[0]);
+        }).then(function () {
+            return chaisePage.waitForElementInverse(element(by.id("spinner")));
+        }).then(function() {
+            return chaisePage.recordsetPage.getPageTitleElement().click();
+        }).then(function () {
 
-    //         browser.wait(function() {
-    //             return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-    //                 return (ct == rowCount+1);
-    //             });
-    //         }, browser.params.defaultTimeout);
+            browser.wait(function() {
+                return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                    return (ct == testParams.num_rows+1);
+                });
+            }, browser.params.defaultTimeout);
 
-    //         return chaisePage.recordsetPage.getRows();
-    //     }).then(function(rows) {
-    //         expect(rows.length).toBe(rowCount+1);
-    //     });
-    // })
+            return chaisePage.recordsetPage.getRows();
+        }).then(function(rows) {
+            expect(rows.length).toBe(testParams.num_rows+1);
+        });
+    })
 
 });
