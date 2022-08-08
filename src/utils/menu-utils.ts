@@ -166,7 +166,14 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
           if (child.acls.enable === undefined) childCopy.acls.enable = option.acls.enable;
         }
 
-        // TODO: names
+        // create the names array that will be used for logging
+        let parentNames = option.names;
+        if (!Array.isArray(parentNames)) {
+          parentNames = [];
+          if (option.name) parentNames.push(option.name);
+        }
+
+        childCopy.names = parentNames.concat(childCopy.name);
 
         // set values and recurse
         childrenArr.push(recurseMenuOption(childCopy));

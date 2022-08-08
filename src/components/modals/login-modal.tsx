@@ -16,7 +16,7 @@ const LoginModal = (): JSX.Element => {
 
   const cancel = () => {
     if (loginModal?.onModalClose) {
-      loginModal?.onModalClose();
+      loginModal?.onModalClose('cancel');
     } else {
       hideLoginModal();
       // TODO needs discussion

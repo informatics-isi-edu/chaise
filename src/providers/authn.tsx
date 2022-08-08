@@ -35,7 +35,7 @@ export const AuthnContext = createContext<{
   session: Session | null;
   shouldReloadPageAfterLogin: (serverSession: Session | null) => boolean;
   showPreviousSessionAlert: () => boolean;
-  validateSessionBeforeMutation: (cb: any) => void;
+  validateSessionBeforeMutation: (cb: Function) => void;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -60,13 +60,16 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   useEffect(() => {
     setLoginFunction(() => {
-      loginInAModal(function (response: any) {
+      // success callback
+      const successCb = (response: Session | null) => {
         if (shouldReloadPageAfterLogin(session)) {
           window.location.reload();
         } else if (!isSameSessionAsPrevious(response)) {
           dispatchError({ error: new DifferentUserConflictError(session, prevSession) });
         }
-      }, null, LogActions.LOGIN_LOGIN_MODAL)
+      }
+
+      loginInAModal(successCb, null, LogActions.LOGIN_LOGIN_MODAL)
     })
   }, [])
 
@@ -275,9 +278,11 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       const title = sessionParam ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
       const loginModalProps: LoginModalProps = { title: title };
 
-      // var cleanupModal = function (message) {
+      // TODO
+      // const cleanupModal = () => {
       //   $interval.cancel(intervalId);
-      //   $cookies.remove("chaise-" + referrerId, { path: "/" });
+      //   // CookieService
+      //   $cookies.remove('chaise-' + referrerId, { path: '/' });
       // }
 
       loginModalProps.onModalCloseSuccess = () => {
@@ -329,13 +334,11 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     } else {
       window.addEventListener('message', (args) => {
         if (args && args.data && (typeof args.data === 'string')) {
-          console.log('do local storage things');
           _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
           _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
           const obj = queryStringToJSON(args.data);
-          if (obj.referrerid == referrerId && (typeof cb === 'function')) {
+          if (obj.referrerid === referrerId && (typeof cb === 'function')) {
             if (type.indexOf('modal') !== -1) {
-              // modalInstance.close("Done");
               cb();
               closed = true;
             } else {
