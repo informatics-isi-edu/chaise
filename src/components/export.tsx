@@ -79,7 +79,7 @@ const Export = ({
       // of the page have already thrown an error.
     }
 
-  }, [reference]);
+  }, []);
 
   /**
    * Send the request for export

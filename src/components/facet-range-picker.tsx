@@ -143,12 +143,16 @@ const FacetRangePicker = ({
   // set the resize sensor to call the plot resize fucntion
   useLayoutEffect(() => {
     if (!rangePickerContainer.current) return;
-    new ResizeSensor(
+    const rs = new ResizeSensor(
       rangePickerContainer.current,
       () => {
         if (rangePickerContainer.current && plotlyRef.current) plotlyRef.current.resizeHandler();
       }
     )
+
+    return () => {
+      rs.detach();
+    }
   }, []);
 
   useEffect(() => {
