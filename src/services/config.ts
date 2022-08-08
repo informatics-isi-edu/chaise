@@ -12,6 +12,7 @@ import {
 import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import $log, { LoggerLevels } from '@isrd-isi-edu/chaise/src/services/logger';
 
 export interface AppSettings {
   appName: string,
@@ -134,6 +135,10 @@ export class ConfigService {
       if (response && response.chaiseConfig) {
         ConfigService._setChaiseConfig(response.chaiseConfig);
       }
+    }
+
+    if (ConfigService.chaiseConfig.debug === true) {
+      $log.setLevel(LoggerLevels.TRACE);
     }
 
     ConfigService._setupERMrest(ERMrest, session);
