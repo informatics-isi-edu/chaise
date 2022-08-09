@@ -143,6 +143,7 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
       acls: menuOpt.acls || acls,
       isValid: false,
       nameMarkdownPattern: menuOpt.nameMarkdownPattern || menuOpt.markdownPattern || menuOpt.markdownName || menuOpt.name,
+      names: menuOpt.names,
       newTab: openNewTab,
       type: menuOpt.type,
       ...menuOpt
@@ -170,10 +171,14 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
         let parentNames = option.names;
         if (!Array.isArray(parentNames)) {
           parentNames = [];
-          if (option.name) parentNames.push(option.name);
+          // NOTE: we used 'name' before but this isn't consistent with changes we've made to support markdown templates as navbar items
+          //       'nameMarkdownPattern' is set to 'name' if no other values are found
+          if (option.nameMarkdownPattern) parentNames.push(option.nameMarkdownPattern);
         }
 
-        childCopy.names = parentNames.concat(childCopy.name);
+        // NOTE: same note from a few lines above
+        const childNameMarkdownPattern = child.nameMarkdownPattern || child.markdownPattern || child.markdownName || child.name;
+        childCopy.names = parentNames.concat(childNameMarkdownPattern);
 
         // set values and recurse
         childrenArr.push(recurseMenuOption(childCopy));

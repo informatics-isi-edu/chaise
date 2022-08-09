@@ -11,6 +11,7 @@ import { LoginModalProps } from '@isrd-isi-edu/chaise/src/providers/error';
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import Q from 'q';
 import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
 
 // utils
@@ -71,6 +72,53 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
       loginInAModal(successCb, null, LogActions.LOGIN_LOGIN_MODAL)
     })
+
+    // If app is not login then attach the unauthorised 401 http handler to ermrestjs
+    const pathname = windowRef.location.pathname;
+    if (pathname.indexOf('/login') === -1) {
+      // Bind callback function by invoking setHTTP401Handler handler passing the callback
+      // This callback will be called whenever 401 HTTP error is encountered unless there is
+      // already login flow in progress
+      ConfigService.ERMrest.setHTTP401Handler(() => {
+        const defer = Q.defer();
+
+        const successCB = () => {
+
+          // Once the user has logged in fetch the new session and set the session value
+          // and resolve the promise to notify ermrestjs that the user has logged in
+          // and it can continue firing other queued calls
+          getSession('401').then((_session: any) => {
+
+            // Not sure if this will trigger on page load, if not I think it's safe to run this in all contexts
+            // recordset  - read should throw a 409 if there's a permission issue
+            // record     - same issue with read above
+            //            - p&b add throws a conflict error in most cases, so won't get sent here either (RBK)
+            // recordedit - add/update return here in some cases, and in other cases will return a 409 and ignore this case
+            const differentUser = prevSession && !isSameSessionAsPrevious(_session);
+
+            // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
+            defer.resolve(differentUser);
+
+            // throw Error if login is successful but it's a different user
+            if (differentUser) dispatchError({ error: new DifferentUserConflictError(_session, prevSession) });
+          }, (exception: any) => {
+            defer.reject(exception);
+          });
+
+        }
+
+        const rejectCB = (response: any) => {
+          // returns to rejectCB in ermrestJS/http.js
+          defer.reject(response);
+        }
+
+        // Call login in a new modal window to perform authentication
+        // and return a promise to notify ermrestjs that the user has loggedin
+        loginInAModal(successCB, rejectCB, LogActions.LOGIN_LOGIN_MODAL);
+
+        return defer.promise;
+      });
+    }
   }, [])
 
   const _executeListeners = () => {
@@ -207,7 +255,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     logAction: string | null,
     sessionParam?: Session | null
   ) => {
-    const referrerId = (new Date().getTime());
+    const referrerId = '' + (new Date().getTime());
 
     const cc = ConfigService.chaiseConfig;
 
@@ -308,46 +356,23 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       showLoginModal(loginModalProps);
     }
 
-    /* if browser is IE then add explicit handler to watch for changes in localstorage for a particular
-     * variable
-     */
-    if (false) {
-      // if (UriUtils.isBrowserIE()) {
-      // $cookies.put("chaise-" + referrerId, true, { path: "/" });
-      // var intervalId;
-      // var watchChangeInReferrerId = function () {
-      //   if (!$cookies.get("chaise-" + referrerId)) {
-      //     $interval.cancel(intervalId);
-      //     if (typeof cb == 'function') {
-      //       if (type.indexOf('modal') !== -1) {
-      //         intervalId = $interval(watchChangeInReferrerId, 50);
-      //         modalInstance.close("Done");
-      //         cb();
-      //         closed = true;
-      //       } else {
-      //         cb();
-      //       }
-      //     }
-      //     return;
-      //   }
-      // }
-    } else {
-      window.addEventListener('message', (args) => {
-        if (args && args.data && (typeof args.data === 'string')) {
-          _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
-          _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
-          const obj = queryStringToJSON(args.data);
-          if (obj.referrerid === referrerId && (typeof cb === 'function')) {
-            if (type.indexOf('modal') !== -1) {
-              cb();
-              closed = true;
-            } else {
-              cb();
-            }
+
+    window.addEventListener('message', (args) => {
+      if (args && args.data && (typeof args.data === 'string')) {
+        _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
+        _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
+        const obj = queryStringToJSON(args.data);
+
+        if (obj.referrerid === referrerId && (typeof cb === 'function')) {
+          if (type.indexOf('modal') !== -1) {
+            cb();
+            closed = true;
+          } else {
+            cb();
           }
         }
-      });
-    }
+      }
+    });
   };
 
   /**
@@ -694,58 +719,3 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 //   },
 // }
 //     }])
-
-// var pathname = window.location.pathname;
-
-// // If app is not search, viewer and login then attach the unauthorised 401 http handler to ermrestjs
-
-// if (pathname.indexOf('/login') == -1) {
-
-//   angular.module('chaise.authn')
-
-//     .run(['ConfigUtils', 'ERMrest', 'Errors', 'ErrorService', '$injector', '$q', function runRecordEditApp(ConfigUtils, ERMrest, Errors, ErrorService, $injector, $q) {
-
-//       var Session = $injector.get("Session");
-
-//       // Bind callback function by invoking setHTTP401Handler handler passing the callback
-//       // This callback will be called whenever 401 HTTP error is encountered unless there is
-//       // already login flow in progress
-//       ERMrest.setHTTP401Handler(function () {
-//         var defer = $q.defer();
-
-//         // Call login in a new modal window to perform authntication
-//         // and return a promise to notify ermrestjs that the user has loggedin
-//         Session.loginInAModal(function () {
-
-//           // Once the user has logged in fetch the new session and set the session value
-//           // and resolve the promise to notify ermrestjs that the user has logged in
-//           // and it can continue firing other queued calls
-//           Session.getSession("401").then(function (_session) {
-//             var prevSession = Session.getPrevSessionValue();
-//             // Not sure if this will trigger on page load, if not I think it's safe to run this in all contexts
-//             // recordset  - read should throw a 409 if there's a permission issue
-//             // record     - same issue with read above
-//             //            - p&b add throws a conflict error in most cases, so won't get sent here either (RBK)
-//             // recordedit - add/update return here in some cases, and in other cases will return a 409 and ignore this case
-//             var differentUser = prevSession && !Session.isSameSessionAsPrevious();
-
-//             // send boolean to communicate in ermrestJS if execution should continue after 401 error thrown and subsequent login
-//             defer.resolve(differentUser);
-
-//             // throw Error if login is successful but it's a different user
-//             if (differentUser) ErrorService.handleException(new Errors.DifferentUserConflictError(_session, prevSession), false);
-//           }, function (exception) {
-//             defer.reject(exception);
-//           });
-
-//         }, function (response) {
-//           // returns to rejectCB in ermrestJS/http.js
-//           defer.reject(response);
-//         });
-
-//         return defer.promise;
-//       });
-
-//     }]);
-
-// }
