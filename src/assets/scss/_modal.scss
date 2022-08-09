@@ -67,7 +67,7 @@
 /******* Popup modal for error ********/
 // NOTE less than the navbar z-index
 .modal-error-backdrop {
-  z-index: 1035; // less than the modal itself
+  z-index: 1031; // less than the modal itself
 }
 
 .modal-error {
@@ -98,6 +98,16 @@
 .modal-footer .chaise-btn {
   margin-left: 5px;
 }
+
+/******* Popup modal for export *******/
+.export-progress-backdrop {
+  z-index: 1030; // less than the modal itself
+}
+
+.export-progress {
+  z-index: 1031; // less than login instruction modal
+}
+
 
 /******* Popup modal for share ********/
 .chaise-share-citation {
