@@ -226,7 +226,10 @@ const FacetChoicePicker = ({
 
         setCheckboxRows(res);
 
-        defer.resolve();
+        // this timeout will ensure that the set state is done before resolving
+        setTimeout(() => {
+          defer.resolve();
+        });
       }).catch(function (error: any) {
         defer.reject(error);
       });

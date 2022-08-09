@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
@@ -13,7 +13,6 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -41,8 +40,7 @@ const RecordsetApp = (): JSX.Element => {
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
   useEffect(() => {
-    $log.debug('recordset page: useEffect');
-    let logObject: any = {};
+    const logObject: any = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;
@@ -144,7 +142,9 @@ const RecordsetApp = (): JSX.Element => {
   );
 };
 
-ReactDOM.render(
+
+const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+root.render(
   <AppWrapper
     appSettings={recordsetSettings}
     includeAlerts={true}
@@ -152,6 +152,5 @@ ReactDOM.render(
     displaySpinner={true}
   >
     <RecordsetApp />
-  </AppWrapper>,
-  document.getElementById(APP_ROOT_ID_NAME),
+  </AppWrapper>
 );
