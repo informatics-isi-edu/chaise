@@ -238,7 +238,6 @@ const RecordsetInner = ({
       }
 
     }).catch((exception: any) => {
-      $log.warn(exception);
       if (isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
         exception.errorData.redirectUrl = createRedirectLinkFromPath(exception.errorData.redirectPath);
       }
@@ -409,7 +408,7 @@ const RecordsetInner = ({
    * @param action string the log action
    */
   const changeSearch = (term: string | null, action: LogActions) => {
-    $log.log(`search with term: ${term}, action : ${action}`);
+    $log.debug(`search with term: ${term}, action : ${action}`);
     if (term) term = term.trim();
 
     const ref = reference.search(term); // this will clear previous search first

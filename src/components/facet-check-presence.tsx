@@ -1,11 +1,22 @@
-import { FacetCheckBoxRow, FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset';
+
+// components
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
-import { useEffect, useState } from 'react';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-import Q from 'q';
+
+// hooks
+import { useEffect } from 'react';
+import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
+
+// models
+import { FacetCheckBoxRow, FacetModel } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
+// servies
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
+// utilities
+import Q from 'q';
+import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 
 type FacetCheckPresenceProps = {
   /**
@@ -15,7 +26,7 @@ type FacetCheckPresenceProps = {
   /**
    * The facet model that has the UI state variables
    */
-   facetModel: FacetModel,
+  facetModel: FacetModel,
   /**
    * The index of facet in the list of facetColumns
    */
@@ -27,7 +38,7 @@ type FacetCheckPresenceProps = {
   /**
    * dispatch the update of reference
    */
-   updateRecordsetReference: Function
+  updateRecordsetReference: Function
 };
 
 const FacetCheckPresence = ({
@@ -38,7 +49,7 @@ const FacetCheckPresence = ({
   updateRecordsetReference
 }: FacetCheckPresenceProps): JSX.Element => {
 
-  const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>(() => {
+  const [checkboxRows, setCheckboxRows, checkboxRowsRef] = useStateRef<FacetCheckBoxRow[]>(() => {
     const res: FacetCheckBoxRow[] = [];
     if (!facetColumn.hideNotNullChoice) {
       res.push(getNotNullFacetCheckBoxRow(facetColumn.hasNotNullFilter));
@@ -48,6 +59,13 @@ const FacetCheckPresence = ({
     }
     return res;
   });
+
+  /**
+   * We must create references for the state and local variables that
+   * are used in the flow-control related functions. This is to ensure the
+   * functions are using thier latest values.
+   */
+  const facetColumnRef = useVarRef(facetColumn);
 
   /**
    * register the flow-control related functions for the facet
@@ -83,11 +101,11 @@ const FacetCheckPresence = ({
     // we will set the checkboxRows to the value of this variable at the end
     const updatedRows: FacetCheckBoxRow[] = [];
 
-    if (!facetColumn.hideNotNullChoice) {
-      updatedRows.push(getNotNullFacetCheckBoxRow(facetColumn.hasNotNullFilter));
+    if (!facetColumnRef.current.hideNotNullChoice) {
+      updatedRows.push(getNotNullFacetCheckBoxRow(facetColumnRef.current.hasNotNullFilter));
     }
-    if (!facetColumn.hideNullChoice) {
-      updatedRows.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter));
+    if (!facetColumnRef.current.hideNullChoice) {
+      updatedRows.push(getNullFacetCheckBoxRow(facetColumnRef.current.hasNullFilter));
     }
 
     setCheckboxRows(updatedRows);
@@ -99,7 +117,7 @@ const FacetCheckPresence = ({
    * The registered callback to get the selected filters
    */
   const getAppliedFilters = () => {
-    return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
+    return checkboxRowsRef.current.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
   /**
@@ -108,7 +126,7 @@ const FacetCheckPresence = ({
   const removeAppliedFilters = () => {
     setCheckboxRows((prev: FacetCheckBoxRow[]) => {
       return prev.map((curr: FacetCheckBoxRow) => {
-        return {...curr, selected: false}
+        return { ...curr, selected: false }
       });
     });
   }

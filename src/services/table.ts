@@ -100,9 +100,9 @@ export class RecordsetFlowControl {
   * returns true if we have free slots for requests.
   * @return {boolean}
   */
-  haveFreeSlot() {
+  haveFreeSlot(printMessage=true) {
     const res = this.queue.occupiedSlots < this.queue.maxRequests;
-    if (!res) {
+    if (!res && printMessage) {
       $log.debug('No free slot available.');
     }
     return res;

@@ -11,10 +11,13 @@ import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import { LogActions, LogReloadCauses, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode,
+import {
+  FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
@@ -27,6 +30,7 @@ import Q from 'q';
 import { getNotNullFacetCheckBoxRow, getNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { FACET_PANEL_DEFAULT_PAGE_SIZE, RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+
 
 type FacetChoicePickerProps = {
   /**
@@ -93,7 +97,7 @@ const FacetChoicePicker = ({
   /**
    * The displayed checkboxes
    */
-  const [checkboxRows, setCheckboxRows] = useState<FacetCheckBoxRow[]>([]);
+  const [checkboxRows, setCheckboxRows, checkboxRowsRef] = useStateRef<FacetCheckBoxRow[]>([]);
 
   /**
    * Whether there are more options or not
@@ -137,6 +141,14 @@ const FacetChoicePicker = ({
   }
 
   /**
+   * We must create references for the state and local variables that
+   * are used in the flow-control related functions. This is to ensure the
+   * functions are using thier latest values.
+   */
+  const facetColumnRef = useVarRef(facetColumn);
+  const facetReferenceRef = useVarRef(facetReference);
+
+  /**
    * register the flow-control related functions for the facet
    * this will ensure the functions are registerd based on the latest facet changes
    */
@@ -175,7 +187,7 @@ const FacetChoicePicker = ({
    * we should attach the action.
    */
   const getDefaultLogInfo = () => {
-    let res = facetColumn.sourceReference.defaultLogInfo;
+    let res = facetColumnRef.current.sourceReference.defaultLogInfo;
     res.stack = getFacetLogStack(facetIndex);
     return res;
   }
@@ -195,26 +207,26 @@ const FacetChoicePicker = ({
     const defer = Q.defer();
 
     // if not_null exist, other filters are not relevant
-    if (facetColumn.hasNotNullFilter) {
+    if (facetColumnRef.current.hasNotNullFilter) {
       // facetModel.appliedFilters.push(facetingUtils.getNotNullFilter(true));
       setCheckboxRows([getNotNullFacetCheckBoxRow(true)]);
 
       defer.resolve();
     }
-    else if (facetColumn.choiceFilters.length === 0) {
+    else if (facetColumnRef.current.choiceFilters.length === 0) {
       defer.resolve();
     }
     else {
       const res: FacetCheckBoxRow[] = [];
 
       // getChoiceDisplaynames won't return the null filter, so we need to check for it first
-      if (facetColumn.hasNullFilter) {
+      if (facetColumnRef.current.hasNullFilter) {
         res.push(getNullFacetCheckBoxRow(true));
       }
 
       const facetLog = getDefaultLogInfo();
       facetLog.action = getFacetLogAction(facetIndex, LogActions.PRESELECTED_FACETS_LOAD);
-      facetColumn.getChoiceDisplaynames(facetLog).then(function (filters: any) {
+      facetColumnRef.current.getChoiceDisplaynames(facetLog).then(function (filters: any) {
         filters.forEach(function (f: any) {
           res.push({
             uniqueId: f.uniqueId,
@@ -248,13 +260,13 @@ const FacetChoicePicker = ({
     const updatedRows: FacetCheckBoxRow[] = [];
 
     // add not-null filter if it should be added and already has not been selected
-    if (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) {
+    if (!facetColumnRef.current.hideNotNullChoice && !facetColumnRef.current.hasNotNullFilter) {
       updatedRows.push(getNotNullFacetCheckBoxRow());
     }
 
     // add null filter if it should be added and already has not been selected
-    if (!facetColumn.hideNullChoice && !facetColumn.hasNullFilter) {
-      updatedRows.push(getNullFacetCheckBoxRow(facetColumn.hasNullFilter));
+    if (!facetColumnRef.current.hideNullChoice && !facetColumnRef.current.hasNullFilter) {
+      updatedRows.push(getNullFacetCheckBoxRow(facetColumnRef.current.hasNullFilter));
     }
 
     // add the already selected facets
@@ -301,11 +313,11 @@ const FacetChoicePicker = ({
       facetLog.action = getFacetLogAction(facetIndex, action);
 
       // update the filter log info to stack
-      LogService.updateStackFilterInfo(facetLog.stack, facetReference.filterLogInfo);
+      LogService.updateStackFilterInfo(facetLog.stack, facetReferenceRef.current.filterLogInfo);
 
-      facetReference.read(FACET_PANEL_DEFAULT_PAGE_SIZE, facetLog, true).then((page: any) => {
+      facetReferenceRef.current.read(FACET_PANEL_DEFAULT_PAGE_SIZE, facetLog, true).then((page: any) => {
         // if this is not the result of latest facet change
-        if (facetReference.uri !== uri) {
+        if (facetReferenceRef.current.uri !== uri) {
           defer.resolve(false);
           return defer.promise;
         }
@@ -341,7 +353,7 @@ const FacetChoicePicker = ({
         return processFavorites(updatedRows);
       }).then((result: any) => {
         // if this is not the result of latest facet change
-        if (facetReference.uri !== uri) {
+        if (facetReferenceRef.current.uri !== uri) {
           defer.resolve(false);
           return defer.promise;
         }
@@ -352,7 +364,7 @@ const FacetChoicePicker = ({
       }).catch(function (err: any) {
         defer.reject(err);
       });
-    })(facetReference.uri);
+    })(facetReferenceRef.current.uri);
 
     return defer.promise;
   };
@@ -361,7 +373,7 @@ const FacetChoicePicker = ({
    * The registered callback to get the selected filters
    */
   const getAppliedFilters = () => {
-    return checkboxRows.filter((cbr: FacetCheckBoxRow) => cbr.selected);
+    return checkboxRowsRef.current.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
   /**
@@ -407,7 +419,7 @@ const FacetChoicePicker = ({
     if (term) term = term.trim();
 
     // make sure adding the search doesn't go above the URL length limit
-    const ref = facetReference.search(term);
+    const ref = facetReferenceRef.current.search(term);
     if (checkReferenceURL(ref)) {
 
       // log the client action
@@ -471,7 +483,7 @@ const FacetChoicePicker = ({
     removeURLLimitAlert();
 
     setRecordsetModalProps({
-      initialReference: facetReference,
+      initialReference: facetReferenceRef.current,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
@@ -538,8 +550,6 @@ const FacetChoicePicker = ({
 
   const onRowClick = (row: FacetCheckBoxRow, rowIndex: number, event: any) => {
     const checked = !row.selected;
-    $log.log(`facet checkbox ${row.uniqueId} has been ${checked ? 'selected' : 'deselected'}`);
-
     const cause = checked ? LogReloadCauses.FACET_SELECT : LogReloadCauses.FACET_DESELECT;
     // get the new reference based on the operation
     let ref;
