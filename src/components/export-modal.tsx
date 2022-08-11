@@ -1,6 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 
 import { Button, Modal } from 'react-bootstrap';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 
 type ExportModalProps = {
   /**
@@ -21,13 +22,29 @@ type ExportModalProps = {
  * returns Modal Component - Component that renders progress modal dialog
  */
 const ExportModal = ({ title, show, closeModal }: ExportModalProps) => {
+  /**
+   * move the modal down so navbar is visible
+   */
+  const moveModal = (node: HTMLElement) => {
+    const mainnav = document.querySelector('#navheader') as HTMLElement;
+    if (!mainnav) return;
+
+    node.style.top = `${mainnav.offsetHeight}px`;
+
+    // if the size of navbar changed, change the offset
+    new ResizeSensor(mainnav, () => {
+      node.style.top = `${mainnav.offsetHeight}px`;
+    });
+  };
+
   return (
-    <Modal 
-      className='export-progress' 
+    <Modal
+      className='export-progress'
       backdropClassName='export-progress-backdrop'
-      show={show} 
-      onHide={closeModal} 
-      backdrop='static' 
+      show={show}
+      onHide={closeModal}
+      onEntered={moveModal}
+      backdrop='static'
       keyboard={false}
     >
       <Modal.Header>
