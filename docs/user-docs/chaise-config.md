@@ -186,7 +186,7 @@ If a property appears in the same configuration twice, the property defined late
    - Type: String - URL
    - Sample syntax:
      ```
-     navbarBrandImage: "../images/logo.png"
+     navbarBrandImage: "/path/to/logo.png"
      ```
 
  #### navbarMenu
