@@ -1,29 +1,33 @@
-import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+// componets
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 
 // hooks
+import { useEffect, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
-// model
+// models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
-import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
-import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+
+// utilties
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const recordsetSettings = {
   appName: 'recordset',

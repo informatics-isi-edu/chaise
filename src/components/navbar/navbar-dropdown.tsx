@@ -14,12 +14,12 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-interface ChaiseLoginDropdownProps {
+interface NavbarDropdownProps {
   menu: MenuOption[],
   openProfileCb?: MouseEventHandler,
   parentDropdown: any // TODO: useRef wrapper type
   /**
-   * Property to capture parent menu's alignment. 
+   * Property to capture parent menu's alignment.
    * submenu takes alginRight prop and makes decision whether to align right or left
    * based on parent's alignment. (eg: if parent alignment is right, child will continue to align
    * right till it reaches end of the screen)
@@ -29,9 +29,9 @@ interface ChaiseLoginDropdownProps {
 
 // NOTE: this dropdown should eventually replace ChaiseNavDropdown but that syntax
 //       hasn't been updated to use the "types" or set default types on menu ingest
-const ChaiseLoginDropdown = ({
+const NavbarDropdown = ({
   menu, openProfileCb, parentDropdown, alignRight
-}: ChaiseLoginDropdownProps): JSX.Element => {
+}: NavbarDropdownProps): JSX.Element => {
   const { logout, session } = useAuthn();
   const dropdownWrapper = useRef<any>(null); // TODO: type the useRef wrapped element
 
@@ -39,9 +39,9 @@ const ChaiseLoginDropdown = ({
    * State variables to align submenu/dropdown to right or left
    * subMenuStyle.fromTop represents top: position
    * subMenuStyle.fromLeft represents left: position
-   * subMenuStyle.dropEnd represents whether submenu should be left or right (might be redudant to set this 
+   * subMenuStyle.dropEnd represents whether submenu should be left or right (might be redudant to set this
    * state variable, but bootstrap might be using this dropEnd or dropStart class internally)
-   */ 
+   */
   const [subMenuStyle, setSubMenuStyle] = useState<any>({
     fromTop: 0,
     fromLeft: 0,
@@ -76,14 +76,14 @@ const ChaiseLoginDropdown = ({
       const subMenu = event.currentTarget.getElementsByClassName('dropdown-menu')[0];
       subMenu.style.display = 'block';
       const childWidth = subMenu.getBoundingClientRect().width;
-      
-      // NOTE: To fix the issue by assigning submenu’s height to available 
+
+      // NOTE: To fix the issue by assigning submenu’s height to available
       // screen height so that all menu items are visible.
       const childHeight = subMenu.scrollHeight;
 
       subMenu.style.display = null;
 
-      // NOTE: To fix the issue by assigning submenu’s height to available 
+      // NOTE: To fix the issue by assigning submenu’s height to available
       // screen height so that all menu items are visible.
       const availableHeight = winHeight - y;
       if (childHeight > availableHeight) {
@@ -96,7 +96,7 @@ const ChaiseLoginDropdown = ({
       } else {
         fromTop = y;
       }
-  
+
       // If elements' position is greater than threshold, align left
       if (alignRight && (x + parentWidth + childWidth) < threshold) {
         // Align right if parentMenu is right and subMenu is within window screen
@@ -111,7 +111,7 @@ const ChaiseLoginDropdown = ({
       }
 
       setSubMenuStyle({
-        fromLeft, 
+        fromLeft,
         fromTop,
         dropEnd
       });
@@ -135,7 +135,7 @@ const ChaiseLoginDropdown = ({
   />
 
   const renderDropdownMenu = (item: MenuOption, index: number) => {
-  
+
     return (
       <Dropdown
         key={index}
@@ -151,18 +151,18 @@ const ChaiseLoginDropdown = ({
           className={menuItemClasses(item, session, true)}
           dangerouslySetInnerHTML={{ __html: renderName(item) }}
         />
-        <Dropdown.Menu 
-          // renderOnMount prop is required to get submenu's width that can be 
+        <Dropdown.Menu
+          // renderOnMount prop is required to get submenu's width that can be
           // used to align submenu to left or right
           renderOnMount
-          style={{ 
-            top: subMenuStyle.fromTop, 
-            left: subMenuStyle.fromLeft, 
+          style={{
+            top: subMenuStyle.fromTop,
+            left: subMenuStyle.fromLeft,
           }}
           // Moved inline style position: fixed property to css class
           className='custom-dropdown-submenu'
         >
-          <ChaiseLoginDropdown
+          <NavbarDropdown
             menu={item.children || []}
             openProfileCb={openProfileCb}
             parentDropdown={dropdownWrapper}
@@ -232,4 +232,4 @@ const ChaiseLoginDropdown = ({
   </>)
 }
 
-export default ChaiseLoginDropdown;
+export default NavbarDropdown;

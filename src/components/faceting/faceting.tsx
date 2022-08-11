@@ -2,10 +2,10 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
 // Components
 import Accordion from 'react-bootstrap/Accordion';
-import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
-import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/facet-check-presence';
-import FacetHeader from '@isrd-isi-edu/chaise/src/components/facet-header';
-import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
+import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-choice-picker';
+import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-presence';
+import FacetHeader from '@isrd-isi-edu/chaise/src/components/faceting/facet-header';
+import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/faceting/facet-range-picker';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';

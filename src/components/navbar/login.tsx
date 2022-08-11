@@ -4,8 +4,8 @@ import { MouseEvent, useEffect, useRef, useState } from 'react';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
-import ChaiseLoginDropdown from '@isrd-isi-edu/chaise/src/components/login-dropdown';
-import ProfileModal from '@isrd-isi-edu/chaise/src/components/profile-modal';
+import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
+import ProfileModal from '@isrd-isi-edu/chaise/src/components/modals/profile-modal';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 
@@ -167,7 +167,7 @@ const ChaiseLogin = (): JSX.Element => {
 
   const renderMenuChildren = () => {
     if (loggedInMenu.menuOptions) {
-      return (<ChaiseLoginDropdown
+      return (<NavbarDropdown
         menu={loggedInMenu.menuOptions}
         openProfileCb={handleOpenProfileClick}
         parentDropdown={dropdownWrapper}

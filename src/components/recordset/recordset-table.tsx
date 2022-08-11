@@ -8,7 +8,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import TableRow from '@isrd-isi-edu/chaise/src/components/table-row';
+import TableRow from '@isrd-isi-edu/chaise/src/components/recordset/table-row';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type RecordsetTableProps = {

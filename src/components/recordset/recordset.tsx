@@ -1,68 +1,46 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset.scss';
 
-import React, { useEffect, useRef, useState } from 'react';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
-import Export from '@isrd-isi-edu/chaise/src/components/export';
+// components
+import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset-table';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import Export from '@isrd-isi-edu/chaise/src/components/export';
+import Faceting from '@isrd-isi-edu/chaise/src/components/faceting/faceting';
+import FilterChiclet from '@isrd-isi-edu/chaise/src/components/recordset/filter-chiclet';
+import Footer from '@isrd-isi-edu/chaise/src/components/footer';
+import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
+import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
+import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
+import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
+import TableHeader from '@isrd-isi-edu/chaise/src/components/recordset/table-header';
+
+// hooks
+import { useEffect, useRef, useState } from 'react';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+
+// models
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetProps, RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+
+// providers
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
+import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
+
+// services
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+
+// utilities
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor, copyToClipboard } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import Footer from '@isrd-isi-edu/chaise/src/components/footer';
-import Faceting from '@isrd-isi-edu/chaise/src/components/faceting';
-import TableHeader from '@isrd-isi-edu/chaise/src/components/table-header';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
-import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
-import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
-import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
-import FilterChiclet from '@isrd-isi-edu/chaise/src/components/filter-chiclet';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
-import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
-import SelectedRows from '@isrd-isi-edu/chaise/src/components/selected-rows';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-
-export type RecordsetProps = {
-  initialReference: any,
-  config: RecordsetConfig,
-  logInfo: {
-    logObject?: any,
-    logStack: any,
-    logStackPath: string,
-    logAppMode?: string
-  },
-  initialPageLimit?: number,
-  getFavorites?: Function,
-  getDisabledTuples?: Function,
-  initialSelectedRows?: SelectedRow[],
-  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
-  onFavoritesChanged?: Function,
-  parentReference?: any,
-  parentTuple?: any,
-  /**
-   * The parent container that recordset will be part of
-   * (used for scrollbar logic)
-   */
-  parentContainer?: HTMLElement,
-  /**
-   * The sticky area of the parent container
-   * (used for scrollbar logic)
-   */
-  parentStickyArea?: HTMLElement,
-  /**
-   *
-   */
-  onFacetPanelOpenChanged?: (newState: boolean) => void
-};
 
 const Recordset = ({
   initialReference,
@@ -195,7 +173,7 @@ const RecordsetInner = ({
    *   - make sure the right padding is correct
    */
   useEffect(() => {
-    let paddingSensor : any;
+    let paddingSensor: any;
     if (isInitialized) {
       // must be done after the data has been initialized to reduce the jitteriness
       paddingSensor = attachMainContainerPaddingSensor(parentContainer);
@@ -232,7 +210,7 @@ const RecordsetInner = ({
         const cb = function () {
           windowRef.history.replaceState({}, '', getRecordsetLink(reference));
         };
-        dispatchError({error: res.issues, closeBtnCallback: cb, okBtnCallback: cb})
+        dispatchError({ error: res.issues, closeBtnCallback: cb, okBtnCallback: cb })
       } else {
         // TODO save query should just return a promise
       }

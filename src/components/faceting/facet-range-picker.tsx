@@ -2,7 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
 
 // components
-import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
+import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
 import Tooltip from 'react-bootstrap/Tooltip';

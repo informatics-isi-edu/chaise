@@ -3,7 +3,8 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 import Modal from 'react-bootstrap/Modal';
-import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
+import { RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks

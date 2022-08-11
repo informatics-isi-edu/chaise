@@ -1,6 +1,6 @@
 
 // components
-import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
+import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
 
 // hooks
 import { useEffect } from 'react';

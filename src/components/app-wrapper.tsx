@@ -10,7 +10,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar';
+import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar/navbar';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import ErrorModal from '@isrd-isi-edu/chaise/src/components/modals/error-modal';

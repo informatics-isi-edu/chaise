@@ -7,9 +7,9 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
-import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/login';
-import ChaiseLoginDropdown from '@isrd-isi-edu/chaise/src/components/login-dropdown';
-import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/banner';
+import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
+import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
+import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -344,7 +344,7 @@ const ChaiseNavbar = (): JSX.Element => {
             renderMenuOnMount
             className='chaise-nav-item'
           >
-            <ChaiseLoginDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></ChaiseLoginDropdown>
+            <NavbarDropdown menu={item.children} parentDropdown={dropdownWrapper} alignRight={true}></NavbarDropdown>
           </NavDropdown>
         );
       }

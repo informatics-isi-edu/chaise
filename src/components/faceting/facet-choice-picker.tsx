@@ -2,9 +2,8 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_facet-choice-picker.scss';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import FacetCheckList from '@isrd-isi-edu/chaise/src/components/facet-check-list';
-import { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
-import RecordsetModal from '@isrd-isi-edu/chaise/src/components/recordset-modal';
+import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 
 // hooks
@@ -18,7 +17,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import { LogActions, LogReloadCauses, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import {
   FacetCheckBoxRow, FacetModel, RecordsetConfig, RecordsetDisplayMode,
-  RecordsetSelectMode, SelectedRow
+  RecordsetSelectMode, SelectedRow, RecordsetProps
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
