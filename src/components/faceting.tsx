@@ -1,20 +1,27 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-
 // Components
 import Accordion from 'react-bootstrap/Accordion';
 import FacetChoicePicker from '@isrd-isi-edu/chaise/src/components/facet-choice-picker';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import FacetCheckPresence from '@isrd-isi-edu/chaise/src/components/facet-check-presence';
-import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
-import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import FacetHeader from '@isrd-isi-edu/chaise/src/components/facet-header';
+import FacetRangePicker from '@isrd-isi-edu/chaise/src/components/facet-range-picker';
+
+// hooks
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// models
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { FacetModel, FacetRequestModel } from '@isrd-isi-edu/chaise/src/models/recordset';
+
+// servies
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
 
 type FacetingProps = {
   /**
@@ -49,7 +56,7 @@ const Faceting = ({
   const [displayFacets, setDisplayFacets] = useState(false);
   const [readyToInitialize, setReadyToInitialize] = useState(false);
 
-  const [facetModels, setFacetModels] = useState<FacetModel[]>(() => {
+  const [facetModels, setFacetModels, facetModelsRef] = useStateRef<FacetModel[]>(() => {
     const res: FacetModel[] = [];
     let firstOpen = -1;
     reference.facetColumns.forEach((fc: any, index: number) => {
@@ -242,8 +249,8 @@ const Faceting = ({
   }
 
   const updateFacets = (flowControl: any, updatePage: Function) => {
-    if (!flowControl.current.haveFreeSlot()) {
-      $log.debug('no free slot!');
+    if (!flowControl.current.haveFreeSlot(false)) {
+      $log.debug('No free slot available (faceting).');
       return;
     }
 
@@ -275,17 +282,11 @@ const Faceting = ({
           return;
         }
 
-        $log.debug(`processing facet ${index}`);
         flowControl.current.queue.occupiedSlots++;
         frm.processed = true;
 
         (function (i) {
-          printDebugMessage(`updating facet (index=${i})`);
-
-          // TODO facetRequestModel stuff should be passed to process facet
-          //      e.g. reloadCauses, reloadTime, etc..
-          //      everything should be handled here eventually
-          //      and the processFacet should only use the values and not modify them
+          printDebugMessage(`updating facet (index=${index})`);
           facetRequestModels.current[i].processFacet(frm.reloadCauses, frm.reloadStartTime).then(function (res: any) {
             setFacetModelByIndex(i, { facetHasTimeoutError: false });
             afterFacetUpdate(i, res, flowControl);
@@ -389,11 +390,11 @@ const Faceting = ({
     return true;
   };
 
-  const getFacetLogAction = (index: number, actionPath: LogActions) : string => {
+  const getFacetLogAction = (index: number, actionPath: LogActions): string => {
     return getLogAction(actionPath, LogStackPaths.FACET);
   };
 
-  const getFacetLogStack = (index: number, extraInfo?: any) : any => {
+  const getFacetLogStack = (index: number, extraInfo?: any): any => {
     return getLogStack(facetRequestModels.current[index].logStackNode, extraInfo);
   }
 
@@ -587,32 +588,6 @@ const Faceting = ({
     }
   };
 
-  const renderFacets = () => {
-    return reference.facetColumns.map((fc: any, index: number) => {
-      const facetModel = facetModels[index];
-
-      return (
-        // TODO TESTING id changed to class (test cases need to be updated)
-        <Accordion.Item eventKey={index + ''} key={index} className={`facet-panel fc-${index}${facetModel.isOpen ? ' panel-open' : ''}`}>
-          {/* TODO TESTING id changed to class */}
-          <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
-            <FacetHeader
-              displayname={fc.displayname}
-              showTooltipIcon={fc.comment ? true : false}
-              comment={fc.comment}
-              isLoading={facetModel.isLoading}
-              facetHasTimeoutError={facetModel.facetHasTimeoutError}
-              noConstraints={facetModel.noConstraints}
-            />
-          </Accordion.Header>
-          <Accordion.Body>
-            {renderFacet(fc, index)}
-          </Accordion.Body>
-        </Accordion.Item>
-      )
-    })
-  };
-
   // bootstrap expects an array of strings
   const activeKeys: string[] = [];
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
@@ -624,12 +599,27 @@ const Faceting = ({
   return (
     <div className='side-panel-container' ref={sidePanelContainer}>
       <div className='faceting-columns-container'>
-        <Accordion
-          className='panel-group'
-          alwaysOpen // allow multiple to be open together
-          activeKey={activeKeys}
-        >
-          {renderFacets()}
+        <Accordion className='panel-group' activeKey={activeKeys} alwaysOpen >
+          {reference.facetColumns.map((fc: any, index: number) => (
+            <Accordion.Item
+              eventKey={index + ''} key={index}
+              className={`facet-panel fc-${index}${facetModels[index].isOpen ? ' panel-open' : ''}`}
+            >
+              <Accordion.Header className={`fc-heading-${index}`} onClick={() => toggleFacet(index)}>
+                <FacetHeader
+                  displayname={fc.displayname}
+                  showTooltipIcon={fc.comment ? true : false}
+                  comment={fc.comment}
+                  isLoading={facetModels[index].isLoading}
+                  facetHasTimeoutError={facetModels[index].facetHasTimeoutError}
+                  noConstraints={facetModels[index].noConstraints}
+                />
+              </Accordion.Header>
+              <Accordion.Body>
+                {renderFacet(fc, index)}
+              </Accordion.Body>
+            </Accordion.Item>
+          ))}
         </Accordion>
       </div>
     </div>

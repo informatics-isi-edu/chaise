@@ -12,10 +12,10 @@ import Plotly from 'plotly.js-basic-dist-min';
 import createPlotlyComponent from 'react-plotly.js/factory';
 const Plot = createPlotlyComponent(Plotly);
 
-import { ResizeSensor } from 'css-element-queries';
-
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
+import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
 
 // models
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
@@ -40,7 +40,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getNotNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
+import { ResizeSensor } from 'css-element-queries';
 
 const FacetRangePicker = ({
   dispatchFacetUpdate,
@@ -53,12 +53,19 @@ const FacetRangePicker = ({
   getFacetLogAction,
   getFacetLogStack,
 }: FacetRangePickerProps): JSX.Element => {
-  const [ranges, setRanges] = useState<FacetCheckBoxRow[]>(
+  const [ranges, setRanges, rangesRef] = useStateRef<FacetCheckBoxRow[]>(
     (!facetColumn.hideNotNullChoice && !facetColumn.hasNotNullFilter) ? [getNotNullFacetCheckBoxRow(false)] : []
   );
 
+  /**
+   * We must create references for the state and local variables that
+   * are used in the flow-control related functions. This is to ensure the
+   * functions are using thier latest values.
+   */
+  const facetColumnRef = useVarRef(facetColumn);
+
   const isColumnOfType = (columnType: string) => {
-    return (facetColumn.column.type.rootName.indexOf(columnType) > -1)
+    return (facetColumnRef.current.column.type.rootName.indexOf(columnType) > -1)
   }
 
   const createChoiceDisplay = (filter: any, selected: boolean) => {
@@ -75,64 +82,65 @@ const FacetRangePicker = ({
     }
   };
 
-  const defaultPlotLayout: PlotlyLayout = {
-    autosize: true,
-    height: 150,
-    margin: {
-      l: 40,
-      r: 0,
-      b: 80,
-      t: 20,
-      pad: 2
-    },
-    xaxis: {
-      fixedrange: false,
-      ticks: 'inside',
-      tickangle: 45,
-      // set to "linear" for int/float graphs
-      // set to "date" for date/timestamp graphs
-      type: '-'
-      // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
-      // autorange: true // default is true. if range is provided, set to false.
-      // rangemode: "normal"/"tozero"/"nonnegative"
-    },
-    yaxis: {
-      fixedrange: true,
-      zeroline: true,
-      tickformat: ',d'
-    },
-    bargap: 0
-  }
-
-  // isColumnOfType relies on `facetColumn` being defined. This component won't load unles there's a facetColumn
-  if (isColumnOfType('int')) {
-    defaultPlotLayout.margin.b = 40;
-    defaultPlotLayout.xaxis.tickformat = ',d';
-  } else if (isColumnOfType('date')) {
-    defaultPlotLayout.xaxis.tickformat = '%Y-%m-%d';
-  } else if (isColumnOfType('timestamp')) {
-    defaultPlotLayout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
-  }
-
-  const [compState, setCompState] = useState<RangePickerState>({
-    disableZoomIn: false,
-    histogramDataStack: [],
-    rangeOptions: { absMin: null, absMax: null, model: { min: null, max: null } },
-    relayout: false,
-    plot: {
-      data: [{
-        x: [],
-        y: [],
-        type: 'bar'
-      }],
-      config: {
-        displayModeBar: false,
-        responsive: true
+  const [compState, setCompState] = useState<RangePickerState>(() => {
+    const defaultPlotLayout: PlotlyLayout = {
+      autosize: true,
+      height: 150,
+      margin: {
+        l: 40,
+        r: 0,
+        b: 80,
+        t: 20,
+        pad: 2
       },
-      layout: defaultPlotLayout
+      xaxis: {
+        fixedrange: false,
+        ticks: 'inside',
+        tickangle: 45,
+        // set to "linear" for int/float graphs
+        // set to "date" for date/timestamp graphs
+        type: '-'
+        // NOTE: setting the range currently to unzoom the graph because auto-range wasn't working it seemed
+        // autorange: true // default is true. if range is provided, set to false.
+        // rangemode: "normal"/"tozero"/"nonnegative"
+      },
+      yaxis: {
+        fixedrange: true,
+        zeroline: true,
+        tickformat: ',d'
+      },
+      bargap: 0
+    }
+
+    // isColumnOfType relies on `facetColumn` being defined. This component won't load unles there's a facetColumn
+    if (isColumnOfType('int')) {
+      defaultPlotLayout.margin.b = 40;
+      defaultPlotLayout.xaxis.tickformat = ',d';
+    } else if (isColumnOfType('date')) {
+      defaultPlotLayout.xaxis.tickformat = '%Y-%m-%d';
+    } else if (isColumnOfType('timestamp')) {
+      defaultPlotLayout.xaxis.tickformat = '%Y-%m-%d\n%H:%M';
+    }
+
+    return {
+      disableZoomIn: false,
+      histogramDataStack: [],
+      rangeOptions: { absMin: null, absMax: null, model: { min: null, max: null } },
+      relayout: false,
+      plot: {
+        data: [{
+          x: [],
+          y: [],
+          type: 'bar'
+        }],
+        config: {
+          displayModeBar: false,
+          responsive: true
+        },
+        layout: defaultPlotLayout
+      }
     }
   })
-
 
   const rangePickerContainer = useRef<HTMLDivElement>(null);
   const listContainer = useRef<HTMLDivElement>(null);
@@ -143,12 +151,16 @@ const FacetRangePicker = ({
   // set the resize sensor to call the plot resize fucntion
   useLayoutEffect(() => {
     if (!rangePickerContainer.current) return;
-    new ResizeSensor(
+    const rs = new ResizeSensor(
       rangePickerContainer.current,
       () => {
         if (rangePickerContainer.current && plotlyRef.current) plotlyRef.current.resizeHandler();
       }
     )
+
+    return () => {
+      rs.detach();
+    }
   }, []);
 
   useEffect(() => {
@@ -186,17 +198,17 @@ const FacetRangePicker = ({
     const defer = Q.defer();
 
     // if we have the not-null filter, other filters are not important and can be ignored
-    if (facetColumn.hasNotNullFilter) {
+    if (facetColumnRef.current.hasNotNullFilter) {
       setRanges([getNotNullFacetCheckBoxRow(true)]);
       defer.resolve(true);
     } else {
       // default handles whether notNull option should be present
-      const updatedRows: FacetCheckBoxRow[] = [...ranges];
+      const updatedRows: FacetCheckBoxRow[] = [...rangesRef.current];
 
-      for (let i = 0; i < facetColumn.rangeFilters.length; i++) {
-        const filter = facetColumn.rangeFilters[i];
+      for (let i = 0; i < facetColumnRef.current.rangeFilters.length; i++) {
+        const filter = facetColumnRef.current.rangeFilters[i];
 
-        const rowIndex = ranges.findIndex(function (obj) {
+        const rowIndex = rangesRef.current.findIndex(function (obj) {
           return obj.uniqueId === filter.uniqueId;
         });
 
@@ -233,7 +245,7 @@ const FacetRangePicker = ({
    * The registered callback to get the selected filters
    */
   const getAppliedFilters = () => {
-    return ranges.filter((cbr: FacetCheckBoxRow) => cbr.selected);
+    return rangesRef.current.filter((cbr: FacetCheckBoxRow) => cbr.selected);
   };
 
   /**
@@ -338,7 +350,7 @@ const FacetRangePicker = ({
       if (!compState.relayout) {
         // the captured uri is not the same as the initial data uri so we need to refetch the min/max
         // this happens when another facet adds a filter that affects the facett object in the uri
-        const agg = facetColumn.column.aggregate;
+        const agg = facetColumnRef.current.column.aggregate;
         const aggregateList = [
           agg.minAgg,
           agg.maxAgg
@@ -353,8 +365,8 @@ const FacetRangePicker = ({
         }
         facetLog.action = getFacetLogAction(facetIndex, action);
         $log.debug('fetch aggregates')
-        facetColumn.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
-          if (facetColumn.sourceReference.uri !== uri) {
+        facetColumnRef.current.sourceReference.getAggregates(aggregateList, facetLog).then((response: any) => {
+          if (facetColumnRef.current.sourceReference.uri !== uri) {
             defer.resolve(false);
             return defer.promise;
           }
@@ -366,7 +378,7 @@ const FacetRangePicker = ({
           //    - bar_plot in annotation is 'false'
           //    - histogram not supported for column type
           // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
-          if (!(facetColumn.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
+          if (!(facetColumnRef.current.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
             setCompState({
               ...compState,
               rangeOptions: minMaxRangeOptions
@@ -399,7 +411,7 @@ const FacetRangePicker = ({
           defer.reject(err);
         });
       }
-    })(facetColumn.sourceReference.uri, reloadCauses, reloadStartTime);
+    })(facetColumnRef.current.sourceReference.uri, reloadCauses, reloadStartTime);
 
     // // so we can check if the getAggregates request needs to be remade or we can just call histogramData
     // scope.initialDataUri = scope.facetColumn.sourceReference.uri;
@@ -426,7 +438,7 @@ const FacetRangePicker = ({
 
       facetLog.action = getFacetLogAction(facetIndex, action);
       $log.debug('fetch histogram data')
-      facetColumn.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
+      facetColumnRef.current.column.groupAggregate.histogram(numBuckets, requestMin, requestMax).read(facetLog).then((response: any) => {
         if (facetColumn.sourceReference.uri !== uri) {
           // return breaks out of the current callback function
           defer.resolve(false);
@@ -480,7 +492,7 @@ const FacetRangePicker = ({
         defer.reject(err);
         console.log('catch histogram data: ', err);
       });
-    })(facetColumn.sourceReference.uri);
+    })(facetColumnRef.current.sourceReference.uri);
 
     return defer.promise;
   }
@@ -494,7 +506,7 @@ const FacetRangePicker = ({
    * we should attach the action.
    */
   const getDefaultLogInfo = () => {
-    const res = facetColumn.sourceReference.defaultLogInfo;
+    const res = facetColumnRef.current.sourceReference.defaultLogInfo;
     res.stack = getFacetLogStack(facetIndex);
     return res;
   }

@@ -1,11 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
-// Login Popup App
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
-
-import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -23,7 +19,8 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
-import { chaiseBaseURL, queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 const loginSettings = {
@@ -92,7 +89,7 @@ const LoginPopupApp = (): JSX.Element => {
             window.close();
           }).catch((error: any) => {
             // NOTE: this should almost never happen
-            //     will happen in any deployment that turns this feature on before we rework the 
+            //     will happen in any deployment that turns this feature on before we rework the
             //      property definition to include the "userProfile Path" as a configuration property
             // if a user reports this hanging around, we need to identify what error caused it
             // should be easy since the error will be logged with context pointing to login I believe
@@ -165,7 +162,8 @@ const LoginPopupApp = (): JSX.Element => {
   );
 };
 
-ReactDOM.render(
+const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+root.render(
   <AppWrapper
     appSettings={loginSettings}
     includeAlerts={false}
@@ -173,6 +171,5 @@ ReactDOM.render(
     displaySpinner={true}
   >
     <LoginPopupApp />
-  </AppWrapper>,
-  document.getElementById('chaise-app-root'),
+  </AppWrapper>
 );
