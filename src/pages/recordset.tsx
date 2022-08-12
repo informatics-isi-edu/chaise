@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 
-// componets
+// components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
@@ -17,6 +17,7 @@ import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, RecordsetPr
 import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
+import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
@@ -29,6 +30,7 @@ import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/cha
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+
 const recordsetSettings = {
   appName: 'recordset',
   appTitle: 'Recordset',
@@ -39,7 +41,7 @@ const recordsetSettings = {
 
 const RecordsetApp = (): JSX.Element => {
   const { addAlert } = useAlert()
-  const { createPromptExpirationToken, session, showPreviousSessionAlert } = useAuthn();
+  const { session, showPreviousSessionAlert } = useAuthn();
   const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
@@ -60,7 +62,7 @@ const RecordsetApp = (): JSX.Element => {
       // TODO saved query?
 
       if (!session && showPreviousSessionAlert()) {
-        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, createPromptExpirationToken, true);
+        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
       }
 
       const logStack = [

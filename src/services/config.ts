@@ -13,6 +13,7 @@ import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import $log, { LoggerLevels } from '@isrd-isi-edu/chaise/src/services/logger';
+import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
 
 export interface AppSettings {
   appName: string,
@@ -185,8 +186,7 @@ export class ConfigService {
   private static _setupERMrest(ERMrest: any, session: Session | null) {
     ERMrest.appLinkFn(ConfigService._appTagToURL);
     ERMrest.systemColumnsHeuristicsMode(ConfigService._systemColumnsMode);
-    // TODO
-    // ERMrest.onHTTPSuccess(Session.extendPromptExpirationToken);
+    ERMrest.onHTTPSuccess(AuthnStorageService.extendPromptExpirationToken);
 
     const chaiseConfig = ConfigService.chaiseConfig;
     ERMrest.setClientConfig({

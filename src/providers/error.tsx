@@ -4,9 +4,9 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type LoginModalProps = {
+  onModalClose?: Function;
+  onModalCloseSuccess?: Function;
   title: string;
-  onModalCloseSuccess?: Function,
-  onModalClose?: Function
 };
 
 interface ChaiseError {
