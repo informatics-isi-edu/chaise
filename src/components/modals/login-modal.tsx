@@ -1,7 +1,7 @@
+import { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 
@@ -9,21 +9,31 @@ const LoginModal = (): JSX.Element => {
   const { dispatchError, loginModal, hideLoginModal } = useError();
   const { popupLogin } = useAuthn();
 
+  const [closeMessage, setCloseMessage] = useState<string | null>(null)
+  const [show, setShow] = useState<boolean>(true);
+
   const login = () => {
-    // TODO
-    popupLogin(LogActions.LOGIN_LOGIN_MODAL, loginModal?.onModalCloseSuccess);
+    setCloseMessage('login');
+    popupLogin(LogActions.LOGIN_LOGIN_MODAL);
   };
 
   const cancel = () => {
-    if (loginModal?.onModalClose) {
-      loginModal?.onModalClose('cancel');
+    setCloseMessage('cancel');
+    setShow(false);
+  };
+
+  const onExited = () => {
+    hideLoginModal(); // sets modal to null after it's been hidden
+    if (closeMessage === 'login' && loginModal?.onModalCloseSuccess) {
+      loginModal.onModalCloseSuccess()
+    } else if (closeMessage === 'cancel' && loginModal?.onModalClose) {
+      loginModal.onModalClose('cancel');
     } else {
-      hideLoginModal();
       // TODO needs discussion
       // https://github.com/informatics-isi-edu/chaise/issues/2091#issuecomment-868144407
-      dispatchError({ error: new Error('You cannot proceed without logging in.') })
+      // dispatchError({ error: new Error('You cannot proceed without logging in.') })
     }
-  };
+  }
 
   if (!loginModal) {
     return <></>;
@@ -33,9 +43,10 @@ const LoginModal = (): JSX.Element => {
     <Modal
       className='modal-login-instruction'
       backdropClassName='modal-login-instruction-backdrop'
-      show={true}
+      show={show}
       backdrop='static'
       keyboard={false}
+      onExited={onExited}
     >
       <Modal.Header>
         <Modal.Title as='h2'>{loginModal.title}</Modal.Title>

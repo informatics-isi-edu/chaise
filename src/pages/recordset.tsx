@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom';
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
+// components
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -10,21 +15,23 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // model
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
+// services
+import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
+// utils
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -36,7 +43,7 @@ const recordsetSettings = {
 
 const RecordsetApp = (): JSX.Element => {
   const { addAlert } = useAlert()
-  const { createPromptExpirationToken, session, showPreviousSessionAlert } = useAuthn();
+  const { session, showPreviousSessionAlert } = useAuthn();
   const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
@@ -58,7 +65,7 @@ const RecordsetApp = (): JSX.Element => {
       // TODO saved query?
 
       if (!session && showPreviousSessionAlert()) {
-        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, createPromptExpirationToken, true);
+        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
       }
 
       const logStack = [

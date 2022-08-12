@@ -4,11 +4,13 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { DifferentUserConflictError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 import { LoginModalProps } from '@isrd-isi-edu/chaise/src/providers/error';
 
 // services
+import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import Q from 'q';
@@ -16,27 +18,29 @@ import StorageService from '@isrd-isi-edu/chaise/src/utils/storage';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 import { chaiseDeploymentPath, fixedEncodeURIComponent, queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
-// TODO function types
+type sessionCbFunction = (response?: Session | null) => void;
 
 export const AuthnContext = createContext<{
-  createPromptExpirationToken: () => void;
   getSession: (context: string) => Promise<Session | null>;
   isSameSessionAsPrevious: (serverSession: Session | null) => boolean;
-  loginInAModal: (notifyErmrestCB: Function, notifyErmrestRejectCB: Function, logAction: string) => void;
   logout: (action: string) => void;
   logoutWithoutRedirect: (action: string) => void;
-  popupLogin: (logAction: string | null, postLoginCB?: Function) => void;
+  modalLogin: (
+    notifyErmrestCB: sessionCbFunction, 
+    notifyErmrestRejectCB: sessionCbFunction | null, 
+    logAction: string
+  ) => void;
+  popupLogin: (logAction: string | null, postLoginCB?: sessionCbFunction) => void;
   prevSession: Session | null;
   refreshLogin: (action: string) => Promise<string | Error>;
   session: Session | null;
   shouldReloadPageAfterLogin: (serverSession: Session | null) => boolean;
   showPreviousSessionAlert: () => boolean;
-  validateSessionBeforeMutation: (cb: Function) => void;
+  validateSessionBeforeMutation: (cb: () => void) => void;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -53,7 +57,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
-  const { dispatchError, hideLoginModal, showLoginModal, setLoginFunction } = useError();
+  const { dispatchError, showLoginModal, setLoginFunction } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
   const _changeCbs: any = {};
@@ -62,15 +66,15 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   useEffect(() => {
     setLoginFunction(() => {
       // success callback
-      const successCb = (response: Session | null) => {
+      const successCb: sessionCbFunction = (response?: Session | null) => {
         if (shouldReloadPageAfterLogin(session)) {
           window.location.reload();
-        } else if (!isSameSessionAsPrevious(response)) {
+        } else if (response && !isSameSessionAsPrevious(response)) {
           dispatchError({ error: new DifferentUserConflictError(session, prevSession) });
         }
       }
 
-      loginInAModal(successCb, null, LogActions.LOGIN_LOGIN_MODAL)
+      modalLogin(successCb, null, LogActions.LOGIN_LOGIN_MODAL)
     })
 
     // If app is not login then attach the unauthorised 401 http handler to ermrestjs
@@ -107,6 +111,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
         }
 
+        // TODO: type of response might be Session | null
         const rejectCB = (response: any) => {
           // returns to rejectCB in ermrestJS/http.js
           defer.reject(response);
@@ -114,7 +119,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
         // Call login in a new modal window to perform authentication
         // and return a promise to notify ermrestjs that the user has loggedin
-        loginInAModal(successCB, rejectCB, LogActions.LOGIN_LOGIN_MODAL);
+        modalLogin(successCB, rejectCB, LogActions.LOGIN_LOGIN_MODAL);
 
         return defer.promise;
       });
@@ -127,72 +132,12 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     }
   };
 
-  /**
-   * Functions that interact with the StorageService tokens
-   * There are 3 keys stored under the LOCAL_STORAGE_KEY object, PROMPT_EXPIRATION_KEY, PREVIOUS_SESSION_KEY
-   */
-
-  // returns data stored in loacal storage for `keyName`
-  const _getKeyFromStorage = (keyName: string) => {
-    return StorageService.getStorage(LOCAL_STORAGE_KEY)[keyName];
-  };
-
-  // create value in storage with `keyName` and `value`
-  const _setKeyInStorage = (keyName: string, value: string | boolean) => {
-    const data = {} as any;
-
-    data[keyName] = value;
-
-    StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
-  };
-
-  // verifies value exists for `keyName`
-  const _keyExistsInStorage = (keyName: string) => {
-    const sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
-
-    return (sessionStorage && sessionStorage[keyName]);
-  };
-
-  // removes the key/value pair at `keyName`
-  const _removeKeyFromStorage = (keyName: string) => {
-    if (_keyExistsInStorage(keyName)) {
-      StorageService.deleteStorageValue(LOCAL_STORAGE_KEY, keyName);
-    }
-  };
-
-  // creates an expiration token with `keyName`
-  const _createToken = (keyName: string) => {
-    const data = {} as any;
-    const hourFromNow = new Date();
-    hourFromNow.setHours(hourFromNow.getHours() + 1);
-
-    data[keyName] = hourFromNow.getTime();
-
-    StorageService.updateStorage(LOCAL_STORAGE_KEY, data);
-  };
-
-  // checks if the expiration token with `keyName` has expired
-  const _expiredToken = (keyName: string) => {
-    const sessionStorage = StorageService.getStorage(LOCAL_STORAGE_KEY);
-
-    return (sessionStorage && new Date().getTime() > sessionStorage[keyName]);
-  };
-
-  // extends the expiration token with `keyName` if it hasn't expired
-  const _extendToken = (keyName: string) => {
-    if (_keyExistsInStorage(keyName) && !_expiredToken(keyName)) {
-      _createToken(keyName);
-    }
-  };
-
-  const createPromptExpirationToken = () => {
-    _createToken(PROMPT_EXPIRATION_KEY);
-  }
-
   // if there's a previous login token AND
   // the prompt expiration token does not exist OR it has expired
   const showPreviousSessionAlert = () => {
-    return (_keyExistsInStorage(PREVIOUS_SESSION_KEY) && (!_keyExistsInStorage(PROMPT_EXPIRATION_KEY) || _expiredToken(PROMPT_EXPIRATION_KEY)));
+    return (
+      AuthnStorageService.keyExistsInStorage(PREVIOUS_SESSION_KEY) && 
+      (!AuthnStorageService.keyExistsInStorage(PROMPT_EXPIRATION_KEY) || AuthnStorageService.expiredToken(PROMPT_EXPIRATION_KEY)));
   }
 
   const isSameSessionAsPrevious = (sessionParam: Session | null) => {
@@ -210,7 +155,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   /**
    * opens a window dialog for logging in
    */
-  const popupLogin = (logAction: string | null, postLoginCB?: Function) => {
+  const popupLogin = (logAction: string | null, postLoginCB?: sessionCbFunction) => {
     if (!postLoginCB) {
       postLoginCB = () => {
         // fetches the session of the user that just logged in
@@ -241,23 +186,20 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // focus on the opened window
     win?.focus();
 
-    logInHelper(loginWindowCb, win, postLoginCB, 'popUp', null, logAction);
+    _logInHelper(win, postLoginCB, 'popUp', null, logAction);
   };
 
   // NOTE: sessionParam attached so it can be passed back to callbacks for comparisons since functions execute synchronously
   //       and `session` state variable updates asynchronously sometime during or after these functions are executing
-  const logInHelper = (
-    logInTypeCb: Function,
-    win: any,
-    cb: Function,
+  const _logInHelper = (
+    win: Window | null,
+    cb: sessionCbFunction,
     type: string,
-    rejectCb: Function | null,
+    rejectCb: sessionCbFunction | null,
     logAction: string | null,
     sessionParam?: Session | null
   ) => {
     const referrerId = '' + (new Date().getTime());
-
-    const cc = ConfigService.chaiseConfig;
 
     const referrerUrl = `${window.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH}login/?referrerid=${referrerId}`;
     const url = `${serviceURL}/authn/preauth?referrer=${fixedEncodeURIComponent(referrerUrl)}`;
@@ -269,7 +211,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       skipHTTP401Handling: true,
     };
 
-    // TODO in the case of loginInAModal, we're not doing the actual login,
+    // TODO in the case of modalLogin, we're not doing the actual login,
     // but we're still sending the request. Since we need to change this anyways,
     // I decided to not add any log action in that case and instead we should just
     // fix that function.
@@ -278,6 +220,9 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         action: LogService.getActionString(logAction, '', '')
       }
     }
+
+    // response is an object containing the session info
+    // object with type - { data: Session}
     ConfigService.http.get(url, config).then((response: any) => {
       const data = response.data;
 
@@ -308,69 +253,56 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         login_url += `&method=${method}&action=${action}&text=${text}&hidden=${hidden}&?referrerid=${referrerId}`;
       }
 
-      const params = {
-        login_url,
-      };
-      if (win) {
-        win.location = params.login_url;
+      const params = { login_url };
+      if (win) win.location = params.login_url;
+
+      if (type === 'modal') {
+        _openLoginModal(referrerId, cb, rejectCb, sessionParam)
+      } else {
+        // type === 'popup'
+        _loginWindowCb(referrerId, cb);
       }
-      logInTypeCb(params, referrerId, cb, type, rejectCb, sessionParam);
     }, (error: any) => {
       throw ConfigService.ERMrest.responseToError(error);
     });
   };
 
-  // post login callback function
-  const loginWindowCb = (params: any, referrerId: string, cb: Function, type: string, rejectCb: Function | null, sessionParam?: Session | null) => {
-    if (type.indexOf('modal') !== -1) {
-      const title = sessionParam ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
-      const loginModalProps: LoginModalProps = { title: title };
+  const _openLoginModal = (referrerId: string, cb: sessionCbFunction, rejectCb: sessionCbFunction | null, sessionParam?: Session | null) => {
+    const title = sessionParam ? MESSAGE_MAP.sessionExpired.title : MESSAGE_MAP.noSession.title;
+    const loginModalProps: LoginModalProps = { title: title };
 
-      // TODO
-      // const cleanupModal = () => {
-      //   $interval.cancel(intervalId);
-      //   // CookieService
-      //   $cookies.remove('chaise-' + referrerId, { path: '/' });
-      // }
+    loginModalProps.onModalCloseSuccess = () => {
+      CookieService.deleteCookie('chaise-' + referrerId, '/')
+      getSession('').then((response: Session | null) => {
+        cb(response);
+      });
+    };
 
-      loginModalProps.onModalCloseSuccess = () => {
-        // cleanupModal("login refreshed");
-        getSession('').then((response: any) => {
-          hideLoginModal();
-          cb(response);
-        });
-      };
-
-      loginModalProps.onModalClose = (response: any) => {
-        // cleanupModal("no login");
-        hideLoginModal();
-        if (rejectCb) {
-          //  ermrestJS throws error if 'response' is not formatted as an Error
-          if (typeof response === 'string') {
-            response = new Error(response);
-          }
-          rejectCb(response);
+    // onModalClose is registered as the `onExited` function of login-modal
+    // response is an error or string
+    loginModalProps.onModalClose = (response: any) => {
+      CookieService.deleteCookie('chaise-' + referrerId, '/')
+      if (rejectCb) {
+        //  ermrestJS throws error if 'response' is not formatted as an Error
+        if (typeof response === 'string') {
+          response = new Error(response);
         }
-      };
+        rejectCb(response);
+      }
+    };
 
-      showLoginModal(loginModalProps);
-    }
+    showLoginModal(loginModalProps);
+  }
 
-
+  // post login callback function
+  const _loginWindowCb = (referrerId: string, cb: sessionCbFunction) => {
     window.addEventListener('message', (args) => {
       if (args && args.data && (typeof args.data === 'string')) {
-        _setKeyInStorage(PREVIOUS_SESSION_KEY, true);
-        _removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
+        AuthnStorageService.setKeyInStorage(PREVIOUS_SESSION_KEY, true);
+        AuthnStorageService.removeKeyFromStorage(PROMPT_EXPIRATION_KEY);
         const obj = queryStringToJSON(args.data);
 
-        if (obj.referrerid === referrerId && (typeof cb === 'function')) {
-          if (type.indexOf('modal') !== -1) {
-            cb();
-            closed = true;
-          } else {
-            cb();
-          }
-        }
+        if (obj.referrerid === referrerId && (typeof cb === 'function')) cb();
       }
     });
   };
@@ -383,9 +315,11 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
    * @param  {string=} context undefined or "401"
    */
   const getSession = (context: string) => {
+    // TODO: type of config/headers object
     const config = {
       skipHTTP401Handling: true,
-      headers: {} as any,
+      // TODO: type of headers object
+      headers: {} as any
     };
 
     // config.headers[ERMrest.contextHeaderName] = {
@@ -413,6 +347,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
      *  - if expired
      * */
 
+    // response is an object containing the session info
+    // object with type - { data: Session }
     return ConfigService.http.get(`${serviceURL}/authn/session`, config).then((response: any) => {
       if (context === '401' && shouldReloadPageAfterLogin(response)) {
         // window.location.reload();
@@ -448,6 +384,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     let url = serviceURL + '/authn/session';
     url += '?logout_url=' + fixedEncodeURIComponent(logoutURL);
 
+    // TODO: type of config/headers object
     let config: any = {
       skipHTTP401Handling: true,
       headers: {}
@@ -467,6 +404,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   }
 
   const logoutWithoutRedirect = (action: string) => {
+    // TODO: type of config/headers object
     const logoutConfig: any = {
       skipHTTP401Handling: true,
       headers: {}
@@ -477,7 +415,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     };
 
     // logout without redirecting the user
-    ConfigService.http.delete(serviceURL + '/authn/session/', logoutConfig).then((response: any) => {
+    // response usually returns an object like { data: {logout_url: ''} }
+    ConfigService.http.delete(serviceURL + '/authn/session/', logoutConfig).then(() => {
       StorageService.deleteStorageNamespace(LOCAL_STORAGE_KEY);
 
     }).catch((error: any) => {
@@ -493,6 +432,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       preauthReferrer = window.location.origin + chaiseDeploymentPath() + 'login/?referrerid=' + referrerId,
       redirectUrl = serviceURL + '/authn/preauth/?referrer=' + fixedEncodeURIComponent(preauthReferrer);
 
+    // TODO: type of config/headers object
     const loginConfig: any = {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -505,6 +445,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       action: LogService.getActionString(action, '', '')
     }
 
+    // response is an object containing the session info
+    // object with type - { data: Session }
     return ConfigService.http.get(redirectUrl, loginConfig).then((response: any) => {
       const data = response.data;
 
@@ -521,7 +463,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   }
 
-  const _setSession = (inp: any) => {
+  const _setSession = (inp: Session | null) => {
     if (!inp) {
       setSession(null);
       return;
@@ -576,12 +518,12 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
   // Makes a request to fetch the most recent session from the server
   // verifies if that is the same as when the page loaded before calling `cb`
-  const validateSessionBeforeMutation = (cb: any) => {
-    const handleDiffUser = (serverSession: any) => {
+  const validateSessionBeforeMutation = (cb: () => void) => {
+    const handleDiffUser = (serverSession: Session | null) => {
       // modalInstance comes from error modal controller to close the modal after logging in, but before checking to throw an error again
       const checkSession = () => {
         // check if login state resolved
-        getSession('').then((response: any) => {
+        getSession('').then((response: Session | null) => {
           if (!response || !isSameSessionAsPrevious(response)) {
             handleDiffUser(response)
           } else {
@@ -606,7 +548,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 
     // Checks if an error needs to be thrown because the user is different and continues execution if the login state is resolved
     // a session must exist before calling this function
-    const validateSessionSubmit = (serverSession: any) => {
+    const validateSessionSubmit = (serverSession: Session | null) => {
       if (!isSameSessionAsPrevious(serverSession)) {
         handleDiffUser(serverSession);
       } else {
@@ -615,10 +557,10 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       }
     }
 
-    getSession('').then((response: any) => {
+    getSession('').then((response: Session | null) => {
       if (!response) {
-        const onSuccess = (serverSession: any) => {
-          validateSessionSubmit(serverSession);
+        const onSuccess = (serverSession?: Session | null) => {
+          if (serverSession) validateSessionSubmit(serverSession);
         }
 
         const onError = (err: any) => {
@@ -628,7 +570,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         }
 
         // should be modal login
-        logInHelper(loginWindowCb, '', onSuccess, 'modal', onError, LogActions.SWITCH_USER_ACCOUNTS_LOGIN, response);
+        _logInHelper(null, onSuccess, 'modal', onError, LogActions.SWITCH_USER_ACCOUNTS_LOGIN, response);
       } else {
         validateSessionSubmit(response);
       }
@@ -636,23 +578,22 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   };
 
   /**
-   * TODO technically this function should even ask for preauthn in logInHelper
+   * TODO technically this function should even ask for preauthn in _logInHelper
    * This function opens a modal dialog which has a link for login
    * the callback for this function has a race condition because the login link in the modal uses `loginInAPopUp`
    * that function uses the embedded `reloadCb` as the callback for the actual login window closing.
    * these 2 callbacks trigger in the order of `popupCb` first then `modalCb` where modalCb is ignored more often than not
    * @param {Function} notifyErmrestCB - runs after the login process has been complete
    */
-  const loginInAModal = (notifyErmrestCB: Function, notifyErmrestRejectCB: Function | null, logAction: string) => {
-    logInHelper(loginWindowCb, '', notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
+  const modalLogin = (notifyErmrestCB: sessionCbFunction, notifyErmrestRejectCB: sessionCbFunction | null, logAction: string) => {
+    _logInHelper(null, notifyErmrestCB, 'modal', notifyErmrestRejectCB, logAction);
   }
 
   const providerValue = useMemo(() => {
     return {
-      createPromptExpirationToken,
       getSession,
       isSameSessionAsPrevious,
-      loginInAModal,
+      modalLogin,
       logout,
       logoutWithoutRedirect,
       popupLogin,
@@ -672,7 +613,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   )
 } // end provider
 
-// return {
 
 //   /**
 //    * Will return a promise that is resolved with the session.
@@ -713,9 +653,3 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
 //   unsubscribeOnChange: function (id) {
 //     delete _changeCbs[id];
 //   },
-
-//   extendPromptExpirationToken: function () {
-//     _extendToken(PROMPT_EXPIRATION_KEY);
-//   },
-// }
-//     }])
