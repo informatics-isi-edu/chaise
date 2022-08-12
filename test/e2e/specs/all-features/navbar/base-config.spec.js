@@ -1,3 +1,4 @@
+const { browser } = require('protractor');
 let chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {
@@ -72,7 +73,7 @@ describe('Navbar ', function() {
     });
 
     if (!process.env.CI) {
-        var menuDropdowns, disabledSubMenuOptions;
+        var menuDropdowns, disabledSubMenuOptions, editMenu;
         
         it("should have 4 top level dropdown menus", function() {
             expect(menu.all(by.css('.chaise-nav-item')).count()).toBe(4, "number of top level dropdown menus is wrong");
@@ -86,7 +87,7 @@ describe('Navbar ', function() {
         it('should have a header and a disabled "Edit Existing Record" submenu link (no children).', function () {
             //menu should still be open from previous test case
             // chaise-nav-item represents top menus in the navbar.
-            let editMenu = menu.all(by.css('.chaise-nav-item')).get(3);
+            editMenu = menu.all(by.css('.chaise-nav-item')).get(3);
             editMenu.click().then(function() {
                 expect(editMenu.all(by.css('.chaise-dropdown-header')).get(0).getText()).toBe("For Mutating Data", "Sub menu header is incorrect or not showing");
                 return editMenu.all(by.css("a.disable-link"));
@@ -105,7 +106,7 @@ describe('Navbar ', function() {
         });
 
         it('should have a "mailto:" link displayed properly', function () {
-            editMenu.all(by.css('a')).then(function (options) {
+            editMenu.all(by.css('.dropdown-menu a')).then(function (options) {
                 expect(options.length).toBe(7, 'some options are not shown properly');
                 expect(options[6].getText()).toBe('Help with Editing', 'Help link title is incorrect');
                 expect(chaisePage.navbar.getHrefValue(options[6])).toBe('mailto:support@isrd.isi.edu.test', 'mailto: link was incorrect')
