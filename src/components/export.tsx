@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
-import ExportModal from '@isrd-isi-edu/chaise/src/components/export-modal';
+import ExportModal from '@isrd-isi-edu/chaise/src/components/modals/export-modal';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -79,7 +79,7 @@ const Export = ({
       // of the page have already thrown an error.
     }
 
-  }, [reference]);
+  }, []);
 
   /**
    * Send the request for export

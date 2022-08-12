@@ -1,5 +1,7 @@
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+export const IS_DEV_MODE = process.env.NODE_ENV === 'development';
+
 export const APP_TAG_MAPPING = {
   'tag:isrd.isi.edu,2016:chaise:record': 'record',
   'tag:isrd.isi.edu,2016:chaise:detailed': 'detailed',
@@ -26,6 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
+  'debug'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {

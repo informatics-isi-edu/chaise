@@ -82,7 +82,7 @@ const SearchInput = ({
   const triggerSearch = (isButton: boolean) => {
     if (disabled) return;
 
-    $log.debug(`search term: ${searchTerm}`);
+    // $log.debug(`search term: ${searchTerm}`);
 
     // cancel the timeout
     if (inputChangedTimeout.current) {

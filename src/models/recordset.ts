@@ -1,6 +1,41 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
 
+export type RecordsetProps = {
+  initialReference: any,
+  config: RecordsetConfig,
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  },
+  initialPageLimit?: number,
+  getFavorites?: Function,
+  getDisabledTuples?: Function,
+  initialSelectedRows?: SelectedRow[],
+  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  onFavoritesChanged?: Function,
+  parentReference?: any,
+  parentTuple?: any,
+  /**
+   * The parent container that recordset will be part of
+   * (used for scrollbar logic)
+   */
+  parentContainer?: HTMLElement,
+  /**
+   * The sticky area of the parent container
+   * (used for scrollbar logic)
+   */
+  parentStickyArea?: HTMLElement,
+  /**
+   * the callback that will be called when the state of facet panel changed.
+   * Currently used in recordset-modal to ensure the modal title's left-panel
+   * is also closed with the panel
+   */
+  onFacetPanelOpenChanged?: (newState: boolean) => void
+};
+
 export enum RecordsetSelectMode {
   NO_SELECT,
   SINGLE_SELECT,

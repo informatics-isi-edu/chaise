@@ -10,7 +10,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
-import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar';
+import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar/navbar';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import ErrorModal from '@isrd-isi-edu/chaise/src/components/modals/error-modal';
@@ -58,22 +58,26 @@ const AppWrapperInner = ({
   const { getSession, session } = useAuthn();
 
   useEffect(() => {
+    const onError = (event: any) => {
+      dispatchError({ error: event.error });
+    };
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      dispatchError({ error: event.reason });
+    };
+    const onHashChange = () => {
+      windowRef.location.reload();
+    };
+
     /**
      * global error handler for uncaught errors
      */
-    windowRef.addEventListener('error', (event) => {
-      dispatchError({ error: event.error });
-    });
-    windowRef.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-      dispatchError({ error: event.reason });
-    });
+    windowRef.addEventListener('error', onError);
+    windowRef.addEventListener('unhandledrejection', onUnhandledRejection);
 
     /**
      * reload the page when users change the hash portion of the URL
      */
-    windowRef.addEventListener('hashchange', () => {
-      windowRef.location.reload();
-    });
+    windowRef.addEventListener('hashchange', onHashChange);
 
     getSession('').then((response: any) => {
       return ConfigService.configure(appSettings, response);
@@ -82,6 +86,12 @@ const AppWrapperInner = ({
     }).catch((err: any) => {
       dispatchError({ error: err });
     });
+
+    return () => {
+      windowRef.removeEventListener('error', onError);
+      windowRef.removeEventListener('unhandledrejection', onUnhandledRejection);
+      windowRef.removeEventListener('hashchange', onHashChange);
+    }
 
   }, []); // run it only once on load
 

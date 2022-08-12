@@ -14,7 +14,7 @@
 
 * **Page being automatically reloaded during test ? I am writing test for recordset in Chaise. But after page is loaded, the address bar is updated with extra “/” after “#”.So the original url `http://…/#1234/schema:table` which becomes `http://…/#/1234/schema:table`, and that causes app to throw error.**
 
-     >  This issue has been documented [here](https://github.com/informatics-isi-edu/chaise/issues/582). It happens because of the default angular routing. Protractor depends on it. We are not using the default angular routing in Chaise and Protractor tries to use that when we are changing the location using `browser.get`. For now you just want to get rid of the explicit routing that has been added in your apps as seen [here](https://github.com/informatics-isi-edu/chaise/blob/master/recordset/recordset.js#L352).
+     >  This issue has been documented [here](https://github.com/informatics-isi-edu/chaise/issues/582). It happens because of the default angular routing. Protractor depends on it. We are not using the default angular routing in Chaise and Protractor tries to use that when we are changing the location using `browser.get`. For now you just want to get rid of the explicit routing that has been added in your apps.
 
 ***
 

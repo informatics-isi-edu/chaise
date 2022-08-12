@@ -27,7 +27,7 @@ var testParams = {
             columnName: "col_w_column_order_false"
         },
         {
-            title: "facet without order and hide_num_occurrences\ntrue",
+            title: "facet without order and hide_num_occurrences true",
             facetIdx: 21,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,

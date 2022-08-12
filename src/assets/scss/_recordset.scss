@@ -103,6 +103,13 @@
             padding: 0;
             height: unset;
             margin-bottom: 5px;
+
+            // because of the order of events, this button might
+            // show up a few seconds before the filter chiclets.
+            // this rule will make sure that is not the case.
+            &:only-child {
+              display: none;
+            }
           }
         }
 

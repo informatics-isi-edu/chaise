@@ -7,7 +7,7 @@ import 'regenerator-runtime';
 
 import { Session } from '@isrd-isi-edu/chaise/src/models/user';
 import {
-  APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG,
+  APP_CONTEXT_MAPPING, APP_TAG_MAPPING, BUILD_VARIABLES, CHAISE_CONFIG_PROPERTY_NAMES, DEFAULT_CHAISE_CONFIG, IS_DEV_MODE,
 } from '@isrd-isi-edu/chaise/src/utils/constants';
 import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { getCatalogId, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -138,7 +138,8 @@ export class ConfigService {
       }
     }
 
-    if (ConfigService.chaiseConfig.debug === true) {
+    if (ConfigService.chaiseConfig.debug === true || IS_DEV_MODE) {
+      $log.debug('=====================\nDEBUG MODE ENABLED\n=====================');
       $log.setLevel(LoggerLevels.TRACE);
     }
 
