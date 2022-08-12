@@ -1325,6 +1325,10 @@ var navbar = function () {
         var banner = this.getBanner(key);
         return banner.element(by.css(".close"));
     }
+
+    this.getHrefValue = function(element) {
+        return browser.executeScript("return arguments[0].getAttribute('href');", element);
+    };
 }
 
 // Makes a string safe and valid for use in an HTML element's id attribute.

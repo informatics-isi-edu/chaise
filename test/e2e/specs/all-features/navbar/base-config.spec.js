@@ -46,9 +46,9 @@ describe('Navbar ', function() {
     it('for the menu, should generate the correct # of list items based on acls to show/hide specific options', function() {
         const nodesInDOM = menu.all(by.css('a'));
         // Count the number of nodes that are being shown (top level and submenus)
-        //   - Local: config has 13 but 1 is hidden by ACLs
-        //   - CI: config has 13 but 7 are hidden based on ACLs
-        var counter = (!process.env.CI ? 12 : 6); // counted from chaise config doc rather than having code count
+        //   - Local: config has 14 but 1 is hidden by ACLs
+        //   - CI: config has 14 but 7 are hidden based on ACLs
+        var counter = (!process.env.CI ? 13 : 7); // counted from chaise config doc rather than having code count
 
         nodesInDOM.count().then(function(count) {
             expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
@@ -102,6 +102,14 @@ describe('Navbar ', function() {
         it('should have disabled "Edit Records" submenu link (has children)', function () {
             //menu should still be open from previous test case
             expect(disabledSubMenuOptions[1].getText()).toBe("Edit Records", "the wrong link is disabled or caret is still visible");
+        });
+
+        it('should have a "mailto:" link displayed properly', function () {
+            editMenu.all(by.css('a')).then(function (options) {
+                expect(options.length).toBe(7, 'some options are not shown properly');
+                expect(options[6].getText()).toBe('Help with Editing', 'Help link title is incorrect');
+                expect(chaisePage.navbar.getHrefValue(options[6])).toBe('mailto:support@isrd.isi.edu.test', 'mailto: link was incorrect')
+            });
         });
     }
 
