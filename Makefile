@@ -310,13 +310,21 @@ RSYNC_FILE_LIST=common \
 	sitemap \
 	styles \
 	viewer \
-	$(JS_CONFIG) \
 	version.txt
+
+# the same list above but also includes the config files
+RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
+	$(JS_CONFIG)
 
 .make-rsync-list:
 	$(info - creating .make-rsync-list)
 	@> .make-rsync-list
 	@$(call add_array_to_file,$(RSYNC_FILE_LIST),.make-rsync-list)
+
+.make-rsync-list-w-config:
+	$(info - creating .make-rsync-list-w-config)
+	@> .make-rsync-list-w-config
+	@$(call add_array_to_file,$(RSYNC_FILE_LIST_W_CONFIG),.make-rsync-list-w-config)
 
 # -------------------------- record app -------------------------- #
 RECORD_ROOT=record
@@ -570,7 +578,7 @@ clean:
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
-	rm -rf $(MODULES) || true
+	@rm -rf $(MODULES) || true
 
 .PHONY: lint
 lint: $(SOURCE)
@@ -595,14 +603,14 @@ run-webpack: $(SOURCE) $(BUILD_VERSION)
 .PHONY: deploy
 deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='dist/react' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='dist/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
 	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # rsync the build and config files to the location
 .PHONY: deploy-w-config
-deploy-w-config: dont_deploy_in_root .make-rsync-list $(JS_CONFIG) $(VIEWER_CONFIG)
+deploy-w-config: dont_deploy_in_root .make-rsync-list-w-config $(JS_CONFIG) $(VIEWER_CONFIG)
 	$(info - deploying the package with the existing default config files)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='dist/react' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list-w-config --exclude='dist/react' . $(CHAISEDIR)
 	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
 
 # Rule to create version.txt
