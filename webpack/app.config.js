@@ -39,6 +39,13 @@ module.exports = (appName, title, mode, env, options) => {
     app_config = `<script src='${options.appConfigLocation}?v=${buildVersion}'></script>`;
   }
 
+  let external_files = '';
+  if (Array.isArray(options.external_files)) {
+    external_files = options.external_files.reduce((prev, curr) => {
+      return `${prev}<script src='${curr}?v=${buildVersion}'></script>\n`
+    }, '')
+  }
+
   return {
     name: appName,
     devtool: (mode === 'development') ? 'inline-source-map' : false,
@@ -74,7 +81,9 @@ module.exports = (appName, title, mode, env, options) => {
         },
         {
           test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
-          type: 'asset/inline',
+          // this will make sure the fonts are part of the css
+          // type: 'asset/inline',
+          type: 'asset/resource',
         },
       ],
     },
@@ -95,13 +104,18 @@ module.exports = (appName, title, mode, env, options) => {
           `<script src='${ermrestjsPath}ermrest.min.js?v=${buildVersion}'></script>`,
         ].join('\n'),
         chaise_config: `<script src='${chaisePath}chaise-config.js?v=${buildVersion}'></script>`,
-        app_config
+        app_config,
+        external_files
       }),
     ],
     optimization: {
       splitChunks: {
         chunks: 'all',
       },
+    },
+    externals: {
+      // treat plotly as an external dependency and don't compute it
+      'plotly.js-basic-dist-min': 'Plotly'
     },
   };
 };
