@@ -424,7 +424,7 @@ describe("Viewing Recordset with Faceting,", function () {
                 showMore.click().then(function () {
                     // one row is selected
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedModalOptions().count().then(function(ct) {
+                        return chaisePage.recordsetPage.getCheckedModalOptions().count().then(function (ct) {
                             return ct == 1;
                         });
                     }, browser.params.defaultTimeout, "waiting for one row to be selected");
@@ -439,7 +439,7 @@ describe("Viewing Recordset with Faceting,", function () {
                 }).then(function () {
                     // make sure search result is displayed
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getModalOptions().count().then(function(ct) {
+                        return chaisePage.recordsetPage.getModalOptions().count().then(function (ct) {
                             return ct == 13;
                         });
                     }, browser.params.defaultTimeout, "waiting for rows after search");
@@ -460,7 +460,7 @@ describe("Viewing Recordset with Faceting,", function () {
                 }).then(function () {
 
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function(ct) {
+                        return chaisePage.recordsetPage.getCheckedFacetOptions(0).count().then(function (ct) {
                             return ct == 2;
                         });
                     }, browser.params.defaultTimeout, "waiting for checked facet options in recordset");
@@ -480,7 +480,7 @@ describe("Viewing Recordset with Faceting,", function () {
                     chaisePage.recordsetPage.getFacetSearchBox(0).sendKeys(11);
 
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getFacetOptions(0).count().then(function(ct) {
+                        return chaisePage.recordsetPage.getFacetOptions(0).count().then(function (ct) {
                             return ct == 3;
                         });
                     }, browser.params.defaultTimeout);
@@ -575,7 +575,7 @@ describe("Viewing Recordset with Faceting,", function () {
                     return chaisePage.clickButton(showMore);
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedModalOptions().count().then(function(ct) {
+                        return chaisePage.recordsetPage.getCheckedModalOptions().count().then(function (ct) {
                             return ct == 1;
                         });
                     }, browser.params.defaultTimeout);
@@ -588,7 +588,7 @@ describe("Viewing Recordset with Faceting,", function () {
                     return chaisePage.recordsetPage.getModalSubmit().click();
                 }).then(function () {
                     browser.wait(function () {
-                        return chaisePage.recordsetPage.getCheckedFacetOptions(11).count().then(function(ct) {
+                        return chaisePage.recordsetPage.getCheckedFacetOptions(11).count().then(function (ct) {
                             return ct == 2;
                         });
                     }, browser.params.defaultTimeout);
@@ -611,48 +611,49 @@ describe("Viewing Recordset with Faceting,", function () {
                 });
             });
 
-            // TODO should be reviewed
-            xit("should show correct tooltip for the facets.", function (done) {
-                var testFacettooltip = function (idx) {
+            if (process.env.CI) {
+                it("should show correct tooltip for the facets.", function (done) {
+                    var testFacettooltip = function (idx) {
 
-                    // if we reached the end of the list, then finish the test case
-                    if (idx == testParams.facets.length) {
-                        done();
-                        return;
+                        // if we reached the end of the list, then finish the test case
+                        if (idx == testParams.facets.length) {
+                            done();
+                            return;
+                        }
+
+                        var facetParams = testParams.facets[idx];
+
+                        // if the facet doesn't have any comment, go to the next
+                        if (!facetParams.comment) {
+                            testFacettooltip(idx + 1);
+                            return;
+                        }
+
+                        var facetHeader = chaisePage.recordsetPage.getFacetHeaderById(idx);
+                        var tooltip = chaisePage.getTooltipDiv();
+
+                        // move mouse over the facet header to show the tooltip (it will scroll too)
+                        browser.actions().mouseMove(facetHeader).perform();
+
+                        // wait for the tooltip to show up
+                        chaisePage.waitForElement(tooltip).then(function () {
+                            expect(tooltip.getText()).toContain(facetParams.comment, "comment missmatch for facet index=" + idx);
+
+                            // move mouse to somewhere that doesn't have tooltip just to clear the tooltip from page
+                            browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                            chaisePage.waitForElementInverse(tooltip);
+
+                            // test the next facet
+                            testFacettooltip(idx + 1);
+                        }).catch(function (err) {
+                            done.fail(err);
+                        });
                     }
 
-                    var facetParams = testParams.facets[idx];
-
-                    // if the facet doesn't have any comment, go to the next
-                    if (!facetParams.comment) {
-                        testFacettooltip(idx + 1);
-                        return;
-                    }
-
-                    var facetHeader = chaisePage.recordsetPage.getFacetHeaderById(idx);
-                    var tooltip = chaisePage.getTooltipDiv();
-
-                    // move mouse over the facet header to show the tooltip (it will scroll too)
-                    browser.actions().mouseMove(facetHeader).perform();
-
-                    // wait for the tooltip to show up
-                    chaisePage.waitForElement(tooltip).then(function () {
-                        expect(tooltip.getText()).toContain(facetParams.comment, "comment missmatch for facet index=" + idx);
-
-                        // move mouse to somewhere that doesn't have tooltip just to clear the tooltip from page
-                        browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                        chaisePage.waitForElementInverse(tooltip);
-
-                        // test the next facet
-                        testFacettooltip(idx + 1);
-                    }).catch(function (err) {
-                        done.fail(err);
-                    });
-                }
-
-                // go one by one over facets and test their tooltip
-                testFacettooltip(0);
-            });
+                    // go one by one over facets and test their tooltip
+                    testFacettooltip(0);
+                });
+            }
 
             // facets 12 (idx = 11), 2, and 1 are open by default when the page loads
             //   - 1 and 2 have values preselected in them
@@ -1382,7 +1383,6 @@ describe("Viewing Recordset with Faceting,", function () {
                 });
             });
 
-            // TODO: final request is not being sent or data is not loading into UI properly on return
             it("should open facets, click an option in each, and verify the data after", function (done) {
                 var numFacets = testParams.multipleFacets.length;
 
