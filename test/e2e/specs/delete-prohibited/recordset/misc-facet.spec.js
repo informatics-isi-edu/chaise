@@ -468,7 +468,7 @@ describe("Other facet features, ", function() {
                                 });
                             }, browser.params.defaultTimeout);
 
-                            browser.sleep(50);
+                            browser.sleep(75);
 
                             return chaisePage.recordsetPage.getModalFirstColumn();
                         }).then(function (values) {

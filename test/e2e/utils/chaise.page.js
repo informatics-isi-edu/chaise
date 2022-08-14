@@ -421,8 +421,14 @@ var recordEditPage = function() {
         return browser.executeScript("return $('.alert-danger:visible a')[0].getAttribute('href');");
     };
 
+    // TODO: remove when all apps migrated
     this.getAlertWarning = function() {
         return browser.executeScript("return $('.alert-warning:visible')[0];");
+    };
+
+    // TODO: rename when all apps migrated
+    this.getReactAlertWarning = function() {
+        return element(by.css('.alert-warning.show'));
     };
 
     this.getViewModelRows = function() {
