@@ -345,8 +345,6 @@ const Faceting = ({
       setFacetModelByIndex(index, val);
     }
 
-    $log.debug(`faceting: asking flow control to update facet index=${index}`);
-
     if (!Number.isInteger(frm.reloadStartTime) || frm.reloadStartTime === -1) {
       frm.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
       if (cause && frm.reloadCauses.indexOf(cause) === -1) {
@@ -354,8 +352,12 @@ const Faceting = ({
       }
     }
 
+    // $log.debug(`faceting: asking flow control to update facet index=${index}`);
+
     // call the flow-control, so the update of facet is queued properly
-    update(null, null, { sameCounter: true });
+    // the timeout makes sure the set-state is done prior to calling the folow-control
+    // (the noConstraints is needed to be set beforehand since it will affect the request)
+    setTimeout(() => update(null, null, { sameCounter: true }));
   };
 
   /**
