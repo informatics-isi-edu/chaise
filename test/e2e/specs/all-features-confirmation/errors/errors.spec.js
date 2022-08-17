@@ -251,7 +251,11 @@ describe('Error related test cases,', function() {
         });
 
         it('After clicking back button initial page should appear', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function () {
+            var modalOkBtn = chaisePage.recordPage.getErrorModalOkButton();
+
+            browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+
+            chaisePage.clickButton(modalOkBtn).then(function () {
                 return chaisePage.recordsetPageReady();
             }).then(function () {
                 return browser.navigate().back();
@@ -446,12 +450,12 @@ describe('Error related test cases,', function() {
           chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function() {
               // we cannot use recordPageReady because of the error,
               // we just make sure the url is correct
-              browser.wait(function () {
+              return browser.wait(function () {
                   return browser.driver.getCurrentUrl().then(function(url) {
                     return url === recordsetPageUrl;
                   });
               });
-
+          }).then(function() {
               return browser.driver.getCurrentUrl();
           }).then(function(currentUrl) {
              expect(currentUrl).toBe(recordsetPageUrl, "The redirection to Recordset page failed");

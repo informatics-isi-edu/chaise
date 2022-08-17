@@ -84,6 +84,7 @@ describe('Edit a record,', function() {
                         expect(opt.getAttribute("innerHTML")).toBe(testParams.booleanOptions[idx], "Boolean option text with idx: " + idx + " is incorrect");
                     });
 
+                    browser.wait(EC.elementToBeClickable(dropdown), browser.params.defaultTimeout);
                     return chaisePage.recordEditPage.selectDropdownValue(dropdown, trueOption);
                 }).then(function(option) {
                     expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe(trueOption, "The truthy option was not selected");
