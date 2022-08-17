@@ -379,7 +379,7 @@ describe('Error related test cases,', function() {
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
-             expect(currentUrl).toBe(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
+             expect(currentUrl).toContain(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
              done();
           }).catch(chaisePage.catchTestError(done));
       });
