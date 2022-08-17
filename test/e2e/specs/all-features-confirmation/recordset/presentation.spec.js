@@ -447,7 +447,7 @@ describe('View recordset,', function () {
                     done.fail();
                 });
             });
-            
+
             it("should have '2' options in the dropdown menu.", function (done) {
                 const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                 exportDropdown.click().then(function () {
@@ -462,7 +462,7 @@ describe('View recordset,', function () {
                     done.fail();
                 });
             });
-            
+
             if (!process.env.CI) {
                 it("should have 'CSV' as a download option and download the file.", function(done) {
                     const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
@@ -1104,7 +1104,7 @@ describe('View recordset,', function () {
             });
 
             chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
-                return viewButtons[0].click();
+                return chaisePage.clickButton(viewButtons[0]);
             }).then(function () {
                 return chaisePage.recordPageReady();
             }).then(function () {
@@ -1156,7 +1156,7 @@ describe('View recordset,', function () {
             var chaiseConfig, keys = [];
             keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
             var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")";
-            
+
             chaisePage.navigate(url);
 
             chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function () {

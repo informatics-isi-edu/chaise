@@ -586,7 +586,6 @@ const FacetChoicePicker = ({
   };
 
   const retryQuery = (noConstraints: boolean) => {
-    // TODO this is not working properly (facetModel.noConstraints is one step behind)
     // ask the parent to update the facet column
     dispatchFacetUpdate(facetIndex, true, LogReloadCauses.FACET_RETRY, noConstraints);
   }
