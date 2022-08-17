@@ -821,7 +821,7 @@ describe("Viewing Recordset with Faceting,", function () {
 
                                     return minClear.click();
                                 }).then(function () {
-                                    return maxClear.click();
+                                    return chaisePage.clickButton(maxClear);
                                 }).then(function () {
                                     // test min and max being set
                                     // define test params values
@@ -871,7 +871,7 @@ describe("Viewing Recordset with Faceting,", function () {
 
                                     return minClear.click();
                                 }).then(function () {
-                                    return maxClear.click();
+                                    return chaisePage.clickButton(maxClear);
                                 }).then(function () {
                                     done();
                                 }).catch(chaisePage.catchTestError(done));
