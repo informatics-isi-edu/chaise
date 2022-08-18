@@ -23,6 +23,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
   const ermrestjsPath = env.BUILD_VARIABLES.ERMRESTJS_BASE_PATH;
   const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
   const buildVersion = env.BUILD_VARIABLES.BUILD_VERSION;
+  const isDevMode = (mode === 'development') ;
 
   options = options || {};
   if (typeof options.pathPrefix !== 'string' || options.pathPrefix.length === 0) {
@@ -73,13 +74,12 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
   });
 
   return {
-    devtool: (mode === 'development') ? 'inline-source-map' : false,
+    devtool: isDevMode ? 'inline-source-map' : false,
     mode,
     entry: entries,
     output: {
       path: path.resolve(options.pathPrefix, 'dist', 'react', 'bundles'),
-      // filename: '[name].[contenthash].bundle.js',
-      filename: '[name].bundle.js',
+      filename: '[name].[contenthash].js',
       clean: true
     },
     resolve: {
@@ -99,17 +99,21 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
           test: /\.(css|scss)$/,
           use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
           // cue up for tree shake
-          sideEffects: true,
+          sideEffects: true
         },
         {
           test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
           type: 'asset/resource',
+          generator: {
+            filename: 'assets/[base][query]'
+          }
         },
         {
           test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
-          // this will make sure the fonts are part of the css
-          // type: 'asset/inline',
           type: 'asset/resource',
+          generator: {
+            filename: 'assets/[base][query]'
+          }
         },
       ],
     },
@@ -121,17 +125,45 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         // create a global variable for the build variables
         CHAISE_BUILD_VARIABLES: JSON.stringify(env.BUILD_VARIABLES),
       }),
-      new MiniCssExtractPlugin()
+      new MiniCssExtractPlugin({
+        filename: '[name].[contenthash].css'
+      })
     ],
     optimization: {
+      moduleIds: 'deterministic',
+      runtimeChunk: 'single',
       splitChunks: {
         chunks: 'all',
+        name: 'common',
+        cacheGroups: {
+          reactVendor: {
+            test: /[\\/]node_modules[\\/](react|react-dom|react-bootstrap)[\\/]/,
+            name: 'vendor-react',
+            chunks: 'all',
+          },
+          bootstrapVendor: {
+            test: /[\\/]node_modules[\\/](bootstrap)[\\/]/,
+            name: 'vendor-bootstrap',
+            chunks: 'all',
+          },
+          vendor: {
+            test: /[\\/]node_modules[\\/]((?!(react|react-dom|react-bootstrap|bootstrap)).*)[\\/]/,
+            name: 'vendor-rest',
+            chunks: 'all',
+          },
+        },
       },
     },
     externals: {
       // treat plotly as an external dependency and don't compute it
       'plotly.js-basic-dist-min': 'Plotly'
     },
+    performance: {
+      assetFilter: (assetFilename) => {
+        // ignore the fonts
+        return !/\.(woff(2)?|eot|ttf|otf|svg|)$/.test(assetFilename);
+      }
+    }
   }
 }
 

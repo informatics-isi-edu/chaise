@@ -202,18 +202,23 @@ MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 
 SOURCE=src
 
- DIST=dist
+DIST=dist
 
- # Shared utilities
- COMMON=common
+# Shared utilities
+COMMON=common
 
- # old CSS source
- CSS=styles
+# old CSS source
+CSS=styles
 
- # old javascript sources
- JS=scripts
+# old javascript sources
+JS=scripts
 
  MAKEFILE_VAR=makefile_variables.js
+
+# react bundle location
+REACT_BUNDLES_FOLDERNAME=bundles
+REACT_BUNDLES=$(DIST)/react/$(REACT_BUNDLES_FOLDERNAME)
+
 # -------------------------- shared/common files -------------------------- #
 
 SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
@@ -538,9 +543,10 @@ define add_array_to_file
 endef
 
 define copy_webpack_external_vendor_files
-  mkdir -p $(DIST)/react/vendor
+	$(info - copying webpack external files into location)
+	mkdir -p $(REACT_BUNDLES)
 	for f in $(WEBPACK_EXTERNAL_VENDOR_FILES); do \
-		eval "cp $$f $(DIST)/react/vendor" ; \
+		eval "rsync -a $$f $(REACT_BUNDLES)" ; \
 	done
 endef
 
@@ -606,26 +612,34 @@ dist-wo-deps: print-variables run-webpack $(SASS) $(MIN) $(HTML) gitversion
 # Rule to install the dependencies and create the pacakge
 $(DIST): deps dist-wo-deps
 
+# run webpack to build the react folder and bundles in it, and
+# copy the external vendor files that webpack expects into react folder
 run-webpack: $(SOURCE) $(BUILD_VERSION)
 	$(info - creating webpack bundles)
-  # run webpack to build the react folder and bundles in it
 	@npx webpack --config ./webpack/main.config.js --env BUILD_VARIABLES.BUILD_VERSION=$(BUILD_VERSION) --env BUILD_VARIABLES.CHAISE_BASE_PATH=$(CHAISE_BASE_PATH) --env BUILD_VARIABLES.ERMRESTJS_BASE_PATH=$(ERMRESTJS_BASE_PATH) --env BUILD_VARIABLES.OSD_VIEWER_BASE_PATH=$(OSD_VIEWER_BASE_PATH)
-  # copy the external vendor files that webpack expects into react folder
 	@$(call copy_webpack_external_vendor_files)
 
 # deploy chaise to the location
+# this is separated into three seaprate rsyncs:
+#  - send AngularJS files
+#  - send React related files except bundles folder
+#  - send bundles folder. This is separated to ensure cleaning up the bundles folder
+#    The content of bundles folder are generated based on hash so we have to make sure older files are deleted.
 .PHONY: deploy
 deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -ravz --files-from=.make-rsync-list --exclude='dist/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
-	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
+	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
 # rsync the build and config files to the location
+# refer to the previous comment for why this is separated into three different rsyncs
 .PHONY: deploy-w-config
 deploy-w-config: dont_deploy_in_root .make-rsync-list-w-config $(JS_CONFIG) $(VIEWER_CONFIG)
 	$(info - deploying the package with the existing default config files)
-	@rsync -ravz --files-from=.make-rsync-list-w-config --exclude='dist/react' . $(CHAISEDIR)
-	@rsync -avz $(DIST)/react/ $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list-w-config --exclude='$(DIST)/react' . $(CHAISEDIR)
+	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
+	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
 # Rule to create version.txt
 .PHONY: gitversion

@@ -21,7 +21,7 @@ module.exports = (env) => {
       {
         appName: 'recordset',
         appTitle: 'Recordset',
-        externalFiles: [`${chaisePath}vendor/plotly-basic.min.js`]
+        externalFiles: [`${chaisePath}bundles/plotly-basic.min.js`]
       }
     ],
     mode,
