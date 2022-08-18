@@ -1,14 +1,13 @@
 
 name: Chaise end-to-end tests
 
-on:
-  push: [push]
+on: [push]
   # push:
   #   branches:
   #     - 'master'
-  pull_request:
-    branches:
-      - 'master'
+  # pull_request:
+  #   branches:
+  #     - 'master'
 
 concurrency: chaise_env
 
