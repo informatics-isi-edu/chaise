@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var EC = protractor.ExpectedConditions;
 var testParams = {
     table_name: "accommodation",
     column_names: ["luxurious", "first_name", "last_name", "index", "0YGNuO_bvxoczJ6ms2k0tQ"],
@@ -29,7 +30,6 @@ describe('Edit a record,', function() {
             var rows;
 
             it("the composite key should be filled in.", function(done) {
-                var EC = protractor.ExpectedConditions;
                 var modalTitle = chaisePage.recordEditPage.getModalTitle();
 
                 // make sure recordedit is loaded
@@ -84,6 +84,7 @@ describe('Edit a record,', function() {
                         expect(opt.getAttribute("innerHTML")).toBe(testParams.booleanOptions[idx], "Boolean option text with idx: " + idx + " is incorrect");
                     });
 
+                    browser.wait(EC.elementToBeClickable(dropdown), browser.params.defaultTimeout);
                     return chaisePage.recordEditPage.selectDropdownValue(dropdown, trueOption);
                 }).then(function(option) {
                     expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe(trueOption, "The truthy option was not selected");

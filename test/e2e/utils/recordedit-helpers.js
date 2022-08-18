@@ -685,6 +685,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
                                     browser.wait(EC.elementToBeClickable(element(by.className('modal-close'))), browser.params.defaultTimeout);
                                     element(by.className('modal-close')).click();
+                                    browser.wait(EC.elementToBeClickable(PrevBtn), browser.params.defaultTimeout);
                                     PrevBtn.click();        //generate preview
                                     let mdPrevDiv = element(by.className("md-preview"));
                                     browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
