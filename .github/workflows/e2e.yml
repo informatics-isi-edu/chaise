@@ -2,9 +2,10 @@
 name: Chaise end-to-end tests
 
 on:
-  push:
-    branches:
-      - 'master'
+  push: [push]
+  # push:
+  #   branches:
+  #     - 'master'
   pull_request:
     branches:
       - 'master'
@@ -18,7 +19,8 @@ jobs:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
-      SHARDING: true
+      SHARDING: false
+      MAXINSTANCES: 1
       PYTHONWARNINGS: ignore:Unverified HTTPS request
     timeout-minutes: 120
     steps:
