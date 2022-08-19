@@ -5,10 +5,11 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
- * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `#navheader` will be used.
+ * @param   {Node=} parentContainerSticky - the sticky area of parent. if undefined `.app-header-container` will be used.
  * @param   {boolean} useDocHeight - whether we should use the doc height even if parentContainer is passed.
  * Call this function once the DOM elements are loaded to attach resize sensors that will fix the height of bottom-panel-container
  * If you don't pass any parentContainer, it will use the body
@@ -20,15 +21,17 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  */
 export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
   try {
+    const appRootId = `#${APP_ROOT_ID_NAME}`;
+
     // get the parentContainer and its usable height
-    if (parentContainer == null || parentContainer === document.querySelector('body')) {
+    if (!parentContainer || parentContainer === document.querySelector(appRootId)) {
       useDocHeight = true;
-      parentContainer = document;
+      parentContainer = document.querySelector(appRootId);
     }
 
     // get the parent sticky
     if (parentContainerSticky == null) {
-      parentContainerSticky = document.querySelector('#navheader');
+      parentContainerSticky = document.querySelector('.app-header-container');
     }
 
     let parentUsableHeight: number;
@@ -103,7 +106,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     };
 
     //watch for the parent container height (this act as resize event)
-    new ResizeSensor(appContent, function (dimension) {
+    const appContentSensor = new ResizeSensor(appContent, function (dimension) {
       if (appContent.offsetHeight != cache.appContentHeight) {
         cache.appContentHeight = appContent.offsetHeight;
         setContainerHeight();
@@ -111,7 +114,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     });
 
     // watch for size of the parent sticky section
-    new ResizeSensor(parentContainerSticky, function (dimension) {
+    const parentContaienrStickySensor = new ResizeSensor(parentContainerSticky, function (dimension) {
       if (parentContainerSticky.offsetHeight != cache.parentContainerStickyHeight) {
         cache.parentContainerStickyHeight = parentContainerSticky.offsetHeight;
         setContainerHeight();
@@ -119,13 +122,14 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
     });
 
     // watch for size of the sticky section
-    new ResizeSensor(containerSticky, function (dimension) {
+    const containerStickySensor = new ResizeSensor(containerSticky, function (dimension) {
       if (containerSticky.offsetHeight != cache.containerStickyHeight) {
         cache.containerStickyHeight = containerSticky.offsetHeight;
         setContainerHeight();
       }
     });
 
+    return [appContentSensor, parentContaienrStickySensor, containerStickySensor];
 
   } catch (err) {
     $log.warn(err);
@@ -170,14 +174,14 @@ export function attachFooterResizeSensor(index?: number) {
 }
 
 /**
- * @param   {DOMElement} parentContainer - the container that we want the alignment for
+ * @param  {DOMElement} parentContainer - the container that we want the alignment for
  * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
  *
  * Make sure the `.top-right-panel` and `.main-container` are aligned.
  * They can be missaligned if the scrollbar is visible and takes space.
  */
 export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) {
-  const container = parentContainer ? parentContainer : document.querySelector('body') as HTMLElement;
+  const container = parentContainer ? parentContainer : document.querySelector(`#${APP_ROOT_ID_NAME}`) as HTMLElement;
   const mainContainer = container.querySelector('.main-container') as HTMLElement;
   const topRightPanel = container.querySelector('.top-right-panel') as HTMLElement;
   let mainContainerPaddingTimeout: any;
@@ -187,8 +191,7 @@ export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) 
     if (mainContainerPaddingTimeout) clearTimeout(mainContainerPaddingTimeout);
     mainContainerPaddingTimeout = setTimeout(function () {
       try {
-        let padding = mainContainer.clientWidth - topRightPanel.clientWidth;
-        padding = Math.max(padding, 20);
+        const padding = mainContainer.clientWidth - topRightPanel.clientWidth;
         mainContainer.style.paddingRight = padding + 'px';
       } catch (exp) { }
     }, 10);
@@ -272,14 +275,14 @@ export function copyToClipboard(text: string) {
   }
   else if (navigator && navigator.clipboard) {
     navigator.clipboard.writeText(text).catch((err) => {
-      $log.error('failed to copy with the following error:')
-      $log.error(err);
+      $log.warn('failed to copy with the following error:')
+      $log.warn(err);
     });
   }
 }
 
 /**
- * 
+ *
  * @param callback function that needs to be invoked after the delay
  * @param timeout delay
  * @returns debounced function
@@ -292,8 +295,9 @@ export function debounce(callback: Function, timeout: number) {
     clearTimeout(timer);
     timer = setTimeout(() => {
       timer = null;
+      // @ts-ignore:
       callback.apply(this, args);
-    }, timeout);  
+    }, timeout);
   }
 }
 
@@ -335,4 +339,22 @@ export function convertVWToPixel(value: number) {
 
   const result = (x * value) / 100;
   return result;
+}
+
+/**
+ * mimic the same behavior as clicking on a link and opening it in a new tab
+ * @param href the link
+ */
+export function clickHref(href: string) {
+  // fetch the file for the user
+  const downloadLink = document.createElement('a');
+  downloadLink.setAttribute('href', href);
+  downloadLink.setAttribute('download', '');
+  downloadLink.setAttribute('visibility', 'hidden');
+  downloadLink.setAttribute('display', 'none');
+  downloadLink.setAttribute('target', '_blank');
+  // Append to page
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  document.body.removeChild(downloadLink);
 }

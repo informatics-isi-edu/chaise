@@ -96,6 +96,11 @@ var chaiseConfig = {
                         ]
                     },
                     {
+                        name: "Help with Editing",
+                        url: "mailto:support@isrd.isi.edu.test",
+                        newTab: true
+                    },
+                    {
                         name: "No Show",
                         url: "/chaise/record/#1/isa:dataset/id=404",
                         newTab: false,

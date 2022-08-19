@@ -1,25 +1,26 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
-// Login Popup App
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
-
-import { ChangeEvent, KeyboardEvent, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
 
 // components
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
-// services
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+// hooks
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+
+// models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
-import { chaiseBaseURL, queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 const loginSettings = {
@@ -38,19 +39,19 @@ export type loginForm = {
 const LoginPopupApp = (): JSX.Element => {
   const cc = ConfigService.chaiseConfig;
 
+  const { logoutWithoutRedirect, refreshLogin, session } = useAuthn();
+
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
-    const authnRes = AuthnService.session;
-
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
     let hasGroup = false;
 
     // only check if the user has the group if the config is valid
-    if (validConfig && authnRes) {
+    if (validConfig && session) {
       // if the user does have the defined group, continue with auto close and reload of the application
-      hasGroup = authnRes.attributes.filter(function (attr) {
+      hasGroup = session.attributes.filter(function (attr) {
         return attr.id === cc.termsAndConditionsConfig.groupId;
       }).length > 0;
     }
@@ -71,12 +72,12 @@ const LoginPopupApp = (): JSX.Element => {
         // ]
         const userProfilePath = '/ermrest/catalog/registry/entity/CFDE:user_profile?onconflict=skip';
 
-        // if hasGroup is true, then authnRes has to be defined
-        if (validConfig && authnRes) {
+        // if hasGroup is true, then session has to be defined
+        if (validConfig && session) {
           const rows = [{
-            'id': authnRes.client.id,
-            'display_name': authnRes.client.display_name,
-            'full_name': authnRes.client.full_name
+            'id': session.client.id,
+            'display_name': session.client.display_name,
+            'full_name': session.client.full_name
           }]
 
           // we only want to force adding to this group if the termsAndConditionsConfig is defined
@@ -88,7 +89,7 @@ const LoginPopupApp = (): JSX.Element => {
             window.close();
           }).catch((error: any) => {
             // NOTE: this should almost never happen
-            //     will happen in any deployment that turns this feature on before we rework the 
+            //     will happen in any deployment that turns this feature on before we rework the
             //      property definition to include the "userProfile Path" as a configuration property
             // if a user reports this hanging around, we need to identify what error caused it
             // should be easy since the error will be logged with context pointing to login I believe
@@ -104,13 +105,13 @@ const LoginPopupApp = (): JSX.Element => {
       setShowInstructions(!hasGroup);
       // if this login process is used for verifying group membership, that group is REQUIRED to have an active login
       // log the user out if they don't have the group
-      AuthnService.logoutWithoutRedirect(LogActions.VERIFY_GLOBUS_GROUP_LOGOUT);
+      logoutWithoutRedirect(LogActions.VERIFY_GLOBUS_GROUP_LOGOUT);
     }
   }, []);
 
   const reLogin = () => {
     setShowSpinner(true);
-    AuthnService.refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
+    refreshLogin(LogActions.VERIFY_GLOBUS_GROUP_LOGIN).then((redirectUrl: any) => {
       setShowSpinner(false);
 
       window.location = redirectUrl;
@@ -161,7 +162,8 @@ const LoginPopupApp = (): JSX.Element => {
   );
 };
 
-ReactDOM.render(
+const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+root.render(
   <AppWrapper
     appSettings={loginSettings}
     includeAlerts={false}
@@ -169,6 +171,5 @@ ReactDOM.render(
     displaySpinner={true}
   >
     <LoginPopupApp />
-  </AppWrapper>,
-  document.getElementById('chaise-app-root'),
+  </AppWrapper>
 );

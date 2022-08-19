@@ -18,7 +18,7 @@ export const MESSAGE_MAP = {
   previousSession: {
     message: [
       'Your login session has expired. You are now accessing data anonymously. ',
-      '<a ng-click=\'login()\'>Log in</a> to continue your privileged access. ',
+      '<a onclick=\'login()\'>Log in</a> to continue your privileged access. ',
       '<i class="chaise-icon chaise-info" tooltip-placement="bottom-left" uib-tooltip="Clicking on \'×\' button on the right will snooze this alert for one hour."></i>',
     ].join(''),
   },
@@ -29,10 +29,8 @@ export const MESSAGE_MAP = {
     continueMessageReload: 'Click <b>Reload</b> to start over with the identity ',
     anonContinueMessageReload: 'Click <b>Reload</b> to start over with limited anonymous access; or',
     continueMessage1: 'Click <b>Continue</b> to continue as ',
-    continueMessage2: ' after you restore your login status. Instructions on how to restore login is in the <a id="switch-user-accounts-link" ng-click="ctrl.switchUserAccounts()">Switch User Accounts Document</a>.',
+    continueMessage2: ' after you restore your login status.',
     anonContinueMessage: 'Click <b>Login</b> to login and continue access as ',
-    dismissDialog: 'Click <b>OK</b> to dismiss this dialog.',
-    loginOrDismissDialog: 'Click <a ng-click=\'ctrl.login()\'>Login</a> to log in to the system, or click <b>OK</b> to dismiss this dialog.',
     messageWReplace: 'Click <b>OK</b> to reload this page without @errorStatus.',
     multipleRecords: 'Click <b>OK</b> to show all the matched records.',
     noRecordsFound: 'Click <b>OK</b> to show the list of all records.',
@@ -57,7 +55,7 @@ export const MESSAGE_MAP = {
   showErrDetails: 'Show Error Details',
   hideErrDetails: 'Hide Error Details',
   tooltip: {
-    versionTime: 'You are looking at data that was snapshotted ',
+    versionTime: 'You are looking at data that was snapshotted on ',
     downloadCSV: 'Click to download all matched results',
     permalink: 'Click to copy the current url to clipboard.',
     actionCol: 'Click on the action buttons to view, edit, or delete each record',

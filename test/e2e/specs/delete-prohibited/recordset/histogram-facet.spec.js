@@ -12,7 +12,7 @@ var testParams = {
             absMax: "30",
             zoom1: { min: "7", max: "25" },
             zoom2: { min: "9", max: "21" },
-            allRecords: "Displaying\nfirst 25\nof 195 matching results",
+            allRecords: "Displaying first\n25\nof 195 matching results",
             zoom3: { min: "11", max: "19" }
         }, {
             name: "float_col",
@@ -20,7 +20,7 @@ var testParams = {
             absMax: "30.30",
             zoom1: { min: "6.94", max: "24.46" },
             zoom2: { min: "10.44", max: "20.96" },
-            allRecords: "Displaying\nfirst 25\nof 155 matching results",
+            allRecords: "Displaying first\n25\nof 155 matching results",
             zoom3: { min: "12.55", max: "18.85" }
         }, {
             name: "date_col",
@@ -28,7 +28,7 @@ var testParams = {
             absMax: "2030-06-30",
             zoom1: { min: "2006-11-27", max: "2024-08-12" },
             zoom2: { min: "2010-06-13", max: "2021-01-28" },
-            allRecords: "Displaying\nfirst 25\nof 165 matching results",
+            allRecords: "Displaying first\n25\nof 165 matching results",
             zoom3: { min: "2012-07-30", max: "2018-12-20" }
         }, {
             name: "timestamp_col",
@@ -42,7 +42,7 @@ var testParams = {
                 min: {date: "2007-06-01", time: "18:08:03"},
                 max: {date: "2007-08-04", time: "13:23:28"}
             },
-            allRecords: "Displaying\nfirst 25\nof 155 matching results",
+            allRecords: "Displaying first\n25\nof 155 matching results",
             zoom3: {
                 min: {date: "2007-06-14", time: "12:23:08"},
                 max: {date: "2007-07-22", time: "19:08:23"}
@@ -69,8 +69,7 @@ describe("Viewing Recordset with Faceting,", function() {
         uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
         beforeAll(function () {
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.navigate(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             browser.wait(function () {
@@ -80,13 +79,19 @@ describe("Viewing Recordset with Faceting,", function() {
             }, browser.params.defaultTimeout);
 
             // close the first facet
-            chaisePage.recordsetPage.getFacetById(0).click();
+            chaisePage.recordsetPage.getFacetHeaderButtonById(0).click();
         });
 
         it("should have " + testParams.totalNumFacets + " facets", function () {
-            expect(chaisePage.recordsetPage.getFacetTitles()).toEqual(testParams.facetNames, "Displayed list of facets is incorrect");
+            chaisePage.recordsetPage.getFacetTitles().then(function (titles) {
+                titles.forEach(function (title, idx) {
+                    expect(title.getText()).toEqual(testParams.facetNames[idx], "Displayed list of facets is incorrect");
+                });
+            });
         });
 
+        // NOTE: Migrated these tests to react by commenting this out and testing locally.
+        //       I think this should run locally too unless we determine otherwise again
         if (!process.env.CI) {
             console.log("histogram test cases only work on CI environments.");
             return;
@@ -98,17 +103,17 @@ describe("Viewing Recordset with Faceting,", function() {
                 // anon function capture looping variables
                 (function(facetParams, idx) {
                     describe("for facet: " + facetParams.name + ",", function () {
+                        var minInput, maxInput, minDateInput, minTimeInput, maxDateInput, maxTimeInput,
+                            zoomBtn, zoomBtnDisabled, unzoomBtn, unzoomBtnDisabled;
 
                         beforeAll(function() {
-                            var minInput, maxInput, minDateInput, minTimeInput, maxDateInput, maxTimeInput,
-                                zoomBtn, zoomBtnDisabled, unzoomBtn, unzoomBtnDisabled;
                             // open the facet
                             browser.wait(function () {
                                 return chaisePage.recordsetPage.getClosedFacets().count().then(function(ct) {
                                     return ct == testParams.totalNumFacets;
                                 });
                             }, browser.params.defaultTimeout).then(function () {
-                                return chaisePage.recordsetPage.getFacetById(idx).click();
+                                return chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click();
                             });
                         });
 
@@ -144,6 +149,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return zoomBtn.click();
                                 }).then(function () {
+                                    browser.sleep(50);
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom1.min.date, "min date input after zoom 1 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom1.min.time, "min time input after zoom 1 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom1.max.date, "max date input after zoom 1 is incorrect");
@@ -151,12 +157,13 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
-                                    expect(ct).toBe(0, "unzoom button is disbaled still");
+                                    expect(ct).toBe(0, "unzoom button is disabled still");
                                 });
                             });
 
                             it("zoom in again and submit the range filter should display the proper resultset.", function () {
                                 zoomBtn.click().then(function () {
+                                    browser.sleep(50);
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom2.min.date, "min date input after zoom 2 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom2.min.time, "min time input after zoom 2 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom2.max.date, "max date input after zoom 2 is incorrect");
@@ -164,6 +171,12 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                                            return ct == 1;
+                                        });
+                                    }, browser.params.defaultTimeout)
+
                                     return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "Number of visible filters is incorrect");
@@ -176,6 +189,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in once more, unzoom once, then reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
+                                    browser.sleep(50);
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom3.min.date, "min date input after zoom 3 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom3.min.time, "min time input after zoom 3 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom3.max.date, "max date input after zoom 3 is incorrect");
@@ -183,6 +197,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return unzoomBtn.click();
                                 }).then(function () {
+                                    browser.sleep(50);
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom2.min.date, "min date input after unzoom is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom2.min.time, "min time input after unzoom is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom2.max.date, "max date input after unzoom is incorrect");
@@ -190,6 +205,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return chaisePage.recordsetPage.getPlotlyReset(idx).click();
                                 }).then(function () {
+                                    browser.sleep(50);
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.absMin.date, "min date input after reset is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.absMin.time, "min time input after reset is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.absMax.date, "max date input after reset is incorrect");
@@ -199,6 +215,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("clear all filters should reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
+                                    browser.sleep(50);
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.zoom1.min.date, "min date input after zoom 1 is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.zoom1.min.time, "min time input after zoom 1 is incorrect");
                                     expect(maxDateInput.getAttribute("value")).toBe(facetParams.zoom1.max.date, "max date input after zoom 1 is incorrect");
@@ -207,6 +224,7 @@ describe("Viewing Recordset with Faceting,", function() {
                                     return chaisePage.recordsetPage.getClearAllFilters().click();
                                 }).then(function () {
                                     chaisePage.waitForElementInverse(element(by.id("spinner")));
+                                    browser.sleep(200);
 
                                     expect(minDateInput.getAttribute("value")).toBe(facetParams.absMin.date, "min date input after clear all is incorrect");
                                     expect(minTimeInput.getAttribute("value")).toBe(facetParams.absMin.time, "min time input after clear all is incorrect");
@@ -243,22 +261,30 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return zoomBtn.click();
                                 }).then(function () {
+                                    browser.sleep(50);
                                     testInputValue(facetParams.name, minInput, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return unzoomBtnDisabled.count();
                                 }).then(function (ct) {
-                                    expect(ct).toBe(0, "unzoom button is disbaled still");
+                                    expect(ct).toBe(0, "unzoom button is disabled still");
                                 });
                             });
 
                             it("zoom in again and submit the range filter should display the proper resultset.", function () {
                                 zoomBtn.click().then(function () {
+                                    browser.sleep(50);
                                     testInputValue(facetParams.name, minInput, facetParams.zoom2.min, "min input after zoom 2 is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.zoom2.max, "max input after zoom 2 is incorrect");
 
                                     return chaisePage.recordsetPage.getRangeSubmit(idx).click();
                                 }).then(function () {
+                                    browser.wait(function () {
+                                        return chaisePage.recordsetPage.getFacetFilters().count().then(function(ct) {
+                                            return ct == 1;
+                                        });
+                                    }, browser.params.defaultTimeout)
+
                                     return chaisePage.recordsetPage.getFacetFilters().count();
                                 }).then(function (ct) {
                                     expect(ct).toBe(1, "Number of visible filters is incorrect");
@@ -271,6 +297,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("zoom in once more, unzoom once, then reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
+                                    browser.sleep(50);
                                     testInputValue(facetParams.name, minInput, facetParams.zoom3.min, "min input after zoom 3 is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.zoom3.max, "max input after zoom 3 is incorrect");
 
@@ -280,11 +307,13 @@ describe("Viewing Recordset with Faceting,", function() {
 
                                     return unzoomBtn.click();
                                 }).then(function () {
+                                    browser.sleep(50);
                                     testInputValue(facetParams.name, minInput, facetParams.zoom2.min, "min input after unzoom is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.zoom2.max, "max input after unzoom is incorrect");
 
                                     return chaisePage.recordsetPage.getPlotlyReset(idx).click();
                                 }).then(function () {
+                                    browser.sleep(50);
                                     testInputValue(facetParams.name, minInput, facetParams.absMin,  "initial min value after reset is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value after reset is incorrect");
                                 });
@@ -292,12 +321,14 @@ describe("Viewing Recordset with Faceting,", function() {
 
                             it("clear all filters should reset the histogram.", function () {
                                 zoomBtn.click().then(function () {
+                                    browser.sleep(50);
                                     testInputValue(facetParams.name, minInput, facetParams.zoom1.min, "min input after zoom 1 is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.zoom1.max, "max input after zoom 1 is incorrect");
 
                                     return chaisePage.recordsetPage.getClearAllFilters().click();
                                 }).then(function () {
                                     chaisePage.waitForElementInverse(element(by.id("spinner")));
+                                    browser.sleep(200);
 
                                     testInputValue(facetParams.name, minInput, facetParams.absMin,  "initial min value after clear all is incorrect");
                                     testInputValue(facetParams.name, maxInput, facetParams.absMax, "initial max value after clear all is incorrect");
@@ -307,7 +338,7 @@ describe("Viewing Recordset with Faceting,", function() {
 
                         afterAll(function () {
                             // close the facet
-                            chaisePage.recordsetPage.getFacetById(idx).click();
+                            chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click();
                         });
                     });
                 })(testParams.facets[j], j);
@@ -317,7 +348,7 @@ describe("Viewing Recordset with Faceting,", function() {
         describe ("going to a page with filters that return no data.", function () {
             beforeAll(function () {
                 var noDataUri = uri + "/int_col::leq::0&float_col::leq::0&date_col::leq::2000-01-01&timestamp_col::leq::2000-01-01";
-                browser.get(noDataUri);
+                chaisePage.refresh(noDataUri);
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
             });
 

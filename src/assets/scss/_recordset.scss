@@ -4,28 +4,6 @@
 .chaise-body {
   .recordset-container {
     .top-panel-container {
-      .top-flex-panel {
-        .top-left-panel {
-          &.open-panel {
-            width: 21vw;
-            flex-basis: unset;
-          }
-        }
-      }
-    }
-
-    .bottom-panel-container {
-      .side-panel-resizable {
-        &.open-panel {
-          width: 21vw;
-          flex-basis: unset;
-        }
-      }
-    }
-  }
-
-  .recordset-container {
-    .top-panel-container {
       .top-flex-panel .top-left-panel div.panel-header {
         bottom: 10px;
         display: block;
@@ -120,23 +98,24 @@
               cursor: pointer;
             }
           }
+
+          .clear-all-filters {
+            padding: 0;
+            height: unset;
+            margin-bottom: 5px;
+
+            // because of the order of events, this button might
+            // show up a few seconds before the filter chiclets.
+            // this rule will make sure that is not the case.
+            &:only-child {
+              display: none;
+            }
+          }
         }
 
         .recordset-main-search {
           min-width: 250px;
         }
-      }
-    }
-
-    .main-container {
-      flex: 1;
-      position: relative;
-      overflow-x: hidden;
-      overflow-y: auto;
-
-      // we're going to adjust this dynamically for dynamic-padding
-      &:not(.dynamic-padding) {
-        padding-right: $viewport-margin;
       }
     }
   }

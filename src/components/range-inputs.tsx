@@ -1,13 +1,22 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
-import { useState, useRef } from 'react';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
+// components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
+
+// hooks
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+// models
+import { RangeOptions, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
+
+// services
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const INTEGER_REGEXP = /^\-?\d+$/;
 
 const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
 
-const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm';
+const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -17,12 +26,12 @@ const DATE_FORMAT = 'YYYY-MM-DD';
 const errorMsgMap: {
   [key: string]: string;
 } = {
-  'range': 'From value cannot be greater than the To value',
-  'int': 'Please enter a valid integer value',
-  'float': 'Please enter a valid decimal value',
-  'numeric': 'Please enter a valid decimal value',
-  'date': 'Please enter a valid date value',
-  'timestamp': 'Please enter a valid date and time value'
+  'range': 'From value cannot be greater than the To value.',
+  'int': 'Please enter a valid integer value.',
+  'float': 'Please enter a valid decimal value.',
+  'numeric': 'Please enter a valid decimal value.',
+  'date': 'Please enter a valid date value.',
+  'timestamp': 'Please enter a valid date and time value.'
 };
 
 type RangeInputsProps = {
@@ -38,41 +47,66 @@ type RangeInputsProps = {
   /**
    * use for applying custom styles on the component
    */
-  classes?: string
+  classes?: string,
+  /**
+   * callback for applying the range inputs
+   */
+  addRange: Function,
+  /**
+   * the min value for the full dataset to show on load
+   */
+  absMin: RangeOptions['absMin'],
+  /**
+   * the max value for the full dataset to show on load
+   */
+  absMax: RangeOptions['absMax'],
+  /**
+   * whether the form should be disabled
+   */
+  disabled?: boolean
 };
 
 const getType = (inputType: string): string => {
+  let type: string;
+  switch (inputType) {
+    case 'int2':
+    case 'int4':
+    case 'int8':
+      type = 'int';
+      break;
+    case 'float4':
+    case 'float8':
+      type = 'float'
+      break;
+    case 'numeric':
+      type = 'numeric';
+      break;
+    case 'date':
+      type = 'date';
+      break;
+    case 'timestamp':
+    case 'timestamptz':
+      type = 'timestamp';
+      break;
+    default:
+      type = 'invalid_type'
+  }
 
-  if (inputType.indexOf('int') > -1) return 'int';
-
-  if (inputType.indexOf('float') > -1) return 'float';
-
-  if (inputType.indexOf('numeric') > -1) return 'numeric';
-
-  if (inputType.indexOf('date') > -1) return 'date';
-
-  if (inputType.indexOf('timestamp') > -1) return 'timestamp';
-
-  return 'invalid_type';
+  return type;
 }
 
-const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
+const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled }: RangeInputsProps) => {
   const momentJS = windowRef.moment;
 
   const fromRef = useRef<HTMLInputElement>(null);
-
   const toRef = useRef<HTMLInputElement>(null);
-
   const fromTimeRef = useRef<HTMLInputElement>(null);
-
   const toTimeRef = useRef<HTMLInputElement>(null);
 
   const type = getType(inputType);
 
   const [error, setError] = useState<string | null>(null);
-
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(type === 'int' || type === 'float' || type === 'numeric');
-
+  const [disableSubmit, setDisableSubmit] = useState<boolean>(disabled || (type === 'int' || type === 'float' || type === 'numeric'));
   const [showClearInputs, setShowClearInput] = useState({
     from: type === 'date' || type === 'timestamp',
     fromTime: true,
@@ -80,20 +114,57 @@ const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
     toTime: true
   });
 
-  const toggleSubmitBtn = (value: boolean) => {
-    if (disableSubmit !== value) setDisableSubmit(value);
-  }
+  // if absMin or absMax change, update state
+  useLayoutEffect(() => {
+    if ((!absMin && !absMax) || (!fromRef.current || !toRef.current)) return;
+
+    // enable the submit button if we have a min/max
+    setDisableSubmit(!!disabled);
+
+    if (type === 'timestamp') {
+      if (!fromTimeRef.current || !toTimeRef.current) return;
+      
+      const min = absMin as TimeStamp;
+      fromRef.current.value = min.date;
+      fromTimeRef.current.value = min.time;
+      
+      const max = absMax as TimeStamp;
+      toRef.current.value = max.date;
+      toTimeRef.current.value = max.time;
+
+      setShowClearInput({
+        from: Boolean(min.date),
+        fromTime: Boolean(min.time),
+        to: Boolean(max.date),
+        toTime: Boolean(max.time)
+      });
+    } else {
+      fromRef.current.value = absMin as string;
+      toRef.current.value = absMax as string;
+
+      setShowClearInput({
+        from: Boolean(absMin),
+        fromTime: true,
+        to: Boolean(absMax),
+        toTime: true
+      });
+    } 
+  }, [absMin, absMax]);
+
+  useEffect(() => {
+    setDisableSubmit(!!disabled || (!fromRef?.current?.value && !toRef?.current?.value));
+  }, [disabled])
 
   const formatTimeValues = () => {
     const fromDateVal = fromRef?.current?.value;
     let fromTimeVal = fromTimeRef?.current?.value;
 
-    if (fromDateVal && !fromTimeVal) fromTimeVal = '00:00';
+    if (fromDateVal && !fromTimeVal) fromTimeVal = '00:00:00';
 
     const toDateVal = toRef?.current?.value;
     let toTimeVal = toTimeRef?.current?.value;
 
-    if (toDateVal && !toTimeVal) toTimeVal = '00:00';
+    if (toDateVal && !toTimeVal) toTimeVal = '00:00:00';
 
     return {
       fromVal: fromDateVal || fromTimeVal ? `${fromDateVal}T${fromTimeVal}` : '',
@@ -119,7 +190,7 @@ const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
 
     const areBothFieldsEmpty = !formatedValues.fromVal && !formatedValues.toVal;
 
-    toggleSubmitBtn(areBothFieldsEmpty || !validatedResult);
+    setDisableSubmit(!!disabled || areBothFieldsEmpty || !validatedResult);
 
     if (!validatedResult) setError(errorMsgMap[type])
     else setError(null);
@@ -179,15 +250,11 @@ const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
 
     const validatedResult = validateValues(formatedValues.fromVal, formatedValues.toVal);
 
-    console.log('validation result: ', validatedResult);
-
     if (validatedResult === 'valid') {
       /* clear out any previous errors when a new submission is validated */
       setError(null);
 
-      /* eslint-disable  @typescript-eslint/no-non-null-assertion */
-      console.log('values sent to server', formatedValues);
-      /* eslint-enable  @typescript-eslint/no-non-null-assertion */
+      addRange(formatedValues.fromVal, formatedValues.toVal);
     } else {
       setError(errorMsgMap[validatedResult]);
     }
@@ -197,17 +264,27 @@ const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
 
   return (
     <div className={classes}>
-      <div className='range-input-container'>
+      <div className='range-input-container range-inputs-width'>
         <div className={`range-input ${classTypeName}`}>
           <label>From:
             <InputSwitch
               reference={fromRef}
               timeRef={fromTimeRef}
               type={type}
-              value='2015-06-01'
-              showClearBtn={showClearInputs.from}
-              showClearnTimeBtn={showClearInputs.fromTime}
+              value={absMin}
+              placeholder={absMin}
+              datePlaceholder={(absMin as TimeStamp)?.date}
+              timePlaceholder={(absMin as TimeStamp)?.time}
+              showClearBtn={showClearInputs.from && !disabled}
+              showClearTimeBtn={showClearInputs.fromTime && !disabled}
+              disableInput={disabled}
               handleChange={handleChange}
+              classes='range-min'
+              dateClasses='ts-date-range-min'
+              timeClasses='ts-time-range-min'
+              clearClasses='min-clear'
+              dateClearClasses='min-date-clear'
+              timeClearClasses='min-time-clear'
             />
           </label>
         </div>
@@ -217,10 +294,20 @@ const RangeInputs = ({ inputType, classes }: RangeInputsProps) => {
               reference={toRef}
               timeRef={toTimeRef}
               type={type}
-              value='2018-08-29'
-              showClearBtn={showClearInputs.to}
-              showClearnTimeBtn={showClearInputs.toTime}
+              value={absMax}
+              placeholder={absMax}
+              datePlaceholder={(absMax as TimeStamp)?.date}
+              timePlaceholder={(absMax as TimeStamp)?.time}
+              showClearBtn={showClearInputs.to && !disabled}
+              showClearTimeBtn={showClearInputs.toTime && !disabled}
+              disableInput={disabled}
               handleChange={handleChange}
+              classes='range-max'
+              dateClasses='ts-date-range-max'
+              timeClasses='ts-time-range-max'
+              clearClasses='max-clear'
+              dateClearClasses='max-date-clear'
+              timeClearClasses='max-time-clear'
             />
           </label>
         </div>

@@ -75,7 +75,11 @@
                 separator = "&";
             }
 
-            $window.location.href = appLink + separator + "copy=true&limit=1";
+            // this URL used to have limit=1 but we removed it since it was redundant.
+            // we're throwing an error when there are multiple records with the given
+            // given filter in record page. we're also making sure the record link
+            // is based on the shortest key, so this query parameter is redundant
+            $window.location.href = appLink + separator + "copy=true";
         };
 
         vm.canDelete = function() {

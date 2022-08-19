@@ -1,17 +1,26 @@
-import { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
+// components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import Record, { RecordProps } from '@isrd-isi-edu/chaise/src/components/record/record';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+
+// hooks
+import { useEffect, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// models
+
+// services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
+
+// utilities
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import Record, { RecordProps } from '@isrd-isi-edu/chaise/src/components/record/record';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordSettings = {
   appName: 'record',
@@ -23,7 +32,7 @@ const recordSettings = {
 
 const RecordApp = (): JSX.Element => {
 
-  const { dispatchError, error } = useError();
+  const { dispatchError, errors } = useError();
 
   const [recordProps, setRecordProps] = useState<RecordProps | null>(null);
 
@@ -47,13 +56,13 @@ const RecordApp = (): JSX.Element => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
-      dispatchError({ error: err, isGlobal: true });
+      dispatchError({ error: err });
     })
 
   }, []);
 
   // if there was an error during setup, hide the spinner
-  if (!recordProps && error) {
+  if (!recordProps && errors.length > 0) {
     return <></>;
   }
 
@@ -64,7 +73,8 @@ const RecordApp = (): JSX.Element => {
   return <Record {...recordProps} />;
 };
 
-ReactDOM.render(
+const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+root.render(
   <AppWrapper
     appSettings={recordSettings}
     includeAlerts={true}
@@ -72,8 +82,6 @@ ReactDOM.render(
     displaySpinner={true}
   >
     <RecordApp />
-  </AppWrapper>,
-  document.getElementById('chaise-app-root'),
+  </AppWrapper>
 );
-
 

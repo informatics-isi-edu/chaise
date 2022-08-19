@@ -5,46 +5,69 @@
  * so we can suppress some of them in production mode.
  */
 
+export enum LoggerLevels {
+  TRACE = 0,
+  DEBUG = 1,
+  INFO = 2,
+  LOG = 2,
+  WARN = 3,
+  ERROR = 4,
+  SILENT = 5
+}
+
 class Logger {
-  private _enabled = true;
+  private _level = LoggerLevels.INFO;
 
-  public enable() {
-    this._enabled = true;
+  private isAllowed(level: LoggerLevels): boolean {
+    return this._level <= level;
   }
 
-  public disable() {
-    this._enabled = false;
+  public enableAll() {
+    this._level = LoggerLevels.TRACE;
   }
 
-  info(...args: any[]): void {
-    if (!this._enabled) return;
+  public disableAll() {
+    this._level = LoggerLevels.SILENT;
+  }
+
+  public setLevel(level: LoggerLevels) {
+    this._level = level;
+  }
+
+  public trace(...args: any[]): void {
+    if (!this.isAllowed(LoggerLevels.TRACE)) return;
+    console.trace(...args);
+  }
+
+  public debug(...args: any[]): void {
+    if (!this.isAllowed(LoggerLevels.DEBUG)) return;
+    console.debug(...args);
+  }
+
+  public info(...args: any[]): void {
+    if (!this.isAllowed(LoggerLevels.INFO)) return;
     console.info(...args);
   }
 
-  log(...args: any[]): void {
-    if (!this._enabled) return;
+  public log(...args: any[]): void {
+    if (!this.isAllowed(LoggerLevels.LOG)) return;
     console.log(...args);
   }
 
-  warn(...args: any[]): void {
-    if (!this._enabled) return;
+  public warn(...args: any[]): void {
+    if (!this.isAllowed(LoggerLevels.WARN)) return;
     console.warn(...args);
   }
 
-  error(...args: any[]): void {
-    if (!this._enabled) return;
+  public error(...args: any[]): void {
+    if (!this.isAllowed(LoggerLevels.ERROR)) return;
     console.error(...args);
   }
 
-  debug(...args: any[]): void {
-    if (!this._enabled) return;
-    console.debug(...args);
-  }
 }
 
 const $log = new Logger();
 
-// TODO should this be bsased on NOD_ENV? or some other settings?
-// $log.disable();
+$log.setLevel(LoggerLevels.INFO);
 
 export default $log;

@@ -1,3 +1,7 @@
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
+export const IS_DEV_MODE = process.env.NODE_ENV === 'development';
+
 export const APP_TAG_MAPPING = {
   'tag:isrd.isi.edu,2016:chaise:record': 'record',
   'tag:isrd.isi.edu,2016:chaise:detailed': 'detailed',
@@ -24,6 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
+  'debug'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
@@ -119,6 +124,8 @@ export const BODY_CLASS_NAMES = {
   iframe: 'chaise-iframe',
 };
 
+export const APP_ROOT_ID_NAME = 'chaise-app-root';
+
 export const DEFAULT_DISPLAYNAME = {
   null: '<i>No value </i>',
   empty: '<i>Empty</i>',
@@ -153,3 +160,6 @@ declare let CHAISE_BUILD_VARIABLES: {
 };
 
 export const BUILD_VARIABLES = CHAISE_BUILD_VARIABLES;
+
+// attach build variables to the window object (ermrestjs uses this value)
+windowRef.chaiseBuildVariables = CHAISE_BUILD_VARIABLES;

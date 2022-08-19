@@ -16,9 +16,10 @@ type ChaiseTooltipProps = {
    */
   children: JSX.Element,
   /**
-   * Whether we want the tooltip to always be on left
+   * The class name that will be attached to the tooltip
+   * (can be used for applying custom styles to the tooltip)
    */
-   tooltipAlwaysOnLeft?: boolean,
+   className?: string,
 }
 
 
@@ -26,9 +27,8 @@ const ChaiseTooltip = ({
   tooltip,
   children,
   placement,
-  tooltipAlwaysOnLeft,
+  className,
 }: ChaiseTooltipProps): JSX.Element => {
-  const className = tooltipAlwaysOnLeft ? 'tooltip-w-arrow-always-on-left' : '';
   return (
     <OverlayTrigger
       placement={placement}

@@ -16,12 +16,11 @@ describe('When viewing Recordset app', function() {
     var EC = protractor.ExpectedConditions, url;
     beforeAll(function() {
         url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions";
-        browser.ignoreSynchronization = true;
     });
 
     describe('for a read-only table', function() {
         beforeAll(function() {
-            browser.get(url + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(url + ':main_read_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
         });
 
@@ -42,8 +41,17 @@ describe('When viewing Recordset app', function() {
 
             it("should have the correct tooltip", function(){
                 var viewCol = element(by.css('.actions-header')).element(by.tagName("span"));
-                recordsetPage.getColumnComment(viewCol).then(function(comment){
-                    expect(comment).toBe(testParams.tooltip.viewCol);
+
+                // hover over pageTitle
+                browser.actions().mouseMove(viewCol).perform();
+
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.viewCol);
+                    // move cursor to hide tooltip
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                }).catch(function (err) {
+                    console.log(err);
                 });
             });
 
@@ -74,7 +82,7 @@ describe('When viewing Recordset app', function() {
 
     describe('for a create-only table', function() {
         beforeAll(function() {
-            browser.get(url + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.refresh(url + ':main_create_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
         });
 
@@ -120,7 +128,7 @@ describe('When viewing Recordset app', function() {
 
     describe('for a table that allows edit and create (but no delete)', function() {
         beforeAll(function() {
-            browser.get(url + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.refresh(url + ':main_update_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
         });
 
@@ -165,7 +173,7 @@ describe('When viewing Recordset app', function() {
 
     describe('for a delete-only table', function() {
         beforeAll(function() {
-            browser.get(url + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.refresh(url + ':main_delete_table/' + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             chaisePage.recordsetPageReady();
         });
 

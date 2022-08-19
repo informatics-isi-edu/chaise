@@ -1,4 +1,3 @@
-const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
@@ -28,7 +27,7 @@ var testParams = {
             columnName: "col_w_column_order_false"
         },
         {
-            title: "facet without order and hide_num_occurrences\ntrue",
+            title: "facet without order and hide_num_occurrences true",
             facetIdx: 21,
             modalOptions: ['01', '13', '12', '11', '10', '09', '08', '07', '06', '05', '04', '03', '02'],
             sortable: true,
@@ -71,13 +70,13 @@ var testParams = {
     hide_row_count: {
         hidden: {
             facetIdx: 11,
-            displayingText: "Displaying\nall 13\nrecords",
+            displayingText: "Displaying all\n13\nrecords",
             numModalOptions: 13
 
         },
         shown: {
             facetIdx: 10,
-            displayingText: "Displaying\nall 12\nof 12 records",
+            displayingText: "Displaying all\n12\nof 12 records",
             numModalOptions: 12
         }
     },
@@ -223,15 +222,14 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
             chaisePage.waitForElement(clearAll);
 
             idx = testParams.filter_secondary_key.facetIdx;
-            facet = chaisePage.recordsetPage.getFacetById(idx);
+            facet = chaisePage.recordsetPage.getFacetHeaderButtonById(idx);
 
             chaisePage.clickButton(clearAll).then(function () {
                 done()
@@ -335,12 +333,14 @@ describe("Other facet features, ", function() {
 
         it ("removing values in the modal should allow for submitting to remove the set of selected options for that facet.", function (done) {
             chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
-                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
-
-                expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(2, "number of checked rows missmatch.");
+                browser.wait(function() {
+                    return  chaisePage.recordsetPage.getCheckedModalOptions().count().then(function(ct) {
+                        return (ct == 2);
+                    });
+                }, browser.params.defaultTimeout, "number of checked rows mismatch.");
 
                 // clear selections in modal to remove selections in facet
-                return chaisePage.clickButton(chaisePage.recordsetPage.getModalClearSelection());
+                return chaisePage.recordsetPage.getModalClearSelection(chaisePage.searchPopup.getFacetPopup()).click();
             }).then(function () {
                 expect(chaisePage.recordsetPage.getCheckedModalOptions().count()).toBe(0, "number of checked rows missmatch after clearing selection.");
 
@@ -370,9 +370,9 @@ describe("Other facet features, ", function() {
         var clearAll, showMore, sortBtn;
 
         beforeAll(function (done) {
-            browser.ignoreSynchronization=true;
+
             // using browser.get with the same uri doesn't work, so we should just refresh
-            browser.navigate().refresh();
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -388,7 +388,7 @@ describe("Other facet features, ", function() {
         testParams.facet_order.forEach(function (params) {
             describe("for " + params.title + ", ", function () {
                 it ("the rows in the modal should honor the given order.", function (done) {
-                    chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(params.facetIdx)).then(function () {
+                    chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(params.facetIdx)).then(function () {
                         // wait for facet to open
                         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(params.facetIdx)), browser.params.defaultTimeout);
 
@@ -399,14 +399,17 @@ describe("Other facet features, ", function() {
                     }).then(function () {
                         chaisePage.recordsetPage.waitForInverseModalSpinner();
                         browser.wait(function () {
-                            return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                            return chaisePage.recordsetPage.getModalFirstColumn().then(function(values) {
                                 return values.length == params.modalOptions.length;
                             });
                         }, browser.params.defaultTimeout);
 
-                        return chaisePage.recordsetPage.getModalFirstColumnValues();
+                        return chaisePage.recordsetPage.getModalFirstColumn();
                     }).then(function (values) {
-                        expect(values).toEqual(params.modalOptions, "modal options missmatch");
+                        values.forEach(function (val, idx) {
+                            expect(val.getText()).toEqual(params.modalOptions[idx], "modal options missmatch");
+                        });
+
                         done();
                     }).catch(chaisePage.catchTestError(done));
                 });
@@ -421,9 +424,21 @@ describe("Other facet features, ", function() {
                         expect(sortBtn.isDisplayed()).toBe(true, "sort button is not available.");
                         chaisePage.clickButton(sortBtn).then(function () {
                             chaisePage.recordsetPage.waitForInverseModalSpinner();
-                            return chaisePage.recordsetPage.getModalFirstColumnValues();
+
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getModalFirstColumn().then(function(values) {
+                                    return values.length == params.modalOptionsSortedByScalar.length;
+                                });
+                            }, browser.params.defaultTimeout);
+
+                            browser.sleep(50);
+
+                            return chaisePage.recordsetPage.getModalFirstColumn();
                         }).then(function (values) {
-                            expect(values).toEqual(params.modalOptionsSortedByScalar, "modal options missmatch");
+                            values.forEach(function (val, idx) {
+                                expect(val.getText()).toEqual(params.modalOptionsSortedByScalar[idx], "modal options missmatch");
+                            });
+
                             done();
                         }).catch(chaisePage.catchTestError(done));
                     });
@@ -446,9 +461,21 @@ describe("Other facet features, ", function() {
                         expect(sortBtn.isDisplayed()).toBe(true, "sort button is not available.");
                         chaisePage.clickButton(sortBtn).then(function () {
                             chaisePage.recordsetPage.waitForInverseModalSpinner();
-                            return chaisePage.recordsetPage.getModalFirstColumnValues();
+
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getModalFirstColumn().then(function(values) {
+                                    return values.length == params.modalOptionsSortedByNumOfOccurences.length;
+                                });
+                            }, browser.params.defaultTimeout);
+
+                            browser.sleep(75);
+
+                            return chaisePage.recordsetPage.getModalFirstColumn();
                         }).then(function (values) {
-                            expect(values).toEqual(params.modalOptionsSortedByNumOfOccurences, "modal options missmatch");
+                            values.forEach(function (val, idx) {
+                                expect(val.getText()).toEqual(params.modalOptionsSortedByNumOfOccurences[idx], "modal options missmatch");
+                            });
+
                             done();
                         }).catch(chaisePage.catchTestError(done));
                     });
@@ -470,9 +497,7 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-            browser.ignoreSynchronization=true;
-            // using browser.get with the same uri doesn't work, so we should just refresh
-            browser.navigate().refresh();
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -481,7 +506,7 @@ describe("Other facet features, ", function() {
             clearAll.click().then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
-                facet = chaisePage.recordsetPage.getFacetById(testParams.not_null.option);
+                facet = chaisePage.recordsetPage.getFacetHeaderButtonById(testParams.not_null.option);
 
                 return chaisePage.clickButton(facet);
             }).then(function () {
@@ -500,8 +525,11 @@ describe("Other facet features, ", function() {
                 });
             }, browser.params.defaultTimeout);
 
-            chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option).then(function (text) {
-                expect(text).toEqual(testParams.not_null.options_w_not_null, "the options are not the same.");
+            chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option).then(function (opts) {
+                opts.forEach(function (option, idx) {
+                    expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the options are not the same.");
+                });
+
                 done();
             }).catch(chaisePage.catchTestError(done));
         });
@@ -519,9 +547,12 @@ describe("Other facet features, ", function() {
             }).then(function (count) {
                 expect(count).toBe(1, "number of selected filters missmatch.");
 
-                return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
-            }).then(function (text) {
-                expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+                return chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option);
+            }).then(function (opts) {
+                opts.forEach(function (option, idx) {
+                    expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the text of selected faacet missmatch.");
+                });
+
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(testParams.not_null.disabled_rows_w_not_null, "numer of disabled filters missmatch.");
                 expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.not_null.result_num_w_not_null, "number of results missmatch.");
 
@@ -531,10 +562,12 @@ describe("Other facet features, ", function() {
 
         it ("Deselecting `All records with value` should enable all the values on the list.", function (done) {
             chaisePage.clickButton(notNullBtn).then(function () {
-                return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
-            }).then(function (text) {
+                return chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option);
+            }).then(function (opts) {
                 // make sure the options havn't changed
-                expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+                opts.forEach(function (option, idx) {
+                    expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the text of selected faacet missmatch.");
+                });
 
                 // expect(chaisePage.recordsetPage.getModalMatchNullInput().getAttribute('disabled')).not.toBe('true', "null option is still disabled.");
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(0, "number of selected filters missmatch.");
@@ -546,10 +579,12 @@ describe("Other facet features, ", function() {
 
         it ("should be able to select other filters on the facet.", function (done) {
             chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(testParams.not_null.option, 1)).then(function () {
-                return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
-            }).then(function (text) {
+                return chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option);
+            }).then(function (opts) {
                 // make sure the options havn't changed
-                expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+                opts.forEach(function (option, idx) {
+                    expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the text of selected faacet missmatch.");
+                });
 
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(1, "Number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(0, "numer of disabled filters missmatch.");
@@ -560,10 +595,12 @@ describe("Other facet features, ", function() {
 
         it ("Selecting `All records with value` in the list, should remove all the checked filters on facet.", function (done) {
             chaisePage.clickButton(notNullBtn).then(function () {
-                return chaisePage.recordsetPage.getFacetOptionsText(testParams.not_null.option);
-            }).then(function (text) {
+                return chaisePage.recordsetPage.getFacetOptions(testParams.not_null.option);
+            }).then(function (opts) {
                 // make sure the options haven't changed
-                expect(text).toEqual(testParams.not_null.options_w_not_null, "the text of selected faacet missmatch.");
+                opts.forEach(function (option, idx) {
+                    expect(option.getText()).toEqual(testParams.not_null.options_w_not_null[idx], "the text of selected faacet missmatch.");
+                });
 
                 expect(chaisePage.recordsetPage.getCheckedFacetOptions(testParams.not_null.option).count()).toBe(1, "number of selected filters missmatch.");
                 expect(chaisePage.recordsetPage.getDisabledFacetOptions(testParams.not_null.option).count()).toBe(testParams.not_null.disabled_rows_w_not_null, "numer of disabled filters missmatch.");
@@ -578,9 +615,8 @@ describe("Other facet features, ", function() {
         var clearAll, showMore, nullBtn;
 
         beforeAll(function (done) {
-            browser.ignoreSynchronization=true;
             // using browser.get with the same uri doesn't work, so we should just refresh
-            browser.navigate().refresh();
+            chaisePage.refresh(uri)
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -594,7 +630,7 @@ describe("Other facet features, ", function() {
 
         it ("null should be provided as an option and user should be able to select it.", function (done) {
             var params = testParams.null_filter.panel;
-            chaisePage.recordsetPage.getFacetById(params.facetIdx).click().then(function () {
+            chaisePage.recordsetPage.getFacetHeaderButtonById(params.facetIdx).click().then(function () {
                 // wait for facet checkboxes to load
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getFacetOptions(params.facetIdx).count().then(function(ct) {
@@ -622,7 +658,7 @@ describe("Other facet features, ", function() {
             var params = testParams.null_filter.right_join, idx;
             it ("null should be provided as an option and user should be able to select it.", function (done) {
                 idx = params.firstFacet.idx;
-                chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+                chaisePage.recordsetPage.getFacetHeaderButtonById(idx).click().then(function () {
                     browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                     // wait for facet checkboxes to load
@@ -661,14 +697,14 @@ describe("Other facet features, ", function() {
 
         beforeAll(function(done) {
             var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
             done();
         });
 
         it ("the main results should be correct", function (done) {
             // wait for table rows to load
+            // NOTE 2 rows
             browser.wait(function () {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                     return ct == currParams.numRows;
@@ -702,8 +738,7 @@ describe("Other facet features, ", function() {
 
         beforeAll(function() {
             var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
@@ -753,8 +788,7 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -772,12 +806,12 @@ describe("Other facet features, ", function() {
             chaisePage.clickButton(showMore).then(function () {
                 chaisePage.recordsetPage.waitForInverseModalSpinner();
                 browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                    return chaisePage.recordsetPage.getModalFirstColumn().then(function(values) {
                         return values.length == facetParams.numModalOptions;
                     });
                 }, browser.params.defaultTimeout);
 
-                expect(chaisePage.recordsetPage.getModalTotalCount().getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
+                expect(chaisePage.recordsetPage.getModalTotalCount(chaisePage.searchPopup.getFacetPopup()).getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
 
                 return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function (){
@@ -787,7 +821,7 @@ describe("Other facet features, ", function() {
 
         it ("otherwise should show the total count", function (done) {
             var facetParams = testParams.hide_row_count.shown;
-            var facet = chaisePage.recordsetPage.getFacetById(facetParams.facetIdx);
+            var facet = chaisePage.recordsetPage.getFacetHeaderButtonById(facetParams.facetIdx);
 
             // open the facet first and then open the modal
             chaisePage.clickButton(facet).then(function () {
@@ -797,12 +831,12 @@ describe("Other facet features, ", function() {
             }).then(function () {
                 chaisePage.recordsetPage.waitForInverseModalSpinner();
                 browser.wait(function () {
-                    return chaisePage.recordsetPage.getModalFirstColumnValues().then(function(values) {
+                    return chaisePage.recordsetPage.getModalFirstColumn().then(function(values) {
                         return values.length == facetParams.numModalOptions;
                     });
                 }, browser.params.defaultTimeout);
 
-                expect(chaisePage.recordsetPage.getModalTotalCount().getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
+                expect(chaisePage.recordsetPage.getModalTotalCount(chaisePage.searchPopup.getFacetPopup()).getText()).toBe(facetParams.displayingText, "hide_row_count not honored");
 
                 return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function (){
@@ -821,8 +855,7 @@ describe("Other facet features, ", function() {
 
             uri += "/" + customFilterParams.ermrestFilter;
 
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
         });
 
@@ -853,7 +886,7 @@ describe("Other facet features, ", function() {
             }, browser.params.defaultTimeout);
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFilterParams.numRows, "total row count missmatch.");
 
-            chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                 // wait for facet checkboxes to load
@@ -866,9 +899,16 @@ describe("Other facet features, ", function() {
                 // wait for list to be fully visible
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
                 return chaisePage.recordsetPage.getFacetOptionsText(idx);
-            }).then(function (text) {
-                expect(text).toEqual(customFilterParams.options, "options missmatch.");
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFilterParams.options[i], `options missmatch, index=${i}`);
+                });
 
                 // select a new facet
                 return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFilterParams.option));
@@ -893,7 +933,7 @@ describe("Other facet features, ", function() {
         it ("clicking on `x` for Custom Filter should only clear the filter.", function (done) {
             expect(chaisePage.recordsetPage.getClearCustomFilters().isDisplayed()).toBeTruthy("`Clear Custom Filters` is not visible.");
 
-            chaisePage.recordsetPage.getClearCustomFilters().click().then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getClearCustomFilters()).then(function () {
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
@@ -908,7 +948,17 @@ describe("Other facet features, ", function() {
                         return ct == customFilterParams.optionsWOFilter.length;
                     });
                 }, browser.params.defaultTimeout);
-                expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFilterParams.optionsWOFilter, "options missmatch.");
+
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFilterParams.optionsWOFilter[i], `options missmatch, index=${i}`);
+                });
 
                 done();
             }).catch(chaisePage.catchTestError(done));
@@ -921,25 +971,24 @@ describe("Other facet features, ", function() {
         var alert = chaisePage.recordsetPage.getWarningAlert();
         var submitBtn = chaisePage.recordsetPage.getModalSubmit();
         var idx = testParams.maximumLength.facetIdx;
-        var facet = chaisePage.recordsetPage.getFacetById(idx);
+        var facet = chaisePage.recordsetPage.getFacetHeaderButtonById(idx);
 
-        var checkAlert = function () {
-            browser.wait(EC.visibilityOf(alert, browser.params.defaultTimeout));
-            expect(alert.getText()).toContain("Warning Maximum URL length reached. Cannot perform the requested action.", "alert message missmatch.");
+        var checkAlert = function (al) {
+            browser.wait(EC.visibilityOf(al, browser.params.defaultTimeout));
+            expect(al.getText()).toContain("WarningMaximum URL length reached. Cannot perform the requested action.", "alert message missmatch.");
         };
 
         beforeAll(function (done) {
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
             browser.wait(EC.elementToBeClickable(clearAll));
 
             //close the first facet
-            chaisePage.recordsetPage.getFacetById(0).click().then(function () {
+            chaisePage.recordsetPage.getFacetHeaderButtonById(0).click().then(function () {
                 //close the second facet
-                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetById(1));
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(1));
             }).then(function () {
                 return clearAll.click();
             }).then(function () {
@@ -951,13 +1000,14 @@ describe("Other facet features, ", function() {
 
         it ("searching a lenghty string should show the `Maximum URL length reached` warning.", function () {
             var mainSearch = chaisePage.recordsetPage.getMainSearchInput();
-            chaisePage.setInputValue(mainSearch, chance.string({length: 4000}));
+            mainSearch.sendKeys(chance.string({length: 4000}));
             chaisePage.recordsetPage.waitForInverseMainSpinner();
             expect(chaisePage.recordsetPage.getRows().count()).toBe(testParams.maximumLength.numRows, "row count missmatch.");
-            checkAlert();
+            checkAlert(alert);
         });
 
         describe("in facet modal, ", function () {
+            var modalAlert = chaisePage.recordsetPage.getModalWarningAlert(chaisePage.searchPopup.getFacetPopup());
             beforeAll(function (done) {
                 chaisePage.clickButton(facet).then(function () {
                     // wait for facet to open
@@ -974,19 +1024,25 @@ describe("Other facet features, ", function() {
             });
 
             it ('after opening the modal, the existing url limit alert should be removed.', function () {
-                expect(alert.isPresent()).toBeFalsy();
+                expect(modalAlert.isPresent()).toBeFalsy();
             });
 
             it ("alert should be displayed upon reaching the URL limit and submit button should be disabled.", function (done) {
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                        return (ct == 25);
+                    });
+                });
+
                 chaisePage.clickButton(chaisePage.recordsetPage.getSelectAllBtn()).then(function () {
-                    checkAlert();
+                    checkAlert(modalAlert);
                     expect(submitBtn.getAttribute('disabled')).toBe('true', "submit is not disabled.");
                     done();
                 }).catch(chaisePage.catchTestError(done));
             });
 
             it ("changing filters and going below the URL limit should hide the alert and enable the submit button.", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(chaisePage.searchPopup.getFacetPopup(), 0)).then(function () {
                     chaisePage.waitForElementInverse(alert);
                     expect(submitBtn.getAttribute('disabled')).not.toBe('true', "submit is disabled.");
                     return chaisePage.clickButton(submitBtn);
@@ -1005,7 +1061,7 @@ describe("Other facet features, ", function() {
             var secondFacetIdx = testParams.maximumLength.secondFacetIdx;
 
             it ("alert should be displayed upon reaching the URL limit and the request should not be completed.", function (done) {
-                var secondFacet = chaisePage.recordsetPage.getFacetById(secondFacetIdx);
+                var secondFacet = chaisePage.recordsetPage.getFacetHeaderButtonById(secondFacetIdx);
 
                 var secondFacetOption = chaisePage.recordsetPage.getFacetOption(
                     secondFacetIdx,
@@ -1026,7 +1082,7 @@ describe("Other facet features, ", function() {
 
                     return secondFacetOption.click();
                 }).then(function () {
-                        checkAlert();
+                        checkAlert(alert);
                         expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
                         done();
                 }).catch(chaisePage.catchTestError(done));
@@ -1061,8 +1117,7 @@ describe("Other facet features, ", function() {
         describe("from recordset app with multiple records", function () {
 
             beforeAll(function (done) {
-                browser.ignoreSynchronization=true;
-                browser.get(uri);
+                chaisePage.refresh(uri);
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
                 clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -1100,14 +1155,13 @@ describe("Other facet features, ", function() {
             var hidePanelBtn, showPanelBtn;
 
             beforeAll(function (done) {
-                browser.ignoreSynchronization=true;
-                browser.get(uri);
+                chaisePage.refresh(uri);
 
                 chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "recordedit");
-                    browser.get(uri);
+                    chaisePage.refresh(uri);
 
                     chaisePage.recordeditPageReady();
 
@@ -1152,14 +1206,16 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
+                // TODO: change selector once RE is migrated to react
+                chaisePage.clickButton(chaisePage.recordsetPage.getAngularFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
                         });
                     });
 
-                    return chaisePage.recordsetPage.getFacetFilters();
+                    // TODO: change selector once RE is migrated to react
+                    return chaisePage.recordsetPage.getAngularFacetFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.foreignKeyPopupFacetFilter, "Filter for facet is incorrect");
 
@@ -1183,14 +1239,13 @@ describe("Other facet features, ", function() {
             var hidePanelBtn, showPanelBtn;
 
             beforeAll(function (done) {
-                browser.ignoreSynchronization=true;
-                browser.get(uri);
+                chaisePage.navigate(uri);
                 browser.switchTo().alert().accept();
                 chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "record");
-                    browser.get(uri);
+                    chaisePage.refresh(uri);
 
                     chaisePage.waitForElement(element(by.id('tblRecord')));
                     done();
@@ -1233,23 +1288,26 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
+                // TODO: change selector once R is migrated to react
+                chaisePage.clickButton(chaisePage.recordsetPage.getAngularFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
                         });
                     });
 
-                    return chaisePage.recordsetPage.getFacetFilters();
+                    // TODO: change selector once R is migrated to react
+                    return chaisePage.recordsetPage.getAngularFacetFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.associationPopupFacetFilter, "Filter for selected rows is incorrect");
 
-                    var rowCheckbox = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(0);
+                    var rowCheckbox = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(chaisePage.searchPopup.getAddPureBinaryPopup(), 0);
 
                     return chaisePage.clickButton(rowCheckbox);
                 }).then(function () {
                     //verify selected row filter
-                    return chaisePage.recordsetPage.getSelectedRowsFilters();
+                    // TODO: change selector once R is migrated to react
+                    return chaisePage.recordsetPage.getAngularSelectedRowsFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.associationPopupSelectedRowsFilter, "Filter for facet is incorrect");
                     // NOTE: we don't test add here because we aren't trying to test mutating data, but whether the popup behaves appropriately with faceting
@@ -1269,8 +1327,7 @@ describe("Other facet features, ", function() {
 
             uri += "/*::cfacets::" + customFacetParams.cfacetBlob;
 
-            browser.ignoreSynchronization=true;
-            browser.get(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
         });
 
@@ -1299,7 +1356,7 @@ describe("Other facet features, ", function() {
             // main
             expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRows, "total row count missmatch.");
 
-            chaisePage.recordsetPage.getFacetById(idx).click().then(function () {
+            chaisePage.clickButton(chaisePage.recordsetPage.getFacetHeaderButtonById(idx)).then(function () {
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(idx)), browser.params.defaultTimeout);
 
                 // wait for facet checkboxes to load
@@ -1312,9 +1369,16 @@ describe("Other facet features, ", function() {
                 // wait for list to be fully visible
                 browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
 
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
                 return chaisePage.recordsetPage.getFacetOptionsText(idx);
-            }).then(function (text) {
-                expect(text).toEqual(customFacetParams.options, "options missmatch.");
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFacetParams.options[i], `options missmatch, index=${i}`);
+                });
 
                 // select a new facet
                 return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(idx, customFacetParams.option));
@@ -1350,7 +1414,19 @@ describe("Other facet features, ", function() {
 
                 expect(chaisePage.recordsetPage.getRows().count()).toEqual(customFacetParams.numRowsWOCustomFacet, "total row count missmatch.");
 
-                expect(chaisePage.recordsetPage.getFacetOptionsText(idx)).toEqual(customFacetParams.optionsWOCustomFacet, "options missmatch.");
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(idx)), browser.params.defaultTimeout);
+
+                /**
+                 * NOTE: this used to be getFacetOptions, but for some reason the .getText started returning empty
+                 * value for the rows that are hidden because of the height logic
+                 * so I changed it to directly get the text from javascript.
+                 */
+                return chaisePage.recordsetPage.getFacetOptionsText(idx);
+            }).then(function (opts) {
+                opts.forEach(function (option, i) {
+                    expect(option).toEqual(customFacetParams.optionsWOCustomFacet[i], `options missmatch, index=${i}`);
+                });
 
                 done();
             }).catch(chaisePage.catchTestError(done));

@@ -11,8 +11,9 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
 import { createContext, useEffect, useMemo, useRef, useState } from 'react';
-import { NormalModule } from 'webpack';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 /**
  * types related to the update function
@@ -62,10 +63,8 @@ type UpdateOptions = {
    */
   resetAllOpenFacets?: boolean
 }
-type UpdateFunction = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => boolean;
 
 export const RecordsetContext = createContext<{
-  logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any) => void,
   /**
    * The displayed reference
    */
@@ -74,6 +73,14 @@ export const RecordsetContext = createContext<{
    * Whether the main data is loading or not (and therefore we need spinner or not)
    */
   isLoading: boolean,
+  /**
+   * whether we got a timeout error while fetching main entity
+   */
+  hasTimeoutError: boolean,
+  /**
+   * whether we got a timeout error while fetching count
+   */
+  totalRowCountHasTimeoutError: boolean
   /**
    * Whether the main data has been initialized or not
    */
@@ -85,8 +92,7 @@ export const RecordsetContext = createContext<{
   /**
    * Can be used to trigger update on any parts of the page
    */
-  update: UpdateFunction,
-  // update: (newRef: any, limit: any, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => boolean,
+  update: (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => boolean,
   /**
    * The page limit (number of rows that we're fetching for each page)
    */
@@ -136,7 +142,34 @@ export const RecordsetContext = createContext<{
    *   - will return false
    * otherwise it will return true.
    */
-  checkReferenceURL: (ref: any) => boolean
+  checkReferenceURL: (ref: any, showAlert?: boolean) => boolean,
+  /**
+   * the ref for the addRecordRequests
+   * can be used to see if there are any pending create requests
+   */
+  addRecordRequests: any
+  /**
+   * if true, we have to forcefully show the spinner
+   */
+  forceShowSpinner: boolean,
+  /**
+   * can be used to fore showing of the spinner
+   */
+  setForceShowSpinner: Function,
+  /**
+   * log client actions
+   * Notes:
+   *   - the optional `ref` parameter can be used to log based on a different reference object
+   */
+  logRecordsetClientAction: (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => void,
+  /**
+   * get the appropriate log action
+   */
+  getLogAction: (actionPath: LogActions, childStackPath?: any) => string,
+  /**
+   * get the appropriate log stack
+   */
+  getLogStack: (childStackElement?: any, extraInfo?: any) => any,
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -162,7 +195,12 @@ type RecordsetProviderProps = {
   /**
    * log related props
    */
-  logInfo: any, // TODO
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  },
   /**
    * A callback to get the favorites (used in facet popup)
    */
@@ -201,14 +239,14 @@ export default function RecordsetProvider({
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
 
-  const [reference, setReference] = useState<any>(initialReference);
+  const [reference, setReference, referenceRef] = useStateRef<any>(initialReference);
   /**
    * whether the component has initialized or not
    */
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [pageLimit, setPageLimit] = useState(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
-  const [page, setPage] = useState<any>(null);
+  const [isLoading, setIsLoading, isLoadingRef] = useStateRef(true);
+  const [pageLimit, setPageLimit, pageLimitRef] = useStateRef(typeof initialPageLimit === 'number' ? initialPageLimit : RECORDSET_DEAFULT_PAGE_SIZE);
+  const [page, setPage, pageRef] = useStateRef<any>(null);
   const [colValues, setColValues] = useState<any>([]);
   /**
    * The columns that should be displayed in the result table
@@ -222,11 +260,11 @@ export default function RecordsetProvider({
       };
     })
   );
-  const setColumnModelSpinners = (indexes: any, value: boolean) => {
+  const setColumnModelValues = (indexes: any, values: { [key: string]: boolean }) => {
     setColumnModels(
       (prevColumnModels: any) => {
         return prevColumnModels.map((cm: any, index: number) => {
-          return (index in indexes) ? { ...cm, isLoading: value } : cm;
+          return (index in indexes) ? { ...cm, ...values } : cm;
         });
       }
     )
@@ -244,19 +282,39 @@ export default function RecordsetProvider({
   });
   /**
    * A wrapper for the set state function to first call the onSelectedRowsChanged
-   * and see whether we actually want to update it or not.
+   *
+   * if case of facet popup, "false" means:
+   *   - show the url length error
+   * in other cases it means stop changing the selected rows
    */
   const setSelectedRows = (param: SelectedRow[] | ((prevRows: SelectedRow[]) => SelectedRow[])): void => {
     setStateSelectedRows((prevRows: SelectedRow[]) => {
       const res = typeof param === 'function' ? param(prevRows) : param;
-      if (onSelectedRowsChanged && onSelectedRowsChanged(res) === false) {
-        return prevRows;
+      if (onSelectedRowsChanged) {
+        const temp = onSelectedRowsChanged(res);
+        if (config.displayMode === RecordsetDisplayMode.FACET_POPUP) {
+          if (temp === false) {
+            addURLLimitAlert();
+          } else {
+            removeURLLimitAlert();
+          }
+        } else {
+          return prevRows;
+        }
+
       }
       return res;
     });
   };
 
+  const [forceShowSpinner, setForceShowSpinner] = useState(false);
+
+  const [hasTimeoutError, setHasTimeoutError] = useState(false);
+  const [totalRowCountHasTimeoutError, setHasCountTimeoutError] = useState(false);
+
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
+
+  const addRecordRequests = useRef<any>({});
 
   // call the flow-control after each reference object
   useEffect(() => {
@@ -270,21 +328,32 @@ export default function RecordsetProvider({
     }
   }, [isLoading, page]);
 
-  const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any) => {
+  const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
+    const usedRef = ref ? ref : referenceRef.current;
     LogService.logClientAction({
-      action: flowControl.current.getTableLogAction(action),
-      stack: flowControl.current.getTableLogStack(childStackElement, extraInfo)
-    }, reference.defaultLogInfo)
+      action: flowControl.current.getLogAction(action),
+      stack: flowControl.current.getLogStack(childStackElement, extraInfo)
+    }, usedRef.defaultLogInfo)
   };
 
-  const checkReferenceURL = (ref: any): boolean => {
+  const getLogAction = (actionPath: LogActions, childStackPath?: any) => {
+    return flowControl.current.getLogAction(actionPath, childStackPath);
+  }
+
+  const getLogStack = (childStackElement?: any, extraInfo?: any) => {
+    return flowControl.current.getLogStack(childStackElement, extraInfo);
+  }
+
+  const checkReferenceURL = (ref: any, showAlert = true): boolean => {
     const ermrestPath = ref.isAttributeGroup ? ref.ermrestPath : ref.readPath;
     if (ermrestPath.length > URL_PATH_LENGTH_LIMIT || ref.uri.length > URL_PATH_LENGTH_LIMIT) {
 
       $log.warn('url length limit will be reached!');
 
       // show the alert (the function will handle just showing one alert)
-      addURLLimitAlert();
+      if (showAlert) {
+        addURLLimitAlert();
+      }
 
       // TODO I should be able to pass the function from the comp to this provider
       // // scroll to top of the container so users can see the alert
@@ -295,7 +364,9 @@ export default function RecordsetProvider({
     }
 
     // remove the alert if it's present since we don't need it anymore
-    removeURLLimitAlert();
+    if (showAlert) {
+      removeURLLimitAlert();
+    }
     return true;
   };
 
@@ -335,25 +406,23 @@ export default function RecordsetProvider({
    * If while doing so, the whole page updates, the updateFacet function itself should ignore the
    * stale request by looking at the request url.
    */
-  // const update = (newRef: any, limit: number | null, updateResult: boolean, updateCount: boolean, updateFacets: boolean, sameCounter: boolean, cause?: string, lastActiveFacet?: number) => {
   const update = (pageStates: UpdatePageStates | null, newValues: UpdateNewValues | null, options?: UpdateOptions) => {
 
     // page state variables:
-    const updateResult = pageStates && pageStates.updateResult === true;
-    const updateCount = pageStates && pageStates.updateCount === true;
-    const updateFacets = pageStates && pageStates.updateFacets === true;
+    const updateResult = pageStates !== null && pageStates.updateResult === true;
+    const updateCount = pageStates !== null && pageStates.updateCount === true;
+    const updateFacets = pageStates !== null && pageStates.updateFacets === true;
 
     // new values:
-    const newRef = (newValues && newValues.reference) ? newValues.reference : undefined;
-    const limit = (newValues && newValues.pageLimit) ? newValues.pageLimit : undefined;
+    const newRef = (newValues !== null && newValues.reference) ? newValues.reference : undefined;
+    const limit = (newValues !== null && newValues.pageLimit) ? newValues.pageLimit : undefined;
 
     // options:
-    const sameCounter = options && options.sameCounter === true;
-    const cause = options && typeof options.cause === 'string' ?  options.cause : undefined;
-    const resetAllOpenFacets = options && options.resetAllOpenFacets === true;
+    const sameCounter = typeof options !== 'undefined' && options.sameCounter === true;
+    const cause = typeof options !== 'undefined' && typeof options.cause === 'string' ? options.cause : undefined;
+    const resetAllOpenFacets = typeof options !== 'undefined' && options.resetAllOpenFacets === true;
 
 
-    // eslint-disable-next-line max-len
     printDebugMessage(`update called with res=${updateResult}, cnt=${updateCount}, facets=${updateFacets}, sameCnt=${sameCounter}, cause=${cause}`);
 
     if (newRef && !checkReferenceURL(newRef)) {
@@ -390,9 +459,11 @@ export default function RecordsetProvider({
 
     // if it's true change, otherwise don't change.
     flowControl.current.dirtyResult = updateResult || flowControl.current.dirtyResult;
-    // if the result is dirty, then we should get new data and we should
-    // set the isLoading to true
-    setIsLoading(flowControl.current.dirtyResult);
+
+    // change loading only if the caller asked for updating the result
+    if (updateResult) {
+      setIsLoading(flowControl.current.dirtyResult);
+    }
 
     flowControl.current.dirtyCount = updateCount || flowControl.current.dirtyCount;
 
@@ -422,23 +493,29 @@ export default function RecordsetProvider({
       return;
     }
 
-    // TODO does this make sense? it's mutating the logStack
-    LogService.updateStackFilterInfo(flowControl.current.getTableLogStack(), reference.filterLogInfo);
+    // make sure the logStack has the latest value
+    LogService.updateStackFilterInfo(
+      flowControl.current.getLogStack(),
+      referenceRef.current.filterLogInfo,
+      // in fullscreen mode, we want the global log stack to have filter info too
+      // (this is for requests outside of recordset component like export)
+      config.displayMode === RecordsetDisplayMode.FULLSCREEN
+    );
 
     // update the resultset
-    updateMainEntity(updatePage, false);
+    updateMainEntity(updatePage);
 
     // the aggregates are updated when the main entity request is done
 
     // do not fetch table count if hideRowCount is set in the annotation for the table
     // this is because the query takes too long sometimes
-    if (!reference.display || !reference.display.hideRowCount) {
+    if (!referenceRef.current.display || !referenceRef.current.display.hideRowCount) {
       // update the count
       updateTotalRowCount(updatePage);
     }
 
     // TODO does this make sense?
-    if (!isLoading && page && page.length > 0) {
+    if (!isLoadingRef.current && pageRef.current && pageRef.current.length > 0) {
       fetchSecondaryRequests(updatePage);
     }
 
@@ -446,17 +523,17 @@ export default function RecordsetProvider({
     if (flowControl.current.updateFacetsCallback) {
       flowControl.current.updateFacetsCallback(flowControl, updatePage);
     }
+
   };
 
   /**
  * Given the tableModel object, will get the values for main entity and
  * attach them to the model.
  * @param  {function} updatePageCB The update page callback which we will call after getting the result.
- * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
  * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
-  const updateMainEntity = (updatePageCB: Function, hideSpinner: boolean, notTerminal?: boolean, cb?: Function) => {
+  const updateMainEntity = (updatePageCB: Function, notTerminal = false, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -466,40 +543,33 @@ export default function RecordsetProvider({
 
     (function (currentCounter) {
       printDebugMessage('updating result', currentCounter);
-      readMainEntity(hideSpinner, currentCounter).then((res: any) => {
+      readMainEntity(currentCounter).then((res: any) => {
         afterUpdateMainEntity(res, currentCounter);
 
-        // TODO
-        // self.tableError = false;
-        printDebugMessage('read is done. just before update page (to update the rest of the page)', currentCounter);
+        setHasTimeoutError(false);
         if (cb) cb(res);
         // TODO remember last successful main request
         // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
-        setTimeout(() => {
-          updatePageCB();
-        });
+        updatePageCB();
       }).catch((err: any) => {
         afterUpdateMainEntity(true, currentCounter);
         if (cb) cb(self, true);
 
-        // TODO
         // show modal with different text if 400 Query Timeout Error
-        // if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-        // clear the data shown in the table
-        // self.setPage(null);
-        // self.tableError = true;
+        if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+          // clear the data shown in the table
+          setPage(null);
+          setColValues([]);
 
-        // if (!notTerminal) {
-        //   err.subMessage = err.message;
-        //   err.message = `The result set cannot be retrieved. Try the following to reduce the query time:\n${MESSAGE_MAP.queryTimeoutList}`;
-        //   $log.warn(err);
-        //   // TODO dispatch the error
-        //   // ErrorService.handleException(err, true);
-        // }
-        // } else {
-        // TODO dispatch the error
+          setHasTimeoutError(true);
+          if (!notTerminal) {
+            err.subMessage = err.message;
+            err.message = `The result set cannot be retrieved. Try the following to reduce the query time:\n${MESSAGE_MAP.queryTimeoutList}`;
+            dispatchError({ error: err, isDismissible: true });
+            return;
+          }
+        }
         dispatchError({ error: err });
-        // }
       });
     }(flowControl.current.queue.counter));
   }
@@ -516,10 +586,10 @@ export default function RecordsetProvider({
       setIsLoading(false);
     }
 
-    printDebugMessage(`after result update: ${res ? 'successful.' : 'unsuccessful.'}`, counter);
+    printDebugMessage(`after result update: ${res ? 'successful.' : 'unsuccessful.'}, old cnt=${counter}`);
   }
 
-  const readMainEntity = (hideSpinner: boolean, counterer: number) => {
+  const readMainEntity = (counterer: number) => {
     flowControl.current.dirtyResult = false;
     setIsLoading(true);
 
@@ -532,13 +602,13 @@ export default function RecordsetProvider({
 
     // add reloadCauses
     if (hasCauses) {
-      logParams.stack = LogService.addCausesToStack(flowControl.current.getTableLogStack(), reloadCauses, flowControl.current.reloadStartTime);
+      logParams.stack = LogService.addCausesToStack(flowControl.current.getLogStack(), reloadCauses, flowControl.current.reloadStartTime);
     } else {
-      logParams.stack = flowControl.current.getTableLogStack();
+      logParams.stack = flowControl.current.getLogStack();
     }
 
     // create the action
-    logParams.action = flowControl.current.getTableLogAction(act);
+    logParams.action = flowControl.current.getLogAction(act);
 
     (function (current, requestCauses, reloadStartTime) {
       // the places that we want to show edit or delete button, we should also ask for trs
@@ -550,10 +620,9 @@ export default function RecordsetProvider({
       // if it's in related entity section, we should fetch the
       // unlink trs (acl) of association tables
       const getUnlinkTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
-        && reference.derivedAssociationReference;
+        && referenceRef.current.derivedAssociationReference;
 
-      const read = reference.read(pageLimit, logParams, false, false, getTRS, false, getUnlinkTRS);
-      read.then((page: any) => {
+      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve(false);
           return defer.promise;
@@ -561,7 +630,7 @@ export default function RecordsetProvider({
 
         printDebugMessage('read main successful.', current);
 
-        return getFavorites ? getFavorites(page) : { page };
+        return getFavorites ? getFavorites(pageRes) : { page: pageRes };
       }).then((result: any) => {
         if (getDisabledTuples) {
           return getDisabledTuples(self, result.page, requestCauses, reloadStartTime);
@@ -576,11 +645,7 @@ export default function RecordsetProvider({
 
         setIsInitialized(true);
         setPage(result.page);
-        // const tempVals = getColumnValuesFromPage(result.page);
         setColValues(getColumnValuesFromPage(result.page));
-        // setStateVariable(setColValues, () => {
-        //   return tempVals;
-        // });
 
         // update the objects based on the new page
         if (Array.isArray(result.page.templateVariables)) {
@@ -621,7 +686,7 @@ export default function RecordsetProvider({
               }
             });
 
-            setColumnModelSpinners(updatedColumnModels, false);
+            setColumnModelValues(updatedColumnModels, { isLoading: false });
           }
         });
 
@@ -682,7 +747,7 @@ export default function RecordsetProvider({
     let aggList, hasError;
     try {
       // if the table doesn't have any simple key, this might throw error
-      aggList = [reference.aggregate.countAgg];
+      aggList = [referenceRef.current.aggregate.countAgg];
     } catch (exp) {
       hasError = true;
     }
@@ -694,21 +759,20 @@ export default function RecordsetProvider({
 
     const hasCauses = Array.isArray(flowControl.current.recountCauses) && flowControl.current.recountCauses.length > 0;
     const action = hasCauses ? LogActions.RECOUNT : LogActions.COUNT;
-    let stack = flowControl.current.getTableLogStack();
+    let stack = flowControl.current.getLogStack();
     if (hasCauses) {
       stack = LogService.addCausesToStack(stack, flowControl.current.recountCauses, flowControl.current.recountStartTime);
     }
-    reference.getAggregates(
+    referenceRef.current.getAggregates(
       aggList,
-      { action: flowControl.current.getTableLogAction(action), stack: stack }
-    ).then(function getAggregateCount(response: any) {
+      { action: flowControl.current.getLogAction(action), stack: stack }
+    ).then((response: any) => {
       if (current !== flowControl.current.queue.counter) {
         defer.resolve(false);
         return defer.promise;
       }
 
-      // TODO
-      // vm.countError = false;
+      setHasCountTimeoutError(false);
       setTotalRowCount(response[0]);
 
 
@@ -722,11 +786,9 @@ export default function RecordsetProvider({
         return defer.promise;
       }
 
-      // TODO
-      // if (err instanceof ERMrest.QueryTimeoutError) {
-      //   // separate from hasError above
-      //   vm.countError = true;
-      // }
+      if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+        setHasCountTimeoutError(true);
+      }
 
       // fail silently
       setTotalRowCount(null);
@@ -742,7 +804,7 @@ export default function RecordsetProvider({
   const afterUpdateTotalRowCount = (res: boolean, current: number) => {
     flowControl.current.queue.occupiedSlots--;
     flowControl.current.dirtyCount = !res;
-    printDebugMessage(`after update total row count: ${res ? 'successful.' : 'unsuccessful.'}`);
+    printDebugMessage(`after update total row count: ${res ? 'successful.' : 'unsuccessful.'}, old cnt=${current}`);
   }
 
   /**
@@ -769,7 +831,6 @@ export default function RecordsetProvider({
         aggModel.processed = res;
 
         printDebugMessage(`: after aggregated value for column (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
-
         updatePageCB();
       }).catch((err: any) => {
         dispatchError({ error: err });
@@ -795,36 +856,38 @@ export default function RecordsetProvider({
         updatedColumnModels[obj.index] = true;
       }
     });
-    setColumnModelSpinners(updatedColumnModels, !hideSpinner);
+    setColumnModelValues(updatedColumnModels, { isLoading: !hideSpinner });
 
     // we have to get the stack everytime because the filters might change.
-    let action = LogActions.LOAD, stack = flowControl.current.getTableLogStack(aggModel.logStackNode);
+    let action = LogActions.LOAD, stack = flowControl.current.getLogStack(aggModel.logStackNode);
     if (Array.isArray(aggModel.reloadCauses) && aggModel.reloadCauses.length > 0) {
       action = LogActions.RELOAD;
       stack = LogService.addCausesToStack(stack, aggModel.reloadCauses, aggModel.reloadStartTime);
     }
     const logObj = {
-      action: flowControl.current.getTableLogAction(action, LogStackPaths.PSEUDO_COLUMN),
+      action: flowControl.current.getLogAction(action, LogStackPaths.PSEUDO_COLUMN),
       stack,
     };
-    activeListModel.column.getAggregatedValue(page, logObj).then((values: any) => {
+    activeListModel.column.getAggregatedValue(pageRef.current, logObj).then((values: any) => {
       if (flowControl.current.queue.counter !== current) {
+        printDebugMessage(`getAggregatedValue success counter missmatch, old cnt=${current}`);
         return defer.resolve(false), defer.promise;
       }
 
       // remove the column error (they might retry)
-      // TODO
-      // activeListModel.objects.forEach((obj: any) => {
-      //   if (obj.column) {
-      //     this.columnModels[obj.index].columnError = false;
-      //   }
-      // });
+      const errroIndexes: any = {};
+      activeListModel.objects.forEach((obj: any) => {
+        if (obj.column) {
+          errroIndexes[obj.index] = true;
+        }
+      });
+      setColumnModelValues(errroIndexes, { hasError: false });
 
       // use the returned value and:
       //  - update the templateVariables
       //  - update the aggregateResults
       //  - attach the values to the appropriate columnModel if we have all the data.
-      const sourceDefinitions = reference.table.sourceDefinitions;
+      const sourceDefinitions = referenceRef.current.table.sourceDefinitions;
 
       let newColValues: any = [];
       values.forEach((val: any, valIndex: number) => {
@@ -874,7 +937,7 @@ export default function RecordsetProvider({
 
       // TODO this is not working as expected because what's in the state
       // is outdated...
-      setColumnModelSpinners(indexes, false);
+      setColumnModelValues(indexes, { isLoading: false });
 
       // clear the causes
       aggModel.reloadCauses = [];
@@ -886,19 +949,22 @@ export default function RecordsetProvider({
         return defer.resolve(false), defer.promise;
       }
 
-      // TODO
-      // activeListModel.objects.forEach((obj: any) => {
-      //   if (!obj.column) return;
+      let errorIndexes: any = {};
+      activeListModel.objects.forEach((obj: any) => {
+        if (!obj.column) return;
 
-      //   this.columnModels[obj.index].isLoading = false;
+        errorIndexes[obj.index] = true;
+      });
 
-      //   // show the timeout error in dependent models
-      //   if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
-      //     // TODO what about inline and related ones that timed out?
-      //     this.columnModels[obj.index].columnError = true;
-      //     return defer.resolve(true), defer.promise;
-      //   }
-      // });
+      if (err instanceof ConfigService.ERMrest.QueryTimeoutError) {
+        // show the timeout error in dependent models
+        setColumnModelValues(errorIndexes, { isLoading: false, hasError: true });
+
+        // mark this request as done
+        return defer.resolve(true), defer.promise;
+      } else {
+        setColumnModelValues(errorIndexes, { isLoading: false });
+      }
 
       defer.reject(err);
     });
@@ -937,7 +1003,7 @@ export default function RecordsetProvider({
       const displayValue = model.column.sourceFormatPresentation(
         flowControl.current.templateVariables[valIndex],
         flowControl.current.aggregateResults[valIndex][model.column.name],
-        page.tuples[valIndex],
+        pageRef.current.tuples[valIndex],
       );
 
       if (!Array.isArray(newColValues[obj.index])) {
@@ -955,9 +1021,10 @@ export default function RecordsetProvider({
 
   const providerValue = useMemo(() => {
     return {
-      logRecordsetClientAction,
       reference,
       isLoading,
+      hasTimeoutError,
+      totalRowCountHasTimeoutError,
       isInitialized,
       initialize,
       update,
@@ -971,9 +1038,19 @@ export default function RecordsetProvider({
       totalRowCount,
       registerFacetCallbacks,
       printDebugMessage,
-      checkReferenceURL
+      checkReferenceURL,
+      addRecordRequests,
+      forceShowSpinner,
+      setForceShowSpinner,
+      logRecordsetClientAction,
+      getLogAction,
+      getLogStack
     };
-  }, [reference, isLoading, isInitialized, page, colValues, disabledRows, selectedRows, columnModels, totalRowCount]);
+  }, [
+    reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
+    isInitialized, page, colValues,
+    disabledRows, selectedRows, columnModels, totalRowCount
+  ]);
 
   return (
     <RecordsetContext.Provider value={providerValue}>

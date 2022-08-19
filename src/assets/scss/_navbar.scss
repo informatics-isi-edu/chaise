@@ -18,13 +18,6 @@ body > .container {
     position: relative; // for z-index to work, position must be non-static
 }
 
-// default modal z-index is 1050 (for the first modal)
-// as more modals get opened, z-index increases by 10 for each modal (1060, 1070, ...)
-// we tried to be safe about it before by increasing it by only 1
-.modal-login #navheader, .error-open #navheader {
-    z-index: 1501;
-}
-
 .navbar-inverse {
     background-color: #000;
     border-color: #000;
@@ -68,8 +61,8 @@ body > .container {
 	border-color: #4D4D4D;
 }
 
-.navbar-inverse .navbar-nav > .active > a, 
-.navbar-inverse .navbar-nav > .active > a:hover, 
+.navbar-inverse .navbar-nav > .active > a,
+.navbar-inverse .navbar-nav > .active > a:hover,
 .navbar-inverse .navbar-nav > .active > a:focus {
 	background-color: #4D4D4D;
 }
@@ -171,7 +164,7 @@ body > .container {
         cursor: pointer;
         background: 0 0;
         border: 0;
-    
+
         // close from close.less:11
         float: right;
         font-size: 21px;
@@ -352,7 +345,7 @@ nav.navbar {
     }
 
     .custom-dropdown-submenu {
-        // Position fixed is required to align submenu on big screens 
+        // Position fixed is required to align submenu on big screens
         // (since top, left works for position:fixed)
         position: fixed !important;
         right: unset;
@@ -413,7 +406,7 @@ nav.navbar {
     @media (max-width: 992px) {
         .navbar-nav div.dropdown-menu {
             // Adding max-height when screen size is small,
-            // Made important to override maxHeight set by JS (which is not relevant in small screens) 
+            // Made important to override maxHeight set by JS (which is not relevant in small screens)
             max-height: unset !important;
             padding-left: 16px;
 
@@ -423,7 +416,7 @@ nav.navbar {
         }
 
         .dropdown-menu > a,
-        .dropdown-menu > div > a {  
+        .dropdown-menu > div > a {
             color: $dropdown-menu-anchor-color;
 
             &:focus,
@@ -451,7 +444,7 @@ nav.navbar {
     }
 
     @media (min-width: 992px) {
-        // Display is set to block in bigger screens to align login and search input 
+        // Display is set to block in bigger screens to align login and search input
         .navbar-collapse.collapse {
             display: block !important;
         }

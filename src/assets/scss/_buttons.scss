@@ -19,6 +19,7 @@
   // don't show the default blue outline on focus
   &:focus {
     outline: none;
+    box-shadow: none;
   }
 
   // show not-allowed cursor and not allow click
@@ -55,7 +56,7 @@
 
     // the link color is more prominent than our button/control color,
     // we should use this class if we want to make the button to be as prominent as links
-    &.chaise-btn-link {
+    &.chaise-btn-link:not([disabled]):not(.disabled) {
       color: $link-color;
     }
   }
@@ -92,4 +93,13 @@
 //TODO
 .chaise-checkbox input[disabled][type="checkbox"]:checked + label:after {
   color: #ccc !important;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: unset;
+}
+
+// override the default behavior of dropdowns in bootstrap
+.show > button.chaise-btn.btn.dropdown-toggle:focus {
+  box-shadow: none;
 }

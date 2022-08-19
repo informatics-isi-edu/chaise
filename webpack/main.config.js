@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
-const getAppConfig = require('./app.config');
-const getLibConfig = require('./lib.config');
+const { getWebPackConfig } = require('./app.config');
 
 // if NODE_DEV defined properly, uset it. otherwise set it to production.
 const nodeDevs = ['production', 'development'];
@@ -10,13 +9,29 @@ if (nodeDevs.indexOf(mode) === -1) {
   mode = nodeDevs[0];
 }
 
-module.exports = (env) => [
-  // chaise apps:
-  getAppConfig('login', 'Login', mode, env),
-  getAppConfig('recordset', 'Recordset', mode, env),
-  getAppConfig('record', 'Record', mode, env),
+module.exports = (env) => {
+  const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
 
-  // chaise libs:
-  // TODO should be updated and tested before adding it back:
-  // getLibConfig('navbar', mode, env),
-];
+  const recordsetExtFiles = [`${chaisePath}bundles/plotly-basic.min.js`];
+
+  return getWebPackConfig(
+    [
+      {
+        appName: 'login',
+        appTitle: 'Login',
+      },
+      {
+        appName: 'recordset',
+        appTitle: 'Recordset',
+        externalFiles: [...recordsetExtFiles]
+      },
+      {
+        appName: 'record',
+        appTitle: 'Record',
+        externalFiles: [...recordsetExtFiles]
+      }
+    ],
+    mode,
+    env
+  );
+}

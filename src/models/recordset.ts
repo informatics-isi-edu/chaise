@@ -1,5 +1,40 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
-import React from 'react'
+import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
+
+export type RecordsetProps = {
+  initialReference: any,
+  config: RecordsetConfig,
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  },
+  initialPageLimit?: number,
+  getFavorites?: Function,
+  getDisabledTuples?: Function,
+  initialSelectedRows?: SelectedRow[],
+  onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
+  onFavoritesChanged?: Function,
+  parentReference?: any,
+  parentTuple?: any,
+  /**
+   * The parent container that recordset will be part of
+   * (used for scrollbar logic)
+   */
+  parentContainer?: HTMLElement,
+  /**
+   * The sticky area of the parent container
+   * (used for scrollbar logic)
+   */
+  parentStickyArea?: HTMLElement,
+  /**
+   * the callback that will be called when the state of facet panel changed.
+   * Currently used in recordset-modal to ensure the modal title's left-panel
+   * is also closed with the panel
+   */
+  onFacetPanelOpenChanged?: (newState: boolean) => void
+};
 
 export enum RecordsetSelectMode {
   NO_SELECT,
@@ -47,6 +82,12 @@ export type FacetCheckBoxRow = {
   isNotNull?: boolean,
   tuple?: any,
   isFavorite?: boolean,
+  metaData?: {
+    min: RangeOption,
+    minExclusive: boolean,
+    max: RangeOption,
+    maxExclusive: boolean
+  }
 }
 
 export type FacetModel = {
@@ -54,10 +95,11 @@ export type FacetModel = {
   isOpen: boolean,
   isLoading: boolean,
   noConstraints: boolean,
-  facetError: boolean,
+  facetHasTimeoutError: boolean,
   // if the stable key is greater than length 1, the favorites won't be supported for now
   // TODO: support this for composite stable keys
-  enableFavorites: boolean
+  enableFavorites: boolean,
+  parentLogStackPath: string
 }
 
 export type FacetRequestModel = {
@@ -75,10 +117,8 @@ export type FacetRequestModel = {
   reloadStartTime: number, //when the facet became dirty
   // TODO log stuff
   // I could capture the whole logStack,
-  // but only did logStackNode so I can call the recordTableUtils.getTableLogStack with it.
-  // logStackNode: facetLogStackNode,
-  // instead of just logStackPath, we're capturing parent so it can be used in facet and facet picker.
-  // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
+  // but only did logStackNode so I can call the recordTableUtils.getLogStack with it.
+  logStackNode: any
 }
 
 /**

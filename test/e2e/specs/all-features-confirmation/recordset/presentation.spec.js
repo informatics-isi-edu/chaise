@@ -203,7 +203,7 @@ var testParams = {
         data: [
             [
                 "main one", // self_link_rowname
-                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // self_link_id
+                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525\n... more", // self_link_id
                 "1,234,501", //normal_col_int_col
                 "current cnt: 5 - 1,234,511, 1234511, cnt_i1: 5", //normal_col_int_col_2
                 "outbound1 one", //outbound_entity_o1
@@ -255,66 +255,64 @@ describe('View recordset,', function () {
         fileParams = testParams.file_tuple;
 
 
-    // TODO: currently failing because no new aggregate requests are sent when flow control slots open up
-    // if (!process.env.CI) {
-    //     describe("For recordset with columns with waitfor, ", function () {
-    //         var activeListParams = testParams.activeList;
-    //         var activeListData = activeListParams.data;
+    if (!process.env.CI) {
+        describe("For recordset with columns with waitfor, ", function () {
+            var activeListParams = testParams.activeList;
+            var activeListData = activeListParams.data;
 
-    //         beforeAll(function () {
-    //             chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
+            beforeAll(function () {
+                chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "@sort(" + activeListParams.sortby + ")");
 
-    //             chaisePage.recordsetPageReady();
-    //             chaisePage.waitForAggregates();
-    //         });
+                chaisePage.recordsetPageReady();
+                chaisePage.waitForAggregates();
+            });
 
-    //         it ("should not show the total count if hide_row_count is true.", function () {
-    //             expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n"+ activeListData.length + "\nrecords", "hide_row_count not honored");
-    //         });
-    //         it ("should show correct table rows.", function (done) {
-    //             chaisePage.recordsetPage.getRows().then(function (rows) {
-    //                 expect(rows.length).toBe(activeListData.length, "row length missmatch.");
-    //                 rows.forEach(function (row, rowIndex) {
-    //                     var expectedRow = activeListData[rowIndex];
-    //                     chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
-    //                         expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
+            it ("should not show the total count if hide_row_count is true.", function () {
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n"+ activeListData.length + "\nrecords", "hide_row_count not honored");
+            });
 
-    //                         var expectedCell
-    //                         for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
-    //                             expectedCell = expectedRow[cellIndex];
-    //                             // the first cell is the action columns
-    //                             expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
-    //                         }
+            it ("should show correct table rows.", function (done) {
+                chaisePage.recordsetPage.getRows().then(function (rows) {
+                    expect(rows.length).toBe(activeListData.length, "row length missmatch.");
+                    rows.forEach(function (row, rowIndex) {
+                        var expectedRow = activeListData[rowIndex];
+                        chaisePage.recordsetPage.getRowCells(row).then(function (cells) {
+                            expect(cells.length).toBe(expectedRow.length + 1, "cells length missmatch for row index=" + rowIndex);
 
-    //                         if (rowIndex === rows.length - 1) {
-    //                             done();
-    //                         }
+                            var expectedCell
+                            for (var cellIndex = 0; cellIndex < expectedRow.length; cellIndex++) {
+                                expectedCell = expectedRow[cellIndex];
+                                // the first cell is the action columns
+                                expect(cells[cellIndex + 1].getText()).toBe(expectedCell, "data missmatch in row index=" + rowIndex + ", cell index=" + cellIndex);
+                            }
 
-    //                     }).catch(chaisePage.catchTestError(done));
-    //                 });
-    //             }).catch(chaisePage.catchTestError(done));
-    //         });
+                            if (rowIndex === rows.length - 1) {
+                                done();
+                            }
 
-    //         it ("going to a page with no results, the loader for columns should hide.", function (done) {
-    //             chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
-    //             chaisePage.recordsetPageReady()
-    //             chaisePage.waitForAggregates();
-    //             done();
-    //         })
-    //     });
-    // }
+                        }).catch(chaisePage.catchTestError(done));
+                    });
+                }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ("going to a page with no results, the loader for columns should hide.", function (done) {
+                chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
+                chaisePage.recordsetPageReady()
+                chaisePage.waitForAggregates();
+                done();
+            })
+        });
+    }
 
     describe("For table " + accommodationParams.table_name + ",", function () {
 
         beforeAll(function () {
             var keys = [];
             keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
-            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
+            chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")");
 
-            chaisePage.recordsetPageReady()
-            // TODO: currently failing because no new aggregate requests are sent when flow control slots open up
-            // chaisePage.waitForAggregates();
-            browser.sleep(1000);
+            chaisePage.recordsetPageReady();
+            chaisePage.waitForAggregates();
         });
 
         describe("Presentation ,", function () {
@@ -395,37 +393,36 @@ describe('View recordset,', function () {
                 });
             });
 
-            // TODO: currently failing because no new aggregate requests are sent when flow control slots open up
-            // it("should show correct table rows", function() {
-            //     chaisePage.recordsetPage.getRows().then(function(rows) {
-            //         expect(rows.length).toBe(4, "rows length missmatch.");
-            //         for (var i = 0; i < rows.length; i++) {
-            //             (function(index) {
-            //                 rows[index].all(by.tagName("td")).then(function (cells) {
-            //                     expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
-            //                     expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
-            //                     expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
-            //                     expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
-            //                     expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
-            //                     expect(cells[4].getText()).toBe(accommodationParams.data[index].no_of_rooms, "no_of_rooms column missmatch for row=" + index);
-            //                     expect(cells[5].getText()).toContain(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
-            //                     expect(cells[6].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
-            //                     expect(cells[7].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
-            //                     expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
-            //                     expect(cells[9].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
-            //                     expect(cells[10].getText()).toBe(accommodationParams.data[index].no_of_beds, "no_of_beds column missmatch for row=" + index);
-            //                     expect(cells[11].getText()).toBe(accommodationParams.data[index].no_of_baths, "no_of_baths column missmatch for row=" + index);
-            //                     expect(cells[12].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
-            //                     expect(cells[13].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
-            //                     expect(cells[14].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
-            //                     expect(cells[15].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
-            //                     expect(cells[16].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
-            //                     expect(cells[17].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
-            //                 });
-            //             }(i))
-            //         }
-            //     });
-            // });
+            it("should show correct table rows", function() {
+                chaisePage.recordsetPage.getRows().then(function(rows) {
+                    expect(rows.length).toBe(4, "rows length missmatch.");
+                    for (var i = 0; i < rows.length; i++) {
+                        (function(index) {
+                            rows[index].all(by.tagName("td")).then(function (cells) {
+                                expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
+                                expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getAttribute("href")).toBe(accommodationParams.data[index].website, "website column link missmatch for row=" + index);
+                                expect(cells[2].element(by.tagName("a")).getText()).toBe("Link to Website", "website column caption missmatch for row=" + index);
+                                expect(cells[3].getText()).toBe(accommodationParams.data[index].rating, "rating column missmatch for row=" + index);
+                                expect(cells[4].getText()).toBe(accommodationParams.data[index].no_of_rooms, "no_of_rooms column missmatch for row=" + index);
+                                expect(cells[5].getText()).toContain(accommodationParams.data[index].summary, "summary column missmatch for row=" + index);
+                                expect(cells[6].getText()).toBe(accommodationParams.data[index].opened_on, "opened_on column missmatch for row=" + index);
+                                expect(cells[7].getText()).toBe(accommodationParams.data[index].luxurious, "luxurious column missmatch for row=" + index);
+                                expect(cells[8].getText()).toBe(accommodationParams.data[index].json_col, "json_col column missmatch for row=" + index);
+                                expect(cells[9].getText()).toBe(accommodationParams.data[index].json_col_with_markdown, "json_col_with_markdown column missmatch for row=" + index);
+                                expect(cells[10].getText()).toBe(accommodationParams.data[index].no_of_beds, "no_of_beds column missmatch for row=" + index);
+                                expect(cells[11].getText()).toBe(accommodationParams.data[index].no_of_baths, "no_of_baths column missmatch for row=" + index);
+                                expect(cells[12].getText()).toBe(accommodationParams.data[index].category, "category column missmatch for row=" + index);
+                                expect(cells[13].getText()).toBe(accommodationParams.data[index].type_of_facilities, "type of facilities column missmatch for row=" + index);
+                                expect(cells[14].getText()).toBe(accommodationParams.data[index].count_image_id, "count_image_id column missmatch for row=" + index);
+                                expect(cells[15].getText()).toBe(accommodationParams.data[index].count_distinct_image_id, "count_distinct_image_id column missmatch for row=" + index);
+                                expect(cells[16].getText()).toBe(accommodationParams.data[index].min_image_id, "min_image_id column missmatch for row=" + index);
+                                expect(cells[17].getText()).toBe(accommodationParams.data[index].max_image_id, "max_image_id column missmatch for row=" + index);
+                            });
+                        }(i))
+                    }
+                });
+            });
 
             it("should have " + accommodationParams.columns.length + " columns", function () {
                 chaisePage.recordsetPage.getColumnNames().then(function (columns) {
@@ -436,116 +433,117 @@ describe('View recordset,', function () {
                 });
             });
 
-            // TODO: uncomment after merging Ravish's branch
-            // it("should display the Export dropdown button with proper tooltip.", function(done) {
-            //     var exportDropdown = chaisePage.recordsetPage.getExportDropdown();
-            //     expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
-            //     browser.actions().mouseMove(exportDropdown).perform();
-            //     var tooltip = chaisePage.getTooltipDiv();
-            //     chaisePage.waitForElement(tooltip).then(function () {
-            //         expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
-            //         browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-            //         done();
-            //     }).catch(function (err) {
-            //         console.log(err);
-            //         done.fail();
-            //     });
-            // });
-            // 
-            // it("should have '2' options in the dropdown menu.", function (done) {
-            //     chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-            //         expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
-            //         // close the dropdown
-            //         return chaisePage.recordsetPage.getExportDropdown().click();
-            //     }).then(function () {
-            //         done();
-            //     }).catch(function (err) {
-            //         console.log(err);
-            //         done.fail();
-            //     });
-            // });
-            // 
-            // if (!process.env.CI) {
-            //     it("should have 'CSV' as a download option and download the file.", function(done) {
-            //         chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-            //             var csvOption = chaisePage.recordsetPage.getExportOption("Search results (CSV)");
-            //             expect(csvOption.getText()).toBe("Search results (CSV)");
-            //             return csvOption.click();
-            //         }).then(function () {
-            //             browser.wait(function() {
-            //                 return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
-            //             }, browser.params.defaultTimeout).then(function () {
-            //                 done();
-            //             }, function () {
-            //                 expect(false).toBeTruthy("Accommodations.csv was not downloaded");
-            //             });
-            //         }).catch(function (err) {
-            //             console.log(err);
-            //             done.fail();
-            //         });
-            //     });
+            it("should display the Export dropdown button with proper tooltip.", function(done) {
+                const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
+                browser.actions().mouseMove(exportDropdown).perform();
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
 
-            //     it("should have 'BDBag' as a download option and download the file.", function(done) {
-            //         chaisePage.recordsetPage.getExportDropdown().click().then(function () {
-            //             var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
-            //             expect(bagOption.getText()).toBe("BDBag");
-            //             return bagOption.click();
-            //         }).then(function () {
-            //             return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
-            //         }).then(function () {
-            //             return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
-            //         }).then(function () {
-            //             return browser.wait(function() {
-            //                 return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
-            //             }, browser.params.defaultTimeout);
-            //         }).then(function () {
-            //             chaisePage.waitForElementInverse(element(by.css(".export-progress")));
-            //             done();
-            //         }).catch(function (err) {
-            //             done.fail(err);
-            //         });
-            //     });
-            // }
+            it("should have '2' options in the dropdown menu.", function (done) {
+                const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                exportDropdown.click().then(function () {
+                    const exportMenuItems = chaisePage.recordsetPage.getExportOptions();
+                    expect(exportMenuItems.count()).toBe(2, "incorrect number of export options");
+                    // close the dropdown
+                    return exportDropdown.click();
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    console.log(err);
+                    done.fail();
+                });
+            });
 
-            it("should show line under columns which have a comment and inspect the comment value too", function () {
+            if (!process.env.CI) {
+                it("should have 'CSV' as a download option and download the file.", function(done) {
+                    const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                    exportDropdown.click().then(function () {
+                        const csvOption = element(by.partialLinkText('Search results (CSV)'));
+                        expect(csvOption.getText()).toBe("Search results (CSV)");
+                        return csvOption.click();
+                    }).then(function () {
+                        browser.wait(function() {
+                            return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
+                        }, browser.params.defaultTimeout).then(function () {
+                            done();
+                        }, function () {
+                            expect(false).toBeTruthy("Accommodations.csv was not downloaded");
+                        });
+                    }).catch(function (err) {
+                        console.log(err);
+                        done.fail();
+                    });
+                });
+
+                it("should have 'BDBag' as a download option and download the file.", function(done) {
+                    const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
+                    exportDropdown.click().then(function () {
+                        const bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
+                        expect(bagOption.getText()).toBe("BDBag");
+                        return bagOption.click();
+                    }).then(function () {
+                        return chaisePage.waitForElement(chaisePage.recordsetPage.getExportModal());
+                    }).then(function () {
+                        return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
+                    }).then(function () {
+                        return browser.wait(function() {
+                            return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
+                        }, browser.params.defaultTimeout);
+                    }).then(function () {
+                        done();
+                    }).catch(function (err) {
+                        done.fail(err);
+                    });
+                });
+            }
+
+            it("should show information icon next in column headers which have a comment and inspect the comment value", function () {
                 var columns = accommodationParams.columns.filter(function (c) {
                     return typeof c.comment == 'string';
                 });
-
-                chaisePage.recordsetPage.getColumnsWithUnderline().then(function (pageColumns) {
+                chaisePage.recordsetPage.getColumnsWithTooltipIcon().then(function (pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);
                     var index = 0;
                     pageColumns.forEach(function (c) {
                         var comment = columns[index++].comment;
 
-                        // hover over pageTitle
+                        // hover over column header
                         browser.actions().mouseMove(c).perform();
 
                         var tooltip = chaisePage.getTooltipDiv();
                         chaisePage.waitForElement(tooltip).then(function () {
                             expect(tooltip.getText()).toBe(comment);
                             // move cursor to hide tooltip
-                            browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                            return browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                        }).then(function () {
+                            chaisePage.waitForElementInverse(tooltip);
                         }).catch(function (err) {
                             console.log(err);
                         });
                     });
                 });
 
-                // TODO: implement displaying Action || View header
-                //    add proper comment based on display value
                 // Check tooltip of Action column
-                // var actionCol = chaisePage.recordsetPage.getActionHeaderSpan();
-                // browser.actions().mouseMove(actionCol).perform();
+                var actionCol = chaisePage.recordsetPage.getActionHeaderSpan();
+                browser.actions().mouseMove(actionCol).perform();
 
-                // var tooltip = chaisePage.getTooltipDiv();
-                // chaisePage.waitForElement(tooltip).then(function () {
-                //     expect(tooltip.getText()).toBe(testParams.tooltip.actionCol);
-                //     // move cursor to hide tooltip
-                //     browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                // }).catch(function (err) {
-                //     console.log(err);
-                // });
+                var tooltip = chaisePage.getTooltipDiv();
+                chaisePage.waitForElement(tooltip).then(function () {
+                    expect(tooltip.getText()).toBe(testParams.tooltip.actionCol);
+                    // move cursor to hide tooltip
+                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
+                }).catch(function (err) {
+                    console.log(err);
+                });
             });
 
             it("apply different searches, ", function (done) {
@@ -682,38 +680,37 @@ describe('View recordset,', function () {
                 });
             });
 
-            // TODO: uncomment when recordedit is implemented
-            // it("action columns should show edit button that redirects to the recordedit page", function () {
-            //     var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-            //         return entity.id == accommodationParams.data[0].id;
-            //     });
-            //     var filter = accommodationParams.shortest_key_filter + dataRow.RID;
-            //     var allWindows;
+            it("action columns should show edit button that redirects to the recordedit page", function () {
+                var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                    return entity.id == accommodationParams.data[0].id;
+                });
+                var filter = accommodationParams.shortest_key_filter + dataRow.RID;
+                var allWindows;
 
-            //     browser.wait(function () {
-            //         return chaisePage.recordsetPage.getEditActionButtons().count().then(function (ct) {
-            //             return (ct == 4);
-            //         });
-            //     }, browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getEditActionButtons().count().then(function (ct) {
+                        return (ct == 4);
+                    });
+                }, browser.params.defaultTimeout);
 
-            //     chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
-            //         return editButtons[0].click();
-            //     }).then(function () {
-            //         return browser.getAllWindowHandles();
-            //     }).then(function (handles) {
-            //         allWindows = handles;
-            //         return browser.switchTo().window(allWindows[1]);
-            //     }).then(function () {
-            //         var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
-            //         browser.driver.getCurrentUrl().then(function (url) {
-            //             // Store this for use in later spec.
-            //             recEditUrl = url;
-            //         });
-            //         expect(browser.driver.getCurrentUrl()).toContain(result);
-            //         browser.close();
-            //         browser.switchTo().window(allWindows[0]);
-            //     });
-            // });
+                chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
+                    return editButtons[0].click();
+                }).then(function () {
+                    return browser.getAllWindowHandles();
+                }).then(function (handles) {
+                    allWindows = handles;
+                    return browser.switchTo().window(allWindows[1]);
+                }).then(function () {
+                    var result = '/recordedit/#' + browser.params.catalogId + "/" + accommodationParams.schemaName + ":" + accommodationParams.table_name + "/" + filter;
+                    browser.driver.getCurrentUrl().then(function (url) {
+                        // Store this for use in later spec.
+                        recEditUrl = url;
+                    });
+                    expect(browser.driver.getCurrentUrl()).toContain(result);
+                    browser.close();
+                    browser.switchTo().window(allWindows[0]);
+                });
+            });
 
             xit('should show a modal if user tries to delete (via action column) a record that has been modified by someone else (412 error)', function () {
                 var EC = protractor.ExpectedConditions, allWindows, config;
@@ -774,36 +771,35 @@ describe('View recordset,', function () {
                 });
             }).pend("412 support has been dropped from ermestjs.");
 
-            // TODO: uncomment when delete action is implemented
-            // it("action columns should show delete button that deletes record", function () {
-            //     var deleteButton;
-            //     var EC = protractor.ExpectedConditions;
+            it("action columns should show delete button that deletes record", function () {
+                var deleteButton;
+                var EC = protractor.ExpectedConditions;
 
-            //     browser.wait(function () {
-            //         return chaisePage.recordsetPage.getDeleteActionButtons().count().then(function (ct) {
-            //             return (ct == 4);
-            //         });
-            //     }, browser.params.defaultTimeout);
-            //     chaisePage.recordsetPage.getDeleteActionButtons().then(function (deleteButtons) {
-            //         deleteButton = deleteButtons[3];
-            //         return deleteButton.click();
-            //     }).then(function () {
-            //         var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
-            //         browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+                browser.wait(function () {
+                    return chaisePage.recordsetPage.getDeleteActionButtons().count().then(function (ct) {
+                        return (ct == 4);
+                    });
+                }, browser.params.defaultTimeout);
+                chaisePage.recordsetPage.getDeleteActionButtons().then(function (deleteButtons) {
+                    deleteButton = deleteButtons[3];
+                    return deleteButton.click();
+                }).then(function () {
+                    var confirmButton = chaisePage.recordsetPage.getConfirmDeleteButton();
+                    browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
 
-            //         return confirmButton.click();
-            //     }).then(function () {
-            //         browser.wait(function () {
-            //             return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-            //                 return (ct == 3)
-            //             });
-            //         });
+                    return confirmButton.click();
+                }).then(function () {
+                    browser.wait(function () {
+                        return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                            return (ct == 3)
+                        });
+                    });
 
-            //         return chaisePage.recordsetPage.getRows().count();
-            //     }).then(function (ct) {
-            //         expect(ct).toBe(3);
-            //     });
-            // });
+                    return chaisePage.recordsetPage.getRows().count();
+                }).then(function (ct) {
+                    expect(ct).toBe(3);
+                });
+            });
 
             if (!process.env.CI) {
                 afterAll(function () {
@@ -815,190 +811,188 @@ describe('View recordset,', function () {
 
         });
 
-        // TODO: uncomment once delete button is implemented for actions column
-        //       relies on a row being deleted from above for all expectations to work as expected
-        // describe("testing sorting and paging features, ", function () {
-        //     var rowCount = chaisePage.recordsetPage.getTotalCount();
-        //     var recordsOnPage1 = accommodationParams.sortedData[0].page1.asc.length;
-        //     var recordsOnPage2 = accommodationParams.sortedData[0].page2.asc.length;
-        //     var totalRecords = recordsOnPage1 + recordsOnPage2;
+        describe("testing sorting and paging features, ", function () {
+            var rowCount = chaisePage.recordsetPage.getTotalCount();
+            var recordsOnPage1 = accommodationParams.sortedData[0].page1.asc.length;
+            var recordsOnPage2 = accommodationParams.sortedData[0].page2.asc.length;
+            var totalRecords = recordsOnPage1 + recordsOnPage2;
 
-        //     beforeAll(function () {
-        //         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "?limit=3");
-        //         var EC = protractor.ExpectedConditions;
+            beforeAll(function () {
+                chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "?limit=3");
+                var EC = protractor.ExpectedConditions;
 
-        //         chaisePage.recordsetPageReady();
-        //         chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //         browser.wait(EC.presenceOf(chaisePage.recordsetPage.getRows().get(2)), browser.params.defaultTimeout);
-        //     });
+                chaisePage.recordsetPageReady();
+                chaisePage.recordsetPage.waitForInverseMainSpinner();
+                browser.wait(EC.presenceOf(chaisePage.recordsetPage.getRows().get(2)), browser.params.defaultTimeout);
+            });
 
-        //     for (var j = 0; j < accommodationParams.sortedData.length; j++) {
-        //         (function (k) {
-        //             it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
-        //                 // Check the presence of initial sort button
-        //                 expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
+            for (var j = 0; j < accommodationParams.sortedData.length; j++) {
+                (function (k) {
+                    it("should sort " + accommodationParams.sortedData[k].columnName + " column in ascending order.", function (done) {
+                        // Check the presence of initial sort button
+                        expect(chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the initial sort button.");
 
-        //                 // Click on sort button
-        //                 chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-        //                     chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //                     browser.wait(function () {
-        //                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-        //                             return (ct == 3);
-        //                         });
-        //                     }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
-        //                     expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
+                        // Click on sort button
+                        chaisePage.recordsetPage.getColumnSortButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                            chaisePage.recordsetPage.waitForInverseMainSpinner();
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    return (ct == 3);
+                                });
+                            }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
+                            expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
 
-        //                     //Check the presence of descending sort button
-        //                     expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
+                            //Check the presence of descending sort button
+                            expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
 
-        //                     // Check if the url has @sort by column name
-        //                     chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
 
-        //                     return chaisePage.recordsetPage.getRows();
+                            return chaisePage.recordsetPage.getRows();
 
-        //                 }).then(function (rows) {
-        //                     // Check if values of the sorted column on this page(first page) are in ascending order.
-        //                     for (var i = 0; i < recordsOnPage1; i++) {
-        //                         (function (index1) {
-        //                             rows[index1].all(by.tagName("td")).then(function (cells) {
-        //                                 expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.asc[index1], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index1 + " in ascending order on Page 1.");
-        //                             });
-        //                         }(i))
-        //                     }
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on this page(first page) are in ascending order.
+                            for (var i = 0; i < recordsOnPage1; i++) {
+                                (function (index1) {
+                                    rows[index1].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.asc[index1], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index1 + " in ascending order on Page 1.");
+                                    });
+                                }(i))
+                            }
 
-        //                     // Go to the next page
-        //                     return chaisePage.recordsetPage.getNextButton().click();
+                            // Go to the next page
+                            return chaisePage.recordsetPage.getNextButton().click();
 
-        //                 }).then(function () {
-        //                     chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //                     browser.wait(function () {
-        //                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-        //                             return (ct == 2);
-        //                         });
-        //                     }, browser.params.defaultTimeout, "row count mismatch, displaying first 2");
-        //                     expect(rowCount.getText()).toContain("Displaying last\n" + recordsOnPage2 + "\nof " + totalRecords + " records");
+                        }).then(function () {
+                            chaisePage.recordsetPage.waitForInverseMainSpinner();
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    return (ct == 2);
+                                });
+                            }, browser.params.defaultTimeout, "row count mismatch, displaying first 2");
+                            expect(rowCount.getText()).toContain("Displaying last\n" + recordsOnPage2 + "\nof " + totalRecords + " records");
 
-        //                     // Check if the url has @sort by column name
-        //                     chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for ascending order.");
 
-        //                     return chaisePage.recordsetPage.getRows();
-        //                 }).then(function (rows) {
-        //                     // Check if values of the sorted column on second page are in ascending order
-        //                     for (var i = 0; i < recordsOnPage2; i++) {
-        //                         (function (index2) {
-        //                             rows[index2].all(by.tagName("td")).then(function (cells) {
-        //                                 expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.asc[index2], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index2 + " in ascending order on Page 2.");
-        //                             });
-        //                         }(i))
-        //                     }
+                            return chaisePage.recordsetPage.getRows();
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on second page are in ascending order
+                            for (var i = 0; i < recordsOnPage2; i++) {
+                                (function (index2) {
+                                    rows[index2].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.asc[index2], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index2 + " in ascending order on Page 2.");
+                                    });
+                                }(i))
+                            }
 
-        //                     // Go to the previous page
-        //                     return chaisePage.recordsetPage.getPreviousButton().click();
+                            // Go to the previous page
+                            return chaisePage.recordsetPage.getPreviousButton().click();
 
-        //                 }).then(function () {
-        //                     chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //                     browser.wait(function () {
-        //                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-        //                             return (ct == 3);
-        //                         });
-        //                     }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
-        //                     expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
+                        }).then(function () {
+                            chaisePage.recordsetPage.waitForInverseMainSpinner();
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    return (ct == 3);
+                                });
+                            }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
+                            expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
 
-        //                     // Sanity check on the previous page
-        //                     chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
-        //                     done();
+                            // Sanity check on the previous page
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + ',RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for ascending order.");
+                            done();
 
-        //                 }).catch(function (err) {
-        //                     console.log("Error in the promise chain: ", err);
-        //                     done.fail(err);
-        //                 });
+                        }).catch(function (err) {
+                            console.log("Error in the promise chain: ", err);
+                            done.fail(err);
+                        });
 
-        //             });
+                    });
 
-        //             it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
-        //                 // Check the presence of descending sort button
-        //                 expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
+                    it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
+                        // Check the presence of descending sort button
+                        expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
 
-        //                 // Click on sort button to sort in descending order
-        //                 chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
-        //                     chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //                     browser.wait(function () {
-        //                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-        //                             return (ct == 3);
-        //                         });
-        //                     }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
-        //                     expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
+                        // Click on sort button to sort in descending order
+                        chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                            chaisePage.recordsetPage.waitForInverseMainSpinner();
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    return (ct == 3);
+                                });
+                            }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
+                            expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
 
-        //                     // Check the presence of ascending sort button
-        //                     expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the ascending sort button.");
+                            // Check the presence of ascending sort button
+                            expect(chaisePage.recordsetPage.getColumnSortAscButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the ascending sort button.");
 
-        //                     // Check if the url has @sort by column name
-        //                     chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
 
-        //                     return chaisePage.recordsetPage.getRows();
+                            return chaisePage.recordsetPage.getRows();
 
-        //                 }).then(function (rows) {
-        //                     // Check if values of the sorted column on first page are in descending order
-        //                     for (var i = 0; i < recordsOnPage1; i++) {
-        //                         (function (index3) {
-        //                             rows[index3].all(by.tagName("td")).then(function (cells) {
-        //                                 expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.desc[index3], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index3 + " in descending order on Page 1");
-        //                             });
-        //                         }(i))
-        //                     }
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on first page are in descending order
+                            for (var i = 0; i < recordsOnPage1; i++) {
+                                (function (index3) {
+                                    rows[index3].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page1.desc[index3], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index3 + " in descending order on Page 1");
+                                    });
+                                }(i))
+                            }
 
-        //                     // Go to the next page
-        //                     return chaisePage.recordsetPage.getNextButton().click();
+                            // Go to the next page
+                            return chaisePage.recordsetPage.getNextButton().click();
 
-        //                 }).then(function () {
-        //                     chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //                     browser.wait(function () {
-        //                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-        //                             return (ct == 2);
-        //                         });
-        //                     }, browser.params.defaultTimeout, "row count mismatch, displaying first 2");
-        //                     expect(rowCount.getText()).toContain("Displaying last\n" + recordsOnPage2 + "\nof " + totalRecords + " records");
+                        }).then(function () {
+                            chaisePage.recordsetPage.waitForInverseMainSpinner();
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    return (ct == 2);
+                                });
+                            }, browser.params.defaultTimeout, "row count mismatch, displaying first 2");
+                            expect(rowCount.getText()).toContain("Displaying last\n" + recordsOnPage2 + "\nof " + totalRecords + " records");
 
-        //                     // Check if the url has @sort by column name
-        //                     chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
+                            // Check if the url has @sort by column name
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 2 for descending order.");
 
-        //                     return chaisePage.recordsetPage.getRows();
+                            return chaisePage.recordsetPage.getRows();
 
-        //                 }).then(function (rows) {
-        //                     // Check if values of the sorted column on second page are in descending order
-        //                     for (var i = 0; i < recordsOnPage2; i++) {
-        //                         (function (index4) {
-        //                             rows[index4].all(by.tagName("td")).then(function (cells) {
-        //                                 expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.desc[index4], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index4 + " in descending order on Page 2.");
-        //                             });
-        //                         }(i))
-        //                     }
+                        }).then(function (rows) {
+                            // Check if values of the sorted column on second page are in descending order
+                            for (var i = 0; i < recordsOnPage2; i++) {
+                                (function (index4) {
+                                    rows[index4].all(by.tagName("td")).then(function (cells) {
+                                        expect(cells[accommodationParams.sortedData[k].columnPosition].getText()).toBe(accommodationParams.sortedData[k].page2.desc[index4], accommodationParams.sortedData[k].rawColumnName + " column value missmatch for row = " + index4 + " in descending order on Page 2.");
+                                    });
+                                }(i))
+                            }
 
-        //                     // Go to the previous page
-        //                     return chaisePage.recordsetPage.getPreviousButton().click();
+                            // Go to the previous page
+                            return chaisePage.recordsetPage.getPreviousButton().click();
 
-        //                 }).then(function () {
-        //                     chaisePage.recordsetPage.waitForInverseMainSpinner();
-        //                     browser.wait(function () {
-        //                         return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-        //                             return (ct == 3);
-        //                         });
-        //                     }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
-        //                     expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
+                        }).then(function () {
+                            chaisePage.recordsetPage.waitForInverseMainSpinner();
+                            browser.wait(function () {
+                                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                                    return (ct == 3);
+                                });
+                            }, browser.params.defaultTimeout, "row count mismatch, displaying first 3");
+                            expect(rowCount.getText()).toContain("Displaying first\n" + recordsOnPage1 + "\nof " + totalRecords + " records");
 
-        //                     // Sanity check on the previous page
-        //                     chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
-        //                     done();
+                            // Sanity check on the previous page
+                            chaisePage.waitForTextInUrl('@sort(' + accommodationParams.sortedData[k].rawColumnName + '::desc::,RID)', "Url doesn't contain @sort(column name) for " + accommodationParams.sortedData[k].rawColumnName + " column on Page 1 for descending order.");
+                            done();
 
-        //                 }).catch(function (err) {
-        //                     console.log("Error in the promise chain: ", err);
-        //                     done.fail(err);
-        //                 });
-        //             });
-        //         }(j))
-        //     }
+                        }).catch(function (err) {
+                            console.log("Error in the promise chain: ", err);
+                            done.fail(err);
+                        });
+                    });
+                }(j))
+            }
 
-        // });
+        });
 
     });
 
@@ -1006,7 +1000,7 @@ describe('View recordset,', function () {
         var EC = protractor.ExpectedConditions;
 
         beforeAll(function () {
-            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
+            chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);
             chaisePage.recordsetPageReady();
         });
 
@@ -1098,63 +1092,61 @@ describe('View recordset,', function () {
                 return chaisePage.getWindowName();
             }).then(function (name) {
                 windowId = name;
-            //     return chaisePage.getPageId();
-            // }).then(function (id) {
-            //     pageId = id;
+                return chaisePage.getPageId();
+            }).then(function (id) {
+                pageId = id;
             });
         });
 
-        // TODO: uncomment when record app implemented and dcctx alterative is added to the window
-        // it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
-        //     var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-        //         return entity.id == accommodationParams.data[0].id;
-        //     });
+        it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
 
-        //     chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
-        //         return viewButtons[0].click();
-        //     }).then(function () {
-        //         return chaisePage.recordPageReady();
-        //     }).then(function () {
-        //         expect(chaisePage.getWindowName()).toBe(windowId);
-        //         // pageId should change when the window changes page
-        //         expect(chaisePage.getPageId()).not.toBe(pageId);
-        //         done();
-        //     }).catch(function (err) {
-        //         done.fail(err);
-        //     })
-        // });
+            chaisePage.recordsetPage.getViewActionButtons().then(function (viewButtons) {
+                return chaisePage.clickButton(viewButtons[0]);
+            }).then(function () {
+                return chaisePage.recordPageReady();
+            }).then(function () {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should change when the window changes page
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
+        });
 
-        // TODO: uncomment when recordedit app implemented and dcctx alterative is added to the window
-        // it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
-        //     var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
-        //         return entity.id == accommodationParams.data[0].id;
-        //     });
-        //     var allWindows;
+        it("clicking edit action should open a new window with a new window ID and a new page ID.", function (done) {
+            var dataRow = browser.params.entities[accommodationParams.schemaName][accommodationParams.table_name].find(function (entity) {
+                return entity.id == accommodationParams.data[0].id;
+            });
+            var allWindows;
 
-        //     chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
-        //         return editButtons[0].click();
-        //     }).then(function () {
-        //         return browser.getAllWindowHandles();
-        //     }).then(function (handles) {
-        //         allWindows = handles;
-        //         return browser.switchTo().window(allWindows[1]);
-        //     }).then(function () {
-        //         return chaisePage.recordeditPageReady();
-        //     }).finally(function () {
-        //         expect(chaisePage.getWindowName()).not.toBe(windowId);
-        //         // pageId should change when a new window is opened
-        //         expect(chaisePage.getPageId()).not.toBe(pageId);
-        //         browser.close();
-        //         return browser.switchTo().window(allWindows[0]);
-        //     }).then(function () {
-        //         expect(chaisePage.getWindowName()).toBe(windowId);
-        //         // pageId should not have changed when a new window was opened
-        //         expect(chaisePage.getPageId()).toBe(pageId);
-        //         done();
-        //     }).catch(function (err) {
-        //         done.fail(err);
-        //     })
-        // });
+            chaisePage.recordsetPage.getEditActionButtons().then(function (editButtons) {
+                return editButtons[0].click();
+            }).then(function () {
+                return browser.getAllWindowHandles();
+            }).then(function (handles) {
+                allWindows = handles;
+                return browser.switchTo().window(allWindows[1]);
+            }).then(function () {
+                return chaisePage.recordeditPageReady();
+            }).finally(function () {
+                expect(chaisePage.getWindowName()).not.toBe(windowId);
+                // pageId should change when a new window is opened
+                expect(chaisePage.getPageId()).not.toBe(pageId);
+                browser.close();
+                return browser.switchTo().window(allWindows[0]);
+            }).then(function () {
+                expect(chaisePage.getWindowName()).toBe(windowId);
+                // pageId should not have changed when a new window was opened
+                expect(chaisePage.getPageId()).toBe(pageId);
+                done();
+            }).catch(function (err) {
+                done.fail(err);
+            })
+        });
     });
 
     describe("For chaise config properties", function () {
@@ -1164,7 +1156,7 @@ describe('View recordset,', function () {
             var chaiseConfig, keys = [];
             keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
             var url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")";
-            
+
             chaisePage.navigate(url);
 
             chaisePage.waitForElement(element(by.id('page-title')), browser.params.defaultTimeout).then(function () {
@@ -1207,18 +1199,17 @@ describe('View recordset,', function () {
                     });
                 });
 
-                // TODO: uncomment when errors implemented
-                // it("should throw a malformed URI error when no default schema:table is set for a catalog.", function () {
-                //     chaisePage.navigate(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
+                it("should throw a malformed URI error when no default schema:table is set for a catalog.", function () {
+                    chaisePage.navigate(process.env.CHAISE_BASE_URL + "/recordset/#" + browser.params.catalogId);
 
-                //     var modalTitle = chaisePage.recordEditPage.getModalTitle();
+                    var modalTitle = chaisePage.recordEditPage.getModalTitle();
 
-                //     chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function () {
-                //         return modalTitle.getText();
-                //     }).then(function (title) {
-                //         expect(title).toBe("Invalid URI");
-                //     });
-                // });
+                    chaisePage.waitForElement(modalTitle, browser.params.defaultTimeout).then(function () {
+                        return modalTitle.getText();
+                    }).then(function (title) {
+                        expect(title).toBe("Invalid URI");
+                    });
+                });
             });
 
             describe("should load chaise-config.js with system columns heuristic properties", function () {
@@ -1254,56 +1245,53 @@ describe('View recordset,', function () {
                     });
                 });
 
-                // TODO: uncomment when record app is implemented
-                // it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
-                //     chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
-                //         expect(buttons.length).toBe(1);
-                //         return buttons[0].click();
-                //     }).then(function () {
-                //         return chaisePage.recordPageReady();
-                //     }).then(function () {
-                //         browser.wait(function () {
-                //             return chaisePage.recordPage.getColumns().count().then(function (ct) {
-                //                 return ct == systemColumnsParams.detailedColumns.length;
-                //             });
-                //         });
+                it("systemColumnsDisplayDetailed: true, should have proper columns after clicking a row.", function () {
+                    chaisePage.recordsetPage.getViewActionButtons().then(function (buttons) {
+                        expect(buttons.length).toBe(1);
+                        return buttons[0].click();
+                    }).then(function () {
+                        return chaisePage.recordPageReady();
+                    }).then(function () {
+                        browser.wait(function () {
+                            return chaisePage.recordPage.getColumns().count().then(function (ct) {
+                                return ct == systemColumnsParams.detailedColumns.length;
+                            });
+                        });
 
-                //         return chaisePage.recordPage.getColumns();
-                //     }).then(function (columns) {
-                //         expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
-                //         for (var i = 0; i < columns.length; i++) {
-                //             expect(columns[i].getText()).toEqual(systemColumnsParams.detailedColumns[i]);
-                //         }
-                //     });
-                // });
+                        return chaisePage.recordPage.getColumns();
+                    }).then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.detailedColumns.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.detailedColumns[i]);
+                        }
+                    });
+                });
 
-                // TODO: uncomment when record app is implemented
-                // it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
-                //     chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
-                //         expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
-                //         for (var i = 0; i < columns.length; i++) {
-                //             expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
-                //         }
-                //     });
-                // });
+                it("on record page, systemColumnsDisplayCompact should also be honored for related tables.", function () {
+                    chaisePage.recordPage.getRelatedTableColumnNamesByTable("person").then(function (columns) {
+                        expect(columns.length).toBe(systemColumnsParams.compactColumnsPersonTable.length);
+                        for (var i = 0; i < columns.length; i++) {
+                            expect(columns[i].getText()).toEqual(systemColumnsParams.compactColumnsPersonTable[i]);
+                        }
+                    });
+                });
 
-                // TODO: uncomment when recordedit app is implemented
-                // it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
-                //     // click create
-                //     chaisePage.recordPage.getCreateRecordButton().click().then(function () {
-                //         // test columns length
+                it("on recordedit page with systemColumnsDisplayEntry: ['RCB', 'RMB', 'RMT'], should have proper columns", function () {
+                    // click create
+                    chaisePage.recordPage.getCreateRecordButton().click().then(function () {
+                        // test columns length
 
-                //         chaisePage.recordeditPageReady();
-                //         return chaisePage.recordEditPage.getAllColumnCaptions();
-                //     }).then(function (pageColumns) {
-                //         expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
+                        chaisePage.recordeditPageReady();
+                        return chaisePage.recordEditPage.getAllColumnCaptions();
+                    }).then(function (pageColumns) {
+                        expect(pageColumns.length).toBe(systemColumnsParams.entryColumns.length, "number of visible columns in entry is not what is expected.");
 
-                //         // test each column
-                //         for (var i = 0; i < pageColumns.length; i++) {
-                //             expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
-                //         }
-                //     });
-                // });
+                        // test each column
+                        for (var i = 0; i < pageColumns.length; i++) {
+                            expect(pageColumns[i].getAttribute('innerHTML')).toEqual(systemColumnsParams.entryColumns[i], "column with index i=" + i + " is not correct");
+                        }
+                    });
+                });
             });
         }
     });

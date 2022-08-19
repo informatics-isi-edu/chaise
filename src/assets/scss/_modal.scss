@@ -31,45 +31,59 @@
 }
 
 /******** Popup modal for login instructions ********/
-.modal-login .modal-backdrop {
+.modal-login-instruction-backdrop {
   opacity: 0.7 !important;
+  z-index: 1035; // less than the modal itself
 }
 
-.modal-login-instruction .modal-dialog {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-left: -300px;
-  margin-top: -100px;
-}
+.modal-login-instruction {
+  z-index: 1036; // less than navbar
+  .modal-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -100px;
 
-.modal-login-instruction .modal-dialog .modal-content {
-  width: 600px;
-}
+    .modal-content {
+      width: 600px;
+    }
 
-.modal-login-instruction .modal-dialog ol li {
-  list-style-type: decimal;
-}
-
-.modal-login-instruction .modal-dialog pre {
-  white-space: pre-line;
-  word-break: inherit;
-  text-align: justify;
-}
-
-.modal-login .modal-title {
-  font-size: 22px !important;
+    .modal-header {
+      justify-content: space-around;
+      .modal-title {
+        font-size: 22px !important;
+      }
+    }
+    .modal-body {
+      text-align: center;
+      button {
+        margin-left: 5px;
+      }
+    }
+  }
 }
 
 /******* Popup modal for error ********/
-/* hide the loading spinner if we have the error dialog open */
-body.error-open loading-spinner {
-  display: none !important;
+// NOTE less than the navbar z-index
+.modal-error-backdrop {
+  z-index: 1031; // less than the modal itself
 }
 
 .modal-error {
+  z-index: 1036; // less than navbar
+  overflow: hidden;
+
   .no-word-break {
     white-space: nowrap;
+  }
+
+  .toggle-error-details {
+    display: block;
+    padding-left: 0;
+    i {
+      padding-right: 3px;
+    }
   }
 
   .modal-footer .chaise-btn {
@@ -80,6 +94,20 @@ body.error-open loading-spinner {
     }
   }
 }
+
+.modal-footer .chaise-btn {
+  margin-left: 5px;
+}
+
+/******* Popup modal for export *******/
+.export-progress-backdrop {
+  z-index: 1030; // less than the modal itself
+}
+
+.export-progress {
+  z-index: 1031; // less than login instruction modal
+}
+
 
 /******* Popup modal for share ********/
 .chaise-share-citation {
@@ -99,19 +127,21 @@ body.error-open loading-spinner {
 /*******Bootstrap  Modal styling *********/
 /*When the modal fills the screen it has an even 2.5% on top and bottom*/
 /*Centers the modal*/
-.modal-xl {
+.chaise-body .modal-dialog.modal-xl {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 95vw;
 }
 
-.modal-lg {
+.chaise-body .modal-dialog.modal-lg {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 80vw;
 }
 
-.modal-md {
+// NOTE in bootstrap3 this used to be modal-md,
+// but we don't have that notion anymore and therefore this is just the default size
+.chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
   margin: 2.5vh auto;
   width: auto !important;
   max-width: 60vw;
@@ -154,7 +184,7 @@ body.error-open loading-spinner {
 /************* Profile Card ****************/
 .profile-popup {
   // to allow scrolling and showing all content
-  &.modal-content {
+  .modal-content {
     max-height: unset;
   }
   ul li {
@@ -165,8 +195,9 @@ body.error-open loading-spinner {
     }
   }
 
-  table tr:nth-child(1) > td {
-    border-top: none;
+  // remove the last border since it's not needed
+  table tr:last-child > td {
+    border-bottom: none;
   }
 
   .profileValue {
@@ -180,6 +211,7 @@ body.error-open loading-spinner {
     height: 95vh;
     .modal-header {
       padding: 0;
+      padding-top: 20px;
       // we don't want it to be flex, since we're doing flex ourselves
       display: block;
     }
@@ -207,10 +239,29 @@ body.error-open loading-spinner {
   }
 }
 
+.export-progress {
+  .modal-body {
+    padding-top: 0;
+  }
+
+  .modal-text {
+    margin: 8px 0px;
+  }
+
+  .progress {
+    height: 1.5rem;
+  }
+
+  .progress-bar {
+    background-size: 1.75rem 1.75rem;
+    background-color: #4674a7;
+  }
+}
+
 @media (min-width: 768px) {
-  .modal-dialog {
-    max-width: unset;
-    width: 600px;
-    margin: 30px auto;
+  .chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+    max-width: unset !important;
+    width: 600px !important;
+    margin: 30px auto !important;
   }
 }

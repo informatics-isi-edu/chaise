@@ -123,11 +123,15 @@
                     resultsReference.filterLogInfo
                 );
 
-                // includes identifiers for specific records modified
-                // TODO: the above comment seems wrong
-                // NOTE: I think we are using the base reference for the page so we go to either an unconstrained recordset (multi create)
-                // or a constrained recordset (multi edit we entered recordedit with)
-                vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
+                // create the link based on the initial link that users used to 
+                // navigate to this page for edit mode so it has the filters
+                if (vm.editMode) {
+                    vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
+                } 
+                // for create and copy mode we want unfiltered links
+                else {
+                    vm.resultsetRecordsetLink = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
+                }
 
                 // set values for the view to flip to recordedit resultset view
                 vm.resultsetModel = {

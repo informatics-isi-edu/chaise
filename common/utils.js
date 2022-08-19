@@ -2496,7 +2496,7 @@
             // angular configurations
             // allows unsafe prefixes to be downloaded
             // full regex: "/^\s*(https?|ftp|mailto|tel|file|blob):/"
-            compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob):/);
+            compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|blob|mailto):/);
             cookiesProvider.defaults.path = '/';
             logProvider.debugEnabled(getConfigJSON().debug === true);
             // Configure all tooltips to be attached to the body by default. To attach a
@@ -3131,7 +3131,7 @@
             SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
 
-            // - login2:
+            // - login:
             VERIFY_GLOBUS_GROUP_LOGIN: "verify-globus-group" + clientPathActionSeparator + "login",
             VERIFY_GLOBUS_GROUP_LOGOUT: "verify-globus-group" + clientPathActionSeparator + "logout",
 

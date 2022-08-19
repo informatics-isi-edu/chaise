@@ -4,12 +4,15 @@ import { MouseEvent } from 'react';
 import { BUILD_VARIABLES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
+// models
+import { Session } from '@isrd-isi-edu/chaise/src/models/user';
+
 // services
-import AuthnService from '@isrd-isi-edu/chaise/src/services/authn';
 import { ConfigService, ContextHeaderParams } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
+import { isGroupIncluded } from '@isrd-isi-edu/chaise/src/utils/authn-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 /* ===== Interfaces ===== */
@@ -140,6 +143,7 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
       acls: menuOpt.acls || acls,
       isValid: false,
       nameMarkdownPattern: menuOpt.nameMarkdownPattern || menuOpt.markdownPattern || menuOpt.markdownName || menuOpt.name,
+      names: menuOpt.names,
       newTab: openNewTab,
       type: menuOpt.type,
       ...menuOpt
@@ -163,7 +167,18 @@ export function createMenuList(menu: any, parentNewTab: boolean, parentAcls: Men
           if (child.acls.enable === undefined) childCopy.acls.enable = option.acls.enable;
         }
 
-        // TODO: names
+        // create the names array that will be used for logging
+        let parentNames = option.names;
+        if (!Array.isArray(parentNames)) {
+          parentNames = [];
+          // NOTE: we used 'name' before but this isn't consistent with changes we've made to support markdown templates as navbar items
+          //       'nameMarkdownPattern' is set to 'name' if no other values are found
+          if (option.nameMarkdownPattern) parentNames.push(option.nameMarkdownPattern);
+        }
+
+        // NOTE: same note from a few lines above
+        const childNameMarkdownPattern = child.nameMarkdownPattern || child.markdownPattern || child.markdownName || child.name;
+        childCopy.names = parentNames.concat(childNameMarkdownPattern);
 
         // set values and recurse
         childrenArr.push(recurseMenuOption(childCopy));
@@ -232,9 +247,9 @@ export function onLinkClick(event: MouseEvent<HTMLElement>, menuObject: MenuOpti
   }
 }
 
-export function menuItemClasses(option: MenuOption, checkHeader: boolean): string {
+export function menuItemClasses(option: MenuOption, session: Session | null, checkHeader: boolean): string {
   let classes = '';
-  if (!canEnable(option)) classes += 'disable-link ';
+  if (!canEnable(option, session)) classes += 'disable-link ';
   if (checkHeader && option.header === true) classes += 'chaise-dropdown-header';
   return classes;
 }
@@ -245,14 +260,14 @@ export function renderName(option: MenuOption): string {
 }
 
 // option - navbar menu object form children array
-export function canShow(option: MenuOption): boolean {
-  return option.acls && AuthnService.isGroupIncluded(option.acls.show);
+export function canShow(option: MenuOption, session: Session | null): boolean {
+  return option.acls && isGroupIncluded(option.acls.show, session);
 }
 
 // option - navbar menu object form children array
 // session - Session factory
-export function canEnable(option: MenuOption): boolean {
-  return option.acls && AuthnService.isGroupIncluded(option.acls.enable);
+export function canEnable(option: MenuOption, session: Session | null): boolean {
+  return option.acls && isGroupIncluded(option.acls.enable, session);
 }
 
 // NOTE: hard coded action
@@ -261,9 +276,3 @@ export function openProfileModal() {
     action: LogService.getActionString(LogActions.NAVBAR_PROFILE_OPEN, '', '')
   });
 }
-
-// NOTE: hard coded action
-export function logout() {
- AuthnService.logout(LogActions.LOGOUT_NAVBAR);
-}
-

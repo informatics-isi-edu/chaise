@@ -101,9 +101,9 @@ export class RecordsetFlowControl {
   * returns true if we have free slots for requests.
   * @return {boolean}
   */
-  haveFreeSlot() {
+  haveFreeSlot(printMessage=true) {
     const res = this.queue.occupiedSlots < this.queue.maxRequests;
-    if (!res) {
+    if (!res && printMessage) {
       $log.debug('No free slot available.');
     }
     return res;
@@ -115,7 +115,7 @@ export class RecordsetFlowControl {
    * @param {String} actionPath - the ui context and verb
    * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
    */
-  getTableLogAction(actionPath: LogActions, childStackPath?: any) {
+  getLogAction(actionPath: LogActions, childStackPath?: any) : string {
     let stackPath = this.logStackPath;
     if (childStackPath) {
       stackPath = LogService.getStackPath(stackPath, childStackPath);
@@ -127,7 +127,7 @@ export class RecordsetFlowControl {
   /**
    * Returns the stack object that should be used
    */
-  getTableLogStack(childStackElement?: any, extraInfo?: any) {
+  getLogStack(childStackElement?: any, extraInfo?: any): any {
     let stack = this.logStack;
     if (childStackElement) {
       stack = this.logStack.concat(childStackElement);

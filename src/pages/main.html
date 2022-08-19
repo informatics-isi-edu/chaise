@@ -8,6 +8,7 @@
     <%= htmlWebpackPlugin.options.title %>
   </title>
   <%= htmlWebpackPlugin.options.ermrestjs %>
+  <%= htmlWebpackPlugin.options.external_files %>
   <%= htmlWebpackPlugin.options.chaise_config %>
   <%= htmlWebpackPlugin.options.app_config %>
 </head>
@@ -45,7 +46,7 @@
           </div>
           <div class='modal-body'>
             You're using a browser that we don't support.
-            <br/><br/>
+            <br /><br />
             We recommend using <a target="_blank" href="https://www.google.com/chrome/">Google Chrome</a>
             or <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a>
             for a better web experience.
@@ -59,14 +60,22 @@
 </body>
 
 <script>
-  // NOTE this should be updated when we have the proper list of supports
-  var isIE = window.document.documentMode ? true : false;
-  if (isIE) {
+  function checkBrowser() {
     var el = document.getElementById("browser-not-supported-error");
-    if (el) {
+    if (!el) return;
+
+    // NOTE this should be updated when we have the proper list of supports
+    var isIE = window.document.documentMode ? true : false;
+
+    if (isIE) {
       el.style.display = "block"
+    } else {
+      el.remove();
     }
   }
+
+  checkBrowser();
 </script>
 <script src='/gtm-id.js'></script>
+
 </html>

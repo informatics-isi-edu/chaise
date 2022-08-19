@@ -8,8 +8,8 @@ describe('Navbar ', function() {
         browser.ignoreSynchronization=true;
         browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-navbar:accommodation");
         navbar = element(by.id('mainnav'));
-        menu = element(by.id('navbar-menu'));
-        loginMenu = element(by.css('.chaise-login-menu'));
+        menu = element(by.css('.navbar-menu-options'));
+        loginMenu = element(by.css('.username-display > div.dropdown-menu'));
         browser.executeScript('return chaiseConfig').then(function(config) {
             chaiseConfig = config;
             browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
@@ -84,13 +84,15 @@ describe('Navbar ', function() {
             chaisePage.clickButton(banner1Dismiss).then(function () {
                 chaisePage.waitForElementInverse(banner1);
 
-                expect(banner1.isDisplayed()).toBeFalsy("banner 1 didn't close");
+                // IsPresent(): Returns TRUE if element exists in DOM(may or may not be hidden) else returns false
+                expect(banner1.isPresent()).toBeFalsy("banner 1 didn't close");
 
                 return chaisePage.clickButton(banner4Dismiss);
             }).then(function () {
                 chaisePage.waitForElementInverse(banner4);
 
-                expect(banner4.isDisplayed()).toBeFalsy("banner 4 didn't close");
+                // IsPresent(): Returns TRUE if element exists in DOM(may or may not be hidden) else returns false
+                expect(banner4.isPresent()).toBeFalsy("banner 4 didn't close");
 
                 done();
             }).catch(function (err) {
@@ -103,7 +105,8 @@ describe('Navbar ', function() {
         var allWindows;
 
         it('should generate the correct # of list items', function() {
-            var nodesInDOM = menu.all(by.tagName('li'));
+            // Now we have all the menu items as anchor tag
+            var nodesInDOM = menu.all(by.tagName('a'));
             var counter = 7; // counted from chaise config doc rather than having code count
 
             nodesInDOM.count().then(function(count) {
@@ -114,7 +117,7 @@ describe('Navbar ', function() {
         if (!process.env.CI){
             // Menu options: ['Search', 'RecordSets', 'Dataset', 'File', 'RecordEdit', 'Add Records', 'Edit Existing Record']
             it('top level menu with no children should use default "newTab" value and navigate in a new tab', function (done) {
-                var searchOption = menu.all(by.tagName('li')).get(0);
+                var searchOption = menu.all(by.tagName('a')).get(0);
                 expect(searchOption.getText()).toBe("Search", "First top level menu option text is incorrect");
 
                 searchOption.click().then(function () {
@@ -140,11 +143,14 @@ describe('Navbar ', function() {
             });
 
             it('first level nested link should inherit newTab value from parent when newTab is undefined and navigate in new tab', function (done) {
-                var recordsetsMenu = menu.all(by.tagName('li')).get(1);
+                // Added chaise-nav-item class to get all first level menu item in navbar
+                var recordsetsMenu = menu.all(by.css('.chaise-nav-item')).get(1);
                 expect(recordsetsMenu.getText()).toBe("RecordSets", "Second top level menu option text is incorrect");
 
                 recordsetsMenu.click().then(function () {
-                    var datasetOption = recordsetsMenu.all(by.tagName('li')).get(0);
+                    // Since, main menu also contains <a> tag, dropdown-item class gives the correct dropdown items present under the main menu.
+                    // Structure: <div class='chiase-nav-item'> <a> RecordSets </a> <div> **DROPDOWN MENUS** </div>
+                    var datasetOption = recordsetsMenu.all(by.tagName('a')).get(1);
                     expect(datasetOption.getText()).toBe("Dataset", "First 2nd level option for 'RecordSets' is in incorrect");
 
                     return datasetOption.click();
@@ -177,35 +183,20 @@ describe('Navbar ', function() {
 
         it('should show the "Display Name" of the logged in user in the top right based on chaise-config property', function () {
             var name = browser.params.client.display_name;
-            expect(element(by.css('login .username-display')).getText()).toBe(name, "user's displayed name is incorrect");
-        });
-
-        it('should generate the correct # of list items', function(done) {
-            var nodesInDOM = loginMenu.all(by.tagName('li'));
-            // counted from chaise config doc rather than having code count
-            // 7 menu options defined in chaise-config
-            // accounts for 2 broken menu options that are set as invalid
-            var counter = 5;
-
-            nodesInDOM.count().then(function(count) {
-                expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
-
-                done();
-            }).catch(function (err) {
-                done.fail();
-                console.log(err);
-            });
+            // Removing login tagName as we are not using it anymore
+            expect(element(by.css('.username-display')).getText()).toBe(name, "user's displayed name is incorrect");
         });
 
         it('should change the name of the "My Profile" and "Log Out" links', function(done) {
-            var loginDropdown = element(by.css('login .dropdown-toggle'));
+            // Now class name has changed to username-display
+            var loginDropdown = element(by.css('.username-display'));
 
             browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
-            chaisePage.clickButton(loginDropdown).then(function() {
-                var profileLink = element(by.id('profile-link'));
+            loginDropdown.click().then(function() {
+                var profileLink = element(by.css('#profile-link'));
                 expect(profileLink.getText()).toBe("User Profile", "my_profile link shows wrong name");
 
-                var logoutLink = element(by.id('logout-link'));
+                var logoutLink = element(by.css('#logout-link'));
                 expect(logoutLink.getText()).toBe("Logout", "logout link shows wrong name");
 
                 done();
@@ -216,12 +207,36 @@ describe('Navbar ', function() {
         });
 
         it('should have a disabled link named "Disabled Link".', function () {
-            var dropdownOptions = element.all(by.css('.chaise-login-menu > li'));
+            // .dropdown-menu > * is needed as we can have multiple nested submenu 
+            // inside login dropdown (including div, a, etc). This selector will select all first level children under login dropdown
+            var dropdownOptions = element.all(by.css('.username-display > div.dropdown-menu > *'));
 
             expect(dropdownOptions.count()).toBe(4, "number of top level dropdown menu options is wrong");
-
-            var disabledEle = element(by.css('.chaise-login-menu > li a.disable-link'));
+            
+            const disabledEle = loginMenu.all(by.css('a.disable-link')).get(0);
             expect(disabledEle.getText()).toBe("Disabled Link", "text for disabled link is incorrect");
+        });
+
+        it('should generate the correct # of list items', function(done) {
+            let loginDropdown = element(by.css('.username-display'));
+
+            // Click is needed because profile menu dropdown will not be present in the DOM initially
+            browser.wait(EC.elementToBeClickable(loginDropdown), browser.params.defaultTimeout);
+            loginDropdown.click().then(function() {
+                var nodesInDOM = loginMenu.all(by.tagName('a'));
+        
+                return nodesInDOM.count();
+            }).then(function(count) {
+                // counted from chaise config doc rather than having code count
+                // 7 menu options defined in chaise-config
+                // accounts for 2 broken menu options that are set as invalid
+                var counter = 5;
+                expect(count).toEqual(counter, "number of nodes present does not match what's defined in chaise-config");
+
+                done();
+            }).catch(function(err) {
+                done.fail(err);
+            });
         });
     });
 

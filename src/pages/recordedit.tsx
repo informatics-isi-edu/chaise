@@ -34,7 +34,7 @@ const RecordeditApp = () : JSX.Element => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
-      dispatchError({ error: err, isGlobal: true });
+      dispatchError({ error: err });
     })
 
   }, [])

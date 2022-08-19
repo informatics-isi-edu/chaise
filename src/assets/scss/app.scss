@@ -82,6 +82,22 @@ html {
     line-height: 1.2;
   }
 
+  // the bootstrap 3 style that is missing from boostrap 5
+  h1 .small,
+  h1 small,
+  h2 .small,
+  h2 small,
+  h3 .small,
+  h3 small,
+  .h1-class small,
+  .h2-class small,
+  .h3-class small,
+  .h4-class small {
+    font-weight: 400;
+    line-height: 1;
+    color: #777;
+  }
+
   li {
     list-style-type: none;
   }
@@ -95,9 +111,15 @@ html {
     cursor: pointer;
   }
 
-  a {
+  // the last selector is added to override bootstrap default behavior
+  a, a:not([href]):not([class]) {
     cursor: pointer;
     color: $link-color;
+    text-decoration: none;
+  }
+  // the last selector is added to override bootstrap default behavior
+  a:focus, a:hover, a:not([href]):not([class]):hover {
+    text-decoration: underline;
   }
 
   // make sure the code style is consistent with old bootstrap styles
@@ -108,11 +130,32 @@ html {
     background-color: #f9f2f4;
     border-radius: 4px;
   }
+  // make sure the pre style is consistent with old bootstrap styles
+  pre {
+    display: block;
+    padding: 9.5px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.42857143;
+    color: #333;
+    word-break: break-all;
+    word-wrap: break-word;
+    background-color: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 
+  // TODO this is most probably not needed:
   .caret {
     border-top: 5px solid;
     border-right: 5px solid transparent;
     border-left: 5px solid transparent;
+  }
+
+  // modify the position of caret to be in the middle
+  .dropdown-toggle::after {
+    vertical-align: 0.12em;
+    margin-left: 0.4em;
   }
 
   a.external-link-icon:not(:empty):not(.external-link-no-icon),
@@ -167,27 +210,21 @@ html {
     max-width: none;
     white-space: pre-wrap;
   }
-  // ensure arrow is always displayed at the left edge
-  .tooltip-w-arrow-always-on-left .tooltip-arrow {
-    transform: none !important;
-    left: 5px !important;
-  }
-
 
   // disabled row and form
   .disabled-form,
   .disabled-row {
-    color: $disabled-color;
+    color: $disabled-color !important;
   }
 
   .disabled-form *,
   .disabled-row * {
-    color: inherit;
+    color: inherit !important;
   }
 
   .disabled-form a,
   .disabled-row a {
-    color: $disabled-color;
+    color: $disabled-color !important;
   }
 
   .disabled-form .remove-input-btn {
@@ -237,6 +274,10 @@ html {
   // bookmark container start
   #page-title {
     margin: -7px 0 0;
+
+    small {
+      margin-left: 10px;
+    }
   }
 
   #page-subtitle {
@@ -387,9 +428,16 @@ html {
     }
   }
 
+  // fix the padding issues related to the main alerts container that is outside of apps
+  .app-header-container > .alerts-container {
+    padding: $viewport-margin;
+    padding-bottom: 0;
+  }
+
   // top panel container for record and recordset
   .top-panel-container {
-    padding-top: $viewport-margin;
+    // NOTE the padding top has been moved to the rule above (.app-header-container > .alerts-container)
+    // padding-top: $viewport-margin;
     padding-right: $viewport-margin;
 
     .alerts-container {
@@ -409,7 +457,7 @@ html {
 
         &.open-panel {
           flex: 0;
-          flex-basis: $left-panel-width-lg;
+          flex-basis:  $left-panel-width-lg;
           min-width: 170px;
 
           & + .top-right-panel {
@@ -475,13 +523,13 @@ html {
 
       &.open-panel {
         flex: 0;
-        flex-basis: $left-panel-width-lg;
+        flex-basis:  $left-panel-width-lg;
         min-width: 170px;
 
-        & + .main-container {
+        & ~ .main-container {
           padding-left: $main-alley;
 
-          footer.position-relative {
+          .footer-container.position-relative {
             margin-left: -$main-alley;
           }
         }
@@ -496,14 +544,14 @@ html {
           width: 0;
         }
 
-        & + .main-container {
+        & ~ .main-container {
           // NOTE the padding is here and not on the parent because
           // of the footer behaviour that we want.
           // If we move it up, then the footer won't be displayed properly
           // when the side-panel is closed
           padding-left: $viewport-margin;
 
-          footer.position-relative {
+          .footer-container.position-relative {
             margin-left: -$viewport-margin;
           }
         }
@@ -525,8 +573,7 @@ html {
 
   // NOTE general rule that applies to record and recordset
   // TODO duplicate or simplify
-  .side-panel-resizable.close-panel .rg-left,
-  .side-panel-resizable.close-panel .rg-right {
+  .side-panel-resizable.close-panel + .divider-hitbox {
     display: none;
   }
 
@@ -726,41 +773,6 @@ html {
     }
   }
 
-  /******* range inputs ***********/
-  range-inputs {
-    .form-inline {
-      padding-left: 5px;
-
-      .icon-btn {
-        padding: 5px 6px;
-      }
-
-      .range-inputs-width {
-        display: inline-block;
-        min-width: 100px;
-
-        .numeric-date-width {
-          max-width: 110px;
-        }
-
-        .datetime-width {
-          max-width: 170px;
-        }
-
-        // timestamp range inputs
-        .input-container.chaise-input-group {
-          width: 100%;
-        }
-      }
-
-      // end .range-inputs-width
-    }
-
-    // end .form-inline
-  }
-
-  // end range-inputs
-
   /* Rule for Chrome */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
@@ -810,24 +822,9 @@ html {
 
       height: 25px;
       padding: 0;
-      vertical-align: middle;
-
-      /* forces one line chiclet */
-      max-width: 240px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      .selected-chiclet-name {
-        cursor: default;
-        user-select: text;
-        -webkit-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        vertical-align: -1px;
-      }
 
       .selected-chiclet-remove {
+        display: inline-block;
         cursor: pointer;
         padding-right: 3px;
         color: black;
@@ -835,10 +832,31 @@ html {
         vertical-align: middle;
       }
 
-      .selected-chiclet-btn {
+      .selected-chiclet-name {
+        display: inline-block;
+        cursor: default;
+        user-select: text;
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+
+        /* forces one line chiclet */
+        max-width: 240px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      // show-more/less and clear-all
+      .selected-chiclets-btn {
         padding: 0;
         height: auto;
-        margin-top: 3px;
+      }
+
+      .selected-chiclet-name,
+      .selected-chiclets-btn {
+        vertical-align: middle;
+        margin-top: -3px;
       }
     }
   }

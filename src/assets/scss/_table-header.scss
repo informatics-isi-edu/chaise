@@ -11,7 +11,8 @@
     display: flex;
     align-items: center;
     height: $btn-height;
-    
+    white-space: nowrap;
+
     &:not(.with-page-size-dropdown) {
       .displaying-text,
       .total-count-text {
@@ -22,10 +23,15 @@
     .displaying-text {
       margin-right: 4px;
     }
+
+    .timeout-icon {
+      padding-left: 5px;
+      vertical-align: middle;
+      font-size: 1.3em;
+    }
   }
   .page-size-dropdown {
     padding: 0 10px;
-    padding-bottom: 2px;
     margin-right: 4px;
   }
 

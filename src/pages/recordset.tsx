@@ -1,22 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
-import Recordset, { RecordsetProps } from '@isrd-isi-edu/chaise/src/components/recordset';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+// components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
-import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
+
+// hooks
+import { useEffect, useState } from 'react';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// models
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetSelectMode, RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+
+// services
+import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+
+// utilties
+import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { RECORDSET_DEAFULT_PAGE_SIZE, APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
 
 const recordsetSettings = {
   appName: 'recordset',
@@ -27,12 +40,13 @@ const recordsetSettings = {
 };
 
 const RecordsetApp = (): JSX.Element => {
-  const { dispatchError, error } = useError();
+  const { addAlert } = useAlert()
+  const { session, showPreviousSessionAlert } = useAuthn();
+  const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
   useEffect(() => {
-    $log.debug('recordset page: useEffect');
-    let logObject: any = {};
+    const logObject: any = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;
@@ -47,10 +61,9 @@ const RecordsetApp = (): JSX.Element => {
 
       // TODO saved query?
 
-      // TODO show the session alert
-      // if (!session && Session.showPreviousSessionAlert()) {
-      //   AlertsService.addAlert(messageMap.previousSession.message, 'warning', Session.createPromptExpirationToken);
-      // }
+      if (!session && showPreviousSessionAlert()) {
+        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
+      }
 
       const logStack = [
         LogService.getStackNode(
@@ -111,12 +124,12 @@ const RecordsetApp = (): JSX.Element => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
-      dispatchError({ error: err, isGlobal: true });
+      dispatchError({ error: err });
     });
   }, []);
 
   // if there was an error during setup, hide the spinner
-  if (!recordsetProps && error) {
+  if (!recordsetProps && errors.length > 0) {
     return <></>;
   }
 
@@ -135,7 +148,9 @@ const RecordsetApp = (): JSX.Element => {
   );
 };
 
-ReactDOM.render(
+
+const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+root.render(
   <AppWrapper
     appSettings={recordsetSettings}
     includeAlerts={true}
@@ -143,6 +158,5 @@ ReactDOM.render(
     displaySpinner={true}
   >
     <RecordsetApp />
-  </AppWrapper>,
-  document.getElementById('chaise-app-root'),
+  </AppWrapper>
 );

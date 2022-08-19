@@ -40,7 +40,7 @@ var EC = protractor.ExpectedConditions;
  */
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     beforeAll(function () {
-        chaisePage.recordeditPageReady();
+        chaisePage.recordeditPageReady();   
     });
 
     var visibleFields = [];
@@ -685,6 +685,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
                                     browser.wait(EC.elementToBeClickable(element(by.className('modal-close'))), browser.params.defaultTimeout);
                                     element(by.className('modal-close')).click();
+                                    browser.wait(EC.elementToBeClickable(PrevBtn), browser.params.defaultTimeout);
                                     PrevBtn.click();        //generate preview
                                     let mdPrevDiv = element(by.className("md-preview"));
                                     browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
@@ -844,8 +845,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should open a modal search and select a foreign key value.", function () {
                         chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
-                            var modalTitle = chaisePage.recordEditPage.getModalTitle(),
-                            EC = protractor.ExpectedConditions;
+                            var EC = protractor.ExpectedConditions;
 
                             // plus an extra foreignKeyCols.length because there is 1 select all input per foreign key column
                             expect(popupBtns.length).toBe(foreignKeyCols.length * (recordIndex + 1) + (foreignKeyCols.length), "number of foreign keys is not as expected.");
@@ -853,12 +853,15 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             for (var i=0; i<foreignKeyCols.length; i++) {
                                 (function(i) {
                                     var col = foreignKeyCols[i];
+                                    var modalTitle;
 
                                     // this will have the index and the presentational value
                                     var fkSelectedValue = getRecordInput(col.name);
 
                                     var rows, searchBox;
+                                    browser.sleep(100);
                                     chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]).then(function() {
+                                        modalTitle = chaisePage.recordEditPage.getModalTitle();
                                         // wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                                         // Expect search box to have focus
