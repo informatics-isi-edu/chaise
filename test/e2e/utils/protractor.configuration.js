@@ -22,7 +22,7 @@ exports.getConfig = function(options) {
           }
       },
       'platform': 'macOS 10.15',
-      // 'screenResolution': '1280x960'
+      'screenResolution': '1280x960'
     },
     specs: [
       '*.spec.js'
