@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+var EC = protractor.ExpectedConditions;
 var fs = require('fs');
 var testParams = {
     accommodation_tuple: {
@@ -910,11 +911,14 @@ describe('View recordset,', function () {
                     });
 
                     it("should sort " + accommodationParams.sortedData[k].columnName + " column in descending order.", function (done) {
+                        let sortDescBtn = chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName);
                         // Check the presence of descending sort button
-                        expect(chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
+                        expect(sortDescBtn.isDisplayed()).toBe(true, accommodationParams.sortedData[k].columnName + " column doesn't contain the descending sort button.");
+
+                        browser.wait(EC.elementToBeClickable(sortDescBtn), browser.params.defaultTimeout);
 
                         // Click on sort button to sort in descending order
-                        chaisePage.recordsetPage.getColumnSortDescButton(accommodationParams.sortedData[k].rawColumnName).click().then(function () {
+                        sortDescBtn.click().then(function () {
                             chaisePage.recordsetPage.waitForInverseMainSpinner();
                             browser.wait(function () {
                                 return chaisePage.recordsetPage.getRows().count().then(function (ct) {
@@ -997,7 +1001,6 @@ describe('View recordset,', function () {
     });
 
     describe("For table " + fileParams.table_name + ',', function () {
-        var EC = protractor.ExpectedConditions;
 
         beforeAll(function () {
             chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + fileParams.table_name);

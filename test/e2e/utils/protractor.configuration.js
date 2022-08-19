@@ -12,8 +12,6 @@ exports.getConfig = function(options) {
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
       'chromeOptions' : {
-          // args: ['--lang=en',
-          //        '--window-size=1280,720'],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
@@ -24,7 +22,7 @@ exports.getConfig = function(options) {
           }
       },
       'platform': 'macOS 10.15',
-      'screenResolution': '1280x960'
+      // 'screenResolution': '1280x960'
     },
     specs: [
       '*.spec.js'
@@ -54,6 +52,11 @@ exports.getConfig = function(options) {
         browser.addMockModule('disableNgAnimate', disableNgAnimate);
     }
   };
+
+  // setting screen size when running the tests locally to be consistent across different laptops and external displays
+  // tests are currently optimzed for this screen size
+  // this is the same as `screenResolution` above to make sure we test the same in CI environment as locally
+  if (!process.env.CI) config.capabilities.chromeOptions.args = ['--window-size=1280,960'];
 
   Object.assign(config, options);
 

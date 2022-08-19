@@ -505,6 +505,7 @@ describe('Error related test cases,', function() {
             var showDetails = chaisePage.errorModal.getToggleDetailsLink();
             var errorDetails = chaisePage.errorModal.getErrorDetails();
             chaisePage.waitForElement(showDetails);
+            browser.wait(EC.elementToBeClickable(showDetails), browser.params.defaultTimeout);
             showDetails.click().then(function(){
                 chaisePage.waitForElement(errorDetails);
                 expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
