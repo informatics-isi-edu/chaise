@@ -219,7 +219,7 @@
                     if (scope.config.deletable) {
                         if (associationRef) {
                             if (scope.tuple.canUnlink) {
-                                scope.tooltip.unlink = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.tableModel.parentReference.displayname.value + '.';
+                                scope.tooltip.unlink = "'Disconnect <code>" + scope.tableModel.reference.displayname.value + "</code>: <code>" + scope.tuple.displayname.value + "</code> from this <code>" + scope.tableModel.parentReference.displayname.value + "</code>.'";
                                 // define unlink function
                                 scope.unlink = function() {
                                     deleteReference(scope, associationRef, isRelated, true);
