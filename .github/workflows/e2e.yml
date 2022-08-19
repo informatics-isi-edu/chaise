@@ -243,8 +243,8 @@ jobs:
       #   if: always() && steps.test-footer.outcome != 'success'
       #   run: exit 1
       # - name: Check on error test spec
-        if: always() && steps.test-errors.outcome != 'success'
-        run: exit 1
+        # if: always() && steps.test-errors.outcome != 'success'
+        # run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
