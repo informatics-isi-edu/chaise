@@ -7,12 +7,16 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
 import { useEffect, useState } from 'react';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
 
 // utilities
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -20,6 +24,7 @@ import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordSettings = {
@@ -32,6 +37,8 @@ const recordSettings = {
 
 const RecordApp = (): JSX.Element => {
 
+  const { addAlert } = useAlert()
+  const { session, showPreviousSessionAlert } = useAuthn();
   const { dispatchError, errors } = useError();
 
   const [recordProps, setRecordProps] = useState<RecordProps | null>(null);
@@ -45,9 +52,13 @@ const RecordApp = (): JSX.Element => {
     if (res.isQueryParameter) logObject.cqp = 1;
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
-      const reference = response.contextualize.compact;
+      const reference = response.contextualize.detailed;
 
       updateHeadTitle(`${getDisplaynameInnerText(reference.displayname)}: pending...`);
+
+      if (!session && showPreviousSessionAlert()) {
+        addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
+      }
 
       // TODO log stuff and other props
       setRecordProps({ reference });

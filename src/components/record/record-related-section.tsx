@@ -1,29 +1,26 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_record_related_container.scss';
+import '@isrd-isi-edu/chaise/src/assets/scss/_record-related-section.scss';
 
-import { Accordion, Button } from 'react-bootstrap';
+// components
+import Accordion from 'react-bootstrap/Accordion';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
-export type RecordRelatedSectionProps = {
-  /**
-   * The displayed reference
-   */
-  reference: any;
-};
+// hooks
+import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 /**
  * Returns Related Section of the record page.
  */
-const RecordRelatedSection = ({
-  reference
-}: RecordRelatedSectionProps): JSX.Element => {
+const RecordRelatedSection = (): JSX.Element => {
+
+  const { reference } = useRecord();
 
   /**
    * Function to display title in the related section of record page
    * @param reference takes reference parameter
    * @returns DisplayValue Component
    */
-   const getTitle = (reference: any) => {
+  const getTitle = (reference: any) => {
     return (
       <div className='rt-section-header'>
         <span className='rt-displayname'>
@@ -43,10 +40,10 @@ const RecordRelatedSection = ({
             placement='top'
             tooltip={`Explore more ${reference?.displayname?.value} records related to this collection.`}
           >
-            <Button className='chaise-btn chaise-btn-secondary more-results-link'>
+            <div className='chaise-btn chaise-btn-secondary more-results-link'>
               <span className='chaise-btn-icon fa fa-search'></span>
               Explore
-            </Button>
+            </div>
           </ChaiseTooltip>
         </span>
       </div>
@@ -59,7 +56,6 @@ const RecordRelatedSection = ({
         <Accordion
           className='panel-group'
           alwaysOpen // allow multiple to be open together
-          //   activeKey={activeKeys}
         >
           {reference && Array.isArray(reference.related) && reference.related.map((ref: any, index: number) => {
             return (

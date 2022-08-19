@@ -1,15 +1,27 @@
-import Q from 'q';
+// hooks
 import { createContext, useMemo, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+
+// models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+
+// services
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
+// utilities
+import Q from 'q';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 export const RecordContext = createContext<{
   page: any,
+  recordValues: any,
   readMainEntity: any,
-  reference: any
+  reference: any,
+  initialized: boolean
 } | null>(null);
 
 type RecordProviderProps = {
@@ -24,6 +36,8 @@ export default function RecordProvider({
   const { dispatchError } = useError();
 
   const [page, setPage] = useState<any>(null);
+  const [recordValues, setRecordValues] = useState<any>([]);
+  const [initialized, setInitialized] = useState(false);
 
   const readMainEntity = (isUpdate: boolean, logObj: any) => {
     const defer = Q.defer();
@@ -55,37 +69,28 @@ export default function RecordProvider({
       let recordSetLink;
       const tableDisplayName = page.reference.displayname.value;
       if (page.tuples.length < 1) {
-        dispatchError({error: new Error('No record found!')})
-
         //  recordSetLink should be used to present user with an option in case of no data found
-        // TODO
-        // recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-        // throw new Errors.noRecordError({}, tableDisplayName, recordSetLink);
+        recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
+        dispatchError({ error: new NoRecordError({}, tableDisplayName, recordSetLink) })
       }
       else if (page.hasNext || page.hasPrevious) {
-        dispatchError({error: new Error('More than one record found!')})
-        // TOD
-        // recordSetLink = page.reference.contextualize.compact.appLink;
-        // throw new Errors.multipleRecordError(tableDisplayName, recordSetLink);
+        recordSetLink = page.reference.contextualize.compact.appLink;
+        dispatchError({ error: new MultipleRecordError(tableDisplayName, recordSetLink) })
       }
-
-      setPage(page);
-      // TODO
-      // $rootScope.page = page;
-      // var tuple = $rootScope.tuple = page.tuples[0];
-
-      // // Used directly in the record-display directive
-      // $rootScope.recordDisplayname = tuple.displayname;
 
       // // Collate tuple.isHTML and tuple.values into an array of objects
       // // i.e. {isHTML: false, value: 'sample'}
-      // $rootScope.recordValues = [];
-      // tuple.values.forEach(function (value, index) {
-      //   $rootScope.recordValues.push({
-      //     isHTML: tuple.isHTML[index],
-      //     value: value
-      //   });
-      // });
+      const rv : any[] = [];
+      page.tuples[0].values.forEach(function (value: any, index: number) {
+        rv.push({
+          isHTML: page.tuples[0].isHTML[index],
+          value: value
+        });
+      });
+
+      setPage(page);
+      setRecordValues(rv);
+      setInitialized(true);
 
       // // the initial values for the templateVariables
       // $rootScope.templateVariables = tuple.templateVariables.values;
@@ -112,10 +117,22 @@ export default function RecordProvider({
       // $rootScope.reloadStartTime = -1;
 
       defer.resolve(page);
-    }).catch(function (err: any) {
-      defer.reject(err);
-    });
+    }).catch(function (exception: any) {
+      // show modal with different text if 400 Query Timeout Error
+      if (exception instanceof windowRef.ERMrest.QueryTimeoutError) {
+        exception.subMessage = exception.message;
+        exception.message = 'The main entity cannot be retrieved. Refresh the page later to try again.';
+        // TODO on master this was dismissible, but why?
+      } else {
+        if (isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
+          const redirectLink = createRedirectLinkFromPath(exception.errorData.redirectPath);
+          exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
+        }
+      }
+      dispatchError({ error: exception });
 
+      defer.reject(exception);
+    });
 
     return defer.promise;
   };
@@ -123,9 +140,11 @@ export default function RecordProvider({
   const providerValue = useMemo(() => {
     return {
       page,
+      recordValues,
       // TODO should be changed
       readMainEntity,
-      reference
+      reference,
+      initialized,
     };
   }, [page]);
 

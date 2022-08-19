@@ -120,7 +120,7 @@ export class NoRecordError extends ChaiseError {
    * @param  {array} filters  Filters used during retrival of data
    * @param  {string} message Error message
    */
-  constructor(filters: any, tableDisplayName: string, redirectUrl: string, message: string) {
+  constructor(filters: any, tableDisplayName: string, redirectUrl: string, message?: string) {
     let noDataMessage = (message === undefined) ? errorMessages.noDataMessage : message;
     if (filters) {
       for (let k = 0; k < filters.length; k++) {

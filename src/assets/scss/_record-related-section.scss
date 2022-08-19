@@ -1,0 +1,157 @@
+@import "helpers";
+@import "variables";
+
+.record-container {
+  $record-table-cell-padding: 5px;
+  $record-table-cell-border-width: 1px;
+  $space-between-related-sections: 5px;
+  $row-focus-border-width: 2px;
+
+  /*
+     * In case of related entities, the accordion icon is adding this much space,
+     * so we're making sure the rest of titles and content are aligned with it.
+     */
+  $record-header-padding-left: 40px;
+
+  /******Related Entities in record **************/
+  #rt-container {
+    .rt-displayname {
+      font-size: 1.75rem;
+
+      span {
+        margin-right: 5px;
+      }
+    }
+
+    .related-table-accordion {
+      &.panel {
+        // override the default bootstrap styles
+        box-shadow: none;
+        border-radius: 0;
+        border: 0;
+        + .panel {
+          margin-top: $space-between-related-sections;
+        }
+
+        // row-focus will add a border of 2px,
+        // - adding -2px margin to left and right to avoid shrinkage
+        // - reducing the margin-top from 5px to 3px to avoid moving
+        &.row-focus {
+          margin-left: -$row-focus-border-width;
+          margin-right: -$row-focus-border-width;
+          margin-top: $space-between-related-sections - $row-focus-border-width;
+
+          + .panel:not(.row-focus) {
+            margin-top: $space-between-related-sections - $row-focus-border-width;
+          }
+
+          // if there are two row-focus on top of each other, we should
+          // change the margin to account for both of their borders.
+          + .row-focus {
+            margin-top: $space-between-related-sections - ($row-focus-border-width * 2);
+          }
+        }
+
+        // the first row doesn't have margin top
+        &:first-child.row-focus {
+          margin-top: -$row-focus-border-width;
+        }
+      }
+
+      .inline-tooltip {
+        padding-left: $record-header-padding-left;
+        margin-bottom: 10px;
+      }
+
+      .rt-section-header {
+        width: 100%;
+      }
+
+      .action-buttons {
+        float: right;
+        margin-top: 3px;
+      }
+
+      // > .panel-heading {
+      //     height: 44px;
+      //     text-transform: inherit;
+      //     padding: 8px 8px 8px 8px;
+      //     color: $white-color;
+      //     border: none;
+      //     border-radius: inherit;
+      //     background: $section-background-color;
+
+      //     .panel-title {
+      //         font-size: inherit;
+
+      //         & > a:hover, & > a:focus{
+      //             text-decoration: none;
+      //         }
+
+      //         a.accordion-toggle {
+      //             color: inherit;
+
+      //             .rt-section-header {
+      //                 font-size: $h2-font-size;
+
+      //                 .toggle-icon {
+      //                     &.fa-chevron-right {
+      //                         margin-right: 5px;
+      //                         margin-left: 5px;
+      //                     }
+
+      //                     &.fa-chevron-down {
+      //                         margin-right: 4px;
+      //                     }
+      //                 }
+      //             }
+      //         }
+      //     } // end .panel-title
+
+      //     & + .panel-collapse > .panel-body {
+      //         border-top: none;
+      //         padding: 10px 0px 10px 0px;
+
+      //         .accordion-content {
+      //             padding-left: $record-header-padding-left;
+      //             padding-right: 8px;
+      //         }
+      //     } // end .panel-body
+      // } // end .panel-heading
+    } // end .related-table-accordion
+
+    .accordion-button {
+      // start .accordion-button
+      height: 44px;
+      text-transform: inherit;
+      padding: 8px 8px 8px 8px;
+      color: $white-color;
+      border: none;
+      border-radius: inherit;
+      background: $section-background-color;
+      // Overriding accordian-button css to align right angle bracket icon to left
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+
+      &:focus {
+        box-shadow: none;
+      }
+
+      // Overriding accordian-button css to align right angle bracket icon to left
+      &::after {
+        margin: 0px 8px;
+        background-image: none;
+        content: "\f054"; // fa-solid fa-chevron-right
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        transform: unset;
+        font-size: 1.75rem;
+        height: unset;
+      }
+
+      &:not(.collapsed)::after {
+        content: "\f078"; // fa-solid fa-chevron-down
+      }
+    } // end .accordion-button
+  } // end rt-container
+}
