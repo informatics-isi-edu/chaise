@@ -18,7 +18,7 @@ jobs:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
-      SHARDING: true
+      SHARDING: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
     timeout-minutes: 120
     steps:
@@ -137,41 +137,113 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run full features confirmation test spec
-        id: test-full-features-confirmation
+      # - name: Run full features confirmation test spec
+      #   id: test-full-features-confirmation
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testfullfeaturesconfirmation
+      # - name: Run default config test spec
+      #   id: test-default-config
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdefaultconfig
+      # - name: Run full features test spec
+      #   id: test-full-features
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testfullfeatures
+      # - name: Run delete prohibited test spec
+      #   id: test-delete-prohibited
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited
+      # - name: Check on full features confirmation test spec
+      #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on default config test spec
+      #   if: always() && steps.test-default-config.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on full features test spec
+      #   if: always() && steps.test-full-features.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on delete prohibited test spec
+      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
+      #   run: exit 1
+      - name: Run navbar test spec
+        id: test-navbar
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeaturesconfirmation
-      - name: Run default config test spec
-        id: test-default-config
+          make testnavbar
+      - name: Run record test spec
+        id: test-record
         continue-on-error: true
         run: |
           cd chaise
-          make testdefaultconfig
-      - name: Run full features test spec
-        id: test-full-features
+          make testrecord
+      - name: Run recordset test spec
+        id: test-recordset
         continue-on-error: true
         run: |
           cd chaise
-          make testfullfeatures
-      - name: Run delete prohibited test spec
-        id: test-delete-prohibited
+          make testrecordset
+      - name: Run recordadd test spec
+        id: test-recordadd
         continue-on-error: true
         run: |
           cd chaise
-          make testdeleteprohibited
-      - name: Check on full features confirmation test spec
-        if: always() && steps.test-full-features-confirmation.outcome != 'success'
+          make testrecordadd
+      - name: Run recordedit test spec
+        id: test-recordedit
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testrecordedit
+      - name: Run permissions test spec
+        id: test-permissions
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testpermissions
+      - name: Run footer test spec
+        id: test-footer
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfooter
+      - name: Run errors test spec
+        id: test-errors
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testerrors
+      - name: Check on navbar test spec
+        if: always() && steps.test-navbar.outcome != 'success'
         run: exit 1
-      - name: Check on default config test spec
-        if: always() && steps.test-default-config.outcome != 'success'
+      - name: Check on record test spec
+        if: always() && steps.test-record.outcome != 'success'
         run: exit 1
-      - name: Check on full features test spec
-        if: always() && steps.test-full-features.outcome != 'success'
+      - name: Check on recordset test spec
+        if: always() && steps.test-recordset.outcome != 'success'
         run: exit 1
-      - name: Check on delete prohibited test spec
-        if: always() && steps.test-delete-prohibited.outcome != 'success'
+      - name: Check on recordadd test spec
+        if: always() && steps.test-recordadd.outcome != 'success'
+        run: exit 1
+      - name: Check on recordedit test spec
+        if: always() && steps.test-recordedit.outcome != 'success'
+        run: exit 1
+      - name: Check on permissions test spec
+        if: always() && steps.test-permissions.outcome != 'success'
+        run: exit 1
+      - name: Check on footer test spec
+        if: always() && steps.test-footer.outcome != 'success'
+        run: exit 1
+      - name: Check on error test spec
+        if: always() && steps.test-errors.outcome != 'success'
         run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
