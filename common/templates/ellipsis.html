@@ -26,7 +26,7 @@
         <button ng-if="edit" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom-left" uib-tooltip="Edit">
             <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
         </button>
-        <button ng-if="unlink" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="unlink()" tooltip-placement="bottom-left" uib-tooltip-html="{{tooltip.unlink}}">
+        <button ng-if="unlink" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="unlink()" tooltip-placement="bottom-left" uib-tooltip-html="'{{tooltip.unlink}}'">
             <span class="chaise-btn-icon glyphicon glyphicon-remove-circle"></span>
         </button>
         <button ng-if="delete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="delete()" tooltip-placement="bottom-left" uib-tooltip="Delete">
