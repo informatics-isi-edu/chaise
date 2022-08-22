@@ -13,6 +13,7 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useState } from 'react';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // providers
@@ -39,6 +40,7 @@ const Record = ({ reference }: RecordProps): JSX.Element => {
 };
 
 const RecordInner = (): JSX.Element => {
+  const { dispatchError, errors } = useError();
   const { page, readMainEntity, reference, initialized } = useRecord();
 
   /**
@@ -52,7 +54,9 @@ const RecordInner = (): JSX.Element => {
       // send string to prepend to "headTitle" format: <table-name>: <row-name>
       const title = `${getDisplaynameInnerText(reference.displayname)}: ${getDisplaynameInnerText(p.tuples[0].displayname)}`;
       updateHeadTitle(title);
-    }).catch(() => { /* the readMainEntity itself is calling the error handler */ });
+    }).catch((error: any) => {
+      dispatchError({ error });
+    });
   }, []);
 
   // properly set scrollable section height
@@ -68,7 +72,11 @@ const RecordInner = (): JSX.Element => {
   // TODO does this make sense?
   // we're currently showing the header buttons while loading
   // but I don't see the point and I think not showing anything makes more sense
+  {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */}
   if (!page) {
+    if (errors.length > 0) {
+      return <></>;
+    }
     return <ChaiseSpinner />;
   }
 
@@ -81,7 +89,6 @@ const RecordInner = (): JSX.Element => {
 
   return (
     <div className='record-container app-content-container'>
-      {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */}
       <div className='top-panel-container'>
         <Alerts />
         {/* TODO */}

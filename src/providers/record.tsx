@@ -1,6 +1,5 @@
 // hooks
 import { createContext, useMemo, useState } from 'react';
-import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -33,7 +32,6 @@ export default function RecordProvider({
   children,
   reference
 }: RecordProviderProps): JSX.Element {
-  const { dispatchError } = useError();
 
   const [page, setPage] = useState<any>(null);
   const [recordValues, setRecordValues] = useState<any>([]);
@@ -71,11 +69,11 @@ export default function RecordProvider({
       if (page.tuples.length < 1) {
         //  recordSetLink should be used to present user with an option in case of no data found
         recordSetLink = page.reference.unfilteredReference.contextualize.compact.appLink;
-        dispatchError({ error: new NoRecordError({}, tableDisplayName, recordSetLink) })
+        return defer.reject(new NoRecordError({}, tableDisplayName, recordSetLink)), defer.promise;
       }
       else if (page.hasNext || page.hasPrevious) {
         recordSetLink = page.reference.contextualize.compact.appLink;
-        dispatchError({ error: new MultipleRecordError(tableDisplayName, recordSetLink) })
+        return defer.reject(new MultipleRecordError(tableDisplayName, recordSetLink)), defer.promise;
       }
 
       // // Collate tuple.isHTML and tuple.values into an array of objects
@@ -122,14 +120,12 @@ export default function RecordProvider({
       if (exception instanceof windowRef.ERMrest.QueryTimeoutError) {
         exception.subMessage = exception.message;
         exception.message = 'The main entity cannot be retrieved. Refresh the page later to try again.';
-        // TODO on master this was dismissible, but why?
       } else {
         if (isObjectAndKeyDefined(exception.errorData, 'redirectPath')) {
           const redirectLink = createRedirectLinkFromPath(exception.errorData.redirectPath);
           exception.errorData.redirectUrl = redirectLink.replace('record', 'recordset');
         }
       }
-      dispatchError({ error: exception });
 
       defer.reject(exception);
     });
