@@ -28,7 +28,7 @@
                         </a>
                         <!-- save query -->
                         <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown>
-                            <div tooltip-placement="top-right" uib-tooltip="{{tooltip.saveQuery}}">
+                            <div tooltip-placement="top-right" uib-tooltip-html="'{{tooltip.saveQuery}}'">
                                 <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" ng-click="logSavedQueryDropdownOpened()" uib-dropdown-toggle ng-style="{'pointer-events': disableSavedQueryButton() ? 'none' : ''}">
                                     <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
                                     <span>Saved searches</span>
@@ -97,8 +97,8 @@
                         <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied">
                             <i class="glyphicon glyphicon-remove"></i>
                         </button>
-                        <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value + ' filter'}}" ng-bind-html="::fc.displayname.value"></button>
-                        <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip="{{'Go to ' + fc.displayname.value+ ' filter'}}" ng-bind="::fc.displayname.value"></button>
+                        <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip-html="'{{'Go to <code>' + fc.displayname.value + '</code> filter'}}'" ng-bind-html="::fc.displayname.value"></button>
+                        <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip-html="'{{'Go to <code>' + fc.displayname.value+ '</code> filter'}}'" ng-bind="::fc.displayname.value"></button>
                         <script type="text/ng-template" id="filtersTooltipTemplate.html">
                             <span ng-repeat="filter in vm.facetModels[$index].appliedFilters">
                                 <span>&bull;</span>

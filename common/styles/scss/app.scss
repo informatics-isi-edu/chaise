@@ -152,6 +152,12 @@ html {
         text-align: left;
         max-width: none;
         white-space: pre-wrap;
+
+        code {
+            background: rgba(110,118,129);
+            color: #fff;
+            padding: 0.5px;
+        }
     }
 
     // the tooltip that is displayed for the filter chiclets

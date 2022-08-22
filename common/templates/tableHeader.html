@@ -24,7 +24,7 @@
             <button ng-if="showAddRecord()"
                 class="chaise-table-header-create-link chaise-btn"
                 ng-class="vm.config.displayMode === recordsetDisplayModes.fullscreen ? 'chaise-btn-primary': 'chaise-btn-secondary'"
-                ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip="Create new {{vm.displayname ? vm.displayname.value : vm.reference.displayname.value}}">
+                ng-click="addRecord()" tooltip-placement="bottom-right" uib-tooltip-html="'{{'Create new <code>' + (vm.displayname ? vm.displayname.value : vm.reference.displayname.value) + '</code>'}}'">
                 <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
                 <span>{{vm.config.displayMode === recordsetDisplayModes.fullscreen ? "Create" : "Create new"}}</span>
             </button>

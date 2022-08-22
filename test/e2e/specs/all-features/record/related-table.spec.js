@@ -551,7 +551,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it("should have the proper tooltip", function () {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe("'Linking to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+                expect(comment).toBe("'Linking to <code>" + displayname + "</code> is disabled until <code>" + columnname + "</code> in <code>" + tablename + "</code> is set.'", "Incorrect tooltip on disabled Add button");
             });
         });
     });
@@ -574,7 +574,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it("should have the proper tooltip", function () {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe("'Adding to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+                expect(comment).toBe("'Adding to <code>" + displayname + "</code> is disabled until <code>" + columnname + "</code> in <code>" + tablename + "</code> is set.'", "Incorrect tooltip on disabled Add button");
             });
         });
     });
