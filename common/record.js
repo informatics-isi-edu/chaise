@@ -115,9 +115,9 @@
             if ($scope.baseTableName.isHTML) tablename = DataUtils.makeSafeHTML($scope.baseTableName.value);
 
             $scope.tooltip = {
-                createButton: "Connect " + displayname + " records to this " + tablename + ".",
-                deleteButton: "Disconnect " + displayname + " records from this " + tablename + ".",
-                exploreButton: "Explore more " + displayname + " records related to this " + tablename + "."
+                createButton: "Connect <code>" + displayname + "</code> records to this <code>" + tablename + "</code>.",
+                deleteButton: "Disconnect <code>" + displayname + "</code> records from this <code>" + tablename + "</code>.",
+                exploreButton: "Explore more <code>" + displayname + "</code> records related to this <code>" + tablename + "</code>."
             };
 
             if ($scope.canCreateDisabled) {
@@ -127,13 +127,13 @@
                     if (idx+1 != $scope.keyset.length) keysetString += ", "
                 });
 
-                $scope.tooltip.createButton = ($scope.isPureAndBinary ? "Linking" : "Adding") + " to " + displayname + " is disabled until " + keysetString + " in " + tablename + " is set.";
+                $scope.tooltip.createButton = ($scope.isPureAndBinary ? "Linking" : "Adding") + " to <code>" + displayname + "</code> is disabled until <code>" + keysetString + "</code> in <code>" + tablename + "</code> is set.";
             }
 
             if ($scope.canEdit) {
-                $scope.tooltip.tableModeButton = "Display edit controls for " + displayname + " related to this " + tablename + ".";
+                $scope.tooltip.tableModeButton = "Display edit controls for <code>" + displayname + "</code> related to this <code>" + tablename + "</code>.";
             } else {
-                $scope.tooltip.tableModeButton = "Display related " + displayname + " in tabular mode.";
+                $scope.tooltip.tableModeButton = "Display related <code>" + displayname + "</code> in tabular mode.";
             }
         }]);
 })();

@@ -367,10 +367,10 @@
 
         if (params.displayMode == recordsetDisplayModes.unlinkPureBinaryPopup) {
             vm.submitText = "Unlink";
-            vm.submitTooltip = "Disconnect the selected records from " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+            vm.submitTooltip = "Disconnect the selected records from <code>" + params.parentReference.displayname.value + "</code>: <code>" + params.parentTuple.displayname.value + "</code>.";
         } else if (params.displayMode == recordsetDisplayModes.addPureBinaryPopup) {
             vm.submitText = "Link";
-            vm.submitTooltip = "Connect the selected records to " + params.parentReference.displayname.value + ": " + params.parentTuple.displayname.value + ".";
+            vm.submitTooltip = "Connect the selected records to <code>" + params.parentReference.displayname.value + "</code>: <code>" + params.parentTuple.displayname.value + "</code>.";
         } else {
             vm.submitTooltip = "Apply the selected records";
         }
