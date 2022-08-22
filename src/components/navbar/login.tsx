@@ -162,7 +162,7 @@ const ChaiseLogin = (): JSX.Element => {
   const renderSignupLink = () => {
     if (!cc.signUpURL) return;
 
-    return (<Nav.Link id='signup-link' className='navbar-nav' href={cc.signUpUrl}>Sign Up</Nav.Link>);
+    return (<Nav.Link id='signup-link' className='navbar-nav' href={cc.signUpURL}>Sign Up</Nav.Link>);
   };
 
   const renderMenuChildren = () => {
