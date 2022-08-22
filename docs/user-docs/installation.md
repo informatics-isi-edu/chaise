@@ -23,13 +23,11 @@ Chaise depends on the following server- and client-side software.
 
 Development dependencies include:
 
-* [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any unix/linux/osx host.
-* [Rsync](https://en.wikipedia.org/wiki/Rsync): usually present on any unix/linux/osx host.
-* [Node](https://nodejs.org/): Mac users, we recommend downloading
-direct from the node site as we have seen problems with the version installed
-by Homebrew.
-* Additional dependencies specified in `package.json` will be
-automatically retrieved by NPM.
+* [Make](https://en.wikipedia.org/wiki/Make_%28software%29): usually present on any Unix systems.
+* [Rsync](https://en.wikipedia.org/wiki/Rsync): usually present on any Unix systems.
+* [Node](https://nodejs.org/): usually present on any Unix systems. For development environments we recommends installing [nvm](https://github.com/nvm-sh/nvm#installing-and-updating) which will allow you to easily install and switch between different versions.
+* Additional dependencies specified in [package.json](./package.json) will be automatically retrieved by NPM.
+
 
 ### Stop! Before going forward read this!
 
@@ -72,7 +70,8 @@ ERMrestJS tests, which will also instruct you to get shared dependencies needed 
     ```
 
     Notes:
-      - If the given directory does not exist, it will first create it. So you may need to run `make deploy` with _super user_ privileges depending on the deployment directory you choose (by default it's `/var/www/html/`).
+      - Before bundling and deploying Chaise packages, this command will install the node modules. You can also use alternative commands to modify this behavior. For more information please refer to the [developer guide](../dev-docs/dev-guide.md#building-and-installation).
+      - If the given directory does not exist, it will first create it. So you may need to run `make deploy` with _super user_ privileges depending on the installation directory you choose.
 
 ## Configuration
 

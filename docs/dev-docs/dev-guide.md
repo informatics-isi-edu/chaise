@@ -1,64 +1,181 @@
 # Developer Guide
+This is a guide for people who develop Chaise.
 
-This is a guide for people who develop Chaise.  We also have our own [Chaise style guide](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/style-guide.md), that explains the use of different libraries (bootstrap) and other HTML and CSS combinations.
+## Table of contents
 
-## Table of Contents
-- [CSS and SASS](#css-and-sass)
-  - [Useful links](#useful-links)
-  - [SCSS structure](#scss-structure)
-  - [Idioms](#idioms)
-  - [Font Awesome](#font-awesome)
-- [AngularJS-related](#angularjs-related)
-  * [AngularJS Developer Guides](#angularjs-developer-guides)
-  * [One-Time Binding](#one-time-binding)
-- [General](#general)
-  * [Extracting `common` code](#extracting-common-code)
-  * [Session](#session)
-  * [Use variable vs string in lookup](#use-variable-vs-string-in-lookup)
-  * [Naming Conventions](#naming-conventions)
-- [Error Handling](#error-handling)
+- [Reading Material](#reading-material)
+- [Idioms](#idioms)
+  * [Naming conventions](#naming-conventions)
+  * [General](#general-1)
+  * [React/TypeScript](#reacttypescript-1)
+  * [Lint](#lint)
+  * [CSS/SCSS](#cssscss-1)
+  * [Font Awesome](#font-awesome)
+  * [Handling time](#handling-time)
+- [Folder structure](#folder-structure)
+- [Building and installation](#building-and-installation)
+    + [Make targets](#make-targets)
+    + [NPM](#npm)
+- [Structure of an App](#structure-of-an-app)
+- [Error handling](#error-handling)
+  * [How it works](#how-it-works)
+  * [Guidelines](#guidelines)
   * [Guidelines for promise chains](#guidelines-for-promise-chains)
-  * [Promise with success, reject, and catch handlers](#promise-with-success-reject-and-catch-handlers)
-  * [Promise with success and catch handlers](#promise-with-success-and-catch-handlers)
-  * [Promise chaining with single catch](#promise-chaining-with-single-catch)
-  * [Promise chaining with interleaved catches](#promise-chaining-with-interleaved-catches)
-  * [How It Works](#how-it-works)
-- [Config App](#config-app)
 
-## CSS and SASS
 
-As part of your task you might need to modify some of the existing styles or add new ones.
+## Reading Material
+In this section, we've included all the guides and tools that we think are useful
+for learning different concepts.
 
-### Useful links
-To make sure you're familiar with both CSS and SASS. The following are some guides that you can use:
-  - [W3schools CSS tutorial](https://www.w3schools.com/css/): this is a good starting point for refreshing your CSS knowledge.
-  - [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS): a very thorough CSS reference that you can use to learn more about different CSS features.
-  - [caniuse.com](https://caniuse.com/): can be used to quickly figure out if a feature can be used based on our browser support or not.
-  - [Sass basics](https://sass-lang.com/guide): a very good starting point for learning Sass basics (we're using SCSS syntax.)
-  - [Guide to Chrome DevTools](https://www.keycdn.com/blog/chrome-devtools): Very useful for CSS debugging.
-  - [Glyph-icons](https://css-tricks.com/snippets/html/glyphs/) : An amazing comprehensive guide to include any glyphs in your css code
-  - [CSS Printing Guide - 1](https://www.smashingmagazine.com/2018/05/print-stylesheets-in-2018/) : A-Z about CSS print rules
-  - [CSS Printing Guide - 2](https://www.smashingmagazine.com/2015/01/designing-for-print-with-css/) : Essentials for CSS Print rules
-    (part - 2)
-  - [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority but they
-    too can be overwritten when the element is accessed as shown in the document.
-  - [Important Information on CSS position](https://css-tricks.com/almanac/properties/p/position/) : Adding scrolling to a collapsible navbar can be
-    tricky. This link explains how you can add scrolling without affecting any level of dropdown menus.
-  - [Calculating position of element](https://javascript.info/size-and-scroll) : This link gives an in-depth understanding of how we can manually
-    calculate the position of any element dynamically in the DOM
+### General
+- [caniuse.com](https://caniuse.com/): can be used to quickly figure out if a feature can be used based on our browser support or not.
+- [Guide to Chrome DevTools](https://www.keycdn.com/blog/chrome-devtools): Very useful for debugging.
 
-### Useful CSS rules
-How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc). Hence we need to keep in mind the following while writing print rules in css.
+### React/TypeScript
+- [Intro to React, Redux, and TypeScript](https://blog.isquaredsoftware.com/presentations/react-redux-ts-intro-2020-12)
+- [Code style](https://github.com/typescript-cheatsheets/react)
+- [React design patterns](https://blog.logrocket.com/react-component-design-patterns-2022/)
+
+### CSS/SCSS
+
+- [W3schools CSS tutorial](https://www.w3schools.com/css/): this is a good starting point for refreshing your CSS knowledge.
+- [MDN CSS reference](https://developer.mozilla.org/en-US/docs/Web/CSS): a very thorough CSS reference that you can use to learn more about different CSS features.
+- [Sass basics](https://sass-lang.com/guide): a very good starting point for learning Sass basics (we're using SCSS syntax.)
+- [CSS Printing Guide - 1](https://www.smashingmagazine.com/2018/05/print-stylesheets-in-2018/) : A-Z about CSS print rules
+- [CSS Printing Guide - 2](https://www.smashingmagazine.com/2015/01/designing-for-print-with-css/) : Essentials for CSS Print rules
+  (part - 2)
+- [Overriding inline styles](https://css-tricks.com/override-inline-styles-with-css/) : Inline styles have the highest priority, but they
+  too can be overwritten when the element is accessed, as shown in the document.
+- [Important Information on CSS position](https://css-tricks.com/almanac/properties/p/position/) : Adding scrolling to a collapsible navbar can be
+  tricky. This link explains how you can add scrolling without affecting any level of dropdown menus.
+- [Calculating position of element](https://javascript.info/size-and-scroll) : This link gives an in-depth understanding of how we can manually
+  calculate the position of any element dynamically in the DOM
+
+## Idioms
+
+The rules that should be followed while writing code.
+
+### Naming conventions
+
+- Use kebab-case for filenames (all lower case with `-` for breaking words).
+- Related to React/Typescript,
+  - Use PascalCase for type names, class names, and enum values.
+  - Use camelCase for function names.
+  - Use camelCase for property names and local variables.
+  - Use `_` as a prefix for private properties and functions.
+  - Use whole words in names when possible.
+- Related to SASS/SCSS,
+  - Use kebab-case (all lower case with `-` for breaking words). Avoid using camelCase or `_`.
+  - Use meaningful names that can be easily understood without knowing the whole page. Try to convey what an ID or class is about while being as brief as possible.
+- Related to annotations,
+  - All the keys and properties are case sensitive and written in lower case.
+  - Annotation keys are using kebab-case (all lower case with `-` for breaking words).
+  - Annotation properties use snake case (all lower case with `_` for breaking words).
+  - Properties that enforce a boolean state should be defined based on the opposite default value. For example, if a button is displayed by default and we want to add a property to force its state, we have to add `hide_button`.
+- Related to markdown and templating,
+  - The helper functions are case sensitive and use camelCase.
+
+### General
+- Use semicolons everywhere. Even though it's unnecessary, use a semicolon after each line for consistency.
+- Stick with the indentation size of 2. If a file is not using size 2, just change the whole file.
+
+### React/TypeScript
+
+- Use functional components in most cases (class components should only be considered for special cases.)
+- Avoid using `any` type as much as you can.
+- Don't use relative paths while importing. Instead, use the `@isrd-isi-edu/chaise` alias, which points to the root. For example:
+  ```js
+  import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+  ```
+- Create a `type` for `props` of components.
+
+- Regarding [Render logic](https://blog.isquaredsoftware.com/presentations/react-redux-ts-intro-2020-12/#/36),
+  - It must be “pure“, without any “side effects”
+    - No AJAX calls, mutating data, random values
+    - Rendering should only be based on current props and state
+  - Render any dependent items into temporary variables, such as conditional components or lists.
+
+- Regarding `useState` and `setState` hooks:
+  - Creating callbacks “closes over” variable values at time of render
+    - Can cause bugs due to “stale state” if not careful!
+  - Be careful with multiple update calls in a row!
+  - `setState` can accept an “updater” callback instead of a value.
+    - Updater will be called with the latest value as its argument, and should return a new value. Safer to use this if multiple updates depend on each other
+    - Also can avoid having to capture value from parent scope
+
+  ```typescript
+  // ❌ Two bugs here!
+  // 1) "Closed over" old value of `counter`
+  // 2) Updates will be batched together
+  const onClick = () => {
+    setCounter(counter + 1);
+    setCounter(counter + 1);
+  }
+
+  const onClickFixed = () => {
+    // ✅ Can pass an "updater" function to setState,
+    // which gets the latest value as its argument
+    setCounter(prevCounter => prevCounter + 1);
+    setCounter(prevCounter => prevCounter + 1);
+  };
+  ```
+- List items must have keys, which tell React list item   identity
+  - Should be unique per list
+  - Ideally, use item IDs
+  - Fallback, use array indices, but only if data won’t reorder
+
+- Take a look at `example.tsx` for a sample react component.
+
+- Since we're using [`StrictMode`](https://reactjs.org/docs/strict-mode.html), React will double-invoke the functions related to rendering content to find issues. So to debug the performance and rendering issues, we should make sure that we are always using production mode.
+
+- While importing `react-bootstrap` components, import individual components using `react-bootstrap/Button` rather than the entire library ([source](https://react-bootstrap.github.io/getting-started/introduction/#importing-components)).
+  ```ts
+  // ❌ bad
+  import { Button } from 'react-bootstrap';
+
+  // ✅ good
+  import Button from 'react-bootstrap/Button';
+  ```
+
+### Lint
+- Make sure the `ESLint` extension is installed for Visual Studio Code.
+
+- Makefile commands related to linter:
+  - `make lint`: Run linter and only show the errors.
+  - `make lint-w-warn`: Run linter and show both warning and errors.
+
+- You can ask linter to escape a file or line, but you should not use this unless
+  you're 100% sure what you're doing is correct:
+
+  ```
+  // to ignore the rule for the next line:
+  // eslint-disable-next-line NAME_OF_THE_RULE
+
+  // to ignore the rule for the whole file:
+  /* eslint NAME_OF_THE_RULE: 0 */
+  ```
+
+- Using the previously described method, you can also change rules locally, but we generally recommend against it .
+
+### CSS/SCSS
+
+- General-purpose styles should be part of the `app.scss` (or included as part of `app.scss`.)
+- Styles specific to a component should be included in a separate file and imported into the component TSX file.
+- It's better if you use classes instead of ids for writing CSS rules.
+- Avoid adding duplicated rules. If there's a rule in a file that is applied to the element that you're trying to add a new style to, add it there.
+- Avoid using `!important` as much as you can (Unless there's a bootstrap rule that you're trying to override.)
+- Comment your rule to make it easier for others to figure out why a rule was added.
+- If you're doing some calculations, don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
+- Use variables if you're using the same value more than once, and these values should be the same all the time (Just because you're using the value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
+- How each browser renders printing styles is different from the other. Mac and Windows behave differently for the same browser type (Firefox, Chrome, etc.). Hence we need to keep in mind the following while writing print rules in CSS.
 
   - If table borders or other line elements are not visible in the print preview or the PDF, check if there exists any overriding
-    bootstrap rules. These bootstrap rules could be a `background-color`, `background-border`, etc. and they always take precedence over the custom css rules that are defined in the @media-print section of the css file.
+    bootstrap rules. These bootstrap rules could be a `background-color`, `background-border`, etc., and they always take precedence over the custom CSS rules that are defined in the @media-print section of the CSS file.
 
-  - If yes, then we must override those rules with `!important` to get the desired effect.
+  - If yes, we must override those rules with `!important` to get the desired effect.
 
-  - A new class has been defined to apply custom styling to the case of Firefox browser in combination with MacOs which can be found here
-    : (https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/custom-css.md)
-
-  - Use the print mode in the rendering tab to see how the document looks when printed in Chrome browser. On Firefox, this can be achieved
+  - A new class has been defined to apply custom styling to the case of Firefox browser in combination with MacOs, which can be found [here](../user-docs/custom-css.md).
+  - Use the print mode in the rendering tab to see how the document looks when printed in the Chrome browser. On Firefox, this can be achieved
     by clicking on a small page icon in the "Inspect Element mode".
 
   - The print preview that is seen when doing a `Ctrl-P` on Windows or a `Cmd-P` on Mac doesn't necessarily give you the right picture of
@@ -66,31 +183,13 @@ How each browser renders printing styles is different from the other. Mac and Wi
 
   - Scrolling can be persisted by using the `scrolling : scroll` option.
 
-### SCSS structure
-
-Since we're using Sass3+, we're using the SCSS syntax. On of the advantages of Sass in general is the fact that you can easily break your stylesheets into different sections and then merge them together. In Chaise, the `*.scss` files that start with `_` are not meant to be on their own and are only meant to be included (imported) in other files. These files are generally supposed to cover a well-contained feature of UI element. For example `_buttons.scss` contains all the styles related to buttons. The main file that will be compiled in the end is `app.scss` which will be compiled into `app.css` and used in Chaise. You don't need to compile the file manually yourself as make commands will do that automatically for you.
-
-### Idioms
-
-If you want to add a new style, make sure you're following these rules:
-
-- It's better if you use classes instead of ids for writing css rules.
-- Use `-` to break the words in your name. Avoid using camelCase or `_`.
-- Follow the indentation that the file has. Don't mix different indentations together.
-- Use names that are meaningful and can be easily understood without knowing the whole page. Try to convey what an ID or class is about while being as brief as possible.
-- Avoid adding duplicated rules. If there's a rule in a file that is applied to the element that you're trying to add a new style to, add it there.
-- Avoid using `!important` as much as you can (Unless there's a bootstrap rule that you're trying to override.)
-- Comment your rule to make it easier for others to figure out why a rule was added.
-- If you're doing some calculations don't just use the end result. Right the calculations so later we can easily figure out why you chose that value.
-- Use variables if you're using the same value more than once and these values should be the same all the times (Just because you're using value `10` in two different rules doesn't mean they should share the same variable. Use a variable if these two rules MUST be using the same value. So if later you changed one to `20`, the other one should be updated as well).
-
 ### Font Awesome
 
 In font-awesome, each font/icon can either be solid, regular, or light. In some cases
-only one version is available in the free open-source version that we're using.
+only one version is available in the free, open-source version that we're using.
 
-While using these types of fonts the font-awesome website directs us to use `fas` for sold,
-`far` for regular, and `fal` for light. `fal` is not available in the free version so
+While using these types of fonts, the font-awesome website directs us to use `fas` for sold,
+`far` for regular, and `fal` for light. `fal` is not available in the free version, so
 we should not use it at all. From the font-awesome source, the only difference between `far` and `fas` is font-weight:
 
 ```css
@@ -107,8 +206,8 @@ we should not use it at all. From the font-awesome source, the only difference b
 }
 ```
 
-This can cause some inconsistencies where `far`/`fas` are used in places that we're
-manually changing the `font-weight`. For example assume the following icon is used
+This can cause some inconsistencies where `far`/`fas` are used in places where we're
+manually changing the `font-weight`. For example, assume the following icon is used.
 
 ```html
 <span class="fas fa-ellipsis-v some-icon"></span>
@@ -121,84 +220,310 @@ And we're using the following CSS rule
 }
 ```
 
-Eventhough by using `fas` we were meant to use the solid version of the font,
+Even though by using `fas` we were meant to use the solid version of the font,
 the CSS rule will make sure we're using the regular version instead. And in this
-case, the regular version of `fa-ellipsis-v` is not available in free version of font-awesome that we're using. So,
+case, the regular version of `fa-ellipsis-v` is not available in the free version of font-awesome that we're using. So,
 - We have to be careful where we're using font-awesome and avoid any manual changing
 of `font-family` or `font-weight` and let font-awesome handle it for us.
-- While changing font-awesome versions we have to make sure the fonts that we're using
-  are available. In some cases we might want to change the font-weight group by
+- While changing font-awesome versions, we have to make sure the fonts that we're using
+  are available. In some cases, we might want to change the font-weight group by
   updating the font-awesome classes that are used.
 
-## AngularJS-related
+### Handling time
 
-Because this is not an exhaustive guide, consider looking through @johnpapa's [AngularJS style guide](https://github.com/johnpapa/angular-styleguide/tree/master/a1) to understand the spirit and conventions of AngularJS development. The following are a few notable points that should be followed:
+Regarding `timestamp` and `timestamptz` column types:
 
-* Use `controllerAs` syntax instead of `$scope` whenever possible and refrain from using `$rootscope`
-* AngularJS allows for users to define a module and later extend that module with new **services**, **controllers**, **factories**, **providers**, and so on. These other components should be defined in separate files to avoid having one single `*.app.js` file.
+- A `timestamptz` value is stored as a single point in time in Postgres. When the value is retrieved, the value is in whatever time zone the database is in.
+- A `timestamp` value is stored as a string with the date and time; time zone info will be dropped in Postgres.
+- When submitting values for `timestamp` and `timestamptz` columns, the app should just submit the values as browser's local time. (The app currently converts to UTC before submitting, which is unnecessary.)
+- When displaying `timestamp` value, display whatever is in the database (the date and time, no need to convert to local time because there's no time zone info attached anyway)
+- When displaying `timestamptz` value, convert that value to browser's local time.
 
-### AngularJS Developer Guides
+## Folder structure
 
-- [View Templating](https://code.angularjs.org/1.6.9/docs/guide/templates)
-- [Data Binding with Templates](https://code.angularjs.org/1.6.9/docs/guide/databinding) ([tutorial](https://www.w3schools.com/angular/angular_databinding.asp))
-- [Modules](https://code.angularjs.org/1.6.9/docs/guide/module) ([tutorial](https://www.w3schools.com/angular/angular_modules.asp))
-- [Directives](https://code.angularjs.org/1.6.9/docs/guide/directive) ([tutorial](https://www.w3schools.com/angular/angular_directives.asp))
-- [Dependency Injection](https://code.angularjs.org/1.6.9/docs/guide/di)
-- [Services and Factories](https://code.angularjs.org/1.6.9/docs/guide/services) ([tutorial](https://www.w3schools.com/angular/angular_services.asp))
-- [App Bootstrapping](https://code.angularjs.org/1.6.9/docs/guide/bootstrap)
+The following is the overall structure of the project:
 
-### One-Time Binding
-- Use one-time binding for improved performance.
-- If you know an AngularJS expression won't change its value after the first digest (e.g. displaying an ERMrest table name), prepend the binding with `::` to benefit from one-time binding. For more details about this, see the One-Time Binding section of the [doc on AngularJS expressions](https://docs.angularjs.org/guide/expression).
+```
+.
+├── src
+│   ├── assets
+│   │   └── scss
+│   │       ├── app.scss
+│   │       └── _<comp>.scss
+│   ├── components
+│   │   └── <comp>.tsx
+│   ├── hooks
+│   │   └── <feature>.ts
+│   ├── libs
+│   │   └── <library>.tsx
+│   ├── models
+│   │   └── <feature>.ts
+│   ├── pages
+│   │   ├── <app>.tsx
+│   │   └── main.html
+│   ├── providers
+│   │   └── <feeature>.tsx
+│   ├── services
+│   │   └── <feature>.ts
+│   ├── utils
+│   │   └── <function>.ts
+│   └── vendor
+├── webpack
+│   ├── app.config.js
+│   ├── lib.config.js
+│   └── main.configjs
+├── Makefile
+└── package.json
+```
 
-## General
-
-### Extracting `common` code
-- When writing functionality that can already be found in another part of Chaise, that's usually a good candidate for pulling this functionality out and into the `chaise/common` folder. Instead of refactoring the common functionality out of an app, a good practice is to simply copy the existing functionality into the `common` folder and then have the existing functionality call the code in `chaise/common`. Actual refactoring will occur in a later cycle. This minimizes disruptions to existing apps and encourages code reuse.
-- An example: I'm working on a Feature X for the RecordEdit app, and this function has been already been written into the Search app. Instead of duplicating the function in both apps, I copy the code for Feature X from Search into `chaise/common` and genericize the function as necessary. In Data Entry, I simply call the code in `chaise/common` to get Feature X. In Search, the function's body is replaced with a call to the Feature X function in `chaise/common`.
-
-### Session
-The Navbar fetches the session object for information to display in the Navbar. Each app needs to also individually fetch the session so that we can make sure the session is available before trying to do anything with the reference.
-NOTE: This was causing a race condition before when we were relying on the session being fetched in the navbar and attaching it to $rootScope.
+- `assets`: This folder is used to house all the fonts, images, and SCSS files. The component-specific SCSS files should have the same name as their component file.
+- `components`: Each app will rely on similar components for functionality and display purposes. If there is a need to reuse code, even if that's in only 2 places, a common component should be extracted and placed in the components folder.
+- `libs`: Independent applications that may be used in non-React environments outside of Chaise.
+- `models`: The models or types that are
+- `providers`: Providers are a way to have a consistent state that can be accessed by any component at any level of the parent/child component hierarchy. Providers make use of React hooks to manage the app state.
+- `services`: Services are used for common functionality like interacting with the server, configuring the application, managing the user session, and more. These functional services provide a scope that is shared throughout the service that each function can interact with.
+- `utils`: Utilities are intended to be collections of functions exported individually that are then imported as needed in other places.
 
 
-### Use variable vs string in lookup
-The purpose of using variables or enumeration is to avoid rewriting (or copy-and-pasting) the same string in multiple places.
-- if you have more than one call site in more than one script, then define the variable in the utilities.js script and add it to the module (e.g., module._tag_default = "tag:...default") and it may then be used by code in different ERMrestJS scripts (e.g., referencing module._tag_default somewhere). Note that this is not being added to the public interface. Code outside of the various ERMrestJS scripts are not intended to use these variables. Hence we follow the underscore prefix convention (\__variableName_), which by convention indicates that the variable should be considered private to the module and clients are at least warned not to use it.
-- Example: The `messageMap` constant can be used to store and display user-facing messages in Chaise. [ERMrestJS#68](https://github.com/informatics-isi-edu/ermrestjs/issues/68) contains detail discussion related to this topic.
+## Building and installation
 
-### Naming Conventions
+This section will focus on more advanced details related to installation. Please refer to the installation guide in the `user-docs` folder for general information. The build process uses Makefile to simplify what needs to be called from the command line to get started. `Make` will manage dependency installation (through `npm`) and the react build process (using `webpack`).
 
-#### Chaise
-There are a few naming conventions that are being used across the apps. This pertains to variables, module names, and file names.
-- File names should be written in camel case (camelCase) with identifying information separated by `.` (`*.controller.js`, `*.app.js`, `*.html`).
-- AngularJS modules need to be defined like the following `chaise.*`. Chaise identifies the set of apps it applies to and the `*` is that modules purpose in Chaise.
-- Service, Factory, Provider, Controller, and other angular classes should be defined with camel case text leading with a capital letter. For example: `ErrorDialogController` is the convention for naming controllers. Don't shorten the text to `ctrl` because we should be using controller as syntax and want to have a more readable structure to our code.
-- Variables should follow a similar naming convention using camel case text. Variables and functions that are prefixed with an underscore, should be treated as private variables and used with caution.
-- Folder names should be different from file names. Of course folders don't have an extension so it's more apparent that they are folders, but developers should use `-` separated names for folders, i.e. `common\templates\data-link`.
-- Chaise config properties are technically case-insensitive, but to make the documents easier to read we are writing them as camel case in code and documentation.
+#### Make targets
+The following are all the Makefile targets related to installation:
 
-#### ERMrestJS
-- Related to annotations,
-  - All the keys and properties are case sensitive and written in lower case.
-  - Annotation keys are using kebab case (dash case).
-  - Annotation properties are using snake case.
-  - Properties that are enforcing a boolean state should be defined based on the oposite default value. For example if a button is displayed by default and we want to add a property to force its state, we have to add `hide_button`.
-- Related to markdown and templating:
-  - The helper functions are case sensitive and using came case.
+- `dist`: This target is designed for deployment environments, where we want to make sure we can install from scratch without any hiccups and errors. That's why we're always doing a clean installation (`npm ci`) as part of this command, which will ensure that the dependencies are installed based on what's encoded in the `package-lock.json` (without fetching new versions from the upstream). While developing features in Chaise, you should only run this command during the first installation or when `package-lock.json` has been modified.
+- `dist-wo-deps`: Designed for development purposes, will only build and install Chaise.
+- `deploy`: Deployed the built folders into the given location.
+- `deploy-w-config`:  The same as `deploy`, but will also `rsync` the configuration files.
+#### NPM
+This section will go over how we think the NPM modules should be managed.
 
-## Error Handling
+- Ensure the latest stable node and npm versions are used.
+- Only use `make install` when the `package-lock.json` has been changed (or when doing a clean install).
+- Use `make install-wo-deps` while developing.
+- Avoid using `npm install`.
+- `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
+- Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
+  - Ensure the used node and npm versions are updated and the latest stable.
+  - Run `npm install` to sync `package-lock.json` with `package.json`
+  - Double-check the changes to `pacakge-lock.json`
+
+
+## Structure of an App
+Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
+
+### Main HTML
+The instantiation and bundle of dependencies should be almost the same for each app. The build process using webpack will generate the outer HTML based on `pages/main.html`. Each app attaches to the element with `id` equal to `chaise-app-root` defined in `main.html`.
+
+### App Wrapper
+Each app in Chaise is instantiated and configured the same way as far as creating the outer HTML and <head> tag, wrapping the app in the proper providers, configuring Chaise and ermrestJS, and fetching the session. To help manage parts of this, we created a component called `AppWrapper` to wrap each app for setup and configuration.
+
+### Context
+For state sharing between components, Chaise is using the built-in `useContext` hook. Each application has its top-level context, with each component defining its own context as needed (like alerts and errors).
+
+### Error Provider
+To handle global errors, the app wrapper adds an `ErrorProvider` to handle the error state and an `ErrorBoundary` to catch the errors. Each app only needs to throw errors to let the global handler decide what to do with them.
+
+### Alerts Provider
+`Alerts` also has its own provider created to have a consistent state at the app level when trying to show alerts from sub-components of the app. The provider here acts like a service that handles the functionality surrounding alerts. This provider also allows for showing alerts in multiple places without having duplicate alerts show in the wrong contexts.
+
+### Chaise Navbar
+The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in the app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
+
+
+## Error handling
+
+This section focuses on error handling practices that we should follow while migrating from AngularJS to React.
+
+In the AngularJS implementation of Chaise, we rely on `window.onerror` and `$exceptionHandler` to catch any asynchronous or synchronous errors that might happen while processing the page.
+
+Both of the mentioned methods are working as a "catch-all" where we're calling the `handleException` function in `ErrorService`. This function can handle both expected/known errors (e.g. 403 from a read request), or unexpected/unknown errors (e.g. JavaScript errors because of programmatic mistakes).
+
+Therefore the general guideline, regardless of the asynchronous or synchronous nature of the error, was:
+- If you want a local treatment of errors, catch the errors locally.
+- Otherwise, throw the error (which means the "catch-all" logic would handle it properly).
+
+This is not fully the case anymore. In React, any synchronous error that happens during the rendering of a component will break the whole app, and to avoid that we need to make some modifications to our error handling logic.
+### How it works
+
+The following is how error handling should work in Chaise using React:
+
+#### Error provider
+
+- To make sure we can call the error handler from anywhere in the page structure, we've created an `ErrorProvider` that uses `ErorrContext`. This will allow us to store the state of errors. This way,
+  - We can use the `useError` costom hook which gives use a `dispatchError` that can be used for "throwing" the error.
+  - The logic to show a proper error message or UX behavior based on the error object will be part of the error provider.
+  - The error modal component can use the `error` returned from `useError` to determine whether it should show any errors or not.
+
+#### Global handler (catch-all)
+
+- The whole app should be wrapped in an error boundary. This will ensure that even if there's an unexpected error, we can show the error modal to users (and also log the error).
+- `error` and `unhandledrejection` event listeners must be defined in the app component, so we can `dispatchError` the unhandled errors.
+
+Based on this, the following is how each app should roughly look like:
+```tsx
+const RecordSetApp = () : JSX.Element => {
+  const { dispatchError } = useError();
+  ...
+
+  useEffect(() => {
+    /**
+     * global error handler for uncaught errors
+    */
+    window.addEventListener("error", (event) => {
+      dispatchError(...);
+    });
+    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
+      dispatchError(...);
+    });
+
+    ...
+  });
+
+  ...
+
+  const errorFallback = ({error}: FallbackProps) => {
+    // log the error
+    ...
+
+    // dispatchError the error
+    dispatchError(...);
+
+    // the error modal will be displayed so there's no need for the fallback
+    return null;
+  }
+
+
+  return (
+    <ErrorBoundary FallbackComponent={errorFallback}>
+      ...
+    </ErrorBoundary>
+  )
+}
+```
+
+#### Local handler
+
+- We should not let any error be unhandled. All errors should be caught.
+  - If we don't want to do anything specific for the error, we should dispatchError the caught error.
+    ```tsx
+    // async errors:
+    reference.read(pageSize, logObject).then(function (page) {
+      ...
+    }).catch(function (err) {
+      // do the local handling if we have to
+      ...
+
+      // dispatchError the error
+      dispatchError(...);
+    });
+
+    // sync errors:
+    try {
+      // some function call that is error prone
+      ...
+    } catch (exp) {
+      // do the local handling if we have to
+      ...
+
+      // dispatchError the error
+      dispatchError(...);
+    }
+    ```
+
+
+  - If we want a local treatment for errors, we can wrap the component in an error boundary like the example in [here](#error-boundary). This will allow us to offer an alternative UI.
+
+
+##### Multiple errors on the page
+
+Since our apps are complicated and can have multiple components that behave somewhat independently (and in an asynchronous fashion), there might be a case that the page throws multiple errors. As soon as an error is thrown, we're dispatchErroring it to the error service and the error service will display it right away. If in this state (while we're showing the error) another error is dispatchErrored, the error handler is going to act differently depending on the type of the error. In general, we can categorize errors in the following categories:
+
+1. Blocking errors: When we encounter such errors, we cannot simply recover the app state. In this case, the error popup is supposed to block the user from interacting with the page and offer a way to get out of the broken state. The actions in this type of error are usually redirecting the user to a completely different location, or the same page with different settings.
+
+2. Non-blocking errors: These errors don't affect the overall state of the app, and users can simply dismiss them. For example, a 409 error while trying to delete a row.
+
+Therefore,
+
+1. If the displayed error is a blocking error, we should just swallow the newer error. All of our blocking errors offer a way to get out of the error state, either by removing part of the URL or completely redirecting to another location. Therefore even if we mask all the errors except one, users can still get out of the error state.
+
+2. If the displayed error is non-blocking, we cannot simply swallow the other errors. If users dismiss the error modal, then the page will be in an error state without users realizing it. Therefore we should keep track of all the errors. This way after dismissing the first error we can display the other one. The same two rules should apply depending on whether the error can be dismissed or not.
+
+> If any of these errors is a 401, since we have special handling for it, it should just show on top of everything else. 401 errors will trigger the login modal which can completely change the state of the app and most probably fix all the other issues on the page.
+
+While discussing this, we also talked about the possibility of combining all the errors into one. To make this work, we have to make sure the error message and actions that we offer are well-designed for any combination of errors. This seems unnecessarily complex given that we have a lot of different error types in ERMrestJS and Chaise, that's why we are not going to pursue this.
+
+### Guidelines
+
+#### Development vs. Production
+
+React will behave differently in case of errors in development and production modes. As it is [described here](https://github.com/facebook/react/issues/10384#issuecomment-334142138), React is rethrowing an error and doesn't allow you to swallow an error in development mode. Since our whole error handling logic rely on this, make sure you're using production mode while testing error handling.
+
+
+#### Error boundary
+
+As we mentioned JavaScript errors in any part of the UI will break the whole app. To solve this problem, React 16 introduces a new concept of [error boundaries](https://reactjs.org/docs/error-boundaries.html).
+
+Error boundaries are React components that catch JavaScript errors anywhere in their child component tree, log those errors, and display a fallback UI instead of the component tree that crashed. Error boundaries catch errors during rendering, in lifecycle methods, and in constructors of the whole tree below them.
+
+Error boundaries do not catch errors for:
+  - Event handlers
+  - Asynchronous code (e.g. setTimeout or requestAnimationFrame callbacks)
+  - Server-side rendering
+  - Errors thrown in the error boundary itself (rather than its children)
+
+That being said, instead of just using the built-in error boundary class component, we're using [react-error-boundary](https://github.com/bvaughn/react-error-boundary) instead. With this component,
+
+- We can use error boundaries in functional components.
+- We can use the `useError` hook to manually call the error boundary in order to offer a uniform error handling for a component (we can catch the errors in async calls that the error boundary doesn't support and manually call the error boundary logic).
+
+Therefore, if we want uniform error handling for a component, we should use `react-error-boundary`.
+
+```tsx
+const ParentComponent = () : JSX.Element => {
+
+  const fallbackComp = ({error}: FallbackProps) => {
+    // dispatchError the error message
+    // return a fallback component
+  }
+
+  return (
+    <ErrorBoundary
+      FallbackComponent={fallbackComp}
+    >
+      <ChildComponent/>
+    </ErrorBoundary>
+  )
+}
+
+// a component that might throw some errors
+function ChildComponent = (): JSX.Element => {
+  const handleError = useErrorHandler();
+  ...
+
+  // somewhere in a async call
+  somePromise.then({
+    ...
+  }).catch(function (err) {
+    // call the closest error boundary
+    handleError(err);
+  })
+
+  ...
+}
+```
 
 ### Guidelines for promise chains
 
-The general guidelines for handling errors in promises are that:
+The general guidelines for handling errors in promises are:
 - do not let your handlers "silence" any unhandled errors, _always_ throw an unhandled error so that later catch blocks may handle it;
-- even when you do not have any (or any _more_) catch blocks, throw an unhandled error so that the general exception handler service can handle it.
-- reject is a callback function that gets carried out after the promise is rejected, whereas throw cannot be used asynchronously. If you chose to use reject, your code will continue to run normally in asynchronous fashion whereas throw will prioritize completing the resolver function (this function will run immediately).
+- when you do not have any (or any _more_) catch blocks, dispatchError the unhandled error so that the general exception handler service can handle it.
+- reject is a callback function that gets carried out after the promise is rejected, whereas throw cannot be used asynchronously. If you chose to use reject, your code will continue to run normally in an asynchronous fashion whereas throw will prioritize completing the resolver function (this function will run immediately).
 
-### Promise with success, reject, and catch handlers
+#### Promise with success, reject, and catch handlers
 
-One style when working with a single promise is to use success, reject, and "catch" handlers. The `catch` function is just a syntactic sugar for `then(null, function)` where the success handler is not given.
+One style when working with a single promise is to use success, reject, and "catch" handlers. The `catch` function is just syntactic sugar for `then(null, function)` where the success handler is not given.
 
 ```javascript
 promise.then(
@@ -220,9 +545,8 @@ promise.then(
     // this can be useful for adding some common error handling logic
     // for errors that could be raised by either of the previous handlers
     ...
-    // again as a general practice, conclude by throwing unhandled error
-    // this will be caught and handled by app-wide exceptionHandler function
-    throw err;
+    // again as a general practice, conclude by dispatchErroring unhandled error
+    dispatchError(...);
   }
 );
 ```
@@ -240,7 +564,7 @@ except my_errors:
   handle_my_errors();
 ```
 
-### Promise with success and catch handlers
+#### Promise with success and catch handlers
 
 An alternate style for working with a single promise is to use only success and catch handlers. One advantage of this style is that a single reject handler defined in the `catch` block will handle _both_ a rejected promise or any exceptions thrown by the success block.
 
@@ -256,13 +580,13 @@ promise.then(
     //  - the original promise was rejected, OR...
     //  - the success handler threw an exception
     ...
-    // as a general practice, conclude by throwing any unhandled error
-    throw err;
+    // as a general practice, conclude by dispatchErroring unhandled error
+    dispatchError(...);
   }
 );
 ```
 
-### Promise chaining with single catch
+#### Promise chaining with single catch
 
 One style for handling errors in a promise chain is to first chain all of your success blocks and then conclude with a catch for your particular errors. The advantage of this style is that it is relatively easy to read and is logically similar to a try/catch block that has (depending on the language, one or more) type-specific catch block(s) at the end.
 
@@ -301,13 +625,13 @@ promise.then(
       return; // if you resolved the error, return
     }
     // if none of the above error handling blocks resolved the error.
-    // then make sure to throw the error again, as usual.
-    throw err;
+    // then make sure to dispatchError the error again, as usual.
+    dispatchError(...);
   }
 );
 ```
 
-### Promise chaining with interleaved catches
+#### Promise chaining with interleaved catches
 
 When it is possible to recover from an error, you may want to interleave catch blocks so that subsequent success blocks may execute.
 
@@ -322,13 +646,13 @@ promise.then(
     // handle a recoverable error
     ...
 
-    // if the error could not be recovered from, then you will need to
+    // if the error could not be recovered, then you will need to
     // throw the error again so that the next reject/catch handler will
     // process it, and so that it will skip any success handlers.
     throw err;
 
-    // if the error was recovered from, you may need to return something
-    // based on what the next success handler expects. Otherwise you can
+    // if the error was recovered, you may need to return something
+    // based on what the next success handler expects. Otherwise, you can
     // return without a return parameter or technically the function could
     // terminate without any return statement (again, so long as the next
     // success handler is expecting no required parameters). In this example,
@@ -350,39 +674,8 @@ promise.then(
     // handle any upstream errors that were not previously recovered from.
     ...
 
-    // as usual, if the error could not be handled in this block, throw it again.
-    throw err;
+    // as usual, if the error could not be handled in this block, dispatchError it
+    dispatchError(...);
   }
 );
 ```
-
-### How It Works
-
-This section will provide more information on how the error handling has been implemented in Chaise.
-
-#### $exceptionHandler
-
-AngularJS has a common exception handler service, `$exceptionHandler`. For reference:
-- [Official guide](https://docs.angularjs.org/api/ng/service/$exceptionHandler)
-- [Unofficial style guide](https://github.com/johnpapa/angular-styleguide/blob/master/a1/README.md#exception-handling)
-
-The AngularJS global exception handler, `$exceptionHandler`, is used as the final catch for exceptions in the Chaise applications. Any exceptions that need to be handled in a common way should throw the exception and leave it to the AngularJS service to catch them. A function is registered with `$exceptionHandler` to manage how we want general cases to be handled.
-
-#### Special Case: $uibModal
-The promise used to create an instance of $uibModal is rejected if the user dismisses the modal. Unless you have logic for when the modal is dismissed, there's no need to attach an error callback to this promise. There's also no need to add a `.catch()` because `$exceptionHandler` will handle any errors in the success callback.
-
-#### Synchronous try/catch blocks
-
-Any unhandled exception will be handled by the `$exceptionHandler`. So we should always be specific about what error conditions that we are catching; and make sure that you throw unhandled exceptions.
-
-#### non-AngularJS asynchronous event-handling functions
-
-In general, we should only implement event-handling functions within the AngularJS framework. However, in the event that we must implement an event-handler outside of AngularJS, `window.onerror` will handle this.
-
-The `window.onerror` handler may be called by the browser for many error conditions outside of the scope of our applications. There are also known browser compatibility issues at the time of writing this guideline. The following are some references related to `window.onerror`:
-
-- This old article discussed issues with window.onerror. https://danlimerick.wordpress.com/2014/01/18/how-to-catch-javascript-errors-with-window-onerror-even-on-chrome-and-firefox/
-- This article summarizes window.onerror support for each browser and provide an example to wrap a function so the exception can be logged. Maybe we can use the same method? https://blog.sentry.io/2016/01/04/client-javascript-reporting-window-onerror.html
-
-## Config App
-We have a configuration app that is loaded into the DOM before each of our angular apps to do some setup before attaching the app instance. More info can be found in the [Config app guide](https://github.com/informatics-isi-edu/chaise/blob/master/docs/dev-docs/config-app.md).

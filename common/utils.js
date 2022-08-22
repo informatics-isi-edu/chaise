@@ -3131,7 +3131,7 @@
             SWITCH_USER_ACCOUNTS_WIKI_LOGIN: "switch-accounts-wiki" + clientPathActionSeparator + "login",
             SWITCH_USER_ACCOUNTS_LOGOUT: "switch-accounts" + clientPathActionSeparator + "logout",
 
-            // - login2:
+            // - login:
             VERIFY_GLOBUS_GROUP_LOGIN: "verify-globus-group" + clientPathActionSeparator + "login",
             VERIFY_GLOBUS_GROUP_LOGOUT: "verify-globus-group" + clientPathActionSeparator + "logout",
 

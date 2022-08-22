@@ -1,0 +1,200 @@
+@import "helpers";
+@import "variables";
+
+.recordset-table {
+  overflow-y: hidden;
+}
+
+.chaise-table.table {
+  border-top: 1px solid $table-border-color;
+  border-bottom: 1px solid $table-border-color;
+  margin: 0;
+
+  tbody {
+    display: table-row-group;
+    vertical-align: middle;
+
+    > tr > td.disabled-cell {
+      background-color: #f4f4f4;
+    }
+
+    /* table hover */
+    > tr:hover {
+      // background-color: #f7f0cf !important;
+      --bs-table-hover-bg: #f7f0cf !important;
+
+      /* match color from row highlight for disabled cells */
+      > td.disabled-cell {
+        background-color: #f7f0cf !important;
+        // --bs-table-hover-bg: #f7f0cf !important;;
+      }
+
+      .hover-show {
+        visibility: visible;
+      }
+    }
+
+    /* odd disabled cells need to be darker */
+    > tr:nth-child(odd) > td.disabled-cell {
+      background-color: #ebebeb;
+    }
+
+    /* odd row hover for striped table */
+    > tr:nth-child(odd):hover {
+      background-color: #efebda !important;
+
+      /* odd disabled cells need to match odd row hover for striped table above */
+      > td.disabled-cell {
+        background-color: #efebda !important;
+      }
+    }
+  }
+
+  tr {
+    border-left: 1px solid $table-border-color;
+    border-bottom: none;
+  }
+
+  .table-heading {
+    background-color: $table-header-background-color;
+    color: $black-color;
+
+    .actions-header {
+      width: 100px;
+
+      &.view-header {
+        width: 50px;
+      }
+
+      &.single-select-header {
+        width: 65px;
+      }
+
+      &.multi-select-header {
+        button {
+          display: block;
+          width: 120px;
+          &:first-child {
+            margin-bottom: 5px;
+          }
+        }
+      }
+    }
+  }
+
+  // override bootstrap default
+  & > :not(:first-child) {
+    border: 0;
+  }
+
+  & > tbody > tr {
+    position: unset !important;
+  }
+
+  & > tbody > tr:nth-child(odd) {
+    background: $table-striped-background-color;
+  }
+
+  > thead > tr > th {
+    border-bottom: 1px solid $table-border-color;
+    white-space: nowrap;
+  }
+
+  > thead > tr > th,
+  > tbody > tr > th,
+  > tfoot > tr > th,
+  > thead > tr > td,
+  > tbody > tr > td,
+  > tfoot > tr > td {
+    border-top: none;
+    border-bottom: none;
+    border-right: 1px solid $table-border-color;
+    word-wrap: break-word;
+  }
+
+  > tbody > tr > td {
+    padding: 5px;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 400;
+    border-top: 1px solid $table-border-color;
+    position: relative;
+
+    &.actions-header {
+      white-space: nowrap;
+      text-align: center;
+      font-size: $h4-font-size;
+      padding: 8px;
+    }
+
+    .table-column-displayname {
+      font-size: $h4-font-size;
+    }
+
+    // preserve space for the icon on the right
+    // 20 for the "icon space"
+    // 10 for the "right indentation"
+    padding-right: 30px;
+    .table-heading-icons {
+      position: absolute;
+      bottom: 7px;
+      right: 10px;
+      font-size: $h4-font-size;
+
+      .table-column-spinner {
+        position: absolute;
+        bottom: 2px;
+        right: -5px;
+
+        .spinner-border {
+          color: #828282;
+          width: 1.1rem;
+          height: 1.1rem;
+          border-width: .16em;
+        }
+      }
+    }
+  }
+
+  .action-btns {
+    text-align: center;
+    font-size: 1.2rem;
+    // since we're increasing the size of icons, we should decrease the padding
+    padding: 5px 0 0 0;
+
+    .chaise-btn {
+      padding: 0;
+      margin: -3px;
+      height: auto; //override the default button height
+      min-height: 25px; // make sure the button has default height
+    }
+
+    .chaise-view-details {
+      font-size: 1.1em;
+    }
+
+    .disabled {
+      cursor: not-allowed;
+      color: $disabled-color;
+    }
+
+    .delete-loader {
+      color: $disabled-color;
+    }
+  }
+
+  .full-col-span-row {
+    text-align: center;
+  }
+}
+
+.chaise-table-pagination {
+  padding: 20px 0 50px 0;
+  text-align: center;
+  button {
+    width: 75px;
+    margin-left: 5px;
+  }
+}

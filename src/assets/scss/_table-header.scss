@@ -1,0 +1,46 @@
+@import "variables";
+
+.chaise-table-header {
+  padding-bottom: 10px;
+
+  .chaise-table-header-total-count {
+    // There are two display modes here, one where we only show text, and
+    // the other that has the page-size-dropdown.
+    // the following styles are added to ensure the text stays in the same
+    // position in both display modes.
+    display: flex;
+    align-items: center;
+    height: $btn-height;
+    white-space: nowrap;
+
+    &:not(.with-page-size-dropdown) {
+      .displaying-text,
+      .total-count-text {
+        margin-top: -4px;
+      }
+    }
+
+    .displaying-text {
+      margin-right: 4px;
+    }
+
+    .timeout-icon {
+      padding-left: 5px;
+      vertical-align: middle;
+      font-size: 1.3em;
+    }
+  }
+  .page-size-dropdown {
+    padding: 0 10px;
+    margin-right: 4px;
+  }
+
+  .chaise-table-header-buttons {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .chaise-table-header-buttons-span {
+    margin: 0px 5px;
+  }
+}

@@ -1,0 +1,33 @@
+@import "variables";
+
+.chaise-input-control {
+    .input-switch {
+        padding-right: 0;
+        height: auto;
+    }
+
+    .input-switch-clear {
+        position: absolute;
+        top: 3px;
+        right: 6px;
+        cursor: pointer;
+    }
+}
+
+.input-switch-datetime {
+    flex-direction: column;
+
+    .chaise-input-control {
+        height: unset;
+        min-height: auto;
+    }
+
+    .chaise-input-control:first-child {
+        margin-bottom: 5px;
+    }
+}
+
+.chaise-firefox .input-switch-date.chaise-input-control.has-feedback,
+.chaise-firefox .input-switch-time.chaise-input-control.has-feedback {
+    padding-right: $input-remove-width;
+}

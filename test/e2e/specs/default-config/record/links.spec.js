@@ -2,6 +2,7 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var EC = protractor.ExpectedConditions;
 var fs = require('fs');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
+const { browser } = require('protractor');
 var testParams = {
     table_name: "links-table",
     key: {
@@ -37,7 +38,8 @@ describe('View existing record,', function() {
             describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
-                    exportBtn = chaisePage.recordsetPage.getExportDropdown();
+                    // TODO: change after record app migrated
+                    exportBtn = chaisePage.recordsetPage.getAngularExportDropdown();
                     // delete files that may have been downloaded before
                     console.log("delete existing files");
                     recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
@@ -96,6 +98,12 @@ describe('View existing record,', function() {
         }
 
         it("should hide the text column based on hide_column_header property of column-display annotation", function (done) {
+            browser.wait(function() {
+                return chaisePage.recordPage.getColumns().count().then(function(ct) {
+                    return (ct == 3);
+                });
+            }, browser.params.defaultTimeout);
+            
             chaisePage.recordPage.getColumns().then(function (cols) {
                 // shown column headers
                 expect(cols[0].isDisplayed()).toBeTruthy("Column header is hidden for id column");

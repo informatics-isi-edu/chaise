@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html lang='en' id='<%= htmlWebpackPlugin.options.app_name %>'>
+
+<head>
+  <meta charset='UTF-8'>
+  <title>
+    <%= htmlWebpackPlugin.options.title %>
+  </title>
+  <%= htmlWebpackPlugin.options.ermrestjs %>
+  <%= htmlWebpackPlugin.options.external_files %>
+  <%= htmlWebpackPlugin.options.chaise_config %>
+  <%= htmlWebpackPlugin.options.app_config %>
+</head>
+
+<body class='chaise-body'>
+  <noscript>
+    <div class='modal' tabindex='-1' role='dialog' style='z-index: 1050; display: block;'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h2 class='modal-title '>JavaScript Required</h2>
+          </div>
+          <div class='modal-body'>
+            For full functionality of this site it is necessary to enable JavaScript.
+            <br>
+            Here are <a href='http://www.enable-javascript.com/' target='_blank'>instructions how to enable JavaScript
+              in your web browser</a>.
+            <br><br>
+            Click OK to return to the Home Page.
+          </div>
+          <div class='modal-footer'>
+            <a href='/' class='chaise-btn chaise-btn-danger'>OK</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='modal-backdrop fade in' style='z-index: 1040;'></div>
+  </noscript>
+  <div id="browser-not-supported-error" style="display: none;">
+    <div class='modal' tabindex='-1' role='dialog' style='z-index: 1050; display: block;'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
+          <div class='modal-header'>
+            <h2 class='modal-title '>Browser not supported</h2>
+          </div>
+          <div class='modal-body'>
+            You're using a browser that we don't support.
+            <br /><br />
+            We recommend using <a target="_blank" href="https://www.google.com/chrome/">Google Chrome</a>
+            or <a target="_blank" href="https://www.mozilla.org/en-US/firefox/new/">Mozilla Firefox</a>
+            for a better web experience.
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class='modal-backdrop fade in' style='z-index: 1040;'></div>
+  </div>
+  <div id='chaise-app-root'></div>
+</body>
+
+<script>
+  function checkBrowser() {
+    var el = document.getElementById("browser-not-supported-error");
+    if (!el) return;
+
+    // NOTE this should be updated when we have the proper list of supports
+    var isIE = window.document.documentMode ? true : false;
+
+    if (isIE) {
+      el.style.display = "block"
+    } else {
+      el.remove();
+    }
+  }
+
+  checkBrowser();
+</script>
+<script src='/gtm-id.js'></script>
+
+</html>

@@ -1,0 +1,32 @@
+.choice-picker {
+  .picker-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .chaise-search-box {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .button-container {
+      margin-top: auto;
+      height: 20px;
+
+      .retry-btn {
+        padding: 0;
+      }
+
+      .show-more-btn {
+        padding: 0;
+        float: right;
+      }
+    }
+  }
+
+  .error-container {
+    button {
+      margin-right: 5px;
+    }
+  }
+}

@@ -31,6 +31,9 @@ exports.parameterize = function(config, configParams) {
         config.capabilities['tunnel-identifier'] = process.env.SAUCE_TUNNEL_IDENTIFIER;
         config.capabilities['build'] = process.env.GITHUB_RUN_ID;
         config.capabilities['name'] = process.env.GITHUB_WORKFLOW;
+        config.capabilities['idleTimeout'] = 190;
+        config.capabilities['commandTimeout'] = 500;
+
     }
 
     var onErmrestLogin = function(defer) {

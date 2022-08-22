@@ -11,6 +11,8 @@
             "recordedit/delete.config.json",
 
             "recordset/config.json",
+            "recordset/active-list.config.json",
+            "recordset/system-columns-heuristic.config.json",
 
             "navbar/config.json",
             "footer/config.json"

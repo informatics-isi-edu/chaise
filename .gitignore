@@ -26,7 +26,6 @@ version.txt
 mdHelp.html
 # ignore uploaded files
 test/e2e/data_setup/uploaded_files/*.*
-package-lock.json
 entities.json
 lib/switchUserAccounts.html
 

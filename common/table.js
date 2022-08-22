@@ -1172,6 +1172,7 @@
                         filter.choices = [];
 
 
+                        // TODO this could be fc.choiceFilters so we don't need the applied filters here
                         for (var j = 0; j < fm.appliedFilters.length; j++) {
                             var af = fm.appliedFilters[j];
                             // ignore the not-null choice (it's already encoded and we don't need to map it)
@@ -1594,7 +1595,8 @@
                     var name = nameDescriptionPrefix
                     var description = nameDescriptionPrefix + ":\n";
 
-                    var modelsWFilters = scope.vm.facetModels.filter(function (fm, idx) {
+                    // TODO in react branch this needs to be rewritten
+                    var modelsWFilters = scope.vm.reference.filter(function (fm, idx) {
                         fm.displayname = scope.vm.reference.facetColumns[idx].displayname.value;
                         fm.preferredMode = scope.vm.reference.facetColumns[idx].preferredMode;
                         return (fm.appliedFilters.length > 0);

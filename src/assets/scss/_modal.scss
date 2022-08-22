@@ -1,0 +1,267 @@
+// don't add border to the modal header
+.modal-header {
+  border-bottom: none;
+
+  &.center-aligned-title {
+    display: block;
+    text-align: center;
+  }
+}
+
+// uploader
+.modal-upload-progress {
+  .progress {
+    margin-bottom: 0;
+    height: 30px;
+    border: 1px solid #ccc9c9;
+  }
+
+  .no-row-margin {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .pad0-left {
+    padding-left: 0;
+  }
+
+  .pad0-right {
+    padding-right: 0;
+  }
+}
+
+/******** Popup modal for login instructions ********/
+.modal-login-instruction-backdrop {
+  opacity: 0.7 !important;
+  z-index: 1035; // less than the modal itself
+}
+
+.modal-login-instruction {
+  z-index: 1036; // less than navbar
+  .modal-dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-left: -300px;
+    margin-top: -100px;
+
+    .modal-content {
+      width: 600px;
+    }
+
+    .modal-header {
+      justify-content: space-around;
+      .modal-title {
+        font-size: 22px !important;
+      }
+    }
+    .modal-body {
+      text-align: center;
+      button {
+        margin-left: 5px;
+      }
+    }
+  }
+}
+
+/******* Popup modal for error ********/
+// NOTE less than the navbar z-index
+.modal-error-backdrop {
+  z-index: 1031; // less than the modal itself
+}
+
+.modal-error {
+  z-index: 1036; // less than navbar
+  overflow: hidden;
+
+  .no-word-break {
+    white-space: nowrap;
+  }
+
+  .toggle-error-details {
+    display: block;
+    padding-left: 0;
+    i {
+      padding-right: 3px;
+    }
+  }
+
+  .modal-footer .chaise-btn {
+    width: 60px;
+
+    &.footer-continue-btn {
+      width: unset;
+    }
+  }
+}
+
+.modal-footer .chaise-btn {
+  margin-left: 5px;
+}
+
+/******* Popup modal for export *******/
+.export-progress-backdrop {
+  z-index: 1030; // less than the modal itself
+}
+
+.export-progress {
+  z-index: 1031; // less than login instruction modal
+}
+
+
+/******* Popup modal for share ********/
+.chaise-share-citation {
+  ul {
+    padding-left: 10px;
+  }
+
+  #share-link h2 {
+    margin-top: 5px;
+  }
+
+  .citation-loader {
+    padding-top: 20px;
+  }
+}
+
+/*******Bootstrap  Modal styling *********/
+/*When the modal fills the screen it has an even 2.5% on top and bottom*/
+/*Centers the modal*/
+.chaise-body .modal-dialog.modal-xl {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 95vw;
+}
+
+.chaise-body .modal-dialog.modal-lg {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 80vw;
+}
+
+// NOTE in bootstrap3 this used to be modal-md,
+// but we don't have that notion anymore and therefore this is just the default size
+.chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+  margin: 2.5vh auto;
+  width: auto !important;
+  max-width: 60vw;
+}
+
+.modal-close-absolute {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
+/*Sets the maximum height of the entire modal to 95% of the screen height*/
+.modal-content {
+  margin: auto;
+  max-height: 95vh;
+  overflow: hidden;
+  max-width: 95vw;
+}
+/*Sets the maximum height of the modal body to 85% of the screen height*/
+.modal-xl .modal-body {
+  max-height: 90vh;
+  min-height: 40vh;
+}
+
+.modal-lg .modal-body {
+  max-height: 90vh;
+  min-height: 40vh;
+}
+
+.modal-body #spinner {
+  top: 50% !important;
+}
+
+.modal-popup .input-group-addon {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  vertical-align: top;
+}
+
+/************* Profile Card ****************/
+.profile-popup {
+  // to allow scrolling and showing all content
+  .modal-content {
+    max-height: unset;
+  }
+  ul li {
+    list-style-type: disc;
+
+    a {
+      text-decoration: none;
+    }
+  }
+
+  // remove the last border since it's not needed
+  table tr:last-child > td {
+    border-bottom: none;
+  }
+
+  .profileValue {
+    padding-left: 32px;
+  }
+}
+
+/************** search popup **************/
+.search-popup {
+  .modal-content {
+    height: 95vh;
+    .modal-header {
+      padding: 0;
+      padding-top: 20px;
+      // we don't want it to be flex, since we're doing flex ourselves
+      display: block;
+    }
+    .modal-body {
+      padding: 0;
+      height: 90vh;
+      .top-panel-container {
+        padding-top: 0;
+      }
+    }
+  }
+}
+
+// don't show alerts on modals
+// except facet since it has to show the url length error
+.modal:not(.faceting-show-details-popup) .recordset-container alerts {
+  display: none !important;
+}
+
+.scalar-show-details-popup {
+  // change width of number of Occurrences
+  // we cannot use the class name because the scalar column might be using the same name
+  .recordset-table th:nth-child(3) {
+    width: 130px;
+  }
+}
+
+.export-progress {
+  .modal-body {
+    padding-top: 0;
+  }
+
+  .modal-text {
+    margin: 8px 0px;
+  }
+
+  .progress {
+    height: 1.5rem;
+  }
+
+  .progress-bar {
+    background-size: 1.75rem 1.75rem;
+    background-color: #4674a7;
+  }
+}
+
+@media (min-width: 768px) {
+  .chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
+    max-width: unset !important;
+    width: 600px !important;
+    margin: 30px auto !important;
+  }
+}

@@ -227,8 +227,7 @@
             var referrerId = (new Date().getTime());
 
             var chaiseConfig = ConfigUtils.getConfigJSON();
-            var loginApp = ConfigUtils.validateTermsAndConditionsConfig(chaiseConfig.termsAndConditionsConfig) ? "login2" : "login";
-            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + loginApp + "/?referrerid=" + referrerId);
+            var url = serviceURL + '/authn/preauth?referrer='+UriUtils.fixedEncodeURIComponent($window.location.origin + UriUtils.chaiseDeploymentPath() + "login/?referrerid=" + referrerId);
             var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -306,7 +305,7 @@
             }
 
             // make sure the width and height are not bigger than the screen
-            var popupWidth = Math.min(800, screen.availWidth), 
+            var popupWidth = Math.min(800, screen.availWidth),
                 popupHeight = Math.min(750, screen.availHeight);
             var topOffset = 50;
 
@@ -615,7 +614,7 @@
 
                 // get referrerid from browser url
                 var referrerId = UriUtils.queryStringToJSON($window.location.search).referrerid,
-                    preauthReferrer = $window.location.origin + UriUtils.chaiseDeploymentPath() + "login2/?referrerid=" + referrerId,
+                    preauthReferrer = $window.location.origin + UriUtils.chaiseDeploymentPath() + "login/?referrerid=" + referrerId,
                     redirectUrl = serviceURL + '/authn/preauth/?referrer=' + UriUtils.fixedEncodeURIComponent(preauthReferrer);
 
                 var loginConfig = {

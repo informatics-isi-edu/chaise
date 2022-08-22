@@ -1,10 +1,10 @@
 // TODO can be combined with recordset/edit.spec.js
-
 var chaisePage = require('../../../utils/chaise.page.js');
 var moment = require('moment');
 var testParams = {
     schemaName: "product-recordset-add",
     table_name: "accommodation",
+    num_rows: 6,
     title: "Best Western Plus Amedia Art Salzburg",
     rating: "3.50",
     summary: "The BEST WESTERN PLUS Amedia Art Salzburg is located near the traditional old part of town, near the highway, near the train station and close to the exhibition center of Salzburg.\nBEST WESTERN PLUS Amedia Art Salzburg offers harmony of modern technique and convenient atmosphere to our national and international business guest and tourists."
@@ -12,19 +12,14 @@ var testParams = {
 
 describe('Recordset add record,', function() {
 
-    var rowCount, allWindows;;
+    var  allWindows;;
 
     beforeAll(function () {
-        browser.ignoreSynchronization = true;
-        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
-        chaisePage.recordsetPageReady().then(function() {
-            return chaisePage.recordsetPage.getRows();
-        }).then(function(rows) {
-            rowCount = rows.length;
-        });
-
+        chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
+        chaisePage.recordsetPageReady();
     });
 
+    
     it("show an inline comment instead of tooltip", function () {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
@@ -43,7 +38,6 @@ describe('Recordset add record,', function() {
         }).then(function (dimensions) {
             // the calculations might be one pixel off
             expect(Math.abs(dimensions.height - cellHeight) <= 1).toBeTruthy();
-
             return testCell.element(by.css(".readmore")).click();
         }).then(function () {
             expect(testCell.getText()).toContain("... less");
@@ -73,6 +67,11 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPage.getSearchSubmitButton().click();
         }).then(function() {
             chaisePage.recordsetPage.waitForInverseMainSpinner();
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                    return (ct == 1)
+                });
+            });
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(1);
@@ -119,6 +118,13 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPageReady();
         }).then(function() {
             var rows = chaisePage.recordsetPage.getRows();
+
+            browser.wait(function () {
+                return rows.count().then(function (ct) {
+                    return (ct == 5)
+                });
+            });
+            
             return rows.get(0).all(by.css(".select-action-button"));
         }).then(function(selectButtons) {
             selectButtons[0].click();
@@ -160,13 +166,13 @@ describe('Recordset add record,', function() {
 
             browser.wait(function() {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
-                    return (ct == rowCount+1);
+                    return (ct == testParams.num_rows+1);
                 });
             }, browser.params.defaultTimeout);
 
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
-            expect(rows.length).toBe(rowCount+1);
+            expect(rows.length).toBe(testParams.num_rows+1);
         });
     })
 

@@ -4,7 +4,12 @@
 .SUFFIXES:
 
 
-# env variables
+# make sure NOD_ENV is defined (use production if not defined or invalid)
+ifneq ($(NODE_ENV),development)
+NODE_ENV:=production
+endif
+
+# env variables needed for installation
 WEB_URL_ROOT?=/
 WEB_INSTALL_ROOT?=/var/www/html/
 ERMRESTJS_REL_PATH?=ermrestjs/
@@ -12,7 +17,7 @@ CHAISE_REL_PATH?=chaise/
 OSD_VIEWER_REL_PATH?=openseadragon-viewer/
 
 # version number added to all the assets
-BUILD_VERSION:=$(shell date +%Y%m%d%H%M%S)
+BUILD_VERSION:=$(shell date -u +%Y%m%d%H%M%S)
 
 # where chaise will be deployed
 CHAISEDIR:=$(WEB_INSTALL_ROOT)$(CHAISE_REL_PATH)
@@ -179,10 +184,7 @@ test: test-ALL_TESTS
 # ============================================================= #
 
 # HTML files that need to be created
-HTML=login/index.html \
-	 login2/index.html \
-	 recordset/index.html \
-	 viewer/index.html \
+HTML=viewer/index.html \
 	 recordedit/index.html \
 	 record/index.html \
 	 recordedit/mdHelp.html \
@@ -194,25 +196,29 @@ HTML=login/index.html \
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
-	$(DIST)/$(RECORDSET_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
 	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
-	$(DIST)/$(LOGIN_JS_SOURCE_MIN) \
-	$(DIST)/$(LOGIN2_JS_SOURCE_MIN) \
 	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
- DIST=dist
+SOURCE=src
 
- # Shared utilities
- COMMON=common
+DIST=dist
 
- # old CSS source
- CSS=styles
+# Shared utilities
+COMMON=common
 
- # old javascript sources
- JS=scripts
+# old CSS source
+CSS=styles
+
+# old javascript sources
+JS=scripts
 
  MAKEFILE_VAR=makefile_variables.js
+
+# react bundle location
+REACT_BUNDLES_FOLDERNAME=bundles
+REACT_BUNDLES=$(DIST)/react/$(REACT_BUNDLES_FOLDERNAME)
+
 # -------------------------- shared/common files -------------------------- #
 
 SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
@@ -297,6 +303,38 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 	@$(call add_js_script,$(DIST)/chaise-dependencies.html,$(ANGULARJS) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN))
 	@$(call add_ermrestjs_script,$(DIST)/chaise-dependencies.html)
 
+# list of file and folders that will be sent to the given location
+RSYNC_FILE_LIST=common \
+	dist \
+	help \
+	images \
+	lib \
+	record \
+	recordedit \
+	scripts \
+	sitemap \
+	styles \
+	viewer \
+	version.txt
+
+# the same list above but also includes the config files
+RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
+	$(JS_CONFIG)
+
+.make-rsync-list:
+	$(info - creating .make-rsync-list)
+	@> .make-rsync-list
+	@$(call add_array_to_file,$(RSYNC_FILE_LIST),.make-rsync-list)
+
+.make-rsync-list-w-config:
+	$(info - creating .make-rsync-list-w-config)
+	@> .make-rsync-list-w-config
+	@$(call add_array_to_file,$(RSYNC_FILE_LIST_W_CONFIG),.make-rsync-list-w-config)
+
+# vendor files that will be treated externally in webpack
+WEBPACK_EXTERNAL_VENDOR_FILES= \
+	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
+
 # -------------------------- record app -------------------------- #
 RECORD_ROOT=record
 
@@ -322,38 +360,6 @@ RECORD_CSS_SOURCE=
 record/index.html: record/index.html.in .make-record-includes
 	$(info - creating record/index.html)
 	@$(call build_html, .make-record-includes, record/index.html)
-
-# -------------------------- recordset app -------------------------- #
-
-RECORDSET_ROOT=recordset
-
-RECORDSET_JS_SOURCE=$(RECORDSET_ROOT)/recordset.app.js \
-    $(RECORDSET_ROOT)/recordset.controller.js
-
-RECORDSET_JS_SOURCE_MIN=recordset.min.js
-$(DIST)/$(RECORDSET_JS_SOURCE_MIN): $(RECORDSET_JS_SOURCE)
-	$(call bundle_js_files,$(RECORDSET_JS_SOURCE_MIN),$(RECORDSET_JS_SOURCE))
-
-# TODO why four different files for markdown? if inputswitch will be used everywhere, this should move to shared
-RECORDSET_JS_VENDOR_ASSET=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
-	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
-
-RECORDSET_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
-
-.make-recordset-includes: $(BUILD_VERSION)
-	@> .make-recordset-includes
-	$(info - creating .make-recordset-includes)
-	@$(call add_css_link,.make-recordset-includes,$(RECORDSET_CSS_SOURCE))
-	@$(call add_js_script,.make-recordset-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDSET_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDSET_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-recordset-includes)
-
-recordset/index.html: recordset/index.html.in .make-recordset-includes
-	$(info - creating recordset/index.html)
-	@$(call build_html,.make-recordset-includes,recordset/index.html)
 
 
 # -------------------------- recordedit app -------------------------- #
@@ -452,76 +458,6 @@ viewer/index.html: viewer/index.html.in .make-viewer-includes
 	$(info - creating viewer/index.html)
 	@$(call build_html, .make-viewer-includes, viewer/index.html)
 
-# -------------------------- Login app -------------------------- #
-LOGIN_ROOT=login
-
-LOGIN_JS_SOURCE=$(JS)/respond.js \
-	$(JS)/variables.js \
-	$(JS)/utils.js \
-	$(JS)/ermrest.js \
-	$(JS)/app.js \
-	$(JS)/facetsModel.js \
-	$(JS)/facetsService.js \
-	$(JS)/controller/ermrestDetailController.js \
-	$(JS)/controller/ermrestFilterController.js \
-	$(JS)/controller/ermrestInitController.js \
-	$(JS)/controller/ermrestLoginController.js \
-	$(JS)/controller/ermrestResultsController.js \
-	$(JS)/controller/ermrestSideBarController.js \
-	$(JS)/controller/ermrestTourController.js \
-	$(JS)/tour.js
-
-LOGIN_JS_SOURCE_MIN=login.min.js
-$(DIST)/$(LOGIN_JS_SOURCE_MIN): $(LOGIN_JS_SOURCE)
-	$(call bundle_js_files,$(LOGIN_JS_SOURCE_MIN),$(LOGIN_JS_SOURCE))
-
-LOGIN_JS_VENDOR_ASSET=$(JS)/vendor/jquery-ui-tooltip.min.js \
-	$(JS)/vendor/jquery.nouislider.all.min.js \
-	$(JS)/vendor/jquery.cookie.js \
-	$(JS)/vendor/ng-grid.js \
-	$(JS)/vendor/bootstrap-tour.min.js \
-	$(JS)/vendor/select.js
-
-LOGIN_CSS_SOURCE=$(CSS)/jquery.nouislider.min.css \
-	$(CSS)/vendor/ng-grid.css \
-	$(CSS)/vendor/select.css \
-	$(CSS)/vendor/select2.css \
-	$(CSS)/vendor/bootstrap-tour.min.css \
-	$(COMMON)/styles/navbar.css
-
-.make-login-includes: $(BUILD_VERSION)
-	@> .make-login-includes
-	$(info - creating .make-login-includes)
-	@$(call add_css_link,.make-login-includes,$(LOGIN_CSS_SOURCE))
-	@$(call add_js_script,.make-login-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN_JS_VENDOR_ASSET) $(DIST)/$(LOGIN_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-login-includes)
-
-login/index.html: login/index.html.in .make-login-includes
-	$(info - creating login/index.html)
-	@$(call build_html, .make-login-includes, login/index.html)
-
-# ------------------------------- Login2 app --------------------------------#
-LOGIN2_JS_SOURCE=login2/login.app.js
-
-LOGIN2_JS_SOURCE_MIN=login2.min.js
-$(DIST)/$(LOGIN2_JS_SOURCE_MIN): $(LOGIN2_JS_SOURCE)
-	$(call bundle_js_files,$(LOGIN2_JS_SOURCE_MIN),$(LOGIN2_JS_SOURCE))
-
-LOGIN2_JS_VENDOR_ASSET=
-
-LOGIN2_CSS_SOURCE=
-
-.make-login2-includes: $(BUILD_VERSION)
-	@> .make-login2-includes
-	$(info - creating .make-login2-includes)
-	@$(call add_css_link,.make-login2-includes,$(LOGIN2_CSS_SOURCE))
-	@$(call add_js_script,.make-login2-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(LOGIN2_JS_VENDOR_ASSET) $(DIST)/$(LOGIN2_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-login2-includes)
-
-login2/index.html: login2/index.html.in .make-login2-includes
-	$(info - creating login2/index.html)
-	@$(call build_html, .make-login2-includes, login2/index.html)
-
 # -------------------------- switch user help app -------------------------- #
 SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
 
@@ -600,6 +536,20 @@ define bundle_js_files
 	@$(BIN)/uglifyjs $(2) -o $(DIST)/$(1) --compress --source-map "url='$(1).map',root='$(CHAISE_BASE_PATH)'"
 endef
 
+define add_array_to_file
+	for folder in $(1); do \
+		echo "$$folder" >> $(2); \
+	done
+endef
+
+define copy_webpack_external_vendor_files
+	$(info - copying webpack external files into location)
+	mkdir -p $(REACT_BUNDLES)
+	for f in $(WEBPACK_EXTERNAL_VENDOR_FILES); do \
+		eval "rsync -a $$f $(REACT_BUNDLES)" ; \
+	done
+endef
+
 # build version will change everytime it's called
 $(BUILD_VERSION):
 
@@ -608,16 +558,17 @@ $(BUILD_VERSION):
 update-webdriver:
 	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
 
-# install packages needed for production
-.PHONY: npm-install-prod-modules
-npm-install-prod-modules:
-	npm install --production
+# install packages (honors NOD_ENV)
+# using clean-install instead of install to ensure usage of pacakge-lock.json
+.PHONY: npm-install-modules
+npm-install-modules:
+	@npm clean-install
 
 # install packages needed for production and development (including testing)
 # --production=false makes sure to ignore NODE_ENV and install everything
 .PHONY: npm-install-all-modules
 npm-install-all-modules:
-	npm install --production=false
+	@npm clean-install --production=false
 
 # for test cases we have to make sure we're installing dev dependencies and
 # webdriver is always updated to the latest version
@@ -626,7 +577,7 @@ deps-test: npm-install-all-modules update-webdriver
 
 # install all the dependencies
 .PHONY: deps
-deps: npm-install-prod-modules
+deps: npm-install-modules
 
 .PHONY: updeps
 updeps:
@@ -635,40 +586,66 @@ updeps:
 # Rule to clean project directory
 .PHONY: clean
 clean:
-	rm $(HTML) || true
-	rm $(COMMON)/styles/app.css || true
-	rm $(COMMON)/styles/navbar.css || true
-	rm -rf $(DIST) || true
-	rm .make-* || true
+	@rm $(HTML) || true
+	@rm $(COMMON)/styles/app.css || true
+	@rm $(COMMON)/styles/navbar.css || true
+	@rm -rf $(DIST) || true
+	@rm .make-* || true
 
 # Rule to clean the dependencies too
 .PHONY: distclean
 distclean: clean
-	rm -rf $(MODULES) || true
+	@rm -rf $(MODULES) || true
+
+.PHONY: lint
+lint: $(SOURCE)
+	@npx eslint src --ext .ts,.tsx --quiet
+
+.PHONY: lint-w-warn
+lint-w-warn: $(SOURCE)
+	@npx eslint src --ext .ts,.tsx
 
 # Rule to create the package.
 .PHONY: dist-wo-deps
-dist-wo-deps: print-variables $(SASS) $(MIN) $(HTML) gitversion
+dist-wo-deps: print-variables run-webpack $(SASS) $(MIN) $(HTML) gitversion
 
 # Rule to install the dependencies and create the pacakge
 $(DIST): deps dist-wo-deps
 
+# run webpack to build the react folder and bundles in it, and
+# copy the external vendor files that webpack expects into react folder
+run-webpack: $(SOURCE) $(BUILD_VERSION)
+	$(info - creating webpack bundles)
+	@npx webpack --config ./webpack/main.config.js --env BUILD_VARIABLES.BUILD_VERSION=$(BUILD_VERSION) --env BUILD_VARIABLES.CHAISE_BASE_PATH=$(CHAISE_BASE_PATH) --env BUILD_VARIABLES.ERMRESTJS_BASE_PATH=$(ERMRESTJS_BASE_PATH) --env BUILD_VARIABLES.OSD_VIEWER_BASE_PATH=$(OSD_VIEWER_BASE_PATH)
+	@$(call copy_webpack_external_vendor_files)
+
 # deploy chaise to the location
+# this is separated into three seaprate rsyncs:
+#  - send AngularJS files
+#  - send React related files except bundles folder
+#  - send bundles folder. This is separated to ensure cleaning up the bundles folder
+#    The content of bundles folder are generated based on hash so we have to make sure older files are deleted.
 .PHONY: deploy
-deploy: dont_deploy_in_root
+deploy: dont_deploy_in_root .make-rsync-list
 	$(info - deploying the package)
-	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' --exclude='$(JS_CONFIG)' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list --exclude='$(DIST)/react' --exclude='$(VIEWER_CONFIG)' . $(CHAISEDIR)
+	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
+	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
 # rsync the build and config files to the location
+# refer to the previous comment for why this is separated into three different rsyncs
 .PHONY: deploy-w-config
-deploy-w-config: dont_deploy_in_root $(JS_CONFIG) $(VIEWER_CONFIG)
+deploy-w-config: dont_deploy_in_root .make-rsync-list-w-config $(JS_CONFIG) $(VIEWER_CONFIG)
 	$(info - deploying the package with the existing default config files)
-	@rsync -avz --exclude='.*' --exclude='docs' --exclude='test' --exclude='$(MODULES)' . $(CHAISEDIR)
+	@rsync -ravz --files-from=.make-rsync-list-w-config --exclude='$(DIST)/react' . $(CHAISEDIR)
+	@rsync -avz --exclude='$(REACT_BUNDLES_FOLDERNAME)' $(DIST)/react/ $(CHAISEDIR)
+	@rsync -avz --delete $(REACT_BUNDLES) $(CHAISEDIR)
 
 # Rule to create version.txt
 .PHONY: gitversion
 gitversion:
 	$(info - creating version.txt)
+	@> version.txt
 	@sh ./git_version_info.sh
 
 dont_deploy_in_root:
@@ -677,6 +654,7 @@ dont_deploy_in_root:
 print-variables:
 	@mkdir -p $(DIST)
 	$(info =================)
+	$(info NODE_ENV:=$(NODE_ENV))
 	$(info BUILD_VERSION=$(BUILD_VERSION))
 	$(info building and deploying to: $(CHAISEDIR))
 	$(info Chaise will be accessed using: $(CHAISE_BASE_PATH))
