@@ -815,7 +815,9 @@ export default function RecordsetProvider({
    * @param  {boolean} hideSpinner?  Indicates whether we should show spinner for columns or not
    */
   const fetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => {
-    if (isLoading) return;
+    // if the data is still loading, don't fetch the secondary requests
+    if (isLoadingRef.current) return;
+
     flowControl.current.requestModels.forEach((aggModel: any, index: number) => {
       if (!flowControl.current.haveFreeSlot() || aggModel.processed) {
         return;

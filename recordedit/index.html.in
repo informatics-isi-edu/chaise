@@ -74,7 +74,7 @@
                                                         <td class="form-header entity-value" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                                             <div class="pull-left" ng-bind="rowIndex + 1"></div>
                                                             <div class="pull-right">
-                                                                <i ng-if="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This recod cannot be modified."></i>
+                                                                <i ng-if="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This record cannot be modified."></i>
                                                                 <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
                                                                     <span class="glyphicon glyphicon-remove"></span>
                                                                 </button>

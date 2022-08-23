@@ -693,7 +693,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             it('should have the correct tooltip.', function(){
                 chaisePage.recordPage.getColumnCommentHTML(exploreBtn).then(function(comment){
-                    expect(comment).toBe("'Explore more " + params.displayname + " records related to this " + params.baseTable + ".'", "Incorrect tooltip on View More button");
+                    expect(comment).toBe("'Explore more <code>" + params.displayname + "</code> records related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on View More button");
                 });
             });
 
@@ -748,7 +748,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Edit mode");
                         chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display edit controls for " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on Edit button");
+                            expect(comment).toBe("'Display edit controls for <code>" + params.displayname + "</code> related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Edit button");
                         });
                     });
                 } else {
@@ -757,7 +757,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Table mode");
                         chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display related " + params.displayname + " in tabular mode.'", "Incorrect tooltip on Table Display button");
+                            expect(comment).toBe("'Display related <code>" + params.displayname + "</code> in tabular mode.'", "Incorrect tooltip on Table Display button");
                         });
                     });
                 }
@@ -807,7 +807,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 expect(addBtn.isPresent()).toBe(params.canCreate);
                 if(params.canCreate){
                     chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
-                        expect(comment).toBe("'Connect " + params.displayname + " records to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
+                        expect(comment).toBe("'Connect <code>" + params.displayname + "</code> records to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Add button");
                     });
                 }
             });
@@ -878,7 +878,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                     if (params.isAssociation) {
                         it ("button tooltip should be `Unlink`.", function () {
-                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe('Disconnect ' + params.displayname + ': ' + params.entityMarkdownName + ' from this ' + params.baseTable + '.');
+                            expect(deleteBtn.getAttribute("uib-tooltip-html")).toBe('\'Disconnect <code>' + params.displayname + '</code>: <code>' + params.entityMarkdownName + '</code> from this <code>' + params.baseTable + '</code>.\'');
                         });
                     } else {
                         it ("button tooltip be `Delete`.", function () {
