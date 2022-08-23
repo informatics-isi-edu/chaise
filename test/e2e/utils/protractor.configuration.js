@@ -3,6 +3,9 @@ exports.getConfig = function(options) {
     sauceUser: process.env.SAUCE_USERNAME,
     sauceKey: process.env.SAUCE_ACCESS_KEY,
     framework: 'jasmine2',
+    // NOTE: rewuires webdriver-manager update to run and install binaries for different browsers which we do
+    // avoids the need for the selenium standalone server
+    directConnect: true,
     capabilities: {
       //browserName: 'internet explorer',
       //browserName: 'firefox',
