@@ -1,3 +1,4 @@
+const { toEditorSettings } = require('typescript');
 var pConfig = require('./../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({
@@ -10,7 +11,8 @@ var config = pConfig.getConfig({
         "recordedit/immutable-inputs.spec.js",
         "recordedit/domain-filter.spec.js",
         "recordedit/remove-edit-form.spec.js",
-        "recordedit/submission-disabled.spec.js"
+        "recordedit/submission-disabled.spec.js",
+        "multi-edit.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
