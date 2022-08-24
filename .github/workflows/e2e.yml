@@ -143,36 +143,36 @@ jobs:
       #   run: |
       #     cd chaise
       #     make testfullfeaturesconfirmation
-      - name: Run default config test spec
-        id: test-default-config
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdefaultconfig
+      # - name: Run default config test spec
+      #   id: test-default-config
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdefaultconfig
       # - name: Run full features test spec
       #   id: test-full-features
       #   continue-on-error: true
       #   run: |
       #     cd chaise
       #     make testfullfeatures
-      # - name: Run delete prohibited test spec
-      #   id: test-delete-prohibited
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
       # - name: Check on full features confirmation test spec
       #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
       #   run: exit 1
-      - name: Check on default config test spec
-        if: always() && steps.test-default-config.outcome != 'success'
-        run: exit 1
+      # - name: Check on default config test spec
+      #   if: always() && steps.test-default-config.outcome != 'success'
+      #   run: exit 1
       # - name: Check on full features test spec
       #   if: always() && steps.test-full-features.outcome != 'success'
       #   run: exit 1
-      # - name: Check on delete prohibited test spec
-      #   if: always() && steps.test-delete-prohibited.outcome != 'success'
-      #   run: exit 1
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
+        run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
