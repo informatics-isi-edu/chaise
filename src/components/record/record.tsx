@@ -9,6 +9,7 @@ import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import RecordMainSection from '@isrd-isi-edu/chaise/src/components/record/record-main-section';
 import RecordRelatedSection from '@isrd-isi-edu/chaise/src/components/record/record-related-section';
+import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
@@ -26,20 +27,36 @@ import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-uti
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 
 export type RecordProps = {
+  /**
+   * The parent container that recordset will be part of
+   * (used for scrollbar logic)
+   */
+  parentContainer?: HTMLElement;
   reference: any;
 };
 
-const Record = ({ reference }: RecordProps): JSX.Element => {
+const Record = ({
+  parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
+  reference
+}: RecordProps): JSX.Element => {
   return (
     <AlertsProvider>
       <RecordProvider reference={reference}>
-        <RecordInner />
+        <RecordInner
+          parentContainer={parentContainer}
+        />
       </RecordProvider>
     </AlertsProvider>
   );
 };
 
-const RecordInner = (): JSX.Element => {
+type RecordInnerProps = {
+  parentContainer?: HTMLElement
+};
+
+const RecordInner = ({
+  parentContainer,
+}: RecordInnerProps): JSX.Element => {
   const { dispatchError, errors } = useError();
   const { page, readMainEntity, reference, initialized } = useRecord();
 
@@ -86,6 +103,44 @@ const RecordInner = (): JSX.Element => {
   const hidePanel = () => {
     setShowPanel(!showPanel);
   };
+
+  const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
+    <div
+      id='record-side-pan'
+      className={`side-panel-resizable record-toc resizable ${showPanel ? 'open-panel' : 'close-panel'
+        }`}
+      ref={leftRef}
+    >
+      {/* TODO table of contents */}
+      <div className='side-panel-container'>
+        <div className='columns-container'>
+          Table Content Goes here
+        </div>
+      </div>
+
+    </div>
+  );
+
+  const renderMainContainer = () => (
+    <div className='main-container dynamic-padding'>
+      <div className='main-body'>
+        {/* TODO there's no reason to have these two comps, needs discussion */}
+        <RecordMainSection />
+        <RecordRelatedSection />
+      </div>
+      <Footer />
+    </div>
+  );
+
+  /**
+   * The left panels that should be resized together
+   * This will take care of the resizing the modal header as well
+   * implementation copied from components/recordset.tsx
+   */
+  const leftPartners: HTMLElement[] = [];
+  parentContainer?.querySelectorAll('.top-left-panel').forEach((el) => {
+    leftPartners.push(el as HTMLElement);
+  });
 
   return (
     <div className='record-container app-content-container'>
@@ -212,32 +267,18 @@ const RecordInner = (): JSX.Element => {
           </div>
         </div>
       </div>
-      {/* TODO eventually split-view should be used here as well */}
-      <div className='bottom-panel-container'>
-        <div
-          id='record-side-pan'
-          className={`side-panel-resizable record-toc resizable ${showPanel ? 'open-panel' : 'close-panel'
-            }`}
-        >
-          {/* TODO table of contents */}
-          <div className='side-panel-container'>
-            <div className='columns-container'>
-              Table Content Goes here
-            </div>
-          </div>
-
-        </div>
-        <div
-          className='main-container dynamic-padding'
-        >
-          <div className='main-body'>
-            {/* TODO there's no reason to have these two comps, needs discussion */}
-            <RecordMainSection />
-            <RecordRelatedSection />
-          </div>
-          <Footer />
-        </div>
-      </div>
+      <SplitView
+        parentContainer={parentContainer}
+        left={renderTableOfContents}
+        leftPartners={leftPartners}
+        right={renderMainContainer}
+        minWidth={200}
+        maxWidth={40}
+        initialWidth={21}
+        className='bottom-panel-container'
+        convertMaxWidth
+        convertInitialWidth
+      />
     </div>
   );
 };
