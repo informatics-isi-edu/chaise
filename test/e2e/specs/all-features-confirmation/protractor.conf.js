@@ -4,13 +4,17 @@ var config = pConfig.getConfig({
     // This config is meant to be run as part of the parallel tests configuration
     configFileName: 'parallel-configs/all-features-confirmation.dev.json',
     specs: [
-        "*/*.spec.js"
-        // "acls/static-acl.spec.js",
-        // "navbar/base-config.spec.js",
-        // "record/copy-btn.spec.js",
-        // "recordedit/permissions-annotation.spec.js",
-        // "acls/dynamic-acl.spec.js",
-        // "recordset/permissions-annotation.spec.js"
+        // "*/*.spec.js"
+        "footer/footer.spec.js",
+        "record/create-btn.spec.js",
+        "navbar/no-logo.spec.js",
+        "record/edit-btn.spec.js",
+        "record/delete-btn.spec.js",
+        "errors/errors.spec.js",
+        "record/presentation.spec.js",
+        "recordset/presentation.spec.js",
+        "recordedit/edit.spec.js",
+        // "recordedit/add.spec.js",
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
