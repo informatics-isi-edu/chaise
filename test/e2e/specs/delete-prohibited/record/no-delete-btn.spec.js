@@ -28,7 +28,7 @@ describe('View existing record,', function() {
         it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4, showWriterEmptyRelatedOnLoad=true", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
                 expect(chaiseConfig.deleteRecord).toBeFalsy();
-                expect(chaiseConfig.resolverImplicitCatalog).toBe(1);
+                expect(chaiseConfig.resolverImplicitCatalog).toBe(4);
                 expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeTruthy();
             });
         });
