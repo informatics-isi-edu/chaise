@@ -10,7 +10,6 @@ var config = pConfig.getConfig({
         "record/copy-btn.spec.js",
         "recordedit/permissions-annotation.spec.js",
         "acls/dynamic-acl.spec.js",
-        "recordset/permissions-annotation.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;
