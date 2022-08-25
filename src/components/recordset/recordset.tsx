@@ -192,6 +192,11 @@ const RecordsetInner = ({
 
       setFacetColumnsReady(true);
 
+      // if there wasn't any facets, close the panel by default
+      if (res.facetColumns.length === 0) {
+        setFacetPanelOpen(false);
+      }
+
       // facet will call initialize when it's fully loaded
 
       /**
