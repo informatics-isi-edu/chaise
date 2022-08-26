@@ -173,6 +173,12 @@ jobs:
         run: |
           cd chaise
           make testdeleteprohibited
+      - name: Run delete prohibited configuration tests 4
+        id: test-delete-prohibited-4
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
       # - name: Check on full features confirmation test spec
       #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
       #   run: exit 1
@@ -189,6 +195,9 @@ jobs:
         if: always() && steps.test-delete-prohibited-2.outcome != 'success'
         run: exit 1
       - name: Check on delete prohibited configuration tests 3
+        if: always() && steps.test-delete-prohibited-3.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited configuration tests 4
         if: always() && steps.test-delete-prohibited-3.outcome != 'success'
         run: exit 1
       - name: Diagnosis after failure

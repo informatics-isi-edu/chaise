@@ -18,7 +18,7 @@ var chaiseConfig = {
     navbarBanner: {
         markdownPattern: "This is a banner with [link](https://example.com)"
     },
-    resolverImplicitCatalog: 4 // when run in parallel config mode, this config runs for catalogId 4 in ci
+    resolverImplicitCatalog: 1 // when run in parallel config mode, this config runs for catalogId 4 in ci
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {
