@@ -21,6 +21,9 @@ import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
+// services
+import { ConfigService } from '@isrd-isi-edu/chaise/src//services/config';
+
 // utilities
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
@@ -64,6 +67,9 @@ const RecordInner = ({
    * State variable to show or hide side panel
    */
   const [showPanel, setShowPanel] = useState<boolean>(true);
+  const [canCreate, setCanCreate] = useState<boolean>(false);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [canDelete, setCanDelete] = useState<boolean>(false);
 
   // initialize the page
   useEffect(() => {
@@ -75,6 +81,19 @@ const RecordInner = ({
       dispatchError({ error });
     });
   }, []);
+
+  useEffect(() => {
+    if (!reference) return;
+    const modifyRecord = ConfigService.chaiseConfig.editRecord === false ? false : true;
+    setCanCreate(reference.canCreate && modifyRecord);
+
+    if (!page || !page.tuples[0]) return;
+    let tuple = page.tuples[0];
+    setCanEdit(tuple.canUpdate && modifyRecord);
+
+    const showDeleteButton = ConfigService.chaiseConfig.deleteRecord === true ? true : false;
+    setCanDelete(tuple.canDelete && modifyRecord && showDeleteButton);
+  }, [page, reference]);
 
   // properly set scrollable section height
   useLayoutEffect(() => {
@@ -89,7 +108,7 @@ const RecordInner = ({
   // TODO does this make sense?
   // we're currently showing the header buttons while loading
   // but I don't see the point and I think not showing anything makes more sense
-  {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */}
+  {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */ }
   if (!page) {
     if (errors.length > 0) {
       return <></>;
@@ -208,44 +227,47 @@ const RecordInner = ({
                     <span>: </span>
                     <DisplayValue value={page.tuples[0].displayname} />
 
-                    <div className='title-buttons record-action-btns-container'>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to create a record.'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon fa fa-plus'></span>
-                          Create
-                        </div>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to create a copy of this record'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon  fa fa-clipboard'></span>
-                          Copy
-                        </div>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to edit this record'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon  fa fa-pencil'></span>
-                          Edit
-                        </div>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to delete this record'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon fa fa-trash-alt'></span>
-                          Delete
-                        </div>
-                      </ChaiseTooltip>
-                    </div>
+                    {(canCreate || canEdit || canDelete) ?
+                      <div className='title-buttons record-action-btns-container'>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to create a record.'
+                        >
+                          <div className='chaise-btn chaise-btn-primary'>
+                            <span className='record-app-action-icon fa fa-plus'></span>
+                            Create
+                          </div>
+                        </ChaiseTooltip>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to create a copy of this record'
+                        >
+                          <div className='chaise-btn chaise-btn-primary'>
+                            <span className='record-app-action-icon  fa fa-clipboard'></span>
+                            Copy
+                          </div>
+                        </ChaiseTooltip>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to edit this record'
+                        >
+                          <div className='chaise-btn chaise-btn-primary'>
+                            <span className='record-app-action-icon  fa fa-pencil'></span>
+                            Edit
+                          </div>
+                        </ChaiseTooltip>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to delete this record'
+                        >
+                          <div className='chaise-btn chaise-btn-primary'>
+                            <span className='record-app-action-icon fa fa-trash-alt'></span>
+                            Delete
+                          </div>
+                        </ChaiseTooltip>
+                      </div>
+                    : <></>}
+
                   </h1>
                   {!showPanel && (
                     <ChaiseTooltip
