@@ -12,7 +12,7 @@ var config = pConfig.getConfig({
         "record/delete-btn.spec.js",
         "errors/errors.spec.js",
         "record/presentation.spec.js",
-        // "recordset/presentation.spec.js",
+        "recordset/presentation.spec.js",
         // "recordedit/edit.spec.js",
         // "recordedit/add.spec.js",
     ],
