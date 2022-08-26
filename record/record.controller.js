@@ -176,14 +176,34 @@
             };
 
             if (canShow()) {
-                return ($rootScope.showEmptyRelatedTables || (rtm.tableModel.page && rtm.tableModel.page.length > 0));
+                // this flag signals that the returned data is non-empty and is returned
+                var nonEmpty = rtm.tableModel.page && rtm.tableModel.page.length > 0;
+
+                // if the filter is based on the main table and returns empty, the related table should be hidden
+                var ref = rtm.tableModel.reference;
+                if (ref.pseudoColumn && ref.pseudoColumn.isFiltered && ref.pseudoColumn.filterProps.hasRootFilter) {
+                    return nonEmpty;
+                }
+
+                return ($rootScope.showEmptyRelatedTables || nonEmpty);
             }
             return false;
         };
 
         vm.showInlineTable = function (i) {
             var cm = $rootScope.columnModels[i];
-            return cm.isInline && ($rootScope.showEmptyRelatedTables || (cm.tableModel.page && cm.tableModel.page.length > 0));
+            if (!cm.isInline) return false;
+
+            // this flag signals that the returned data is non-empty and is returned
+            var nonEmpty = cm.tableModel.page && cm.tableModel.page.length > 0;
+
+            // if the filter is based on the main table and returns empty, the related table should be hidden
+            var ref = cm.tableModel.reference;
+            if (ref.pseudoColumn && ref.pseudoColumn.isFiltered && ref.pseudoColumn.filterProps.hasRootFilter) {
+                return nonEmpty;
+            }
+
+            return ($rootScope.showEmptyRelatedTables || nonEmpty);
         };
 
         /**
@@ -281,9 +301,21 @@
                 return false;
             }
 
-            // we are not supporting add if it's a free-form related table
-            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
-                return false;
+            if (relatedRef.pseudoColumn) {
+                // we are not supporting add if it's a free-form related table
+                if (!relatedRef.pseudoColumn.isInboundForeignKey) {
+                    return false;
+                }
+
+                // if the related table has filter in its source
+                if (relatedRef.pseudoColumn.isFiltered && (
+                    // don't allow add for one hop
+                    !relatedRef.derivedAssociationReference ||
+                    // don't allow add for pb that has filter in between
+                    relatedRef.pseudoColumn.filterProps.hasFilterInBetween
+                )) {
+                    return false;
+                }
             }
 
             var ref = (relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference : relatedRef);
@@ -291,13 +323,8 @@
         };
 
         vm.canCreateRelatedDisabled = function(relatedRef) {
-            if(angular.isUndefined(relatedRef) || !$rootScope.modifyRecord) {
-                return false;
-            }
-
-            // we are not supporting disable in this case
-            // NOTE: probably won't be reached since the button won't even be shown
-            if (relatedRef.pseudoColumn && !relatedRef.pseudoColumn.isInboundForeignKey) {
+            // return false if user cannot even create
+            if (!vm.canCreateRelated(relatedRef)) {
                 return false;
             }
 
