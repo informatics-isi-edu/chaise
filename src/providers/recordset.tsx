@@ -4,7 +4,7 @@ import { RecordsetConfig, RecordsetDisplayMode, SelectedRow } from '@isrd-isi-ed
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
+import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordest-flow-control';
 import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
