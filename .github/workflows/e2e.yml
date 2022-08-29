@@ -149,48 +149,48 @@ jobs:
       #   run: |
       #     cd chaise
       #     make testdefaultconfig
-      # - name: Run full features test spec
-      #   id: test-full-features
+      - name: Run full features test spec
+        id: test-full-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfullfeatures
+      # - name: Run delete prohibited configuration tests 1
+      #   id: test-delete-prohibited-1
       #   continue-on-error: true
       #   run: |
       #     cd chaise
-      #     make testfullfeatures
-      - name: Run delete prohibited configuration tests 1
-        id: test-delete-prohibited-1
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited
-      - name: Run delete prohibited configuration tests 2
-        id: test-delete-prohibited-2
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited
-      - name: Run delete prohibited configuration tests 3
-        id: test-delete-prohibited-3
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testdeleteprohibited
+      #     make testdeleteprohibited
+      # - name: Run delete prohibited configuration tests 2
+      #   id: test-delete-prohibited-2
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited
+      # - name: Run delete prohibited configuration tests 3
+      #   id: test-delete-prohibited-3
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testdeleteprohibited
       # - name: Check on full features confirmation test spec
       #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
       #   run: exit 1
       # - name: Check on default config test spec
       #   if: always() && steps.test-default-config.outcome != 'success'
       #   run: exit 1
-      # - name: Check on full features test spec
-      #   if: always() && steps.test-full-features.outcome != 'success'
+      - name: Check on full features test spec
+        if: always() && steps.test-full-features.outcome != 'success'
+        run: exit 1
+      # - name: Check on delete prohibited configuration tests 1
+      #   if: always() && steps.test-delete-prohibited-1.outcome != 'success'
       #   run: exit 1
-      - name: Check on delete prohibited configuration tests 1
-        if: always() && steps.test-delete-prohibited-1.outcome != 'success'
-        run: exit 1
-      - name: Check on delete prohibited configuration tests 2
-        if: always() && steps.test-delete-prohibited-2.outcome != 'success'
-        run: exit 1
-      - name: Check on delete prohibited configuration tests 3
-        if: always() && steps.test-delete-prohibited-3.outcome != 'success'
-        run: exit 1
+      # - name: Check on delete prohibited configuration tests 2
+      #   if: always() && steps.test-delete-prohibited-2.outcome != 'success'
+      #   run: exit 1
+      # - name: Check on delete prohibited configuration tests 3
+      #   if: always() && steps.test-delete-prohibited-3.outcome != 'success'
+      #   run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
