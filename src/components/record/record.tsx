@@ -14,15 +14,20 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+
+// models
+import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src//services/config';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -60,8 +65,11 @@ type RecordInnerProps = {
 const RecordInner = ({
   parentContainer,
 }: RecordInnerProps): JSX.Element => {
+  // const { validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors } = useError();
   const { page, readMainEntity, reference, initialized } = useRecord();
+  // TODO: add getLogAction and getLogStack
+  // const { page, readMainEntity, reference, initialized, getLogAction, getLogStack } = useRecord();
 
   /**
    * State variable to show or hide side panel
@@ -116,6 +124,67 @@ const RecordInner = ({
     return <ChaiseSpinner />;
   }
 
+  // function instead of variable so the link is updated after the app loads instead of being captured on page load
+  // no need to create as a useState variable either
+  const createRecord = () => reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink;
+
+  const editRecord = () => reference.contextualize.entryEdit.appLink;
+
+  const copyRecord = () => {
+    const appLink = reference.contextualize.entryCreate.appLink;
+    let separator = '?';
+    // if appLink already has query params, add &
+    // NOTE: With the ppid and pcid implementation appLink will always have
+    // that, this is just to avoid further changes if we reverted that change.
+    if (appLink.indexOf('?') !== -1) separator = '&';
+
+    // this URL used to have limit=1 but we removed it since it was redundant.
+    // we're throwing an error when there are multiple records with the given
+    // given filter in record page. we're also making sure the record link
+    // is based on the shortest key, so this query parameter is redundant
+    return appLink + separator + 'copy=true';
+  }
+
+  // TODO: refactor implementation from table-row to another component for delete
+  const deleteRecord = () => {
+    // validateSessionBeforeMutation(() => {
+    //   if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+    //     LogService.logClientAction({
+    //       action: getLogAction(LogActions.DELETE_INTEND, LogStackPaths.ENTITY),
+    //       stack: getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, reference.table, reference.filterLogInfo))
+    //     }, reference.defaultLogInfo);
+
+    //     const confirmMessage: JSX.Element = (
+    //       <>
+    //         Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+    //         <span>: </span>
+    //         <code><DisplayValue value={page.tuples[0].displayname}></DisplayValue></code>?
+    //       </>
+    //     );
+
+    //     setShowDeleteConfirmationModal({
+    //       buttonLabel: isUnlink ? 'Unlink' : 'Delete',
+    //       onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
+    //       onCancel: () => {
+    //         setShowDeleteConfirmationModal(null);
+    //         const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
+    //         LogService.logClientAction({
+    //           action: getRowLogAction(actionVerb),
+    //           stack: logStack
+    //         }, reference.defaultLogInfo);
+    //       },
+    //       message: confirmMessage
+    //     });
+
+    //   } else {
+    //     onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
+    //   }
+    // })
+    // $log.debug('deleting tuple!');
+
+    return;
+  }
+
   /**
    * function to change state to show or hide side panel
    */
@@ -161,6 +230,7 @@ const RecordInner = ({
     leftPartners.push(el as HTMLElement);
   });
 
+  const btnClasses = 'chaise-btn chaise-btn-primary';
   return (
     <div className='record-container app-content-container'>
       <div className='top-panel-container'>
@@ -233,40 +303,40 @@ const RecordInner = ({
                           placement='bottom-start'
                           tooltip='Click here to create a record.'
                         >
-                          <div className='chaise-btn chaise-btn-primary'>
+                          <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={createRecord()}>
                             <span className='record-app-action-icon fa fa-plus'></span>
                             Create
-                          </div>
+                          </a>
                         </ChaiseTooltip>
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to create a copy of this record'
                         >
-                          <div className='chaise-btn chaise-btn-primary'>
+                          <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={copyRecord()}>
                             <span className='record-app-action-icon  fa fa-clipboard'></span>
                             Copy
-                          </div>
+                          </a>
                         </ChaiseTooltip>
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to edit this record'
                         >
-                          <div className='chaise-btn chaise-btn-primary'>
+                          <a className={btnClasses + (!canEdit ? ' disabled' : '')} href={editRecord()}>
                             <span className='record-app-action-icon  fa fa-pencil'></span>
                             Edit
-                          </div>
+                          </a>
                         </ChaiseTooltip>
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to delete this record'
                         >
-                          <div className='chaise-btn chaise-btn-primary'>
+                          <button className={btnClasses + (!canDelete ? ' disabled' : '')} onClick={deleteRecord}>
                             <span className='record-app-action-icon fa fa-trash-alt'></span>
                             Delete
-                          </div>
+                          </button>
                         </ChaiseTooltip>
                       </div>
-                    : <></>}
+                      : <></>}
 
                   </h1>
                   {!showPanel && (
