@@ -1536,7 +1536,13 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             // deselect "Television"
             var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 0);
 
-            chaisePage.clickButton(inp2).then(function (){
+            chaisePage.clickButton(inp2).then(function () {
+                return browser.wait(function () {
+                    return chaisePage.recordsetPage.getAngularSelectedRowsFilters().count().then(function (ct) {
+                        return (ct == 1);
+                    });
+                });
+            }).then(function () {
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Unlink", "Unlink button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
