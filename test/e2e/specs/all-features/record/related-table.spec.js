@@ -50,29 +50,40 @@ var pageReadyCondition = function () {
 
 
 describe ("Viewing exisiting record with related entities, ", function () {
-    beforeAll(function () {
+    beforeAll(function (done) {
         var keys = [];
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-        browser.ignoreSynchronization=true;
         var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-        browser.get(url);
-
-        pageReadyCondition();
+        // chaisePage.navigate(url)
+        // pageReadyCondition();
+        // done();
+        chaisePage.navigate(url).then(function () {
+            pageReadyCondition();
+            done();
+        }).catch(function(err) {
+            done.fail(err);
+        });
     });
 
-    it ("should show the related entities in the expected order.", function () {
+    it ("should show the related entities in the expected order.", function (done) {
         // wait for expected # of related tables to be visible before checking titles
         // this ensures the page content is loaded AND visible
         browser.wait(function() {
             return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
                 return (ct == testParams.tocHeaders.length);
             });
-        }, browser.params.defaultTimeout);
-        expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+        }, browser.params.defaultTimeout).then(function () {
+            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+            done();
+        }).catch(function(err) {
+            done.fail(err);
+        });
     });
 
-    it ("should show the related table names in the correct order in the Table of Contents", function () {
+    it ("should show the related table names in the correct order in the Table of Contents", function (done) {
+        // TODO fix this test case
         expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        done();
     });
 
     describe("share popup when the citation annotation has wait_for of all-outbound", function () {
@@ -261,14 +272,13 @@ describe ("Viewing exisiting record with related entities, ", function () {
         // test trying to unlink 2 rows where 1 is allowed and 1 is not
         // verifies the error case works as expected and rows are still selected after failure
         // need to attach a "postLogin" function to reload the record page we are testing
-        recordHelpers.testBatchUnlinkDynamicAclsAssociationTable(association_table.unlink, false, pageReadyCondition, function () {
+        recordHelpers.testBatchUnlinkDynamicAclsAssociationTable(association_table.unlink, false, pageReadyCondition, function (done) {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
-
-            pageReadyCondition();
+            chaisePage.navigate(url).then(function () {
+                pageReadyCondition();
+            });
         });
     });
 
@@ -287,19 +297,21 @@ describe ("Viewing exisiting record with related entities, ", function () {
     describe("for a pure and binary association with page_size and hide_row_count, ", function () {
         recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
 
-        it ("Opened modal by `Link` button should honor the page_size and hide_row_count.", function () {
+        it ("Opened modal by `Link` button should honor the page_size and hide_row_count.", function (done) {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
             addRelatedRecordLink.click().then(function(){
-                chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+                return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+            }).then(function () {
                 return chaisePage.recordEditPage.getModalTitle().getText();
             }).then(function (title) {
                 expect(title).toBe("Link file to Accommodations: Super 8 North Hollywood Motel", "title missmatch.");
 
-                browser.wait(function () {
+                return browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                         return (ct == 2);
                     });
                 });
+            }).then(function () {
                 return chaisePage.recordsetPage.getModalRows().count();
             }).then(function(ct){
                 expect(ct).toBe(2, "association count missmatch for file domain table.");
@@ -307,9 +319,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nfirst 2\nrecords", "hide_row_count not honored");
 
                 return chaisePage.recordEditPage.getModalCloseBtn().click();
+            }).then(function () {
+                done();
             }).catch(function(error) {
                 console.log(error);
                 expect('There was an error in this promise chain').toBe('Please see error message.');
+                done.fail();
             });
         });
     });
@@ -465,9 +480,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
         describe("for a related entity with filter on related table", function () {
             recordHelpers.testRelatedTable(related_w_filter_on_related, pageReadyCondition);
 
-            it ("add button should not be available", function () {
+            it ("add button should not be available", function (done) {
                 var btn = chaisePage.recordPage.getAddRecordLink(related_w_filter_on_related.displayname);
                 expect(btn.isPresent()).toBeFalsy();
+                done();
             });
         });
 
@@ -495,9 +511,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
         describe("for a pure and binary association with filter on related table", function () {
             recordHelpers.testRelatedTable(assoc_w_filter_on_related, pageReadyCondition);
 
-            it ("link button should not be available", function () {
+            it ("link button should not be available", function (done) {
                 var btn = chaisePage.recordPage.getAddRecordLink(assoc_w_filter_on_related.displayname);
                 expect(btn.isPresent()).toBeFalsy();
+                done();
             });
         });
 
@@ -523,9 +540,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
             describe("for a related entity with a path of length 3 with filter", function () {
                 recordHelpers.testRelatedTable(path_related_w_filter, pageReadyCondition);
 
-                it ("add button should not be available", function () {
+                it ("add button should not be available", function (done) {
                     var btn = chaisePage.recordPage.getAddRecordLink(path_related_w_filter.displayname);
                     expect(btn.isPresent()).toBeFalsy();
+                    done();
                 });
             });
         }
@@ -537,21 +555,30 @@ describe ("Viewing exisiting record with related entities, ", function () {
             columnname = "nullable_assoc_key",
             addBtn;
 
-        beforeAll(function() {
+        beforeAll(function(done) {
             pageReadyCondition();
-            // click show empty sections button
+                // click show empty sections button
             chaisePage.recordPage.getShowAllRelatedEntitiesButton().click().then(function () {
                 addBtn = chaisePage.recordPage.getAddRecordLink(displayname, true);
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
             });
         });
 
-        it("should disable the link record button", function () {
+        it("should disable the link record button", function (done) {
             expect(addBtn.isEnabled()).toBeFalsy();
+            done();
         });
 
-        it("should have the proper tooltip", function () {
+        it("should have the proper tooltip", function (done) {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
                 expect(comment).toBe("'Linking to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
             });
         });
     });
@@ -562,36 +589,45 @@ describe ("Viewing exisiting record with related entities, ", function () {
             columnname = "nullable_assoc_key",
             addBtn;
 
-        beforeAll(function() {
+        beforeAll(function(done) {
             pageReadyCondition();
-
             addBtn = chaisePage.recordPage.getAddRecordLink("inbound_null_key", true);
+            done();
         });
 
-        it("should disable the add record button", function () {
+        it("should disable the add record button", function (done) {
             expect(addBtn.isEnabled()).toBeFalsy();
+            done();
         });
 
-        it("should have the proper tooltip", function () {
+        it("should have the proper tooltip", function (done) {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
                 expect(comment).toBe("'Adding to " + displayname + " is disabled until " + columnname + " in " + tablename + " is set.'", "Incorrect tooltip on disabled Add button");
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
             });
         });
     });
 
     describe("for a pure and binary association with a null value for the key on the leaf table", function () {
-        it("should add a not null filter and only show 2 of the 5 rows for related_table_null_key", function () {
+        it("should add a not null filter and only show 2 of the 5 rows for related_table_null_key", function (done) {
             var addBtn = chaisePage.recordPage.getAddRecordLink("association_table_null_keys2", true);
             expect(addBtn.isEnabled()).toBeTruthy();
 
             addBtn.click().then(function () {
-                browser.wait(function () {
+                return browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                         return (ct == 2);
                     });
                 });
-
+            }).then(function () {
                 expect(chaisePage.recordsetPage.getModalRows().count()).toBe(2, "Number of rows after applying not null filter is incorrect")
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
             });
         });
     });
@@ -600,17 +636,20 @@ describe ("Viewing exisiting record with related entities, ", function () {
 describe("For scroll to query parameter", function() {
     var displayname = "table_w_aggregates";
 
-    beforeAll(function () {
+    beforeAll(function (done) {
         var keys = [];
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-        browser.ignoreSynchronization=true;
         var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&") + "?scrollTo=" + displayname;
-        browser.get(url);
-
-        pageReadyCondition();
+        chaisePage.navigate(url).then(function () {
+            pageReadyCondition();
+            done();
+        }).catch(function(error) {
+            console.log(error);
+            done.fail();
+        });
     });
 
-    it("should scroll to the related table.", function () {
+    it("should scroll to the related table.", function (done) {
         var heading = chaisePage.recordPage.getRelatedTableAccordion(displayname);
 
         browser.wait(function () {
@@ -620,10 +659,14 @@ describe("For scroll to query parameter", function() {
                 // the element might not be even in the DOM
                 return false;
             })
-        });
-
-        heading.getAttribute("class").then(function(className) {
+        }).then(function () {
+            return heading.getAttribute("class")
+        }).then(function(className) {
             expect(className).toContain("panel-open", "Related table panel is not open when autoscrolled.");
+            done()
+        }).catch(function(error) {
+            console.log(error);
+            done.fail();
         });
     });
 });
