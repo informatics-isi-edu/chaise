@@ -4,6 +4,8 @@ exports.getConfig = function(options) {
     sauceKey: process.env.SAUCE_ACCESS_KEY,
     framework: 'jasmine2',
     capabilities: {
+      commandTimeout: 300,
+      // idleTimeout: 90,
       //browserName: 'internet explorer',
       //browserName: 'firefox',
       browserName: 'chrome',
