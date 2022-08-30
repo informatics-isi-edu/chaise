@@ -541,11 +541,12 @@ describe("regarding dynamic ACL support, ", function () {
             });
 
             it ("Trying to edit a column in another row should display a warning", function (done) {
+                var warn;
                 // we want to click on the first cell, so get it
                 var overlay = recordEditPage.getColumnPermissionOverlay(0, "name");
                 expect(overlay.isPresent()).toBeTruthy("overlay not present");
                 overlay.click().then(function () {
-                    var warn = recordEditPage.getColumnPermissionError(0, "name");
+                    warn = recordEditPage.getColumnPermissionError(0, "name");
 
                     return chaisePage.waitForElement(warn);
                 }).then(function () {
