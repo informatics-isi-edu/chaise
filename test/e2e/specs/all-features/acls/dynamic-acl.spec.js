@@ -234,13 +234,17 @@ var getRecordURL = function (id) {
 };
 
 var testRecordEditDelete = function (id, editable, deletable) {
-    beforeAll(function () {
-        browser.ignoreSynchronization = true;
-        browser.get(getRecordURL(id));
-        chaisePage.recordPageReady();
+    beforeAll(function (done) {
+        chaisePage.navigate(getRecordURL(id)).then(function () {
+            return chaisePage.recordPageReady();
+        }).then(function () {
+            done();
+        }).catch(function (err) {
+            done.fail(err);
+        });
     });
 
-    it("should display the Edit link" + (editable ? "" : " as a disabled"), function () {
+    it("should display the Edit link" + (editable ? "" : " as a disabled"), function (done) {
         var button = recordPage.getEditRecordButton();
         expect(button.isPresent()).toEqual(true, "edit button missing");
         if (editable) {
@@ -248,9 +252,11 @@ var testRecordEditDelete = function (id, editable, deletable) {
         } else {
             expect(button.getAttribute("disabled")).toBeTruthy("edit button enabled");
         }
+
+        done();
     });
 
-    it("should display the Delete link" + (deletable ? "" : " as disabled"), function () {
+    it("should display the Delete link" + (deletable ? "" : " as disabled"), function (done) {
         var button = recordPage.getDeleteRecordButton();
         expect(button.isPresent()).toEqual(true, "delete button missing");
         if (deletable) {
@@ -258,6 +264,8 @@ var testRecordEditDelete = function (id, editable, deletable) {
         } else {
             expect(button.getAttribute("disabled")).toBeTruthy("delete button enabled");
         }
+
+        done();
     });
 };
 
@@ -285,19 +293,26 @@ var getRecordEditURL = function (filter) {
 /******************** recordset helpers ************************/
 
 var testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, expectedEditable, expectedDeletable) {
-    beforeAll(function () {
-        chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + uriFilter + "@sort(id)");
-        chaisePage.recordsetPageReady();
-        browser.wait(function () {
-            return chaisePage.recordsetPage.getRows().count().then(function (ct) {
-                return (ct==rowCount)
+    beforeAll(function (done) {
+        chaisePage.refresh(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + uriFilter + "@sort(id)").then(function () {
+            return chaisePage.recordsetPageReady();
+        }).then(function () {
+            return browser.wait(function () {
+                return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+                    return (ct==rowCount)
+                });
             });
+        }).then(function () {
+            done();
+        }).catch(function (err) {
+            done.fail(err);
         });
     });
 
-    it ("should " + (displayBulkEdit ? "" : " not") +  " display the bulk edit link.", function () {
+    it ("should " + (displayBulkEdit ? "" : " not") +  " display the bulk edit link.", function (done) {
         var link = recordsetPage.getEditRecordLink();
         expect(link.isPresent()).toBe(displayBulkEdit, "bulk edit missmatch");
+        done();
     });
 
     describe("the action columns, ", function () {
@@ -312,7 +327,7 @@ var testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, ex
                 done();
             }).catch(function (err) {
                 done.fail(err);
-            })
+            });
         });
     });
 }
@@ -340,20 +355,26 @@ describe("regarding dynamic ACL support, ", function () {
 
         describe("when the row cannot be edited or deleted, ", function () {
             // in this case none of the buttons show up (no edit, no delete, no create)
-            beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(getRecordURL(testParams.dynamic_acl.row_ids.non_edit_non_delete));
-                chaisePage.recordPageReady();
+            beforeAll(function (done) {
+                chaisePage.navigate(getRecordURL(testParams.dynamic_acl.row_ids.non_edit_non_delete)).then(function () {
+                    return chaisePage.recordPageReady();
+                }).then(function () {
+                    done();
+                }).catch(function(err) {
+                    done.fail(err);
+                });
             });
 
-            it ("should not display the Edit button.", function () {
+            it ("should not display the Edit button.", function (done) {
                 var button = recordPage.getEditRecordButton();
                 expect(button.isPresent()).toBeFalsy();
+                done();
             });
 
-            it ("should not display the Delete button.", function () {
+            it ("should not display the Delete button.", function (done) {
                 var button = recordPage.getDeleteRecordButton();
                 expect(button.isPresent()).toBeFalsy();
+                done();
             });
         });
 
@@ -374,37 +395,47 @@ describe("regarding dynamic ACL support, ", function () {
         }).pend("tcrs support has been removed because of performance issues");
 
         describe("when the related tables have dynamic acls, ", function () {
-            beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(getRecordURL(testParams.dynamic_acl.related.main_id));
-                chaisePage.recordPageReady();
+            beforeAll(function (done) {
+                chaisePage.navigate(getRecordURL(testParams.dynamic_acl.related.main_id)).then(function () {
+                    return chaisePage.recordPageReady();
+                }).then(function () {
+                    done();
+                }).catch(function(err) {
+                    done.fail(err);
+                });
             });
 
             describe("for a related table, ", function () {
-                it ("rows should be displayed properly", function () {
+                it ("rows should be displayed properly", function (done) {
                     expect(recordPage.getRelatedTableRows(testParams.dynamic_acl.related.inbound_displayname).count()).toBe(4);
+                    done();
                 });
 
-                it ("Edit button should display based on related table acls,", function () {
+                it ("Edit button should display based on related table acls,", function (done) {
                     testRelatedEdit(testParams.dynamic_acl.related.inbound_displayname, [true, false, false, true]);
+                    done();
                 });
 
-                it ("Delete button should display based on related table acls", function () {
+                it ("Delete button should display based on related table acls", function (done) {
                     testRelatedDelete(testParams.dynamic_acl.related.inbound_displayname, [true, false, true, false]);
+                    done();
                 });
             });
 
             describe("for an association table, ", function () {
-                it ("rows should be displayed properly", function () {
+                it ("rows should be displayed properly", function (done) {
                     expect(recordPage.getRelatedTableRows(testParams.dynamic_acl.related.assoc_displayname).count()).toBe(2);
+                    done();
                 });
 
-                it ("Edit button should display based on related table acls,", function () {
+                it ("Edit button should display based on related table acls,", function (done) {
                     testRelatedEdit(testParams.dynamic_acl.related.assoc_displayname, [true, false]);
+                    done();
                 });
 
-                it ("Unlink button should display based on association table acls", function () {
+                it ("Unlink button should display based on association table acls", function (done) {
                     testRelatedDelete(testParams.dynamic_acl.related.assoc_displayname, [false, true]);
+                    done();
                 });
             });
         });
@@ -413,24 +444,30 @@ describe("regarding dynamic ACL support, ", function () {
     /******************** recordedit tests ************************/
     describe("when viewing Recordedit app for a table with dynamic acls", function () {
         describe("when the whole row cannot be edited", function () {
-            beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(getRecordEditURL("id=1;id=2;id=5"));
-                chaisePage.recordeditPageReady();
-                browser.wait(function() {
-                    return recordEditPage.getAllColumnNames().count().then(function(ct) {
-                        return (ct == 3);
-                    });
-                }, browser.params.defaultTimeout);
+            beforeAll(function (done) {
+                chaisePage.navigate(getRecordEditURL("id=1;id=2;id=5")).then(function () {
+                    return chaisePage.recordeditPageReady();
+                }).then(function () {
+                    return browser.wait(function() {
+                        return recordEditPage.getAllColumnNames().count().then(function(ct) {
+                            return (ct == 3);
+                        });
+                    }, browser.params.defaultTimeout);
+                }).then(function () {
+                    done();
+                }).catch(function(err) {
+                    done.fail(err);
+                });
             });
 
-            it("the `ban` icon should be displayed on the header.", function () {
+            it("the `ban` icon should be displayed on the header.", function (done) {
                 expect(recordEditPage.getDisabledRowIcon(0).isPresent()).toBe(false, "first row missmatch");
                 expect(recordEditPage.getDisabledRowIcon(1).isPresent()).toBe(true, "second row missmatch");
                 expect(recordEditPage.getDisabledRowIcon(2).isPresent()).toBe(true, "third row missmatch");
+                done();
             });
 
-            it ("all the columns in the row should be disabled.", function () {
+            it ("all the columns in the row should be disabled.", function (done) {
                 // 1 all except id enabled, 2 table-level disabled, 3 all vis columns disabled
                 expect(recordEditPage.getInputById(0, "id").getAttribute('disabled')).toBeTruthy("row=0 id missmatch");
                 expect(recordEditPage.getInputById(0, "name").getAttribute('disabled')).toBeFalsy("row=0 name missmatch");
@@ -443,20 +480,21 @@ describe("regarding dynamic ACL support, ", function () {
                 expect(recordEditPage.getInputById(2, "id").getAttribute('disabled')).toBeTruthy("row=2 id missmatch");
                 expect(recordEditPage.getInputById(2, "name").getAttribute('disabled')).toBeTruthy("row=2 name missmatch");
                 expect(recordEditPage.getInputById(2, "fk_col").getAttribute('disabled')).toBeTruthy("row=2 fk_col missmatch");
+                done();
             });
 
             it ("submitting the form should not submit the value and show the rows a `disabled`", function (done) {
                 var nameInpt = recordEditPage.getInputById(0, "name");
-                nameInpt.sendKeys("new one");
-                recordEditPage.submitForm().then(function () {
-
+                nameInpt.sendKeys("new one").then(function () {
+                    return recordEditPage.submitForm();
+                }).then(function () {
                     // Make sure the table shows up with the expected # of rows
-                    browser.wait(function() {
+                    return browser.wait(function() {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                             return (ct == 3);
                         });
                     }, browser.params.defaultTimeout);
-
+                }).then(function () {
                     expect(recordEditPage.getResultsetTitleElement().getText()).toBe("1/3 dynamic_acl_main_table records updated successfully", "Resultset title is incorrect.");
 
                     expect(recordEditPage.getDisabledResultSetHeader().getText()).toBe("2 disabled records (due to lack of permission)", "disabled header is incorrect.");
@@ -464,24 +502,31 @@ describe("regarding dynamic ACL support, ", function () {
                     done();
                 }).catch(function (err) {
                     done.fail(err);
-                })
+                });
             });
         });
 
         describe("when some of the columns in the row cannot be edited", function () {
-            beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(getRecordEditURL("id=1;id=6"));
-                // just in case the other test failed and didn't submit
-                browser.switchTo().alert().then(function (alert) {
-                    alert.accept();
-                }).catch(function () {}).finally(function () {
-                    chaisePage.recordeditPageReady();
-                    browser.wait(function() {
+            beforeAll(function (done) {
+                chaisePage.navigate(getRecordEditURL("id=1;id=6")).then(function () {
+                    // just in case the other test failed and didn't submit
+                    return browser.switchTo().alert()
+                }).then(function (alert) {
+                    return alert.accept();
+                }).catch(function () {
+                    // do nothing
+                }).finally(function () {
+                    return chaisePage.recordeditPageReady();
+                }).then(function () {
+                    return browser.wait(function() {
                         return recordEditPage.getAllColumnNames().count().then(function(ct) {
                             return (ct == 3);
                         });
                     }, browser.params.defaultTimeout);
+                }).then(function () {
+                    done();
+                }).catch(function (err) {
+                    done.fail(err);
                 });
             });
 
@@ -502,8 +547,8 @@ describe("regarding dynamic ACL support, ", function () {
                 overlay.click().then(function () {
                     var warn = recordEditPage.getColumnPermissionError(0, "name");
 
-                    chaisePage.waitForElement(warn);
-
+                    return chaisePage.waitForElement(warn);
+                }).then(function () {
                     var message = "This field cannot be modified. To modify it, remove all records that have this field disabled (e.g. Record Number 2)";
                     expect(warn.getText()).toEqual(message, "permission error text missmatch");
                     // remove the record from form
@@ -516,7 +561,8 @@ describe("regarding dynamic ACL support, ", function () {
                     expect(ct).toBe(1, "number of rows is incorrect after removing 1");
 
                     var nameInpt = recordEditPage.getInputById(0, "name");
-                    nameInpt.sendKeys("1");
+                    return nameInpt.sendKeys("1");
+                }).then(function () {
                     return recordEditPage.submitForm();
                 }).then(function () {
                     return recordEditPage.getAlertError();
@@ -528,16 +574,19 @@ describe("regarding dynamic ACL support, ", function () {
                     }
                 }).catch(function (err) {
                     done.fail(err);
-                })
+                });
             });
         })
 
         // navigate away from the recordedit page so it doesn't interfere with other tests
         afterAll(function (done) {
-            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table");
-            browser.switchTo().alert().then(function (alert) {
-                alert.accept();
-            }).catch(function () {}).finally(function () {
+            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table").then(function () {
+                return browser.switchTo().alert();
+            }).then(function (alert) {
+                return alert.accept();
+            }).catch(function () {
+                // do nothing
+            }).finally(function () {
                 done();
             });
         });
