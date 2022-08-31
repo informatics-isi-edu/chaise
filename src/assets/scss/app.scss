@@ -698,10 +698,12 @@ html {
     cursor: pointer;
     font-size: 18px;
 
+    // TODO should be removed or modified
     &.glyphicon-star {
       color: goldenrod;
     }
 
+    // TODO should be removed or modified
     // glyphicon-star-empty
     &.hover-show {
       visibility: hidden;
@@ -710,6 +712,7 @@ html {
     &.favorite-spinner-container {
       font-size: 1em;
 
+      // TODO should be removed or modified
       > .glyphicon-refresh {
         cursor: not-allowed;
         font-size: 14px;
@@ -727,11 +730,13 @@ html {
     border: none;
   }
 
+  // TODO should be removed
   // spinner
   .glyphicon-refresh {
     color: $spinner-color;
   }
 
+  // TODO should be removed
   // spinner animation
   .glyphicon-refresh-animate {
     -animation: spin 0.7s infinite linear;

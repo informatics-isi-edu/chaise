@@ -114,8 +114,9 @@ html {
         &::after {
             display: inline-block;
             font-size: .85rem;
-            font-family: 'Glyphicons Halflings';
-            content: "\e164"; // glyphicon-new-window
+            font-family: 'Font Awesome 5 Free';
+            content: '\f35d'; // fas fa-external-link
+            font-weight: 900;
             padding-left: 2px;
         }
     }
