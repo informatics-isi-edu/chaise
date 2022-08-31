@@ -40,7 +40,7 @@
     "execSync": "x",
     "jasmine-spec-reporter": "^2.5.0",
     "moment": "2.29.4",
-    "moment-timezone": "0.5.14",
+    "moment-timezone": "0.5.35",
     "protractor": "5.4.4",
     "request": "x",
     "request-q": "x",
