@@ -666,11 +666,14 @@ exports.testSharePopup = function (sharePopupParams) {
 exports.testRelatedTable = function (params, pageReadyCondition) {
     var currentEl, markdownToggleLink, toggled = false, noRows = false;
     beforeAll(function(done) {
-        pageReadyCondition();
-        currentEl = params.isInline ? chaisePage.recordPage.getEntityRelatedTable(params.displayname) : chaisePage.recordPage.getRelatedTableAccordion(params.displayname);
+        pageReadyCondition().then(function () {
+            currentEl = params.isInline ? chaisePage.recordPage.getEntityRelatedTable(params.displayname) : chaisePage.recordPage.getRelatedTableAccordion(params.displayname);
 
-        markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname, params.isInline);
-        done();
+            markdownToggleLink = chaisePage.recordPage.getToggleDisplayLink(params.displayname, params.isInline);
+            done();
+        }).catch(function(err) {
+            done.fail(err);
+        });
     });
 
     if (!params.isInline) {
@@ -740,12 +743,13 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         expect(chaisePage.recordsetPage.getFacetFilters().first().getText()).toEqual(params.viewMore.filter, "filter missmatch.");
                         return browser.navigate().back()
                     }).then(function () {
-                        pageReadyCondition();
+                        return pageReadyCondition();
+                    }).then(function () {
                         done();
                     }).catch(function (err) {
                         browser.navigate().back().then(function () {
-                            pageReadyCondition();
-                        
+                            return pageReadyCondition();
+                        }).finally(function () {
                             done.fail(err);
                         });
                     })

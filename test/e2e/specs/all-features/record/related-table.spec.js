@@ -42,10 +42,10 @@ var testParams = {
 };
 
 var pageReadyCondition = function () {
-    chaisePage.waitForElementInverse(element(by.id("spinner")));
-
-    // make sure the loader is hidden
-    chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+    return chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function () {
+        // make sure the loader is hidden
+        return chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+    });
 };
 
 
@@ -54,11 +54,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
         var keys = [];
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
         var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-        // chaisePage.navigate(url)
-        // pageReadyCondition();
-        // done();
+
         chaisePage.navigate(url).then(function () {
-            pageReadyCondition();
+            return pageReadyCondition();
+        }).then(function () {
             done();
         }).catch(function(err) {
             done.fail(err);
@@ -277,7 +276,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
             chaisePage.navigate(url).then(function () {
-                pageReadyCondition();
+                return pageReadyCondition();
             });
         });
     });
@@ -556,9 +555,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
             addBtn;
 
         beforeAll(function(done) {
-            pageReadyCondition();
+            pageReadyCondition().then(function () {
                 // click show empty sections button
-            chaisePage.recordPage.getShowAllRelatedEntitiesButton().click().then(function () {
+                return chaisePage.recordPage.getShowAllRelatedEntitiesButton().click()
+            }).then(function () {
                 addBtn = chaisePage.recordPage.getAddRecordLink(displayname, true);
                 done();
             }).catch(function(error) {
@@ -590,9 +590,13 @@ describe ("Viewing exisiting record with related entities, ", function () {
             addBtn;
 
         beforeAll(function(done) {
-            pageReadyCondition();
-            addBtn = chaisePage.recordPage.getAddRecordLink("inbound_null_key", true);
-            done();
+            pageReadyCondition().then(function () {
+                addBtn = chaisePage.recordPage.getAddRecordLink("inbound_null_key", true);
+                done();
+            }).catch(function(error) {
+                console.log(error);
+                done.fail();
+            });
         });
 
         it("should disable the add record button", function (done) {
@@ -641,7 +645,8 @@ describe("For scroll to query parameter", function() {
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
         var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&") + "?scrollTo=" + displayname;
         chaisePage.navigate(url).then(function () {
-            pageReadyCondition();
+            return pageReadyCondition();
+        }).then(function () {
             done();
         }).catch(function(error) {
             console.log(error);
