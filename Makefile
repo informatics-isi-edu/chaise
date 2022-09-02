@@ -82,7 +82,7 @@ E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
-FullFeaturesParallel=test/e2e/specs/all-features/protractor_2.conf.js
+FullFeaturesParallel2=test/e2e/specs/all-features/protractor_2.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
