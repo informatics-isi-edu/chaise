@@ -155,7 +155,7 @@ testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures2
-testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS_TWO
+testfullfeatures2: test-FULL_FEATURES_PARALLEL_TESTS_TWO
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeaturesconfirmation
