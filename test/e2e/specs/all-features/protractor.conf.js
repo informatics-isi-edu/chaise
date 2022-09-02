@@ -4,12 +4,12 @@ var config = pConfig.getConfig({
     // This config is meant to be run as part of the parallel tests configuration
     configFileName: 'parallel-configs/all-features.dev.json',
     specs: [
-        "*/*.spec.js"
-        // "acls/dynamic-acl.spec.js",
+        // "*/*.spec.js"
+        "acls/dynamic-acl.spec.js",
         // "acls/static-acl.spec.js",
         // "navbar/base-config.spec.js",
         // "record/copy-btn.spec.js",
-        // "record/related-table.spec.js", // should be moved down 1 for accurate order
+        "record/related-table.spec.js", // should be moved down 1 for accurate order
         // "record/permissions-annotation.spec.js",
         // "recordedit/permissions-annotation.spec.js",
         // "recordset/permissions-annotation.spec.js",
