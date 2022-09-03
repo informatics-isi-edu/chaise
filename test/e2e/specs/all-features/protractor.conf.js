@@ -6,9 +6,9 @@ var config = pConfig.getConfig({
     specs: [
         // "*/*.spec.js"
         "record/related-table.spec.js", // should be moved down 1 for accurate order
-        "acls/static-acl.spec.js",
-        "navbar/base-config.spec.js",
-        "record/copy-btn.spec.js",
+        // "acls/static-acl.spec.js",
+        // "navbar/base-config.spec.js",
+        // "record/copy-btn.spec.js",
         // "acls/dynamic-acl.spec.js",
         // "record/permissions-annotation.spec.js",
         // "recordedit/permissions-annotation.spec.js",

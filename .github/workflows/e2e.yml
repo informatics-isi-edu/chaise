@@ -155,12 +155,6 @@ jobs:
         run: |
           cd chaise
           make testfullfeatures
-      - name: Run full features 2 test spec
-        id: test-full-features-2
-        continue-on-error: true
-        run: |
-          cd chaise
-          make testfullfeatures2
       # - name: Run delete prohibited configuration tests 1
       #   id: test-delete-prohibited-1
       #   continue-on-error: true
@@ -187,9 +181,6 @@ jobs:
       #   run: exit 1
       - name: Check on full features test spec
         if: always() && steps.test-full-features.outcome != 'success'
-        run: exit 1
-      - name: Check on full features 2 test spec
-        if: always() && steps.test-full-features-2.outcome != 'success'
         run: exit 1
       # - name: Check on delete prohibited configuration tests 1
       #   if: always() && steps.test-delete-prohibited-1.outcome != 'success'
