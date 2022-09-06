@@ -50,8 +50,8 @@
     white-space: normal;
 
     &:before {
-      content: '\f019'; // fas fa-download
-      font-family: 'Font Awesome 5 Free';
+      content: '\f019'; // fa-solid fa-download
+      font-family: 'Font Awesome 6 Free';
       font-weight: 900;
       padding-right: 4px;
     }
@@ -59,7 +59,7 @@
     &.external-link-icon:not(.external-link-no-icon) {
       // change the icon to cloud download
       &:before {
-        content: '\f381'; // fas cloud-download-alt
+        content: '\f0ed'; // fa-solid fa-cloud-arrow-down
       }
 
       //remove the external link icon on after
