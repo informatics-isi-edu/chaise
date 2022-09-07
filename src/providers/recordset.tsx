@@ -153,7 +153,7 @@ export const RecordsetContext = createContext<{
    */
   forceShowSpinner: boolean,
   /**
-   * can be used to fore showing of the spinner
+   * can be used to force showing of the spinner
    */
   setForceShowSpinner: Function,
   /**

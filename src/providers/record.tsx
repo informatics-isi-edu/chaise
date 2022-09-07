@@ -1,5 +1,6 @@
 // hooks
 import { createContext, useMemo, useState } from 'react';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -20,7 +21,19 @@ export const RecordContext = createContext<{
   recordValues: any,
   readMainEntity: any,
   reference: any,
-  initialized: boolean
+  initialized: boolean,
+  /* Whether the main data is loading or not (and therefore we need spinner or not) */
+  isLoading: boolean,
+  /* if true, we have to forcefully show the spinner */
+  forceShowSpinner: boolean,
+  /* can be used to force showing of the spinner */
+  setForceShowSpinner: Function
+  /* get the appropriate log action */
+  // getLogAction: (actionPath: LogActions, childStackPath?: any) => string,
+  /**
+   * get the appropriate log stack
+   */
+  // getLogStack: (childStackElement?: any, extraInfo?: any) => any,
 } | null>(null);
 
 type RecordProviderProps = {
@@ -36,6 +49,8 @@ export default function RecordProvider({
   const [page, setPage] = useState<any>(null);
   const [recordValues, setRecordValues] = useState<any>([]);
   const [initialized, setInitialized] = useState(false);
+  const [isLoading, setIsLoading, isLoadingRef] = useStateRef(true);
+  const [forceShowSpinner, setForceShowSpinner] = useState(false);
 
   const readMainEntity = (isUpdate: boolean, logObj: any) => {
     const defer = Q.defer();
@@ -76,9 +91,9 @@ export default function RecordProvider({
         return defer.reject(new MultipleRecordError(tableDisplayName, recordSetLink)), defer.promise;
       }
 
-      // // Collate tuple.isHTML and tuple.values into an array of objects
-      // // i.e. {isHTML: false, value: 'sample'}
-      const rv : any[] = [];
+      // Collate tuple.isHTML and tuple.values into an array of objects
+      // i.e. {isHTML: false, value: 'sample'}
+      const rv: any[] = [];
       page.tuples[0].values.forEach(function (value: any, index: number) {
         rv.push({
           isHTML: page.tuples[0].isHTML[index],
@@ -89,6 +104,7 @@ export default function RecordProvider({
       setPage(page);
       setRecordValues(rv);
       setInitialized(true);
+      setIsLoading(false);
 
       // // the initial values for the templateVariables
       // $rootScope.templateVariables = tuple.templateVariables.values;
@@ -141,6 +157,9 @@ export default function RecordProvider({
       readMainEntity,
       reference,
       initialized,
+      isLoading,
+      forceShowSpinner,
+      setForceShowSpinner
     };
   }, [page]);
 

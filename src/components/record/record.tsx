@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -26,6 +27,7 @@ import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
 // services
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
@@ -33,6 +35,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type RecordProps = {
   /**
@@ -65,11 +68,19 @@ type RecordInnerProps = {
 const RecordInner = ({
   parentContainer,
 }: RecordInnerProps): JSX.Element => {
-  // const { validateSessionBeforeMutation } = useAuthn();
+  const { validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors } = useError();
-  const { page, readMainEntity, reference, initialized } = useRecord();
-  // TODO: add getLogAction and getLogStack
-  // const { page, readMainEntity, reference, initialized, getLogAction, getLogStack } = useRecord();
+
+  // TODO: add getLogAction and getLogStack to record provider
+  const { 
+    forceShowSpinner, 
+    setForceShowSpinner,
+    initialized,
+    isLoading,
+    page, 
+    readMainEntity, 
+    reference, 
+  } = useRecord();
 
   /**
    * State variable to show or hide side panel
@@ -78,6 +89,14 @@ const RecordInner = ({
   const [canCreate, setCanCreate] = useState<boolean>(false);
   const [canEdit, setCanEdit] = useState<boolean>(false);
   const [canDelete, setCanDelete] = useState<boolean>(false);
+  // when object is null, hide the modal
+  // object is the props for the the modal
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
+    onConfirm: () => void,
+    onCancel: () => void,
+    buttonLabel: string,
+    message: JSX.Element
+  } | null>(null);
 
   // initialize the page
   useEffect(() => {
@@ -145,44 +164,67 @@ const RecordInner = ({
     return appLink + separator + 'copy=true';
   }
 
-  // TODO: refactor implementation from table-row to another component for delete
   const deleteRecord = () => {
-    // validateSessionBeforeMutation(() => {
-    //   if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-    //     LogService.logClientAction({
-    //       action: getLogAction(LogActions.DELETE_INTEND, LogStackPaths.ENTITY),
-    //       stack: getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, reference.table, reference.filterLogInfo))
-    //     }, reference.defaultLogInfo);
+    validateSessionBeforeMutation(() => {
+      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+        LogService.logClientAction({
+          // action: getLogAction(LogActions.DELETE_INTEND, LogStackPaths.ENTITY),
+          // stack: getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, reference.table, reference.filterLogInfo))
+        }, reference.defaultLogInfo);
 
-    //     const confirmMessage: JSX.Element = (
-    //       <>
-    //         Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
-    //         <span>: </span>
-    //         <code><DisplayValue value={page.tuples[0].displayname}></DisplayValue></code>?
-    //       </>
-    //     );
+        const confirmMessage: JSX.Element = (
+          <>
+            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+            <span>: </span>
+            <code><DisplayValue value={page.tuples[0].displayname}></DisplayValue></code>?
+          </>
+        );
 
-    //     setShowDeleteConfirmationModal({
-    //       buttonLabel: isUnlink ? 'Unlink' : 'Delete',
-    //       onConfirm: () => { onDeleteUnlinkConfirmation(reference, isRelated, isUnlink) },
-    //       onCancel: () => {
-    //         setShowDeleteConfirmationModal(null);
-    //         const actionVerb = isUnlink ? LogActions.UNLINK_CANCEL : LogActions.DELETE_CANCEL
-    //         LogService.logClientAction({
-    //           action: getRowLogAction(actionVerb),
-    //           stack: logStack
-    //         }, reference.defaultLogInfo);
-    //       },
-    //       message: confirmMessage
-    //     });
+        setShowDeleteConfirmationModal({
+          buttonLabel: 'Delete',
+          onConfirm: () => { onDeleteUnlinkConfirmation() },
+          onCancel: () => {
+            setShowDeleteConfirmationModal(null);
+            const actionVerb = LogActions.DELETE_CANCEL;
+            LogService.logClientAction({
+              // action: getRowLogAction(actionVerb),
+              // stack: logStack
+            }, reference.defaultLogInfo);
+          },
+          message: confirmMessage
+        });
 
-    //   } else {
-    //     onDeleteUnlinkConfirmation(reference, isRelated, isUnlink);
-    //   }
-    // })
-    // $log.debug('deleting tuple!');
+      } else {
+        onDeleteUnlinkConfirmation();
+      }
+    })
+    $log.debug('deleting tuple!');
 
     return;
+  }
+
+  const onDeleteUnlinkConfirmation = () => {
+    // make sure the main spinner is displayed (it's a state variable in recordset provider)
+    setForceShowSpinner(true);
+    // close the confirmation modal if it exists
+    setShowDeleteConfirmationModal(null);
+
+    const actionVerb = LogActions.DELETE;
+    const logObj = {
+      // action: getRowLogAction(actionVerb),
+      // stack: logStack
+    };
+    reference.delete(logObj).then(function deleteSuccess() {
+      // Get an appLink from a reference to the table that the existing reference came from
+      const unfilteredRefAppLink = reference.table.reference.contextualize.compact.appLink;
+      // $rootScope.showSpinner = false;
+      windowRef.location = unfilteredRefAppLink;
+    }).catch(function (error: any) {
+      dispatchError({ error: error, isDismissible: true });
+    }).finally(() => {
+      // hide the spinner
+      setForceShowSpinner(false);
+    });
   }
 
   /**
@@ -233,6 +275,10 @@ const RecordInner = ({
   const btnClasses = 'chaise-btn chaise-btn-primary';
   return (
     <div className='record-container app-content-container'>
+      {
+        errors.length === 0 && (isLoading || forceShowSpinner) &&
+        <ChaiseSpinner />
+      } 
       <div className='top-panel-container'>
         <Alerts />
         {/* TODO */}
@@ -371,6 +417,15 @@ const RecordInner = ({
         convertMaxWidth
         convertInitialWidth
       />
+      {showDeleteConfirmationModal &&
+        <DeleteConfirmationModal
+          show={!!showDeleteConfirmationModal}
+          message={showDeleteConfirmationModal.message}
+          buttonLabel={showDeleteConfirmationModal.buttonLabel}
+          onConfirm={showDeleteConfirmationModal.onConfirm}
+          onCancel={showDeleteConfirmationModal.onCancel}
+        />
+      }
     </div>
   );
 };
