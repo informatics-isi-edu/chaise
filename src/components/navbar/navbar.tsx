@@ -6,6 +6,7 @@ import { ChangeEvent, KeyboardEvent, MouseEvent, useEffect, useRef, useState } f
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import Spinner from 'react-bootstrap/Spinner';
 
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
@@ -282,7 +283,7 @@ const ChaiseNavbar = (): JSX.Element => {
   }
 
   const renderRidSearchIcon = () => {
-    if (showRidSpinner) return (<span className='chaise-btn-icon fa-solid fa-rotate fa-spin' />);
+    if (showRidSpinner) return <Spinner size='sm' animation='border'/>;
 
     return (<span className='chaise-btn-icon fa-solid fa-share' />);
   };

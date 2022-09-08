@@ -2776,7 +2776,7 @@
         return {
             restrict: 'E',
             template: '<div class="chaise-input-control-feedback" ng-if="show">' +
-                       '<span class="{{btnClass}} remove-input-btn glyphicon glyphicon-remove" ng-click="clickCallback()" tooltip-placement="bottom" uib-tooltip="Clear input"></span>' +
+                       '<span class="{{btnClass}} remove-input-btn fa-solid fa-xmark" ng-click="clickCallback()" tooltip-placement="bottom" uib-tooltip="Clear input"></span>' +
                       '</div>',
             scope: {
                 btnClass: "@",
@@ -3534,7 +3534,7 @@
 
                 e.preventDefault();
 
-                var spinnerHTML = ' <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>';
+                var spinnerHTML = ' <span class="fa-solid fa-circle-notch fa-spin"></span>';
                 //show spinner
                 element.innerHTML += spinnerHTML;
 

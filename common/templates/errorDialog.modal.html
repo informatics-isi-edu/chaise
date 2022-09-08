@@ -12,8 +12,8 @@
     <span ng-if="ctrl.showContinueBtn">
         <span compile="ctrl.continueMessage"></span>
     </span>
-    <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()" id="toggle-error-details">
-        <i class="pull-left glyphicon glyphicon-triangle-right" ng-class="{'glyphicon-triangle-bottom': ctrl.displayDetails, 'glyphicon-triangle-right': !ctrl.displayDetails}"></i>
+    <a ng-show="ctrl.params.subMessage" ng-click="ctrl.showDetails()" id="toggle-error-details" class="toggle-error-details">
+        <i class="pull-left fa-solid" ng-class="{'fa-caret-down': ctrl.displayDetails, 'fa-caret-right': !ctrl.displayDetails}"></i>
         {{ctrl.linkText}}
     </a>
 

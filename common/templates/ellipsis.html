@@ -1,33 +1,33 @@
 <td ng-if="config.viewable || config.editable || config.deletable || config.selectMode != noSelect" class="block action-btns" ng-switch="config.selectMode">
     <button ng-switch-when="single-select" type="button" class="select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn" ng-disabled="selectDisabled" ng-click="onSelect($event)" tooltip-placement="bottom" uib-tooltip="Select" >
-        <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
+        <span class="chaise-btn-icon fa-regular fa-square-check"></span>
     </button>
     <div ng-switch-when="multi-select" class="chaise-checkbox">
         <input type="checkbox" ng-checked="selected || selectDisabled" ng-click="onSelect($event)" ng-disabled="selectDisabled">
         <label />
         <span ng-if="config.enableFavorites && isFavoriteLoading" class="favorite-icon favorite-spinner-container pull-right">
-            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+            <span class="fa-solid fa-circle-notch fa-spin"></span>
         </span>
-        <span ng-if="config.enableFavorites && !isFavoriteLoading && tuple.isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="callToggleFavorite()"></span>
-        <span ng-if="config.enableFavorites && !isFavoriteLoading && !tuple.isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="callToggleFavorite()"></span>
+        <span ng-if="config.enableFavorites && !isFavoriteLoading && tuple.isFavorite" class="favorite-icon fa-solid fa-star pull-right" ng-click="callToggleFavorite()"></span>
+        <span ng-if="config.enableFavorites && !isFavoriteLoading && !tuple.isFavorite" class="favorite-icon hover-show fa-regular fa-star pull-right" ng-click="callToggleFavorite()"></span>
     </div>
     <div class="chaise-btn-group" ng-switch-default>
         <a ng-if="applySavedQuery" class="apply-saved-query-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{applySavedQuery}}" tooltip-placement="bottom-left" uib-tooltip="Apply search criteria">
-            <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
+            <span class="chaise-btn-icon fa-regular fa-square-check"></span>
         </a>
         <!-- NOTE we're not setting this to disabled because we want the tooltip  -->
         <span ng-if="applySavedQuery === false" class="apply-saved-query-button disabled chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" tooltip-placement="bottom-left" uib-tooltip="Search criteria cannot be applied">
-            <span class="chaise-btn-icon glyphicon glyphicon-check"></span>
+            <span class="chaise-btn-icon fa-regular fa-square-check"></span>
         </span>
         <!-- NOTE: so users can control how to open the view link -->
         <a ng-if="viewLink" type="button" class="view-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-href="{{viewLink}}" tooltip-placement="bottom-left" uib-tooltip="View Details">
             <span class="chaise-btn-icon chaise-icon chaise-view-details"></span>
         </a>
         <button ng-if="edit" type="button" class="edit-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="edit()" target="_blank" tooltip-placement="bottom-left" uib-tooltip="Edit">
-            <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+            <span class="chaise-btn-icon fa-solid fa-pencil"></span>
         </button>
         <button ng-if="unlink" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="unlink()" tooltip-placement="bottom-left" uib-tooltip-html="'{{tooltip.unlink}}'">
-            <span class="chaise-btn-icon glyphicon glyphicon-remove-circle"></span>
+            <span class="chaise-btn-icon fa-regular fa-circle-xmark"></span>
         </button>
         <button ng-if="delete" type="button" class="delete-action-button chaise-btn chaise-btn-tertiary chaise-btn-link icon-btn" ng-click="delete()" tooltip-placement="bottom-left" uib-tooltip="Delete">
             <span class="chaise-btn-icon far fa-trash-alt""></span>

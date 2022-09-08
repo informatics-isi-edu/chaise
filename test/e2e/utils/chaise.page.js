@@ -457,7 +457,7 @@ var recordEditPage = function() {
     };
 
     this.getClearButton = function(el) {
-        return browser.executeScript("return $(arguments[0]).parent().parent().find('.glyphicon-remove')[0]", el);
+        return browser.executeScript("return $(arguments[0]).parent().parent().find('.fa-xmark')[0]", el);
     };
 
     this.getDisabledResultSet = function () {
