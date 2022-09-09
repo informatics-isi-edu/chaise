@@ -574,9 +574,9 @@ html {
     // END remove
 
 
-    // copy btn (used in share dialog)
-    .chaise-copy-btn {
-        color: $black-color;
+    // copy to clipboard btn (used in share dialog)
+    .chaise-copy-to-clipboard-btn {
+        color: $primary-color;
         font-size: 65%;
         cursor: pointer;
     }
