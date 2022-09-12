@@ -290,7 +290,7 @@ const RecordsetTable = ({
               </ChaiseTooltip>
             }
             {!col.hasError && col.isLoading &&
-              <span className='table-column-spinner'><Spinner animation='border' /></span>
+              <span className='table-column-spinner'><Spinner size='sm' animation='border' /></span>
             }
             {!col.hasError && !col.isLoading && canSort &&
               <span className='column-sort-icon'>{renderColumnSortIcon(col)}</span>
