@@ -787,7 +787,7 @@
                             display: inline-block;
 
                             // change chaise default color
-                            .glyphicon-refresh {
+                            .fa-circle-notch {
                                 color: $primary-color;
                             }
 
@@ -845,34 +845,6 @@
         /* border: 1px solid #737171; */
         /* border-radius: 3px; */
         padding: 5px 0px 5px 0px;
-    }
-
-    #viewer-content .menu-btn-container .menu-btn{
-        border: none;
-        display: flex;
-        background: none;
-        color: #ffffff;
-        align-items: center;
-        cursor: pointer;
-        opacity: 0.6;
-        background: #000;
-        padding: 3px 5px;
-        outline: none;
-    }
-
-    #viewer-content .menu-btn-container .menu-btn.pick{
-        color: #fff;
-        background: #2b2b2b;
-        opacity: 1;
-    }
-    #viewer-content .menu-btn-container .menu-btn:hover{
-        color: #fff;
-        background: #6194d6;
-        opacity: 0.85;
-    }
-
-    #viewer-content .menu-btn-container .menu-btn .glyphicon{
-        margin-right: 5px;
     }
 
     #viewer-header .top-flex-panel, #viewer-content {

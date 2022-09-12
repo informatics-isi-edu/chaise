@@ -85,7 +85,8 @@ body > .container {
         border-radius: 4px 0px 0px 4px;
     }
 
-    .chaise-search-btn .glyphicon-refresh {
+    // change the color of spinner
+    .chaise-search-btn .fa-circle-notch {
         color: white;
     }
 }

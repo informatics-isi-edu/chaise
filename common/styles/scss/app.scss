@@ -121,6 +121,12 @@ html {
         }
     }
 
+    .fullscreen-icon::after {
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      content: '\f065'; // fa-solid fa-expand
+    }
+
     // tooltip
     .chaise-icon-for-tooltip::after {
         line-height: 1; // fix
@@ -568,9 +574,9 @@ html {
     // END remove
 
 
-    // copy btn (used in share dialog)
-    .chaise-copy-btn {
-        color: $black-color;
+    // copy to clipboard btn (used in share dialog)
+    .chaise-copy-to-clipboard-btn {
+        color: $primary-color;
         font-size: 65%;
         cursor: pointer;
     }
@@ -600,13 +606,22 @@ html {
 
             &:disabled {
                 cursor: not-allowed;
-                &:after {
+                &:before,
+                &:checked:after {
                     color: $disabled-color;
                     border-color: $disabled-color;
                 }
             }
 
-            &:after {
+            &:before,
+            &:checked:after {
+                color: $primary-color;
+                -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+                -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+                transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
+            }
+
+            &:before {
                 content: "";
                 display: inline-block;
                 position: absolute;
@@ -618,15 +633,15 @@ html {
                 border-radius: 3px;
                 color: $primary-color;
                 background-color: $white-color;
-                -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-                -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
-                transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
             }
 
             &:checked:after {
-                font-family: 'Glyphicons Halflings';
-                content: "\e013"; // check mark
-                font-size: 1.21rem;
+                position: absolute;
+                left: 2px;
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+                content: "\f00c"; // fa-solid fa-check
+                font-size: 1.3rem;
             }
         }
     }
@@ -645,18 +660,17 @@ html {
         cursor: pointer;
         font-size: 18px;
 
-        &.glyphicon-star {
-            color: goldenrod;
+        &.fa-solid.fa-star {
+          color: goldenrod;
         }
 
-        // glyphicon-star-empty
         &.hover-show {
             visibility: hidden;
         }
 
         &.favorite-spinner-container {
             font-size: 1em;
-            > .glyphicon-refresh {
+            > .fa-circle-notch {
                 cursor: not-allowed;
                 font-size: 14px;
                 padding-right: 0px;
@@ -667,52 +681,17 @@ html {
 
     }
 
-    // changes the color of alert glyphicon (used for timeout error)
-    .glyphicon-alert {
-        color: $warning-color !important;
-        border: none;
+    // changes the color of alert fa-triangle-exclamation (used for timeout error)
+    .fa-triangle-exclamation {
+      color: $warning-color !important;
+      border: none;
     }
 
     // spinner
-    .glyphicon-refresh {
-        color: $spinner-color;
+    .fa-circle-notch {
+      color: $spinner-color;
     }
 
-    // spinner animation
-    .glyphicon-refresh-animate {
-        -animation: spin 0.7s infinite linear;
-        -ms-animation: spin 0.7s infinite linear;
-        -webkit-animation: spinw 0.7s infinite linear;
-        -moz-animation: spinm 0.7s infinite linear;
-    }
-
-    @keyframes spin {
-        from {
-            transform: scale(1) rotate(0deg);
-        }
-
-        to {
-            transform: scale(1) rotate(360deg);
-        }
-    }
-    @-webkit-keyframes spinw {
-        from {
-            -webkit-transform: rotate(0deg);
-        }
-
-        to {
-            -webkit-transform: rotate(360deg);
-        }
-    }
-    @-moz-keyframes spinm {
-        from {
-            -moz-transform: rotate(0deg);
-        }
-
-        to {
-            -moz-transform: rotate(360deg);
-        }
-    }
 
 /****** longtext inputs *********/
     .md-editor {

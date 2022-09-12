@@ -199,7 +199,7 @@ const SearchInput = ({
             className='chaise-search-btn chaise-btn chaise-btn-primary'
             disabled={disabled} onClick={() => triggerSearch(true)} role='button'
           >
-            <span className='chaise-btn-icon fa-solid fa-search' />
+            <span className='chaise-btn-icon fa-solid fa-magnifying-glass' />
           </button>
         </OverlayTrigger>
       </div>

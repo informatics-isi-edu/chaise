@@ -664,7 +664,7 @@ const RecordsetInner = ({
                   {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
                             <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
                                 <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
-                                    <span className='chaise-btn-icon glyphicon glyphicon-floppy-save'></span>
+                                    <span className='chaise-btn-icon fa-solid fa-floppy-disk'></span>
                                     <span>Saved searches</span>
                                     <span className='caret '></span>
                                 </button>

@@ -170,6 +170,12 @@ html {
     }
   }
 
+  .fullscreen-icon::after {
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    content: '\f065'; // fa-solid fa-expand
+  }
+
   // tooltip
   .chaise-icon-for-tooltip::after {
     line-height: 1; // fix
@@ -698,13 +704,10 @@ html {
     cursor: pointer;
     font-size: 18px;
 
-    // TODO should be removed or modified
-    &.glyphicon-star {
+    &.fa-solid.fa-star {
       color: goldenrod;
     }
 
-    // TODO should be removed or modified
-    // glyphicon-star-empty
     &.hover-show {
       visibility: hidden;
     }
@@ -712,8 +715,7 @@ html {
     &.favorite-spinner-container {
       font-size: 1em;
 
-      // TODO should be removed or modified
-      > .glyphicon-refresh {
+      > .fa-circle-notch {
         cursor: not-allowed;
         font-size: 14px;
         padding-right: 0px;
@@ -724,55 +726,14 @@ html {
   }
 
   // changes the color of alert fa-triangle-exclamation (used for timeout error)
-  // NOTE used to be glyphicon-alert
   .fa-triangle-exclamation {
     color: $warning-color !important;
     border: none;
   }
 
-  // TODO should be removed
   // spinner
-  .glyphicon-refresh {
+  .fa-circle-notch {
     color: $spinner-color;
-  }
-
-  // TODO should be removed
-  // spinner animation
-  .glyphicon-refresh-animate {
-    -animation: spin 0.7s infinite linear;
-    -ms-animation: spin 0.7s infinite linear;
-    -webkit-animation: spinw 0.7s infinite linear;
-    -moz-animation: spinm 0.7s infinite linear;
-  }
-
-  @keyframes spin {
-    from {
-      transform: scale(1) rotate(0deg);
-    }
-
-    to {
-      transform: scale(1) rotate(360deg);
-    }
-  }
-
-  @-webkit-keyframes spinw {
-    from {
-      -webkit-transform: rotate(0deg);
-    }
-
-    to {
-      -webkit-transform: rotate(360deg);
-    }
-  }
-
-  @-moz-keyframes spinm {
-    from {
-      -moz-transform: rotate(0deg);
-    }
-
-    to {
-      -moz-transform: rotate(360deg);
-    }
   }
 
   /* Rule for Chrome */

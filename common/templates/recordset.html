@@ -23,14 +23,14 @@
                         <export reference="vm.reference" disabled="!vm.hasLoaded || !vm.initialized || vm.rowValues.length == 0"></export>
                         <!-- permalink -->
                         <a id="permalink" ng-href="{{ getRecordsetLink() }}" ng-click="::copyPermalink()" tooltip-placement="bottom-right" uib-tooltip={{tooltip.permalink}} class="chaise-btn chaise-btn-primary">
-                            <span class="chaise-btn-icon glyphicon glyphicon-bookmark"></span>
+                            <span class="chaise-btn-icon fa-solid fa-bookmark"></span>
                             <span>Permalink</span>
                         </a>
                         <!-- save query -->
                         <div ng-if="showSavedQueryUI && vm.savedQueryReference" class="chaise-btn-group" uib-dropdown>
                             <div tooltip-placement="top-right" uib-tooltip-html="'{{tooltip.saveQuery}}'">
                                 <button id="save-query" class="chaise-btn chaise-btn-primary dropdown-toggle" ng-disabled="disableSavedQueryButton()" ng-click="logSavedQueryDropdownOpened()" uib-dropdown-toggle ng-style="{'pointer-events': disableSavedQueryButton() ? 'none' : ''}">
-                                    <span class="chaise-btn-icon glyphicon glyphicon-floppy-save"></span>
+                                    <span class="chaise-btn-icon fa-solid fa-floppy-disk"></span>
                                     <span>Saved searches</span>
                                     <span class="caret "></span>
                                 </button>
@@ -55,7 +55,7 @@
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
                         <div class="selected-chiclet" ng-repeat="row in vm.selectedRows track by $index">
                             <span class="selected-chiclet-remove" ng-click="removePill(row.uniqueId, $event)" uib-tooltip="Clear selected row" tooltip-placement="bottom-left">
-                                <i class="glyphicon glyphicon-remove"></i>
+                                <i class="fa-solid fa-xmark"></i>
                             </span>
                             <span class="selected-chiclet-name" ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                             <span class="selected-chiclet-name" ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>
@@ -77,14 +77,14 @@
                 <div class="recordset-chiclets-container recordset-chiclets" ng-if="vm.reference.location.filter || vm.hasFilter() || (vm.reference.location.customFacets && vm.reference.location.customFacets.displayname)">
                     <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.filter">
                         <button class="clear-custom-filters filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('filters')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
-                            <i class="icon-btn glyphicon glyphicon-remove"></i>
+                            <i class="icon-btn fa-solid fa-xmark"></i>
                         </button>
                         <span class="filter-chiclet-title chaise-btn chaise-btn-secondary">Custom Filter</span>
                         <span class="filter-chiclet-value chaise-btn chaise-btn-secondary" ng-bind="transformCustomFilter(vm.reference.location.filtersString)" tooltip-placement="bottom-left" uib-tooltip="{{transformCustomFilter(vm.reference.location.filtersString)}}" tooltip-class="custom-filter-tooltip"></span>
                     </div>
                     <div class="filter-chiclet chaise-btn-group" ng-if="vm.reference.location.customFacets && vm.reference.location.customFacets.displayname">
                         <button ng-if="vm.reference.location.customFacets.removable" class="clear-custom-facets filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter('cfacets')" tooltip-placement="bottom" uib-tooltip="Clear custom filter applied">
-                            <i class="glyphicon glyphicon-remove"></i>
+                            <i class="fa-solid fa-xmark"></i>
                         </button>
                         <span ng-if="!vm.reference.location.customFacets.removable" class="clear-custom-facets filter-chiclet-remove chaise-btn chaise-btn-secondary" tooltip-placement="bottom-left" uib-tooltip="Predefined filter(s)">
                             <i class="fas fa-filter"></i>
@@ -95,7 +95,7 @@
                     </div>
                     <div class="filter-chiclet chaise-btn-group" ng-repeat="fc in vm.reference.facetColumns track by $index" ng-if="vm.facetColumnsReady && vm.hasFilter($index)">
                         <button class="filter-chiclet-remove chaise-btn chaise-btn-secondary" ng-click="vm.removeFilter($index)" tooltip-placement="bottom" uib-tooltip="Clear filter applied">
-                            <i class="glyphicon glyphicon-remove"></i>
+                            <i class="fa-solid fa-xmark"></i>
                         </button>
                         <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::fc.displayname.isHTML"  ng-attr-uib-tooltip-html="'{{'Go to <code>' + fc.displayname.value + '</code> filter'}}'" ng-bind-html="::fc.displayname.value"></button>
                         <button class="filter-chiclet-title chaise-btn chaise-btn-secondary" tooltip-placement="bottom" ng-click="vm.focusOnFacet($index)" ng-if="::!fc.displayname.isHTML" ng-attr-uib-tooltip-html="'{{'Go to <code>' + fc.displayname.value+ '</code> filter'}}'" ng-bind="::fc.displayname.value"></button>
