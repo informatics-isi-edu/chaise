@@ -1,0 +1,718 @@
+/* eslint-disable max-len */
+// const chaisePage = require('../../../utils/chaise.page.js');
+// const recordHelpers = require('../../../utils/record-helpers.js');
+// const EC = protractor.ExpectedConditions;
+// const moment = require('moment');
+import { test, expect, Page } from '@playwright/test';
+import { recordPage } from '@isrd-isi-edu/chaise/tests/utils/record.page';
+import {
+  testSharePopup, testRelatedTable
+} from '@isrd-isi-edu/chaise/tests/utils/record-helpers';
+
+// run tests in sequence
+let page: Page;
+
+const testParams = {
+  catalogid: 77201,
+  schemaName: 'product-unordered-related-tables-links',
+  table_name: 'accommodation',
+  key: {
+    name: 'id',
+    value: '2004',
+    operator: '='
+  },
+  headers: [
+    'booking', // normal
+    'schedule', // has search
+    'media', // has row_markdown_pattern
+    'association_table', // association
+    'accommodation_image', // association with page_size
+    'association_table_markdown', // association with markdown
+    'related_table_2', // related entity with path length 3, wait_for entity set but no markdown patt
+    'table_w_aggregates', // related entity with aggregate columns
+    'table_w_invalid_row_markdown_pattern', // related entity with invalid row_markdown_pattern
+    'inbound related with display.wait_for entityset', //related entity with wait_for entityset and markdown patt
+    'inbound related with display.wait_for agg', //related entity with wait_for agg and markdown patt
+    'inbound related with filter on related table', // related entity with filter on related table
+    'association with filter on related table', // association with filter on related table
+    'path of length 3 with filters' // path of length 3 with filters
+  ],
+  tocHeaders: [
+    'Summary', 'booking (6)', 'schedule (2)', 'media (1)', 'association_table (1)',
+    'accommodation_image (2+)', 'association_table_markdown (1)', 'related_table_2 (1)',
+    'table_w_aggregates (2)', 'table_w_invalid_row_markdown_pattern (1)',
+    'inbound related with display.wait_for entityset (3)',
+    'inbound related with display.wait_for agg (3)',
+    'inbound related with filter on related table (1)',
+    'association with filter on related table (1)',
+    'path of length 3 with filters (1)'
+  ],
+  related_table_name_with_page_size_annotation: 'accommodation_image',
+  related_table_name_with_link_in_table: 'accommodation_image'
+};
+
+const pageReadyCondition = async (page: any) => {
+  await page.waitForSelector('spinner', { state: 'hidden' });
+  await page.waitForSelector('rt-loading', { state: 'hidden' });
+};
+
+test.describe.serial('Viewing exisiting record with related entities, ', () => {
+  let RIDLink: string;
+  test.beforeAll(async ({ browser }) => {
+    page = await browser.newPage();
+
+    const keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+
+    // TODO: browser
+    // const url = `${browser.params.url}/record/#${browser.params.catalogId}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
+    const url = `https://dev.isrd.isi.edu/chaise/record/#${testParams.catalogid}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
+
+    await page.goto(url);
+    await pageReadyCondition(page);
+  });
+
+  test('should show the related entities in the expected order.', async () => {
+    // wait for expected # of related tables to be visible before checking titles
+    // this ensures the page content is loaded AND visible
+    // await expect(recordPage.getSidePanelHeadings(page)).toHaveCount(testParams.tocHeaders.length);
+
+    const tableTitles = await recordPage.getRelatedTableTitles(page);
+    await expect(tableTitles).toHaveCount(testParams.headers.length);
+
+    for (let i = 0; i < testParams.headers.length; i++) {
+      await expect(tableTitles.nth(i)).toHaveText(testParams.headers[i]);
+    }
+  });
+
+  test('should show the related table names in the correct order in the Table of Contents', async () => {
+    const panelTitles = await recordPage.getSidePanelTableTitles(page);
+    await expect(panelTitles).toHaveCount(testParams.tocHeaders.length);
+
+    for (let i = 0; i < testParams.tocHeaders.length; i++) {
+      await expect(panelTitles.nth(i)).toHaveText(testParams.tocHeaders[i]);
+    }
+  });
+
+  // test.describe.serial('share popup when the citation annotation has wait_for of all-outbound', async () => {
+
+  //   // let RIDLink = `${browser.params.url}/chaise/record/#${browser.params.catalogId}/${testParams.schemaName}:${testParams.table_name}`;
+  //   // RIDLink += '/RID=' + chaisePage.getEntityRow(testParams.schemaName, testParams.table_name, [{ column: testParams.key.name, value: testParams.key.value }]).RID;
+  //   RIDLink = `https://dev.isrd.isi.edu/chaise/record/#${testParams.catalogid}/${testParams.schemaName}:${testParams.table_name}/RID=`;
+
+    // testSharePopup(page, {
+  //     // permalink: RIDLink,
+  //     // the table has history-capture: false
+  //     hasVersionedLink: false,
+  //     verifyVersionedLink: false,
+  //     // citation: 'Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (' + moment().format('YYYY') + ').',
+  //     citation: 'Super 8 North Hollywood Motel, accommodation_outbound1_outbound1 two https://www.kayak.com/hotels/Super-8-North-Hollywood-c31809-h40498/2016-06-09/2016-06-10/2guests (????).',
+  //     bibtextFile: false, // we don't need to test this here as well (it has been tested in record presentation)
+  //     title: 'Share and Cite'
+  //   });
+  // });
+
+  test.afterAll(async () => {
+    await page.close();
+  });
+});
+
+const related_table = {
+  // comment: 'inbound related, no applink or row_markdown_pattern',
+  schemaName: 'product-unordered-related-tables-links',
+  displayname: 'booking',
+  name: 'booking',
+  baseTable: 'Accommodations',
+  count: 6,
+  canDelete: true,
+  canEdit: true,
+  inlineComment: true,
+  comment: 'booking inline comment',
+  viewMore: {
+    displayname: 'booking',
+    filter: 'Accommodations\nSuper 8 North Hollywood Motel'
+  },
+  rowValues: [
+    ['125.0000', '2016-03-12 00:00:00'],
+    ['100.0000', '2016-06-01 00:00:00'],
+    ['110.0000', '2016-05-19 01:00:00'],
+    ['120.0000', '2015-11-10 00:00:00'],
+    ['180.0000', '2016-09-04 01:00:00'],
+    ['80.0000', '2016-01-01 00:00:00'],
+  ],
+  rowViewPaths: [
+    [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '8' }],
+    [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '9' }],
+    [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '10' }],
+    [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '11' }],
+    [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '12' }],
+    [{ column: 'accommodation_id', value: '2004' }, { column: 'id', value: '13' }]
+  ],
+  add: {
+    tableName: 'booking',
+    schemaName: 'product-unordered-related-tables-links',
+    relatedDisplayname: 'booking',
+    tableDisplayname: 'booking',
+    prefilledValues: {
+      'fk_1': 'Super 8 North Hollywood Motel', // the same fk
+      'fk_2': 'Super 8 North Hollywood Motel', // superset fk
+      'fk2_col': '4', // the second column of fk_2
+      'fk_3': '', // supserset fk but nullok
+      'fk3_col1': '',
+      'fk_4': 'Super 8 North Hollywood Motel', // supserset fk
+      'fk_5': '4: four' // the second column of fk_2 that is a fk to another table
+    },
+    rowValuesAfter: [
+      ['247.0000', ''],
+      ['100.0000', '2016-06-01 00:00:00'],
+      ['110.0000', '2016-05-19 01:00:00'],
+      ['120.0000', '2015-11-10 00:00:00'],
+      ['180.0000', '2016-09-04 01:00:00'],
+      ['80.0000', '2016-01-01 00:00:00'],
+    ]
+  }
+};
+
+test.describe.serial('for a related entity, ', () => {
+  test.beforeAll(async ({ browser }) => {
+    page = await browser.newPage();
+
+    const keys = [];
+    keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+
+    // TODO: browser
+    // const url = `${browser.params.url}/record/#${browser.params.catalogId}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
+    const url = `https://dev.isrd.isi.edu/chaise/record/#${testParams.catalogid}/${testParams.schemaName}:${testParams.table_name}/${keys.join('&')}`;
+
+    await page.goto(url);
+    await pageReadyCondition(page);
+    
+  });
+
+  // test('TEMPORARY: title should be correct.', async () => {
+  //   const titleEl = await recordPage.getRelatedTableSectionHeader(page, related_table.displayname);
+  //   await expect(titleEl).toHaveText(related_table.displayname);
+  // });
+
+  test.describe(async () => {
+    await testRelatedTable(page, related_table, pageReadyCondition);
+  });
+  // testAddRelatedTable(related_table.add, false, function () {
+  //   var input = chaisePage.recordEditPage.getInputById(0, 'price');
+  //   return input.sendKeys('247.00');
+  // });
+
+  test.afterAll(async () => {
+    await page.close();
+  });
+});
+
+  // var rel_applink_search = {
+  //   comment: 'inbound related, has applink defined as search',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'schedule',
+  //   name: 'schedule',
+  //   baseTable: 'Accommodations',
+  //   count: 2,
+  //   viewMore: {
+  //     displayname: 'schedule',
+  //     filter: 'Accommodations\nSuper 8 North Hollywood Motel'
+  //   }
+  // };
+  // describe('for a related entity with search applink, ', function () {
+  //   recordHelpers.testRelatedTable(rel_applink_search, pageReadyCondition);
+  // });
+
+  // var rel_name_with_row_markdown_pattern = {
+  //   comment: 'inbound related, has row_markdown_pattern',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'media',
+  //   name: 'media',
+  //   baseTable: 'Accommodations',
+  //   count: 1,
+  //   canDelete: true,
+  //   canEdit: false,
+  //   markdownValue: '<p>2004</p>\n',
+  //   isMarkdown: true
+  // };
+  // describe('for a related entity with row_markdown_pattern, ', function () {
+  //   recordHelpers.testRelatedTable(rel_name_with_row_markdown_pattern, pageReadyCondition);
+  // });
+
+  // var association_table = {
+  //   comment: 'association table',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'association_table',
+  //   name: 'association_table',
+  //   relatedName: 'related_table',
+  //   baseTable: 'Accommodations',
+  //   isAssociation: true,
+  //   viewMore: {
+  //     displayname: 'related_table',
+  //     filter: 'base table association related\nSuper 8 North Hollywood Motel'
+  //   },
+  //   rowValues: [
+  //     ['Television']
+  //   ],
+  //   rowViewPaths: [
+  //     [{ column: 'id', value: '1' }]
+  //   ],
+  //   count: 1,
+  //   canEdit: true,
+  //   add: {
+  //     relatedDisplayname: 'association_table',
+  //     tableDisplayname: 'related_table',
+  //     modalTitle: 'Link related_table to Accommodations: Super 8 North Hollywood Motel',
+  //     totalCount: 5,
+  //     existingCount: 1,
+  //     disabledRows: ['1'],
+  //     search: {
+  //       term: 'television|Coffee',
+  //       afterSearchCount: 2,
+  //       afterSearchDisabledRows: ['1']
+  //     },
+  //     rowValuesAfter: [
+  //       ['Television'],
+  //       ['Air Conditioning'],
+  //       ['Coffee Maker'],
+  //       ['UHD TV'],
+  //       ['Space Heater']
+  //     ]
+  //   },
+  //   unlink: {
+  //     // we unlink rows 2 and 4 ('Air Conditioning' and 'UHD TV')
+  //     catalogId: browser.params.catalogId,
+  //     relatedDisplayname: 'association_table',
+  //     modalTitle: 'Unlink association_table from Accommodations : Super 8 North Hollywood Motel',
+  //     totalCount: 5,
+  //     postDeleteMessage: '2 records successfully unlinked.\n\nClick OK to dismiss this dialog.',
+  //     countAfterUnlink: 3,
+  //     rowValuesAfter: [
+  //       ['Television'],
+  //       ['Coffee Maker'],
+  //       ['Space Heater']
+  //     ],
+  //     failedPostDeleteMessage: '2 records could not be unlinked. Check the error details below to see more information.\n\nClick OK to dismiss this dialog.\nShow Error Details',
+  //     // we unlink row 5 ('Space Heater')
+  //     aclPostDeleteMessage: '1 record successfully unlinked.\n\nClick OK to dismiss this dialog.',
+  //     countAfterAclUnlink: 2,
+  //     rowValuesAfterAclRemove: [
+  //       ['Television'],
+  //       ['Coffee Maker']
+  //     ]
+  //   }
+  // };
+
+  // describe('for a pure and binary association,', function () {
+  //   recordHelpers.testRelatedTable(association_table, pageReadyCondition);
+
+  //   recordHelpers.testAddAssociationTable(association_table.add, false, pageReadyCondition);
+
+  //   recordHelpers.testBatchUnlinkAssociationTable(association_table.unlink, false, pageReadyCondition);
+
+  //   // test trying to unlink 2 rows where 1 is allowed and 1 is not
+  //   // verifies the error case works as expected and rows are still selected after failure
+  //   // need to attach a 'postLogin' function to reload the record page we are testing
+  //   recordHelpers.testBatchUnlinkDynamicAclsAssociationTable(association_table.unlink, false, pageReadyCondition, function (done) {
+  //     var keys = [];
+  //     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+  //     var url = browser.params.url + '/record/#' + browser.params.catalogId + '/' + testParams.schemaName + ':' + testParams.table_name + '/' + keys.join('&');
+  //     chaisePage.navigate(url).then(function () {
+  //       return pageReadyCondition();
+  //     });
+  //   });
+  // });
+
+  // var association_with_page_size = {
+  //   comment: 'association table, has page_size',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'accommodation_image',
+  //   name: 'accommodation_image',
+  //   relatedName: 'related_name',
+  //   baseTable: 'Accommodations',
+  //   count: 3,
+  //   page_size: 2,
+  //   isAssociation: true,
+  //   canEdit: true
+  // };
+  // describe('for a pure and binary association with page_size and hide_row_count, ', function () {
+  //   recordHelpers.testRelatedTable(association_with_page_size, pageReadyCondition);
+
+  //   it('Opened modal by `Link` button should honor the page_size and hide_row_count.', function (done) {
+  //     var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
+  //     addRelatedRecordLink.click().then(function () {
+  //       return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
+  //     }).then(function () {
+  //       return chaisePage.recordEditPage.getModalTitle().getText();
+  //     }).then(function (title) {
+  //       expect(title).toBe('Link file to Accommodations: Super 8 North Hollywood Motel', 'title missmatch.');
+
+  //       return browser.wait(function () {
+  //         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+  //           return (ct == 2);
+  //         });
+  //       });
+  //     }).then(function () {
+  //       return chaisePage.recordsetPage.getModalRows().count();
+  //     }).then(function (ct) {
+  //       expect(ct).toBe(2, 'association count missmatch for file domain table.');
+
+  //       expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe('Displaying\nfirst 2\nrecords', 'hide_row_count not honored');
+
+  //       return chaisePage.recordEditPage.getModalCloseBtn().click();
+  //     }).then(function () {
+  //       done();
+  //     }).catch(function (error) {
+  //       console.log(error);
+  //       expect('There was an error in this promise chain').toBe('Please see error message.');
+  //       done.fail();
+  //     });
+  //   });
+  // });
+
+  // var association_with_markdown = {
+  //   comment: 'association table, has markdown',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'association_table_markdown',
+  //   name: 'association_table_markdown',
+  //   entityMarkdownName: ' <strong class='vocab'>1:Television</strong> ',
+  //   relatedName: 'related_table',
+  //   baseTable: 'Accommodations',
+  //   isAssociation: true,
+  //   isMarkdown: true,
+  //   count: 1,
+  //   canEdit: true,
+  //   canDelete: true
+  // };
+  // describe('for a pure and binary association with row_markdown_pattern, ', function () {
+  //   recordHelpers.testRelatedTable(association_with_markdown, pageReadyCondition);
+  // });
+
+  // var path_related = {
+  //   comment: 'related with a path of length 3',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'related_table_2',
+  //   name: 'related_table_2',
+  //   baseTable: 'Accommodations',
+  //   viewMore: {
+  //     displayname: 'related_table_2',
+  //     filter: 'base table association related\nSuper 8 North Hollywood Motel'
+  //   },
+  //   rowValues: [
+  //     ['one'],
+  //     ['three'],
+  //   ],
+  //   rowViewPaths: [
+  //     [{ column: 'id', value: '1' }], [{ column: 'id', value: '3' }]
+  //   ],
+  //   count: 2, // by load time it's one but when we add another related for the other table this should be updated too.
+  //   canEdit: true,
+  //   canCreate: false,
+  //   canDelete: true
+  // };
+
+  // // When rows are added to association_table, it affects this test.
+  // // data relies on rows from p&b unlink tests above
+  // describe('for a related entity with a path of length 3, ', function () {
+  //   recordHelpers.testRelatedTable(path_related, pageReadyCondition);
+  // });
+
+  // var related_w_agg = {
+  //   comment: 'related with aggregate columns',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'table_w_aggregates',
+  //   name: 'table_w_aggregates',
+  //   baseTable: 'Accommodations',
+  //   viewMore: {
+  //     displayname: 'table_w_aggregates',
+  //     filter: 'fk_to_accommodation\nSuper 8 North Hollywood Motel'
+  //   },
+  //   rowValues: [
+  //     ['1', '100', '100', '1', '1', 'virtual 100 with Super 8 North Hollywood Motel'],
+  //     ['2', '101', '101', '1', '1', 'virtual 101 with Super 8 North Hollywood Motel'],
+  //   ],
+  //   rowViewPaths: [
+  //     [{ column: 'id', value: '1' }], [{ column: 'id', value: '2' }]
+  //   ],
+  //   count: 2,
+  //   canEdit: true,
+  //   canCreate: true,
+  //   canDelete: true
+  // };
+  // describe('for a related entity with aggregate columns.', function () {
+  //   recordHelpers.testRelatedTable(related_w_agg, pageReadyCondition);
+  // });
+
+  // var related_w_invalid_row_markdown_pattern = {
+  //   comment: 'has markdown that results in empty string',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'table_w_invalid_row_markdown_pattern',
+  //   name: 'table_w_invalid_row_markdown_pattern',
+  //   baseTable: 'Accommodations',
+  //   viewMore: {
+  //     name: 'table_w_invalid_row_markdown_pattern',
+  //     displayname: 'table_w_invalid_row_markdown_pattern',
+  //     filter: 'Accommodations\nSuper 8 North Hollywood Motel'
+  //   },
+  //   rowValues: [
+  //     ['four']
+  //   ],
+  //   rowViewPaths: [
+  //     [{ column: 'id', value: '2004' }]
+  //   ],
+  //   count: 1,
+  //   canEdit: true
+  // };
+
+  // describe('for a related table with invalid row_markdown_pattern, ', function () {
+  //   recordHelpers.testRelatedTable(related_w_invalid_row_markdown_pattern, pageReadyCondition);
+  // });
+
+
+  // var related_w_entityset_waitfor = {
+  //   comment: 'related table, has waitfor entityset and markdown_pattern',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'inbound related with display.wait_for entityset',
+  //   name: 'accommodation_inbound1',
+  //   baseTable: 'Accommodations',
+  //   markdownValue: '<p>accommodation_inbound1 seven, accommodation_inbound1 eight, accommodation_inbound1 nine (accommodation_inbound2 seven, accommodation_inbound2 eight, accommodation_inbound2 nine)</p>\n',
+  //   isMarkdown: true,
+  //   count: 3,
+  //   canEdit: true,
+  //   canDelete: true
+  // };
+  // describe('for a related entity with wait_for entity set and markdown_pattern', function () {
+  //   recordHelpers.testRelatedTable(related_w_entityset_waitfor, pageReadyCondition);
+  // });
+
+  // var related_w_agg_waitfor = {
+  //   comment: 'related table, has waitfor entityset and markdown_pattern',
+  //   schemaName: 'product-unordered-related-tables-links',
+  //   displayname: 'inbound related with display.wait_for agg',
+  //   name: 'accommodation_inbound3',
+  //   baseTable: 'Accommodations',
+  //   markdownValue: '<p>accommodation_inbound3 seven, accommodation_inbound3 eight, accommodation_inbound3 nine (3)</p>\n',
+  //   isMarkdown: true,
+  //   count: 3,
+  //   canEdit: true,
+  //   canDelete: true
+  // };
+  // describe('for a related entity with wait_for aggregate and markdown_pattern', function () {
+  //   recordHelpers.testRelatedTable(related_w_agg_waitfor, pageReadyCondition);
+  // });
+
+  // describe('regarding usage of filter in source', function () {
+  //   var related_w_filter_on_related = {
+  //     comment: 'inbound related, filter on related',
+  //     schemaName: 'product-unordered-related-tables-links',
+  //     displayname: 'inbound related with filter on related table',
+  //     name: 'booking',
+  //     baseTable: 'Accommodations',
+  //     count: 2,
+  //     viewMore: {
+  //       displayname: 'booking',
+  //       filter: 'Accommodations\nSuper 8 North Hollywood Motel'
+  //     },
+  //     rowValues: [
+  //       ['247.0000', ''], // created by another test case
+  //       ['80.0000', '2016-01-01 00:00:00']
+  //     ]
+  //   };
+  //   describe('for a related entity with filter on related table', function () {
+  //     recordHelpers.testRelatedTable(related_w_filter_on_related, pageReadyCondition);
+
+  //     it('add button should not be available', function (done) {
+  //       var btn = chaisePage.recordPage.getAddRecordLink(related_w_filter_on_related.displayname);
+  //       expect(btn.isPresent()).toBeFalsy();
+  //       done();
+  //     });
+  //   });
+
+  //   var assoc_w_filter_on_related = {
+  //     comment: 'assoc related, filter on related',
+  //     schemaName: 'product-unordered-related-tables-links',
+  //     displayname: 'association with filter on related table',
+  //     name: 'association_table',
+  //     relatedName: 'related_table',
+  //     baseTable: 'Accommodations',
+  //     isAssociation: true,
+  //     count: 1,
+  //     viewMore: {
+  //       displayname: 'related_table',
+  //       filter: 'base table association related\nSuper 8 North Hollywood Motel'
+  //     },
+  //     rowValues: [
+  //       ['Television']
+  //     ],
+  //     rowViewPaths: [
+  //       [{ column: 'id', value: '1' }]
+  //     ],
+
+  //   };
+  //   describe('for a pure and binary association with filter on related table', function () {
+  //     recordHelpers.testRelatedTable(assoc_w_filter_on_related, pageReadyCondition);
+
+  //     it('link button should not be available', function (done) {
+  //       var btn = chaisePage.recordPage.getAddRecordLink(assoc_w_filter_on_related.displayname);
+  //       expect(btn.isPresent()).toBeFalsy();
+  //       done();
+  //     });
+  //   });
+
+  //   if (!process.env.CI) {
+  //     var path_related_w_filter = {
+  //       comment: 'related with a path of length 3',
+  //       schemaName: 'product-unordered-related-tables-links',
+  //       displayname: 'path of length 3 with filters',
+  //       name: 'related_table_2',
+  //       baseTable: 'Accommodations',
+  //       viewMore: {
+  //         displayname: 'related_table_2',
+  //         filter: 'base table association related\nSuper 8 North Hollywood Motel'
+  //       },
+  //       rowValues: [
+  //         ['three']
+  //       ],
+  //       rowViewPaths: [
+  //         [{ column: 'id', value: '3' }]
+  //       ],
+  //       count: 1, // one row is deleted by another test
+  //     };
+  //     describe('for a related entity with a path of length 3 with filter', function () {
+  //       recordHelpers.testRelatedTable(path_related_w_filter, pageReadyCondition);
+
+  //       it('add button should not be available', function (done) {
+  //         var btn = chaisePage.recordPage.getAddRecordLink(path_related_w_filter.displayname);
+  //         expect(btn.isPresent()).toBeFalsy();
+  //         done();
+  //       });
+  //     });
+  //   }
+  // });
+
+  // describe('for a pure and binary association with a null value for the key on main', function () {
+  //   var displayname = 'association_table_null_keys',
+  //     tablename = 'Accommodations',
+  //     columnname = 'nullable_assoc_key',
+  //     addBtn;
+
+  //   beforeAll(function (done) {
+  //     pageReadyCondition().then(function () {
+  //       // click show empty sections button
+  //       return chaisePage.recordPage.getShowAllRelatedEntitiesButton().click()
+  //     }).then(function () {
+  //       addBtn = chaisePage.recordPage.getAddRecordLink(displayname, true);
+  //       done();
+  //     }).catch(function (error) {
+  //       console.log(error);
+  //       done.fail();
+  //     });
+  //   });
+
+  //   it('should disable the link record button', function (done) {
+  //     expect(addBtn.isEnabled()).toBeFalsy();
+  //     done();
+  //   });
+
+  //   it('should have the proper tooltip', function (done) {
+  //     chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath('./..'))).then(function (comment) {
+  //       expect(comment).toBe(''Linking to ' + displayname + ' is disabled until ' + columnname + ' in ' + tablename + ' is set.'', 'Incorrect tooltip on disabled Add button');
+  //       done();
+  //     }).catch(function (error) {
+  //       console.log(error);
+  //       done.fail();
+  //     });
+  //   });
+  // });
+
+  // describe('for a inbound fk with a null value for the key on main', function () {
+  //   var displayname = 'inbound_null_key',
+  //     tablename = 'Accommodations',
+  //     columnname = 'nullable_assoc_key',
+  //     addBtn;
+
+  //   beforeAll(function (done) {
+  //     pageReadyCondition().then(function () {
+  //       addBtn = chaisePage.recordPage.getAddRecordLink('inbound_null_key', true);
+  //       done();
+  //     }).catch(function (error) {
+  //       console.log(error);
+  //       done.fail();
+  //     });
+  //   });
+
+  //   it('should disable the add record button', function (done) {
+  //     expect(addBtn.isEnabled()).toBeFalsy();
+  //     done();
+  //   });
+
+  //   it('should have the proper tooltip', function (done) {
+  //     chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath('./..'))).then(function (comment) {
+  //       expect(comment).toBe(''Adding to ' + displayname + ' is disabled until ' + columnname + ' in ' + tablename + ' is set.'', 'Incorrect tooltip on disabled Add button');
+  //       done();
+  //     }).catch(function (error) {
+  //       console.log(error);
+  //       done.fail();
+  //     });
+  //   });
+  // });
+
+  // describe('for a pure and binary association with a null value for the key on the leaf table', function () {
+  //   it('should add a not null filter and only show 2 of the 5 rows for related_table_null_key', function (done) {
+  //     var addBtn = chaisePage.recordPage.getAddRecordLink('association_table_null_keys2', true);
+  //     expect(addBtn.isEnabled()).toBeTruthy();
+
+  //     addBtn.click().then(function () {
+  //       return browser.wait(function () {
+  //         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+  //           return (ct == 2);
+  //         });
+  //       });
+  //     }).then(function () {
+  //       expect(chaisePage.recordsetPage.getModalRows().count()).toBe(2, 'Number of rows after applying not null filter is incorrect')
+  //       done();
+  //     }).catch(function (error) {
+  //       console.log(error);
+  //       done.fail();
+  //     });
+  //   });
+  // });
+
+// describe('For scroll to query parameter', function () {
+//   var displayname = 'table_w_aggregates';
+
+//   beforeAll(function (done) {
+//     var keys = [];
+//     keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+//     var url = browser.params.url + '/record/#' + browser.params.catalogId + '/' + testParams.schemaName + ':' + testParams.table_name + '/' + keys.join('&') + '?scrollTo=' + displayname;
+//     chaisePage.navigate(url).then(function () {
+//       return pageReadyCondition();
+//     }).then(function () {
+//       done();
+//     }).catch(function (error) {
+//       console.log(error);
+//       done.fail();
+//     });
+//   });
+
+//   it('should scroll to the related table.', function (done) {
+//     var heading = chaisePage.recordPage.getRelatedTableAccordion(displayname);
+
+//     browser.wait(function () {
+//       return heading.isDisplayed().then(function (bool) {
+//         return bool;
+//       }).catch(function () {
+//         // the element might not be even in the DOM
+//         return false;
+//       })
+//     }).then(function () {
+//       return heading.getAttribute('class')
+//     }).then(function (className) {
+//       expect(className).toContain('panel-open', 'Related table panel is not open when autoscrolled.');
+//       done()
+//     }).catch(function (error) {
+//       console.log(error);
+//       done.fail();
+//     });
+//   });
+// });
