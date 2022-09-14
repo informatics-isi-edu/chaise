@@ -7,12 +7,12 @@ var EC = protractor.ExpectedConditions;
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
-        chaisePage.waitForElementInverse(element(by.id("spinner")));
-
-        // make sure the last related entity is visible
-        chaisePage.waitForElementInverse(element(by.id('rt-loading')));
-
-        chaisePage.waitForAggregates();
+        return chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function () {
+            // make sure the last related entity is visible
+            return chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+        }).then(function () {
+            return chaisePage.waitForAggregates();
+        });
     };
 
     beforeAll(function () {

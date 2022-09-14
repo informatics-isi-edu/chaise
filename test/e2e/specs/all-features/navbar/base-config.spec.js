@@ -1,4 +1,3 @@
-const { browser } = require('protractor');
 let chaisePage = require('../../../utils/chaise.page.js');
 
 describe('Navbar ', function() {

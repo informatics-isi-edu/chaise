@@ -13,7 +13,8 @@ exports.getConfig = function(options) {
       timeZone: 'Los Angeles', // specify the timezone the browser should execute in
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
-      'chromeOptions' : {
+      chromeOptions: {
+          args: [ "--headless", "--disable-gpu" ],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
@@ -58,7 +59,13 @@ exports.getConfig = function(options) {
   // setting screen size when running the tests locally to be consistent across different laptops and external displays
   // tests are currently optimzed for this screen size
   // this is the same as `screenResolution` above to make sure we test the same in CI environment as locally
-  if (!process.env.CI) config.capabilities.chromeOptions.args = ['--window-size=1280,960'];
+  if (!process.env.CI) {
+    if (Array.isArray(config.capabilities.chromeOptions.args)) {
+      config.capabilities.chromeOptions.args.push('--window-size=1280,960');
+    } else {
+      config.capabilities.chromeOptions.args = ['--window-size=1280,960'];
+    }
+  }
 
   Object.assign(config, options);
 
