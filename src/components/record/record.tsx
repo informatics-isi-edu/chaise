@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
@@ -14,17 +15,27 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useState } from 'react';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+
+// models
+import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
 import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 
+// services
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+
 // utilities
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type RecordProps = {
   /**
@@ -57,13 +68,35 @@ type RecordInnerProps = {
 const RecordInner = ({
   parentContainer,
 }: RecordInnerProps): JSX.Element => {
+  const { validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors } = useError();
-  const { page, readMainEntity, reference, initialized } = useRecord();
+
+  // TODO: add getLogAction and getLogStack to record provider
+  const { 
+    forceShowSpinner, 
+    setForceShowSpinner,
+    initialized,
+    isLoading,
+    page, 
+    readMainEntity, 
+    reference, 
+  } = useRecord();
 
   /**
    * State variable to show or hide side panel
    */
   const [showPanel, setShowPanel] = useState<boolean>(true);
+  const [canCreate, setCanCreate] = useState<boolean>(false);
+  const [canEdit, setCanEdit] = useState<boolean>(false);
+  const [canDelete, setCanDelete] = useState<boolean>(false);
+  // when object is null, hide the modal
+  // object is the props for the the modal
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
+    onConfirm: () => void,
+    onCancel: () => void,
+    buttonLabel: string,
+    message: JSX.Element
+  } | null>(null);
 
   // initialize the page
   useEffect(() => {
@@ -75,6 +108,19 @@ const RecordInner = ({
       dispatchError({ error });
     });
   }, []);
+
+  useEffect(() => {
+    if (!reference) return;
+    const modifyRecord = ConfigService.chaiseConfig.editRecord === false ? false : true;
+    setCanCreate(reference.canCreate && modifyRecord);
+
+    if (!page || !page.tuples[0]) return;
+    let tuple = page.tuples[0];
+    setCanEdit(tuple.canUpdate && modifyRecord);
+
+    const showDeleteButton = ConfigService.chaiseConfig.deleteRecord === true ? true : false;
+    setCanDelete(tuple.canDelete && modifyRecord && showDeleteButton);
+  }, [page, reference]);
 
   // properly set scrollable section height
   useLayoutEffect(() => {
@@ -89,12 +135,96 @@ const RecordInner = ({
   // TODO does this make sense?
   // we're currently showing the header buttons while loading
   // but I don't see the point and I think not showing anything makes more sense
-  {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */}
+  {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */ }
   if (!page) {
     if (errors.length > 0) {
       return <></>;
     }
     return <ChaiseSpinner />;
+  }
+
+  // function instead of variable so the link is updated after the app loads instead of being captured on page load
+  // no need to create as a useState variable either
+  const createRecord = () => reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink;
+
+  const editRecord = () => reference.contextualize.entryEdit.appLink;
+
+  const copyRecord = () => {
+    const appLink = reference.contextualize.entryCreate.appLink;
+    let separator = '?';
+    // if appLink already has query params, add &
+    // NOTE: With the ppid and pcid implementation appLink will always have
+    // that, this is just to avoid further changes if we reverted that change.
+    if (appLink.indexOf('?') !== -1) separator = '&';
+
+    // this URL used to have limit=1 but we removed it since it was redundant.
+    // we're throwing an error when there are multiple records with the given
+    // given filter in record page. we're also making sure the record link
+    // is based on the shortest key, so this query parameter is redundant
+    return appLink + separator + 'copy=true';
+  }
+
+  const deleteRecord = () => {
+    validateSessionBeforeMutation(() => {
+      if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
+        LogService.logClientAction({
+          // action: getLogAction(LogActions.DELETE_INTEND, LogStackPaths.ENTITY),
+          // stack: getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, reference.table, reference.filterLogInfo))
+        }, reference.defaultLogInfo);
+
+        const confirmMessage: JSX.Element = (
+          <>
+            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+            <span>: </span>
+            <code><DisplayValue value={page.tuples[0].displayname}></DisplayValue></code>?
+          </>
+        );
+
+        setShowDeleteConfirmationModal({
+          buttonLabel: 'Delete',
+          onConfirm: () => { onDeleteUnlinkConfirmation() },
+          onCancel: () => {
+            setShowDeleteConfirmationModal(null);
+            const actionVerb = LogActions.DELETE_CANCEL;
+            LogService.logClientAction({
+              // action: getRowLogAction(actionVerb),
+              // stack: logStack
+            }, reference.defaultLogInfo);
+          },
+          message: confirmMessage
+        });
+
+      } else {
+        onDeleteUnlinkConfirmation();
+      }
+    })
+    $log.debug('deleting tuple!');
+
+    return;
+  }
+
+  const onDeleteUnlinkConfirmation = () => {
+    // make sure the main spinner is displayed (it's a state variable in recordset provider)
+    setForceShowSpinner(true);
+    // close the confirmation modal if it exists
+    setShowDeleteConfirmationModal(null);
+
+    const actionVerb = LogActions.DELETE;
+    const logObj = {
+      // action: getRowLogAction(actionVerb),
+      // stack: logStack
+    };
+    reference.delete(logObj).then(function deleteSuccess() {
+      // Get an appLink from a reference to the table that the existing reference came from
+      const unfilteredRefAppLink = reference.table.reference.contextualize.compact.appLink;
+      // $rootScope.showSpinner = false;
+      windowRef.location = unfilteredRefAppLink;
+    }).catch(function (error: any) {
+      dispatchError({ error: error, isDismissible: true });
+    }).finally(() => {
+      // hide the spinner
+      setForceShowSpinner(false);
+    });
   }
 
   /**
@@ -142,8 +272,13 @@ const RecordInner = ({
     leftPartners.push(el as HTMLElement);
   });
 
+  const btnClasses = 'chaise-btn chaise-btn-primary';
   return (
     <div className='record-container app-content-container'>
+      {
+        errors.length === 0 && (isLoading || forceShowSpinner) &&
+        <ChaiseSpinner />
+      } 
       <div className='top-panel-container'>
         <Alerts />
         {/* TODO */}
@@ -208,44 +343,47 @@ const RecordInner = ({
                     <span>: </span>
                     <DisplayValue value={page.tuples[0].displayname} />
 
-                    <div className='title-buttons record-action-btns-container'>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to create a record.'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon fa fa-plus'></span>
-                          Create
-                        </div>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to create a copy of this record'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon  fa fa-clipboard'></span>
-                          Copy
-                        </div>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to edit this record'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon  fa fa-pencil'></span>
-                          Edit
-                        </div>
-                      </ChaiseTooltip>
-                      <ChaiseTooltip
-                        placement='bottom-start'
-                        tooltip='Click here to delete this record'
-                      >
-                        <div className='chaise-btn chaise-btn-primary'>
-                          <span className='record-app-action-icon fa fa-trash-alt'></span>
-                          Delete
-                        </div>
-                      </ChaiseTooltip>
-                    </div>
+                    {(canCreate || canEdit || canDelete) ?
+                      <div className='title-buttons record-action-btns-container'>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to create a record.'
+                        >
+                          <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={createRecord()}>
+                            <span className='record-app-action-icon fa fa-plus'></span>
+                            Create
+                          </a>
+                        </ChaiseTooltip>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to create a copy of this record'
+                        >
+                          <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={copyRecord()}>
+                            <span className='record-app-action-icon  fa fa-clipboard'></span>
+                            Copy
+                          </a>
+                        </ChaiseTooltip>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to edit this record'
+                        >
+                          <a className={btnClasses + (!canEdit ? ' disabled' : '')} href={editRecord()}>
+                            <span className='record-app-action-icon  fa fa-pencil'></span>
+                            Edit
+                          </a>
+                        </ChaiseTooltip>
+                        <ChaiseTooltip
+                          placement='bottom-start'
+                          tooltip='Click here to delete this record'
+                        >
+                          <button className={btnClasses + (!canDelete ? ' disabled' : '')} onClick={deleteRecord}>
+                            <span className='record-app-action-icon fa fa-trash-alt'></span>
+                            Delete
+                          </button>
+                        </ChaiseTooltip>
+                      </div>
+                      : <></>}
+
                   </h1>
                   {!showPanel && (
                     <ChaiseTooltip
@@ -279,6 +417,15 @@ const RecordInner = ({
         convertMaxWidth
         convertInitialWidth
       />
+      {showDeleteConfirmationModal &&
+        <DeleteConfirmationModal
+          show={!!showDeleteConfirmationModal}
+          message={showDeleteConfirmationModal.message}
+          buttonLabel={showDeleteConfirmationModal.buttonLabel}
+          onConfirm={showDeleteConfirmationModal.onConfirm}
+          onCancel={showDeleteConfirmationModal.onCancel}
+        />
+      }
     </div>
   );
 };

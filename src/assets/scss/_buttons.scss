@@ -23,7 +23,8 @@
   }
 
   // show not-allowed cursor and not allow click
-  &[disabled] {
+  &[disabled],
+  &.disabled {
     cursor: not-allowed;
     &:active {
       pointer-events: none;
@@ -39,7 +40,9 @@
   }
 
   &.chaise-btn.chaise-btn-primary[disabled],
-  &.chaise-btn.chaise-btn-secondary[disabled] {
+  &.chaise-btn.chaise-btn-secondary[disabled],
+  &.chaise-btn.chaise-btn-primary.disabled,
+  &.chaise-btn.chaise-btn-secondary.disabled {
     color: $disabled-color;
     background-color: $disabled-background-color;
     border-color: $disabled-background-color;
@@ -50,7 +53,8 @@
     border: none;
     background: transparent;
 
-    &[disabled] {
+    &[disabled],
+    &.disabled {
       color: $disabled-color;
     }
 
