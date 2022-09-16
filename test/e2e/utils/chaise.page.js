@@ -1545,6 +1545,7 @@ function chaisePage() {
         defer = defer || require('q').defer();
 
         this.navigate(process.env.CHAISE_BASE_URL + "/login/");
+        console.log("navigate to login screen")
 
         if(isAlertPresent){
             browser.switchTo().alert().accept();
@@ -1552,8 +1553,10 @@ function chaisePage() {
 
 
         browser.wait(protractor.ExpectedConditions.urlContains('/login/'), browser.params.defaultTimeout).then(function() {
+            console.log("before set cookie")
             return browser.executeScript('document.cookie="' + cookie + ';path=/;' + (process.env.CI ? '"' : 'secure;"'))
         }).then(function() {
+            console.log("before set localStorage info")
             return browser.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
         }).then(function () {
             browser.ignoreSynchronization = false;

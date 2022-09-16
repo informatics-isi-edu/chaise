@@ -2,7 +2,6 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var EC = protractor.ExpectedConditions;
 var fs = require('fs');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
-const { browser } = require('protractor');
 var testParams = {
     table_name: "links-table",
     key: {
