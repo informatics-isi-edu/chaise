@@ -14,7 +14,9 @@ exports.getConfig = function(options) {
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
       chromeOptions: {
-          args: [ "--headless", "--disable-gpu" ],
+          // args is defined as empty so any additional args are "pushed" instead of replacing the object.
+          // see conditions below for setting screen resolution and using headless mode
+          args: [],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
@@ -60,11 +62,13 @@ exports.getConfig = function(options) {
   // tests are currently optimzed for this screen size
   // this is the same as `screenResolution` above to make sure we test the same in CI environment as locally
   if (!process.env.CI) {
-    if (Array.isArray(config.capabilities.chromeOptions.args)) {
-      config.capabilities.chromeOptions.args.push('--window-size=1280,960');
-    } else {
-      config.capabilities.chromeOptions.args = ['--window-size=1280,960'];
-    }
+    config.capabilities.chromeOptions.args.push('--window-size=1280,960');
+  }
+
+  // using chrome in headless mode
+  if (process.env.HEADLESS) {
+    config.capabilities.chromeOptions.args.push('--headless');
+    config.capabilities.chromeOptions.args.push('--disable-gpu');
   }
 
   Object.assign(config, options);

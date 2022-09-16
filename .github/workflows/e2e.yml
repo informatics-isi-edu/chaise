@@ -19,6 +19,7 @@ jobs:
       # SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       # SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: false
+      HEADLESS: true
       PYTHONWARNINGS: ignore:Unverified HTTPS request
     timeout-minutes: 120
     steps:
