@@ -39,20 +39,27 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 export type RecordProps = {
   /**
-   * The parent container that recordset will be part of
+   * The parent container that record will be part of
    * (used for scrollbar logic)
    */
   parentContainer?: HTMLElement;
   reference: any;
+  logInfo: {
+    logObject?: any,
+    logStack: any,
+    logStackPath: string,
+    logAppMode?: string
+  }
 };
 
 const Record = ({
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
-  reference
+  reference,
+  logInfo
 }: RecordProps): JSX.Element => {
   return (
     <AlertsProvider>
-      <RecordProvider reference={reference}>
+      <RecordProvider reference={reference} logInfo={logInfo}>
         <RecordInner
           parentContainer={parentContainer}
         />
@@ -72,23 +79,21 @@ const RecordInner = ({
   const { dispatchError, errors } = useError();
 
   // TODO: add getLogAction and getLogStack to record provider
-  const { 
-    forceShowSpinner, 
+  const {
+    forceShowSpinner,
     setForceShowSpinner,
     initialized,
-    isLoading,
-    page, 
-    readMainEntity, 
-    reference, 
+    page,
+    readMainEntity,
+    reference,
+    logRecordClientAction, getRecordLogAction, getRecordLogStack,
   } = useRecord();
 
   /**
    * State variable to show or hide side panel
    */
   const [showPanel, setShowPanel] = useState<boolean>(true);
-  const [canCreate, setCanCreate] = useState<boolean>(false);
-  const [canEdit, setCanEdit] = useState<boolean>(false);
-  const [canDelete, setCanDelete] = useState<boolean>(false);
+
   // when object is null, hide the modal
   // object is the props for the the modal
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
@@ -101,26 +106,24 @@ const RecordInner = ({
   // initialize the page
   useEffect(() => {
     readMainEntity().then((p: any) => {
+      const tuple = p.tuples[0];
+
       // send string to prepend to "headTitle" format: <table-name>: <row-name>
-      const title = `${getDisplaynameInnerText(reference.displayname)}: ${getDisplaynameInnerText(p.tuples[0].displayname)}`;
+      const title = `${getDisplaynameInnerText(reference.displayname)}: ${getDisplaynameInnerText(tuple.displayname)}`;
       updateHeadTitle(title);
+
+      // update the window location with tuple to remove query params (namely ppid and pcid)
+      // and also change the url to always be based on RID
+      let url = tuple.reference.contextualize.detailed.appLink;
+      url = url.substring(0, url.lastIndexOf('?'));
+
+      // add hideNavbar param back if true
+      if (ConfigService.appSettings.hideNavbar) url += `?hideNavbar=${ConfigService.appSettings.hideNavbar}`;
+      windowRef.history.replaceState({}, '', url);
     }).catch((error: any) => {
       dispatchError({ error });
     });
   }, []);
-
-  useEffect(() => {
-    if (!reference) return;
-    const modifyRecord = ConfigService.chaiseConfig.editRecord === false ? false : true;
-    setCanCreate(reference.canCreate && modifyRecord);
-
-    if (!page || !page.tuples[0]) return;
-    let tuple = page.tuples[0];
-    setCanEdit(tuple.canUpdate && modifyRecord);
-
-    const showDeleteButton = ConfigService.chaiseConfig.deleteRecord === true ? true : false;
-    setCanDelete(tuple.canDelete && modifyRecord && showDeleteButton);
-  }, [page, reference]);
 
   // properly set scrollable section height
   useLayoutEffect(() => {
@@ -132,20 +135,24 @@ const RecordInner = ({
     }
   }, [initialized]);
 
-  // TODO does this make sense?
-  // we're currently showing the header buttons while loading
-  // but I don't see the point and I think not showing anything makes more sense
-  {/* TODO spinner was here with this: (!displayReady || showSpinner) && !error */ }
-  if (!page) {
+  // if the main data is not initialized, just show spinner
+  if (!initialized) {
     if (errors.length > 0) {
       return <></>;
     }
     return <ChaiseSpinner />;
   }
 
+  const tuple = page.tuples[0];
+  const modifyRecord = ConfigService.chaiseConfig.editRecord === false ? false : true;
+
+  const canCreate = reference.canCreate && modifyRecord;
+  const canEdit = tuple.canUpdate && modifyRecord;
+  const canDelete = tuple.canDelete && modifyRecord && ConfigService.chaiseConfig.deleteRecord === true;
+
   // function instead of variable so the link is updated after the app loads instead of being captured on page load
   // no need to create as a useState variable either
-  const createRecord = () => reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink;
+  // const createRecord = () => reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink;
 
   const editRecord = () => reference.contextualize.entryEdit.appLink;
 
@@ -167,10 +174,7 @@ const RecordInner = ({
   const deleteRecord = () => {
     validateSessionBeforeMutation(() => {
       if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
-        LogService.logClientAction({
-          // action: getLogAction(LogActions.DELETE_INTEND, LogStackPaths.ENTITY),
-          // stack: getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, reference.table, reference.filterLogInfo))
-        }, reference.defaultLogInfo);
+        logRecordClientAction(LogActions.DELETE_INTEND);
 
         const confirmMessage: JSX.Element = (
           <>
@@ -185,11 +189,7 @@ const RecordInner = ({
           onConfirm: () => { onDeleteUnlinkConfirmation() },
           onCancel: () => {
             setShowDeleteConfirmationModal(null);
-            const actionVerb = LogActions.DELETE_CANCEL;
-            LogService.logClientAction({
-              // action: getRowLogAction(actionVerb),
-              // stack: logStack
-            }, reference.defaultLogInfo);
+            logRecordClientAction(LogActions.DELETE_CANCEL);
           },
           message: confirmMessage
         });
@@ -209,10 +209,9 @@ const RecordInner = ({
     // close the confirmation modal if it exists
     setShowDeleteConfirmationModal(null);
 
-    const actionVerb = LogActions.DELETE;
     const logObj = {
-      // action: getRowLogAction(actionVerb),
-      // stack: logStack
+      action: getRecordLogAction(LogActions.DELETE),
+      stack: getRecordLogStack()
     };
     reference.delete(logObj).then(function deleteSuccess() {
       // Get an appLink from a reference to the table that the existing reference came from
@@ -276,9 +275,9 @@ const RecordInner = ({
   return (
     <div className='record-container app-content-container'>
       {
-        errors.length === 0 && (isLoading || forceShowSpinner) &&
+        errors.length === 0 && forceShowSpinner &&
         <ChaiseSpinner />
-      } 
+      }
       <div className='top-panel-container'>
         <Alerts />
         {/* TODO */}
@@ -349,7 +348,10 @@ const RecordInner = ({
                           placement='bottom-start'
                           tooltip='Click here to create a record.'
                         >
-                          <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={createRecord()}>
+                          <a
+                            className={btnClasses + (!canCreate ? ' disabled' : '')}
+                            href={reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink}
+                          >
                             <span className='record-app-action-icon fa fa-plus'></span>
                             Create
                           </a>

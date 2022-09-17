@@ -29,7 +29,7 @@
                             <span class="markdown-container" ng-bind-html="col.tableMarkdownContent | trustedHTML"></span>
                         </span>
                     </span>
-                    <span ng-switch-default id="entity-{{$index}}-recTab">
+                    <span ng-switch-default>
                         <table-header vm="col.tableModel"></table-header>
                         <record-table class="related-table" id="rt-{{::makeSafeIdAttr(col.column.displayname.value)}}" vm="col.tableModel"></record-table>
                     </span>

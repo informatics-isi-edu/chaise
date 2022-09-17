@@ -1,27 +1,19 @@
 // models
-import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { RecordRelatedRequestModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-
-type RecordRequestModel = {
-  activeListModel: any;
-  processed: boolean;
-  logStack: any;
-  logStackPath: string;
-  reloadCauses: string[];
-  reloadStartTime: number;
-  reference?: any;
-}
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 export default class RecordFlowControl {
   dirtyMain = false;
   reloadCauses: string[];
   reloadStartTime: number;
 
-  requestModels: RecordRequestModel[];
+  requestModels: RecordRequestModel[] = [];
+  relatedRequestModels: RecordRelatedRequestModel[] = [];
 
   /**
    * the initial values for the templateVariables
@@ -38,42 +30,30 @@ export default class RecordFlowControl {
 
   queue: FlowControlQueueInfo;
 
-  constructor(reference: any, queue?: FlowControlQueueInfo) {
+  logStack: any;
+  logStackPath: string;
+  logObject: any;
+  logAppMode: string | undefined;
+
+  constructor(
+    logInfo: {
+      logObject?: any,
+      logStack: any,
+      logStackPath: string,
+      logAppMode?: string
+    },
+    queue?: FlowControlQueueInfo,
+  ) {
 
     this.queue = queue ? queue : new FlowControlQueueInfo(6);
 
     this.reloadStartTime = -1;
     this.reloadCauses = [];
 
-    this.requestModels = [];
-    reference.activeList.requests.forEach((req: any) => {
-
-      if (req.entityset || req.aggregate) {
-        const extra: { source: any, entity: boolean, agg?: string } = {
-          source: req.column.compressedDataSource,
-          entity: req.column.isEntityMode,
-        };
-        if (req.aggregate) {
-          extra.agg = req.column.aggregateFn;
-        }
-
-        this.requestModels.push({
-          activeListModel: req,
-          processed: false,
-          // these attributes are used for logging purposes:
-          logStack: LogService.getStackObject(
-            LogService.getStackNode(LogStackTypes.PSEUDO_COLUMN, req.column.table, extra)
-          ),
-          logStackPath: LogService.getStackPath(null, LogStackPaths.PSEUDO_COLUMN),
-          reloadCauses: [],
-          reloadStartTime: -1,
-          // to avoid computing this multiple times
-          // this reference is going to be used for getting the values
-          ...(req.entityset && { reference: req.column.reference.contextualize.compactBrief })
-        });
-      }
-    });
-
+    this.logStack = logInfo.logStack;
+    this.logStackPath = logInfo.logStackPath;
+    this.logObject = logInfo.logObject;
+    this.logAppMode = logInfo.logAppMode;
   }
 
   /**
@@ -86,5 +66,34 @@ export default class RecordFlowControl {
       $log.debug('No free slot available.');
     }
     return res;
+  }
+
+  /**
+   * Return the action string that should be used for logs.
+   * @param {Object} vm - the vm object
+   * @param {String} actionPath - the ui context and verb
+   * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
+   */
+  getLogAction(actionPath: LogActions, childStackPath?: any): string {
+    let stackPath = this.logStackPath;
+    if (childStackPath) {
+      stackPath = LogService.getStackPath(stackPath, childStackPath);
+    }
+    const appMode = this.logAppMode ? this.logAppMode : undefined;
+    return LogService.getActionString(actionPath, stackPath, appMode);
+  }
+
+  /**
+   * Returns the stack object that should be used
+   */
+  getLogStack(childStackElement?: any, extraInfo?: any): any {
+    let stack = this.logStack;
+    if (childStackElement) {
+      stack = this.logStack.concat(childStackElement);
+    }
+    if (extraInfo) {
+      return LogService.addExtraInfoToStack(stack, extraInfo);
+    }
+    return stack;
   }
 }

@@ -15,6 +15,10 @@
 
   /******Related Entities in record **************/
   #rt-container {
+    .panel-group {
+      margin-bottom: 20px;
+    }
+
     .rt-displayname {
       font-size: 1.75rem;
 
@@ -70,6 +74,9 @@
       .action-buttons {
         float: right;
         margin-top: 3px;
+        a.chaise-btn {
+          text-decoration: none;
+        }
       }
 
       // > .panel-heading {

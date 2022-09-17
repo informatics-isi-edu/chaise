@@ -134,3 +134,7 @@ export type SelectedRow = {
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
 }
+
+export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean) => void;
+export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, cb?: Function) => void;
+export type RecordsetProviderFetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => void;
