@@ -27,7 +27,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
  */
 const RecordRelatedSection = (): JSX.Element => {
 
-  const { relatedModels } = useRecord();
+  const { relatedModels, showEmptySections } = useRecord();
 
   // by default open all the sections
   const [openSections, setOpenSections] = useState<string[]>(Array.from(Array(relatedModels.length), (e, i) => `${i}`));
@@ -96,22 +96,20 @@ const RecordRelatedSection = (): JSX.Element => {
 
   return (
     <div id='rt-container'>
-      {/*
-       TODO activeKey={openSections} should be added back to be able to log the event
-       but adding it will break the open/close functionality completely
-       */}
-      <Accordion className='panel-group' alwaysOpen >
-        {relatedModels.map((rm: RecordRelatedModel, index: number) => (
+      <Accordion className='panel-group' activeKey={openSections} alwaysOpen >
+        {relatedModels.map((rm: RecordRelatedModel) => (
           <Accordion.Item
-            key={`record-related-${index}`}
-            eventKey={'record-related-' + index}
-            className='related-table-accordion panel'
+            key={`record-related-${rm.index}`}
+            eventKey={rm.index + ''}
+            // TODO should be changed and just added for test purposes
+            className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'hidden': ''}`}
             id='rt-heading-Gene'
             as='div'
+
           >
             <Accordion.Header
               as='div' className='panel-heading panel-title'
-              // onClick={() => toggleSection(rm)}
+              onClick={() => toggleSection(rm)}
             >
               {getTitle(rm)}
             </Accordion.Header>

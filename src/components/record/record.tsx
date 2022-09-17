@@ -82,6 +82,8 @@ const RecordInner = ({
   const {
     forceShowSpinner,
     setForceShowSpinner,
+    showEmptySections,
+    toggleShowEmptySections,
     initialized,
     page,
     readMainEntity,
@@ -295,13 +297,13 @@ const RecordInner = ({
                   placement='top'
                   tooltip='Click to hide table of contents'
                 >
-                  <div
+                  <button
                     className='chaise-btn chaise-btn-tertiary'
                     onClick={hidePanel}
                   >
                     <span className='record-app-action-icon chaise-icon chaise-sidebar-close'></span>
                     Hide panel
-                  </div>
+                  </button>
                 </ChaiseTooltip>
               </div>
             </div>
@@ -311,22 +313,22 @@ const RecordInner = ({
               <div className='float-right'>
                 <ChaiseTooltip
                   placement='bottom-start'
-                  tooltip='Click here to show empty related sections too.'
+                  tooltip={`Click here to ${showEmptySections ? 'hide empty related sections.' : 'show empty related sections too.'}`}
                 >
-                  <div className='chaise-btn chaise-btn-primary'>
+                  <button className='chaise-btn chaise-btn-primary' onClick={toggleShowEmptySections}>
                     <span className='record-app-action-icon  fa fa-th-list'></span>
-                    Show empty sections
-                  </div>
+                    {showEmptySections ? 'Hide' : 'Show'} empty sections
+                  </button>
                 </ChaiseTooltip>
                 <Export reference={reference} disabled={false} />
                 <ChaiseTooltip
                   placement='bottom-start'
                   tooltip='Click here to show the share dialog.'
                 >
-                  <div className='chaise-btn chaise-btn-primary'>
+                  <button className='chaise-btn chaise-btn-primary'>
                     <span className='record-app-action-icon  fa fa-share-square'></span>
                     Share and cite
-                  </div>
+                  </button>
                 </ChaiseTooltip>
               </div>
             </div>

@@ -13,6 +13,7 @@ import { RecordsetDisplayMode, RecordsetProviderAddUpdateCauses, RecordsetProvid
 // services
 import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 import Q from 'q';
@@ -47,6 +48,11 @@ export const RecordContext = createContext<{
    * forcefully show the spinner if set to true
    */
   forceShowSpinner: boolean,
+  /**
+   * Whether we should show empty sections or not
+   */
+  showEmptySections: boolean,
+  toggleShowEmptySections: () => void,
   /**
    * can be used to force showing of the spinner
    */
@@ -121,6 +127,8 @@ export default function RecordProvider({
   // TODO these two most probably are not needed
   const [forceShowSpinner, setForceShowSpinner] = useState(false);
 
+  const [showEmptySections, setShowEmptySections] = useState(false);
+
   const [relatedModels, setRelatedModels, relatedModelsRef] = useStateRef<RecordRelatedModel[]>([]);
   const setRelatedModelsByIndex = (index: number, updatedVals: { [key: string]: any }) => {
     setRelatedModels((prevModels: RecordRelatedModel[]) => {
@@ -183,6 +191,7 @@ export default function RecordProvider({
     processRequests(isUpdate);
   };
 
+  // -------------------------- flow control function ---------------------- //
   /**
    * The function that actually sends the requests
    */
@@ -338,6 +347,8 @@ export default function RecordProvider({
 
   const initializeModels = (tuple: any) => {
 
+    let canCreateAtLeastOne = false;
+
     // NOTE: when the read is called, reference.activeList will be generated
     // autmoatically but we want to make sure that urls are generated using tuple,
     // so the links are based on facet. We might be able to improve this and avoid
@@ -390,12 +401,12 @@ export default function RecordProvider({
         initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
       }
 
-      // TODO
       // user can modify the current record page and can modify at least 1 of the related tables in visible-foreignkeys
-      // var canCreateRelation = ref.derivedAssociationReference ? ref.derivedAssociationReference.canCreate : ref.canCreate;
-      // if (!$rootScope.showEmptyRelatedTables && $rootScope.modifyRecord && canCreateRelation) {
-      //     $rootScope.showEmptyRelatedTables = true;
-      // }
+      const canCreateRelation = ref.derivedAssociationReference ? ref.derivedAssociationReference.canCreate : ref.canCreate;
+      if (!canCreateAtLeastOne && canCreateRelation && ConfigService.chaiseConfig.editRecord !== false) {
+        canCreateAtLeastOne = true;
+      }
+
       flowControl.current.relatedRequestModels.push({
         index,
         hasWaitFor: ref.display.sourceHasWaitFor,
@@ -411,46 +422,49 @@ export default function RecordProvider({
         ref.table,
         { source: ref.compressedDataSource, entity: true }
       );
-      computedRelatedModels.push({
-        index,
-        isInline: false,
-        initialReference: ref,
-        isTableDisplay: ref.display.type === 'table',
-        tableMarkdownContentInitialized: false,
-        tableMarkdownContent: null,
-        recordsetState: {
-          page: null,
-          isLoading: false,
-          initialized: false,
-          hasTimeoutError: false,
-        },
-        recordsetProps: {
-          initialPageLimit,
-          config: {
-            viewable: true,
-            editable: true,
-            deletable: true,
-            sortable: true,
-            selectMode: RecordsetSelectMode.NO_SELECT,
-            showFaceting: false,
-            disableFaceting: true,
-            displayMode: RecordsetDisplayMode.RELATED
+      computedRelatedModels.push(
+        new RecordRelatedModel(
+          index,
+          false,
+          ref,
+          ref.display.type === 'table',
+          false,
+          null,
+          {
+            page: null,
+            isLoading: false,
+            initialized: false,
+            hasTimeoutError: false,
           },
-          logInfo: {
-            logStack: LogService.getStackObject(stackNode),
-            logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
+          {
+            initialPageLimit,
+            config: {
+              viewable: true,
+              editable: true,
+              deletable: true,
+              sortable: true,
+              selectMode: RecordsetSelectMode.NO_SELECT,
+              showFaceting: false,
+              disableFaceting: true,
+              displayMode: RecordsetDisplayMode.RELATED
+            },
+            logInfo: {
+              logStack: LogService.getStackObject(stackNode),
+              logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
+            }
           }
-        }
-      });
+        )
+      );
     });
     setRelatedModels(computedRelatedModels);
 
-    // TODO
     // chaiseConfig.showWriterEmptyRelatedOnLoad takes precedence over heuristics above for $rootScope.showEmptyRelatedTables when true or false
     // showWriterEmptyRelatedOnLoad only applies to users with write permissions for current table
-    // if ($rootScope.reference.canCreate && typeof chaiseConfig.showWriterEmptyRelatedOnLoad === "boolean") {
-    //   $rootScope.showEmptyRelatedTables = chaiseConfig.showWriterEmptyRelatedOnLoad;
-    // }
+    if (reference.canCreate && typeof ConfigService.chaiseConfig.showWriterEmptyRelatedOnLoad === 'boolean') {
+      setShowEmptySections(ConfigService.chaiseConfig.showWriterEmptyRelatedOnLoad);
+    } else {
+      setShowEmptySections(canCreateAtLeastOne);
+    }
 
     setModelsInitialized(true);
   };
@@ -509,12 +523,14 @@ export default function RecordProvider({
         if (res.success && res.page && (!rm.hasWaitFor || rm.waitForDataLoaded)) {
           setRelatedModelsByIndex(index, {
             tableMarkdownContentInitialized: true,
-            tableMarkdownContent: page.getContent(flowControl.current.templateVariables)
+            tableMarkdownContent: res.page.getContent(flowControl.current.templateVariables)
           })
         }
       }
     };
   };
+
+  // ---------------- log related function --------------------------- //
 
   const logRecordClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
     const usedRef = ref ? ref : reference;
@@ -532,6 +548,21 @@ export default function RecordProvider({
     return flowControl.current.getLogStack(childStackElement, extraInfo);
   }
 
+  // ----------------- utility/misc functions ---------------------------- //
+
+  /**
+   * Toggle the empty section
+   * @returns
+   */
+  const toggleShowEmptySections = () => {
+    setShowEmptySections((curr) => {
+      logRecordClientAction(curr ? LogActions.EMPTY_RELATED_HIDE : LogActions.EMPTY_RELATED_SHOW);
+      // TODO test and see if the footer issue still persists
+      return !curr;
+    })
+  };
+
+
   const providerValue = useMemo(() => {
     return {
       // main entity:
@@ -543,6 +574,8 @@ export default function RecordProvider({
       // utilities:
       forceShowSpinner,
       setForceShowSpinner,
+      showEmptySections,
+      toggleShowEmptySections,
       // log related:
       logRecordClientAction,
       getRecordLogAction,
@@ -552,7 +585,7 @@ export default function RecordProvider({
       updateRelatedRecordsetState,
       registerRelatedModel
     };
-  }, [page, recordValues, initialized, forceShowSpinner, relatedModels]);
+  }, [page, recordValues, initialized, forceShowSpinner, showEmptySections, relatedModels]);
 
   return (
     <RecordContext.Provider value={providerValue}>

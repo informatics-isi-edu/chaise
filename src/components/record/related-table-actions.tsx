@@ -2,6 +2,9 @@
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
+// hooks
+import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
@@ -16,6 +19,9 @@ type RelatedTableActionsProps = {
 const RelatedTableActions = ({
   relatedModel
 }: RelatedTableActionsProps): JSX.Element => {
+
+  const { reference } = useRecord();
+
   let containerClassName = 'action-bar-RT-heading';
   if (relatedModel.isInline) {
     containerClassName = relatedModel.isTableDisplay ? 'action-bar-entity-display-mode' : 'action-bar-entity-table-mode';
@@ -60,7 +66,7 @@ const RelatedTableActions = ({
         tooltip={
           <span>
             Explore more <code><DisplayValue value={usedRef.displayname}></DisplayValue></code> records
-            related to this <code><DisplayValue value={usedRef.table.displayname}></DisplayValue></code>.
+            related to this <code><DisplayValue value={reference.displayname}></DisplayValue></code>.
           </span>
         }
       >

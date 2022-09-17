@@ -28,6 +28,10 @@
     }
 
     .related-table-accordion {
+      &.hidden {
+        display: none !important;
+      }
+
       &.panel {
         // override the default bootstrap styles
         box-shadow: none;

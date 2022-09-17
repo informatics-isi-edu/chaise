@@ -56,17 +56,7 @@ const RelatedTableInner = ({
   }, []);
 
   const usedRef = relatedModel.initialReference;
-
-  /**
-   * allow related table markdown display if all the following are true:
-   *  - reference.display.type is `markdown`
-   *  - related table has data.
-   *  - related table's tableMarkdownContent is not empty string
-   */
-  const allowInlineTableMarkdown = usedRef.display.type === 'markdown' && page &&
-    page.length > 0 && relatedModel.tableMarkdownContentInitialized && relatedModel.tableMarkdownContent !== '';
-
-  const displayMarkdown = allowInlineTableMarkdown && !relatedModel.isTableDisplay;
+  const displayCustomMode = relatedModel.displayCustomMode();
 
   return (
     // TODO class: 'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}
@@ -75,12 +65,12 @@ const RelatedTableInner = ({
       {usedRef.commentDisplay === 'inline' && usedRef.comment &&
         <div className='inline-tooltip'>{usedRef.comment}</div>
       }
-      {displayMarkdown &&
+      {displayCustomMode &&
         <DisplayValue addClass={true} value={{isHTML: true, value: relatedModel.tableMarkdownContent}} />
       }
       {/* TODO the following was span for inline, but shouldn't matter */}
       {/* TODO related-table and related-table-accordion classes removed  */}
-      {!displayMarkdown &&
+      {!displayCustomMode &&
         < div className='related-table-content'>
           <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
           <RecordsetTable

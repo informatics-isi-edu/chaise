@@ -14,30 +14,51 @@ import { RecordsetConfig, RecordsetProviderAddUpdateCauses, RecordsetProviderFet
 //   isLoading: boolean
 // }
 
-export interface RecordRelatedModel {
-  index: number,
-  isInline: boolean,
-  initialReference: any,
-  isTableDisplay: boolean,
-  // this indicates that the tableMarkdownContent has been initialized:
-  // we should not show the related table before initialzing the tableMarkdownContent
-  tableMarkdownContentInitialized: boolean,
-  tableMarkdownContent: any, // TODO
-  recordsetState: {
-    page: any,
-    isLoading: boolean,
-    initialized: boolean,
-    hasTimeoutError: boolean,
-  },
-  recordsetProps: {
-    initialPageLimit: number,
-    config: RecordsetConfig,
-    logInfo: {
-      logStack: any,
-      logStackPath: string
+export class RecordRelatedModel {
+  constructor(
+    public index: number,
+    public isInline: boolean,
+    public initialReference: any,
+    public isTableDisplay: boolean,
+    // this indicates that the tableMarkdownContent has been initialized:
+    // we should not show the related table before initialzing the tableMarkdownContent
+    public tableMarkdownContentInitialized: boolean,
+    public tableMarkdownContent: any, // TODO
+    public recordsetState: {
+      page: any,
+      isLoading: boolean,
+      initialized: boolean,
+      hasTimeoutError: boolean,
+    },
+    public recordsetProps: {
+      initialPageLimit: number,
+      config: RecordsetConfig,
+      logInfo: {
+        logStack: any,
+        logStackPath: string
+      }
     }
+  ) { }
+
+  /**
+   * allow related table markdown display if all the following are true:
+   *  - reference.display.type is `markdown`
+   *  - related table has data.
+   *  - related table's tableMarkdownContent is not empty string
+   */
+  allowCustomMode = () : boolean => {
+    return this.initialReference.display.type === 'markdown' && this.recordsetState.page &&
+      this.recordsetState.page.length > 0 && this.tableMarkdownContentInitialized && this.tableMarkdownContent !== '';
+  };
+
+  /**
+   * whether we should display the custom mode or not
+   */
+  displayCustomMode = () : boolean => {
+    return this.allowCustomMode() && !this.isTableDisplay;
   }
 }
+
 
 export interface RecordRelatedRequestModel {
   index: number,
