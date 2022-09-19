@@ -66,10 +66,12 @@ exports.getConfig = function(options) {
   }
 
   // using chrome in headless mode
-  if (process.env.HEADLESS && process.env.HEADLESS == true) {
+  if (process.env.HEADLESS == "true") {
     config.capabilities.chromeOptions.args.push('--headless');
     config.capabilities.chromeOptions.args.push('--disable-gpu');
   }
+
+  console.log(config.capabilities.chromeOptions.args)
 
   Object.assign(config, options);
 

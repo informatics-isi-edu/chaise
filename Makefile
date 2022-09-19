@@ -82,7 +82,6 @@ E2Efooter=test/e2e/specs/all-features-confirmation/footer/protractor.conf.js
 E2Eerrors=test/e2e/specs/all-features-confirmation/errors/protractor.conf.js
 ## Parallel protractor scripts
 FullFeaturesParallel=test/e2e/specs/all-features/protractor.conf.js
-FullFeaturesParallel2=test/e2e/specs/all-features/protractor_2.conf.js
 FullFeaturesConfirmationParallel=test/e2e/specs/all-features-confirmation/protractor.conf.js
 DeleteProhibitedParallel=test/e2e/specs/delete-prohibited/protractor.conf.js
 DefaultConfigParallel=test/e2e/specs/default-config/protractor.conf.js
@@ -102,7 +101,6 @@ DEFAULT_CONFIG_PARALLEL_TESTS=$(DefaultConfigParallel)
 DELETE_PROHIBITED_PARALLEL_TESTS=$(DeleteProhibitedParallel)
 FULL_FEATURES_CONFIRMATION_PARALLEL_TESTS=$(FullFeaturesConfirmationParallel)
 FULL_FEATURES_PARALLEL_TESTS=$(FullFeaturesParallel)
-FULL_FEATURES_PARALLEL_TESTS_TWO=$(FullFeaturesParallel2)
 PARALLEL_TESTS=$(FullFeaturesConfirmationParallel) $(DefaultConfigParallel) $(FullFeaturesParallel) $(DeleteProhibitedParallel)
 
 ALL_TESTS=$(NAVBAR_TESTS) $(RECORD_TESTS) $(RECORDSET_TESTS) $(RECORDADD_TESTS) $(RECORDEDIT_TESTS) $(PERMISSIONS_TESTS) $(FOOTER_TESTS) $(ERRORS_TESTS)
@@ -152,10 +150,6 @@ testparallel: test-PARALLEL_TESTS
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeatures
 testfullfeatures: test-FULL_FEATURES_PARALLEL_TESTS
-
-#Rule to run the full features chaise configuration tests in parallel
-.PHONY: testfullfeatures2
-testfullfeatures2: test-FULL_FEATURES_PARALLEL_TESTS_TWO
 
 #Rule to run the full features chaise configuration tests in parallel
 .PHONY: testfullfeaturesconfirmation

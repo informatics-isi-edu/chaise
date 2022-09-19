@@ -6,13 +6,6 @@ var config = pConfig.getConfig({
     configFileName: 'parallel-configs/default-config.dev.json',
     specs: [
         "*/*.spec.js"
-        // "record/links.spec.js",
-        // "recordedit/add-x-forms.spec.js",
-        // "recordedit/immutable-inputs.spec.js",
-        // "recordedit/domain-filter.spec.js",
-        // "recordedit/remove-edit-form.spec.js",
-        // "recordedit/submission-disabled.spec.js",
-        // "multi-edit.spec.js"
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;

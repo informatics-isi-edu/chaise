@@ -5,14 +5,6 @@ var config = pConfig.getConfig({
     configFileName: 'parallel-configs/all-features.dev.json',
     specs: [
         "*/*.spec.js"
-        // "record/related-table.spec.js", // should be moved down 1 for accurate order
-        // "acls/static-acl.spec.js",
-        // "navbar/base-config.spec.js",
-        // "record/copy-btn.spec.js",
-        // "acls/dynamic-acl.spec.js",
-        // "record/permissions-annotation.spec.js",
-        // "recordedit/permissions-annotation.spec.js",
-        // "recordset/permissions-annotation.spec.js",
     ],
     setBaseUrl: function(browser, data) {
         browser.params.url = process.env.CHAISE_BASE_URL;

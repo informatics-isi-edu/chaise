@@ -662,7 +662,7 @@ exports.testSharePopup = function (sharePopupParams) {
  * testEdit
  * testDelete
  */
-
+// 4 describes & 21 its
 exports.testRelatedTable = function (params, pageReadyCondition) {
     var currentEl, markdownToggleLink, toggled = false, noRows = false;
     beforeAll(function(done) {

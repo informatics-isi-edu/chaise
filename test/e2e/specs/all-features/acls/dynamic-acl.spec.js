@@ -6,7 +6,6 @@
 
 var pImport =  require('../../../utils/protractor.import.js');
 var chaisePage = require('../../../utils/chaise.page.js');
-const { browser } = require('protractor');
 var recordPage = chaisePage.recordPage;
 var recordEditPage = chaisePage.recordEditPage;
 var recordsetPage = chaisePage.recordsetPage;
