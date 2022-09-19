@@ -1,4 +1,3 @@
-const { toEditorSettings } = require('typescript');
 var pConfig = require('./../../utils/protractor.configuration.js');
 
 var config = pConfig.getConfig({

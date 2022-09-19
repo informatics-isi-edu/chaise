@@ -172,7 +172,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         });
     }
 
-    // 14 describes & 47 its
     var testMultipleRecords = function(recordIndex) {
 
         // helper functions:
@@ -1720,7 +1719,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
  * @param  {Boolean} isEditMode  [description]
  * @return {[type]}              [description]
  */
- // 1 describes & 8 its
 exports.testSubmission = function (tableParams, isEditMode) {
     beforeAll(function() {
         // Submit the form
