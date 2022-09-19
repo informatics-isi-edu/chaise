@@ -61,20 +61,15 @@
                 // inline
                 if (activeListModel.inline) {
                     model = $rootScope.columnModels[activeListModel.index];
-                    if (model.tableModel.dirtyResult) {
-                        // will take care of adding to occpuied slots
-                        recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
-                    }
+                    // will take care of adding to occpuied slots
+                    recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
                     continue;
                 }
 
                 // related
                 if (activeListModel.related) {
                     model = $rootScope.relatedTableModels[activeListModel.index];
-                    if (model.tableModel.dirtyResult) {
-                        // will take care of adding to occpuied slots
-                        recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
-                    }
+                    recordTableUtils.updateMainEntity(model.tableModel, _processRequests, !isUpdate, true, _afterUpdateRelatedEntity(model));
                     continue;
                 }
 
@@ -85,16 +80,14 @@
             // aggregates in inline
             for (i = 0; i < $rootScope.columnModels.length && $rootScope.hasInline; i++) {
                 model = $rootScope.columnModels[i];
-                if (!model.isInline || model.tableModel.dirtyResult) continue;
-                if (!_haveFreeSlot()) return;
-                recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
+                if (model.isInline) {
+                  recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
+                }
             }
 
             // aggregates in related
             for (i = 0; i < $rootScope.relatedTableModels.length; i++) {
                 model = $rootScope.relatedTableModels[i];
-                if (model.tableModel.dirtyResult) continue;
-                if (!_haveFreeSlot()) return;
                 recordTableUtils.updateColumnAggregates(model.tableModel, _processRequests, !isUpdate);
             }
         }
@@ -402,7 +395,7 @@
                     model.waitForDataLoaded = true;
                     // if the page data is already fetched, we can just popuplate the tableMarkdownContent value.
                     // otherwise we should just wait for the related/inline table data to get back to popuplate the tableMarkdownContent
-                    if (model.tableModel.page && !model.tableModel.dirtyResult) {
+                    if (model.tableModel.page && model.tableModel.hasLoaded) {
                         model.tableMarkdownContent = model.tableModel.page.getContent($rootScope.templateVariables);
                         model.tableMarkdownContentInitialized = true;
                     }

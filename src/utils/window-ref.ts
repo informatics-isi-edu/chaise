@@ -9,6 +9,8 @@ interface ICustomWindow extends Window {
   chaiseBuildVariables: any;
   // chaiseConfig is attached to the window with the chaise-config.js file
   chaiseConfig: any;
+  // googleDatasetConfig is attached to the window with the google-dataset-config.js file
+  googleDatasetConfig: any;
   dcctx: {
     // the object that will be logged with every request:
     contextHeaderParams: {

@@ -112,13 +112,16 @@ html {
   }
 
   // the last selector is added to override bootstrap default behavior
-  a, a:not([href]):not([class]) {
+  a,
+  a:not([href]):not([class]) {
     cursor: pointer;
     color: $link-color;
     text-decoration: none;
   }
   // the last selector is added to override bootstrap default behavior
-  a:focus, a:hover, a:not([href]):not([class]):hover {
+  a:focus,
+  a:hover,
+  a:not([href]):not([class]):hover {
     text-decoration: underline;
   }
 
@@ -209,6 +212,12 @@ html {
     text-align: left;
     max-width: none;
     white-space: pre-wrap;
+  }
+  .tooltip code,
+  .tooltip-inner code {
+    background: rgba(110, 118, 129);
+    color: #fff;
+    padding: 0.5px;
   }
 
   // disabled row and form
@@ -309,7 +318,7 @@ html {
   }
 
   .float-right {
-      float: right;
+    float: right;
   }
   // bookmark container end
 
@@ -457,7 +466,7 @@ html {
 
         &.open-panel {
           flex: 0;
-          flex-basis:  $left-panel-width-lg;
+          flex-basis: $left-panel-width-lg;
           min-width: 170px;
 
           & + .top-right-panel {
@@ -523,7 +532,7 @@ html {
 
       &.open-panel {
         flex: 0;
-        flex-basis:  $left-panel-width-lg;
+        flex-basis: $left-panel-width-lg;
         min-width: 170px;
 
         & ~ .main-container {

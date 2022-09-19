@@ -1,25 +1,17 @@
 /* eslint max-classes-per-file: 0 */
 
+// modesl
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+
+// servies
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import {generateUUID} from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
-class FlowControlQueueInfo {
-  maxRequests = 4;
+// utils
+import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 
-  occupiedSlots = 0;
-
-  counter = 0;
-
-  constructor(maxRequests?: number) {
-    if (maxRequests) {
-      this.maxRequests = maxRequests;
-    }
-  }
-}
-
-export class RecordsetFlowControl {
+export default class RecordsetFlowControl {
   dirtyResult = false;
   dirtyCount = false;
   dirtyFacets = false;
@@ -101,7 +93,7 @@ export class RecordsetFlowControl {
   * returns true if we have free slots for requests.
   * @return {boolean}
   */
-  haveFreeSlot(printMessage=true) {
+  haveFreeSlot(printMessage = true) {
     const res = this.queue.occupiedSlots < this.queue.maxRequests;
     if (!res && printMessage) {
       $log.debug('No free slot available.');
@@ -115,7 +107,7 @@ export class RecordsetFlowControl {
    * @param {String} actionPath - the ui context and verb
    * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
    */
-  getLogAction(actionPath: LogActions, childStackPath?: any) : string {
+  getLogAction(actionPath: LogActions, childStackPath?: any): string {
     let stackPath = this.logStackPath;
     if (childStackPath) {
       stackPath = LogService.getStackPath(stackPath, childStackPath);

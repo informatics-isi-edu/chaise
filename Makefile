@@ -186,7 +186,6 @@ test: test-ALL_TESTS
 # HTML files that need to be created
 HTML=viewer/index.html \
 	 recordedit/index.html \
-	 record/index.html \
 	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
 	 $(DIST)/chaise-dependencies.html \
@@ -333,33 +332,6 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 # vendor files that will be treated externally in webpack
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
-
-# -------------------------- record app -------------------------- #
-RECORD_ROOT=record
-
-RECORD_JS_SOURCE=$(RECORD_ROOT)/record.app.js \
-	$(RECORD_ROOT)/record.utils.js \
-	$(RECORD_ROOT)/record.controller.js
-
-RECORD_JS_SOURCE_MIN=record.min.js
-$(DIST)/$(RECORD_JS_SOURCE_MIN): $(RECORD_JS_SOURCE)
-	$(call bundle_js_files,$(RECORD_JS_SOURCE_MIN),$(RECORD_JS_SOURCE))
-
-RECORD_JS_VENDOR_ASSET=
-
-RECORD_CSS_SOURCE=
-
-.make-record-includes: $(BUILD_VERSION)
-	$(info - creating .make-record-includes)
-	@> .make-record-includes
-	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
-	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(GOOGLE_DATASET_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-record-includes)
-
-record/index.html: record/index.html.in .make-record-includes
-	$(info - creating record/index.html)
-	@$(call build_html, .make-record-includes, record/index.html)
-
 
 # -------------------------- recordedit app -------------------------- #
 RECORDEDIT_ROOT=recordedit

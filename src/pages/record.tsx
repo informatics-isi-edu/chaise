@@ -13,10 +13,12 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -37,19 +39,22 @@ const recordSettings = {
 
 const RecordApp = (): JSX.Element => {
 
-  const { addAlert } = useAlert()
-  const { session, showPreviousSessionAlert } = useAuthn();
+  const { addAlert } = useAlert();
+  const { session, showPreviousSessionAlert, popupLogin } = useAuthn();
   const { dispatchError, errors } = useError();
 
   const [recordProps, setRecordProps] = useState<RecordProps | null>(null);
 
   useEffect(() => {
-
-    let logObject: any = {};
+    const logObject: any = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;
     if (res.isQueryParameter) logObject.cqp = 1;
+    if (res.queryParams && !session && 'promptlogin' in res.queryParams) {
+      // 'promptlogin' query parameter comes from static generated chaise record pages
+      popupLogin(LogActions.LOGIN_WARNING);
+    }
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
       const reference = response.contextualize.detailed;
@@ -60,8 +65,20 @@ const RecordApp = (): JSX.Element => {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
       }
 
-      // TODO log stuff and other props
-      setRecordProps({ reference });
+      const logStack = [
+        LogService.getStackNode(
+          LogStackTypes.ENTITY,
+          reference.table,
+          reference.filterLogInfo,
+        ),
+      ];
+      const logStackPath = LogStackTypes.ENTITY;
+
+      // set the global log stack and log stack path
+      LogService.config(logStack, logStackPath);
+
+      // set the record props so it can start bootstraping
+      setRecordProps({ reference, logInfo: { logObject, logStack, logStackPath } });
 
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {

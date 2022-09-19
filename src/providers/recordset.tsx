@@ -1,10 +1,10 @@
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetProviderAddUpdateCauses, RecordsetProviderFetchSecondaryRequests, RecordsetProviderUpdateMainEntity, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
+import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
 import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -170,6 +170,18 @@ export const RecordsetContext = createContext<{
    * get the appropriate log stack
    */
   getLogStack: (childStackElement?: any, extraInfo?: any) => any,
+  /**
+   * manually trigger the request for the main entity
+   */
+  updateMainEntity: RecordsetProviderUpdateMainEntity,
+  /**
+   * manually trigger the update for the secondary requests
+   */
+  fetchSecondaryRequests: RecordsetProviderFetchSecondaryRequests,
+  /**
+   * manually add update cases and set the dirty flag
+   */
+  addUpdateCauses: RecordsetProviderAddUpdateCauses,
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -440,12 +452,7 @@ export default function RecordsetProvider({
     }
 
     if (updateResult) {
-      if (!Number.isInteger(flowControl.current.reloadStartTime) || flowControl.current.reloadStartTime === -1) {
-        flowControl.current.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
-      }
-      if (cause && flowControl.current.reloadCauses.indexOf(cause) === -1) {
-        flowControl.current.reloadCauses.push(cause);
-      }
+      addUpdateCauses([cause]);
     }
 
     if (updateCount) {
@@ -484,6 +491,22 @@ export default function RecordsetProvider({
     }
 
     return true;
+  };
+
+  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean) => {
+    if (setDirtyResult) {
+      flowControl.current.dirtyResult = true;
+    }
+    // the time that will be logged with the request
+    if (!Number.isInteger(flowControl.current.reloadStartTime) || flowControl.current.reloadStartTime === -1) {
+      flowControl.current.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
+    }
+
+    causes.forEach((cause) => {
+      if (cause && flowControl.current.reloadCauses.indexOf(cause) === -1) {
+        flowControl.current.reloadCauses.push(cause);
+      }
+    });
   };
 
   const updatePage = () => {
@@ -530,7 +553,7 @@ export default function RecordsetProvider({
  * Given the tableModel object, will get the values for main entity and
  * attach them to the model.
  * @param  {function} updatePageCB The update page callback which we will call after getting the result.
- * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
+ * @param  {object} notTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
   const updateMainEntity = (updatePageCB: Function, notTerminal = false, cb?: Function) => {
@@ -544,7 +567,7 @@ export default function RecordsetProvider({
     (function (currentCounter) {
       printDebugMessage('updating result', currentCounter);
       readMainEntity(currentCounter).then((res: any) => {
-        afterUpdateMainEntity(res, currentCounter);
+        afterUpdateMainEntity(res.success, currentCounter);
 
         setHasTimeoutError(false);
         if (cb) cb(res);
@@ -624,7 +647,7 @@ export default function RecordsetProvider({
 
       referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
         if (current !== flowControl.current.queue.counter) {
-          defer.resolve(false);
+          defer.resolve({success: false, page: null});
           return defer.promise;
         }
 
@@ -639,7 +662,7 @@ export default function RecordsetProvider({
         }
       }).then((result: any) => {
         if (current !== flowControl.current.queue.counter) {
-          defer.resolve(false);
+          defer.resolve({success: false, page: null});
           return defer.promise;
         }
 
@@ -694,10 +717,10 @@ export default function RecordsetProvider({
         flowControl.current.reloadCauses = [];
         flowControl.current.reloadStartTime = -1;
 
-        defer.resolve(true);
+        defer.resolve({success: true, page: result.page});
       }).catch((err: any) => {
         if (current !== flowControl.current.queue.counter) {
-          return defer.resolve(false);
+          return defer.resolve({success: false, page: null});
         }
 
         setIsInitialized(true);
@@ -1042,11 +1065,11 @@ export default function RecordsetProvider({
       printDebugMessage,
       checkReferenceURL,
       addRecordRequests,
-      forceShowSpinner,
-      setForceShowSpinner,
-      logRecordsetClientAction,
-      getLogAction,
-      getLogStack
+      forceShowSpinner, setForceShowSpinner,
+      // log related:
+      logRecordsetClientAction, getLogAction, getLogStack,
+      // used for manually calling the flow-control in record page
+      updateMainEntity, fetchSecondaryRequests, addUpdateCauses
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
