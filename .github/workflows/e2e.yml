@@ -194,7 +194,7 @@ jobs:
         run: exit 1
       - name: Check on delete prohibited configuration tests 1
         if: always() && steps.test-delete-prohibited-1.outcome != 'success'
-      #   run: exit 1
+        run: exit 1
       # - name: Check on delete prohibited configuration tests 2
       #   if: always() && steps.test-delete-prohibited-2.outcome != 'success'
       #   run: exit 1
