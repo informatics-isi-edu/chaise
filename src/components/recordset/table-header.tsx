@@ -2,6 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
+import Spinner from 'react-bootstrap/Spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // models
@@ -17,7 +18,6 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-
 
 type TableHeaderProps = {
   config: RecordsetConfig
@@ -215,6 +215,9 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
             >
               <span className='timeout-icon fa-solid fa-triangle-exclamation' />
             </ChaiseTooltip>
+          }
+          {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0 && isLoading &&
+            <Spinner className='chaise-table-header-spinner' animation='border' size='sm' />
           }
         </span>
       </div>

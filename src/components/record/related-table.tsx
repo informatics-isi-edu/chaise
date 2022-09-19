@@ -16,6 +16,7 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // utils
 import { useEffect } from 'react';
+import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 type RelatedTableProps = {
   relatedModel: RecordRelatedModel
@@ -30,17 +31,17 @@ const RelatedTable = ({
       // TODO the following most probably should go somewhere else:
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} />
+      <RelatedTableInner relatedModel={relatedModel}/>
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
-  relatedModel
+  relatedModel,
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
     updateMainEntity, addUpdateCauses, fetchSecondaryRequests,
-   } = useRecordset();
+  } = useRecordset();
   const {
     updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
@@ -56,7 +57,7 @@ const RelatedTableInner = ({
   }, []);
 
   const usedRef = relatedModel.initialReference;
-  const displayCustomMode = relatedModel.displayCustomMode();
+  const displayCustomMode = displayCustomModeRelated(relatedModel);
 
   return (
     // TODO class: 'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}
@@ -66,19 +67,17 @@ const RelatedTableInner = ({
         <div className='inline-tooltip'>{usedRef.comment}</div>
       }
       {displayCustomMode &&
-        <DisplayValue addClass={true} value={{isHTML: true, value: relatedModel.tableMarkdownContent}} />
+        <DisplayValue addClass={true} value={{ isHTML: true, value: relatedModel.tableMarkdownContent }} />
       }
       {/* TODO the following was span for inline, but shouldn't matter */}
       {/* TODO related-table and related-table-accordion classes removed  */}
-      {!displayCustomMode &&
-        < div className='related-table-content'>
-          <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
-          <RecordsetTable
-            config={relatedModel.recordsetProps.config}
-            initialSortObject={usedRef.location.sortObject}
-          />
-        </div>
-      }
+      <div className={`related-table-content ${displayCustomMode ? 'hidden': ''}`} style={{display: displayCustomMode ? 'none': 'block'}}>
+        <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
+        <RecordsetTable
+          config={relatedModel.recordsetProps.config}
+          initialSortObject={usedRef.location.sortObject}
+        />
+      </div>
     </div >
   )
 };

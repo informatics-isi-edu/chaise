@@ -8,7 +8,11 @@ import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/s
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import { RecordRelatedModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { RecordsetDisplayMode, RecordsetProviderAddUpdateCauses, RecordsetProviderFetchSecondaryRequests, RecordsetProviderUpdateMainEntity, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import {
+  RecordsetDisplayMode, RecordsetProviderAddUpdateCauses,
+  RecordsetProviderFetchSecondaryRequests,
+  RecordsetProviderUpdateMainEntity, RecordsetSelectMode
+} from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
@@ -18,10 +22,14 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 // utilities
 import Q from 'q';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { attachGoogleDatasetJsonLd } from '@isrd-isi-edu/chaise/src/utils/google-dataset';
+import {
+  CanCreateDisabledRelated, canCreateRelated,
+  canDeleteRelated, canEditRelated
+} from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 export const RecordContext = createContext<{
   /**
@@ -83,6 +91,7 @@ export const RecordContext = createContext<{
     updateMainEntity: RecordsetProviderUpdateMainEntity,
     fetchSecondaryRequests: RecordsetProviderFetchSecondaryRequests,
     addUpdateCauses: RecordsetProviderAddUpdateCauses) => void,
+  toggleRelatedDisplayMode: (index: number, isInline: boolean) => void,
   /**
    * log client actions
    * Notes:
@@ -401,9 +410,12 @@ export default function RecordProvider({
         initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
       }
 
+      const isPureBinary = isObjectAndNotNull(ref.derivedAssociationReference);
+      const canCreate = canCreateRelated(ref);
+
       // user can modify the current record page and can modify at least 1 of the related tables in visible-foreignkeys
-      const canCreateRelation = ref.derivedAssociationReference ? ref.derivedAssociationReference.canCreate : ref.canCreate;
-      if (!canCreateAtLeastOne && canCreateRelation && ConfigService.chaiseConfig.editRecord !== false) {
+      // TODO does this even make sense?
+      if (!canCreateAtLeastOne && canCreate) {
         canCreateAtLeastOne = true;
       }
 
@@ -422,39 +434,42 @@ export default function RecordProvider({
         ref.table,
         { source: ref.compressedDataSource, entity: true }
       );
-      computedRelatedModels.push(
-        new RecordRelatedModel(
-          index,
-          false,
-          ref,
-          ref.display.type === 'table',
-          false,
-          null,
-          {
-            page: null,
-            isLoading: false,
-            initialized: false,
-            hasTimeoutError: false,
+      computedRelatedModels.push({
+        index,
+        isInline: false,
+        isPureBinary,
+        initialReference: ref,
+        isTableDisplay: ref.display.type === 'table',
+        tableMarkdownContentInitialized: false,
+        tableMarkdownContent: null,
+        recordsetState: {
+          page: null,
+          isLoading: false,
+          initialized: false,
+          hasTimeoutError: false,
+        },
+        recordsetProps: {
+          initialPageLimit,
+          config: {
+            viewable: true,
+            editable: true,
+            deletable: true,
+            sortable: true,
+            selectMode: RecordsetSelectMode.NO_SELECT,
+            showFaceting: false,
+            disableFaceting: true,
+            displayMode: RecordsetDisplayMode.RELATED
           },
-          {
-            initialPageLimit,
-            config: {
-              viewable: true,
-              editable: true,
-              deletable: true,
-              sortable: true,
-              selectMode: RecordsetSelectMode.NO_SELECT,
-              showFaceting: false,
-              disableFaceting: true,
-              displayMode: RecordsetDisplayMode.RELATED
-            },
-            logInfo: {
-              logStack: LogService.getStackObject(stackNode),
-              logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
-            }
+          logInfo: {
+            logStack: LogService.getStackObject(stackNode),
+            logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
           }
-        )
-      );
+        },
+        canCreate,
+        canCreateDisabled: CanCreateDisabledRelated(ref, tuple),
+        canEdit: canEditRelated(ref),
+        canDelete: canDeleteRelated(ref)
+      });
     });
     setRelatedModels(computedRelatedModels);
 
@@ -562,6 +577,25 @@ export default function RecordProvider({
     })
   };
 
+  const toggleRelatedDisplayMode = (index: number, isInline: boolean) => {
+    if (isInline) {
+      // TODO
+    } else {
+      setRelatedModels((prevModels: RecordRelatedModel[]) => {
+        return prevModels.map((pm: RecordRelatedModel, pmIndex: number) => {
+          if (index !== pmIndex) return pm;
+          const isTableDisplay = !pm.isTableDisplay;
+          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_MARKDOWN : LogActions.RELATED_DISPLAY_TABLE;
+
+          // TODO what about the stack?
+          // logRecordClientAction(action, )
+
+          return { ...pm, isTableDisplay };
+        });
+      });
+    }
+  };
+
 
   const providerValue = useMemo(() => {
     return {
@@ -583,7 +617,8 @@ export default function RecordProvider({
       // related entity:
       relatedModels,
       updateRelatedRecordsetState,
-      registerRelatedModel
+      registerRelatedModel,
+      toggleRelatedDisplayMode
     };
   }, [page, recordValues, initialized, forceShowSpinner, showEmptySections, relatedModels]);
 

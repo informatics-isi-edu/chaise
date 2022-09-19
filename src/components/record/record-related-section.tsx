@@ -27,7 +27,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
  */
 const RecordRelatedSection = (): JSX.Element => {
 
-  const { relatedModels, showEmptySections } = useRecord();
+  const { relatedModels, relatedReferences, showEmptySections } = useRecord();
 
   // by default open all the sections
   const [openSections, setOpenSections] = useState<string[]>(Array.from(Array(relatedModels.length), (e, i) => `${i}`));
@@ -40,11 +40,12 @@ const RecordRelatedSection = (): JSX.Element => {
       const action = isOpen ? LogActions.CLOSE : LogActions.OPEN;
 
       // TODO shouldn't we use logRecordCleintAction here?
+      // TODO should technically be based on the latest reference
       // log the action
-      LogService.logClientAction({
-        action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
-        stack: relatedModel.recordsetProps.logInfo.logStack
-      }, relatedModel.initialReference.defaultLogInfo);
+      // LogService.logClientAction({
+      //   action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
+      //   stack: relatedModel.recordsetProps.logInfo.logStack
+      // }, relatedModel.initialReference.defaultLogInfo);
 
       return isOpen ? [...currState.slice(0, currIndex), ...currState.slice(currIndex + 1)] : currState.concat(relatedModel.index.toString());
     });
@@ -105,7 +106,6 @@ const RecordRelatedSection = (): JSX.Element => {
             className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'hidden': ''}`}
             id='rt-heading-Gene'
             as='div'
-
           >
             <Accordion.Header
               as='div' className='panel-heading panel-title'

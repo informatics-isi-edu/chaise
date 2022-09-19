@@ -78,6 +78,11 @@
       .action-buttons {
         float: right;
         margin-top: 3px;
+
+        .chaise-btn {
+          margin-left: 5px;
+        }
+
         a.chaise-btn {
           text-decoration: none;
         }
