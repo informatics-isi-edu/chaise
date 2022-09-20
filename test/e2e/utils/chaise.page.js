@@ -1559,6 +1559,10 @@ function chaisePage() {
             console.log("before set localStorage info")
             return browser.executeScript('window.localStorage.setItem( \'session\', \'{"previousSession":true}\' );');
         }).then(function () {
+            var allCookies = browser.driver.manage().getCookies();
+            allCookies.forEach(function (cookie) {
+                console.log(cookie.getName() + " -> " + cookie.getValue());
+            })
             browser.ignoreSynchronization = false;
             defer.resolve();
         }).catch(function (err) {
