@@ -15,6 +15,12 @@ describe('Navbar ', function() {
         }).then(function () {
             return chaisePage.recordsetPageReady();
         }).then(function () {
+            return browser.driver.manage().getCookies();
+        }).then(function (allCookies) {
+            allCookies.forEach(function (cookie) {
+                console.log(cookie.name + " -> " + cookie.value);
+            });
+
             done();
         }).catch(function (err) {
             done.fail();
