@@ -316,7 +316,7 @@ exports.testPresentation = function (tableParams) {
 
     it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(done){
         var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.id('entity-4-markdown')), //TODO this should be a function, it's also is assuming the order
+            markdownEntity = element(by.css('#entity-4-table .related-markdown-content')), //TODO this should be a function, it's also is assuming the order
             bookingName = "booking";
 
         var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();

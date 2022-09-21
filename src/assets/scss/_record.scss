@@ -127,13 +127,16 @@
       }
     }
 
-    .action-bar-entity-display-mode {
+    .related-table-actions {
       float: right;
-    }
 
-    .action-bar-entity-table-mode {
-      padding-bottom: 5px;
-      text-align: right;
+      .chaise-btn:not(:first-child) {
+        margin-left: 5px;
+      }
+
+      a.chaise-btn {
+        text-decoration: none;
+      }
     }
 
     .row-focus {
@@ -220,16 +223,9 @@
       display: none;
     }
 
-    //Record action buttons
-    .action-bar-RT-heading {
+    // related action buttons
+    .related-table-actions {
       display: none;
-    }
-
-    //Record action buttons outside heading
-    .bottom-panel-container {
-      .action-bar-entity-display-mode {
-        display: none;
-      }
     }
 
     //Top up arrow

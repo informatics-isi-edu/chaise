@@ -27,7 +27,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
  */
 const RecordRelatedSection = (): JSX.Element => {
 
-  const { relatedModels, relatedReferences, showEmptySections } = useRecord();
+  const { relatedModels, showEmptySections } = useRecord();
 
   // by default open all the sections
   const [openSections, setOpenSections] = useState<string[]>(Array.from(Array(relatedModels.length), (e, i) => `${i}`));

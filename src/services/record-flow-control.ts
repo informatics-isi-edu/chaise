@@ -13,6 +13,7 @@ export default class RecordFlowControl {
   reloadStartTime: number;
 
   requestModels: RecordRequestModel[] = [];
+  inlineRelatedRequestModels: { [index: string]: RecordRelatedRequestModel } = {};
   relatedRequestModels: RecordRelatedRequestModel[] = [];
 
   /**

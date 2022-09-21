@@ -272,7 +272,7 @@ export default function RecordsetProvider({
       };
     })
   );
-  const setColumnModelValues = (indexes: any, values: { [key: string]: boolean }) => {
+  const setColumnModelValues = (indexes: { [key: string]: boolean }, values: { [key: string]: boolean }) => {
     setColumnModels(
       (prevColumnModels: any) => {
         return prevColumnModels.map((cm: any, index: number) => {
@@ -702,7 +702,7 @@ export default function RecordsetProvider({
             // there are not matching rows, so there's no point in creating
             // aggregate requests.
             // make sure the spinner is hidden for the pending columns.
-            let updatedColumnModels: any = {};
+            const updatedColumnModels: any = {};
             agg.activeListModel.objects.forEach((obj: any) => {
               if (obj.column && columnModels[obj.index].isLoading) {
                 updatedColumnModels[obj.index] = true;

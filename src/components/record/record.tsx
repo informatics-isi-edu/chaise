@@ -93,8 +93,9 @@ const RecordInner = ({
 
   /**
    * State variable to show or hide side panel
+   * TODO the default should be adjusted
    */
-  const [showPanel, setShowPanel] = useState<boolean>(true);
+  const [showPanel, setShowPanel] = useState<boolean>(false);
 
   // when object is null, hide the modal
   // object is the props for the the modal

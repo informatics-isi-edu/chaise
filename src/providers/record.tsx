@@ -7,11 +7,11 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { RecordRelatedModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordColumnModel, RecordRelatedModel, RecordRelatedModelRecordsetProps, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
 import {
-  RecordsetDisplayMode, RecordsetProviderAddUpdateCauses,
+  RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
-  RecordsetProviderUpdateMainEntity, RecordsetSelectMode
+  RecordsetProviderUpdateMainEntity,
 } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
@@ -22,14 +22,10 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 // utilities
 import Q from 'q';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { isNonEmptyObject, isObjectAndKeyDefined, isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { attachGoogleDatasetJsonLd } from '@isrd-isi-edu/chaise/src/utils/google-dataset';
-import {
-  CanCreateDisabledRelated, canCreateRelated,
-  canDeleteRelated, canEditRelated
-} from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { canCreateRelated, generateRelatedRecordModel } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 export const RecordContext = createContext<{
   /**
@@ -52,6 +48,10 @@ export const RecordContext = createContext<{
    * Whether the data for the main entity is fetched or not
    */
   initialized: boolean,
+  /**
+   * The column models
+   */
+  columnModels: RecordColumnModel[],
   /**
    * forcefully show the spinner if set to true
    */
@@ -146,7 +146,26 @@ export default function RecordProvider({
         return { ...pm, ...updatedVals };
       });
     });
-  }
+  };
+
+  const [columnModels, setColumnModels, columnModelsRef] = useStateRef<(RecordColumnModel)[]>([]);
+  const setColumnModelValues = (indexes: { [key: string]: boolean }, values: { [key: string]: any }) => {
+    setColumnModels(
+      (prevColumnModels: any) => {
+        return prevColumnModels.map((cm: any, index: number) => {
+          return (index in indexes) ? { ...cm, ...values } : cm;
+        });
+      }
+    )
+  };
+  const setColumnModelsRelatedModelByIndex = (index: number, updatedVals: { [key: string]: any }) => {
+    setColumnModels((prevModels: RecordColumnModel[]) => {
+      return prevModels.map((pm: RecordColumnModel, pmIndex: number) => {
+        if (index !== pmIndex || !pm.relatedModel) return pm;
+        return { ...pm, relatedModel: { ...pm.relatedModel, ...updatedVals } };
+      });
+    });
+  };
 
   const flowControl = useRef(new RecordFlowControl(logInfo));
 
@@ -155,8 +174,11 @@ export default function RecordProvider({
     if (!modelsInitialized) return;
     setInitialized(true);
 
-    // TODO inline
-    if (relatedModels.length === 0) {
+    // if there aren't any related models, just set registered, so we can
+    // then update the whole page.
+    if (flowControl.current.relatedRequestModels.length === 0 &&
+      !isNonEmptyObject(flowControl.current.inlineRelatedRequestModels)
+    ) {
       setModelsRegistered(true);
     }
 
@@ -186,10 +208,18 @@ export default function RecordProvider({
 
     flowControl.current.queue.counter++;
 
-    // TODO
+    // inline table
+    Object.values(flowControl.current.inlineRelatedRequestModels).forEach(function (m) {
+      // TODO causes (changedContainers?)
+      m.addUpdateCauses([cause], true);
+      if (m.hasWaitFor) {
+        m.waitForDataLoaded = false;
+      }
+    });
 
+    // related table
     flowControl.current.relatedRequestModels.forEach(function (m) {
-      // TODO causes
+      // TODO causes (changedContainers?)
       m.addUpdateCauses([cause], true);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
@@ -229,12 +259,17 @@ export default function RecordProvider({
       reqModel.processed = true;
 
       // inline
-      // TODO
+      if (activeListModel.inline) {
+        const rm = flowControl.current.inlineRelatedRequestModels[activeListModel.index];
+        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(reqModel, rm.index, true));
+        return;
+      }
 
       // related
       if (activeListModel.related) {
         const rm = flowControl.current.relatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(reqModel, rm.index, false))
+        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(reqModel, rm.index, false));
+        return;
       }
 
       // entityset or aggregate
@@ -398,19 +433,45 @@ export default function RecordProvider({
       flowControl.current.requestModels.push(rm);
     });
 
-    // inline models
+    // column models
+    const computedColumnModels: RecordColumnModel[] = [];
+    reference.columns.forEach((col: any, index: number) => {
+      const cm: RecordColumnModel = {
+        index,
+        column: col,
+        hasTimeoutError: false,
+        isLoading: false,
+        requireSecondaryRequest: col.hasWaitFor || !col.isUnique
+      };
+
+      // inline
+      if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
+        cm.relatedModel = generateRelatedRecordModel(col.reference.contextualize.compactBriefInline, index, true, tuple);
+
+        flowControl.current.inlineRelatedRequestModels[index] = {
+          index,
+          // whether we should do the waitfor logic:
+          hasWaitFor: col.hasWaitFor,
+          // this indicates that we got the waitfor data:
+          // only if w got the waitfor data, and the main data we can popuplate the tableMarkdownContent value
+          waitForDataLoaded: !col.hasWaitFor,
+          updateMainEntity: () => { throw new Error('function not registered') },
+          fetchSecondaryRequests: () => { throw new Error('function not registered') },
+          addUpdateCauses: () => { throw new Error('function not registered') },
+          registered: false
+        }
+      }
+
+      computedColumnModels.push(cm);
+    });
+
+    setColumnModels(computedColumnModels);
 
     // related models
     const related = reference.related;
     const computedRelatedModels: RecordRelatedModel[] = [];
     related.forEach((item: any, index: number) => {
       const ref = item.contextualize.compactBrief;
-      let initialPageLimit = ref.display.defaultPageSize;
-      if (!initialPageLimit) {
-        initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
-      }
-
-      const isPureBinary = isObjectAndNotNull(ref.derivedAssociationReference);
       const canCreate = canCreateRelated(ref);
 
       // user can modify the current record page and can modify at least 1 of the related tables in visible-foreignkeys
@@ -429,47 +490,7 @@ export default function RecordProvider({
         registered: false
       });
 
-      const stackNode = LogService.getStackNode(
-        LogStackTypes.RELATED,
-        ref.table,
-        { source: ref.compressedDataSource, entity: true }
-      );
-      computedRelatedModels.push({
-        index,
-        isInline: false,
-        isPureBinary,
-        initialReference: ref,
-        isTableDisplay: ref.display.type === 'table',
-        tableMarkdownContentInitialized: false,
-        tableMarkdownContent: null,
-        recordsetState: {
-          page: null,
-          isLoading: false,
-          initialized: false,
-          hasTimeoutError: false,
-        },
-        recordsetProps: {
-          initialPageLimit,
-          config: {
-            viewable: true,
-            editable: true,
-            deletable: true,
-            sortable: true,
-            selectMode: RecordsetSelectMode.NO_SELECT,
-            showFaceting: false,
-            disableFaceting: true,
-            displayMode: RecordsetDisplayMode.RELATED
-          },
-          logInfo: {
-            logStack: LogService.getStackObject(stackNode),
-            logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
-          }
-        },
-        canCreate,
-        canCreateDisabled: CanCreateDisabledRelated(ref, tuple),
-        canEdit: canEditRelated(ref),
-        canDelete: canDeleteRelated(ref)
-      });
+      computedRelatedModels.push(generateRelatedRecordModel(ref, index, false, tuple));
     });
     setRelatedModels(computedRelatedModels);
 
@@ -484,16 +505,24 @@ export default function RecordProvider({
     setModelsInitialized(true);
   };
 
-  const updateRelatedRecordsetState = (index: number, isInline: boolean, values: any) => {
+  const updateRelatedRecordsetState = (index: number, isInline: boolean, values: RecordRelatedModelRecordsetProps) => {
     if (isInline) {
-      // TODO
+      setColumnModelsRelatedModelByIndex(index, { recordsetState: values });
+      // setColumnModels((prevModels: RecordColumnModel[]) => {
+      //   return prevModels.map((pm: RecordColumnModel, pmIndex: number) => {
+      //     if (index !== pmIndex || !pm.relatedModel) return pm;
+      //     const rm = { ...pm.relatedModel, recordsetState: values };
+      //     return { ...pm, relatedModel: rm };
+      //   });
+      // });
     } else {
-      setRelatedModels((prevModels: RecordRelatedModel[]) => {
-        return prevModels.map((pm: RecordRelatedModel, pmIndex: number) => {
-          if (index !== pmIndex) return pm;
-          return { ...pm, recordsetState: values };
-        });
-      });
+      setRelatedModelsByIndex(index, { recordsetState: values });
+      // setRelatedModels((prevModels: RecordRelatedModel[]) => {
+      //   return prevModels.map((pm: RecordRelatedModel, pmIndex: number) => {
+      //     if (index !== pmIndex) return pm;
+      //     return { ...pm, recordsetState: values };
+      //   });
+      // });
     }
   };
 
@@ -503,7 +532,10 @@ export default function RecordProvider({
     addUpdateCauses: RecordsetProviderAddUpdateCauses
   ) => {
     if (isInline) {
-      // TODO
+      flowControl.current.inlineRelatedRequestModels[index].updateMainEntity = updateMainEntity;
+      flowControl.current.inlineRelatedRequestModels[index].fetchSecondaryRequests = fetchSecondaryRequests;
+      flowControl.current.inlineRelatedRequestModels[index].addUpdateCauses = addUpdateCauses;
+      flowControl.current.inlineRelatedRequestModels[index].registered = true;
     } else {
       flowControl.current.relatedRequestModels[index].updateMainEntity = updateMainEntity;
       flowControl.current.relatedRequestModels[index].fetchSecondaryRequests = fetchSecondaryRequests;
@@ -511,8 +543,9 @@ export default function RecordProvider({
       flowControl.current.relatedRequestModels[index].registered = true;
     }
 
-    // TODO this should also check the inlines eventually
-    if (flowControl.current.relatedRequestModels.every((el) => el.registered)) {
+    const allInlineRegistered = Object.values(flowControl.current.inlineRelatedRequestModels).every((el) => el.registered);
+    const allRelatedRegistered = flowControl.current.relatedRequestModels.every((el) => el.registered);
+    if (allInlineRegistered && allRelatedRegistered) {
       setModelsRegistered(true);
     }
   };
@@ -526,20 +559,22 @@ export default function RecordProvider({
     return function (res: { success: boolean, page: any }) {
       reqModel.processed = !res.success;
 
-      if (isInline) {
-        // TODO
-      } else {
-        const rm = flowControl.current.relatedRequestModels[index];
-        /*
-        * the returned `res` boolean indicates whether we should consider this response final or not.
-        * it doesn't necessarily mean that the response was successful, so we should not use the page blindly.
-        * If the request errored out (timeout or other types of error) page will be undefined.
-        */
-        if (res.success && res.page && (!rm.hasWaitFor || rm.waitForDataLoaded)) {
-          setRelatedModelsByIndex(index, {
-            tableMarkdownContentInitialized: true,
-            tableMarkdownContent: res.page.getContent(flowControl.current.templateVariables)
-          })
+      const rm = isInline ? flowControl.current.inlineRelatedRequestModels[index] : flowControl.current.relatedRequestModels[index];
+
+      /*
+      * the returned `res` boolean indicates whether we should consider this response final or not.
+      * it doesn't necessarily mean that the response was successful, so we should not use the page blindly.
+      * If the request errored out (timeout or other types of error) page will be undefined.
+      */
+      if (res.success && res.page && (!rm.hasWaitFor || rm.waitForDataLoaded)) {
+        const updatedValues = {
+          tableMarkdownContentInitialized: true,
+          tableMarkdownContent: res.page.getContent(flowControl.current.templateVariables)
+        };
+        if (isInline) {
+          setColumnModelsRelatedModelByIndex(index, updatedValues);
+        } else {
+          setRelatedModelsByIndex(index, updatedValues);
         }
       }
     };
@@ -579,8 +614,21 @@ export default function RecordProvider({
 
   const toggleRelatedDisplayMode = (index: number, isInline: boolean) => {
     if (isInline) {
-      // TODO
+      // NOTE we want to know the current value, that's why we couldn't use the utility function
+      setColumnModels((prevModels: RecordColumnModel[]) => {
+        return prevModels.map((pm: RecordColumnModel, pmIndex: number) => {
+          if (index !== pmIndex || !pm.relatedModel) return pm;
+
+          const isTableDisplay = !pm.relatedModel.isTableDisplay;
+          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_MARKDOWN : LogActions.RELATED_DISPLAY_TABLE;
+
+          // TODO what about the stack?
+          // logRecordClientAction(action, )
+          return { ...pm, relatedModel: { ...pm.relatedModel, isTableDisplay } };
+        });
+      });
     } else {
+      // NOTE we want to know the current value, that's why we couldn't use the utility function
       setRelatedModels((prevModels: RecordRelatedModel[]) => {
         return prevModels.map((pm: RecordRelatedModel, pmIndex: number) => {
           if (index !== pmIndex) return pm;
@@ -605,6 +653,7 @@ export default function RecordProvider({
       readMainEntity,
       reference,
       initialized,
+      columnModels,
       // utilities:
       forceShowSpinner,
       setForceShowSpinner,
@@ -620,7 +669,7 @@ export default function RecordProvider({
       registerRelatedModel,
       toggleRelatedDisplayMode
     };
-  }, [page, recordValues, initialized, forceShowSpinner, showEmptySections, relatedModels]);
+  }, [page, recordValues, initialized, forceShowSpinner, showEmptySections, relatedModels, columnModels]);
 
   return (
     <RecordContext.Provider value={providerValue}>

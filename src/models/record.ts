@@ -9,20 +9,12 @@ import {
 // utils
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
-
-// export enum RecordColumnModelType {
-//   LOCAL,
-//   RELATED_INLINE,
-//   REQUIRE_SECONDARY_REQUEST,
-// }
-
-// export interface RecordItemModel {
-//   type: RecordColumnModelType,
-// }
-
-// export interface RecordColumnModel extends RecordItemModel {
-//   isLoading: boolean
-// }
+export interface RecordRelatedModelRecordsetProps {
+  page: any,
+  isLoading: boolean,
+  initialized: boolean,
+  hasTimeoutError: boolean,
+}
 
 export interface RecordRelatedModel {
   index: number,
@@ -33,13 +25,8 @@ export interface RecordRelatedModel {
   // this indicates that the tableMarkdownContent has been initialized:
   // we should not show the related table before initialzing the tableMarkdownContent
   tableMarkdownContentInitialized: boolean,
-  tableMarkdownContent: any, // TODO
-  recordsetState: {
-    page: any,
-    isLoading: boolean,
-    initialized: boolean,
-    hasTimeoutError: boolean,
-  },
+  tableMarkdownContent: string|null, // TODO
+  recordsetState: RecordRelatedModelRecordsetProps,
   recordsetProps: {
     initialPageLimit: number,
     config: RecordsetConfig,
@@ -54,6 +41,14 @@ export interface RecordRelatedModel {
   canDelete: boolean,
 }
 
+export interface RecordColumnModel {
+  index: number,
+  column: any,
+  hasTimeoutError: boolean,
+  isLoading: boolean,
+  requireSecondaryRequest: boolean,
+  relatedModel?: RecordRelatedModel
+}
 
 export interface RecordRelatedRequestModel {
   index: number,

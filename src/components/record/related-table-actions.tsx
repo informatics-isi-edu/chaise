@@ -25,10 +25,10 @@ const RelatedTableActions = ({
 
   const { reference, toggleRelatedDisplayMode } = useRecord();
 
-  let containerClassName = 'action-bar-RT-heading';
-  if (relatedModel.isInline) {
-    containerClassName = relatedModel.isTableDisplay ? 'action-bar-entity-display-mode' : 'action-bar-entity-table-mode';
-  }
+  let containerClassName = 'related-table-actions';
+  // if (relatedModel.isInline) {
+  //   containerClassName = relatedModel.isTableDisplay ?  ' action-bar-entity-table-mode' : ' action-bar-entity-display-mode';
+  // }
 
   const usedRef = relatedModel.initialReference;
 

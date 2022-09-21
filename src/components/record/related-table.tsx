@@ -59,15 +59,23 @@ const RelatedTableInner = ({
   const usedRef = relatedModel.initialReference;
   const displayCustomMode = displayCustomModeRelated(relatedModel);
 
+  const contaienrClassName = relatedModel.isInline && relatedModel.isTableDisplay ? '' : '';
+
   return (
-    // TODO class: 'inline-table-display': col.tableModel.isTableDisplay || !allowInlineTableMarkdown($index)}
-    // <div class="row" style="margin-right: 0px; margin-left: 0px;">
-    <div>
+    <div className={contaienrClassName}>
       {usedRef.commentDisplay === 'inline' && usedRef.comment &&
         <div className='inline-tooltip'>{usedRef.comment}</div>
       }
       {displayCustomMode &&
-        <DisplayValue addClass={true} value={{ isHTML: true, value: relatedModel.tableMarkdownContent }} />
+        <>
+          {relatedModel.tableMarkdownContent === null &&
+            <span className='markdown-container'><em><strong>None</strong></em></span>
+          }
+          {relatedModel.tableMarkdownContent !== null &&
+            <DisplayValue className='related-markdown-content' addClass={true} value={{ isHTML: true, value: relatedModel.tableMarkdownContent }} />
+          }
+        </>
+
       }
       {/* TODO the following was span for inline, but shouldn't matter */}
       {/* TODO related-table and related-table-accordion classes removed  */}

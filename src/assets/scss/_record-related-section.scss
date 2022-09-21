@@ -28,9 +28,6 @@
     }
 
     .related-table-accordion {
-      &.hidden {
-        display: none !important;
-      }
 
       &.panel {
         // override the default bootstrap styles
@@ -78,14 +75,6 @@
       .action-buttons {
         float: right;
         margin-top: 3px;
-
-        .chaise-btn {
-          margin-left: 5px;
-        }
-
-        a.chaise-btn {
-          text-decoration: none;
-        }
       }
 
       // > .panel-heading {

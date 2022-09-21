@@ -1,11 +1,15 @@
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { RELATED_TABLE_DEFAULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 /**
@@ -81,12 +85,23 @@ export function canDeleteRelated(relatedRef: any): boolean {
 /**
  * allow related table markdown display if all the following are true:
  *  - reference.display.type is `markdown`
- *  - related table has data.
  *  - related table's tableMarkdownContent is not empty string
+ *  - in non-inline mode, the page must be non-empty
  */
 export function allowCustomModeRelated(relatedModel: RecordRelatedModel): boolean {
-  return relatedModel.initialReference.display.type === 'markdown' && relatedModel.recordsetState.page != null &&
-    relatedModel.recordsetState.page.length > 0 && relatedModel.tableMarkdownContentInitialized && relatedModel.tableMarkdownContent !== '';
+  // the display type must be markdown
+  if (relatedModel.initialReference.display.type !== 'markdown') {
+    return false;
+  }
+  // the markdown content must be initialized
+  if (relatedModel.recordsetState.page == null || !relatedModel.tableMarkdownContentInitialized || relatedModel.tableMarkdownContent === '') {
+    return false;
+  }
+  // in non-inline mode, the page must be non-empty
+  if (relatedModel.recordsetState.page.length === 0 && !relatedModel.isInline) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -94,4 +109,59 @@ export function allowCustomModeRelated(relatedModel: RecordRelatedModel): boolea
  */
 export function displayCustomModeRelated(relatedModel: RecordRelatedModel): boolean {
   return !relatedModel.isTableDisplay && allowCustomModeRelated(relatedModel);
+}
+
+/**
+ * create a related record model
+ * @param ref the refernce
+ * @param index the index of the model in its list
+ * @param isInline whether its inline or not
+ * @param mainTuple the main tuple data
+ */
+export function generateRelatedRecordModel(ref: any, index: number, isInline: boolean, mainTuple: any): RecordRelatedModel {
+  let initialPageLimit = ref.display.defaultPageSize;
+  if (!initialPageLimit) {
+    initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
+  }
+  const stackNode = LogService.getStackNode(
+    LogStackTypes.RELATED,
+    ref.table,
+    { source: ref.compressedDataSource, entity: true }
+  );
+  return {
+    index,
+    isInline,
+    isPureBinary: isObjectAndNotNull(ref.derivedAssociationReference),
+    initialReference: ref,
+    isTableDisplay: ref.display.type === 'table',
+    tableMarkdownContentInitialized: false,
+    tableMarkdownContent: null,
+    recordsetState: {
+      page: null,
+      isLoading: false,
+      initialized: false,
+      hasTimeoutError: false,
+    },
+    recordsetProps: {
+      initialPageLimit,
+      config: {
+        viewable: true,
+        editable: true,
+        deletable: true,
+        sortable: true,
+        selectMode: RecordsetSelectMode.NO_SELECT,
+        showFaceting: false,
+        disableFaceting: true,
+        displayMode: RecordsetDisplayMode.RELATED
+      },
+      logInfo: {
+        logStack: LogService.getStackObject(stackNode),
+        logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
+      }
+    },
+    canCreate: canCreateRelated(ref),
+    canCreateDisabled: CanCreateDisabledRelated(ref, mainTuple),
+    canEdit: canEditRelated(ref),
+    canDelete: canDeleteRelated(ref)
+  }
 }
