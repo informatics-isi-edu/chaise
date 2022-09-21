@@ -32,7 +32,11 @@ module.exports = (env) => {
           ...recordsetExtFiles,
           `${chaisePath}google-dataset-config.js`
         ]
-      }
+      },
+      {
+        appName: 'md-help',
+        appTitle: 'Markdown Help',
+      },
     ],
     mode,
     env
