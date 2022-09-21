@@ -1,6 +1,6 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // components
@@ -44,7 +44,14 @@ const LoginPopupApp = (): JSX.Element => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
+
   useEffect(() => {
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
     let hasGroup = false;
 
