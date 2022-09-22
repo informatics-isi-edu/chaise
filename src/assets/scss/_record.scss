@@ -152,7 +152,7 @@
       padding-bottom: 0px;
     }
 
-    #back-to-top {
+    .back-to-top-btn {
       position: fixed;
       right: 40px;
       bottom: 40px;
@@ -181,6 +181,29 @@
       padding: 5px 20px;
       border: solid #446c73 1.5px;
     }
+  }
+
+  .delete-spinner-container {
+    $delete-spinner-backdrop-z-index: 5;
+    .delete-spinner-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: $delete-spinner-backdrop-z-index;
+      background: black;
+      opacity: 0.5;
+    }
+    .spinner-container {
+      top: 50%;
+      z-index: calc($delete-spinner-backdrop-z-index + 1);
+    }
+  }
+
+  .related-spinner {
+    color: #446c73;
+    font-weight: 600;
   }
 
   /********* print ********/
@@ -228,8 +251,8 @@
       display: none;
     }
 
-    //Top up arrow
-    #back-to-top {
+    // back to top button
+    .back-to-top-btn {
       display: none;
     }
 
@@ -342,7 +365,7 @@
     }
 
     //Removes bubbles and represents the vocab as a dot separated list
-    #rt-container {
+    .related-section-container {
       .vocab + .vocab::before {
         content: "\2022" !important;
         padding-right: 6px;

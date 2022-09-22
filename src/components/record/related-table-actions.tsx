@@ -9,7 +9,7 @@ import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogParentActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -23,7 +23,7 @@ const RelatedTableActions = ({
   relatedModel
 }: RelatedTableActionsProps): JSX.Element => {
 
-  const { reference, toggleRelatedDisplayMode } = useRecord();
+  const { reference, toggleRelatedDisplayMode, updateRecordPage } = useRecord();
 
   let containerClassName = 'related-table-actions';
   // if (relatedModel.isInline) {
@@ -49,14 +49,20 @@ const RelatedTableActions = ({
     // this is to avoid the accordion header to recieve the click
     e.stopPropagation();
 
-    // TODO
+    // TODO implement add related and p&b
+
+    // TODO this is added for test purposes and should be removed
+    updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
   };
 
   const onUnlink = (e: MouseEvent<HTMLElement>) => {
     // this is to avoid the accordion header to recieve the click
     e.stopPropagation();
 
-    // TODO
+    // TODO implement unlink p&b
+
+    // TODO this is added for test purposes and should be removed
+    updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
   };
 
   const mainTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;

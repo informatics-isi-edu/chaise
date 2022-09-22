@@ -216,7 +216,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
               <span className='timeout-icon fa-solid fa-triangle-exclamation' />
             </ChaiseTooltip>
           }
-          {config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0 && isLoading &&
+          {config.displayMode === RecordsetDisplayMode.RELATED && isLoading &&
             <Spinner className='chaise-table-header-spinner' animation='border' size='sm' />
           }
         </span>

@@ -96,7 +96,7 @@ const RecordRelatedSection = (): JSX.Element => {
   }
 
   return (
-    <div id='rt-container'>
+    <div className='related-section-container'>
       <Accordion className='panel-group' activeKey={openSections} alwaysOpen >
         {relatedModels.map((rm: RecordRelatedModel) => (
           <Accordion.Item

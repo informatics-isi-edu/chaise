@@ -14,7 +14,7 @@
   $record-header-padding-left: 40px;
 
   /******Related Entities in record **************/
-  #rt-container {
+  .related-section-container {
     .panel-group {
       margin-bottom: 20px;
     }
@@ -158,5 +158,5 @@
         content: "\f078"; // fa-solid fa-chevron-down
       }
     } // end .accordion-button
-  } // end rt-container
+  } // end related-section-container
 }

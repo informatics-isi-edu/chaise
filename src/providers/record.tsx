@@ -53,18 +53,18 @@ export const RecordContext = createContext<{
    */
   columnModels: RecordColumnModel[],
   /**
-   * forcefully show the spinner if set to true
-   */
-  forceShowSpinner: boolean,
-  /**
    * Whether we should show empty sections or not
    */
   showEmptySections: boolean,
   toggleShowEmptySections: () => void,
   /**
-   * can be used to force showing of the spinner
+   * forcefully show the spinner if set to true
    */
-  setForceShowSpinner: Function
+  showMainSectionSpinner: boolean,
+  /**
+   * Whether to show the spinner for the related section
+   */
+  showRelatedSectionSpinner: boolean
   // TODO while these are not needed for now, but
   // we might want to add them in case we have record-modal
   /*
@@ -106,7 +106,10 @@ export const RecordContext = createContext<{
    * get the appropriate log stack
    */
   getRecordLogStack: (childStackElement?: any, extraInfo?: any) => any,
-
+  /**
+   * ask for the page to be updated
+   */
+  updateRecordPage: (isUpdate: boolean, cause?: string, changedContainers?: any) => void
 } | null>(null);
 
 type RecordProviderProps = {
@@ -130,11 +133,12 @@ export default function RecordProvider({
   const [page, setPage] = useState<any>(null);
   const [recordValues, setRecordValues] = useState<any>([]);
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
+  const [showMainSectionSpinner, setShowMainSectionSpinner] = useState(true);
+  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner] = useState(true);
+
   const [modelsInitialized, setModelsInitialized] = useState(false);
   const [modelsRegistered, setModelsRegistered] = useState(false);
 
-  // TODO these two most probably are not needed
-  const [forceShowSpinner, setForceShowSpinner] = useState(false);
 
   const [showEmptySections, setShowEmptySections] = useState(false);
 
@@ -168,6 +172,8 @@ export default function RecordProvider({
   };
 
   const flowControl = useRef(new RecordFlowControl(logInfo));
+  const initializedRelatedCount = useRef(0);
+  const initializedInlineRelatedCount = useRef(0);
 
   // set the page as initialized so we can show the models and register them
   useEffect(() => {
@@ -207,6 +213,22 @@ export default function RecordProvider({
     }
 
     flowControl.current.queue.counter++;
+
+    // request models
+    flowControl.current.requestModels.forEach(function (m) {
+      m.processed = false;
+      // the cause for related and inline are handled by columnModels and relatedTableModels
+      if (m.activeListModel.entityset || m.activeListModel.aggregate) {
+        // the time that will be logged with the request
+        if (!Number.isInteger(m.reloadStartTime) || m.reloadStartTime === -1) {
+          m.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
+        }
+
+        if (cause && m.reloadCauses && m.reloadCauses.indexOf(cause) === -1) {
+          m.reloadCauses.push(cause);
+        }
+      }
+    });
 
     // inline table
     Object.values(flowControl.current.inlineRelatedRequestModels).forEach(function (m) {
@@ -261,14 +283,14 @@ export default function RecordProvider({
       // inline
       if (activeListModel.inline) {
         const rm = flowControl.current.inlineRelatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(reqModel, rm.index, true));
+        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, true));
         return;
       }
 
       // related
       if (activeListModel.related) {
         const rm = flowControl.current.relatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(reqModel, rm.index, false));
+        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, false));
         return;
       }
 
@@ -276,10 +298,18 @@ export default function RecordProvider({
       // TODO
 
     });
+
+    // aggregates in inline
+    // TODO
+
+    // aggregates in related
+    // TODO
   };
 
   const readMainEntity = (isUpdate: boolean, addDatasetJsonLD?: boolean) => {
     const defer = Q.defer();
+
+    setShowMainSectionSpinner(true);
 
     // TODO
     // clear the value of citation, so we can fetch it again.
@@ -331,6 +361,12 @@ export default function RecordProvider({
       // i.e. {isHTML: false, value: 'sample'}
       const rv: any[] = [];
       tuple.values.forEach(function (value: any, index: number) {
+        // let the old aggregate value be there until we have the new one
+        // TODO test this
+        if (isUpdate && columnModels[index].requireSecondaryRequest) {
+          rv.push(recordValues[index]);
+          return;
+        }
         rv.push({
           isHTML: tuple.isHTML[index],
           value: value
@@ -555,7 +591,7 @@ export default function RecordProvider({
    * - if there's no wait for, or waitfor is loaded: sets the tableMarkdownContent value.
    * - otherwise it will not do anyting.
    */
-  const afterUpdateRelatedEntity = (reqModel: RecordRequestModel, index: number, isInline: boolean) => {
+  const afterUpdateRelatedEntity = (isUpdate: boolean, reqModel: RecordRequestModel, index: number, isInline: boolean) => {
     return function (res: { success: boolean, page: any }) {
       reqModel.processed = !res.success;
 
@@ -567,6 +603,24 @@ export default function RecordProvider({
       * If the request errored out (timeout or other types of error) page will be undefined.
       */
       if (res.success && res.page && (!rm.hasWaitFor || rm.waitForDataLoaded)) {
+
+        // NOTE the same thing should also be called for the wait-for reqs of page.content
+        // since that request might get back sooner
+        if (!isInline && !isUpdate) {
+          ++initializedRelatedCount.current;
+          if (initializedRelatedCount.current === relatedModels.length) {
+            setShowRelatedSectionSpinner(false);
+          }
+        }
+        // TODO this should also take care of aggregates
+        if (isInline) {
+          ++initializedInlineRelatedCount.current;
+          if (initializedInlineRelatedCount.current === Object.keys(flowControl.current.inlineRelatedRequestModels).length) {
+            initializedInlineRelatedCount.current = 0;
+            setShowMainSectionSpinner(false);
+          }
+        }
+
         const updatedValues = {
           tableMarkdownContentInitialized: true,
           tableMarkdownContent: res.page.getContent(flowControl.current.templateVariables)
@@ -654,22 +708,30 @@ export default function RecordProvider({
       reference,
       initialized,
       columnModels,
-      // utilities:
-      forceShowSpinner,
-      setForceShowSpinner,
+      showMainSectionSpinner,
+      // both main and related entities section:
       showEmptySections,
       toggleShowEmptySections,
+      updateRecordPage,
       // log related:
       logRecordClientAction,
       getRecordLogAction,
       getRecordLogStack,
       // related entity:
+      showRelatedSectionSpinner,
       relatedModels,
       updateRelatedRecordsetState,
       registerRelatedModel,
       toggleRelatedDisplayMode
     };
-  }, [page, recordValues, initialized, forceShowSpinner, showEmptySections, relatedModels, columnModels]);
+  }, [
+    // main entity:
+    page, recordValues, initialized, columnModels, showMainSectionSpinner,
+    // mix:
+    showEmptySections,
+    // related entities:
+    showRelatedSectionSpinner, relatedModels,
+  ]);
 
   return (
     <RecordContext.Provider value={providerValue}>

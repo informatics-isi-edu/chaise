@@ -14,7 +14,7 @@ import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
@@ -80,8 +80,7 @@ const RecordInner = ({
 
   // TODO: add getLogAction and getLogStack to record provider
   const {
-    forceShowSpinner,
-    setForceShowSpinner,
+    showRelatedSectionSpinner,
     showEmptySections,
     toggleShowEmptySections,
     initialized,
@@ -105,6 +104,11 @@ const RecordInner = ({
     buttonLabel: string,
     message: JSX.Element
   } | null>(null);
+  const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
+
+  const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
+
+  const mainContainer = useRef<HTMLDivElement>(null);
 
   // initialize the page
   useEffect(() => {
@@ -133,8 +137,16 @@ const RecordInner = ({
     if (!initialized) return;
     const resizeSensors = attachContainerHeightSensors();
 
+    const toggleScrollToTopBtn = () => {
+      if (!mainContainer.current) return;
+      setShowScrollToTopBtn(mainContainer.current.scrollTop > 300);
+    }
+    mainContainer.current?.addEventListener('scroll', toggleScrollToTopBtn);
+
     return () => {
       resizeSensors?.forEach((rs) => rs.detach());
+
+      mainContainer.current?.removeEventListener('scroll', toggleScrollToTopBtn);
     }
   }, [initialized]);
 
@@ -152,12 +164,6 @@ const RecordInner = ({
   const canCreate = reference.canCreate && modifyRecord;
   const canEdit = tuple.canUpdate && modifyRecord;
   const canDelete = tuple.canDelete && modifyRecord && ConfigService.chaiseConfig.deleteRecord === true;
-
-  // function instead of variable so the link is updated after the app loads instead of being captured on page load
-  // no need to create as a useState variable either
-  // const createRecord = () => reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink;
-
-  const editRecord = () => reference.contextualize.entryEdit.appLink;
 
   const copyRecord = () => {
     const appLink = reference.contextualize.entryCreate.appLink;
@@ -189,7 +195,7 @@ const RecordInner = ({
 
         setShowDeleteConfirmationModal({
           buttonLabel: 'Delete',
-          onConfirm: () => { onDeleteUnlinkConfirmation() },
+          onConfirm: () => { onDeleteConfirmation() },
           onCancel: () => {
             setShowDeleteConfirmationModal(null);
             logRecordClientAction(LogActions.DELETE_CANCEL);
@@ -198,7 +204,7 @@ const RecordInner = ({
         });
 
       } else {
-        onDeleteUnlinkConfirmation();
+        onDeleteConfirmation();
       }
     })
     $log.debug('deleting tuple!');
@@ -206,9 +212,9 @@ const RecordInner = ({
     return;
   }
 
-  const onDeleteUnlinkConfirmation = () => {
-    // make sure the main spinner is displayed (it's a state variable in recordset provider)
-    setForceShowSpinner(true);
+  const onDeleteConfirmation = () => {
+    // make sure the main spinner is displayed
+    setShowDeleteSpinner(true);
     // close the confirmation modal if it exists
     setShowDeleteConfirmationModal(null);
 
@@ -225,7 +231,7 @@ const RecordInner = ({
       dispatchError({ error: error, isDismissible: true });
     }).finally(() => {
       // hide the spinner
-      setForceShowSpinner(false);
+      setShowDeleteSpinner(false);
     });
   }
 
@@ -235,6 +241,15 @@ const RecordInner = ({
   const hidePanel = () => {
     setShowPanel(!showPanel);
   };
+
+  const scrollMainContainerToTop = () => {
+    if (!mainContainer.current) return;
+
+    mainContainer.current.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
 
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
@@ -254,11 +269,22 @@ const RecordInner = ({
   );
 
   const renderMainContainer = () => (
-    <div className='main-container dynamic-padding'>
+    <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
         {/* TODO there's no reason to have these two comps, needs discussion */}
         <RecordMainSection />
         <RecordRelatedSection />
+        {/* the related-spinner must be inside the main-body to ensure proper positioning */}
+        {errors.length === 0 && showRelatedSectionSpinner &&
+          <ChaiseSpinner className='related-spinner bottom-left-spinner' spinnerSize='sm' />
+        }
+        {showScrollToTopBtn &&
+          <ChaiseTooltip placement='left' tooltip='Scroll to top'>
+            <div className='chaise-btn chaise-btn-primary back-to-top-btn' onClick={scrollMainContainerToTop}>
+              <i className='fa-solid fa-caret-up'></i>
+            </div>
+          </ChaiseTooltip>
+        }
       </div>
       <Footer />
     </div>
@@ -277,9 +303,11 @@ const RecordInner = ({
   const btnClasses = 'chaise-btn chaise-btn-primary';
   return (
     <div className='record-container app-content-container'>
-      {
-        errors.length === 0 && forceShowSpinner &&
-        <ChaiseSpinner />
+      {errors.length === 0 && showDeleteSpinner &&
+        <div className='delete-spinner-container'>
+          <div className='delete-spinner-backdrop'></div>
+          <ChaiseSpinner className='delete-spinner' message='Waiting for delete response...' />
+        </div>
       }
       <div className='top-panel-container'>
         <Alerts />
@@ -344,9 +372,9 @@ const RecordInner = ({
                     />
                     <span>: </span>
                     <DisplayValue value={page.tuples[0].displayname} />
-
-                    {(canCreate || canEdit || canDelete) ?
+                    {(canCreate || canEdit || canDelete) &&
                       <div className='title-buttons record-action-btns-container'>
+                        {/* create */}
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to create a record.'
@@ -359,6 +387,7 @@ const RecordInner = ({
                             Create
                           </a>
                         </ChaiseTooltip>
+                        {/* edit */}
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to create a copy of this record'
@@ -368,15 +397,20 @@ const RecordInner = ({
                             Copy
                           </a>
                         </ChaiseTooltip>
+                        {/* copy */}
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to edit this record'
                         >
-                          <a className={btnClasses + (!canEdit ? ' disabled' : '')} href={editRecord()}>
+                          <a
+                            className={btnClasses + (!canEdit ? ' disabled' : '')}
+                            href={reference.contextualize.entryEdit.appLink}
+                          >
                             <span className='record-app-action-icon  fa fa-pencil'></span>
                             Edit
                           </a>
                         </ChaiseTooltip>
+                        {/* delete */}
                         <ChaiseTooltip
                           placement='bottom-start'
                           tooltip='Click here to delete this record'
@@ -387,8 +421,7 @@ const RecordInner = ({
                           </button>
                         </ChaiseTooltip>
                       </div>
-                      : <></>}
-
+                    }
                   </h1>
                   {!showPanel && (
                     <ChaiseTooltip

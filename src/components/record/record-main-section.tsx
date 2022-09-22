@@ -6,9 +6,12 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
@@ -16,12 +19,14 @@ import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
+
 /**
  * Returns Main Section of the record page.
  */
 const RecordMainSection = (): JSX.Element => {
 
-  const { recordValues, columnModels, showEmptySections } = useRecord();
+  const { errors } = useError();
+  const { recordValues, columnModels, showEmptySections, showMainSectionSpinner } = useRecord();
 
   const canShow = (cm: RecordColumnModel) => {
     if (cm.relatedModel) {
@@ -63,7 +68,9 @@ const RecordMainSection = (): JSX.Element => {
         <>
           <DisplayValue value={cm.column.displayname}></DisplayValue>
           {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
-          {showLoader(cm) && <span className='fa-solid fa-circle-notch fa-spin aggregate-col-loader pull-right'></span>}
+          <div className='entity-key-icons'>
+            {showLoader(cm) && <Spinner animation='border' size='sm' className='aggregate-col-loader' />}
+          </div>
         </>
       </ConditionalWrapper>
     );
@@ -71,17 +78,15 @@ const RecordMainSection = (): JSX.Element => {
 
   const renderEntityValue = (cm: RecordColumnModel) => {
     const hasError = showError(cm);
-    const hasLoader = showLoader(cm);
-
     return (
       <>
-        {!cm.relatedModel && !hasError && !hasLoader &&
+        {!cm.relatedModel && !hasError &&
           <DisplayValue addClass={true} value={recordValues[cm.index]} />
         }
         {cm.relatedModel &&
           <span id={`entity-${cm.index}-table`}>
             <RelatedTableActions relatedModel={cm.relatedModel} />
-            <div className={`${(hasError || hasLoader) ? 'hidden' : ''}`}>
+            <div className={`${hasError ? 'hidden' : ''}`}>
               <RelatedTable relatedModel={cm.relatedModel} />
             </div>
           </span>
@@ -99,7 +104,12 @@ const RecordMainSection = (): JSX.Element => {
   }
 
   return (
-    <div className='record-display entity-container'>
+    <div className={`record-display entity-container${errors.length === 0 && showMainSectionSpinner ? ' with-spinner' : ''}`}>
+      {errors.length === 0 && showMainSectionSpinner &&
+        <div className='record-main-spinner-container'>
+          <ChaiseSpinner className='record-main-spinner manual-position-spinner' />
+        </div>
+      }
       <table className='table table-fixed-layout' id='tblRecord'>
         <tbody>
           {columnModels.map((cm: any, index: any) => (
