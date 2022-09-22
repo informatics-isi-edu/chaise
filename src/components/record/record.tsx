@@ -181,6 +181,7 @@ const RecordInner = ({
   }
 
   const deleteRecord = () => {
+    // TODO do we need an indicator that we're waiting for session fetch?
     validateSessionBeforeMutation(() => {
       if (ConfigService.chaiseConfig.confirmDelete === undefined || ConfigService.chaiseConfig.confirmDelete) {
         logRecordClientAction(LogActions.DELETE_INTEND);
