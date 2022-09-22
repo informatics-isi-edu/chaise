@@ -357,6 +357,11 @@ export default function RecordProvider({
         initializeModels(tuple);
       }
 
+      // if the main section is not waiting for any other requests, hide the spinner
+      if (!flowControl.current.mainHasSecondaryRequests) {
+        setShowMainSectionSpinner(false);
+      }
+
       // Collate tuple.isHTML and tuple.values into an array of objects
       // i.e. {isHTML: false, value: 'sample'}
       const rv: any[] = [];
@@ -472,16 +477,21 @@ export default function RecordProvider({
     // column models
     const computedColumnModels: RecordColumnModel[] = [];
     reference.columns.forEach((col: any, index: number) => {
+      const requireSecondaryRequest = col.hasWaitFor || !col.isUnique;
+      if (requireSecondaryRequest) {
+        flowControl.current.mainHasSecondaryRequests = true;
+      }
       const cm: RecordColumnModel = {
         index,
         column: col,
         hasTimeoutError: false,
         isLoading: false,
-        requireSecondaryRequest: col.hasWaitFor || !col.isUnique
+        requireSecondaryRequest
       };
 
       // inline
       if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
+        flowControl.current.mainHasSecondaryRequests = true;
         cm.relatedModel = generateRelatedRecordModel(col.reference.contextualize.compactBriefInline, index, true, tuple);
 
         flowControl.current.inlineRelatedRequestModels[index] = {

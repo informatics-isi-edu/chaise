@@ -2,7 +2,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
-import Spinner from 'react-bootstrap/Spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // models
@@ -215,9 +214,6 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
             >
               <span className='timeout-icon fa-solid fa-triangle-exclamation' />
             </ChaiseTooltip>
-          }
-          {config.displayMode === RecordsetDisplayMode.RELATED && isLoading &&
-            <Spinner className='chaise-table-header-spinner' animation='border' size='sm' />
           }
         </span>
       </div>

@@ -7,9 +7,12 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Spinner from 'react-bootstrap/Spinner';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 // hooks
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
@@ -21,6 +24,89 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+
+type RelatedTableHeaderProps = {
+  relatedModel: RecordRelatedModel
+};
+
+const RelatedTableHeader = ({
+  relatedModel
+}: RelatedTableHeaderProps): JSX.Element => {
+  /**
+   * variable to store ref of facet header text
+   */
+  const contentRef = useRef(null);
+  /**
+   * state variable to control whether to show tooltip or not
+   */
+  const [show, setShow] = useState(false);
+
+  /**
+   * Function to check the text overflow.
+   */
+  const isTextOverflow = (element: HTMLElement) => {
+    if (element) {
+      return element.offsetWidth < element.scrollWidth;
+    }
+    return false;
+  };
+
+  const usedRef = relatedModel.initialReference;
+  const hasTooltip = usedRef.comment && usedRef.commentDisplay === 'tooltip';
+
+  const renderedDisplayname = <DisplayValue value={usedRef.displayname} />;
+
+  const renderTooltipContent = () => {
+    if (contentRef && contentRef.current && isTextOverflow(contentRef.current) && hasTooltip) {
+      return <>{renderedDisplayname}: {usedRef.comment}</>;
+    } else if (hasTooltip) {
+      return usedRef.comment;
+    } else {
+      return renderedDisplayname;
+    }
+  };
+
+  return (
+    <div className='rt-section-header'>
+      <OverlayTrigger
+        placement='bottom'
+        overlay={<Tooltip>{renderTooltipContent()}</Tooltip>}
+        onToggle={(nextshow: boolean) => {
+          // Bootstrap onToggle prop to make tooltip visible or hidden
+          if (contentRef && contentRef.current) {
+            const isOverflow = isTextOverflow(contentRef.current);
+
+            // If either text overflow or hasTooltip is true, show tooltip to right of the content
+            setShow((isOverflow || hasTooltip) && nextshow);
+          }
+        }}
+        show={show}
+      >
+        <div className='rt-displayname' ref={contentRef}>
+          {renderedDisplayname}
+          {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
+        </div>
+      </OverlayTrigger>
+
+      <div className='rt-section-header-buttons'>
+        <div className='rt-section-header-icons'>
+          {relatedModel.recordsetState.isLoading && !relatedModel.recordsetState.hasTimeoutError &&
+            <Spinner animation='border' size='sm' />
+          }
+          {relatedModel.recordsetState.hasTimeoutError &&
+            <ChaiseTooltip
+              placement='bottom'
+              tooltip={MESSAGE_MAP.queryTimeoutTooltip}
+            >
+              <span className='fa-solid fa-triangle-exclamation'></span>
+            </ChaiseTooltip>
+          }
+        </div>
+        <RelatedTableActions relatedModel={relatedModel} />
+      </div>
+    </div>
+  );
+};
 
 /**
  * Returns Related Section of the record page.
@@ -51,46 +137,6 @@ const RecordRelatedSection = (): JSX.Element => {
     });
   };
 
-  /**
-   * Function to display title in the related section of record page
-   * @param RecordRelatedModel the related model
-   * @returns what should be used in the title
-   */
-  const getTitle = (relatedModel: RecordRelatedModel) => {
-    const usedRef = relatedModel.initialReference;
-    const hasTooltip = usedRef.comment && usedRef.commentDisplay === 'tooltip'
-    return (
-      <div className='rt-section-header'>
-        <span className='rt-displayname'>
-          <ConditionalWrapper
-            condition={hasTooltip}
-            wrapper={children => (
-              <ChaiseTooltip placement='right' tooltip={usedRef.comment}>
-                {children}
-              </ChaiseTooltip>
-            )}
-          >
-            <>
-              <DisplayValue value={usedRef.displayname} />
-              {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
-            </>
-          </ConditionalWrapper>
-        </span>
-        {relatedModel.recordsetState.hasTimeoutError &&
-          <ChaiseTooltip
-            placement='bottom'
-            tooltip={MESSAGE_MAP.queryTimeoutTooltip}
-          >
-            <span className='fa-solid fa-triangle-exclamation'></span>
-          </ChaiseTooltip>
-        }
-        <span className='action-buttons'>
-          <RelatedTableActions relatedModel={relatedModel} />
-        </span>
-      </div>
-    );
-  };
-
   if (relatedModels.length === 0) {
     return <></>;
   }
@@ -103,15 +149,15 @@ const RecordRelatedSection = (): JSX.Element => {
             key={`record-related-${rm.index}`}
             eventKey={rm.index + ''}
             // TODO should be changed and just added for test purposes
-            className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'hidden': ''}`}
-            id='rt-heading-Gene'
+            className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'hidden' : ''}`}
+            // TODO add id
             as='div'
           >
             <Accordion.Header
               as='div' className='panel-heading panel-title'
               onClick={() => toggleSection(rm)}
             >
-              {getTitle(rm)}
+              <RelatedTableHeader relatedModel={rm} />
             </Accordion.Header>
             <Accordion.Body>
               <RelatedTable relatedModel={rm} />
