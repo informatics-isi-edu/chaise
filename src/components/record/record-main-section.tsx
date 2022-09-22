@@ -40,8 +40,10 @@ const RecordMainSection = (): JSX.Element => {
         return nonEmpty;
       }
       return (showEmptySections || nonEmpty);
+    } else if (cm.requireSecondaryRequest) {
+      return (showEmptySections || (!!recordValues[cm.index] && !!recordValues[cm.index].value));
     } else {
-      return cm.requireSecondaryRequest || (recordValues[cm.index] && recordValues[cm.index].value != null);
+      return (recordValues[cm.index] && recordValues[cm.index].value != null);
     }
   };
 
@@ -53,6 +55,7 @@ const RecordMainSection = (): JSX.Element => {
   };
 
   const showLoader = (cm: RecordColumnModel): boolean => {
+    // TODO this is assuming isLoading is also used for the page.content
     return cm.isLoading || (cm.relatedModel != null && cm.relatedModel.recordsetState.isLoading);
   };
 
@@ -78,6 +81,8 @@ const RecordMainSection = (): JSX.Element => {
 
   const renderEntityValue = (cm: RecordColumnModel) => {
     const hasError = showError(cm);
+    const hasInitialized = !!cm.relatedModel && cm.relatedModel.tableMarkdownContentInitialized &&
+      cm.relatedModel.recordsetState.isInitialized;
     return (
       <>
         {!cm.relatedModel && !hasError &&
@@ -85,8 +90,8 @@ const RecordMainSection = (): JSX.Element => {
         }
         {cm.relatedModel &&
           <span id={`entity-${cm.index}-table`}>
-            <RelatedTableActions relatedModel={cm.relatedModel} />
-            <div className={`${hasError ? 'hidden' : ''}`}>
+            {!hasError && <RelatedTableActions relatedModel={cm.relatedModel} />}
+            <div className={`${hasError || !hasInitialized ? 'forced-hidden' : ''}`}>
               <RelatedTable relatedModel={cm.relatedModel} />
             </div>
           </span>
@@ -114,7 +119,7 @@ const RecordMainSection = (): JSX.Element => {
         <tbody>
           {columnModels.map((cm: any, index: any) => (
             // TODO in angularjs this used to be ng-if, but we need the related comp even if we're not showing
-            <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={`row ${!canShow(cm) ? 'hidden' : ''}`}>
+            <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={`row ${!canShow(cm) ? 'forced-hidden' : ''}`}>
               <td className='entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2'>
                 {renderEntityKey(cm)}
               </td>

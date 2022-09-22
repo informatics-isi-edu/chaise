@@ -12,7 +12,7 @@ import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 export interface RecordRelatedModelRecordsetProps {
   page: any,
   isLoading: boolean,
-  initialized: boolean,
+  isInitialized: boolean,
   hasTimeoutError: boolean,
 }
 

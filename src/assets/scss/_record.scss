@@ -195,7 +195,7 @@
       background: black;
       opacity: 0.5;
     }
-    .spinner-container {
+    .delete-spinner.spinner-container {
       top: 50%;
       z-index: calc($delete-spinner-backdrop-z-index + 1);
     }

@@ -79,7 +79,7 @@ const RelatedTableInner = ({
       }
       {/* TODO the following was span for inline, but shouldn't matter */}
       {/* TODO related-table and related-table-accordion classes removed  */}
-      <div className={`related-table-content ${displayCustomMode ? 'hidden': ''}`} style={{display: displayCustomMode ? 'none': 'block'}}>
+      <div className={`related-table-content ${displayCustomMode ? 'forced-hidden': ''}`} style={{display: displayCustomMode ? 'none': 'block'}}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <RecordsetTable
           config={relatedModel.recordsetProps.config}

@@ -83,7 +83,7 @@ export const RecordContext = createContext<{
    * allows related models to update their captured state in this provider
    * based on the changes in their inner recordsetProvider
    */
-  updateRelatedRecordsetState: (index: number, isInline: boolean, values: any) => void,
+  updateRelatedRecordsetState: (index: number, isInline: boolean, values: RecordRelatedModelRecordsetProps) => void,
   /**
    * register the functions from recordsetProvider that we want to use here.
    */

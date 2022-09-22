@@ -149,7 +149,7 @@ const RecordRelatedSection = (): JSX.Element => {
             key={`record-related-${rm.index}`}
             eventKey={rm.index + ''}
             // TODO should be changed and just added for test purposes
-            className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'hidden' : ''}`}
+            className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'forced-hidden' : ''}`}
             // TODO add id
             as='div'
           >
