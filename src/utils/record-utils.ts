@@ -1,5 +1,5 @@
 // models
-import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordsetDisplayMode, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
@@ -139,7 +139,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
     recordsetState: {
       page: null,
       isLoading: false,
-      initialized: false,
+      isInitialized: false,
       hasTimeoutError: false,
     },
     recordsetProps: {
@@ -164,4 +164,67 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
     canEdit: canEditRelated(ref),
     canDelete: canDeleteRelated(ref)
   }
+}
+
+let lastRenderedTableIndex = 0;
+function allPreviousRelatedInitialized(relatedModel: RecordRelatedModel): boolean {
+  if (!relatedModel.recordsetState.isInitialized || !relatedModel.tableMarkdownContentInitialized) {
+    return false;
+  }
+  if (relatedModel.index === 0 || lastRenderedTableIndex === relatedModel.index - 1) {
+    lastRenderedTableIndex = relatedModel.index;
+
+    // don't show the loading if it's done
+    // if (showRelatedSectionSpinnerRef.current && lastRenderedIndex.current === relatedModels.length - 1) {
+    // setShowRelatedSectionSpinner(false);
+
+    // TODO
+    // defer autoscroll to next digest cycle to ensure aggregates and images were fetched and loaded for last RT
+    // $timeout(autoScroll, 0);
+    // }
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Whether we can show the related table or not
+ * TODO this should be refactored. we want to capture this value instead of computing it multiple times
+ */
+export function canShowRelated(relatedModel: RecordRelatedModel, showEmptySections: boolean): boolean {
+  if (!allPreviousRelatedInitialized(relatedModel)) {
+    return false;
+  }
+
+  // this flag signals that the returned data is non-empty and is returned
+  const nonEmpty = relatedModel.recordsetState.page && relatedModel.recordsetState.page.length > 0;
+
+  // if the filter is based on the main table and returns empty, the related table should be hidden
+  const ref = relatedModel.initialReference;
+  if (ref.pseudoColumn && ref.pseudoColumn.isFiltered && ref.pseudoColumn.filterProps.hasRootFilter) {
+    return nonEmpty;
+  }
+
+  // display based on the state of the show/hide empty section button
+  return (showEmptySections || nonEmpty);
+}
+
+/**
+ * Whether we can show the inline value or not
+ * TODO this should be refactored. we want to capture this value instead of computing it multiple times
+ */
+export function canShowInlineRelated (columnModel: RecordColumnModel, showEmptySections: boolean): boolean {
+  if (!columnModel.relatedModel) return false;
+
+  // this flag signals that the returned data is non-empty and is returned
+  const nonEmpty = (columnModel.relatedModel.recordsetState.page && columnModel.relatedModel.recordsetState.page.length > 0 &&
+    columnModel.relatedModel.tableMarkdownContentInitialized);
+
+  // filter-in-source if the filter is based on the main table and returns empty, the related table should be hidden
+  const ref = columnModel.relatedModel.initialReference;
+  if (ref.pseudoColumn && ref.pseudoColumn.isFiltered && ref.pseudoColumn.filterProps.hasRootFilter) {
+    return nonEmpty;
+  }
+  return (showEmptySections || nonEmpty);
 }

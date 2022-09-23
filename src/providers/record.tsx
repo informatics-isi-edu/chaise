@@ -131,16 +131,16 @@ export default function RecordProvider({
 
   const { dispatchError } = useError();
   const [page, setPage] = useState<any>(null);
-  const [recordValues, setRecordValues] = useState<any>([]);
+  const [recordValues, setRecordValues, recordValuesRef] = useStateRef<any>([]);
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
   const [showMainSectionSpinner, setShowMainSectionSpinner] = useState(true);
-  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner] = useState(true);
+  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner, showRelatedSectionSpinnerRef] = useStateRef(true);
 
   const [modelsInitialized, setModelsInitialized] = useState(false);
   const [modelsRegistered, setModelsRegistered] = useState(false);
 
 
-  const [showEmptySections, setShowEmptySections] = useState(false);
+  const [showEmptySections, setShowEmptySections, showEmptySectionsRef] = useStateRef(false);
 
   const [relatedModels, setRelatedModels, relatedModelsRef] = useStateRef<RecordRelatedModel[]>([]);
   const setRelatedModelsByIndex = (index: number, updatedVals: { [key: string]: any }) => {
@@ -233,7 +233,8 @@ export default function RecordProvider({
     // inline table
     Object.values(flowControl.current.inlineRelatedRequestModels).forEach(function (m) {
       // TODO causes (changedContainers?)
-      m.addUpdateCauses([cause], true);
+      // the last parameter is making sure we're using the same queue for the main and inline
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -242,7 +243,8 @@ export default function RecordProvider({
     // related table
     flowControl.current.relatedRequestModels.forEach(function (m) {
       // TODO causes (changedContainers?)
-      m.addUpdateCauses([cause], true);
+      // the last parameter is making sure we're using the same queue for the main and related
+      m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
       if (m.hasWaitFor) {
         m.waitForDataLoaded = false;
       }
@@ -273,37 +275,51 @@ export default function RecordProvider({
       return;
     }
 
-    flowControl.current.requestModels.forEach((reqModel: RecordRequestModel, index: number) => {
+    let i;
+    for (i = 0; i < flowControl.current.requestModels.length; i++) {
+      const reqModel = flowControl.current.requestModels[i];
+
       if (!flowControl.current.haveFreeSlot()) return;
       const activeListModel = reqModel.activeListModel;
 
-      if (reqModel.processed) return;
+      if (reqModel.processed) continue;
       reqModel.processed = true;
 
       // inline
       if (activeListModel.inline) {
         const rm = flowControl.current.inlineRelatedRequestModels[activeListModel.index];
         rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, true));
-        return;
+        continue;
       }
 
       // related
       if (activeListModel.related) {
         const rm = flowControl.current.relatedRequestModels[activeListModel.index];
         rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, false));
-        return;
+        continue;
       }
 
       // entityset or aggregate
       // TODO
-
-    });
+    }
 
     // aggregates in inline
-    // TODO
+    for (i = 0; i < columnModels.length; i++) {
+      if (!flowControl.current.haveFreeSlot()) return;
+      const cm = columnModels[i];
+      if (cm.relatedModel) {
+        const rm = flowControl.current.inlineRelatedRequestModels[cm.index];
+        // TODO does spinner make sense?
+        rm.fetchSecondaryRequests(processRequests, false);
+      }
+    }
 
     // aggregates in related
-    // TODO
+    for (i = 0; i < flowControl.current.relatedRequestModels.length; i++) {
+      if (!flowControl.current.haveFreeSlot()) return;
+      const rm = flowControl.current.relatedRequestModels[i];
+      rm.fetchSecondaryRequests(processRequests, false);
+    }
   };
 
   const readMainEntity = (isUpdate: boolean, addDatasetJsonLD?: boolean) => {
@@ -486,7 +502,7 @@ export default function RecordProvider({
         column: col,
         hasTimeoutError: false,
         isLoading: false,
-        requireSecondaryRequest
+        requireSecondaryRequest,
       };
 
       // inline
@@ -644,6 +660,8 @@ export default function RecordProvider({
     };
   };
 
+
+
   // ---------------- log related function --------------------------- //
 
   const logRecordClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
@@ -708,7 +726,6 @@ export default function RecordProvider({
     }
   };
 
-
   const providerValue = useMemo(() => {
     return {
       // main entity:
@@ -727,7 +744,7 @@ export default function RecordProvider({
       logRecordClientAction,
       getRecordLogAction,
       getRecordLogStack,
-      // related entity:
+      // related section:
       showRelatedSectionSpinner,
       relatedModels,
       updateRelatedRecordsetState,

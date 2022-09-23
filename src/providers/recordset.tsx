@@ -1,19 +1,33 @@
+import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+
+// hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
+
+// models
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetProviderAddUpdateCauses, RecordsetProviderFetchSecondaryRequests, RecordsetProviderUpdateMainEntity, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import { RecordsetConfig, RecordsetDisplayMode,
+  RecordsetProviderAddUpdateCauses,
+  RecordsetProviderFetchSecondaryRequests,
+  RecordsetProviderUpdateMainEntity, SelectedRow
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+
+
+// services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
+
+// utils
 import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
-import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 /**
  * types related to the update function
@@ -233,7 +247,7 @@ type RecordsetProviderProps = {
   /**
    * The callback that should be called when favorites changed
    */
-  onFavoritesChanged?: Function
+  onFavoritesChanged?: Function,
 }
 
 export default function RecordsetProvider({
@@ -330,15 +344,17 @@ export default function RecordsetProvider({
 
   // call the flow-control after each reference object
   useEffect(() => {
-    updatePage();
+    processRequests();
   }, [pageLimit, reference]);
 
+  // TODO since we're using the references this is not needed anymore
+  // TODO should be tested and then removed
   // after the main data has loaded, we can get the secondary data
-  useEffect(() => {
-    if (!isLoading && page && page.length > 0) {
-      fetchSecondaryRequests(updatePage);
-    }
-  }, [isLoading, page]);
+  // useEffect(() => {
+  //   if (!isLoading && page && page.length > 0) {
+  //     fetchSecondaryRequests(processRequests);
+  //   }
+  // }, [isLoading, page]);
 
   const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
     const usedRef = ref ? ref : referenceRef.current;
@@ -479,21 +495,25 @@ export default function RecordsetProvider({
       $log.debug(`adding one to counter, new: ${flowControl.current.queue.counter}`);
     }
 
-    // updatePage is called as a result of updating the reference
-    // we cannot ensure that the reference is latest, so we cannot call updatePage
+    // processRequests is called as a result of updating the reference
+    // we cannot ensure that the reference is latest, so we cannot call processRequests
     if (newRef) {
-      // after react sets the reference, the useEffect will trigger updatePage
+      // after react sets the reference, the useEffect will trigger processRequests
       setReference(newRef);
     } else if (limit && typeof limit === 'number') {
       setPageLimit(limit);
     } else {
-      updatePage();
+      processRequests();
     }
 
     return true;
   };
 
-  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean) => {
+  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => {
+    if (queue) {
+      flowControl.current.queue = queue;
+    }
+
     if (setDirtyResult) {
       flowControl.current.dirtyResult = true;
     }
@@ -509,7 +529,7 @@ export default function RecordsetProvider({
     });
   };
 
-  const updatePage = () => {
+  const processRequests = () => {
     printDebugMessage('running update page');
 
     if (!flowControl.current.haveFreeSlot()) {
@@ -526,7 +546,7 @@ export default function RecordsetProvider({
     );
 
     // update the resultset
-    updateMainEntity(updatePage);
+    updateMainEntity(processRequests);
 
     // the aggregates are updated when the main entity request is done
 
@@ -534,17 +554,16 @@ export default function RecordsetProvider({
     // this is because the query takes too long sometimes
     if (!referenceRef.current.display || !referenceRef.current.display.hideRowCount) {
       // update the count
-      updateTotalRowCount(updatePage);
+      updateTotalRowCount(processRequests);
     }
 
-    // TODO does this make sense?
     if (!isLoadingRef.current && pageRef.current && pageRef.current.length > 0) {
-      fetchSecondaryRequests(updatePage);
+      fetchSecondaryRequests(processRequests);
     }
 
     // fetch the facets
     if (flowControl.current.updateFacetsCallback) {
-      flowControl.current.updateFacetsCallback(flowControl, updatePage);
+      flowControl.current.updateFacetsCallback(flowControl, processRequests);
     }
 
   };
@@ -552,11 +571,11 @@ export default function RecordsetProvider({
   /**
  * Given the tableModel object, will get the values for main entity and
  * attach them to the model.
- * @param  {function} updatePageCB The update page callback which we will call after getting the result.
+ * @param  {function} processRequestsCB The update page callback which we will call after getting the result.
  * @param  {object} notTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
-  const updateMainEntity = (updatePageCB: Function, notTerminal = false, cb?: Function) => {
+  const updateMainEntity = (processRequestsCB: Function, notTerminal = false, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -573,7 +592,7 @@ export default function RecordsetProvider({
         if (cb) cb(res);
         // TODO remember last successful main request
         // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
-        updatePageCB();
+        processRequestsCB();
       }).catch((err: any) => {
         afterUpdateMainEntity(true, currentCounter);
         if (cb) cb(self, true);
@@ -645,7 +664,11 @@ export default function RecordsetProvider({
       const getUnlinkTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
         && referenceRef.current.derivedAssociationReference;
 
-      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
+      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((values: any) => {
+        const d = Q.defer();
+        setTimeout(() => d.resolve(values), 2000);
+        return d.promise;
+      }).then((pageRes: any) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({success: false, page: null});
           return defer.promise;
@@ -683,12 +706,7 @@ export default function RecordsetProvider({
           setDisabledRows(result.disabledRows);
         }
 
-        // globally sets when the app state is ready to interact with
-        // TODO is this needed?
-        // $rootScope.displayReady = true;
-
         // make sure we're getting the data for aggregate columns
-        // TODO
         flowControl.current.requestModels.forEach((agg: any) => {
           if (result.page.length > 0) {
             agg.processed = false;
@@ -741,7 +759,7 @@ export default function RecordsetProvider({
   }
 
 
-  const updateTotalRowCount = (updatePageCB: Function) => {
+  const updateTotalRowCount = (processRequestsCB: Function) => {
     if (!flowControl.current.dirtyCount || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -752,7 +770,7 @@ export default function RecordsetProvider({
     (function (curr) {
       fetchTotalRowCount(curr).then((res: any) => {
         afterUpdateTotalRowCount(res, curr);
-        updatePageCB();
+        processRequestsCB();
       }).catch(function (err: any) {
         afterUpdateTotalRowCount(true, curr);
         dispatchError({ error: err });
@@ -834,10 +852,10 @@ export default function RecordsetProvider({
    * get values for the secondary requests (aggregate columns, etc).
    * The updateMainEntity should be called on the tableModel before this function.
    * That function will generate `vm.page` which is needed for this function
-   * @param  {function} updatePageCB The update page callback which we will call after getting each result.
+   * @param  {function} processRequestsCB The update page callback which we will call after getting each result.
    * @param  {boolean} hideSpinner?  Indicates whether we should show spinner for columns or not
    */
-  const fetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => {
+  const fetchSecondaryRequests = (processRequestsCB: Function, hideSpinner?: boolean) => {
     // if the data is still loading, don't fetch the secondary requests
     if (isLoadingRef.current) return;
 
@@ -856,7 +874,7 @@ export default function RecordsetProvider({
         aggModel.processed = res;
 
         printDebugMessage(`: after aggregated value for column (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
-        updatePageCB();
+        processRequestsCB();
       }).catch((err: any) => {
         dispatchError({ error: err });
       });
@@ -894,6 +912,10 @@ export default function RecordsetProvider({
       stack,
     };
     activeListModel.column.getAggregatedValue(pageRef.current, logObj).then((values: any) => {
+      const d = Q.defer();
+      setTimeout(() => d.resolve(values), 2000);
+      return d.promise;
+    }).then((values: any) => {
       if (flowControl.current.queue.counter !== current) {
         printDebugMessage(`getAggregatedValue success counter missmatch, old cnt=${current}`);
         return defer.resolve(false), defer.promise;

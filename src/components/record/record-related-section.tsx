@@ -24,6 +24,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 type RelatedTableHeaderProps = {
   relatedModel: RecordRelatedModel
@@ -148,8 +149,7 @@ const RecordRelatedSection = (): JSX.Element => {
           <Accordion.Item
             key={`record-related-${rm.index}`}
             eventKey={rm.index + ''}
-            // TODO should be changed and just added for test purposes
-            className={`related-table-accordion panel ${!showEmptySections && (!rm.recordsetState.page || rm.recordsetState.page.length == 0) ? 'forced-hidden' : ''}`}
+            className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? 'forced-hidden' : ''}`}
             // TODO add id
             as='div'
           >

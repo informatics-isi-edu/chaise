@@ -18,6 +18,7 @@ import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 
 /**
@@ -26,24 +27,15 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 const RecordMainSection = (): JSX.Element => {
 
   const { errors } = useError();
-  const { recordValues, columnModels, showEmptySections, showMainSectionSpinner } = useRecord();
+  const { recordValues, columnModels, showMainSectionSpinner, showEmptySections } = useRecord();
 
-  const canShow = (cm: RecordColumnModel) => {
-    if (cm.relatedModel) {
-      // this flag signals that the returned data is non-empty and is returned
-      const nonEmpty = (cm.relatedModel.recordsetState.page && cm.relatedModel.recordsetState.page.length > 0 &&
-        cm.relatedModel.tableMarkdownContentInitialized);
-
-      // filter-in-source if the filter is based on the main table and returns empty, the related table should be hidden
-      const ref = cm.relatedModel.initialReference;
-      if (ref.pseudoColumn && ref.pseudoColumn.isFiltered && ref.pseudoColumn.filterProps.hasRootFilter) {
-        return nonEmpty;
-      }
-      return (showEmptySections || nonEmpty);
-    } else if (cm.requireSecondaryRequest) {
-      return (showEmptySections || (!!recordValues[cm.index] && !!recordValues[cm.index].value));
+  const canShow = (columnModel: RecordColumnModel) : boolean => {
+    if (columnModel.relatedModel) {
+      return canShowInlineRelated(columnModel, showEmptySections);
+    } else if (columnModel.requireSecondaryRequest) {
+      return (showEmptySections || (!!recordValues[columnModel.index] && !!recordValues[columnModel.index].value));
     } else {
-      return (recordValues[cm.index] && recordValues[cm.index].value != null);
+      return (recordValues[columnModel.index] && recordValues[columnModel.index].value != null);
     }
   };
 

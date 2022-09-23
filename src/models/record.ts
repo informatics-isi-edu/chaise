@@ -47,7 +47,7 @@ export interface RecordColumnModel {
   hasTimeoutError: boolean,
   isLoading: boolean,
   requireSecondaryRequest: boolean,
-  relatedModel?: RecordRelatedModel
+  relatedModel?: RecordRelatedModel,
 }
 
 export interface RecordRelatedRequestModel {
