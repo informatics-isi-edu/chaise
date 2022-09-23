@@ -55,7 +55,7 @@ const RecordMainSection = (): JSX.Element => {
   };
 
   const showLoader = (cm: RecordColumnModel): boolean => {
-    // TODO this is assuming isLoading is also used for the page.content
+    // TODO this is assuming isLoading is also used for the inlines (page.content)
     return cm.isLoading || (cm.relatedModel != null && cm.relatedModel.recordsetState.isLoading);
   };
 

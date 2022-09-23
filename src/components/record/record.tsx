@@ -307,7 +307,7 @@ const RecordInner = ({
       {errors.length === 0 && showDeleteSpinner &&
         <div className='delete-spinner-container'>
           <div className='delete-spinner-backdrop'></div>
-          <ChaiseSpinner className='delete-spinner' message='Waiting for delete response...' />
+          <ChaiseSpinner className='delete-spinner' message='Deleting...' />
         </div>
       }
       <div className='top-panel-container'>
