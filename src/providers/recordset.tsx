@@ -664,11 +664,7 @@ export default function RecordsetProvider({
       const getUnlinkTRS = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0
         && referenceRef.current.derivedAssociationReference;
 
-      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((values: any) => {
-        const d = Q.defer();
-        setTimeout(() => d.resolve(values), 2000);
-        return d.promise;
-      }).then((pageRes: any) => {
+      referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({success: false, page: null});
           return defer.promise;
@@ -912,10 +908,6 @@ export default function RecordsetProvider({
       stack,
     };
     activeListModel.column.getAggregatedValue(pageRef.current, logObj).then((values: any) => {
-      const d = Q.defer();
-      setTimeout(() => d.resolve(values), 2000);
-      return d.promise;
-    }).then((values: any) => {
       if (flowControl.current.queue.counter !== current) {
         printDebugMessage(`getAggregatedValue success counter missmatch, old cnt=${current}`);
         return defer.resolve(false), defer.promise;
