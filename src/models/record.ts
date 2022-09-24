@@ -33,7 +33,9 @@ export interface RecordRelatedModel {
     logInfo: {
       logStack: any,
       logStackPath: string
-    }
+    },
+    parentTuple: any,
+    parentReference: any
   },
   canCreate: boolean,
   canCreateDisabled: boolean,

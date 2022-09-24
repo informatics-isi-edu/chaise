@@ -8,7 +8,8 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // models
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
-import { RecordsetConfig, RecordsetDisplayMode,
+import {
+  RecordsetConfig, RecordsetDisplayMode,
   RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
   RecordsetProviderUpdateMainEntity, SelectedRow
@@ -196,6 +197,14 @@ export const RecordsetContext = createContext<{
    * manually add update cases and set the dirty flag
    */
   addUpdateCauses: RecordsetProviderAddUpdateCauses,
+  /**
+   * The parent page's reference
+   */
+  parentPageReference?: any,
+  /**
+   * The parent page's tuple
+   */
+  parentPageTuple?: any,
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -248,6 +257,14 @@ type RecordsetProviderProps = {
    * The callback that should be called when favorites changed
    */
   onFavoritesChanged?: Function,
+  /**
+   * The parent page's reference
+   */
+  parentReference?: any,
+  /**
+   * The parent page's tuple
+   */
+  parentTuple?: any,
 }
 
 export default function RecordsetProvider({
@@ -260,12 +277,18 @@ export default function RecordsetProvider({
   getDisabledTuples,
   initialSelectedRows,
   onSelectedRowsChanged,
-  onFavoritesChanged
+  onFavoritesChanged,
+  parentReference,
+  parentTuple
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
 
   const [reference, setReference, referenceRef] = useStateRef<any>(initialReference);
+
+  const [parentPageReference, setPageParentReference] = useState(parentReference);
+  const [parentPageTuple, setPageParentTuple] = useState(parentTuple);
+
   /**
    * whether the component has initialized or not
    */
@@ -643,11 +666,13 @@ export default function RecordsetProvider({
     const act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
 
     // add reloadCauses
-    if (hasCauses) {
-      logParams.stack = LogService.addCausesToStack(flowControl.current.getLogStack(), reloadCauses, flowControl.current.reloadStartTime);
-    } else {
-      logParams.stack = flowControl.current.getLogStack();
-    }
+    const usedLogStack = hasCauses ?
+      LogService.addCausesToStack(flowControl.current.getLogStack(), reloadCauses, flowControl.current.reloadStartTime) :
+      flowControl.current.getLogStack();
+
+    const usedLogStackPath = logInfo.logStackPath;
+
+    logParams.stack = usedLogStack;
 
     // create the action
     logParams.action = flowControl.current.getLogAction(act);
@@ -666,7 +691,7 @@ export default function RecordsetProvider({
 
       referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
         if (current !== flowControl.current.queue.counter) {
-          defer.resolve({success: false, page: null});
+          defer.resolve({ success: false, page: null });
           return defer.promise;
         }
 
@@ -675,13 +700,13 @@ export default function RecordsetProvider({
         return getFavorites ? getFavorites(pageRes) : { page: pageRes };
       }).then((result: any) => {
         if (getDisabledTuples) {
-          return getDisabledTuples(self, result.page, requestCauses, reloadStartTime);
+          return getDisabledTuples(result.page, pageLimitRef.current, usedLogStack, usedLogStackPath, requestCauses, reloadStartTime);
         } else {
           return { page: result.page };
         }
       }).then((result: any) => {
         if (current !== flowControl.current.queue.counter) {
-          defer.resolve({success: false, page: null});
+          defer.resolve({ success: false, page: null });
           return defer.promise;
         }
 
@@ -731,10 +756,10 @@ export default function RecordsetProvider({
         flowControl.current.reloadCauses = [];
         flowControl.current.reloadStartTime = -1;
 
-        defer.resolve({success: true, page: result.page});
+        defer.resolve({ success: true, page: result.page });
       }).catch((err: any) => {
         if (current !== flowControl.current.queue.counter) {
-          return defer.resolve({success: false, page: null});
+          return defer.resolve({ success: false, page: null });
         }
 
         setIsInitialized(true);
@@ -1083,7 +1108,10 @@ export default function RecordsetProvider({
       // log related:
       logRecordsetClientAction, getLogAction, getLogStack,
       // used for manually calling the flow-control in record page
-      updateMainEntity, fetchSecondaryRequests, addUpdateCauses
+      updateMainEntity, fetchSecondaryRequests, addUpdateCauses,
+      // the following values are not supposed to change
+      // but needed by other components
+      parentPageReference, parentPageTuple
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,

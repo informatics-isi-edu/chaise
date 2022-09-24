@@ -54,7 +54,9 @@ const Recordset = ({
   onFavoritesChanged,
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
   parentStickyArea,
-  onFacetPanelOpenChanged
+  onFacetPanelOpenChanged,
+  parentReference,
+  parentTuple
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -68,6 +70,8 @@ const Recordset = ({
         initialSelectedRows={initialSelectedRows}
         onSelectedRowsChanged={onSelectedRowsChanged}
         onFavoritesChanged={onFavoritesChanged}
+        parentReference={parentReference}
+        parentTuple={parentTuple}
       >
         <RecordsetInner
           initialReference={initialReference}

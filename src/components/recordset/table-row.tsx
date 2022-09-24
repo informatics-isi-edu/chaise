@@ -63,7 +63,10 @@ const TableRow = ({
    * But if this was in recordset-table then we would need to pass these and
    * it wouldn't make any difference in terms of number of renders
    */
-  const { setForceShowSpinner, update, getLogStack, getLogAction } = useRecordset();
+  const {
+    reference, setForceShowSpinner, update, getLogStack, getLogAction,
+    parentPageTuple, parentPageReference
+  } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
   const tdPadding = 10, // +10 to account for padding on <td>
@@ -153,7 +156,14 @@ const TableRow = ({
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
     isSavedQueryPopup = config.displayMode === RecordsetDisplayMode.SAVED_QUERY_POPUP;
 
-  let logStack : any;
+  /**
+   * The JS.Elements that are used for displaying messages
+   */
+  const parentTable = parentPageTuple ? <code><DisplayValue value={parentPageTuple.displayname}></DisplayValue></code> : <></>;
+  const currentTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;
+  const currentTuple = <code><DisplayValue value={tuple.displayname}></DisplayValue></code>;
+
+  let logStack: any;
   if (tupleReference) {
     logStack = getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo));
   }
@@ -216,19 +226,16 @@ const TableRow = ({
 
   // delete/unlink button
   let deleteCallback: null | (() => void) = null;
-  let unlinkCallback: null | (() => void) = null, unlinkTooltip: string;
+  let unlinkCallback: null | (() => void) = null;
   if (config.deletable) {
     // unlink button should only show up in related mode
     let associationRef: any;
-    // TODO record page
-    // if (isRelated && scope.tableModel.parentTuple) {
-    //   associationRef = scope.tuple.getAssociationRef(scope.tableModel.parentTuple.data);
-    // }
+    if (isRelated && parentPageTuple) {
+      associationRef = tuple.getAssociationRef(parentPageTuple.data);
+    }
 
     if (associationRef) {
       if (tuple.canUnlink) {
-        // TODO record page
-        // unlinkTooltip = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.tableModel.parentReference.displayname.value + '.';
         // define unlink function
         unlinkCallback = function () {
           deleteOrUnlink(associationRef, isRelated, true);
@@ -251,12 +258,10 @@ const TableRow = ({
           stack: logStack
         }, reference.defaultLogInfo);
 
-        // TODO unlink should say disconnect...
         const confirmMessage: JSX.Element = (
           <>
-            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
-            <span>: </span>
-            <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
+            {!isUnlink && <>Are you sure you want to delete {currentTable}:{currentTuple}?</>}
+            {isUnlink && <>Are you sure you want to disconnect {currentTable}:{currentTuple} from this {parentTable}?</>}
           </>
         );
 
@@ -431,7 +436,7 @@ const TableRow = ({
             }
             {unlinkCallback &&
               <ChaiseTooltip
-                tooltip={unlinkTooltip}
+                tooltip={<>Disconnect {currentTable}:{currentTuple} from this {parentTable}.</>}
                 placement='bottom'
               >
                 <button
@@ -440,7 +445,7 @@ const TableRow = ({
                 >
                   {waitingForDelete && <Spinner size='sm' animation='border' className='delete-loader' />}
                   {/* TODO record the icon must be reviewed*/}
-                  {!waitingForDelete && <span className='chaise-btn-icon fa-regular fa-link-slash'></span>}
+                  {!waitingForDelete && <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>}
                 </button>
               </ChaiseTooltip>
             }

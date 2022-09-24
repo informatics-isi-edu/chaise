@@ -118,7 +118,7 @@ export function displayCustomModeRelated(relatedModel: RecordRelatedModel): bool
  * @param isInline whether its inline or not
  * @param mainTuple the main tuple data
  */
-export function generateRelatedRecordModel(ref: any, index: number, isInline: boolean, mainTuple: any): RecordRelatedModel {
+export function generateRelatedRecordModel(ref: any, index: number, isInline: boolean, mainTuple: any, mainReference: any): RecordRelatedModel {
   let initialPageLimit = ref.display.defaultPageSize;
   if (!initialPageLimit) {
     initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
@@ -157,7 +157,9 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
       logInfo: {
         logStack: LogService.getStackObject(stackNode),
         logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
-      }
+      },
+      parentTuple: mainTuple,
+      parentReference: mainReference
     },
     canCreate: canCreateRelated(ref),
     canCreateDisabled: CanCreateDisabledRelated(ref, mainTuple),

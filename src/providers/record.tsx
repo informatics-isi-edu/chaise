@@ -508,7 +508,9 @@ export default function RecordProvider({
       // inline
       if (col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)) {
         flowControl.current.mainHasSecondaryRequests = true;
-        cm.relatedModel = generateRelatedRecordModel(col.reference.contextualize.compactBriefInline, index, true, tuple);
+        cm.relatedModel = generateRelatedRecordModel(
+          col.reference.contextualize.compactBriefInline, index, true, tuple, reference
+        );
 
         flowControl.current.inlineRelatedRequestModels[index] = {
           index,
@@ -552,7 +554,7 @@ export default function RecordProvider({
         registered: false
       });
 
-      computedRelatedModels.push(generateRelatedRecordModel(ref, index, false, tuple));
+      computedRelatedModels.push(generateRelatedRecordModel(ref, index, false, tuple, reference));
     });
     setRelatedModels(computedRelatedModels);
 

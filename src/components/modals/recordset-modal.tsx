@@ -46,10 +46,14 @@ export type RecordestModalProps = {
   onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean,
   /**
    * The function that will be called on submit
+   * Note: the modal won't close on submit and if that's the expected behavior,
+   * you should do it in this callback.
    */
   onSubmit: (selectedRows: SelectedRow[]) => void,
   /**
-   * The function that will be called on closing the modal
+   * The function that will be called when user clicks on "cancel" button
+   * Note: the modal won't close by itself and if that's the expected behavior,
+   * you should do it in this callback.
    */
   onClose: () => void
 }

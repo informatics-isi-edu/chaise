@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 
 // components
 import RecordsetTable from '@isrd-isi-edu/chaise/src/components/recordset/recordset-table';
@@ -15,7 +16,6 @@ import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // utils
-import { useEffect } from 'react';
 import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 
 type RelatedTableProps = {
@@ -31,7 +31,7 @@ const RelatedTable = ({
       // TODO the following most probably should go somewhere else:
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel}/>
+      <RelatedTableInner relatedModel={relatedModel} />
     </RecordsetProvider>
   )
 }
@@ -43,7 +43,7 @@ const RelatedTableInner = ({
     updateMainEntity, addUpdateCauses, fetchSecondaryRequests,
   } = useRecordset();
   const {
-    updateRelatedRecordsetState, registerRelatedModel
+    reference: recordReference, page : recordPage, updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
 
   // update the recordset state in recordProvider
@@ -79,7 +79,7 @@ const RelatedTableInner = ({
       }
       {/* TODO the following was span for inline, but shouldn't matter */}
       {/* TODO related-table and related-table-accordion classes removed  */}
-      <div className={`related-table-content ${displayCustomMode ? 'forced-hidden': ''}`} style={{display: displayCustomMode ? 'none': 'block'}}>
+      <div className={`related-table-content ${displayCustomMode ? 'forced-hidden' : ''}`} style={{ display: displayCustomMode ? 'none' : 'block' }}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <RecordsetTable
           config={relatedModel.recordsetProps.config}

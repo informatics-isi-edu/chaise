@@ -14,7 +14,11 @@ export type RecordsetProps = {
   },
   initialPageLimit?: number,
   getFavorites?: Function,
-  getDisabledTuples?: Function,
+  getDisabledTuples?: (
+    page: any, pageLimit: number, logStack: any,
+    logStackPath: string, requestCauses: any, reloadStartTime: any
+  ) => any
+  ,
   initialSelectedRows?: SelectedRow[],
   onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
   onFavoritesChanged?: Function,
