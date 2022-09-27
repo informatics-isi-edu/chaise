@@ -7,19 +7,25 @@ import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset
 
 // hooks
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
+import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { LogActions, LogParentActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetConfig, RecordsetDisplayMode, RecordsetProps, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+
+// providers
+import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { allowCustomModeRelated, displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { allowCustomModeRelated, displayCustomModeRelated, getPrefillCookieObject } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import Q from 'q';
 
@@ -31,14 +37,19 @@ const RelatedTableActions = ({
   relatedModel
 }: RelatedTableActionsProps): JSX.Element => {
 
-  const { reference: recordReference, page: recordPage, toggleRelatedDisplayMode, updateRecordPage } = useRecord();
+  const {
+    reference: recordReference, page: recordPage,
+    toggleRelatedDisplayMode, updateRecordPage,
+    getRecordLogStack
+  } = useRecord();
 
-  const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(null)
+  const { validateSessionBeforeMutation } = useAuthn();
+  const { addAlert } = useAlert();
+  const { dispatchError  } = useError();
 
-  let containerClassName = 'related-table-actions';
-  // if (relatedModel.isInline) {
-  //   containerClassName = relatedModel.isTableDisplay ?  ' action-bar-entity-table-mode' : ' action-bar-entity-display-mode';
-  // }
+  const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(null);
+  const [submitPureBinaryCB, setAddPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
+  const [showPureBinarySpinner, setShowPureBinarySpinner] = useState(false);
 
   const usedRef = relatedModel.initialReference;
 
@@ -61,6 +72,7 @@ const RelatedTableActions = ({
 
     if (relatedModel.isPureBinary) {
       openAddPureBinaryModal();
+      return;
     }
 
     // TODO add related
@@ -68,11 +80,15 @@ const RelatedTableActions = ({
   };
 
   const openAddPureBinaryModal = () => {
+    // the reference that we're showing in the related section
     const domainRef = relatedModel.initialReference;
+    // the reference that we're going to create rows from
+    const derivedRef = domainRef.derivedAssociationReference;
+    const fkToRelated = derivedRef.associationToRelatedFKR;
 
     const andFilters: any[] = [];
     // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
-    domainRef.derivedAssociationReference.associationToRelatedFKR.key.colset.columns.forEach(function (col: any) {
+    fkToRelated.key.colset.columns.forEach(function (col: any) {
       andFilters.push({
         'source': col.name,
         'hidden': true,
@@ -94,8 +110,8 @@ const RelatedTableActions = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: false,
-      disableFaceting: true,
+      showFaceting: true,
+      disableFaceting: false,
       displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_ADD,
     };
 
@@ -107,25 +123,91 @@ const RelatedTableActions = ({
 
     const logInfo = {
       logObject: null,
-      logStack: LogService.getStackObject(stackElement),
+      logStack: getRecordLogStack(stackElement),
       logStackPath: LogService.getStackPath(null, LogStackPaths.ADD_PB_POPUP),
     };
 
+    /**
+     * The existing rows in this p&b association must be disabled
+     * so users doesn't resubmit them.
+     */
     const getDisabledTuples = (
       page: any, pageLimit: number, logStack: any,
       logStackPath: string, requestCauses: any, reloadStartTime: any
     ) => {
       const defer = Q.defer();
+      const disabledRows: any = [];
 
-      // TODO disable the existing rows
+      let action = LogActions.LOAD, newStack = logStack;
+      if (Array.isArray(requestCauses) && requestCauses.length > 0) {
+        action = LogActions.RELOAD;
+        newStack = LogService.addCausesToStack(logStack, requestCauses, reloadStartTime);
+      }
+      // using the service instead of the record one since this is called from the modal
+      const logObj = {
+        action: LogService.getActionString(action, logStackPath),
+        stack: newStack
+      };
+      // fourth input: preserve the paging (read will remove the before if number of results is less than the limit)
+      domainRef.setSamePaging(page).read(pageLimit, logObj, false, true).then(function (newPage: any) {
+        newPage.tuples.forEach(function (newTuple: any) {
+          const index = page.tuples.findIndex(function (tuple: any) {
+            return tuple.uniqueId == newTuple.uniqueId;
+          });
+          if (index > -1) disabledRows.push(page.tuples[index]);
+        });
 
-      defer.resolve({ page: page });
+        defer.resolve({ disabledRows: disabledRows, page: page });
+      }).catch(function (err: any) {
+        defer.reject(err);
+      });
 
       return defer.promise;
-    }
+    };
 
-    // TODO fix issues of the popup
-    // - the selection is not working!
+    // this function is here since we need to access the outer scope here
+    const submitCB = function (selectedRows: SelectedRow[]) {
+      if (!selectedRows) return;
+
+      // this will populate the values that we should send
+      const fkDetails = getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]);
+
+      // populate submission rows based on the selected rows
+      const submissionRows: any[] = [];
+      selectedRows.forEach((sr: SelectedRow, index: number) => {
+        // add the values from the main table key
+        submissionRows[index] = { ...fkDetails.keys };
+
+        // add the values from the related table key (selected rows)
+        fkToRelated.key.colset.columns.forEach((col: any) => {
+          submissionRows[index][fkToRelated.mapping.getFromColumn(col).name] = sr.data[col.name];
+        });
+      });
+
+      setShowPureBinarySpinner(true);
+
+      validateSessionBeforeMutation(() => {
+        const logObj = {
+          action: LogService.getActionString(LogActions.LINK, logInfo.logStackPath),
+          stack: logInfo.logStack
+        };
+
+        const createRef = derivedRef.unfilteredReference.contextualize.entryCreate;
+        createRef.create(submissionRows, logObj).then(() => {
+          setAddPureBinaryModalProps(null);
+          // TODO better and more costum message
+          addAlert('Your data has been submitted. Showing you the result set...', ChaiseAlertType.SUCCESS);
+
+          // TODO properly send the container
+          updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
+        }).catch((error: any) => {
+          // TODO ask josh about validateSession
+          dispatchError({error: error, isDismissible: true});
+        }).finally(() => setShowPureBinarySpinner(false));
+      });
+    }
+    setAddPureBinarySubmitCB(() => submitCB);
+
     setAddPureBinaryModalProps({
       initialReference: modalReference,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
@@ -140,10 +222,6 @@ const RelatedTableActions = ({
   const closePureBinaryModal = () => {
     // TODO resume update record page
     setAddPureBinaryModalProps(null);
-  };
-
-  const submitPureBinaryModal = () => {
-    // TODO implement submission
   };
 
   const onUnlink = (e: MouseEvent<HTMLElement>) => {
@@ -195,7 +273,7 @@ const RelatedTableActions = ({
 
   return (
     <>
-      <div className={containerClassName}>
+      <div className='related-table-actions'>
         {relatedModel.canCreate &&
           <ChaiseTooltip
             placement='top'
@@ -230,11 +308,12 @@ const RelatedTableActions = ({
         </ChaiseTooltip>
       </div>
       {
-        addPureBinaryModalProps &&
+        addPureBinaryModalProps && submitPureBinaryCB &&
         <RecordsetModal
           modalClassName='add-pure-and-binary-popup'
           recordsetProps={addPureBinaryModalProps}
-          onSubmit={submitPureBinaryModal}
+          onSubmit={submitPureBinaryCB}
+          showSubmitSpinner={showPureBinarySpinner}
           onClose={closePureBinaryModal}
         />
       }

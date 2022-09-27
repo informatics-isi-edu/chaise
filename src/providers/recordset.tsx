@@ -348,7 +348,7 @@ export default function RecordsetProvider({
             removeURLLimitAlert();
           }
         } else {
-          return prevRows;
+          return temp === false ? prevRows : res;
         }
 
       }
@@ -704,7 +704,7 @@ export default function RecordsetProvider({
         } else {
           return { page: result.page };
         }
-      }).then((result: any) => {
+      }).then((result: {page: any, disabledRows?: any}) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;

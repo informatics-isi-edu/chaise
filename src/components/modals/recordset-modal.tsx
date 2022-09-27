@@ -1,10 +1,9 @@
 // components
+import Modal from 'react-bootstrap/Modal';
+import Spinner from 'react-bootstrap/Spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
-import Modal from 'react-bootstrap/Modal';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
-import { RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
@@ -13,6 +12,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 // models
 import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -51,6 +52,10 @@ export type RecordestModalProps = {
    */
   onSubmit: (selectedRows: SelectedRow[]) => void,
   /**
+   * Whether we should show the submit spinner or not
+   */
+  showSubmitSpinner?: boolean,
+  /**
    * The function that will be called when user clicks on "cancel" button
    * Note: the modal won't close by itself and if that's the expected behavior,
    * you should do it in this callback.
@@ -74,6 +79,7 @@ const RecordsetModal = ({
   comment,
   onSelectedRowsChanged,
   onSubmit,
+  showSubmitSpinner,
   onClose
 }: RecordestModalProps) => {
 
@@ -314,9 +320,10 @@ const RecordsetModal = ({
                       <button
                         id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
                         type='button' onClick={submit}
-                        disabled={disableSubmit}
+                        disabled={disableSubmit || showSubmitSpinner}
                       >
-                        <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
+                        {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
+                        {showSubmitSpinner && <Spinner animation='border' size='sm' />}
                         <span>{submitText}</span>
                       </button>
                     </ChaiseTooltip>
@@ -327,7 +334,7 @@ const RecordsetModal = ({
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
-                      onClick={() => onCancelClick()}
+                      onClick={() => onCancelClick()} disabled={showSubmitSpinner}
                     >
                       <strong className='chaise-btn-icon'>X</strong>
                       <span>Cancel</span>
