@@ -370,14 +370,18 @@ export default function RecordsetProvider({
     processRequests();
   }, [pageLimit, reference]);
 
-  // TODO since we're using the references this is not needed anymore
-  // TODO should be tested and then removed
   // after the main data has loaded, we can get the secondary data
-  // useEffect(() => {
-  //   if (!isLoading && page && page.length > 0) {
-  //     fetchSecondaryRequests(processRequests);
-  //   }
-  // }, [isLoading, page]);
+  useEffect(() => {
+    // TODO does this make sense?
+    // in case of related entities, record page will take care of this
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0) {
+      return;
+    }
+
+    if (!isLoading && page && page.length > 0) {
+      fetchSecondaryRequests(processRequests);
+    }
+  }, [isLoading, page]);
 
   const logRecordsetClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
     const usedRef = ref ? ref : referenceRef.current;
