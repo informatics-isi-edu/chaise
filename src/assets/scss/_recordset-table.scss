@@ -149,6 +149,7 @@
         right: -5px;
 
         .spinner-border {
+          // NOTE: we should not customize the width/height since it causes wobbling effect
           color: #828282;
           border-width: .16em;
         }

@@ -49,7 +49,7 @@
                             title: "Help",
                             // btnClass: 'live-preview',
                             icon: {
-                                fa: "fa fa-question",
+                                fa: "fa-solid fa-circle-question",
                                 glyph: "glyphicon glyphicon-question-sign"
                             },
                             callback: function(e) {
@@ -63,7 +63,7 @@
                             btnClass: 'chaise-btn chaise-btn-secondary',
                             icon: {
                                 glyph: 'glyphicon glyphicon-eye-open',
-                                fa: 'fa fa-eye',
+                                fa: 'fa-solid fa-eye',
                                 'fa-3': 'icon-eye-open'
                             },
                             callback: function(e) {
@@ -83,7 +83,7 @@
                             title: "Fullscreen Preview",
                             btnClass: 'chaise-btn chaise-btn-secondary',
                             icon: {
-                                fa: "fa fa-arrows-alt",
+                                fa: "fa-solid fa-expand",
                                 glyph: "glyphicon glyphicon-fullscreen"
                             },
                             callback: function(e) {
@@ -109,7 +109,7 @@
                             title: "RID link",
                             btnClass: 'chaise-btn chaise-btn-secondary chaise-btn-no-padding',
                             icon: {
-                                // fa: "fa fa-arrows-alt",
+                                fa: "chaise-icon chaise-RID",
                                 glyph: "chaise-icon chaise-RID"
                             },
                             callback: function(e) {

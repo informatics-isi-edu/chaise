@@ -9,7 +9,7 @@
                     <div ng-if="vm.selectedRows.length > 0 && vm.config.selectMode == 'multi-select'" class="recordset-selected-rows recordset-chiclets-container">
                         <div class="selected-chiclet" ng-repeat="row in vm.selectedRows track by $index">
                             <span class="selected-chiclet-remove" ng-click="removePill(row.uniqueId, $event)" uib-tooltip="Clear selected row" tooltip-placement="bottom-left">
-                                <i class="glyphicon glyphicon-remove"></i>
+                                <i class="fa-solid fa-xmark"></i>
                             </span>
                             <span class="selected-chiclet-name" ng-if="row.displayname.isHTML" ng-bind-html="row.displayname.value"></span>
                             <span class="selected-chiclet-name" ng-if="!row.displayname.isHTML" ng-bind="row.displayname.value"></span>

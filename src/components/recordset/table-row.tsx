@@ -364,10 +364,10 @@ const TableRow = ({
             {/* TODO favorites */}
             {/*
               <span ng-if="config.enableFavorites && isFavoriteLoading" class="favorite-icon favorite-spinner-container pull-right">
-                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                <span class="fa-solid fa-circle-notch fa-spin"></span>
               </span>
-              <span ng-if="config.enableFavorites && !isFavoriteLoading && tuple.isFavorite" class="favorite-icon glyphicon glyphicon-star pull-right" ng-click="callToggleFavorite()"></span>
-              <span ng-if="config.enableFavorites && !isFavoriteLoading && !tuple.isFavorite" class="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="callToggleFavorite()"></span>
+              <span ng-if="config.enableFavorites && !isFavoriteLoading && tuple.isFavorite" class="favorite-icon fa-solid fa-star pull-right" ng-click="callToggleFavorite()"></span>
+              <span ng-if="config.enableFavorites && !isFavoriteLoading && !tuple.isFavorite" class="favorite-icon hover-show fa-regular fa-star pull-right" ng-click="callToggleFavorite()"></span>
             */}
           </div>
         );

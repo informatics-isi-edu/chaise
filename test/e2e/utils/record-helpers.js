@@ -550,14 +550,14 @@ exports.testSharePopup = function (sharePopupParams) {
 
         var numCopyIcons = sharePopupParams.hasVersionedLink ? 2 : 1;
         it("should have " + numCopyIcons + " copy to clipboard icons visible.", function () {
-            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
+            expect(element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
         });
 
         // NOTE: the copy buttons functionality isn't being tested because it seems really hacky to test this feature
         xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
             var copyIcons, copyInput;
 
-            element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
+            element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).then(function (icons) {
                 copyIcons = icons;
 
                 expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");

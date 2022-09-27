@@ -33,13 +33,13 @@
                         <div class="page-action-btns">
                             <div class="pull-right">
                                 <button id="show-all-related-tables" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.toggleRelatedTables();" uib-tooltip="{{'Click here to ' + ((showEmptyRelatedTables) ? 'hide empty related sections.' : 'show empty related sections too.')}}" tooltip-placement="bottom">
-                                    <span class="chaise-btn-icon glyphicon glyphicon-th-list"></span>
+                                    <span class="chaise-btn-icon fa-solid fa-list"></span>
                                     <span>{{!showEmptyRelatedTables ? 'Show' : 'Hide'}} empty sections</span>
                                 </button>
                                 <!-- download CSV included by default -->
                                 <export reference="reference" style="position:relative;" disabled="!displayReady" csv-option-name="This record (CSV)"></export>
                                 <button ng-show="ctrl.canShowSharePopup()" ng-disabled="!displayReady || tuple == null || ctrl.waitingForSharePopup || !ctrl.canEnableSharePopup()" id="share" class="chaise-btn chaise-btn-primary" ng-click="ctrl.sharePopup()" uib-tooltip="Click here to show the share dialog." tooltip-placement="bottom">
-                                    <span class="chaise-btn-icon glyphicon" ng-class="{'glyphicon-refresh glyphicon-refresh-animate': ctrl.waitingForSharePopup, 'glyphicon-share': !ctrl.waitingForSharePopup}"></span>
+                                    <span class="chaise-btn-icon fa-solid" ng-class="{'fa-circle-notch fa-spin': ctrl.waitingForSharePopup, 'fa-share-from-square': !ctrl.waitingForSharePopup}"></span>
                                     <span>Share and cite</span>
                                 </button>
                             </div>
@@ -54,15 +54,15 @@
 
                                         <div class="title-buttons record-action-btns-container" ng-if="ctrl.canCreate() || ctrl.canEdit() || ctrl.canDelete()">
                                                 <button id="create-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.createRecord()" ng-disabled="::!ctrl.canCreate()" uib-tooltip="Click here to create a record." tooltip-placement="bottom">
-                                                    <span class="chaise-btn-icon glyphicon glyphicon-plus"></span>
+                                                    <span class="chaise-btn-icon fa-solid fa-plus"></span>
                                                     <span>Create</span>
                                                 </button>
                                                 <button id="copy-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.copyRecord()" ng-disabled="::!ctrl.canCreate()" uib-tooltip="Click here to create a copy of this record." tooltip-placement="bottom">
-                                                    <span class="chaise-btn-icon glyphicon glyphicon-copy"></span>
+                                                    <span class="chaise-btn-icon fa-regular fa-copy"></span>
                                                     <span>Copy</span>
                                                 </button>
                                                 <button id="edit-record" class="chaise-btn chaise-btn-primary" ng-click="::ctrl.editRecord()" ng-disabled="::!ctrl.canEdit()" uib-tooltip="Click here to edit this record." tooltip-placement="bottom">
-                                                    <span class="chaise-btn-icon glyphicon glyphicon-pencil"></span>
+                                                    <span class="chaise-btn-icon fa-solid fa-pencil"></span>
                                                     <span>Edit</span>
                                                 </button>
                                                 <delete-link id="delete-record" callback="::ctrl.deleteRecord()" display="button" icon="true" label="Delete" is-disabled="::!ctrl.canDelete()" uib-tooltip="Click here to delete this record." tooltip-placement="bottom"></delete-link>
@@ -139,7 +139,7 @@
                                             <span ng-class="{'chaise-icon-for-tooltip':  rtm.tableModel.reference.commentDisplay == 'tooltip' && rtm.tableModel.reference.comment}" ng-attr-uib-tooltip="{{::(rtm.tableModel.reference.commentDisplay == 'tooltip' && rtm.tableModel.reference.comment) ? rtm.tableModel.reference.comment : undefined}}" tooltip-placement="right">
                                                 <span ng-if="::rtm.displayname.isHTML" class="rt-displayname" ng-bind-html="::rtm.displayname.value"></span>
                                                 <span ng-if="::!rtm.displayname.isHTML" class="rt-displayname" ng-bind="::rtm.displayname.value"></span>
-                                                <span ng-if="rtm.tableModel.tableError" class="glyphicon glyphicon-alert" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
+                                                <span ng-if="rtm.tableModel.tableError" class="fa-solid fa-triangle-exclamation" uib-tooltip="{{ctrl.queryTimeoutTooltip}}" tooltip-placement="right"></span>
                                             </span>
                                         </div>
                                         <record-action-bar can-create="ctrl.canCreateRelated(rtm.tableModel.reference)" can-create-disabled="ctrl.canCreateRelatedDisabled(rtm.tableModel.reference)"
@@ -176,7 +176,7 @@
                 </div> <!-- end main-container -->
                 <div class="chaise-btn chaise-btn-primary" id="back-to-top" ng-click="scrollToTop()" ng-show="showTopBtn">
                     <!-- defined here because it hides the scrollbar when in the same container the scrollbar shows up in -->
-                    <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="glyphicon glyphicon-triangle-top"></i>
+                    <i uib-tooltip="Scroll To Top" tooltip-placement="left" class="fa-solid fa-caret-up"></i>
                 </div>
             </div>
         </div>
