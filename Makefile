@@ -185,8 +185,6 @@ test: test-ALL_TESTS
 
 # HTML files that need to be created
 HTML=viewer/index.html \
-	 recordedit/index.html \
-	 recordedit/mdHelp.html \
 	 lib/switchUserAccounts.html \
 	 $(DIST)/chaise-dependencies.html \
 	 help/index.html
@@ -195,7 +193,6 @@ HTML=viewer/index.html \
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
-	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
 	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
 	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
@@ -308,7 +305,6 @@ RSYNC_FILE_LIST=common \
 	help \
 	images \
 	lib \
-	recordedit \
 	scripts \
 	sitemap \
 	styles \
@@ -332,58 +328,6 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 # vendor files that will be treated externally in webpack
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
-
-# -------------------------- recordedit app -------------------------- #
-RECORDEDIT_ROOT=recordedit
-
-RECORDEDIT_JS_SOURCE=$(RECORDEDIT_ROOT)/recordEdit.app.js \
-	$(RECORDEDIT_ROOT)/model.js \
-	$(RECORDEDIT_ROOT)/form.controller.js \
-	$(RECORDEDIT_ROOT)/recordedit.utils.js
-
-RECORDEDIT_JS_SOURCE_MIN=recordedit.min.js
-$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN): $(RECORDEDIT_JS_SOURCE)
-	$(call bundle_js_files,$(RECORDEDIT_JS_SOURCE_MIN),$(RECORDEDIT_JS_SOURCE))
-
-# TODO why four different files for markdown? if inputswitch will be used everywhere, this should move to shared
-RECORDEDIT_JS_VENDOR_ASSET=$(COMMON)/vendor/MarkdownEditor/bootstrap-markdown.js \
-	$(COMMON)/vendor/MarkdownEditor/highlight.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-highlightjs.min.js \
-	$(COMMON)/vendor/MarkdownEditor/angular-markdown-editor.js \
-	$(COMMON)/vendor/mask.min.js \
-	$(COMMON)/vendor/spectrum/spectrum.min.js
-
-RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/github.min.css \
-	$(COMMON)/vendor/MarkdownEditor/styles/angular-markdown-editor.min.css \
-	$(COMMON)/vendor/spectrum/spectrum.min.css
-
-.make-recordedit-includes: $(BUILD_VERSION)
-	@> .make-recordedit-includes
-	$(info - creating .make-recordedit-includes)
-	@$(call add_css_link,.make-recordedit-includes,$(RECORDEDIT_CSS_SOURCE))
-	@$(call add_js_script,.make-recordedit-includes,$(SHARED_JS_VENDOR_BASE) $(RECORDEDIT_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORDEDIT_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-recordedit-includes)
-
-recordedit/index.html: recordedit/index.html.in .make-recordedit-includes
-	$(info - creating recordedit/index.html)
-	@$(call build_html,.make-recordedit-includes,recordedit/index.html)
-
-# -------------------------- markdown help app -------------------------- #
-MDHELP_JS_SOURCE=$(RECORDEDIT_ROOT)/mdHelp.app.js
-
-MDHELP_CSS_SOURCE=$(RECORDEDIT_ROOT)/mdHelpStyle.min.css
-
-.make-mdhelp-includes: $(BUILD_VERSION)
-	@> .make-mdhelp-includes
-	$(info - creating .make-mdhelp-includes)
-	@$(call add_css_link,.make-mdhelp-includes,$(MDHELP_CSS_SOURCE))
-	@$(call add_js_script,.make-mdhelp-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
-	@$(call add_ermrestjs_script,.make-mdhelp-includes)
-
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
-	$(info - creating recordedit/mdHelp.html)
-	@$(call build_html, .make-mdhelp-includes, recordedit/mdHelp.html)
 
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
