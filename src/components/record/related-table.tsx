@@ -17,6 +17,7 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // utils
 import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RelatedTableProps = {
   relatedModel: RecordRelatedModel
@@ -59,11 +60,10 @@ const RelatedTableInner = ({
   const usedRef = relatedModel.initialReference;
   const displayCustomMode = displayCustomModeRelated(relatedModel);
 
-  const contaienrClassName = relatedModel.isInline && relatedModel.isTableDisplay ? '' : '';
-
   return (
-    <div className={contaienrClassName}>
-      {usedRef.commentDisplay === 'inline' && usedRef.comment &&
+    <div>
+      {/* in case of inline, the comments are already handled */}
+      {!relatedModel.isInline && usedRef.commentDisplay === 'inline' && usedRef.comment &&
         <div className='inline-tooltip'>{usedRef.comment}</div>
       }
       {displayCustomMode &&
@@ -79,7 +79,7 @@ const RelatedTableInner = ({
       }
       {/* TODO the following was span for inline, but shouldn't matter */}
       {/* TODO related-table and related-table-accordion classes removed  */}
-      <div className={`related-table-content ${displayCustomMode ? 'forced-hidden' : ''}`} style={{ display: displayCustomMode ? 'none' : 'block' }}>
+      <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <RecordsetTable
           config={relatedModel.recordsetProps.config}

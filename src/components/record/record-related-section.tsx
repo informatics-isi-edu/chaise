@@ -4,7 +4,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record-related-section.scss';
 import Accordion from 'react-bootstrap/Accordion';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
@@ -25,6 +24,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RelatedTableHeaderProps = {
   relatedModel: RecordRelatedModel
@@ -149,7 +149,7 @@ const RecordRelatedSection = (): JSX.Element => {
           <Accordion.Item
             key={`record-related-${rm.index}`}
             eventKey={rm.index + ''}
-            className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? 'forced-hidden' : ''}`}
+            className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
             // TODO add id
             as='div'
           >

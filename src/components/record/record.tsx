@@ -92,9 +92,13 @@ const RecordInner = ({
 
   /**
    * State variable to show or hide side panel
-   * TODO the default should be adjusted
+   * by default it will be closed if any of the following is true:
+   * - chaise-config's hideTableOfContents is set to true
+   * - reference's collapseToc is true
    */
-  const [showPanel, setShowPanel] = useState<boolean>(false);
+  const [showPanel, setShowPanel] = useState<boolean>(() => (
+    !(ConfigService.chaiseConfig.hideTableOfContents === true || reference.display.collapseToc === true)
+  ));
 
   // when object is null, hide the modal
   // object is the props for the the modal
