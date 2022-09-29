@@ -159,7 +159,7 @@ const TableRow = ({
   /**
    * The JS.Elements that are used for displaying messages
    */
-  const parentTable = parentPageTuple ? <code><DisplayValue value={parentPageTuple.displayname}></DisplayValue></code> : <></>;
+  const parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
   const currentTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;
   const currentTuple = <code><DisplayValue value={tuple.displayname}></DisplayValue></code>;
 

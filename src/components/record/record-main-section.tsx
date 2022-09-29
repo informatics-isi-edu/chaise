@@ -19,6 +19,7 @@ import { RecordColumnModel } from '@isrd-isi-edu/chaise/src/models/record';
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { canShowInlineRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
@@ -60,6 +61,7 @@ const RecordMainSection = (): JSX.Element => {
       const hasError = showError(cm);
       const hasInitialized = !!cm.relatedModel && cm.relatedModel.tableMarkdownContentInitialized &&
         cm.relatedModel.recordsetState.isInitialized;
+      const idSafeDisplayname = makeSafeIdAttr(cm.column.displayname.value);
 
       const rowClassName = ['row'];
       if (!canShow(cm)) {
@@ -105,7 +107,10 @@ const RecordMainSection = (): JSX.Element => {
             </ConditionalWrapper>
           </td>
           {/* --------- entity value ---------- */}
-          <td className={entityValueClassName.join(' ')} colSpan={hideHeader ? 2 : 1}>
+          <td
+            className={entityValueClassName.join(' ')} colSpan={hideHeader ? 2 : 1}
+            id={`entity-${idSafeDisplayname}`}
+          >
             {!cm.relatedModel && !hasError &&
               <DisplayValue addClass={true} value={recordValues[cm.index]} />
             }
@@ -116,7 +121,10 @@ const RecordMainSection = (): JSX.Element => {
                   {cm.column.commentDisplay === 'inline' && cm.column.comment &&
                     <div className='inline-tooltip'>{cm.column.comment}</div>
                   }
-                  <RelatedTable relatedModel={cm.relatedModel} />
+                  <RelatedTable
+                    relatedModel={cm.relatedModel}
+                    tableContainerID={`rt-${idSafeDisplayname}`}
+                  />
                 </div>
               </span>
             }

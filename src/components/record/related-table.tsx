@@ -20,11 +20,13 @@ import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RelatedTableProps = {
-  relatedModel: RecordRelatedModel
+  relatedModel: RecordRelatedModel,
+  tableContainerID: string
 };
 
 const RelatedTable = ({
-  relatedModel
+  relatedModel,
+  tableContainerID
 }: RelatedTableProps): JSX.Element => {
   return (
     <RecordsetProvider
@@ -32,12 +34,13 @@ const RelatedTable = ({
       // TODO the following most probably should go somewhere else:
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} />
+      <RelatedTableInner relatedModel={relatedModel} tableContainerID={tableContainerID} />
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
+  tableContainerID
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
@@ -81,10 +84,12 @@ const RelatedTableInner = ({
       {/* TODO related-table and related-table-accordion classes removed  */}
       <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
-        <RecordsetTable
-          config={relatedModel.recordsetProps.config}
-          initialSortObject={usedRef.location.sortObject}
-        />
+        <div id={tableContainerID}>
+          <RecordsetTable
+            config={relatedModel.recordsetProps.config}
+            initialSortObject={usedRef.location.sortObject}
+          />
+        </div>
       </div>
     </div >
   )

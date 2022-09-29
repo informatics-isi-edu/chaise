@@ -1,10 +1,6 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_record-related-section.scss';
-
 // components
-import Accordion from 'react-bootstrap/Accordion';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Spinner from 'react-bootstrap/Spinner';
@@ -12,19 +8,15 @@ import Tooltip from 'react-bootstrap/Tooltip';
 
 // hooks
 import { useRef, useState } from 'react';
-import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RelatedTableHeaderProps = {
   relatedModel: RecordRelatedModel
@@ -40,7 +32,7 @@ const RelatedTableHeader = ({
   /**
    * state variable to control whether to show tooltip or not
    */
-  const [show, setShow] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   /**
    * Function to check the text overflow.
@@ -78,10 +70,10 @@ const RelatedTableHeader = ({
             const isOverflow = isTextOverflow(contentRef.current);
 
             // If either text overflow or hasTooltip is true, show tooltip to right of the content
-            setShow((isOverflow || hasTooltip) && nextshow);
+            setShowTooltip((isOverflow || hasTooltip) && nextshow);
           }
         }}
-        show={show}
+        show={showTooltip}
       >
         <div className='rt-displayname' ref={contentRef}>
           {renderedDisplayname}
@@ -109,64 +101,4 @@ const RelatedTableHeader = ({
   );
 };
 
-/**
- * Returns Related Section of the record page.
- */
-const RecordRelatedSection = (): JSX.Element => {
-
-  const { relatedModels, showEmptySections } = useRecord();
-
-  // by default open all the sections
-  const [openSections, setOpenSections] = useState<string[]>(Array.from(Array(relatedModels.length), (e, i) => `${i}`));
-
-  const toggleSection = (relatedModel: RecordRelatedModel) => {
-    setOpenSections((currState: string[]) => {
-      const currIndex = currState.indexOf(relatedModel.index.toString());
-      const isOpen = (currIndex !== -1);
-
-      const action = isOpen ? LogActions.CLOSE : LogActions.OPEN;
-
-      // TODO shouldn't we use logRecordCleintAction here?
-      // TODO should technically be based on the latest reference
-      // log the action
-      // LogService.logClientAction({
-      //   action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
-      //   stack: relatedModel.recordsetProps.logInfo.logStack
-      // }, relatedModel.initialReference.defaultLogInfo);
-
-      return isOpen ? [...currState.slice(0, currIndex), ...currState.slice(currIndex + 1)] : currState.concat(relatedModel.index.toString());
-    });
-  };
-
-  if (relatedModels.length === 0) {
-    return <></>;
-  }
-
-  return (
-    <div className='related-section-container'>
-      <Accordion className='panel-group' activeKey={openSections} alwaysOpen >
-        {relatedModels.map((rm: RecordRelatedModel) => (
-          <Accordion.Item
-            key={`record-related-${rm.index}`}
-            eventKey={rm.index + ''}
-            className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
-            // TODO add id
-            as='div'
-          >
-            <Accordion.Header
-              as='div' className='panel-heading panel-title'
-              onClick={() => toggleSection(rm)}
-            >
-              <RelatedTableHeader relatedModel={rm} />
-            </Accordion.Header>
-            <Accordion.Body>
-              <RelatedTable relatedModel={rm} />
-            </Accordion.Body>
-          </Accordion.Item>
-        ))}
-      </Accordion>
-    </div>
-  );
-};
-
-export default RecordRelatedSection;
+export default RelatedTableHeader;

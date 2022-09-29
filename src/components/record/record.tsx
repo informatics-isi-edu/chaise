@@ -2,6 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record.scss';
 
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
+import Accordion from 'react-bootstrap/Accordion';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
@@ -9,9 +10,10 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import RecordMainSection from '@isrd-isi-edu/chaise/src/components/record/record-main-section';
-import RecordRelatedSection from '@isrd-isi-edu/chaise/src/components/record/record-related-section';
 import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
+import RelatedTableHeader from '@isrd-isi-edu/chaise/src/components/record/related-table-header';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -21,6 +23,7 @@ import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -36,6 +39,9 @@ import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 export type RecordProps = {
   /**
@@ -87,6 +93,7 @@ const RecordInner = ({
     page,
     readMainEntity,
     reference,
+    relatedModels,
     logRecordClientAction, getRecordLogAction, getRecordLogStack,
   } = useRecord();
 
@@ -109,6 +116,9 @@ const RecordInner = ({
     message: JSX.Element
   } | null>(null);
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
+
+  // by default open all the sections
+  const [openRelatedSections, setOpenRelatedSections] = useState<string[]>(Array.from(Array(reference.related.length), (e, i) => `${i}`));
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
 
@@ -247,6 +257,25 @@ const RecordInner = ({
     setShowPanel(!showPanel);
   };
 
+  const toggleRelatedSection = (relatedModel: RecordRelatedModel) => {
+    setOpenRelatedSections((currState: string[]) => {
+      const currIndex = currState.indexOf(relatedModel.index.toString());
+      const isOpen = (currIndex !== -1);
+
+      const action = isOpen ? LogActions.CLOSE : LogActions.OPEN;
+
+      // TODO shouldn't we use logRecordCleintAction here?
+      // TODO should technically be based on the latest reference
+      // log the action
+      // LogService.logClientAction({
+      //   action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
+      //   stack: relatedModel.recordsetProps.logInfo.logStack
+      // }, relatedModel.initialReference.defaultLogInfo);
+
+      return isOpen ? [...currState.slice(0, currIndex), ...currState.slice(currIndex + 1)] : currState.concat(relatedModel.index.toString());
+    });
+  };
+
   const scrollMainContainerToTop = () => {
     if (!mainContainer.current) return;
 
@@ -254,7 +283,7 @@ const RecordInner = ({
       top: 0,
       behavior: 'smooth',
     });
-  }
+  };
 
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
@@ -278,7 +307,35 @@ const RecordInner = ({
       <div className='main-body'>
         {/* TODO there's no reason to have these two comps, needs discussion */}
         <RecordMainSection />
-        <RecordRelatedSection />
+        {/* related section */}
+        {relatedModels.length > 0 &&
+          <div className='related-section-container'>
+            <Accordion className='panel-group' activeKey={openRelatedSections} alwaysOpen >
+              {relatedModels.map((rm: RecordRelatedModel) => (
+                <Accordion.Item
+                  key={`record-related-${rm.index}`}
+                  eventKey={rm.index + ''}
+                  className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
+                  // TODO add id
+                  as='div'
+                >
+                  <Accordion.Header
+                    as='div' className='panel-heading panel-title'
+                    onClick={() => toggleRelatedSection(rm)}
+                  >
+                    <RelatedTableHeader relatedModel={rm} />
+                  </Accordion.Header>
+                  <Accordion.Body>
+                    <RelatedTable
+                      relatedModel={rm}
+                      tableContainerID={`rt-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
+                    />
+                  </Accordion.Body>
+                </Accordion.Item>
+              ))}
+            </Accordion>
+          </div>
+        }
         {/* the related-spinner must be inside the main-body to ensure proper positioning */}
         {errors.length === 0 && showRelatedSectionSpinner &&
           <ChaiseSpinner className='related-spinner bottom-left-spinner' spinnerSize='sm' />
@@ -291,7 +348,7 @@ const RecordInner = ({
           </ChaiseTooltip>
         }
       </div>
-      <Footer />
+      {initialized && !showRelatedSectionSpinner && <Footer />}
     </div>
   );
 
