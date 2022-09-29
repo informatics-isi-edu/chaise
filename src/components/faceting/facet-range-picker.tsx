@@ -994,10 +994,25 @@ const FacetRangePicker = ({
     return;
   }
 
+  // return (
+  //   <div className='range-picker' ref={rangePickerContainer}>
+  //     {!facetModel.facetHasTimeoutError && renderPickerContainer()}
+  //     <RangeInputs
+  //       inputType={facetColumn.column.type.rootName}
+  //       classes='facet-range-input'
+  //       addRange={addFilter}
+  //       absMin={compState.rangeOptions.absMin}
+  //       absMax={compState.rangeOptions.absMax}
+  //       disabled={facetColumn.hasNotNullFilter}
+  //     />
+  //     {renderHistogram()}
+  //   </div>
+  // )
   return (
     <div className='range-picker' ref={rangePickerContainer}>
       {!facetModel.facetHasTimeoutError && renderPickerContainer()}
       <RangeInputs
+        name={`${facetIndex}`}
         inputType={facetColumn.column.type.rootName}
         classes='facet-range-input'
         addRange={addFilter}
@@ -1007,7 +1022,10 @@ const FacetRangePicker = ({
       />
       {renderHistogram()}
     </div>
-  )
+  );
 }
+
+
+
 
 export default FacetRangePicker;

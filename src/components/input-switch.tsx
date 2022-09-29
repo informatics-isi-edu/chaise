@@ -1,161 +1,406 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
-
-// components
 import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { useEffect, useState } from 'react';
+import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
+import { useFormContext, useController } from "react-hook-form";
 
-// models
-import { RangeOption,TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
+/**
+ * Things to consider'
+ * 1. need to move the defaultvalue logic to the HOC component
+ * 2. how to handle validate on change for each field
+ * 3. how to handle merging validation logic for date n time inputs for type timestamp
+ * 4. handle integrating these fields into a formik component
+ * 5. how to create a HOC that handles/manages multiple forms  
+ */
 
-type DateTimePickerProps = {
-  /**
-   * classes for styling the date input element
-   */
-  dateClasses?: string,
-  /**
-   * classes for styling the time input element
-   */
-  timeClasses?: string,
-  /**
-   * classes for styling the clear button in the date input
-   */
-  dateClearClasses?: string,
-  /**
-   * classes for styling the clear button in the time input
-   */
-  timeClearClasses?: string,
-  /**
-   * placeholder for the date input of datetime
-   */
-  datePlaceholder?: string,
-  /**
-   * placeholder for the time input of datetime
-   */
-  timePlaceholder?: string,
-  /**
-   * the default date value being used
-   */
-  value?: TimeStamp,
-  /**
-   * the react ref object referencing the date input element
-   */
-  dateRef?: React.RefObject<HTMLInputElement>,
-  /**
-   * the react ref object referencing the time input element
-   */
-  timeRef?: React.RefObject<HTMLInputElement>,
-  /**
-   * flag for showing clear button on date field
-   */
-  showClearDateBtn: boolean,
-  /**
-   * flag for showing clear button on time field
-   */
-  showClearTimeBtn: boolean,
-  /**
-   * flag for disbaling the inputs
-   */
-  disableInput?: boolean,
-  /**
-   * the handler function called on input change
-   */
-  handleChange: (() => void)
+const INTEGER_REGEXP = /^\-?\d+$/;
+
+const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
+
+const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm';
+
+const DATE_FORMAT = 'YYYY-MM-DD';
+
+const integerFieldValidation = {
+  value:  INTEGER_REGEXP,
+  message: 'Please enter a valid integer value'
 };
 
-const DateTimePicker = ({ 
-  dateClasses, 
-  timeClasses, 
-  dateClearClasses,
-  timeClearClasses,
-  datePlaceholder,
-  timePlaceholder,
-  value, 
-  handleChange, 
-  dateRef,
-  timeRef, 
-  showClearDateBtn, 
-  showClearTimeBtn,
-  disableInput,
-}: DateTimePickerProps): JSX.Element => {
-
-  const handleTimeClear = () => {
-    if (timeRef?.current) timeRef.current.value = '';
-    handleChange();
-  }
-
-  const handleDateClear = () => {
-    if (dateRef?.current) dateRef.current.value = '';
-    handleChange();
-  }
-
-  return (
-    <div className='input-switch-datetime'>
-      <div className={'input-switch-date chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
-        <input className={dateClasses} type='date' ref={dateRef} disabled={disableInput}
-          placeholder={datePlaceholder} min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} onChange={handleChange} required />
-        <ClearInputBtn
-          btnClassName={'input-switch-clear' + (dateClearClasses ? ' ' + dateClearClasses : '') }
-          clickCallback={handleDateClear}
-          show={showClearDateBtn}
-        />
-      </div>
-      <div className={'input-switch-time chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
-        <input className={timeClasses} type='time' ref={timeRef} disabled={disableInput}
-          placeholder={timePlaceholder} min='00:00:00' max='23:59:59' step='1' defaultValue={value?.time} onChange={handleChange} required />
-        <ClearInputBtn
-          btnClassName={'input-switch-clear' + (timeClearClasses ? ' ' + timeClearClasses : '') }
-          clickCallback={handleTimeClear}
-          show={showClearTimeBtn}
-        />
-      </div>
-    </div>
-  );
+const numericFieldValidation = {
+  value: FLOAT_REGEXP,
+  message: 'Please enter a valid decimal value'
 };
 
-type InputSwitchProps = {
+const dateFieldValidation = {
+  value: (value: string) => {
+    const date = windowRef.moment(value, DATE_FORMAT, true);
+    return date.isValid();
+  },
+  message: 'Please enter a valid date value'
+};
+
+const timestampFieldValidation = {
+  validate: (value: string) => {
+    const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
+    return !timestamp.isValid();
+  },
+  message: 'Please enter a valid date and time value',
+};
+
+const validationFunctionMap : { 
+  [key: string]: any;
+} = {
+  'int': integerFieldValidation,
+  'float': numericFieldValidation,
+  'numeric': numericFieldValidation,
+  'date': dateFieldValidation,
+  'timestamp': timestampFieldValidation,
+};
+
+type NumericFieldProps = {
+  /**
+   *  the name of the field
+   */
+  name: string,
+  /**
+   * the type of numeric field - int | float/numeric
+   */
+  type: string, 
   /** 
-   * placeholder text for inputs
-  */
-  placeholder?: RangeOption,
-  /**
-   * placeholder for the date input of datetime
+   * placeholder text for int and float input types
    */
-  datePlaceholder?: string,
-  /**
-   * placeholder for the time input of datetime
-   */
-  timePlaceholder?: string,
+  placeholder?: string,
   /**
    * classes for styling the input element
    */
   classes?: string,
   /**
-   * classes for styling the date input element
+   * classes for styling the clear button
    */
-  dateClasses?: string,
+  clearClasses?: string
   /**
-  * classes for styling the time input element
-  */
+   * flag for disabling the input
+   */
+  disableInput?: boolean,
+  /**
+   * flag to show error below the input switch component
+   */
+  displayErrors?: boolean,
+  /**
+   * the handler function called on input change
+   */
+  onFieldChange?: ((value: string) => void)
+};
+
+const NumericField = ({ 
+  name, 
+  type, 
+  placeholder, 
+  classes,
+  clearClasses,
+  disableInput,
+  displayErrors,
+  value,
+  onFieldChange,
+}: NumericFieldProps): JSX.Element => {
+
+  const { setValue, control } = useFormContext();
+
+  const registerOptions = {
+    required: false,
+    pattern: validationFunctionMap[type],
+  };
+
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
+
+  const fieldValue = formInput?.field?.value;
+
+  const fieldState = formInput?.fieldState;
+
+  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
+  
+  const { error, isTouched } = fieldState;
+  
+  const clearInput = () => setValue(name, '');
+
+  useEffect(()=>{
+    if(onFieldChange){
+      onFieldChange(fieldValue);
+    }
+
+    if(showClear!=Boolean(fieldValue)){
+      setShowClear(Boolean(fieldValue));
+    }
+  }, [fieldValue]);
+
+  useEffect(() => {
+    setValue(name, value);
+  }, [value])
+
+  return (
+    <>
+      <div className={`chaise-input-control has-feedback input-switch-numeric ${disableInput ? ' input-disabled' : ''}`}>
+        <input placeholder={placeholder} className={`${classes} input-switch`} {...formInput.field} />
+        <ClearInputBtn
+          btnClassName={`${clearClasses} input-switch-clear`}
+          clickCallback={clearInput}
+          show={showClear}
+        />
+      </div>
+      { displayErrors && isTouched && error?.message && <span className='input-switch-error'>{error.message}</span> }
+    </>
+  );
+};
+
+type DateFieldProps = {
+  /**
+   *  the name of the field
+   */
+  name: string,
+  /**
+   * the default date value
+   */
+  value: RangeOption,
+  /**
+   * classes for styling the input element
+   */
+  classes?: string,
+  /**
+   * classes for styling the clear button
+   */
+  clearClasses?: string
+  /**
+   * flag for disabling the input
+   */
+  disableInput?: boolean,
+  /**
+   * flag to show error below the input switch component
+   */
+  displayErrors?: boolean,
+  /**
+   * the handler function called on input change
+   */
+  onFieldChange?: ((value: string) => void)
+};
+
+const DateField = ({ 
+  name, 
+  classes, 
+  clearClasses,
+  disableInput,
+  displayErrors,
+  value,
+  onFieldChange,
+}: DateFieldProps): JSX.Element => {
+
+  const { setValue, control } = useFormContext();
+
+  const registerOptions = {
+    required: false,
+    validate: validationFunctionMap['date'],
+  };
+
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
+
+  const fieldValue = formInput?.field?.value;
+
+  const fieldState = formInput?.fieldState;
+
+  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
+  
+  const { error, isTouched } = fieldState;
+
+  const clearInput = () => setValue(name, '');
+
+  useEffect(()=>{
+    if(onFieldChange){
+      onFieldChange(fieldValue);
+    }
+
+    if(showClear!=Boolean(fieldValue)){
+      setShowClear(Boolean(fieldValue));
+    }
+  }, [fieldValue]);
+
+
+  useEffect(() => {
+    console.log('value change date useEffect triggered', value, name);
+    setValue(name, value);
+  }, [value])
+
+  return (
+    <>
+      <div className={`chaise-input-control has-feedback input-switch-date ${disableInput ? ' input-disabled' : ''}`}>
+        <input type='date' className={`${classes} input-switch`} step='1' pattern='\d{4}-\d{2}-\d{2}'
+        min='1970-01-01' max='2999-12-31' {...formInput.field} />
+        <ClearInputBtn
+          btnClassName={`${clearClasses} input-switch-clear`}
+          clickCallback={clearInput}
+          show={showClear}
+        />
+      </div>
+      { displayErrors && isTouched && error?.message && <span className='input-switch-error'>{error.message}</span> }
+    </>
+  );
+};
+
+type TimestampFieldProps = {
+  /**
+   *  the name of the field
+   */
+  name: string,
+  /** 
+   * placeholder text for numeric and date fields
+   */
+  placeholder?: string,
+  /**
+   * classes for styling the input date element
+   */
+  classes?: string,
+  /**
+   * classes for styling the input time element
+   */
   timeClasses?: string,
   /**
-   * classes for styling the clear button in the input
+   * classes for styling the clear button
    */
-  clearClasses?: string,
+  clearClasses?: string
   /**
-   * classes for styling the clear button in the date input
+   * classes for styling the clear button for time field
    */
-  dateClearClasses?: string,
+  clearTimeClasses?: string
   /**
-   * classes for styling the clear button in the time input
+   * the default date value
    */
-  timeClearClasses?: string,
-  /** 
-   * the react ref object referencing the input element
-  */
-  reference?: React.RefObject<HTMLInputElement>,
-  /** 
-   * the react ref object referencing the input time element in case of timestamp type
-  */
-  timeRef?: React.RefObject<HTMLInputElement>,
+  value: TimeStamp,
+  /**
+   * flag for disabling the input
+   */
+  disableInput?: boolean,
+  /**
+   * the handler function called on input change
+   */
+  onFieldChange?: ((value: string) => void)
+};
+
+const TimestampField = ({ 
+  name, 
+  value, 
+  classes, 
+  timeClasses, 
+  clearClasses,
+  clearTimeClasses,
+  disableInput,
+  onFieldChange 
+}: TimestampFieldProps): JSX.Element => {
+
+  const { 
+    register,
+    formState,
+    getFieldState,
+    setValue,
+    getValues,
+    watch 
+  } = useFormContext();
+
+  useEffect(() => {
+    
+    const sub = watch((data, options) => {
+      if (options.name in [`${name}-date`, `${name}-date`]) {
+        const dateVal = data[`${name}-date`];
+        let timeVal = data[`${name}-time`];
+        if (dateVal && !timeVal) timeVal = '00:00';
+        setValue(name, `${dateVal}T${timeVal}`); 
+      }
+
+      if (options.name === `${name}-date`) {
+        setValue('lastName', 'bill')
+      }
+    });
+
+
+    return () => sub.unsubscribe();
+  }, [watch]);
+
+  const registerOptions = {
+    disabled: disableInput,
+    validate: validationFunctionMap['timestamp'],
+  };
+
+  const registerOptionsDate = {
+    disabled: disableInput,
+  };
+
+  const registerOptionsTime = {
+    disabled: disableInput,
+  };
+
+  const formInput = register(name, registerOptions); 
+
+  const formInputDate = register(`${name}-date`, registerOptionsDate); 
+
+  const formInputTime = register(`${name}-time`, registerOptionsTime); 
+
+  const { error } = getFieldState(name, formState);
+
+  const { isTouched: isDateTouched } = getFieldState(`${name}-date`, formState);
+
+  const { isTouched: isTimeTouched } = getFieldState(`${name}-time`, formState);
+
+  const clearDate = () => setValue(`${name}-date`, '');
+  
+  const clearTime = () => setValue(`${name}-time`, '');
+
+  const fieldValue = getValues(name);
+
+  const dateFieldValue = getValues(`${name}-date`);
+
+  const timeFieldValue = getValues(`${name}-time`);
+
+  useEffect(() => {
+    onFieldChange && onFieldChange(fieldValue);
+  }, [fieldValue]);
+ 
+  return (
+    <>
+      <div className='input-switch-datetime'>
+        <div className={`chaise-input-control has-feedback input-switch-date ${disableInput ? ' input-disabled' : ''}`}>
+          <input className={`${classes} input-switch`} type='date' placeholder='YYYY-MM-DD'
+          min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} disabled={disableInput} {...formInputDate}/>
+          <ClearInputBtn
+            btnClassName={`${clearClasses} input-switch-clear`}
+            clickCallback={clearDate}
+            show={dateFieldValue}
+          />
+        </div>
+        <div className={`chaise-input-control has-feedback input-switch-time ${disableInput ? ' input-disabled' : ''}`}>
+          <input className={`${timeClasses} input-switch`} type='time' placeholder='HH:MM' 
+          min='00:00' max='23:59' defaultValue='00:00' disabled={disableInput} {...formInputTime}/>
+          <ClearInputBtn
+            btnClassName={`${clearTimeClasses} input-switch-clear`}
+            clickCallback={clearTime}
+            show={timeFieldValue}
+          />
+        </div>
+        <input type='hidden' {...formInput}/>
+      </div>
+      { (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error'>{error.message}</span> }
+    </>
+  );
+};
+
+
+
+type InputSwitchProps = {
   /**
    * the type of input :
    * int
@@ -165,118 +410,104 @@ type InputSwitchProps = {
    * timestamp
    */
   type: string,
+  /**
+   *  the name of the field
+   */
+  name: string,
+  /** 
+   * placeholder text for numeric and date fields
+   */
+  placeholder?: RangeOption,
+  /**
+   * classes for styling the numeric and date input element
+   */
+  classes?: string,
+  /**
+   * classes for styling the time input element
+   */
+  timeClasses?: string,
+  /**
+   * classes for styling the clear button
+   */
+  clearClasses?: string
+  /**
+   * classes for styling the clear button for time field
+   */
+  clearTimeClasses?: string
   /** 
    * the default date value being used in case of date and timestamp types
    */
-  value?: RangeOption,
-  /**
-   * flag for showing clear button on input field
-   */
-  showClearBtn: boolean,
-  /**
-   * flag for showing clear button on time field in case type is timestamp
-   */
-  showClearTimeBtn: boolean,
+  value: RangeOption,
   /**
    * flag for disabling the input
    */
   disableInput?: boolean,
   /**
+   * flag to show error below the input switch component
+   */
+  displayErrors?: boolean,
+  /**
    * the handler function called on input change
    */
-  handleChange: (() => void),
+  onFieldChange?: ((value: string) => void)
 };
 
 const InputSwitch = ({ 
+  type,
+  name, 
   placeholder = 'Enter',
-  datePlaceholder= 'YYYY-MM-DD',
-  timePlaceholder= 'HH:mm:ss',
-  classes = '', 
-  dateClasses = '', 
-  timeClasses = '', 
-  reference, 
-  timeRef,
-  type, 
-  value, 
-  handleChange, 
-  clearClasses = '', 
-  dateClearClasses = '', 
-  timeClearClasses = '', 
-  showClearBtn, 
-  showClearTimeBtn,
-  disableInput
+  classes = '',
+  timeClasses = '',
+  clearClasses,
+  clearTimeClasses,
+  value,
+  disableInput,
+  displayErrors = true,
+  onFieldChange 
 }: InputSwitchProps): JSX.Element | null => {
-
-  const clearInput = () => {
-    if (reference?.current) reference.current.value = '';
-    handleChange();
-  }
 
   return (() => {
     switch (type) {
       case 'timestamp':
-        return <DateTimePicker 
-          dateClasses={`${dateClasses} input-switch`} 
-          timeClasses={`${timeClasses} input-switch`} 
-          value={value as TimeStamp} 
-          dateRef={reference}
-          timeRef={timeRef} 
-          dateClearClasses={dateClearClasses}
-          timeClearClasses={timeClearClasses}
-          showClearDateBtn={showClearBtn} 
-          showClearTimeBtn={showClearTimeBtn} 
-          handleChange={handleChange} 
+        return null
+        return <TimestampField 
+          name={name} 
+          classes={classes} 
+          timeClasses={timeClasses} 
+          clearClasses={clearClasses}
+          clearTimeClasses={clearTimeClasses}
+          value={value as TimeStamp}
           disableInput={disableInput}
-          datePlaceholder={datePlaceholder}
-          timePlaceholder={timePlaceholder}
+          onFieldChange={onFieldChange} 
         />
       case 'int':
       case 'float':
       case 'numeric':
-        return (
-          <div className={'input-switch-date chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
-            <input 
-              className={`${classes} input-switch`} 
-              defaultValue={value as number} 
-              onChange={handleChange} 
-              placeholder={placeholder as string} 
-              ref={reference} 
-              disabled={disableInput}
-            />
-            <ClearInputBtn
-              btnClassName={'input-switch-clear' + (clearClasses ? ' ' + clearClasses : '') }
-              clickCallback={clearInput}
-              show={showClearBtn}
-            />
-          </div>
-        );
+        return <NumericField 
+          type={type}
+          name={name}   
+          displayErrors={displayErrors} 
+          classes={classes} 
+          value={value}
+          placeholder={placeholder} 
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange} 
+        />
       case 'date':
-        return (
-          <div className={'input-switch-date chaise-input-control has-feedback' + (disableInput ? ' input-disabled' : '')}>
-            <input 
-              className={`${classes} input-switch`} 
-              defaultValue={value as string}
-              onChange={handleChange} 
-              pattern='\d{4}-\d{2}-\d{2}' 
-              placeholder={placeholder as string}
-              ref={reference} 
-              required
-              step='1' 
-              type='date' 
-              disabled={disableInput}
-            />
-            <ClearInputBtn
-              btnClassName={'input-switch-clear' + (clearClasses ? ' ' + clearClasses : '') }
-              clickCallback={clearInput}
-              show={showClearBtn}
-            />
-          </div>
-        );
+        return null;
+        return <DateField 
+          name={name} 
+          classes={classes}
+          clearClasses={clearClasses}
+          value={value}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange} 
+        />
       default:
         return null
     }
   })();
 };
-
 
 export default InputSwitch;

@@ -8,6 +8,14 @@
     flex-wrap: wrap;
     margin-top: -5px;
 
+    .range-input-form{
+        display: flex;
+        flex-direction: row;
+        align-items: end;
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
     .range-input {
         width: 40%;
         display: flex;
