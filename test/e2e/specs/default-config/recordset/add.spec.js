@@ -89,7 +89,7 @@ describe('Recordset add record,', function() {
 
     var allWindows;
     it("click on the add button should open a new tab to recordedit", function(done) {
-
+        var rows;
         var EC = protractor.ExpectedConditions;
         var addRecordLink = chaisePage.recordsetPage.getAddRecordLink();
         browser.wait(EC.presenceOf(addRecordLink), browser.params.defaultTimeout);
@@ -117,14 +117,14 @@ describe('Recordset add record,', function() {
         }).then(function() {
             return chaisePage.recordsetPageReady();
         }).then(function() {
-            var rows = chaisePage.recordsetPage.getRows();
+            rows = chaisePage.recordsetPage.getRows();
 
-            browser.wait(function () {
+            return browser.wait(function () {
                 return rows.count().then(function (ct) {
                     return (ct == 5)
                 });
             });
-            
+        }).then(function () {
             return rows.get(0).all(by.css(".select-action-button"));
         }).then(function(selectButtons) {
             selectButtons[0].click();
@@ -163,13 +163,18 @@ describe('Recordset add record,', function() {
         }).then(function() {
             return chaisePage.recordsetPage.getPageTitleElement().click();
         }).then(function () {
+            return browser.driver.manage().getCookies();
+        }).then(function (allCookies) {
+            allCookies.forEach(function (cookie) {
+                console.log(cookie.name + " -> " + cookie.value);
+            });
 
-            browser.wait(function() {
+            return browser.wait(function() {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                     return (ct == testParams.num_rows+1);
                 });
             }, browser.params.defaultTimeout);
-
+        }).then(function () {
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(testParams.num_rows+1);
