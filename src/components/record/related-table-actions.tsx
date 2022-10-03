@@ -45,7 +45,7 @@ const RelatedTableActions = ({
 
   const { validateSessionBeforeMutation } = useAuthn();
   const { addAlert } = useAlert();
-  const { dispatchError  } = useError();
+  const { dispatchError } = useError();
 
   const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(null);
   const [submitPureBinaryCB, setAddPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
@@ -202,7 +202,7 @@ const RelatedTableActions = ({
           updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
         }).catch((error: any) => {
           // TODO ask josh about validateSession
-          dispatchError({error: error, isDismissible: true});
+          dispatchError({ error: error, isDismissible: true });
         }).finally(() => setShowPureBinarySpinner(false));
       });
     }
@@ -263,12 +263,30 @@ const RelatedTableActions = ({
         placement='top'
         tooltip={tooltip}
       >
-        <div className='chaise-btn chaise-btn-secondary toggle-display-link' onClick={onToggleDisplayMode}>
+        <button className='chaise-btn chaise-btn-secondary toggle-display-link' onClick={onToggleDisplayMode}>
           <span className={`chaise-btn-icon ${icon}`}></span>
           <span>{label}</span>
-        </div>
+        </button>
       </ChaiseTooltip>
     )
+  };
+
+  const renderCreateBtnTooltip = () => {
+    if (relatedModel.canCreateDisabled) {
+      const keyset = relatedModel.initialReference.origFKR.key.colset.columns;
+      let keysetString = '';
+      keyset.forEach(function (col: any, idx: number) {
+        keysetString += col.name;
+        if (idx + 1 !== keyset.length) keysetString += ', ';
+      });
+
+      return <span>
+        {relatedModel.isPureBinary ? 'Linking ' : 'Adding '}
+        to {currentTable} is disabled until <code>{keysetString}</code> in {mainTable} is set.
+      </span>
+    }
+
+    return <span>Connect {currentTable} records to this {mainTable}.</span>;
   };
 
   return (
@@ -277,12 +295,16 @@ const RelatedTableActions = ({
         {relatedModel.canCreate &&
           <ChaiseTooltip
             placement='top'
-            tooltip={<span>Connect {currentTable} records to this {mainTable}.</span>}
+            tooltip={renderCreateBtnTooltip()}
           >
-            <div className='chaise-btn chaise-btn-secondary add-records-link' onClick={onCreate}>
+            <button
+              className='chaise-btn chaise-btn-secondary add-records-link'
+              onClick={onCreate}
+              disabled={relatedModel.canCreateDisabled}
+            >
               <span className='chaise-btn-icon fa-solid fa-plus'></span>
               <span>{relatedModel.isPureBinary ? 'Link' : 'Add'} records</span>
-            </div>
+            </button>
           </ChaiseTooltip>
         }
         {relatedModel.isPureBinary && relatedModel.canDelete &&
@@ -290,10 +312,10 @@ const RelatedTableActions = ({
             placement='top'
             tooltip={<span>Disconnect {currentTable} records from this {mainTable}.</span>}
           >
-            <div className='chaise-btn chaise-btn-secondary unlink-records-link' onClick={onUnlink}>
+            <button className='chaise-btn chaise-btn-secondary unlink-records-link' onClick={onUnlink}>
               <span className='chaise-btn-icon fa-regular fa-circle-xmark'></span>
               <span>Unlink records</span>
-            </div>
+            </button>
           </ChaiseTooltip>
         }
         {allowCustomModeRelated(relatedModel) && renderCustomModeBtn()}
