@@ -67,7 +67,7 @@
                         // this flag signals that the returned data is non-empty and is returned
                         var nonEmpty = (cm.tableModel.page && cm.tableModel.page.length > 0 && cm.tableMarkdownContentInitialized);
 
-                        // TODO filter-in-source if the filter is based on the main table and returns empty, the related table should be hidden
+                        // filter-in-source if the filter is based on the main table and returns empty, the related table should be hidden
                         var ref = cm.tableModel.reference;
                         if (ref.pseudoColumn && ref.pseudoColumn.isFiltered && ref.pseudoColumn.filterProps.hasRootFilter) {
                             return nonEmpty;

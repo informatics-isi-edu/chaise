@@ -309,8 +309,8 @@
 
                 // if the related table has filter in its source
                 if (relatedRef.pseudoColumn.isFiltered && (
-                    // don't allow add for one hop
-                    !relatedRef.derivedAssociationReference ||
+                    // don't allow add for one hop, if the filter is not on root)
+                    (!relatedRef.derivedAssociationReference && !relatedRef.pseudoColumn.filterProps.hasRootFilter ) ||
                     // don't allow add for pb that has filter in between
                     relatedRef.pseudoColumn.filterProps.hasFilterInBetween
                 )) {

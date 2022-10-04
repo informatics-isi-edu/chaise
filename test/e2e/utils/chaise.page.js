@@ -568,8 +568,15 @@ var recordPage = function() {
         return element.all(by.css(".related-table-accordion"));
     };
 
+    // TODO this function might not be needed and we should evaluate it during react migration
+    //      (we might only need the getDisplayedRelatedTableTitles function)
+    // given that we're using ng-show, this function is returning the hidden related tables too
     this.getRelatedTableTitles = function() {
         return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
+    }
+    // the following function only returns the related tables that are displayed
+    this.getDisplayedRelatedTableTitles = function() {
+      return browser.executeScript("return $('.related-table-accordion:not(.ng-hide) .panel-title .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getRelatedTableAccordion = function(displayName) {

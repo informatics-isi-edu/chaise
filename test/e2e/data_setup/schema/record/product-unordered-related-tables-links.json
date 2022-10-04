@@ -444,6 +444,23 @@
                         },
                         {
                             "source": [
+                                {"filter": "id", "operand_pattern": "1111"},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_booking_accommodation"]},
+                                "RID"
+                            ],
+                            "markdown_name": "inbound related with filter on main table (hidden)"
+                        },
+                        {
+                            "source": [
+                                {"filter": "id", "operand_pattern": "2004"},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_booking_accommodation"]},
+                                "RID"
+                            ],
+                            "markdown_name": "inbound related with filter on main table",
+                            "comment": "inbound related, filter on main"
+                        },
+                        {
+                            "source": [
                                 {"inbound": ["product-unordered-related-tables-links", "fk_booking_accommodation"]},
                                 {
                                   "or": [
@@ -458,12 +475,47 @@
                         },
                         {
                             "source": [
+                                {"filter": "id", "operand_pattern": "1111"},
                                 {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
                                 {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
-                                {"filter": "facility", "operand_pattern": "Television"},
                                 "RID"
                             ],
-                            "markdown_name": "association with filter on related table"
+                            "markdown_name": "association with filter on main table (hidden)"
+                        },
+                        {
+                            "source": [
+                                {"filter": "id", "operand_pattern": "2004"},
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                "RID"
+                            ],
+                            "markdown_name": "association with filter on main table",
+                            "comment": "assoc related, filter on main"
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {"filter": "id_related", "operand_pattern": "3"},
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                "RID"
+                            ],
+                            "markdown_name": "association with filter on assoc table",
+                            "comment": "assoc related, filter on assoc"
+                        },
+                        {
+                            "source": [
+                                {"inbound": ["product-unordered-related-tables-links", "fk_assoc_accommodation"]},
+                                {"outbound": ["product-unordered-related-tables-links", "fk_assoc_related_table"]},
+                                {
+                                  "or": [
+                                    {"filter": "facility", "operand_pattern": "Television"},
+                                    {"filter": "facility", "operand_pattern": "Air Conditioning"}
+                                  ]
+                                },
+                                "RID"
+                            ],
+                            "markdown_name": "association with filter on related table",
+                            "comment": "assoc related, filter on related"
                         },
                         {
                             "source": [

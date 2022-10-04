@@ -39,7 +39,6 @@ If a property appears in the same configuration twice, the property defined late
    * [editRecord](#editRecord)
    * [deleteRecord](#deleteRecord)
    * [allowErrorDismissal](#allowerrordismissal)
-   * [maxRelatedTablesOpen](#maxrelatedtablesopen)
    * [showWriterEmptyRelatedOnLoad](#showwriteremptyrelatedonload)
    * [showFaceting](#showfaceting)
    * [hideTableOfContents](#hidetableofcontents)
@@ -420,15 +419,6 @@ If a property appears in the same configuration twice, the property defined late
    - Sample syntax:
      ```
      allowErrorDismissal: true
-     ```
-
- #### maxRelatedTablesOpen
- It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
-   - Type: Integer
-   - Default behavior: all related tables will be expanded on load
-   - Sample syntax:
-     ```
-     maxRelatedTablesOpen: 5
      ```
 
  #### showWriterEmptyRelatedOnLoad

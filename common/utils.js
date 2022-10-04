@@ -8,7 +8,7 @@
         "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser",
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
         "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading",
-        "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
+        "allowErrorDismissal", "footerMarkdown", "showFaceting", "hideTableOfContents",
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
