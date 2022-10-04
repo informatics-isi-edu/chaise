@@ -131,13 +131,13 @@ const MarkdownHelpApp = (): JSX.Element => {
               </tr>
               <tr>
                 <td className='rawInput'>
-                  `Inline code` is very usefull
+                  `Inline code` is very useful
                 </td>
                 <td className='rawInput'>
                   &nbsp;
                 </td>
                 <td className='markdown-container'>
-                  <code className='rawInput'>Inline code</code> is very usefull
+                  <code className='rawInput'>Inline code</code> is very useful
                 </td>
               </tr>
               <tr>
@@ -215,10 +215,10 @@ const MarkdownHelpApp = (): JSX.Element => {
                 {/* Because there's nothing in the 2nd td, the first TD cannot have spaces in the HTML */}
                 <td className='rawInput'>
                   <pre className='highlight-pre'>
-Header1 | Header2
-------- | -------
-Cell 1 | Cell 2
-Cell 3 | Cell 4
+                    <div>Header1 | Header2</div>
+                    <div>------- | -------</div>
+                    <div>Cell 1 | Cell 2</div>
+                    <div>Cell 3 | Cell 4</div>
                   </pre>
                 </td>
                 <td></td>
