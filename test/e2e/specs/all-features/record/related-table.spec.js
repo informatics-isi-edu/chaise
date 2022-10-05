@@ -671,8 +671,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
     });
 });
 
-return;
-
 describe("For scroll to query parameter", function() {
     var displayname = "table_w_aggregates";
 
