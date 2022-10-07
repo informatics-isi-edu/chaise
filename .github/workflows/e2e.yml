@@ -19,7 +19,7 @@ jobs:
       # SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       # SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: false
-      HEADLESS: true
+      HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
     timeout-minutes: 120
     steps:
@@ -125,19 +125,19 @@ jobs:
       - name: Restart apache
         run: |
           sudo service apache2 restart
-      # - name: Setup and connect to saucelabs
-      #   timeout-minutes: 2
-      #   run: |
-      #     curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
-      #     tar -xzf saucelabs.tar.gz
-      #     cd sc-*
-      #     bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
-      # - name: Check sauce connect
-      #   run: |
-      #     while [ ! -f /tmp/sc_ready ]; do
-      #       echo "Waiting for Sauce Connect..."
-      #       sleep 5;
-      #     done;
+      - name: Setup and connect to saucelabs
+        timeout-minutes: 2
+        run: |
+          curl https://saucelabs.com/downloads/sc-4.6.2-linux.tar.gz -o saucelabs.tar.gz
+          tar -xzf saucelabs.tar.gz
+          cd sc-*
+          bin/sc -u ${{secrets.SAUCE_USERNAME}} -k ${{secrets.SAUCE_ACCESS_KEY}} -i ${{github.run_id}} -f /tmp/sc_ready --no-ssl-bump-domains=127.0.0.1,localhost --pidfile=/tmp/sc_client.pid &
+      - name: Check sauce connect
+        run: |
+          while [ ! -f /tmp/sc_ready ]; do
+            echo "Waiting for Sauce Connect..."
+            sleep 5;
+          done;
       - name: Run make test
         id: test-sequential
         continue-on-error: true
