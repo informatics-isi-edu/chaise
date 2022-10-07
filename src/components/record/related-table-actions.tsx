@@ -280,13 +280,17 @@ const RelatedTableActions = ({
         if (idx + 1 !== keyset.length) keysetString += ', ';
       });
 
-      return <span>
-        {relatedModel.isPureBinary ? 'Linking ' : 'Adding '}
-        to {currentTable} is disabled until <code>{keysetString}</code> in {mainTable} is set.
-      </span>
+      keysetString = `<code>${keysetString}</code>`;
+      if (relatedModel.isPureBinary) {
+        return <span>Unable to connect to {currentTable} records until {keysetString} in this {mainTable} is set.</span>;
+      }
+      return <span>Unable to create {currentTable} records for this {mainTable} until {keysetString} in this {mainTable} is set.</span>
     }
 
-    return <span>Connect {currentTable} records to this {mainTable}.</span>;
+    if (relatedModel.isPureBinary) {
+      return <span>Connect {currentTable} records to this {mainTable}.</span>;
+    }
+    return <span>Create {currentTable} records for this {mainTable}.</span>
   };
 
   return (

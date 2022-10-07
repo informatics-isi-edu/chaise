@@ -551,7 +551,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it("should have the proper tooltip", function () {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe("'Linking to <code>" + displayname + "</code> is disabled until <code>" + columnname + "</code> in <code>" + tablename + "</code> is set.'", "Incorrect tooltip on disabled Add button");
+                expect(comment).toBe("'Unable to connect to <code>" + displayname + "</code> records until <code>" + columnname + "</code> in <code>" + tablename + "</code> is set.'", "Incorrect tooltip on disabled Add button");
             });
         });
     });
@@ -574,7 +574,10 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it("should have the proper tooltip", function () {
             chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe("'Adding to <code>" + displayname + "</code> is disabled until <code>" + columnname + "</code> in <code>" + tablename + "</code> is set.'", "Incorrect tooltip on disabled Add button");
+                expect(comment).toBe(
+                  `'Unable to create <code>${displayname}</code> records for this <code>${tablename}</code> until <code>${colname}</code> in this <code>${tablename}</code> is set'`,
+                  "Incorrect tooltip on disabled Add button"
+                );
             });
         });
     });

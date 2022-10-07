@@ -807,7 +807,13 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 expect(addBtn.isPresent()).toBe(params.canCreate);
                 if(params.canCreate){
                     chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
-                        expect(comment).toBe("'Connect <code>" + params.displayname + "</code> records to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Add button");
+                        let expected;
+                        if (params.isAssociation) {
+                          expected = `'Connect <code>${params.displayname}</code> records to this <code>${params.baseTable}</code>.'`
+                        } else {
+                          expected = `'Create <code>${params.displayname}</code> records for this <code>${params.baseTable}</code>.'`;
+                        }
+                        expect(comment).toBe(expected, "Incorrect tooltip on Add button");
                     });
                 }
             });
