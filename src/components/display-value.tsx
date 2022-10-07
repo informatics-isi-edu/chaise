@@ -42,7 +42,7 @@ const DisplayValue = ({
       </span>
     )
   }
-  return <span>{value?.value}</span>
+  return <span className={usedClassNames.join(' ')}>{value?.value}</span>
 }
 
 export default DisplayValue;

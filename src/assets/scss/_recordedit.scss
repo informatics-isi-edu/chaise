@@ -1,0 +1,54 @@
+.record-edit-main{
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 20px;
+}
+
+.record-edit-header{
+
+    .form-add-btn{
+        border: 1px solid black;
+        margin-left: 10px;
+        padding: 5px;
+    }
+
+}
+
+.record-edit-container{
+    display: flex;
+    width: 100%;
+    border: 1px solid #ccc;
+
+    .form-container{
+        display: flex;
+        overflow-x: scroll;
+        width: 100%;
+
+        .black-box{
+            flex-grow: 1;
+            flex-shrink: 0;
+            background-color: black;
+            height: 100%;
+            margin-right: 25px;
+            margin-left: 25px;
+            width: 500px;
+            min-width: 250px;
+            color:white;
+        }
+    }
+
+    
+}
+
+.record-edit-column{
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+
+    .column-cell{
+        width: 200px;
+        height: 47px;
+        border-right: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
+    }
+}
