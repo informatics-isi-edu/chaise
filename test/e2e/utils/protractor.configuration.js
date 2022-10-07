@@ -16,7 +16,9 @@ exports.getConfig = function(options) {
       chromeOptions: {
           // args is defined as empty so any additional args are "pushed" instead of replacing the object.
           // see conditions below for setting screen resolution and using headless mode
-          args: [],
+          args: [
+            '--disable-features=ImprovedCookieControls,ImprovedCookieControlsForThirdPartyCookieBlocking,SameSiteByDefaultCookies,CookiesWithoutSameSiteMustBeSecure'
+          ],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
