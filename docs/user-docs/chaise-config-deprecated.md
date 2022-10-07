@@ -8,6 +8,8 @@ This document contains deprecated chaise-config parameters.
 
 * [Login Configuration:](#login-configuration)
    * [profileURL](#profileURL)
+* [Display Configuration:](#display-configuration)
+   * [maxRelatedTablesOpen](#maxrelatedtablesopen)
 * [Search Application](#search-application)
    * [sidebarPosition](#sidebarPosition)
    * [attributesSidebarHeading](#attributesSidebarHeading)
@@ -27,6 +29,18 @@ This document contains deprecated chaise-config parameters.
      ```
      profileURL: "<your-url>"
      ```
+
+### Display Configuration:
+
+#### maxRelatedTablesOpen
+ It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
+   - Type: Integer
+   - Default behavior: all related tables will be expanded on load
+   - Sample syntax:
+     ```
+     maxRelatedTablesOpen: 5
+     ```
+
 
 ### Search Application:
 
