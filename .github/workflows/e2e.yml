@@ -15,9 +15,9 @@ jobs:
   install-and-test:
     runs-on: ubuntu-20.04
     env:
-      # SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-      # SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-      # SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
+      SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+      SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+      SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
       SHARDING: false
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
