@@ -18,7 +18,7 @@ jobs:
       SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
       SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
       SAUCE_TUNNEL_IDENTIFIER: ${{github.run_id}}
-      SHARDING: false
+      SHARDING: true
       HEADLESS: false
       PYTHONWARNINGS: ignore:Unverified HTTPS request
     timeout-minutes: 120
@@ -138,36 +138,36 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      - name: Run make test
-        id: test-sequential
+      # - name: Run make test
+      #   id: test-sequential
+      #   continue-on-error: true
+      #   run: |
+      #     cd chaise
+      #     make testnavbar
+      - name: Run full features confirmation test spec
+        id: test-full-features-confirmation
         continue-on-error: true
         run: |
           cd chaise
-          make testnavbar
-      # - name: Run full features confirmation test spec
-      #   id: test-full-features-confirmation
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testfullfeaturesconfirmation
-      # - name: Run default config test spec
-      #   id: test-default-config
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdefaultconfig
-      # - name: Run full features test spec
-      #   id: test-full-features
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testfullfeatures
-      # - name: Run delete prohibited configuration tests 1
-      #   id: test-delete-prohibited-1
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
+          make testfullfeaturesconfirmation
+      - name: Run default config test spec
+        id: test-default-config
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdefaultconfig
+      - name: Run full features test spec
+        id: test-full-features
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testfullfeatures
+      - name: Run delete prohibited configuration tests 1
+        id: test-delete-prohibited-1
+        continue-on-error: true
+        run: |
+          cd chaise
+          make testdeleteprohibited
       # - name: Run delete prohibited configuration tests 2
       #   id: test-delete-prohibited-2
       #   continue-on-error: true
@@ -180,21 +180,21 @@ jobs:
       #   run: |
       #     cd chaise
       #     make testdeleteprohibited
-      - name: Check on make test
-        if: always() && steps.test-sequential.outcome != 'success'
+      # - name: Check on make test
+      #   if: always() && steps.test-sequential.outcome != 'success'
+      #   run: exit 1
+      - name: Check on full features confirmation test spec
+        if: always() && steps.test-full-features-confirmation.outcome != 'success'
         run: exit 1
-      # - name: Check on full features confirmation test spec
-      #   if: always() && steps.test-full-features-confirmation.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on default config test spec
-      #   if: always() && steps.test-default-config.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on full features test spec
-      #   if: always() && steps.test-full-features.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on delete prohibited configuration tests 1
-      #   if: always() && steps.test-delete-prohibited-1.outcome != 'success'
-      #   run: exit 1
+      - name: Check on default config test spec
+        if: always() && steps.test-default-config.outcome != 'success'
+        run: exit 1
+      - name: Check on full features test spec
+        if: always() && steps.test-full-features.outcome != 'success'
+        run: exit 1
+      - name: Check on delete prohibited configuration tests 1
+        if: always() && steps.test-delete-prohibited-1.outcome != 'success'
+        run: exit 1
       # - name: Check on delete prohibited configuration tests 2
       #   if: always() && steps.test-delete-prohibited-2.outcome != 'success'
       #   run: exit 1
