@@ -5,6 +5,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -305,6 +306,12 @@ const RecordsetModal = ({
       onHide={onClose}
       ref={modalContainer}
     >
+      {showSubmitSpinner &&
+        <div className='modal-submit-spinner-container'>
+          <div className='modal-submit-spinner-backdrop'></div>
+          <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
+        </div>
+      }
       <Modal.Header ref={modalHeader}>
         <div className='top-panel-container'>
           <div className='top-flex-panel'>
@@ -323,7 +330,7 @@ const RecordsetModal = ({
                         disabled={disableSubmit || showSubmitSpinner}
                       >
                         {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
-                        {showSubmitSpinner && <Spinner animation='border' size='sm' />}
+                        {showSubmitSpinner && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
                         <span>{submitText}</span>
                       </button>
                     </ChaiseTooltip>

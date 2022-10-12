@@ -271,6 +271,24 @@
   }
 }
 
+.modal-submit-spinner-container {
+  $modal-submit-spinner-backdrop-z-index: 100;
+  .modal-submit-spinner-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: $modal-submit-spinner-backdrop-z-index;
+    background: black;
+    opacity: 0.5;
+  }
+  .modal-submit-spinner.spinner-container {
+    top: 50% !important;
+    z-index: calc($modal-submit-spinner-backdrop-z-index + 1) !important;
+  }
+}
+
 @media (min-width: 768px) {
   .chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
     max-width: unset !important;
