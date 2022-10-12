@@ -1,7 +1,9 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_alerts.scss';
 
 // components
-import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Alert from 'react-bootstrap/Alert';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';

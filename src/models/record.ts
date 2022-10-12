@@ -75,3 +75,14 @@ export interface RecordRequestModel {
   reloadStartTime?: number,
   reference?: any,
 }
+
+export interface CitationModel {
+  /**
+   * the citation object that comes from ERMrestJS
+   */
+  value: any | null,
+  /**
+   * whether the value is ready to be looked at
+   */
+  isReady: boolean
+}

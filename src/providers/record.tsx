@@ -7,7 +7,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
-import { RecordColumnModel, RecordRelatedModel, RecordRelatedModelRecordsetProps, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { CitationModel, RecordColumnModel, RecordRelatedModel, RecordRelatedModelRecordsetProps, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
 import {
   RecordsetProviderAddUpdateCauses,
   RecordsetProviderFetchSecondaryRequests,
@@ -36,6 +36,10 @@ export const RecordContext = createContext<{
    * The main record values
    */
   recordValues: any,
+  /**
+   * the citation object
+   */
+  citation: CitationModel,
   /**
    * can be used to manually trigger a read of the main entity
    */
@@ -133,6 +137,11 @@ export default function RecordProvider({
   const [page, setPage] = useState<any>(null);
   const [recordValues, setRecordValues, recordValuesRef] = useStateRef<any>([]);
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
+  const [citation, setCitation] = useState<CitationModel>({
+    value: null,
+    isReady: false
+  });
+
   const [showMainSectionSpinner, setShowMainSectionSpinner] = useState(true);
   const [showRelatedSectionSpinner, setShowRelatedSectionSpinner, showRelatedSectionSpinnerRef] = useStateRef(true);
 
@@ -327,14 +336,8 @@ export default function RecordProvider({
 
     setShowMainSectionSpinner(true);
 
-    // TODO
     // clear the value of citation, so we can fetch it again.
-    // if (DataUtils.isObjectAndNotNull($rootScope.reference.citation)) {
-    //   $rootScope.citationReady = false;
-    // } else {
-    //   $rootScope.citationReady = true;
-    //   $rootScope.citation = null;
-    // }
+    setCitation({isReady: isObjectAndNotNull(reference.citation), value: null});
 
     const logParams: any = flowControl.current.logObject ? flowControl.current.logObject : {};
 
@@ -404,18 +407,16 @@ export default function RecordProvider({
       // indicator that the entityset values are fetched
       flowControl.current.entitySetResults = {};
 
-      // TODO
       //whether citation is waiting for other data or we can show it on load
-      // var citation = $rootScope.reference.citation;
-      // if (DataUtils.isObjectAndNotNull(citation)) {
-      //   $rootScope.citationReady = !citation.hasWaitFor;
-      //   if ($rootScope.citationReady) {
-      //     $rootScope.citation = citation.compute(tuple, $rootScope.templateVariables);
-      //   }
-      // } else {
-      //   $rootScope.citationReady = true;
-      //   $rootScope.citation = null;
-      // }
+      const refCitation = reference.citation;
+      if (isObjectAndNotNull(citation)) {
+        setCitation({
+          isReady: !refCitation.hasWaitFor,
+          value: refCitation.hasWaitFor ? null : refCitation.compute(tuple, flowControl.current.templateVariables)
+        });
+      } else {
+        setCitation({isReady: true, value: null});
+      }
 
       flowControl.current.reloadCauses = [];
       flowControl.current.reloadStartTime = -1;
@@ -736,6 +737,7 @@ export default function RecordProvider({
       readMainEntity,
       reference,
       initialized,
+      citation,
       columnModels,
       showMainSectionSpinner,
       // both main and related entities section:
@@ -755,7 +757,7 @@ export default function RecordProvider({
     };
   }, [
     // main entity:
-    page, recordValues, initialized, columnModels, showMainSectionSpinner,
+    page, recordValues, initialized, citation, columnModels, showMainSectionSpinner,
     // mix:
     showEmptySections,
     // related entities:

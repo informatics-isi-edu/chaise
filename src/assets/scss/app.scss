@@ -96,6 +96,7 @@ html {
     font-weight: 400;
     line-height: 1;
     color: #777;
+    font-size: 65%;
   }
 
   li {
@@ -663,6 +664,13 @@ html {
   }
 
   // END remove
+
+  // copy to clipboard btn (used in share dialog)
+  .chaise-copy-to-clipboard-btn {
+    color: $primary-color;
+    font-size: 65%;
+    cursor: pointer;
+  }
 
   // chaise checkbox
   .chaise-checkbox {

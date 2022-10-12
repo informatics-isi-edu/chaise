@@ -276,7 +276,7 @@ export function chaiseBaseURL(): string {
 * @param {ERMrest.Reference} reference - the `ermrestJS` reference object associated with this current page
 * @param {String} version - the encoded version string prepended with the '@' character
 * */
-export function resolvePermalink(tuple: any, reference: any, version: string) {
+export function resolvePermalink(tuple: any, reference: any, version?: string) {
   const chaiseConfig = ConfigService.chaiseConfig;
   const resolverId = chaiseConfig.resolverImplicitCatalog;
   const currCatalog = reference.location.catalogId;

@@ -1,3 +1,5 @@
+@import "variables";
+
 // don't add border to the modal header
 .modal-header {
   border-bottom: none;
@@ -6,6 +8,11 @@
     display: block;
     text-align: center;
   }
+}
+
+.modal-title {
+  font-size: $h2-font-size !important;
+  font-weight: normal;
 }
 
 // uploader
@@ -112,7 +119,13 @@
 /******* Popup modal for share ********/
 .chaise-share-citation {
   ul {
+    word-break: break-word;
     padding-left: 10px;
+  }
+
+  h2, h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
   }
 
   #share-link h2 {

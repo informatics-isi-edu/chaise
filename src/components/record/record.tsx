@@ -14,6 +14,7 @@ import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableHeader from '@isrd-isi-edu/chaise/src/components/record/related-table-header';
+import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-button';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -90,7 +91,7 @@ const RecordInner = ({
     showEmptySections,
     toggleShowEmptySections,
     initialized,
-    page,
+    page, citation,
     readMainEntity,
     reference,
     relatedModels,
@@ -392,8 +393,8 @@ const RecordInner = ({
                     className='chaise-btn chaise-btn-tertiary'
                     onClick={hidePanel}
                   >
-                    <span className='record-app-action-icon chaise-icon chaise-sidebar-close'></span>
-                    Hide panel
+                    <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
+                    <span>Hide panel</span>
                   </button>
                 </ChaiseTooltip>
               </div>
@@ -407,20 +408,12 @@ const RecordInner = ({
                   tooltip={`Click here to ${showEmptySections ? 'hide empty related sections.' : 'show empty related sections too.'}`}
                 >
                   <button className='chaise-btn chaise-btn-primary' onClick={toggleShowEmptySections}>
-                    <span className='record-app-action-icon  fa fa-th-list'></span>
-                    {showEmptySections ? 'Hide' : 'Show'} empty sections
+                    <span className='chaise-btn-icon fa fa-th-list'></span>
+                    <span>{showEmptySections ? 'Hide' : 'Show'} empty sections</span>
                   </button>
                 </ChaiseTooltip>
                 <Export reference={reference} disabled={false} />
-                <ChaiseTooltip
-                  placement='bottom-start'
-                  tooltip='Click here to show the share dialog.'
-                >
-                  <button className='chaise-btn chaise-btn-primary'>
-                    <span className='record-app-action-icon  fa fa-share-square'></span>
-                    Share and cite
-                  </button>
-                </ChaiseTooltip>
+                <ShareCiteButton title={'Share and Cite'} reference={reference} tuple={page.tuples[0]} citation={citation} />
               </div>
             </div>
             <div className='title'>
@@ -445,8 +438,8 @@ const RecordInner = ({
                             className={btnClasses + (!canCreate ? ' disabled' : '')}
                             href={reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink}
                           >
-                            <span className='record-app-action-icon fa fa-plus'></span>
-                            Create
+                            <span className='chaise-btn-icon fa fa-plus'></span>
+                            <span>Create</span>
                           </a>
                         </ChaiseTooltip>
                         {/* edit */}
@@ -455,8 +448,8 @@ const RecordInner = ({
                           tooltip='Click here to create a copy of this record'
                         >
                           <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={copyRecord()}>
-                            <span className='record-app-action-icon  fa fa-clipboard'></span>
-                            Copy
+                            <span className='chaise-btn-icon  fa fa-clipboard'></span>
+                            <span>Copy</span>
                           </a>
                         </ChaiseTooltip>
                         {/* copy */}
@@ -468,8 +461,8 @@ const RecordInner = ({
                             className={btnClasses + (!canEdit ? ' disabled' : '')}
                             href={reference.contextualize.entryEdit.appLink}
                           >
-                            <span className='record-app-action-icon  fa fa-pencil'></span>
-                            Edit
+                            <span className='chaise-btn-icon  fa fa-pencil'></span>
+                            <span>Edit</span>
                           </a>
                         </ChaiseTooltip>
                         {/* delete */}
@@ -478,8 +471,8 @@ const RecordInner = ({
                           tooltip='Click here to delete this record'
                         >
                           <button className={btnClasses + (!canDelete ? ' disabled' : '')} onClick={deleteRecord}>
-                            <span className='record-app-action-icon fa fa-trash-alt'></span>
-                            Delete
+                            <span className='chaise-btn-icon fa fa-trash-alt'></span>
+                            <span>Delete</span>
                           </button>
                         </ChaiseTooltip>
                       </div>
@@ -494,8 +487,8 @@ const RecordInner = ({
                         onClick={hidePanel}
                         className='chaise-btn chaise-btn-tertiary show-toc-btn'
                       >
-                        <span className='record-app-action-icon chaise-icon chaise-sidebar-open'></span>
-                        Show side panel
+                        <span className='chaise-btn-icon chaise-icon chaise-sidebar-open'></span>
+                        <span>Show side panel</span>
                       </div>
                     </ChaiseTooltip>
                   )}
