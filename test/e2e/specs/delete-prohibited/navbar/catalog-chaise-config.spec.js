@@ -3,14 +3,22 @@ var chaisePage = require('../../../utils/chaise.page.js');
 describe('Navbar ', function() {
     var url, navbar, chaiseConfig, EC = protractor.ExpectedConditions;
 
-    beforeAll(function () {
-        browser.ignoreSynchronization=true;
+    beforeAll(function (done) {
         url = browser.params.url + "/recordset/#" + browser.params.catalogId + "/catalog-config-navbar:config-table";
-        browser.get(url);
-        navbar = element(by.id('mainnav'));
-        browser.executeScript('return chaiseConfig;').then(function(config) {
+        chaisePage.navigate(url).then(function () {
+            navbar = element(by.id('mainnav'));
+            
+            return browser.executeScript('return chaiseConfig;')
+        }).then(function(config) {
             chaiseConfig = config;
-            browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
+            return browser.wait(EC.presenceOf(navbar), browser.params.defaultTimeout);
+        }).then(function () {
+            return chaisePage.recordsetPageReady();
+        }).then(function () {
+            done();
+        }).catch(function (err) {
+            done.fail();
+            console.log(err);
         });
     });
 

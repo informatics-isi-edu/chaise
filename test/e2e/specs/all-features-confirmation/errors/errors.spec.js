@@ -378,7 +378,7 @@ describe('Error related test cases,', function() {
           chaisePage.clickButton(modalOkBtn).then(function(){
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
-             recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/";
+             recordsetWithoutFacetUrl = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name;
              expect(currentUrl).toContain(recordsetWithoutFacetUrl, "The redirection to Recordset page failed");
              done();
           }).catch(chaisePage.catchTestError(done));
@@ -505,6 +505,7 @@ describe('Error related test cases,', function() {
             var showDetails = chaisePage.errorModal.getToggleDetailsLink();
             var errorDetails = chaisePage.errorModal.getErrorDetails();
             chaisePage.waitForElement(showDetails);
+            browser.wait(EC.elementToBeClickable(showDetails), browser.params.defaultTimeout);
             showDetails.click().then(function(){
                 chaisePage.waitForElement(errorDetails);
                 expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
