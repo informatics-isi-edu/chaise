@@ -107,9 +107,18 @@ const Faceting = ({
   const sidePanelContainer = useRef<HTMLDivElement>(null);
 
   /**
+   * make sure the setup is done only once
+   */
+  const setupStarted = useRef(false);
+
+  /**
    * register the flow-control related callbacks and then show facets
    */
   useEffect(() => {
+    // run this setup only once
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     facetRequestModels.current = [];
     facetsToPreProcess.current = [];
 

@@ -162,6 +162,11 @@ const RecordsetInner = ({
    */
   const editRequestIsDone = useRef(false);
 
+  /**
+   * to make sure we're running the setup (following useEffect) only once
+   */
+  const setupStarted = useRef(false);
+
 
   /**
    * if data is not initialized:
@@ -179,6 +184,10 @@ const RecordsetInner = ({
       paddingSensor = attachMainContainerPaddingSensor(parentContainer);
       return;
     }
+
+    // run this setup only once
+    if (setupStarted.current) return;
+    setupStarted.current = true;
 
     // if the faceting feature is disabled, then we don't need to generate facets
     if (config.disableFaceting) {
@@ -227,10 +236,11 @@ const RecordsetInner = ({
       dispatchError({ error: exception });
     });
 
-
-    if (paddingSensor && typeof paddingSensor === 'function') {
-      paddingSensor.detach();
-    }
+    return () => {
+      if (paddingSensor && typeof paddingSensor === 'function') {
+        paddingSensor.detach();
+      }
+    };
   }, [isInitialized]);
 
   /**
