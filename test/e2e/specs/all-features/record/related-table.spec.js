@@ -612,7 +612,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         describe("for a related entity with a path of length 3 with filter", function () {
             recordHelpers.testRelatedTable(path_related_w_filter, pageReadyCondition);
 
-            it ("add button should not be available", function () {
+            it ("add button should not be available", function (done) {
                 var btn = chaisePage.recordPage.getAddRecordLink(path_related_w_filter.displayname);
                 expect(btn.isPresent()).toBeFalsy();
                 done();
