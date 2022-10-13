@@ -1,13 +1,13 @@
 
 name: Chaise end-to-end tests
 
-on: [push]
-  # push:
-  #   branches:
-  #     - 'master'
-  # pull_request:
-  #   branches:
-  #     - 'master'
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
 
 concurrency: chaise_env
 
@@ -138,12 +138,6 @@ jobs:
             echo "Waiting for Sauce Connect..."
             sleep 5;
           done;
-      # - name: Run make test
-      #   id: test-sequential
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testnavbar
       - name: Run full features confirmation test spec
         id: test-full-features-confirmation
         continue-on-error: true
@@ -162,27 +156,12 @@ jobs:
         run: |
           cd chaise
           make testfullfeatures
-      - name: Run delete prohibited configuration tests 1
-        id: test-delete-prohibited-1
+      - name: Run delete prohibited test spec
+        id: test-delete-prohibited
         continue-on-error: true
         run: |
           cd chaise
           make testdeleteprohibited
-      # - name: Run delete prohibited configuration tests 2
-      #   id: test-delete-prohibited-2
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
-      # - name: Run delete prohibited configuration tests 3
-      #   id: test-delete-prohibited-3
-      #   continue-on-error: true
-      #   run: |
-      #     cd chaise
-      #     make testdeleteprohibited
-      # - name: Check on make test
-      #   if: always() && steps.test-sequential.outcome != 'success'
-      #   run: exit 1
       - name: Check on full features confirmation test spec
         if: always() && steps.test-full-features-confirmation.outcome != 'success'
         run: exit 1
@@ -192,15 +171,9 @@ jobs:
       - name: Check on full features test spec
         if: always() && steps.test-full-features.outcome != 'success'
         run: exit 1
-      - name: Check on delete prohibited configuration tests 1
-        if: always() && steps.test-delete-prohibited-1.outcome != 'success'
+      - name: Check on delete prohibited test spec
+        if: always() && steps.test-delete-prohibited.outcome != 'success'
         run: exit 1
-      # - name: Check on delete prohibited configuration tests 2
-      #   if: always() && steps.test-delete-prohibited-2.outcome != 'success'
-      #   run: exit 1
-      # - name: Check on delete prohibited configuration tests 3
-      #   if: always() && steps.test-delete-prohibited-3.outcome != 'success'
-      #   run: exit 1
       - name: Diagnosis after failure
         if: ${{ failure() }}
         run: |
