@@ -163,12 +163,6 @@ describe('Recordset add record,', function() {
         }).then(function() {
             return chaisePage.recordsetPage.getPageTitleElement().click();
         }).then(function () {
-            return browser.driver.manage().getCookies();
-        }).then(function (allCookies) {
-            allCookies.forEach(function (cookie) {
-                console.log(cookie.name + " -> " + cookie.value);
-            });
-
             return browser.wait(function() {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                     return (ct == testParams.num_rows+1);
