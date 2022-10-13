@@ -22,8 +22,10 @@ var testParams = {
         "table_w_aggregates", // related entity with aggregate columns
         "table_w_invalid_row_markdown_pattern", // related entity with invalid row_markdown_pattern
         "inbound related with display.wait_for entityset", //related entity with wait_for entityset and markdown patt
-        "inbound related with display.wait_for agg", //related entity with wait_for agg and markdown patt
+        "inbound related with display.wait_for agg", //related entity with wait_for agg and markdown pattern
+        "inbound related with filter on main table", // related entity with filter on main table
         "inbound related with filter on related table", // related entity with filter on related table
+        "association with filter on main table",
         "association with filter on related table", // association with filter on related table
         "path of length 3 with filters" // path of length 3 with filters
     ],
@@ -33,12 +35,12 @@ var testParams = {
         "table_w_aggregates (2)", "table_w_invalid_row_markdown_pattern (1)",
         "inbound related with display.wait_for entityset (3)",
         "inbound related with display.wait_for agg (3)",
+        "inbound related with filter on main table (6)",
         "inbound related with filter on related table (1)",
+        "association with filter on main table (1)",
         "association with filter on related table (1)",
         "path of length 3 with filters (1)"
-    ],
-    related_table_name_with_page_size_annotation: "accommodation_image",
-    related_table_name_with_link_in_table: "accommodation_image"
+    ]
 };
 
 var pageReadyCondition = function () {
@@ -68,7 +70,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 return (ct == testParams.tocHeaders.length);
             });
         }, browser.params.defaultTimeout);
-        expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+        expect(chaisePage.recordPage.getDisplayedRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
     });
 
     it ("should show the related table names in the correct order in the Table of Contents", function () {
@@ -219,6 +221,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
                 afterSearchCount: 2,
                 afterSearchDisabledRows: ["1"]
             },
+            selectOptions: [1, 2, 3, 4],
             rowValuesAfter: [
                 ["Television"],
                 ["Air Conditioning"],
@@ -250,7 +253,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
             ]
         }
     };
-
     describe("for a pure and binary association,", function () {
         recordHelpers.testRelatedTable(association_table, pageReadyCondition);
 
@@ -332,6 +334,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
         recordHelpers.testRelatedTable(association_with_markdown, pageReadyCondition);
     });
 
+    // When rows are added to association_table, it affects this test.
+    // data relies on rows from p&b unlink tests above
     var path_related = {
         comment: "related with a path of length 3",
         schemaName: "product-unordered-related-tables-links",
@@ -354,9 +358,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
         canCreate: false,
         canDelete: true
     };
-
-    // When rows are added to association_table, it affects this test.
-    // data relies on rows from p&b unlink tests above
     describe("for a related entity with a path of length 3, ", function () {
         recordHelpers.testRelatedTable(path_related, pageReadyCondition);
     });
@@ -407,11 +408,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
         count: 1,
         canEdit: true
     };
-
     describe("for a related table with invalid row_markdown_pattern, ", function () {
         recordHelpers.testRelatedTable(related_w_invalid_row_markdown_pattern, pageReadyCondition);
     });
-
 
     var related_w_entityset_waitfor = {
         comment: "related table, has waitfor entityset and markdown_pattern",
@@ -445,7 +444,33 @@ describe ("Viewing exisiting record with related entities, ", function () {
         recordHelpers.testRelatedTable(related_w_agg_waitfor, pageReadyCondition);
     });
 
+    // the rest of test cases are special cases that we don't need to run on CI
+    if (process.env.CI) return;
+
+    // these test cases rely on the previous related and assoc tests
+    // since they are basically the same path with just added filters
     describe("regarding usage of filter in source", function () {
+        var related_w_filter_on_main = {
+          comment: "inbound related, filter on main",
+          schemaName: "product-unordered-related-tables-links",
+          displayname: "inbound related with filter on main table",
+          name: "booking",
+          baseTable:"Accommodations",
+          count: 2,
+          rowValues: [
+              ["247.0000",""],
+              ["100.0000","2016-06-01 00:00:00"],
+              ["110.0000","2016-05-19 01:00:00"],
+              ["120.0000","2015-11-10 00:00:00"],
+              ["180.0000","2016-09-04 01:00:00"],
+              ["80.0000","2016-01-01 00:00:00"],
+          ],
+          canCreate: true
+        };
+        describe("for a related entity with filter on main table,", function () {
+            recordHelpers.testRelatedTable(related_w_filter_on_main, pageReadyCondition);
+        });
+
         var related_w_filter_on_related = {
             comment: "inbound related, filter on related",
             schemaName: "product-unordered-related-tables-links",
@@ -460,15 +485,58 @@ describe ("Viewing exisiting record with related entities, ", function () {
             rowValues: [
                 ["247.0000",""], // created by another test case
                 ["80.0000","2016-01-01 00:00:00"]
-            ]
+            ],
+            canCreate: false
         };
         describe("for a related entity with filter on related table", function () {
             recordHelpers.testRelatedTable(related_w_filter_on_related, pageReadyCondition);
+        });
 
-            it ("add button should not be available", function () {
-                var btn = chaisePage.recordPage.getAddRecordLink(related_w_filter_on_related.displayname);
-                expect(btn.isPresent()).toBeFalsy();
-            });
+        var assoc_w_filter_on_main = {
+          comment: "assoc related, filter on main",
+          schemaName: "product-unordered-related-tables-links",
+          displayname: "association with filter on main table",
+          name: "association_table",
+          relatedName: "related_table",
+          baseTable:"Accommodations",
+          isAssociation: true,
+          count: 2,
+          viewMore: {
+              displayname: "related_table",
+              filter: "base table association related\nSuper 8 North Hollywood Motel"
+          },
+          rowValues: [
+              ["Television"],
+              ["Coffee Maker"]
+          ],
+          canCreate: true
+        };
+        describe("pure and binary association with filter on main table,", function () {
+            recordHelpers.testRelatedTable(assoc_w_filter_on_main, pageReadyCondition);
+        });
+
+        // NOTE this related entity doesn't have any value on load,
+        // but the add p&b test will add the required row for this.
+        var assoc_w_filter_on_assoc = {
+            comment: "assoc related, filter on assoc",
+            schemaName: "product-unordered-related-tables-links",
+            displayname: "association with filter on assoc table",
+            name: "association_table",
+            relatedName: "related_table",
+            baseTable:"Accommodations",
+            isAssociation: true,
+            count: 1,
+            viewMore: {
+                displayname: "related_table",
+                filter: "base table association related\nSuper 8 North Hollywood Motel"
+            },
+            rowValues: [
+                ["Coffee Maker"]
+            ],
+            canCreate: false
+        };
+        describe(" pure and binary association with filter on association table,", function () {
+            recordHelpers.testRelatedTable(assoc_w_filter_on_assoc, pageReadyCondition);
         });
 
         var assoc_w_filter_on_related = {
@@ -480,55 +548,61 @@ describe ("Viewing exisiting record with related entities, ", function () {
             baseTable:"Accommodations",
             isAssociation: true,
             count: 1,
-            viewMore: {
-                displayname: "related_table",
-                filter: "base table association related\nSuper 8 North Hollywood Motel"
-            },
             rowValues: [
                 ["Television"]
             ],
             rowViewPaths: [
                 [{column: "id", value: "1"}]
             ],
-
+            canCreate: true,
+            add: {
+              relatedDisplayname: "association with filter on related table",
+              tableDisplayname: "related_table",
+              modalTitle: "Link related_table to Accommodations: Super 8 North Hollywood Motel",
+              totalCount: 2,
+              existingCount: 1,
+              disabledRows: ["1"],
+              selectOptions: [1],
+              rowValuesAfter: [
+                  ["Television"],
+                  ["Air Conditioning"]
+              ]
+          },
         };
         describe("for a pure and binary association with filter on related table", function () {
             recordHelpers.testRelatedTable(assoc_w_filter_on_related, pageReadyCondition);
 
-            it ("link button should not be available", function () {
-                var btn = chaisePage.recordPage.getAddRecordLink(assoc_w_filter_on_related.displayname);
+            recordHelpers.testAddAssociationTable(assoc_w_filter_on_related.add, false, pageReadyCondition);
+        });
+
+        var path_related_w_filter = {
+            comment: "related with a path of length 3",
+            schemaName: "product-unordered-related-tables-links",
+            displayname: "path of length 3 with filters",
+            name: "related_table_2",
+            baseTable:"Accommodations",
+            viewMore: {
+                displayname: "related_table_2",
+                filter: "base table association related\nSuper 8 North Hollywood Motel"
+            },
+            rowValues: [
+                ["two"],
+                ["three"]
+            ],
+            rowViewPaths: [
+                [{column: "id", value: "2"}],
+                [{column: "id", value: "3"}]
+            ],
+            count: 2, // one row is deleted by unlink test, another is added by add p&b filter on assoc
+        };
+        describe("for a related entity with a path of length 3 with filter", function () {
+            recordHelpers.testRelatedTable(path_related_w_filter, pageReadyCondition);
+
+            it ("add button should not be available", function () {
+                var btn = chaisePage.recordPage.getAddRecordLink(path_related_w_filter.displayname);
                 expect(btn.isPresent()).toBeFalsy();
             });
         });
-
-        if (!process.env.CI) {
-            var path_related_w_filter = {
-                comment: "related with a path of length 3",
-                schemaName: "product-unordered-related-tables-links",
-                displayname: "path of length 3 with filters",
-                name: "related_table_2",
-                baseTable:"Accommodations",
-                viewMore: {
-                    displayname: "related_table_2",
-                    filter: "base table association related\nSuper 8 North Hollywood Motel"
-                },
-                rowValues: [
-                    ["three"]
-                ],
-                rowViewPaths: [
-                    [{column: "id", value: "3"}]
-                ],
-                count: 1, // one row is deleted by another test
-            };
-            describe("for a related entity with a path of length 3 with filter", function () {
-                recordHelpers.testRelatedTable(path_related_w_filter, pageReadyCondition);
-
-                it ("add button should not be available", function () {
-                    var btn = chaisePage.recordPage.getAddRecordLink(path_related_w_filter.displayname);
-                    expect(btn.isPresent()).toBeFalsy();
-                });
-            });
-        }
     });
 
     describe("for a pure and binary association with a null value for the key on main", function () {

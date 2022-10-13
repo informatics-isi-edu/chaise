@@ -31,7 +31,6 @@ describe('View existing record,', function() {
 
     describe("For table " + relatedTableTestParams.table_name + ",", function() {
 
-        // this test is for verifying the related tables option, maxRelatedTablesOpen
         beforeAll(function() {
             var keys = [];
             browser.ignoreSynchronization = true;
@@ -41,16 +40,11 @@ describe('View existing record,', function() {
             chaisePage.recordPageReady();
         });
 
-        it("should load chaise-config.js and have correct maxRelatedTablesOpen, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
+        it("should load chaise-config.js and have correct, disableDefaultExport=true, showWriterEmptyRelatedOnLoad=false,", function() {
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                expect(chaiseConfig.maxRelatedTablesOpen).toBe(14);
                 expect(chaiseConfig.disableDefaultExport).toBeTruthy();
                 expect(chaiseConfig.showWriterEmptyRelatedOnLoad).toBeFalsy();
             });
-        });
-
-        it('should collapse related tables after it exceeds the maxRelatedTablesOpen value',function(){
-            expect(element.all(by.css('.panel-open')).count()).toEqual(0);
         });
 
         it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function () {

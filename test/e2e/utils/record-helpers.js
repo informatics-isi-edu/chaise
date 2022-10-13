@@ -3,6 +3,7 @@ var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
+const Q = require('q');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
@@ -1038,7 +1039,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
  * - totalCount
  * - existingCount
  * - disabledRows
- * - selectIndex
+ * - selectOptions
  */
 exports.testAddAssociationTable = function (params, isInline, pageReadyCondition) {
     describe("Add feature, ", function () {
@@ -1138,17 +1139,12 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
         it ("user should be able to select new values and submit.", function (done) {
             var modal = chaisePage.searchPopup.getAddPureBinaryPopup();
-            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 1);
-            chaisePage.clickButton(inp).then(function (){
-                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 2);
-                return chaisePage.clickButton(inp2);
-            }).then(function (){
-                var inp3 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 3);
-                return chaisePage.clickButton(inp3);
-            }).then(function (){
-                var inp4 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 4);
-                return chaisePage.clickButton(inp4);
-            }).then(function (){
+            var selectOption = (opIndex) => {
+              var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, opIndex);
+              return chaisePage.clickButton(inp);
+            };
+            const promises = params.selectOptions.map((op) => selectOption(op));
+            Q.all(promises).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Link", "Submit button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
@@ -1156,14 +1152,14 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
                 browser.wait(function () {
                     return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
-                        return (rows.length == params.existingCount + 4);
+                        return (rows.length == params.existingCount + params.selectOptions.length);
                     });
                 });
                 checkRelatedRowValues(params.relatedDisplayname, isInline, params.rowValuesAfter, done);
 
                 return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
             }).then(function (count){
-                expect(count).toBe(params.existingCount + 4);
+                expect(count).toBe(params.existingCount + params.selectOptions.length);
                 done();
             }).catch(function(error) {
                 console.log(error);

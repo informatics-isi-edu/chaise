@@ -343,7 +343,14 @@
                 });
             });
 
-            params.reference = domainRef.unfilteredReference.addFacets(andFilters).contextualize.compactSelectAssociationLink;
+            // if filter in source is based on the related table, then we would need to add it as a hidden custom filter here.
+            var customFacets = null;
+            if (domainRef.pseudoColumn && domainRef.pseudoColumn.filterProps && domainRef.pseudoColumn.filterProps.leafFilterString) {
+              // NOTE should we display the filters or not?
+              customFacets = { ermrest_path: domainRef.pseudoColumn.filterProps.leafFilterString, removable: false };
+            }
+
+            params.reference = domainRef.unfilteredReference.addFacets(andFilters, customFacets).contextualize.compactSelectAssociationLink;
             params.selectMode = isModalUpdate ? modalBox.multiSelectMode : modalBox.singleSelectMode;
             params.selectedRows = [];
             params.showFaceting = true;

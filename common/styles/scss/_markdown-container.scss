@@ -119,7 +119,7 @@
         @include chaise-btn-primary();
     }
 
-    a.download-alt {
+    a.download-alt, a[download] {
         @include download-btn();
     }
 
