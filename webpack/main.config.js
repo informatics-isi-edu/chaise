@@ -34,6 +34,10 @@ module.exports = (env) => {
         ]
       },
       {
+        appName: 'help',
+        appTitle: 'Wiki Pages',
+      },
+      {
         appName: 'md-help',
         appTitle: 'Markdown Help',
       },
