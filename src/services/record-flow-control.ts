@@ -15,7 +15,7 @@ export default class RecordFlowControl {
   requestModels: RecordRequestModel[] = [];
   inlineRelatedRequestModels: { [index: string]: RecordRelatedRequestModel } = {};
   relatedRequestModels: RecordRelatedRequestModel[] = [];
-  mainHasSecondaryRequests = false;
+  numColsRequireSecondaryRequests = 0;
 
   /**
    * the initial values for the templateVariables

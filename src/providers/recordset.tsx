@@ -309,7 +309,7 @@ export default function RecordsetProvider({
       };
     })
   );
-  const setColumnModelValues = (indexes: { [key: string]: boolean }, values: { [key: string]: boolean }) => {
+  const setColumnModelValues = (indexes: { [key: string]: any }, values: { [key: string]: boolean }) => {
     setColumnModels(
       (prevColumnModels: any) => {
         return prevColumnModels.map((cm: any, index: number) => {
@@ -917,7 +917,7 @@ export default function RecordsetProvider({
       activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
-    let updatedColumnModels: any = {};
+    const updatedColumnModels: any = {};
     activeListModel.objects.forEach((obj: any) => {
       // this is only called in recordset so it won't be related
       if (obj.column) {
@@ -1003,8 +1003,6 @@ export default function RecordsetProvider({
         }
       );
 
-      // TODO this is not working as expected because what's in the state
-      // is outdated...
       setColumnModelValues(indexes, { isLoading: false });
 
       // clear the causes

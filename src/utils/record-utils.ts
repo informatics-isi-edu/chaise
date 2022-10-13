@@ -113,6 +113,17 @@ export function displayCustomModeRelated(relatedModel: RecordRelatedModel): bool
 }
 
 /**
+ * Given a reference return the page limit that we should use
+ */
+export function getRelatedPageLimit(ref: any) {
+  let initialPageLimit = ref.display.defaultPageSize;
+  if (!initialPageLimit) {
+    initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
+  }
+  return initialPageLimit
+}
+
+/**
  * create a related record model
  * @param ref the refernce
  * @param index the index of the model in its list
@@ -120,10 +131,6 @@ export function displayCustomModeRelated(relatedModel: RecordRelatedModel): bool
  * @param mainTuple the main tuple data
  */
 export function generateRelatedRecordModel(ref: any, index: number, isInline: boolean, mainTuple: any, mainReference: any): RecordRelatedModel {
-  let initialPageLimit = ref.display.defaultPageSize;
-  if (!initialPageLimit) {
-    initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
-  }
   const stackNode = LogService.getStackNode(
     LogStackTypes.RELATED,
     ref.table,
@@ -144,7 +151,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
       hasTimeoutError: false,
     },
     recordsetProps: {
-      initialPageLimit,
+      initialPageLimit: getRelatedPageLimit(ref),
       config: {
         viewable: true,
         editable: true,
