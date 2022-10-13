@@ -32,12 +32,11 @@ const numericFieldValidation = {
   message: 'Please enter a valid decimal value'
 };
 
-const dateFieldValidation = {
-  value: (value: string) => {
-    const date = windowRef.moment(value, DATE_FORMAT, true);
-    return date.isValid();
-  },
-  message: 'Please enter a valid date value'
+
+// https://github.com/react-hook-form/react-hook-form/issues/589
+const dateFieldValidation =  (value: string) => {
+  const date = windowRef.moment(value, DATE_FORMAT, true);
+  return date.isValid() ? true : 'Please enter a valid date value';
 };
 
 const timestampFieldValidation = {
@@ -495,7 +494,7 @@ const InputSwitch = ({
           onFieldChange={onFieldChange} 
         />
       case 'date':
-        return null;
+        // return null;
         return <DateField 
           name={name} 
           classes={classes}
