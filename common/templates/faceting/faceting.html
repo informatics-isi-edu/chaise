@@ -12,8 +12,8 @@
                                 <span ng-if="::!fc.displayname.isHTML" ng-bind="::fc.displayname.value"></span>
                             </span>
                             <span class="facet-header-icon">
-                                <span ng-if="vm.facetModels[$index].isLoading && !(vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
-                                <span ng-if="vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="{{vm.facetModels[$index].noConstraints ? 'Showing facet values without any constraints applied.' : 'Request timeout: The facet values cannot be retrieved for updates.'}}" tooltip-placement="right"></span>
+                                <span ng-if="vm.facetModels[$index].isLoading && !(vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints)" class="fa-solid fa-circle-notch fa-spin"></span>
+                                <span ng-if="vm.facetModels[$index].facetError || vm.facetModels[$index].noConstraints" class="fa-solid fa-triangle-exclamation" ng-attr-uib-tooltip="{{vm.facetModels[$index].noConstraints ? 'Showing facet values without any constraints applied.' : 'Request timeout: The facet values cannot be retrieved for updates.'}}" tooltip-placement="right"></span>
                             </span>
                         </div>
                     </uib-accordion-heading>

@@ -115,7 +115,7 @@ const FacetHeader = ({
       <span className='facet-header-icon'>
         {
           (isLoading && (!facetHasTimeoutError || noConstraints)) &&
-          <Spinner className='facet-spinner' animation='border' />
+          <Spinner className='facet-spinner' size='sm' animation='border' />
         }
         {
           (facetHasTimeoutError || noConstraints) &&

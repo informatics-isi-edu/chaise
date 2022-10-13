@@ -3,6 +3,7 @@ var chaisePage = require('../utils/chaise.page.js');
 var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
+const Q = require('q');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
@@ -558,7 +559,7 @@ exports.testSharePopup = function (sharePopupParams) {
 
         var numCopyIcons = sharePopupParams.hasVersionedLink ? 2 : 1;
         it("should have " + numCopyIcons + " copy to clipboard icons visible.", function (done) {
-            expect(element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
+            expect(element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
             done();
         });
 
@@ -566,7 +567,7 @@ exports.testSharePopup = function (sharePopupParams) {
         xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
             var copyIcons, copyInput;
 
-            element(by.id("share-link")).all(by.css(".glyphicon.glyphicon-copy")).then(function (icons) {
+            element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).then(function (icons) {
                 copyIcons = icons;
 
                 expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
@@ -716,7 +717,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             it('should have the correct tooltip.', function(done){
                 chaisePage.recordPage.getColumnCommentHTML(exploreBtn).then(function(comment){
-                    expect(comment).toBe("'Explore more " + params.displayname + " records related to this " + params.baseTable + ".'", "Incorrect tooltip on View More button");
+                    expect(comment).toBe("'Explore more <code>" + params.displayname + "</code> records related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on View More button");
                     done();
                 }).catch(function(err) {
                     done.fail(err);
@@ -782,7 +783,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Edit mode");
                         chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display edit controls for " + params.displayname + " related to this " + params.baseTable + ".'", "Incorrect tooltip on Edit button");
+                            expect(comment).toBe("'Display edit controls for <code>" + params.displayname + "</code> related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Edit button");
                             done();
                         }).catch(function(err) {
                             done.fail(err);
@@ -794,7 +795,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Table mode");
                         chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display related " + params.displayname + " in tabular mode.'", "Incorrect tooltip on Table Display button");
+                            expect(comment).toBe("'Display related <code>" + params.displayname + "</code> in tabular mode.'", "Incorrect tooltip on Table Display button");
                             done();
                         }).catch(function(err) {
                             done.fail(err);
@@ -853,7 +854,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 expect(addBtn.isPresent()).toBe(params.canCreate);
                 if(params.canCreate){
                     chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
-                        expect(comment).toBe("'Connect " + params.displayname + " records to this " + params.baseTable + ".'", "Incorrect tooltip on Add button");
+                        expect(comment).toBe("'Connect <code>" + params.displayname + "</code> records to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Add button");
                         done();
                     }).catch(function(error) {
                         console.log(error);
@@ -934,7 +935,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                     if (params.isAssociation) {
                         it ("button tooltip should be `Unlink`.", function (done) {
-                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe('Disconnect ' + params.displayname + ': ' + params.entityMarkdownName + ' from this ' + params.baseTable + '.');
+                            expect(deleteBtn.getAttribute("uib-tooltip-html")).toBe('\'Disconnect <code>' + params.displayname + '</code>: <code>' + params.entityMarkdownName + '</code> from this <code>' + params.baseTable + '</code>.\'');
                             done();
                         });
                     } else {
@@ -1096,7 +1097,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
  * - totalCount
  * - existingCount
  * - disabledRows
- * - selectIndex
+ * - selectOptions
  */
 exports.testAddAssociationTable = function (params, isInline, pageReadyCondition) {
     describe("Add feature, ", function () {
@@ -1198,17 +1199,12 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
         it ("user should be able to select new values and submit.", function (done) {
             var modal = chaisePage.searchPopup.getAddPureBinaryPopup();
-            var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 1);
-            chaisePage.clickButton(inp).then(function (){
-                var inp2 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 2);
-                return chaisePage.clickButton(inp2);
-            }).then(function (){
-                var inp3 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 3);
-                return chaisePage.clickButton(inp3);
-            }).then(function (){
-                var inp4 = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 4);
-                return chaisePage.clickButton(inp4);
-            }).then(function (){
+            var selectOption = (opIndex) => {
+              var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, opIndex);
+              return chaisePage.clickButton(inp);
+            };
+            const promises = params.selectOptions.map((op) => selectOption(op));
+            Q.all(promises).then(function (){
                 expect(chaisePage.recordsetPage.getModalSubmit().getText()).toBe("Link", "Submit button text for add pure and binary popup is incorrect");
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
@@ -1217,7 +1213,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
             }).then(function () {
                 return browser.wait(function () {
                     return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname, isInline).then(function (rows) {
-                        return (rows.length == params.existingCount + 4);
+                        return (rows.length == params.existingCount + params.selectOptions.length);
                     });
                 });
             }).then(function () {
@@ -1225,7 +1221,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                 return chaisePage.recordPage.getRelatedTableRows(params.relatedDisplayname).count();
             }).then(function (count){
-                expect(count).toBe(params.existingCount + 4);
+                expect(count).toBe(params.existingCount + params.selectOptions.length);
                 done();
             }).catch(function(error) {
                 console.log(error);

@@ -56,7 +56,7 @@
         <label class="sr-only"></label>
         <span class="chaise-input-group-append">
             <button ng-focus="::vm.blurElement($event);" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="vm.searchPopup()" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
-                <span class="glyphicon glyphicon-chevron-down"></span>
+                <span class="fa-solid fa-chevron-down"></span>
             </button>
         </span>
     </div>
@@ -104,7 +104,7 @@
             <div contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="vm.model"></div>
             <chaise-clear-input btn-class="boolean-remove" click-callback="::vm.clearInput()" show="vm.showBooleanRemove()"></chaise-clear-input>
             <button class="chaise-btn chaise-btn-primary" type="button">
-                <span class="glyphicon glyphicon-chevron-down"></span>
+                <span class="fa-solid fa-chevron-down"></span>
             </button>
         </div>
         <!-- So that the boolean input can be validated -->
@@ -118,7 +118,7 @@
 
     <!-- longtext/textarea input -->
     <div ng-switch-when="longtext">
-        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box chaise-input-control" style="height: 120px" ng-required="vm.isRequired" empty-to-null markdown-editor="{iconlibrary: 'glyph', addExtraButtons: true, fullscreen: { enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+        <textarea ng-model="vm.model" rows="5" name="{{::vm.column.name}}" class="content-box chaise-input-control" style="height: 120px" ng-required="vm.isRequired" empty-to-null markdown-editor="{iconlibrary: 'fa', addExtraButtons: true, fullscreen: { enable: false, icons: {}}, resize: 'vertical'}"></textarea>
         <a href class="live-preview" markdown-preview textinput="vm.model"></a>
     </div>
 
@@ -146,7 +146,7 @@
         </div>
         <span class="chaise-input-group-append">
             <button ng-click="vm.toggleColorPicker($event)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary" type="button" tooltip-placement="bottom" uib-tooltip="Select a color.">
-                <span class="glyphicon glyphicon-chevron-down"></span>
+                <span class="fa-solid fa-chevron-down"></span>
             </button>
         </span>
     </div>

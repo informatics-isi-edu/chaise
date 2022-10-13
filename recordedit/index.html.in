@@ -26,7 +26,7 @@
                                 <div class="title-container meta-icons">
                                     <div class="title-buttons">
                                         <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled || !displayReady" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
-                                            <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
+                                            <span class="chaise-btn-icon fa-solid fa-check-to-slot"></span>
                                             <span>Save</span>
                                         </button>
                                     </div>
@@ -74,9 +74,9 @@
                                                         <td class="form-header entity-value" ng-repeat="(rowIndex, row) in form.recordEditModel.rows track by $index">
                                                             <div class="pull-left" ng-bind="rowIndex + 1"></div>
                                                             <div class="pull-right">
-                                                                <i ng-if="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This recod cannot be modified."></i>
+                                                                <i ng-if="form.editMode && !$root.tuples[rowIndex].canUpdate" class="disabled-row-icon fas fa-ban" tooltip-placement="bottom" uib-tooltip="This record cannot be modified."></i>
                                                                 <button ng-show="form.recordEditModel.rows.length > 1" class="chaise-btn chaise-btn-secondary pull-right remove-form-btn" ng-click="::form.removeFormRow(rowIndex);" tooltip-placement="bottom" uib-tooltip="Click to remove this record from the form.">
-                                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                                    <span class="fa-solid fa-xmark"></span>
                                                                 </button>
                                                             </div>
                                                         </td>
@@ -92,7 +92,7 @@
                                                             </span>
                                                             <span ng-if="form.canShowSelectAllBtn(columnIndex)" class="pull-right">
                                                                 <button ng-disabled="form.disableSelectAllBtn(columnIndex)" id="select-all-{{::form.makeSafeIdAttr(column.displayname.value)}}" type="button" class="chaise-btn chaise-btn-secondary" ng-click="::form.toggleSelectAll(columnIndex)" tooltip-placement="bottom" uib-tooltip="{{form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.'}}">
-                                                                    <span class="glyphicon" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'glyphicon-chevron-up' : 'glyphicon-pencil'"></span>
+                                                                    <span class="fa-solid" ng-class="form.recordEditModel.columnModels[columnIndex].showSelectAll ? 'fa-chevron-up' : 'fa-pencil'"></span>
                                                                 </button>
                                                             </span>
                                                         </td>
@@ -152,7 +152,7 @@
                                                                 <input type="hidden" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" ng-required="::form.isRequired(columnIndex);" />
                                                                 <span class="chaise-input-group-append">
                                                                     <button ng-focus="::form.blurElement($event);" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary modal-popup-btn" type="button" ng-click="::form.searchPopup(rowIndex, column, columnIndex)" tooltip-placement="bottom" uib-tooltip="Select from an existing value.">
-                                                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                        <span class="fa-solid fa-chevron-down"></span>
                                                                     </button>
                                                                 </span>
                                                             </div>
@@ -199,7 +199,7 @@
                                                                     <div id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-display" contenteditable="false" style="cursor: pointer" data-placeholder="Select a value" ng-bind-html="form.recordEditModel.rows[rowIndex][column.name]"></div>
                                                                     <chaise-clear-input btn-class="boolean-remove" click-callback="form.clearInput(rowIndex, column.name)" show="form.showRemove(rowIndex, column.name, 'boolean')"></chaise-clear-input>
                                                                     <button ng-focus="::form.blurElement($event);" class="chaise-btn chaise-btn-primary" type="button">
-                                                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                        <span class="fa-solid fa-chevron-down"></span>
                                                                     </button>
                                                                 </div>
                                                                 <!-- So that the boolean input can be validated -->
@@ -213,7 +213,7 @@
 
                                                             <!-- longtext/textarea input -->
                                                             <div ng-switch-when="longtext">
-                                                                <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'glyph', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
+                                                                <textarea id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-input" ng-model="form.recordEditModel.rows[rowIndex][column.name]" rows="5" name="{{::column.name}}" class="content-box chaise-input-control" ng-required="::form.isRequired(columnIndex);" empty-to-null markdown-editor="{'iconlibrary': 'fa', addExtraButtons:true, fullscreen: {enable: false, icons: {}}, resize: 'vertical'}"></textarea>
                                                             </div>
 
                                                             <!-- File input -->
@@ -240,7 +240,7 @@
                                                                 </div>
                                                                 <span class="chaise-input-group-append">
                                                                     <button ng-click="form.toggleColorPickerCallbacks[rowIndex][columnIndex]($event)" id="form-{{rowIndex}}-{{::form.makeSafeIdAttr(column.displayname.value)}}-button" class="chaise-btn chaise-btn-primary" type="button" tooltip-placement="bottom" uib-tooltip="Select a color.">
-                                                                        <span class="glyphicon glyphicon-chevron-down"></span>
+                                                                        <span class="fa-solid fa-chevron-down"></span>
                                                                     </button>
                                                                 </span>
                                                             </div>

@@ -87,7 +87,6 @@ var chaiseConfig = {
         ]
     },
     footerMarkdown: "**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
-    maxRelatedTablesOpen: 15,
     configRules: [
         {
             host: ["www.rebuildingakidney.org", "staging.rebuildingakidney.org", "dev.rebuildingakidney.org"], // array of host names

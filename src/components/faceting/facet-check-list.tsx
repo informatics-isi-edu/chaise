@@ -164,10 +164,10 @@ const FacetCheckList = ({
           <FacetCheckListRowLabel row={row} />
           {/* TODO favorites: */}
           {/* <span ng-if="enableFavorites && row.isFavoriteLoading" className="favorite-icon favorite-spinner-container pull-right">
-            <span className="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+            <span className="fa-solid fa-circle-notch fa-spin"></span>
           </span>
-          <span ng-if="enableFavorites && !row.isFavoriteLoading && (!row.isNotNull && row.displayname.value != null) && row.isFavorite" className="favorite-icon glyphicon glyphicon-star pull-right" ng-click="callToggleFavorite(row)"></span>
-          <span ng-if="enableFavorites && !row.isFavoriteLoading && (!row.isNotNull && row.displayname.value != null) && !row.isFavorite" className="favorite-icon hover-show glyphicon glyphicon-star-empty pull-right" ng-click="callToggleFavorite(row)"></span>
+          <span ng-if="enableFavorites && !row.isFavoriteLoading && (!row.isNotNull && row.displayname.value != null) && row.isFavorite" className="favorite-icon fa-solid fa-star pull-right" ng-click="callToggleFavorite(row)"></span>
+          <span ng-if="enableFavorites && !row.isFavoriteLoading && (!row.isNotNull && row.displayname.value != null) && !row.isFavorite" className="favorite-icon hover-show fa-regular fa-star pull-right" ng-click="callToggleFavorite(row)"></span>
           */}
         </li>
       );

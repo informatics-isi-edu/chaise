@@ -6,8 +6,8 @@
                 <div class="recordset-title-container title-container">
                     <div class="search-popup-controls recordset-title-buttons title-buttons">
                         <button id="multi-select-submit-btn" ng-if="ctrl.tableModel.config.selectMode=='multi-select'"
-                                tooltip-placement="bottom" uib-tooltip="{{ctrl.submitTooltip}}" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="(!ctrl.rowsOnLoad && ctrl.tableModel.selectedRows.length < 1) || ctrl.disableSubmit">
-                            <span class="chaise-btn-icon glyphicon glyphicon-saved"></span>
+                                tooltip-placement="bottom" uib-tooltip-html="'{{ctrl.submitTooltip}}'" class="chaise-btn chaise-btn-primary" type="button" ng-click="ctrl.submit()" ng-disabled="(!ctrl.rowsOnLoad && ctrl.tableModel.selectedRows.length < 1) || ctrl.disableSubmit">
+                            <span class="chaise-btn-icon fa-solid fa-check-to-slot"></span>
                             <span>{{ctrl.submitText}}</span>
                         </button>
                         <button class="chaise-btn chaise-btn-secondary pull-right modal-close" type="button" ng-click="ctrl.cancel()" tooltip-placement="bottom" uib-tooltip="Close the dialog">
