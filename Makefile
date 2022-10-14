@@ -186,18 +186,14 @@ test: test-ALL_TESTS
 # HTML files that need to be created
 HTML=viewer/index.html \
 	 recordedit/index.html \
-	 recordedit/mdHelp.html \
-	 lib/switchUserAccounts.html \
-	 $(DIST)/chaise-dependencies.html \
-	 help/index.html
+	 $(DIST)/chaise-dependencies.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
-	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
-	$(DIST)/$(HELP_JS_SOURCE_MIN)
+	$(DIST)/$(VIEWER_JS_SOURCE_MIN)
 
 SOURCE=src
 
@@ -305,7 +301,7 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 # list of file and folders that will be sent to the given location
 RSYNC_FILE_LIST=common \
 	dist \
-	help \
+	help-pages \
 	images \
 	lib \
 	recordedit \
@@ -369,22 +365,6 @@ recordedit/index.html: recordedit/index.html.in .make-recordedit-includes
 	$(info - creating recordedit/index.html)
 	@$(call build_html,.make-recordedit-includes,recordedit/index.html)
 
-# -------------------------- markdown help app -------------------------- #
-MDHELP_JS_SOURCE=$(RECORDEDIT_ROOT)/mdHelp.app.js
-
-MDHELP_CSS_SOURCE=$(RECORDEDIT_ROOT)/mdHelpStyle.min.css
-
-.make-mdhelp-includes: $(BUILD_VERSION)
-	@> .make-mdhelp-includes
-	$(info - creating .make-mdhelp-includes)
-	@$(call add_css_link,.make-mdhelp-includes,$(MDHELP_CSS_SOURCE))
-	@$(call add_js_script,.make-mdhelp-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
-	@$(call add_ermrestjs_script,.make-mdhelp-includes)
-
-recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
-	$(info - creating recordedit/mdHelp.html)
-	@$(call build_html, .make-mdhelp-includes, recordedit/mdHelp.html)
-
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
 
@@ -428,43 +408,6 @@ VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.
 viewer/index.html: viewer/index.html.in .make-viewer-includes
 	$(info - creating viewer/index.html)
 	@$(call build_html, .make-viewer-includes, viewer/index.html)
-
-# -------------------------- switch user help app -------------------------- #
-SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
-
-.make-switchuser-includes: $(BUILD_VERSION)
-	@> .make-switchuser-includes
-	$(info - creating .make-switchuser-includes)
-	@$(call add_css_link,.make-switchuser-includes,)
-	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
-	@$(call add_ermrestjs_script,.make-switchuser-includes)
-
-lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
-	$(info - creating lib/switchUserAccounts.html)
-	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
-
-# -------------------------- help app -------------------------- #
-HELP_JS_SOURCE=help/help.app.js
-
-HELP_JS_SOURCE_MIN=help.min.js
-$(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
-	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
-
-HELP_CSS_SOURCE=
-
-HELP_VENDOR_ASSET=
-
-.make-help-includes: $(BUILD_VERSION)
-	@> .make-help-includes
-	$(info - creating .make-help-includes)
-	@$(call add_css_link,.make-help-includes,$(HELP_CSS_SOURCE))
-	@$(call add_js_script,.make-help-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(HELP)/$(HELP_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(HELP_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-help-includes)
-
-help/index.html: help/index.html.in .make-help-includes
-	$(info - creating help/index.html)
-	@$(call build_html,.make-help-includes,help/index.html)
-
 
 # -------------------------- utility functions -------------------------- #
 

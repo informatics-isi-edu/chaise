@@ -2,6 +2,8 @@ import { createRoot } from 'react-dom/client';
 
 // components
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import MarkdownHelp from '@isrd-isi-edu/chaise/src/components/help/markdown-help';
+import SwitchUserAccountsHelp from '@isrd-isi-edu/chaise/src/components/help/switch-user-accounts';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -15,8 +17,6 @@ import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { chaiseDeploymentPath, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import MarkdownHelp from '@isrd-isi-edu/chaise/src/components/help/md-help';
-
 
 const helpSettings = {
   appName: 'help',
@@ -26,32 +26,26 @@ const helpSettings = {
   overrideExternalLinkBehavior: true      // links in navbar might need this
 };
 
-const markdownHelpPages: any = {
-  home: {
-    file: 'home.md',
-    title: 'Chaise help pages'
-  },
-  'viewer-annotation': {
-    file: 'viewer-annotation.md',
-    title: 'Viewer annotation drawing tools'
-  }
-}
-
 const componentHelpPages: any = {
   'markdown-help': {
     title: 'Markdown Help'
+  },
+  'switch-user-accounts': {
+    title: 'Switch User Accounts'
   }
 }
 
 const HelpApp = (): JSX.Element => {
   const { dispatchError } = useError();
   const [helpContent, setHelpContent] = useState<any>(null);
-  const [pageName, setPageName] = useState<string>('home');
-  const [page, setPage] = useState<any>(markdownHelpPages['home']);
-  const [isComponent, setIsComponent] = useState<boolean>(false);
+  const [isComponentPage, setIsComponentPage] = useState<boolean>(false);
+  // the name of the page pulled from thw uery parameter
+  const [pageName, setPageName] = useState<string>('');
+  const [page, setPage] = useState<any>(null);
+
 
   useEffect(() => {
-    let tempPageName = getQueryParam(windowRef.location.href, 'page');
+    let tempPageName = getQueryParam(windowRef.location.href, 'page'), tempIsComponentPage = isComponentPage;
 
     // remove the hash (the qetQueryParam doesn't do that properly)
     if (typeof tempPageName === 'string') {
@@ -63,14 +57,22 @@ const HelpApp = (): JSX.Element => {
       if (tempPageName) setPageName(tempPageName);
     }
 
-    const tempPage = markdownHelpPages[tempPageName || pageName];
-    if (tempPage) {
-      setPage(tempPage);
-      // content is in a .md file
+    let tempPage = componentHelpPages[tempPageName];
+    tempIsComponentPage = tempPage ? true : false;
+    setIsComponentPage(tempIsComponentPage);
+
+    // content is in a .md file
+    if (tempIsComponentPage) {
+      // load a help page component
+      tempPage = componentHelpPages[tempPageName];
+
       updateHeadTitle(tempPage.title);
+      setPage(tempPage);
+    } else {
+      updateHeadTitle('Wiki Pages');
 
       let tempHelpContent: string;
-      ConfigService.http.get(chaiseDeploymentPath() + 'help/' + tempPage.file).then((res: any) => {
+      ConfigService.http.get(chaiseDeploymentPath() + 'help-pages/' + tempPageName + '.md').then((res: any) => {
         console.log(res)
         tempHelpContent = res.data;
 
@@ -78,22 +80,39 @@ const HelpApp = (): JSX.Element => {
       }).then(() => {
         setHelpContent(ConfigService.ERMrest.renderMarkdown(tempHelpContent));
       }).catch((err: any) => {
-        dispatchError({ error: err });
+
+        let errMessage = 'No "page=" query parameter present in the url.'
+        if (tempPageName) errMessage = `No File was found with name: "help-pages/${tempPageName}.md"`
+        
+        dispatchError({ error: new Error(errMessage) });
       });
-    } else {
-      // load a help page component
-      setIsComponent(true)
     }
   }, []);
+
+  const renderHelpPage = () => {
+    if (!isComponentPage) return (<div dangerouslySetInnerHTML={{ __html: helpContent }} className='markdown-container help-content'></div>)
+    switch (pageName) {
+      case 'markdown-help':
+        return (<MarkdownHelp />);
+      case 'switch-user-accounts':
+        return (<SwitchUserAccountsHelp />);
+      default:
+        // NOTE: should never be reached
+        return (<div></div>);
+    }
+  }
+
+  const mainContainerClass = () => {
+    return `main-container${pageName == 'markdown-help' ? ' markdown-help-page' : ''}`
+  }
 
   return (
     <div className='app-container help-container'>
       <div className='app-content-container'>
         <div className='bottom-panel-container'>
-          <div className='main-container'>
+          <div className={mainContainerClass()}>
             <div className='main-body container'>
-              {page && <div dangerouslySetInnerHTML={{ __html: helpContent }} className='markdown-container help-content'></div>}
-              {isComponent && <MarkdownHelp />}
+              {renderHelpPage()}
             </div>
             <footer></footer>
           </div>
