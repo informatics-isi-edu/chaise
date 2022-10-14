@@ -317,15 +317,12 @@ const RecordInner = ({
                   key={`record-related-${rm.index}`}
                   eventKey={rm.index + ''}
                   className={`related-table-accordion panel ${!canShowRelated(rm, showEmptySections) ? CLASS_NAMES.HIDDEN : ''}`}
-                  // TODO add id
+                  id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
                   as='div'
                 >
-                  <Accordion.Header
-                    as='div' className='panel-heading panel-title'
-                    onClick={() => toggleRelatedSection(rm)}
-                  >
+                  <Accordion.Button as='div' onClick={() => toggleRelatedSection(rm)} className='panel-heading'>
                     <RelatedTableHeader relatedModel={rm} />
-                  </Accordion.Header>
+                  </Accordion.Button>
                   <Accordion.Body>
                     <RelatedTable
                       relatedModel={rm}

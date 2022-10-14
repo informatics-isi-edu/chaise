@@ -57,7 +57,7 @@ const RecordMainSection = (): JSX.Element => {
     const hideAllHeaders = reference.display.hideColumnHeaders;
     return columnModels.map((cm: RecordColumnModel, index: number) => {
       const hideHeader = hideAllHeaders || cm.column.hideColumnHeader;
-      const hasTooltip = cm.column.comment && cm.column.commentDisplay === 'tooltip';
+      const hasTooltip = !!cm.column.comment && cm.column.commentDisplay === 'tooltip';
       const hasError = showError(cm);
       const hasInitialized = !!cm.relatedModel && cm.relatedModel.tableMarkdownContentInitialized &&
         cm.relatedModel.recordsetState.isInitialized;
@@ -86,25 +86,25 @@ const RecordMainSection = (): JSX.Element => {
         entityValueClassName.push('col-xs-8 col-sm-8 col-md-9 col-lg-10');
       }
 
+      const columnDisplayname = <DisplayValue value={cm.column.displayname}></DisplayValue>;
+
       return (
         // TODO in angularjs this used to be ng-if, but we need the related comp even if we're not showing
         <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={rowClassName.join(' ')}>
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>
-            <ConditionalWrapper
-              condition={hasTooltip}
-              wrapper={children => (
-                <ChaiseTooltip placement='right' tooltip={cm.column.comment}>{children}</ChaiseTooltip>
-              )}
-            >
-              <>
-                <DisplayValue value={cm.column.displayname}></DisplayValue>
-                {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
-                <div className='entity-key-icons'>
-                  {showLoader(cm) && <Spinner animation='border' size='sm' className='aggregate-col-loader' />}
-                </div>
-              </>
-            </ConditionalWrapper>
+            <span className={`column-displayname ${hasTooltip ? 'chaise-icon-for-tooltip' : ''}`}>
+              {hasTooltip ?
+                <ChaiseTooltip placement='right' tooltip={cm.column.comment}>
+                  {/* NOTE the extra space is needed for proper spacing between icon and */}
+                  <span>{columnDisplayname}{' '}</span>
+                </ChaiseTooltip> :
+                <span>{columnDisplayname}</span>
+              }
+            </span>
+            <div className='entity-key-icons'>
+              {showLoader(cm) && <Spinner animation='border' size='sm' className='aggregate-col-loader' />}
+            </div>
           </td>
           {/* --------- entity value ---------- */}
           <td

@@ -175,6 +175,7 @@
         }
 
         .accordion-button {
+          cursor: pointer;
           height: 44px;
           text-transform: inherit;
           padding: 8px 8px 8px 8px;
@@ -436,10 +437,8 @@
       }
     }
 
-    .panel-title {
-      .rt-section-header {
-        font-size: 1.5rem !important;
-      }
+    .rt-section-header {
+      font-size: 1.5rem !important;
     }
 
     //Prev and Next buttons
