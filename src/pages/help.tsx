@@ -37,12 +37,11 @@ const componentHelpPages: any = {
 
 const HelpApp = (): JSX.Element => {
   const { dispatchError } = useError();
+
   const [helpContent, setHelpContent] = useState<any>(null);
   const [isComponentPage, setIsComponentPage] = useState<boolean>(false);
-  // the name of the page pulled from thw uery parameter
+  // the name of the page pulled from the query parameter
   const [pageName, setPageName] = useState<string>('');
-  const [page, setPage] = useState<any>(null);
-
 
   useEffect(() => {
     let tempPageName = getQueryParam(windowRef.location.href, 'page'), tempIsComponentPage = isComponentPage;
@@ -67,13 +66,9 @@ const HelpApp = (): JSX.Element => {
       tempPage = componentHelpPages[tempPageName];
 
       updateHeadTitle(tempPage.title);
-      setPage(tempPage);
     } else {
-      updateHeadTitle('Wiki Pages');
-
       let tempHelpContent: string;
       ConfigService.http.get(chaiseDeploymentPath() + 'help-pages/' + tempPageName + '.md').then((res: any) => {
-        console.log(res)
         tempHelpContent = res.data;
 
         return ConfigService.ERMrest.onload();
