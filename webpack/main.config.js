@@ -32,6 +32,10 @@ module.exports = (env) => {
           ...recordsetExtFiles,
           `${chaisePath}google-dataset-config.js`
         ]
+      },
+      {
+        appName: 'help',
+        appTitle: 'Wiki Pages',
       }
     ],
     mode,

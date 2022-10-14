@@ -53,7 +53,7 @@
                                 glyph: "glyphicon glyphicon-question-sign"
                             },
                             callback: function(e) {
-                                window.open(UriUtils.chaiseDeploymentPath() + 'recordedit/mdHelp.html');
+                                window.open(UriUtils.chaiseDeploymentPath() + 'chaise/help/index.html?page=markdown-help');
                             }
                         }, {
                             name: 'cmdPreview',
