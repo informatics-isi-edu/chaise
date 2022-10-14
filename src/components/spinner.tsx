@@ -1,21 +1,27 @@
-// import spinner from '@isrd-isi-edu/chaise/src/assets/images/loader.gif';
 import Spinner from 'react-bootstrap/Spinner';
 
 interface SpinnerProps {
   message?: string;
   id?: string;
+  className?: string;
+  spinnerSize?: 'sm';
 }
 
 const ChaiseSpinner = ({
   message,
   id,
-}: SpinnerProps): JSX.Element => (
-  <div id={id} className='spinner-container'>
-    <Spinner animation='border' />
-    <div style={{ marginTop: '15px' }}>
-      { message || 'Loading...' }
+  className,
+  spinnerSize
+}: SpinnerProps): JSX.Element => {
+  const usedClassName = 'spinner-container' + (className ? ` ${className}` : '');
+  return (
+    <div id={id} className={usedClassName}>
+      <Spinner animation='border' size={spinnerSize} />
+      <div className='spinner-message'>
+        {message || 'Loading...'}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default ChaiseSpinner;

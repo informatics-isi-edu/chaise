@@ -188,29 +188,29 @@ The rules that should be followed while writing code.
 In font-awesome, each font/icon can either be solid, regular, or light. In some cases
 only one version is available in the free, open-source version that we're using.
 
-While using these types of fonts, the font-awesome website directs us to use `fas` for sold,
-`far` for regular, and `fal` for light. `fal` is not available in the free version, so
-we should not use it at all. From the font-awesome source, the only difference between `far` and `fas` is font-weight:
+While using these types of fonts, the font-awesome website directs us to use `fa-solid` (`fas`)  for sold,
+`fa-regular` (`far`) for regular, and `fa-light` (`fal`) for light. `fa-light` is not available in the free version, so
+we should not use it at all. From the font-awesome source, the only difference between `fa-regular` and `fa-solid` is font-weight:
 
 ```css
-.far, .fas {
-    font-family: "Font Awesome 5 Free";
+.fa-regular, .fa-solid {
+    font-family: "Font Awesome 6 Free";
 }
 
-.far {
+.fa-regular {
     font-weight: 400;
 }
 
-.fas {
+.fa-solid {
     font-weight: 900;
 }
 ```
 
-This can cause some inconsistencies where `far`/`fas` are used in places where we're
+This can cause some inconsistencies where `fa-regular`/`fa-solid` are used in places where we're
 manually changing the `font-weight`. For example, assume the following icon is used.
 
 ```html
-<span class="fas fa-ellipsis-v some-icon"></span>
+<span class="fa-solid fa-ellipsis-v some-icon"></span>
 ```
 And we're using the following CSS rule
 
@@ -220,7 +220,7 @@ And we're using the following CSS rule
 }
 ```
 
-Even though by using `fas` we were meant to use the solid version of the font,
+Even though by using `fa-solid` we were meant to use the solid version of the font,
 the CSS rule will make sure we're using the regular version instead. And in this
 case, the regular version of `fa-ellipsis-v` is not available in the free version of font-awesome that we're using. So,
 - We have to be careful where we're using font-awesome and avoid any manual changing

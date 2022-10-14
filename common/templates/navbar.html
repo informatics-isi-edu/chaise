@@ -38,7 +38,7 @@
                     <input id="rid-search-input" class="chaise-input-control chaise-input-control-sm has-feedback" type="text" ng-model="ridSearchTerm" on-enter="::ridSearch()" placeholder="Go to RID"></input>
                     <div class="chaise-input-group-append">
                         <button class="chaise-search-btn chaise-btn chaise-btn-sm chaise-btn-primary" ng-click="::ridSearch()" role="button">
-                            <span class="glyphicon chaise-btn-icon" ng-class="{'glyphicon-share-alt': !showRidSpinner, 'glyphicon-refresh glyphicon-refresh-animate': showRidSpinner}"></span>
+                            <span class="fa-solid chaise-btn-icon" ng-class="{'fa-share': !showRidSpinner, 'fa-circle-notch fa-spin': showRidSpinner}"></span>
                         </button>
                     </div>
                 </div>

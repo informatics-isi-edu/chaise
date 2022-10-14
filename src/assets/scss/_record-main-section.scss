@@ -14,8 +14,22 @@
   $record-header-padding-left: 40px;
 
   .record-display {
-    .inline-table-display {
-      margin-top: -25px;
+
+    $record-main-spinner-height: 97px;
+
+    position: relative;
+
+    &.with-spinner {
+      margin-top: -$record-main-spinner-height;
+    }
+    .record-main-spinner-container {
+      position: sticky;
+      position: -webkit-sticky;
+      top: min(50px, 50%);
+      .record-main-spinner {
+        height: $record-main-spinner-height;
+      }
+
     }
 
     > table {
@@ -73,6 +87,17 @@
         padding-left: $record-header-padding-left;
         min-width: 150px;
         border-bottom-width: 0px;
+        position: relative;
+        padding-right: 15px;
+
+        .entity-key-icons {
+          position: absolute;
+          right: 0px;
+          top: 5px;
+          .spinner-border {
+            color: #828282;
+          }
+        }
       }
     }
   }

@@ -457,7 +457,7 @@ var recordEditPage = function() {
     };
 
     this.getClearButton = function(el) {
-        return browser.executeScript("return $(arguments[0]).parent().parent().find('.glyphicon-remove')[0]", el);
+        return browser.executeScript("return $(arguments[0]).parent().parent().find('.fa-xmark')[0]", el);
     };
 
     this.getDisabledResultSet = function () {
@@ -568,8 +568,15 @@ var recordPage = function() {
         return element.all(by.css(".related-table-accordion"));
     };
 
+    // TODO this function might not be needed and we should evaluate it during react migration
+    //      (we might only need the getDisplayedRelatedTableTitles function)
+    // given that we're using ng-show, this function is returning the hidden related tables too
     this.getRelatedTableTitles = function() {
-        return browser.executeScript("return $('.related-table-accordion .panel-title .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript("return $('.related-table-accordion .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
+    }
+    // the following function only returns the related tables that are displayed
+    this.getDisplayedRelatedTableTitles = function() {
+      return browser.executeScript("return $('.related-table-accordion:not(.ng-hide):not(.forced-hidden) .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
     }
 
     this.getRelatedTableAccordion = function(displayName) {
@@ -591,7 +598,7 @@ var recordPage = function() {
 
     this.getRelatedTableHeadingTitle = function(displayname) {
         displayName = makeSafeIdAttr(displayname);
-        return element(by.id("rt-heading-" + displayName)).element(by.css('.panel-title'))
+        return element(by.id("rt-heading-" + displayName)).element(by.css('.panel-heading'))
     };
 
     this.getRelatedTableColumnNamesByTable = function(displayName) {

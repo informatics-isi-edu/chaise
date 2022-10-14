@@ -35,7 +35,7 @@ With the current HTML structure, it is possible to apply different styles to dif
    - identifies the record directive container
    - should be specified when CSS rules are to be applied to only the main body of `record` app
    - can be used to scope CSS rules to the inline related tables
- - `related tables container` identifier (`#rt-container`)
+ - `related tables container` identifier (`.related-section-container`)
    - identifies the related tables container
    - should be specified when CSS rules are to be applied to only the related tables portion of `record` app
    - can be used to scope CSS rules to the related tables not in the main body

@@ -30,13 +30,15 @@ const DisplayValue = ({
     }
   }
 
-  const usedClassName = className ? className : (addClass ? 'markdown-container': '');
+  const usedClassNames: string[] = [];
+  if (className) usedClassNames.push(className);
+  if (addClass) usedClassNames.push('markdown-container');
 
   if (value?.isHTML && value?.value) {
     return (
       <span
         dangerouslySetInnerHTML={{ __html: value.value }}
-        className={usedClassName}>
+        className={usedClassNames.join(' ')}>
       </span>
     )
   }

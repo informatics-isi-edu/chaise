@@ -23,7 +23,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'navbarBrandImage', 'logoutURL', 'maxRecordsetRowHeight', 'dataBrowser', 'defaultAnnotationColor',
   'confirmDelete', 'hideSearchTextFacet', 'editRecord', 'deleteRecord', 'defaultCatalog', 'defaultTables',
   'signUpURL', 'navbarBanner', 'navbarMenu', 'sidebarPosition', 'attributesSidebarHeading', 'userGroups',
-  'allowErrorDismissal', 'footerMarkdown', 'maxRelatedTablesOpen', 'showFaceting', 'hideTableOfContents',
+  'allowErrorDismissal', 'footerMarkdown', 'showFaceting', 'hideTableOfContents',
   'resolverImplicitCatalog', 'disableDefaultExport', 'exportServicePath', 'assetDownloadPolicyURL',
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
@@ -125,6 +125,10 @@ export const BODY_CLASS_NAMES = {
 };
 
 export const APP_ROOT_ID_NAME = 'chaise-app-root';
+
+export const CLASS_NAMES = {
+  HIDDEN: 'forced-hidden'
+}
 
 export const DEFAULT_DISPLAYNAME = {
   null: '<i>No value </i>',

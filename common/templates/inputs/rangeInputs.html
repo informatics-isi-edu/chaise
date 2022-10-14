@@ -143,7 +143,7 @@
         </div>
     </div>
     <button type="submit" class="chaise-btn chaise-btn-primary icon-btn" ng-click="addRange()" ng-disabled="disableAdd()" style="vertical-align: bottom;" uib-tooltip="Apply this range filter" tooltip-placement="right">
-        <span class="chaise-btn-icon glyphicon glyphicon-ok"></span>
+        <span class="chaise-btn-icon fa-solid fa-check"></span>
     </button>
     <div ng-messages="minMaxForm.$error" ng-show="minMaxForm.$dirty || minMaxForm.$submitted" class="text-danger validation-error" role="alert">
         <div ng-message="chaiseMin" ng-show="minMaxForm.numericMin.$error.chaiseMin || minMaxForm.numericMax.$error.chaiseMin">This field requires a value greater than {{intMin}}.</div>

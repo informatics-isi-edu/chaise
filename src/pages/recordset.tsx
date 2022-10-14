@@ -6,7 +6,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 
 // hooks
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -45,7 +45,14 @@ const RecordsetApp = (): JSX.Element => {
   const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
 
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
+
   useEffect(() => {
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     const logObject: any = {};
     const res = chaiseURItoErmrestURI(windowRef.location);
     if (res.pcid) logObject.pcid = res.pcid;

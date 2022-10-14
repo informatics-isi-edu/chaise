@@ -13,7 +13,9 @@ export default class RecordFlowControl {
   reloadStartTime: number;
 
   requestModels: RecordRequestModel[] = [];
+  inlineRelatedRequestModels: { [index: string]: RecordRelatedRequestModel } = {};
   relatedRequestModels: RecordRelatedRequestModel[] = [];
+  numColsRequireSecondaryRequests = 0;
 
   /**
    * the initial values for the templateVariables

@@ -5,7 +5,7 @@
                 <span ng-if="::col.column.displayname.isHTML" ng-bind-html="::col.column.displayname.value"></span>
                 <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
             </span>
-            <span ng-show="showLoader($index)" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader pull-right"></span>
+            <span ng-show="showLoader($index)" class="fa-solid fa-circle-notch fa-spin aggregate-col-loader pull-right"></span>
         </td>
         <td class="entity-value col-xs-8 col-sm-8 col-md-9 col-lg-10" id="entity-{{makeSafeIdAttr(col.column.displayname.value)}}" ng-attr-colspan="{{($root.hideColumnHeaders || col.column.hideColumnHeader) ? 2 : 1}}">
             <span ng-if="showColumn($index)" ng-hide="showError($index) || showLoader($index)">
@@ -35,7 +35,7 @@
                     </span>
                 </div>
             </span>
-            <span ng-show="showError($index)" class="glyphicon glyphicon-alert" ng-attr-uib-tooltip="{{queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
+            <span ng-show="showError($index)" class="fa-solid fa-triangle-exclamation" ng-attr-uib-tooltip="{{queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
         </td>
     </tr>
 </table>

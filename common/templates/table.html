@@ -14,11 +14,11 @@
                         <span ng-switch-when="single-select">Select</span>
                         <div ng-switch-when="multi-select">
                             <button id="table-select-all-rows" type="button" ng-click="::selectAll($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Select all rows on this page" ng-disabled="vm.matchNotNull">
-                                <span class="icon-btn glyphicon glyphicon-check"></span>
+                                <span class="icon-btn fa-regular fa-square-check"></span>
                                 <span>All on page</span>
                             </button>
                             <button type="button" ng-click="::selectNone($event)" class="chaise-btn chaise-btn-secondary chaise-btn-sm" tooltip-placement="right" uib-tooltip="Deselect all rows on this page" ng-disabled="vm.matchNotNull">
-                                <span class="icon-btn glyphicon glyphicon-unchecked"></span>
+                                <span class="icon-btn fa-regular fa-square"></span>
                                 <span>None on page</span>
                             </button>
                         </div>
@@ -29,8 +29,8 @@
                             <span ng-if="::!col.column.displayname.isHTML" ng-bind="::col.column.displayname.value"></span>
                         </span>
                         <span class="table-heading-icons">
-                            <span ng-if="col.columnError" class="glyphicon glyphicon-alert column-error-icon" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
-                            <span ng-if="!col.columnError && col.isLoading" class="glyphicon glyphicon-refresh glyphicon-refresh-animate aggregate-col-loader"></span>
+                            <span ng-if="col.columnError" class="fa-solid fa-triangle-exclamation column-error-icon" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom-left"></span>
+                            <span ng-if="!col.columnError && col.isLoading" class="fa-solid fa-circle-notch fa-spin aggregate-col-loader"></span>
                             <span ng-if="!col.columnError && !col.isLoading && col.column.sortable && vm.enableSort" class="column-sort-icon">
                                 <span ng-show="vm.sortby==col.column.name" ng-switch="vm.sortOrder">
                                     <span ng-switch-when="asc" class="asc-sorted-icon fas fa-long-arrow-alt-up"></span>
@@ -56,7 +56,7 @@
                     <td id="no-results-row" colspan="{{vm.columnModels.length + 1}}" style="text-align: center;">
                         <span ng-if="vm.rowValues.length < 1 && !vm.tableError">No Results Found</span>
                         <span ng-if="vm.tableError">Result Retrieval Failed
-                            <span class="glyphicon glyphicon-alert" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom"></span>
+                            <span class="fa-solid fa-triangle-exclamation" uib-tooltip="{{vm.queryTimeoutTooltip}}" tooltip-placement="bottom"></span>
                         </span>
                     </td>
                 </tr>

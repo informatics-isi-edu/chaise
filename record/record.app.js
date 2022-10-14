@@ -265,8 +265,6 @@
                     $rootScope.columnModels.push(model);
                 });
 
-                var cutOff = chaiseConfig.maxRelatedTablesOpen > 0? chaiseConfig.maxRelatedTablesOpen : Infinity;
-                var openByDefault = related.length > cutOff ? false:true;
                 $rootScope.relatedTableModels = [];
                 $rootScope.lastRendered = null;
                 related.forEach(function (ref, index) {
@@ -278,7 +276,7 @@
                     }
 
                     $rootScope.relatedTableModels.push({
-                        open: openByDefault,
+                        open: true,
                         isTableDisplay: ref.display.type == 'table',
                         displayname: ref.displayname,
                         // whether we should do the waitfor logic:

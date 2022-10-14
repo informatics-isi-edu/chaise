@@ -54,7 +54,9 @@ const Recordset = ({
   onFavoritesChanged,
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
   parentStickyArea,
-  onFacetPanelOpenChanged
+  onFacetPanelOpenChanged,
+  parentReference,
+  parentTuple
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -68,6 +70,8 @@ const Recordset = ({
         initialSelectedRows={initialSelectedRows}
         onSelectedRowsChanged={onSelectedRowsChanged}
         onFavoritesChanged={onFavoritesChanged}
+        parentReference={parentReference}
+        parentTuple={parentTuple}
       >
         <RecordsetInner
           initialReference={initialReference}
@@ -162,6 +166,11 @@ const RecordsetInner = ({
    */
   const editRequestIsDone = useRef(false);
 
+  /**
+   * to make sure we're running the setup (following useEffect) only once
+   */
+  const setupStarted = useRef(false);
+
 
   /**
    * if data is not initialized:
@@ -180,6 +189,10 @@ const RecordsetInner = ({
       return;
     }
 
+    // run this setup only once
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     // if the faceting feature is disabled, then we don't need to generate facets
     if (config.disableFaceting) {
       initialize();
@@ -191,6 +204,11 @@ const RecordsetInner = ({
     reference.generateFacetColumns().then((res: any) => {
 
       setFacetColumnsReady(true);
+
+      // if there wasn't any facets, close the panel by default
+      if (res.facetColumns.length === 0) {
+        setFacetPanelOpen(false);
+      }
 
       // facet will call initialize when it's fully loaded
 
@@ -222,10 +240,11 @@ const RecordsetInner = ({
       dispatchError({ error: exception });
     });
 
-
-    if (paddingSensor && typeof paddingSensor === 'function') {
-      paddingSensor.detach();
-    }
+    return () => {
+      if (paddingSensor && typeof paddingSensor === 'function') {
+        paddingSensor.detach();
+      }
+    };
   }, [isInitialized]);
 
   /**
@@ -659,7 +678,7 @@ const RecordsetInner = ({
                   {/* <div ng-if='showSavedQueryUI && vm.savedQueryReference' className='chaise-btn-group' uib-dropdown>
                             <div tooltip-placement='top-right' uib-tooltip='{{tooltip.saveQuery}}'>
                                 <button id='save-query' className='chaise-btn chaise-btn-primary dropdown-toggle' ng-disabled='disableSavedQueryButton()' ng-click='logSavedQueryDropdownOpened()' uib-dropdown-toggle ng-style='{'pointer-events': disableSavedQueryButton() ? 'none' : ''}'>
-                                    <span className='chaise-btn-icon glyphicon glyphicon-floppy-save'></span>
+                                    <span className='chaise-btn-icon fa-solid fa-floppy-disk'></span>
                                     <span>Saved searches</span>
                                     <span className='caret '></span>
                                 </button>

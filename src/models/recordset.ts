@@ -1,5 +1,7 @@
+// models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
+import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 
 export type RecordsetProps = {
   initialReference: any,
@@ -12,7 +14,11 @@ export type RecordsetProps = {
   },
   initialPageLimit?: number,
   getFavorites?: Function,
-  getDisabledTuples?: Function,
+  getDisabledTuples?: (
+    page: any, pageLimit: number, logStack: any,
+    logStackPath: string, requestCauses: any, reloadStartTime: any
+  ) => any
+  ,
   initialSelectedRows?: SelectedRow[],
   onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
   onFavoritesChanged?: Function,
@@ -135,6 +141,6 @@ export type SelectedRow = {
   // cannotBeRemoved?: boolean;
 }
 
-export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean) => void;
+export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => void;
 export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, cb?: Function) => void;
 export type RecordsetProviderFetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => void;

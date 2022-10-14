@@ -50,18 +50,22 @@
   white-space: normal;
 
   &:before {
-    content: "\e025"; // glyphicon-download-alt
-    font-family: "Glyphicons Halflings";
+    content: '\f019'; // fa-solid fa-download
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
     padding-right: 4px;
   }
 
-  &.external-link-icon:not(.external-link-no-icon):before {
-    content: "\e197"; // glyphicon-cloud-download
-  }
+  &.external-link-icon:not(.external-link-no-icon) {
+    // change the icon to cloud download
+    &:before {
+      content: '\f0ed'; // fa-solid fa-cloud-arrow-down
+    }
 
-  //remove the external link icon on after
-  &.external-link-icon:not(.external-link-no-icon):after {
-    content: "";
+    //remove the external link icon on after
+    &::after {
+      content: '' !important;
+    }
   }
 
   &:hover {

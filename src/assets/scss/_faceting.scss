@@ -89,8 +89,7 @@
 
           .facet-spinner {
             color: #828282;
-            width: 1.3rem;
-            height: 1.3rem;
+            // NOTE: we should not customize the width/height since it causes wobbling effect
             border-width: .2em;
           }
         }
@@ -105,11 +104,6 @@
       font-size: 1.25rem;
     }
 
-    .align-center-icon {
-      line-height: 20px;
-      vertical-align: middle;
-      margin: 4px;
-    }
   }
 
   .range-picker {

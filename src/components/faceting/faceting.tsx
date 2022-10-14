@@ -76,7 +76,7 @@ const Faceting = ({
       });
     });
     // all the facets are closed, open the first one
-    if (firstOpen === -1) {
+    if (firstOpen === -1 && res.length > 0) {
       firstOpen = 0;
       res[0].isOpen = true;
       res[0].isLoading = true;
@@ -107,9 +107,18 @@ const Faceting = ({
   const sidePanelContainer = useRef<HTMLDivElement>(null);
 
   /**
+   * make sure the setup is done only once
+   */
+  const setupStarted = useRef(false);
+
+  /**
    * register the flow-control related callbacks and then show facets
    */
   useEffect(() => {
+    // run this setup only once
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     facetRequestModels.current = [];
     facetsToPreProcess.current = [];
 
@@ -147,6 +156,14 @@ const Faceting = ({
         // parentLogStackPath: $scope.vm.logStackPath ? $scope.vm.logStackPath : logService.logStackPaths.SET,
       });
     });
+
+    /**
+     * if there wasn't any facets, just mark the page as ready to initialize
+     */
+    if (reference.facetColumns.length === 0) {
+      setReadyToInitialize(true);
+      return;
+    }
 
     // all the facets are closed, the fist one should be processed.
     if (!atLeastOneOpen) {
@@ -595,6 +612,9 @@ const Faceting = ({
   facetModels.forEach((fm, index) => { if (fm.isOpen) activeKeys.push(`${index}`) });
 
   if (!displayFacets) {
+    if (facetModels.length === 0) {
+      return <span>No Filter Options</span>
+    }
     return <></>
   }
 

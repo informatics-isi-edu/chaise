@@ -167,6 +167,13 @@
                 .entity-key {
                     padding-left: $record-header-padding-left;
                     min-width: 150px;
+
+                    .aggregate-col-loader {
+                      // changing the line height will avoid the wobbling effect of fa-spin
+                      // TODO when we move to bootstrap's spinner this rule is not needed
+                      line-height: 20px;
+                      font-size: 11px;
+                    }
                 }
             }
         }
