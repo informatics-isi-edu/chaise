@@ -22,11 +22,14 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { allowCustomModeRelated, displayCustomModeRelated, getPrefillCookieObject } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import Q from 'q';
 
 type RelatedTableActionsProps = {
@@ -40,7 +43,8 @@ const RelatedTableActions = ({
   const {
     reference: recordReference, page: recordPage,
     toggleRelatedDisplayMode, updateRecordPage,
-    getRecordLogStack
+    getRecordLogStack,
+    addRecordRequests
   } = useRecord();
 
   const { validateSessionBeforeMutation } = useAuthn();
@@ -75,8 +79,38 @@ const RelatedTableActions = ({
       return;
     }
 
-    // TODO add related
+    // log the client action
+    // TODO log
+    //   logService.logClientAction({
+    //     action: logService.getActionString(logService.logActions.ADD_INTEND, tableModel.logStackPath),
+    //     stack: tableModel.logStack
+    // }, tableModel.reference.defaultLogInfo);
 
+    // Generate a unique cookie name and set it to expire after 24hrs.
+    const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+    const cookieValue = getPrefillCookieObject(relatedModel.initialReference, recordPage.tuples[0]);
+    CookieService.setCookie(cookieName, cookieValue, new Date(Date.now() + (60 * 60 * 24 * 1000)));
+
+    // Generate a unique id for this request
+    // append it to the URL
+    const referrer_id = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+
+    addRecordRequests.current[referrer_id] = {
+      isInline: relatedModel.isInline,
+      index: relatedModel.index
+    };
+
+    // Redirect to the url in a new tab
+    windowRef.open(
+      addQueryParamsToURL(
+        relatedModel.initialReference.unfilteredReference.contextualize.entryCreate.appLink,
+        {
+          prefill: cookieName,
+          invalidate: referrer_id
+        }
+      ),
+      '_blank'
+    );
   };
 
   const openAddPureBinaryModal = () => {

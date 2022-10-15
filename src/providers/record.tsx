@@ -116,7 +116,13 @@ export const RecordContext = createContext<{
   /**
    * ask for the page to be updated
    */
-  updateRecordPage: (isUpdate: boolean, cause?: string, changedContainers?: any) => void
+  updateRecordPage: (isUpdate: boolean, cause?: string, changedContainers?: any) => void,
+  /**
+   * the ref for the addRecordRequests
+   * can be used to see if there are any pending create requests
+   * TODO proper type
+   */
+  addRecordRequests: any
 } | null>(null);
 
 type RecordProviderProps = {
@@ -183,6 +189,8 @@ export default function RecordProvider({
     });
   };
 
+  const addRecordRequests = useRef<any>({});
+
   const flowControl = useRef(new RecordFlowControl(logInfo));
   const initializedRelatedCount = useRef(0);
   const fetchedColsWithSecondaryRequests = useRef(0);
@@ -215,6 +223,7 @@ export default function RecordProvider({
    * @param changedContainers
    */
   const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: any) => {
+    // TODO properly use changed containers
     if (!isUpdate) {
       flowControl.current.queue.counter = 0;
       flowControl.current.queue.occupiedSlots = 0;
@@ -396,6 +405,11 @@ export default function RecordProvider({
           setShowMainSectionSpinner(false);
         }
 
+        // if there aren't any related entities don't show the spinner
+        if (flowControl.current.relatedRequestModels.length === 0 && showRelatedSectionSpinner) {
+          setShowRelatedSectionSpinner(false);
+        }
+
         // Collate tuple.isHTML and tuple.values into an array of objects
         // i.e. {isHTML: false, value: 'sample'}
         const rv: any[] = [];
@@ -424,7 +438,7 @@ export default function RecordProvider({
 
         //whether citation is waiting for other data or we can show it on load
         const refCitation = reference.citation;
-        if (isObjectAndNotNull(citation)) {
+        if (isObjectAndNotNull(refCitation)) {
           setCitation({
             isReady: !refCitation.hasWaitFor,
             value: refCitation.hasWaitFor ? null : refCitation.compute(tuple, flowControl.current.templateVariables)
@@ -1010,7 +1024,8 @@ export default function RecordProvider({
       relatedModels,
       updateRelatedRecordsetState,
       registerRelatedModel,
-      toggleRelatedDisplayMode
+      toggleRelatedDisplayMode,
+      addRecordRequests
     };
   }, [
     // main entity:

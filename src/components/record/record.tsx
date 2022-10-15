@@ -23,7 +23,7 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
-import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // providers
@@ -33,7 +33,7 @@ import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 // services
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 
 // utilities
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -90,12 +90,14 @@ const RecordInner = ({
     showRelatedSectionSpinner,
     showEmptySections,
     toggleShowEmptySections,
+    updateRecordPage,
     initialized,
     page, citation,
     readMainEntity,
     reference,
     relatedModels,
     logRecordClientAction, getRecordLogAction, getRecordLogStack,
+    addRecordRequests
   } = useRecord();
 
   /**
@@ -122,6 +124,11 @@ const RecordInner = ({
   const [openRelatedSections, setOpenRelatedSections] = useState<string[]>(Array.from(Array(reference.related.length), (e, i) => `${i}`));
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
+
+  /**
+   * used to figure out if we need to update the page after edit request or not
+   */
+  const editRecordRequests = useRef<any>({});
 
   const mainContainer = useRef<HTMLDivElement>(null);
 
@@ -164,6 +171,72 @@ const RecordInner = ({
       mainContainer.current?.removeEventListener('scroll', toggleScrollToTopBtn);
     }
   }, [initialized]);
+
+  /**
+   * attach the onFocus event listener
+   * NOTE: we have to make sure the event listener is updated when the
+   * updateRecordPage function changes
+   */
+  useEffect(() => {
+    // TODO listen for the delete and edit custom events from the table-row
+    windowRef.removeEventListener('focus', onFocus);
+    windowRef.addEventListener('focus', onFocus);
+    return () => {
+      windowRef.removeEventListener('focus', onFocus);
+    };
+  }, [updateRecordPage]);
+
+  /**
+     * On window focus, remove request and update the page
+     */
+  const onFocus = () => {
+    // TODO if already loading don't do it, but how?
+
+    const uc = LogReloadCauses;
+
+    // where in the page has been changed
+    const changedContainers: any = [];
+
+    const addToChangedContainers = (details: any, causeDefs: string[]) => {
+      changedContainers.push({
+        ...details,
+        cause: causeDefs[details.isInline ? 1 : 0],
+      });
+    };
+
+    //find the completed edit requests
+    for (const id in editRecordRequests.current) {
+      if (editRecordRequests.current[id].completed) {
+        addToChangedContainers(editRecordRequests.current[id], [uc.RELATED_UPDATE, uc.RELATED_INLINE_UPDATE]);
+        delete editRecordRequests.current[id];
+      }
+    }
+
+    // find the completed create requests
+    for (const id in addRecordRequests.current) {
+      if (CookieService.checkIfCookieExists(id)) { // add request has been completed
+        addToChangedContainers(addRecordRequests.current[id], [uc.RELATED_CREATE, uc.RELATED_INLINE_CREATE]);
+
+        // remove cookie and request
+        CookieService.deleteCookie(id);
+        delete addRecordRequests.current[id];
+      }
+    }
+
+    // if something has changed
+    if (changedContainers.length > 0) {
+      updateRecordPage(true, '', changedContainers);
+    }
+  };
+
+  /**
+   * The callback that recoredit app expects and calls after edit is done.
+   */
+  windowRef.updated = (id: string) => {
+    if (!!editRecordRequests.current[id]) {
+      editRecordRequests.current[id].completed = true;
+    }
+  }
 
   // if the main data is not initialized, just show spinner
   if (!initialized) {
