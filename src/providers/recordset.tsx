@@ -544,16 +544,8 @@ export default function RecordsetProvider({
     if (setDirtyResult) {
       flowControl.current.dirtyResult = true;
     }
-    // the time that will be logged with the request
-    if (!Number.isInteger(flowControl.current.reloadStartTime) || flowControl.current.reloadStartTime === -1) {
-      flowControl.current.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
-    }
 
-    causes.forEach((cause) => {
-      if (cause && flowControl.current.reloadCauses.indexOf(cause) === -1) {
-        flowControl.current.reloadCauses.push(cause);
-      }
-    });
+    flowControl.current.addCauses(causes);
   };
 
   const processRequests = () => {

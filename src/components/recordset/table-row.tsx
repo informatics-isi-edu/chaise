@@ -315,7 +315,6 @@ const TableRow = ({
         // this will also make sure to remove the "disabled" row
         update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
       }
-
       fireCustomEvent('row-delete-success', rowContainer.current, eventDetails);
     }).catch(function (error: any) {
       setWaitingForDelete(false);

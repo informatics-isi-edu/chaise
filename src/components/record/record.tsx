@@ -198,8 +198,6 @@ const RecordInner = ({
      * On window focus, remove request and update the page
      */
   const onFocus = () => {
-    // TODO if already loading don't do it, but how?
-
     const uc = LogReloadCauses;
 
     // where in the page has been changed
@@ -237,6 +235,9 @@ const RecordInner = ({
     }
   };
 
+  /**
+   * capture the edit requests so we know when to refresh the page on focus
+   */
   const onEditRowIntend = ((event: CustomEvent) => {
     const id = event.detail.id;
     const containerDetails = event.detail.containerDetails;
@@ -246,6 +247,9 @@ const RecordInner = ({
     editRecordRequests.current[id] = { ...containerDetails, completed: false };
   }) as EventListener;
 
+  /**
+   * after a successful delete, update the page.
+   */
   const onDeleteRowSuccess = ((event: CustomEvent) => {
     const containerDetails = event.detail.containerDetails;
     if (!isObjectAndNotNull(containerDetails)) return;

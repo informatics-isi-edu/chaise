@@ -42,7 +42,8 @@ const RelatedTableActions = ({
 
   const {
     reference: recordReference, page: recordPage,
-    toggleRelatedDisplayMode, updateRecordPage,
+    toggleRelatedDisplayMode,
+    updateRecordPage, pauseUpdateRecordPage, resumeUpdateRecordPage,
     getRecordLogStack,
     addRecordRequests
   } = useRecord();
@@ -75,6 +76,7 @@ const RelatedTableActions = ({
     e.stopPropagation();
 
     if (relatedModel.isPureBinary) {
+      pauseUpdateRecordPage();
       openAddPureBinaryModal();
       return;
     }
@@ -254,7 +256,7 @@ const RelatedTableActions = ({
   };
 
   const closePureBinaryModal = () => {
-    // TODO resume update record page
+    resumeUpdateRecordPage();
     setAddPureBinaryModalProps(null);
   };
 

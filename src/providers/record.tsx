@@ -4,7 +4,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
-import { LogActions, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import {
@@ -28,7 +28,6 @@ import { isNonEmptyObject, isObjectAndKeyDefined, isObjectAndNotNull } from '@is
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { attachGoogleDatasetJsonLd } from '@isrd-isi-edu/chaise/src/utils/google-dataset';
 import { canCreateRelated, generateRelatedRecordModel, getRelatedPageLimit } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import { isUnionTypeNode } from 'typescript';
 
 export const RecordContext = createContext<{
   /**
@@ -118,6 +117,14 @@ export const RecordContext = createContext<{
    */
   updateRecordPage: (isUpdate: boolean, cause?: string, changedContainers?: any) => void,
   /**
+   * will pause the requests that are pending for updating the page.
+   */
+  pauseUpdateRecordPage: () => void,
+  /**
+   * Resume the requests after pausing
+   */
+  resumeUpdateRecordPage: () => void,
+  /**
    * the ref for the addRecordRequests
    * can be used to see if there are any pending create requests
    * TODO proper type
@@ -191,6 +198,8 @@ export default function RecordProvider({
 
   const addRecordRequests = useRef<any>({});
 
+  const pauseProcessingRequests = useRef(false);
+
   const flowControl = useRef(new RecordFlowControl(logInfo));
   const initializedRelatedCount = useRef(0);
   const fetchedColsWithSecondaryRequests = useRef(0);
@@ -222,7 +231,7 @@ export default function RecordProvider({
    * @param cause
    * @param changedContainers
    */
-  const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: any) => {
+  const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: any[]) => {
     // TODO properly use changed containers
     if (!isUpdate) {
       flowControl.current.queue.counter = 0;
@@ -231,6 +240,8 @@ export default function RecordProvider({
       flowControl.current.dirtyMain = false;
     } else {
       flowControl.current.dirtyMain = true;
+
+      flowControl.current.addCauses([cause]);
     }
 
     flowControl.current.queue.counter++;
@@ -240,19 +251,13 @@ export default function RecordProvider({
       m.processed = false;
       // the cause for related and inline are handled by columnModels and relatedTableModels
       if (m.activeListModel.entityset || m.activeListModel.aggregate) {
-        // the time that will be logged with the request
-        if (!Number.isInteger(m.reloadStartTime) || m.reloadStartTime === -1) {
-          m.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
-        }
-
-        if (cause && m.reloadCauses && m.reloadCauses.indexOf(cause) === -1) {
-          m.reloadCauses.push(cause);
-        }
+        flowControl.current.addCausesToRequestModel(m, [cause]);
       }
     });
 
     // inline table
-    Object.values(flowControl.current.inlineRelatedRequestModels).forEach(function (m) {
+    const inlineRequestModels = Object.values(flowControl.current.inlineRelatedRequestModels);
+    inlineRequestModels.forEach(function (m) {
       // TODO causes (changedContainers?)
       // the last parameter is making sure we're using the same queue for the main and inline
       m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
@@ -271,9 +276,68 @@ export default function RecordProvider({
       }
     });
 
-    // $rootScope.pauseRequests = false;
+    // update the cause list
+    const uc = LogReloadCauses;
+    const selfCause: any = {};
+    selfCause[uc.RELATED_BATCH_UNLINK] = selfCause[uc.RELATED_INLINE_BATCH_UNLINK] = uc.ENTITY_BATCH_UNLINK;
+    selfCause[uc.RELATED_CREATE] = selfCause[uc.RELATED_INLINE_CREATE] = uc.ENTITY_CREATE;
+    selfCause[uc.RELATED_DELETE] = selfCause[uc.RELATED_INLINE_DELETE] = uc.ENTITY_DELETE;
+    selfCause[uc.RELATED_UPDATE] = selfCause[uc.RELATED_INLINE_UPDATE] = uc.ENTITY_UPDATE;
+    if (Array.isArray(changedContainers)) {
+      changedContainers.forEach(function (container) {
+
+        // add it to main causes
+        flowControl.current.addCauses([container.cause]);
+
+        // add it to request models for aggregate and entity set
+        flowControl.current.requestModels.forEach(function (m) {
+          if (m.activeListModel.entityset || m.activeListModel.aggregate) {
+            flowControl.current.addCausesToRequestModel(m, [container.cause]);
+          }
+        });
+
+        // add it to inline related
+        inlineRequestModels.forEach(function (m, index) {
+          let c = container.cause;
+          if (container.isInline && container.index === index) {
+            c = selfCause[c];
+          }
+          m.addUpdateCauses([c]);
+        });
+
+        // add it to related
+        flowControl.current.relatedRequestModels.forEach(function (m, index) {
+          let c = container.cause;
+          if (!container.isInline && container.index === index) {
+            c = selfCause[c];
+          }
+          m.addUpdateCauses([m]);
+        });
+
+      });
+    }
+
+    pauseProcessingRequests.current = false;
     processRequests(isUpdate);
   };
+
+  /**
+   * will pause the requests that are pending for updating the page.
+   * Currently it's only setting a variable, but we might want to add
+   * more logic later.
+   */
+  const pauseUpdateRecordPage = () => {
+    pauseProcessingRequests.current = true;
+  }
+
+  /**
+   * Resume the requests after pausing
+   */
+  const resumeUpdateRecordPage = () => {
+    if (!pauseProcessingRequests.current) return;
+    pauseProcessingRequests.current = false;
+    processRequests(true);
+  }
 
   // -------------------------- flow control function ---------------------- //
   /**
@@ -281,7 +345,7 @@ export default function RecordProvider({
    */
   const processRequests = (isUpdate?: boolean) => {
     // TODO $rootScope.pauseRequests
-    if (!flowControl.current.haveFreeSlot()) {
+    if (!flowControl.current.haveFreeSlot() || pauseProcessingRequests.current) {
       return;
     }
     isUpdate = (typeof isUpdate === 'boolean') ? isUpdate : false;
@@ -1015,6 +1079,8 @@ export default function RecordProvider({
       showEmptySections,
       toggleShowEmptySections,
       updateRecordPage,
+      pauseUpdateRecordPage,
+      resumeUpdateRecordPage,
       // log related:
       logRecordClientAction,
       getRecordLogAction,
