@@ -60,7 +60,7 @@
                         });
                         break;
                     case "openDrawingHelpPage":
-                        $window.open(UriUtils.chaiseDeploymentPath() + "help-pages/?page=viewer-annotation", '_blank');
+                        $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
                         break;
                     case "hideChannelList":
                         $scope.$apply(function(){
