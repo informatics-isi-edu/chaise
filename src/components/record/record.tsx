@@ -360,22 +360,33 @@ const RecordInner = ({
   };
 
   const toggleRelatedSection = (relatedModel: RecordRelatedModel) => {
-    setOpenRelatedSections((currState: string[]) => {
-      const currIndex = currState.indexOf(relatedModel.index.toString());
-      const isOpen = (currIndex !== -1);
+    return (event: any) => {
+      // since we're using the link/unlink popups inside the header,
+      // clicking anywhere on the popups will trigger this handler!
+      // this will ensure what's clicked is actually a decendent of the accordion-button
+      if (!!event.currentTarget) {
+        const pEl = event.currentTarget as HTMLElement;
+        if (!pEl.contains(event.target as HTMLElement)) {
+          return;
+        }
+      }
+      setOpenRelatedSections((currState: string[]) => {
+        const currIndex = currState.indexOf(relatedModel.index.toString());
+        const isOpen = (currIndex !== -1);
 
-      const action = isOpen ? LogActions.CLOSE : LogActions.OPEN;
+        const action = isOpen ? LogActions.CLOSE : LogActions.OPEN;
 
-      // TODO shouldn't we use logRecordCleintAction here?
-      // TODO should technically be based on the latest reference
-      // log the action
-      // LogService.logClientAction({
-      //   action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
-      //   stack: relatedModel.recordsetProps.logInfo.logStack
-      // }, relatedModel.initialReference.defaultLogInfo);
+        // TODO shouldn't we use logRecordCleintAction here?
+        // TODO should technically be based on the latest reference
+        // log the action
+        // LogService.logClientAction({
+        //   action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
+        //   stack: relatedModel.recordsetProps.logInfo.logStack
+        // }, relatedModel.initialReference.defaultLogInfo);
 
-      return isOpen ? [...currState.slice(0, currIndex), ...currState.slice(currIndex + 1)] : currState.concat(relatedModel.index.toString());
-    });
+        return isOpen ? [...currState.slice(0, currIndex), ...currState.slice(currIndex + 1)] : currState.concat(relatedModel.index.toString());
+      });
+    }
   };
 
   const scrollMainContainerToTop = () => {
@@ -421,7 +432,7 @@ const RecordInner = ({
                   id={`rt-heading-${makeSafeIdAttr(rm.initialReference.displayname.value)}`}
                   as='div'
                 >
-                  <Accordion.Button as='div' onClick={() => toggleRelatedSection(rm)} className='panel-heading'>
+                  <Accordion.Button as='div' onClick={toggleRelatedSection(rm)} className='panel-heading'>
                     <RelatedTableHeader relatedModel={rm} />
                   </Accordion.Button>
                   <Accordion.Body>
