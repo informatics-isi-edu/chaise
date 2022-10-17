@@ -25,6 +25,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -156,6 +157,9 @@ const TableRow = ({
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
     isSavedQueryPopup = config.displayMode === RecordsetDisplayMode.SAVED_QUERY_POPUP;
 
+  const eventDetails: { [key: string]: any } = { rowIndex };
+  if (config.containerDetails) eventDetails.containerDetails = config.containerDetails;
+
   /**
    * The JS.Elements that are used for displaying messages
    */
@@ -204,13 +208,15 @@ const TableRow = ({
   let editCallback: null | (() => void) = null;
   if (config.editable && tuple.canUpdate) {
     editCallback = function () {
-      const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      const requestID = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
       const newRef = tupleReference.contextualize?.entryEdit;
 
       if (newRef) {
         const editLink = addQueryParamsToURL(newRef.appLink, {
-          invalidate: referrer_id
+          invalidate: requestID
         });
+
+        fireCustomEvent('row-edit-intend', rowContainer.current, { ...eventDetails, id: requestID });
 
         windowRef.open(editLink, '_blank');
 
@@ -304,9 +310,13 @@ const TableRow = ({
       stack: logStack
     };
     reference.delete(logObj).then(function deleteSuccess() {
-      // ask flow-control to update the page
-      // this will also make sure to remove the "disabled" row
-      update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
+      if (!isRelated) {
+        // ask flow-control to update the page
+        // this will also make sure to remove the "disabled" row
+        update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
+      }
+
+      fireCustomEvent('row-delete-success', rowContainer.current, eventDetails);
     }).catch(function (error: any) {
       setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });

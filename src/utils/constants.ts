@@ -96,6 +96,7 @@ export const errorNames = {
   multipleDataErrorCode: 'Multiple Records Found',
   facetFilterMissing: 'No filter or facet was defined.',
   multipleDataMessage: 'There are more than 1 record found for the filters provided.',
+  invalidHelpPage: 'Help Page Not Found'
 };
 
 export const errorMessages = {
@@ -115,6 +116,7 @@ export const errorMessages = {
   systemAdminMessage: 'An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.',
   viewerOSDFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
   viewerScreenshotFailed: 'Couldn\'t process the screenshot.',
+  invalidHelpPage: 'The requested help page cannot be found.'
 };
 
 export const BODY_CLASS_NAMES = {

@@ -290,7 +290,7 @@ export function copyToClipboard(text: string) {
 export function debounce(callback: Function, timeout: number) {
   let timer: any = null;
 
-  return function(...args: any[]) {
+  return function (...args: any[]) {
 
     clearTimeout(timer);
     timer = setTimeout(() => {
@@ -301,37 +301,34 @@ export function debounce(callback: Function, timeout: number) {
   }
 }
 
-/*
-  This function is used for firing custom events
-  @param {string} eventName - the event name
-  @param {string} targetElement - a DOM element from which the event will propogate
-  @param {object} detail - a custom object for passing data with the event
-  @param {boolean} bubbles - whether the event should be propagated upward to the parent element
-  @param {boolean} cancelable - whether the event can be canceled using event.preventDefault
-  @param {boolean} composed - whether the event will propagate across the shadow DOM boundary into the standard DOM
+/**
+ * This function is used for firing custom events
+ * @param {string} eventName - the event name
+ * @param {string|Element} targetElement - a DOM element from which the event will propogate
+ * @param {object} detail - a custom object for passing data with the event
+ * @param {boolean} bubbles - whether the event should be propagated upward to the parent element
+ * @param {boolean} cancelable - whether the event can be canceled using event.preventDefault
+ * @param {boolean} composed - whether the event will propagate across the shadow DOM boundary into the standard DOM
  */
-export function fireCustomEvent(eventName = 'myEvent', targetElement = 'body', detail = {}, bubbles = true, cancelable = true, composed = false) {
-  const customEvent = new CustomEvent(eventName, {
-    detail,
-    bubbles,
-    cancelable,
-    composed,
-  });
+export function fireCustomEvent(eventName = 'myEvent', targetElement: string | Element = 'body', detail = {},
+  bubbles = true, cancelable = true, composed = false) {
+  const customEvent = new CustomEvent(eventName, { detail, bubbles, cancelable, composed });
 
   if (targetElement === 'body') {
     document.querySelector('body')?.dispatchEvent(customEvent);
-  } else {
+  } else if (typeof targetElement === 'string') {
     document.body.querySelector(targetElement)?.dispatchEvent(customEvent);
+  } else {
+    targetElement.dispatchEvent(customEvent);
   }
 
 }
 
-/*
-  This function is used to covnvert values in vw units to px units
-  @param {number} value - the dimension value in vw units
-  @returns {number} the dimension value in px units
-*/
-
+/**
+ * This function is used to covnvert values in vw units to px units
+ * @param {number} value - the dimension value in vw units
+ * @returns {number} the dimension value in px units
+ */
 export function convertVWToPixel(value: number) {
   const e = document.documentElement;
   const g = document.getElementsByTagName('body')[0];

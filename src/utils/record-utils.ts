@@ -160,7 +160,8 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting: false,
         disableFaceting: true,
-        displayMode: RecordsetDisplayMode.RELATED
+        displayMode: RecordsetDisplayMode.RELATED,
+        containerDetails: { isInline, index }
       },
       logInfo: {
         logStack: LogService.getStackObject(stackNode),

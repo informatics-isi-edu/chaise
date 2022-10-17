@@ -43,6 +43,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 export type RecordProps = {
   /**
@@ -178,10 +179,17 @@ const RecordInner = ({
    * updateRecordPage function changes
    */
   useEffect(() => {
-    // TODO listen for the delete and edit custom events from the table-row
+    windowRef.removeEventListener('row-edit-intend', onEditRowIntend);
+    windowRef.addEventListener('row-edit-intend', onEditRowIntend);
+
+    windowRef.removeEventListener('row-delete-success', onDeleteRowSuccess);
+    windowRef.addEventListener('row-delete-success', onDeleteRowSuccess);
+
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
     return () => {
+      windowRef.removeEventListener('row-edit-intend', onEditRowIntend);
+      windowRef.removeEventListener('row-delete-success', onDeleteRowSuccess);
       windowRef.removeEventListener('focus', onFocus);
     };
   }, [updateRecordPage]);
@@ -228,6 +236,22 @@ const RecordInner = ({
       updateRecordPage(true, '', changedContainers);
     }
   };
+
+  const onEditRowIntend = ((event: CustomEvent) => {
+    const id = event.detail.id;
+    const containerDetails = event.detail.containerDetails;
+    if (typeof id !== 'string' || !isObjectAndNotNull(containerDetails)) {
+      return;
+    }
+    editRecordRequests.current[id] = { ...containerDetails, completed: false };
+  }) as EventListener;
+
+  const onDeleteRowSuccess = ((event: CustomEvent) => {
+    const containerDetails = event.detail.containerDetails;
+    if (!isObjectAndNotNull(containerDetails)) return;
+    const cause = containerDetails.isInline ? LogReloadCauses.RELATED_INLINE_DELETE : LogReloadCauses.RELATED_DELETE;
+    updateRecordPage(true, undefined, [{ ...containerDetails, cause }])
+  }) as EventListener;
 
   /**
    * The callback that recoredit app expects and calls after edit is done.

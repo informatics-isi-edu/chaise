@@ -72,6 +72,10 @@ export type RecordsetConfig = {
   showFaceting: boolean,
   disableFaceting: boolean,
   displayMode: RecordsetDisplayMode,
+  /**
+   * used in record page to figure out where the edit/delete request is fired from
+   */
+  containerDetails?: any,
   // TODO enable favorites
   // enableFavorites: boolean
 }

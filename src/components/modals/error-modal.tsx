@@ -10,6 +10,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import {
   ChaiseError, CustomError, DifferentUserConflictError, ForbiddenAssetAccess,
+  InvalidHelpPage,
   NoRecordError, NoRecordRidError, UnauthorizedAssetAccess
 } from '@isrd-isi-edu/chaise/src/models/errors';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -60,7 +61,12 @@ const ErrorModal = (): JSX.Element | null => {
   // ----------- map error to proper modal properties ------------------//
 
   const showLogin = !session && !(
-    exception instanceof DifferentUserConflictError
+    exception instanceof DifferentUserConflictError ||
+    exception instanceof InvalidHelpPage
+  );
+
+  const skipMaybeNeedLoginMessage = (
+    exception instanceof InvalidHelpPage
   );
 
   // ---------------- message, submessage, and pageName ---------------//
@@ -99,7 +105,7 @@ const ErrorModal = (): JSX.Element | null => {
   /**
    * if user is not logged in add info that they might need to login
    */
-  if (!session) {
+  if (!skipMaybeNeedLoginMessage && !session) {
     if (exception instanceof NoRecordError || exception instanceof NoRecordRidError) {
       // if no logged in user, change the message
       const messageReplacement = (exception instanceof NoRecordError ? MESSAGE_MAP.noRecordForFilter : MESSAGE_MAP.noRecordForRid);

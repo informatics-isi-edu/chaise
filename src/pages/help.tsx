@@ -9,6 +9,9 @@ import SwitchUserAccountsHelp from '@isrd-isi-edu/chaise/src/components/help/swi
 import { useEffect, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
+// models
+import { InvalidHelpPage } from '@isrd-isi-edu/chaise/src/models/errors';
+
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
@@ -78,8 +81,8 @@ const HelpApp = (): JSX.Element => {
 
         let errMessage = 'No "page=" query parameter present in the url.'
         if (tempPageName) errMessage = `No File was found with name: "help-pages/${tempPageName}.md"`
-        
-        dispatchError({ error: new Error(errMessage) });
+
+        dispatchError({ error: new InvalidHelpPage('', errMessage) });
       });
     }
   }, []);

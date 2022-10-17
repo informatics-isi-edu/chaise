@@ -222,7 +222,7 @@ export class DifferentUserConflictError extends ChaiseError {
 
       // TODO can we improve this?
       const link = `
-        <a id='switch-user-accounts-link' target='_blank' href='${chaiseDeploymentPath()}'lib/switchUserAccounts.html'>
+        <a id='switch-user-accounts-link' target='_blank' href='${chaiseDeploymentPath()}help/?page=switch-user-accounts'>
           Switch User Accounts Document
         </a>
       `;
@@ -253,5 +253,16 @@ export class DifferentUserConflictError extends ChaiseError {
         continueCB
       }
     )
+  }
+}
+
+
+export class InvalidHelpPage extends ChaiseError {
+  constructor(message?: string, subMessage?: string) {
+    super(
+      errorNames.invalidHelpPage,
+      message || errorMessages.invalidHelpPage,
+      subMessage
+    );
   }
 }
