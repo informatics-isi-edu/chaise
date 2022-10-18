@@ -41,6 +41,7 @@ import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } f
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
+import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const Recordset = ({
   initialReference,
@@ -126,7 +127,6 @@ const RecordsetInner = ({
     selectedRows,
     setSelectedRows,
     update,
-    addRecordRequests,
     forceShowSpinner
   } = useRecordset();
 
@@ -160,6 +160,11 @@ const RecordsetInner = ({
   } | null>(null);
 
   const clearSearch = useRef<() => void>(null);
+
+  /**
+   * used to see if there are any pending create requests
+   */
+  const addRecordRequests = useRef<any>({});
 
   /**
    * used to figure out if we need to update the page after edit request or not
@@ -280,9 +285,13 @@ const RecordsetInner = ({
    * update function changes
    */
   useEffect(() => {
+    window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+
     window.removeEventListener('focus', onFocus);
     window.addEventListener('focus', onFocus);
     return () => {
+      window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
       window.removeEventListener('focus', onFocus);
     };
   }, [update]);
@@ -349,6 +358,15 @@ const RecordsetInner = ({
       update({ updateResult: true, updateFacets: true, updateCount: true }, null, { cause, lastActiveFacet: -1 });
     }
   };
+
+  /**
+   * capture the create requests so we know when to refresh the page on focus
+   */
+  const onAddIntend = ((event: CustomEvent) => {
+    const id = event.detail.id;
+    if (typeof id !== 'string') return;
+    addRecordRequests.current[id] = 1;
+  }) as EventListener;
 
   /**
    * The callback that recoredit app expects and calls after edit is done.

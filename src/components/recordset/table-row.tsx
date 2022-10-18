@@ -26,6 +26,7 @@ import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -216,7 +217,7 @@ const TableRow = ({
           invalidate: requestID
         });
 
-        fireCustomEvent('row-edit-intend', rowContainer.current, { ...eventDetails, id: requestID });
+        fireCustomEvent(CUSTOM_EVENTS.ROW_EDIT_INTEND, rowContainer.current, { ...eventDetails, id: requestID });
 
         windowRef.open(editLink, '_blank');
 
@@ -315,7 +316,7 @@ const TableRow = ({
         // this will also make sure to remove the "disabled" row
         update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
       }
-      fireCustomEvent('row-delete-success', rowContainer.current, eventDetails);
+      fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
     }).catch(function (error: any) {
       setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });

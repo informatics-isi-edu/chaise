@@ -159,11 +159,6 @@ export const RecordsetContext = createContext<{
    */
   checkReferenceURL: (ref: any, showAlert?: boolean) => boolean,
   /**
-   * the ref for the addRecordRequests
-   * can be used to see if there are any pending create requests
-   */
-  addRecordRequests: any
-  /**
    * if true, we have to forcefully show the spinner
    */
   forceShowSpinner: boolean,
@@ -362,8 +357,6 @@ export default function RecordsetProvider({
   const [totalRowCountHasTimeoutError, setHasCountTimeoutError] = useState(false);
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
-
-  const addRecordRequests = useRef<any>({});
 
   // call the flow-control after each reference object
   useEffect(() => {
@@ -1097,7 +1090,6 @@ export default function RecordsetProvider({
       registerFacetCallbacks,
       printDebugMessage,
       checkReferenceURL,
-      addRecordRequests,
       forceShowSpinner, setForceShowSpinner,
       // log related:
       logRecordsetClientAction, getLogAction, getLogStack,

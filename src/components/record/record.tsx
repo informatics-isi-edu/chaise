@@ -42,7 +42,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 export type RecordProps = {
@@ -97,8 +97,7 @@ const RecordInner = ({
     readMainEntity,
     reference,
     relatedModels,
-    logRecordClientAction, getRecordLogAction, getRecordLogStack,
-    addRecordRequests
+    logRecordClientAction, getRecordLogAction, getRecordLogStack
   } = useRecord();
 
   /**
@@ -125,6 +124,11 @@ const RecordInner = ({
   const [openRelatedSections, setOpenRelatedSections] = useState<string[]>(Array.from(Array(reference.related.length), (e, i) => `${i}`));
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
+
+  /**
+   * used to see if there are any pending create requests
+   */
+   const addRecordRequests = useRef<any>({});
 
   /**
    * used to figure out if we need to update the page after edit request or not
@@ -179,17 +183,21 @@ const RecordInner = ({
    * updateRecordPage function changes
    */
   useEffect(() => {
-    windowRef.removeEventListener('row-edit-intend', onEditRowIntend);
-    windowRef.addEventListener('row-edit-intend', onEditRowIntend);
+    window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+    window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
 
-    windowRef.removeEventListener('row-delete-success', onDeleteRowSuccess);
-    windowRef.addEventListener('row-delete-success', onDeleteRowSuccess);
+    windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
+    windowRef.addEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
+
+    windowRef.removeEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
+    windowRef.addEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
 
     windowRef.removeEventListener('focus', onFocus);
     windowRef.addEventListener('focus', onFocus);
     return () => {
-      windowRef.removeEventListener('row-edit-intend', onEditRowIntend);
-      windowRef.removeEventListener('row-delete-success', onDeleteRowSuccess);
+      window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+      windowRef.removeEventListener(CUSTOM_EVENTS.ROW_EDIT_INTEND, onEditRowIntend);
+      windowRef.removeEventListener(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, onDeleteRowSuccess);
       windowRef.removeEventListener('focus', onFocus);
     };
   }, [updateRecordPage]);
@@ -234,6 +242,18 @@ const RecordInner = ({
       updateRecordPage(true, '', changedContainers);
     }
   };
+
+  /**
+   * capture the create requests so we know when to refresh the page on focus
+   */
+   const onAddIntend = ((event: CustomEvent) => {
+    const id = event.detail.id;
+    const containerDetails = event.detail.containerDetails;
+    if (typeof id !== 'string' || !isObjectAndNotNull(containerDetails)) {
+      return;
+    }
+    addRecordRequests.current[id] = containerDetails;
+  }) as EventListener;
 
   /**
    * capture the edit requests so we know when to refresh the page on focus

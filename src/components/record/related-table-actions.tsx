@@ -1,4 +1,4 @@
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useState, useRef } from 'react';
 
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
@@ -27,9 +27,10 @@ import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { allowCustomModeRelated, displayCustomModeRelated, getPrefillCookieObject } from '@isrd-isi-edu/chaise/src/utils/record-utils';
-import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEAFULT_PAGE_SIZE, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import Q from 'q';
 
 type RelatedTableActionsProps = {
@@ -44,8 +45,7 @@ const RelatedTableActions = ({
     reference: recordReference, page: recordPage,
     toggleRelatedDisplayMode,
     updateRecordPage, pauseUpdateRecordPage, resumeUpdateRecordPage,
-    getRecordLogStack,
-    addRecordRequests
+    getRecordLogStack
   } = useRecord();
 
   const { validateSessionBeforeMutation } = useAuthn();
@@ -55,6 +55,8 @@ const RelatedTableActions = ({
   const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(null);
   const [submitPureBinaryCB, setAddPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
   const [showPureBinarySpinner, setShowPureBinarySpinner] = useState(false);
+
+  const container = useRef<HTMLDivElement>(null);
 
   const usedRef = relatedModel.initialReference;
 
@@ -97,10 +99,15 @@ const RelatedTableActions = ({
     // append it to the URL
     const referrer_id = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
 
-    addRecordRequests.current[referrer_id] = {
-      isInline: relatedModel.isInline,
-      index: relatedModel.index
-    };
+    if (!!container.current) {
+      fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, container.current, {
+        id: referrer_id,
+        containerDetails: {
+          isInline: relatedModel.isInline,
+          index: relatedModel.index
+        }
+      });
+    }
 
     // Redirect to the url in a new tab
     windowRef.open(
@@ -331,7 +338,7 @@ const RelatedTableActions = ({
 
   return (
     <>
-      <div className='related-table-actions'>
+      <div className='related-table-actions' ref={container}>
         {relatedModel.canCreate &&
           <ChaiseTooltip
             placement='top'

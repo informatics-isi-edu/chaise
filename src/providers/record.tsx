@@ -123,13 +123,7 @@ export const RecordContext = createContext<{
   /**
    * Resume the requests after pausing
    */
-  resumeUpdateRecordPage: () => void,
-  /**
-   * the ref for the addRecordRequests
-   * can be used to see if there are any pending create requests
-   * TODO proper type
-   */
-  addRecordRequests: any
+  resumeUpdateRecordPage: () => void
 } | null>(null);
 
 type RecordProviderProps = {
@@ -195,8 +189,6 @@ export default function RecordProvider({
       });
     });
   };
-
-  const addRecordRequests = useRef<any>({});
 
   const pauseProcessingRequests = useRef(false);
 
@@ -1090,8 +1082,7 @@ export default function RecordProvider({
       relatedModels,
       updateRelatedRecordsetState,
       registerRelatedModel,
-      toggleRelatedDisplayMode,
-      addRecordRequests
+      toggleRelatedDisplayMode
     };
   }, [
     // main entity:
