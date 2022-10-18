@@ -18,8 +18,8 @@ describe("Domain filter pattern support,", function () {
             fkModal.allowAnimations(false);
 
             modal = chaisePage.recordEditPage.getModalTitle();
-            browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
-
+            return browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
+        }).then(function () {
             return modal.getText();
         }).then(function (text) {
             expect(text.indexOf("Select")).toBeGreaterThan(-1);

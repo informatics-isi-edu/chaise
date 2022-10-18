@@ -116,7 +116,7 @@
     @include chaise-btn-primary();
   }
 
-  a.download-alt, a[download] {
+  a.download-alt:not(.download), a[download]:not(.download) {
     @include download-btn();
   }
 
