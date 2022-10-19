@@ -1,4 +1,3 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';

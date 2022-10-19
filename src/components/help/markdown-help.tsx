@@ -1,7 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_md-help-app.scss';
 
-import React from 'react';
-
 const MarkdownHelp = (): JSX.Element => {
 
   return (

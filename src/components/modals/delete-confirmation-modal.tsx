@@ -1,5 +1,3 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
-
 import Modal from 'react-bootstrap/Modal';
 
 type DeleteConfirmationModalProps = {
