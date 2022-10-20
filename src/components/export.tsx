@@ -24,16 +24,26 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type ExportProps = {
-  reference: any;
+  reference: any,
+  /**
+   * if this is based on one tuple (record page), this should be passed
+   */
+  tuple?: any,
   /**
    * prop to make export button disable
    */
-  disabled: boolean;
+  disabled: boolean,
+  /**
+   * can be used to modify the csv option name
+   */
+  csvOptionName?: string
 };
 
 const Export = ({
   reference,
-  disabled
+  tuple,
+  disabled,
+  csvOptionName
 }: ExportProps): JSX.Element => {
   /**
    * State variable to export options
@@ -58,7 +68,7 @@ const Export = ({
       if (reference) {
         if (reference.csvDownloadLink) {
           options.push({
-            displayname: 'Search results (CSV)',
+            displayname: csvOptionName ? csvOptionName : 'Search results (CSV)',
             type: 'DIRECT',
           });
         }
@@ -94,10 +104,9 @@ const Export = ({
       case 'BAG':
       case 'FILE':
         setSelectedOption(option);
-        const bagName = reference.table.name;
         const exporter = new ConfigService.ERMrest.Exporter(
           reference,
-          bagName,
+          reference.table.name + (tuple ? `_${tuple.uniqueId}` : ''),
           option,
           ConfigService.chaiseConfig.exportServicePath
         );

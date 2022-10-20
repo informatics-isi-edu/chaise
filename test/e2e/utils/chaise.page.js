@@ -1,3 +1,4 @@
+const { element } = require('protractor');
 var Q = require('q');
 
 var recordEditPage = function() {
@@ -480,39 +481,28 @@ var recordEditPage = function() {
 var recordPage = function() {
     var that = this;
     this.getEntityTitleElement = function() {
-        return element(by.id('entity-title'));
+        return element(by.css('.entity-title'));
     };
 
     this.getEntitySubTitleElement = function() {
-        return element(by.id("entity-subtitle"));
-    };
-
-    this.getEntitySubTitleTooltip = function () {
-        return this.getEntitySubTitleLink().getAttribute('uib-tooltip');
-    };
-
-    this.getEntitySubTitleLink = function () {
-        return this.getEntitySubTitleElement().element(by.tagName("a"));
+        return element(by.css(".entity-subtitle"));
     };
 
     this.getColumns = function() {
-        return element.all(by.css("td.entity-key"));
+        return element.all(by.css("tr:not(.forced-hidden) td.entity-key"));
     };
 
-    this.getAllColumnCaptions = function() {
-        return element.all(by.css('td.entity-key > span.column-displayname > span'));
+    this.getAllColumnNames = function() {
+        return element.all(by.css('tr:not(.forced-hidden) td.entity-key > span.column-displayname > span'));
     };
 
     this.getColumnCaptionsWithHtml = function() {
-        return element.all(by.css('td.entity-key > span.column-displayname > span[ng-bind-html]'));
+        // TODO
+        return element.all(by.css('tr:not(.forced-hidden) td.entity-key) > span.column-displayname > span[ng-bind-html]'));
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname[uib-tooltip]')");
-    };
-
-    this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).siblings('span[ng-if=\"!column.nullok\"].text-danger')[0];", el);
+        return browser.executeScript("return $('td.entity-key:not(.forced-hidden) > span.column-displayname[uib-tooltip]')");
     };
 
     this.getColumnComment = function(el) {
@@ -523,26 +513,16 @@ var recordPage = function() {
         return el.getAttribute('uib-tooltip-html');
     };
 
-    this.getColumnValueElements = function() {
-        return browser.executeScript("return $('.entity-value > span.ng-scope > span.ng-scope');");
-    };
-
     this.getColumnValue = function(columnName) {
-        return element(by.id("row-" + columnName)).element(by.css(".entity-value")).element(by.css(".ng-scope"));
+        return element(by.id("row-" + columnName)).element(by.css(".entity-value")).element(by.css("span"));
     };
 
     this.getLinkChild = function(el) {
         return browser.executeScript("return $(arguments[0]).find('a')[0];", el);
     };
 
-    this.getRelatedTables = function() {
-        return element.all(by.css(".related-table"));
-    };
-    this.getRelatedTablesWithPanel = function () {
-        return element.all(by.css(".panel"));
-    };
-    this.getRelatedTablesWithPanelandHeading = function () {
-        return element.all(by.css(".related-table-accordion.panel:not(.ng-hide)"));
+    this.getRelatedTables = function () {
+        return element.all(by.css(".related-table-accordion:not(.forced-hidden)"));
     };
 
     this.getRelatedTable = function(displayName) {
@@ -660,19 +640,19 @@ var recordPage = function() {
     };
 
     this.getCreateRecordButton = function() {
-        return element(by.id("create-record"));
+        return element(by.css(".title-buttons .create-record-btn"));
     };
 
     this.getEditRecordButton = function() {
-        return element(by.id("edit-record"));
+        return element(by.css(".title-buttons .edit-record-btn"));
     };
 
     this.getCopyRecordButton = function() {
-        return element(by.id("copy-record"));
+        return element(by.css(".title-buttons .copy-record-btn"));
     };
 
     this.getDeleteRecordButton = function () {
-        return element(by.id("delete-record")).element(by.tagName("button"));
+        return element(by.css(".title-buttons .delete-record-btn"));
     };
 
     this.getConfirmDeleteTitle = function() {
@@ -684,19 +664,19 @@ var recordPage = function() {
     }
 
     this.getShowAllRelatedEntitiesButton = function() {
-        return element(by.id("show-all-related-tables"));
+        return element(by.css(".toggle-empty-sections"));
     };
 
     this.getShareButton = function() {
-        return element(by.id('share'));
+        return element(by.css('.share-cite-btn'));
     };
 
-    this.getVersionedLinkText = function() {
-        return element(by.id('version'));
+    this.getVersionedLinkElement = function() {
+        return element(by.css('.share-modal-versioned-link'));
     };
 
-    this.getPermalinkText = function() {
-        return element(by.id('permalink'));
+    this.getLiveLinkElement = function() {
+        return element(by.css('.share-modal-live-link'));
     };
 
     this.getModalText = function() {
@@ -704,7 +684,7 @@ var recordPage = function() {
     };
 
     this.getShareModal = function() {
-        return element(by.css(".chaise-share-citation"));
+        return element(by.css(".chaise-share-citation-modal"));
     };
 
     this.waitForCitation = function (timeout) {
@@ -723,39 +703,31 @@ var recordPage = function() {
     };
 
     this.getShareLinkHeader = function() {
-        return element(by.id("share-link")).element(by.tagName('h2'));
+        return element(by.css(".share-modal-links")).element(by.tagName('h2'));
     };
 
     this.getShareLinkSubHeaders = function() {
-        return element(by.id("share-link")).all(by.tagName('h3'));
+        return element(by.css(".share-modal-links")).all(by.tagName('h3'));
     };
 
     this.getCitationHeader = function() {
-        return element(by.id("citation")).element(by.tagName('h2'));
+        return element(by.css(".share-modal-citation")).element(by.tagName('h2'));
     };
 
     this.getDownloadCitationHeader = function() {
-        return element(by.id("download-citation")).element(by.tagName('h3'));
+        return element(by.css(".share-modal-download-citation")).element(by.tagName('h3'));
     };
 
     this.getCitationText = function() {
-        return element(by.id("citation-text"));
+        return element(by.css(".share-modal-citation-text"));
     };
 
     this.getBibtex = function() {
-        return element(by.id("bibtex-download"));
-    };
-
-    this.getErrorModalReloadButton = function(){
-        return element(by.id('error-reload-button'));
-    };
-
-    this.getErrorModalOkButton = function(){
-        return element(by.id('error-ok-button'));
+        return element(by.css(".bibtex-download-btn"));
     };
 
     this.getModalDisabledRows = function () {
-        return browser.executeScript("return $('.modal-body tr.disabled-row')");
+      return element.all(by.css('.modal-body tr.disabled-row'));
     };
 
     this.getSuccessAlert = function () {
@@ -766,8 +738,8 @@ var recordPage = function() {
         return element(by.id("rt-" + displayname)).all(by.css(".btn-group .delete-action-button"));
     };
 
-    this.getLoadingElement = function () {
-        return element(by.id("rt-loading"));
+    this.getRelatedSectionSpinner = function () {
+        return element(by.css(".related-section-spinner"));
     }
 
     this.getSidePanel = function() {
@@ -817,10 +789,6 @@ var recordsetPage = function() {
     this.waitForInverseMainSpinner = function () {
         var locator = element(by.id("main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
-    };
-
-    this.getPageTitle = function() {
-        return browser.executeScript("return $('#page-title').text();");
     };
 
     this.getPageTitleElement = function() {
@@ -908,10 +876,6 @@ var recordsetPage = function() {
         return element.all(by.css("span.table-column-displayname.chaise-icon-for-tooltip"));
     };
 
-    this.getColumnComment = function(el) {
-        return el.getAttribute('uib-tooltip');
-    };
-
     this.getMainSearchBox = function(el) {
         var locator = by.className("recordset-main-search");
         return el ? el.element(locator) : element(locator);
@@ -997,18 +961,8 @@ var recordsetPage = function() {
         return element(by.css(".export-menu")).element(by.tagName("button"));
     };
 
-    // TODO: remove once record app migrated
-    this.getAngularExportDropdown = function () {
-        return element(by.tagName("export")).element(by.tagName("button"));
-    };
-
     this.getExportOptions = function () {
         return element.all(by.css(".export-menu-item"));
-    };
-
-    // TODO: remove once record app migrated
-    this.getAngularExportOptions = function () {
-        return element(by.tagName("export")).all(by.tagName("li"));
     };
 
     this.getExportOption = function (optionName) {
@@ -1323,6 +1277,22 @@ var errorModal = function () {
     this.getTitle = function () {
         return element(by.css(".modal-error .modal-title"));
     }
+
+    this.getBody = function () {
+        return element(by.css(".modal-error .modal-body"));
+    }
+
+    this.getOKButton = function () {
+        return element(by.css('.modal-error .error-ok-button'));
+    }
+
+    this.getCloseButton = function () {
+        return element(by.css('.modal-error .modal-close'));
+    }
+
+    this.getReloadButton = function () {
+      return element(by.css('.modal-error .error-reload-button'));
+    };
 };
 
 var navbar = function () {
@@ -1397,8 +1367,8 @@ function chaisePage() {
     }
     this.recordPageReady = function() {
         this.waitForElement(this.recordPage.getEntityTitleElement());
-        this.waitForElement(element(by.id('tblRecord')));
-        this.waitForElementInverse(element(by.id('rt-loading')));
+        this.waitForElement(element(by.css('.record-main-section-table')));
+        this.waitForElementInverse(this.recordPage.getRelatedSectionSpinner());
     }
     this.recordeditPageReady = function() {
         this.waitForClickableElement(element(by.id("submit-record-button")));

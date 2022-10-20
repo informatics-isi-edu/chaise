@@ -466,9 +466,9 @@ const RecordInner = ({
             </Accordion>
           </div>
         }
-        {/* the related-spinner must be inside the main-body to ensure proper positioning */}
+        {/* the related-section-spinner must be inside the main-body to ensure proper positioning */}
         {errors.length === 0 && showRelatedSectionSpinner &&
-          <ChaiseSpinner className='related-spinner bottom-left-spinner' spinnerSize='sm' />
+          <ChaiseSpinner className='related-section-spinner bottom-left-spinner' spinnerSize='sm' />
         }
         {showScrollToTopBtn &&
           <ChaiseTooltip placement='left' tooltip='Scroll to top'>
@@ -536,13 +536,13 @@ const RecordInner = ({
                   placement='bottom-start'
                   tooltip={`Click here to ${showEmptySections ? 'hide empty related sections.' : 'show empty related sections too.'}`}
                 >
-                  <button className='chaise-btn chaise-btn-primary' onClick={toggleShowEmptySections}>
+                  <button className='chaise-btn chaise-btn-primary toggle-empty-sections' onClick={toggleShowEmptySections}>
                     <span className='chaise-btn-icon fa fa-th-list'></span>
                     <span>{showEmptySections ? 'Hide' : 'Show'} empty sections</span>
                   </button>
                 </ChaiseTooltip>
-                <Export reference={reference} disabled={false} />
-                <ShareCiteButton title={'Share and Cite'} reference={reference} tuple={page.tuples[0]} citation={citation} />
+                <Export reference={reference} tuple={page.tuples[0]} disabled={false} csvOptionName={'This record (CSV)'} />
+                <ShareCiteButton reference={reference} tuple={page.tuples[0]} citation={citation} />
               </div>
             </div>
             <div className='title'>
@@ -553,18 +553,20 @@ const RecordInner = ({
                       addLink={true}
                       reference={reference}
                       displayname={reference.displayname}
+                      className='entity-subtitle'
                     />
                     <span>: </span>
-                    <DisplayValue value={page.tuples[0].displayname} />
+                    <DisplayValue className='entity-title' value={page.tuples[0].displayname} />
                     {(canCreate || canEdit || canDelete) &&
                       <div className='title-buttons record-action-btns-container'>
                         {/* create */}
                         <ChaiseTooltip
                           placement='bottom-start'
-                          tooltip='Click here to create a record.'
+                          tooltip={canCreate ? 'Click here to create a record.' : 'You cannot perform this action.'}
                         >
                           <a
-                            className={btnClasses + (!canCreate ? ' disabled' : '')}
+                            aria-disabled={!canCreate}
+                            className={btnClasses + ' create-record-btn' + (!canCreate ? ' disabled' : '')}
                             href={reference.table.reference.unfilteredReference.contextualize.entryCreate.appLink}
                           >
                             <span className='chaise-btn-icon fa fa-plus'></span>
@@ -574,9 +576,13 @@ const RecordInner = ({
                         {/* edit */}
                         <ChaiseTooltip
                           placement='bottom-start'
-                          tooltip='Click here to create a copy of this record'
+                          tooltip={canCreate ? 'Click here to create a copy of this record.' : 'You cannot perform this action.'}
                         >
-                          <a className={btnClasses + (!canCreate ? ' disabled' : '')} href={copyRecord()}>
+                          <a
+                            aria-disabled={!canCreate}
+                            className={btnClasses + ' copy-record-btn' + (!canCreate ? ' disabled' : '')}
+                            href={copyRecord()}
+                          >
                             <span className='chaise-btn-icon  fa fa-clipboard'></span>
                             <span>Copy</span>
                           </a>
@@ -584,10 +590,11 @@ const RecordInner = ({
                         {/* copy */}
                         <ChaiseTooltip
                           placement='bottom-start'
-                          tooltip='Click here to edit this record'
+                          tooltip={canEdit ? 'Click here to edit this record.' : 'You cannot perform this action.'}
                         >
                           <a
-                            className={btnClasses + (!canEdit ? ' disabled' : '')}
+                            aria-disabled={!canEdit}
+                            className={btnClasses + ' edit-record-btn' + (!canEdit ? ' disabled' : '')}
                             href={reference.contextualize.entryEdit.appLink}
                           >
                             <span className='chaise-btn-icon  fa fa-pencil'></span>
@@ -597,9 +604,13 @@ const RecordInner = ({
                         {/* delete */}
                         <ChaiseTooltip
                           placement='bottom-start'
-                          tooltip='Click here to delete this record'
+                          tooltip={canDelete ? 'Click here to delete this record.' : 'You cannot perform this action.'}
                         >
-                          <button className={btnClasses + (!canDelete ? ' disabled' : '')} onClick={deleteRecord}>
+                          <button
+                            aria-disabled={!canDelete}
+                            className={btnClasses + ' delete-record-btn' + (!canDelete ? ' disabled' : '')}
+                            onClick={deleteRecord}
+                          >
                             <span className='chaise-btn-icon fa fa-trash-alt'></span>
                             <span>Delete</span>
                           </button>

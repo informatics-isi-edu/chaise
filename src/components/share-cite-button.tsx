@@ -87,7 +87,7 @@ const ShareCiteButton = ({
         placement='bottom-start'
         tooltip={waitingForModal ? 'Opening the share dialog...' : 'Click here to show the share dialog.'}
       >
-        <button className='chaise-btn chaise-btn-primary' onClick={onButtonClick} disabled={waitingForModal}>
+        <button className='share-cite-btn chaise-btn chaise-btn-primary' onClick={onButtonClick} disabled={waitingForModal}>
           {!waitingForModal && <span className='chaise-btn-icon fa fa-share-square'></span>}
           {waitingForModal && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
           <span>Share and cite</span>

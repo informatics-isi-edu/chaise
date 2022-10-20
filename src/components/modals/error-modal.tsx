@@ -269,7 +269,7 @@ const ErrorModal = (): JSX.Element | null => {
         {showOKBtn &&
           <button
             type='button' onClick={() => okCallback()}
-            className='chaise-btn chaise-btn-danger' id='error-ok-button'
+            className='chaise-btn chaise-btn-danger error-ok-button'
           >
             <span>OK</span>
           </button>
@@ -281,7 +281,7 @@ const ErrorModal = (): JSX.Element | null => {
           >
             <button
               type='button' onClick={() => reloadCallback()}
-              className='chaise-btn chaise-btn-secondary' id='error-reload-button'
+              className='chaise-btn chaise-btn-secondary error-reload-button'
             >
               <span>Reload</span>
             </button>
@@ -294,7 +294,7 @@ const ErrorModal = (): JSX.Element | null => {
           >
             <button
               type='button' onClick={() => continueCallback()}
-              className='chaise-btn chaise-btn-secondary footer-continue-btn' id='error-continue-button'
+              className='chaise-btn chaise-btn-secondary footer-continue-btn error-continue-button'
             >
               <span>{exception.errorData?.continueBtnText}</span>
             </button>

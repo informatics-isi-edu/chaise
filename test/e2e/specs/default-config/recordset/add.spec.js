@@ -19,7 +19,7 @@ describe('Recordset add record,', function() {
         chaisePage.recordsetPageReady();
     });
 
-    
+
     it("show an inline comment instead of tooltip", function () {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
@@ -141,7 +141,7 @@ describe('Recordset add record,', function() {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            chaisePage.waitForElement(element(by.id("tblRecord")));
+            chaisePage.waitForElement(element(by.css(".record-main-section-table")));
             done();
         }).catch(function (err) {
             done.fail(err);

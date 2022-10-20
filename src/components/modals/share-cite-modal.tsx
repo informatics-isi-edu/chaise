@@ -118,7 +118,7 @@ const ShareCiteModal = ({
 
   const downloadFilename = `${refTable.name}_${tuple.uniqueId}`;
   let bibtexObjectURL;
-  if (citationReady) {
+  if (citationReady && citation.value) {
     let bibtexContent = '@article{';
     bibtexContent += (citation.value.id ? `${citation.value.id},\n` : `${downloadFilename},\n`);
     if (citation.value.author) bibtexContent += `author = {${citation.value.author}},\n`;
@@ -132,14 +132,19 @@ const ShareCiteModal = ({
     bibtexObjectURL = URL.createObjectURL(bibtexBlob);
   }
 
+  let usedTitle = title;
+  if (!title) {
+    usedTitle = citationReady && citation.value ? 'Share and Cite' : 'Share';
+  }
+
   return (
     <Modal
-      className='chaise-share-citation'
+      className='chaise-share-citation-modal'
       show={true}
       onHide={onClose}
     >
       <Modal.Header className='center-aligned-title'>
-        <Modal.Title>{title ? title : 'Share'}</Modal.Title>
+        <Modal.Title>{usedTitle}</Modal.Title>
         <button
           className='chaise-btn chaise-btn-secondary modal-close modal-close-absolute'
           onClick={() => onClose()}
@@ -169,7 +174,7 @@ const ShareCiteModal = ({
               </li>
             ))
           }
-          <li id='share-link'>
+          <li className='share-modal-links'>
             {!hideHeaders && <h2>Share Link</h2>}
             {versionLink &&
               <>
@@ -185,7 +190,7 @@ const ShareCiteModal = ({
                     />
                   </ChaiseTooltip>
                 </h3>
-                <a className='share-item-value' id='version' href={versionLink}>{versionLink}</a>
+                <a className='share-item-value share-modal-versioned-link' href={versionLink}>{versionLink}</a>
               </>
             }
             <h3 className='share-item-header'>
@@ -197,17 +202,17 @@ const ShareCiteModal = ({
                 />
               </ChaiseTooltip>
             </h3>
-            <a className='share-item-value' id='liveLink' ng-href={liveLink}>{liveLink}</a>
+            <a className='share-item-value share-modal-live-link' ng-href={liveLink}>{liveLink}</a>
           </li>
           {!citationReady &&
             <li className='citation-loader'>
               <ChaiseSpinner spinnerSize='sm' />
             </li>
           }
-          {citationReady && citation &&
-            <li id='citation'>
+          {citationReady && citation.value &&
+            <li className='share-modal-citation'>
               {!hideHeaders && <h2>Data Citation</h2>}
-              <div id='citation-text'>
+              <div className='share-modal-citation-text'>
                 {citation.value.author && <span>{citation.value.author} </span>}
                 {citation.value.title && <span>{citation.value.title} </span>}
                 <i>{citation.value.journal}</i> <a href={citation.value.url}>{citation.value.url}</a> ({citation.value.year}).
@@ -215,10 +220,10 @@ const ShareCiteModal = ({
             </li>
           }
           {citationReady && bibtexObjectURL &&
-            <li id='download-citation'>
+            <li className='share-modal-download-citation'>
               <h3>Download Data Citation:</h3>
               <a
-                className='share-item-value chaise-btn chaise-download-btn' id='bibtex-download'
+                className='share-item-value chaise-btn chaise-download-btn bibtex-download-btn'
                 download={`${downloadFilename}.bib`} href={bibtexObjectURL}
                 onClick={() => logCitationDownload()}>
                 BibTex

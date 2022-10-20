@@ -43,13 +43,7 @@ var testParams = {
     ]
 };
 
-var pageReadyCondition = function () {
-    return chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function () {
-        // make sure the loader is hidden
-        return chaisePage.waitForElementInverse(element(by.id('rt-loading')));
-    });
-};
-
+const pageReadyCondition = chaisePage.recordPageReady();
 
 describe ("Viewing exisiting record with related entities, ", function () {
     beforeAll(function (done) {

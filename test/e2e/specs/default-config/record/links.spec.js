@@ -30,15 +30,14 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
 
-            chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.recordPageReady();
         });
 
         if (!process.env.CI) {
             describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
-                    // TODO: change after record app migrated
-                    exportBtn = chaisePage.recordsetPage.getAngularExportDropdown();
+                    exportBtn = chaisePage.recordsetPage.getExportDropdown();
                     // delete files that may have been downloaded before
                     console.log("delete existing files");
                     recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
@@ -73,7 +72,6 @@ describe('View existing record,', function() {
                     }).then(function () {
                         return chaisePage.waitForElement(exportModal);
                     }).then(function () {
-                        exportModal.allowAnimations(false);
                         return chaisePage.waitForElementInverse(exportModal);
                     }).then(function () {
                         browser.wait(function() {
@@ -102,7 +100,7 @@ describe('View existing record,', function() {
                     return (ct == 3);
                 });
             }, browser.params.defaultTimeout);
-            
+
             chaisePage.recordPage.getColumns().then(function (cols) {
                 // shown column headers
                 expect(cols[0].isDisplayed()).toBeTruthy("Column header is hidden for id column");
@@ -116,17 +114,18 @@ describe('View existing record,', function() {
             });
         });
 
-        it ("should show the empty related association tables and table of contents on page load", function (done) {
-            browser.wait(function() {
-                return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
-                    return (ct == testParams.tocHeaders.length);
-                });
-            }, browser.params.defaultTimeout);
-            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        // TODO test table of contents
+        // it ("should show the empty related association tables and table of contents on page load", function (done) {
+        //     browser.wait(function() {
+        //         return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+        //             return (ct == testParams.tocHeaders.length);
+        //         });
+        //     }, browser.params.defaultTimeout);
+        //     expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
 
-            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
-            done();
-        });
+        //     expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+        //     done();
+        // });
 
         it ("The proper permalink (browser url) should appear in the share popup if resolverImplicitCatalog is undefined", function (done) {
             var shareButton = chaisePage.recordPage.getShareButton(),
@@ -136,14 +135,12 @@ describe('View existing record,', function() {
             chaisePage.clickButton(shareButton).then(function () {
                 // wait for dialog to open
                 chaisePage.waitForElement(shareModal);
-                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
-                shareModal.allowAnimations(false);
 
                 return browser.getCurrentUrl();
             }).then(function (url) {
                 // change url
                 var permalink = browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
+                expect(chaisePage.recordPage.getLiveLinkElement().getText()).toBe(permalink, "permalink url is incorrect");
 
                 return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
@@ -155,7 +152,7 @@ describe('View existing record,', function() {
         });
 
         it("Clicking the subtitle should redirect to recordset app", function(done) {
-            var subtitleLink = chaisePage.recordPage.getEntitySubTitleLink();
+            var subtitleLink = chaisePage.recordPage.getEntitySubTitleElement();
 
             browser.wait(EC.elementToBeClickable(subtitleLink), browser.params.defaultTimeout);
 
@@ -208,41 +205,42 @@ describe('View existing record,', function() {
     });
 });
 
-var inlineParams = {
-    table_name: "inline_table",
-    key: {
-        name: "id",
-        value: "1",
-        operator: "="
-    },
-    headers: ["inline_association_table"],
-    tocHeaders: ["Summary", "inline_association_table (0)"],
-}
-describe('View existing record for testing "show empty sections" heuristics,', function() {
+// TODO test table of contents
+// var inlineParams = {
+//     table_name: "inline_table",
+//     key: {
+//         name: "id",
+//         value: "1",
+//         operator: "="
+//     },
+//     headers: ["inline_association_table"],
+//     tocHeaders: ["Summary", "inline_association_table (0)"],
+// }
+// describe('View existing record for testing "show empty sections" heuristics,', function() {
 
-    describe("For table " + inlineParams.table_name + ",", function() {
+//     describe("For table " + inlineParams.table_name + ",", function() {
 
-        beforeAll(function () {
-            var keys = [];
-            keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
-            browser.ignoreSynchronization=true;
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+//         beforeAll(function () {
+//             var keys = [];
+//             keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
+//             browser.ignoreSynchronization=true;
+//             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
+//             browser.get(url);
 
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-        });
+//             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
+//         });
 
 
-        it ("should show the empty related association tables and table of contents on page load", function (done) {
-            browser.wait(function() {
-                return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
-                    return (ct == inlineParams.tocHeaders.length);
-                });
-            }, browser.params.defaultTimeout);
-            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(inlineParams.tocHeaders, "list of related tables in toc is incorrect");
+//         it ("should show the empty related association tables and table of contents on page load", function (done) {
+//             browser.wait(function() {
+//                 return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+//                     return (ct == inlineParams.tocHeaders.length);
+//                 });
+//             }, browser.params.defaultTimeout);
+//             expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(inlineParams.tocHeaders, "list of related tables in toc is incorrect");
 
-            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(inlineParams.headers, "list of related table accordion headers is incorret");
-            done();
-        });
-    });
-});
+//             expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(inlineParams.headers, "list of related table accordion headers is incorret");
+//             done();
+//         });
+//     });
+// });

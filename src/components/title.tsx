@@ -8,7 +8,8 @@ type TitleProps = {
   displayname?: DisplaynameType,
   comment?: string,
   addLink?: boolean,
-  link?: string
+  link?: string,
+  className?: string
 }
 
 const Title = ({
@@ -16,7 +17,8 @@ const Title = ({
   displayname,
   comment,
   addLink,
-  link
+  link,
+  className
 }: TitleProps): JSX.Element => {
 
   let showTooltip = comment ? true : false;
@@ -41,13 +43,15 @@ const Title = ({
 
   const renderDisplayname = <DisplayValue value={displayname} />;
 
-  const className = showTooltip && comment ? 'chaise-icon-for-tooltip': '';
+  const usedClassNames: string[] = [];
+  if (className) usedClassNames.push(className);
+  if (showTooltip && comment) usedClassNames.push('chaise-icon-for-tooltip');
 
   const renderLinkOrContainer = () => {
     if (addLink) {
-      return <a className={className} href={link}>{renderDisplayname}</a>;
+      return <a className={usedClassNames.join(' ')} href={link}>{renderDisplayname}</a>;
     }
-    return <span className={className}>{renderDisplayname}</span>
+    return <span className={usedClassNames.join(' ')}>{renderDisplayname}</span>
   }
 
 

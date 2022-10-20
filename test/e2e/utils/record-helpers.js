@@ -8,10 +8,7 @@ const Q = require('q');
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
-        return chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function () {
-            // make sure the last related entity is visible
-            return chaisePage.waitForElementInverse(element(by.id('rt-loading')));
-        }).then(function () {
+        chaisePage.recordPageReady().then(function () {
             return chaisePage.waitForAggregates();
         });
     };
@@ -58,7 +55,7 @@ exports.testPresentation = function (tableParams) {
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
             // TODO: change once record app migrated
-            exportButton = chaisePage.recordsetPage.getAngularExportDropdown(),
+            exportButton = chaisePage.recordsetPage.getExportDropdown(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
             shareButton = chaisePage.recordPage.getShareButton();
 
@@ -97,13 +94,11 @@ exports.testPresentation = function (tableParams) {
     exports.testSharePopup(tableParams.sharePopupParams);
 
     it("should have '2' options in the dropdown menu.", function (done) {
-        // TODO: change once record app migrated
-        var exportButton = chaisePage.recordsetPage.getAngularExportDropdown();
+        const exportButton = chaisePage.recordsetPage.getExportDropdown();
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
         chaisePage.clickButton(exportButton).then(function () {
-            // TODO: change once record app migrated
-            expect(chaisePage.recordsetPage.getAngularExportOptions().count()).toBe(2, "incorrect number of export options");
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
             // close the dropdown
             return exportButton.click();
         }).then(function () {
@@ -116,8 +111,7 @@ exports.testPresentation = function (tableParams) {
 
     if (!process.env.CI) {
         it("should have 'This record (CSV)' as a download option and download the file.", function(done) {
-            // TODO: change once record app migrated
-            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
                 expect(csvOption.getText()).toBe("This record (CSV)");
                 return csvOption.click();
@@ -137,8 +131,7 @@ exports.testPresentation = function (tableParams) {
         });
 
         it("should have 'BDBag' as a download option and download the file.", function(done) {
-            // TODO: change once record app migrated
-            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                 expect(bagOption.getText()).toBe("BDBag");
                 return bagOption.click();
@@ -163,7 +156,7 @@ exports.testPresentation = function (tableParams) {
     }
 
     it("should render columns which are specified to be visible and in order", function() {
-        chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
+        chaisePage.recordPage.getAllColumnNames().then(function(pageColumns) {
             expect(pageColumns.length).toBe(notNullColumns.length);
             var index = 0;
             pageColumns.forEach(function(c) {
@@ -271,13 +264,13 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
 
-        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
+        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getRelatedSectionSpinner())), browser.params.defaultTimeout);
         browser.wait(function() {
-            return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
+            return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
                 return (ct=relatedTables.length);
             });
         }, browser.params.defaultTimeout);
-        chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
+        chaisePage.recordPage.getRelatedTables().count().then(function(count) {
             expect(count).toBe(relatedTables.length,'Mismatch in Related table count!');
             tableCount = count;
 
@@ -336,7 +329,6 @@ exports.testPresentation = function (tableParams) {
             browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
             return chaisePage.clickButton(confirmButton);
         }).then(function () {
-            chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             // make sure there is 1 row
             browser.wait(function() {
@@ -351,7 +343,6 @@ exports.testPresentation = function (tableParams) {
             browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
             return chaisePage.clickButton(confirmButton);
         }).then(function () {
-            chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             // make sure there are zero rows
             browser.wait(function() {
@@ -489,9 +480,6 @@ exports.testSharePopup = function (sharePopupParams) {
                 // wait for dialog to open
                 return chaisePage.waitForElement(shareModal);
             }).then(function () {
-                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
-                shareModal.allowAnimations(false);
-
                 done();
             }).catch(function(err){
                 console.log(err);
@@ -543,13 +531,13 @@ exports.testSharePopup = function (sharePopupParams) {
                     // verify versioned link
                     // NOTE this is conditional because in some cases the version link is not based on resolver and is not easy to test
                     if (sharePopupParams.verifyVersionedLink) {
-                        expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(sharePopupParams.permalink, "versioned link url does not contain the permalink");
+                        expect(chaisePage.recordPage.getVersionedLinkElement().getText()).toContain(sharePopupParams.permalink, "versioned link url does not contain the permalink");
                     }
                 }
 
                 // verify permalink
                 expect(subheaders[sharePopupParams.hasVersionedLink ? 1 : 0].getText()).toContain("Live Link", "versioned link header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(sharePopupParams.permalink, "permalink url is incorrect");
+                expect(chaisePage.recordPage.getLiveLinkElement().getText()).toBe(sharePopupParams.permalink, "permalink url is incorrect");
 
                 done();
             }).catch(function (err) {
@@ -559,7 +547,7 @@ exports.testSharePopup = function (sharePopupParams) {
 
         var numCopyIcons = sharePopupParams.hasVersionedLink ? 2 : 1;
         it("should have " + numCopyIcons + " copy to clipboard icons visible.", function (done) {
-            expect(element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
+            expect(element(by.css(".share-modal-links")).all(by.css(".chaise-copy-to-clipboard-btn")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
             done();
         });
 
@@ -567,7 +555,7 @@ exports.testSharePopup = function (sharePopupParams) {
         xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
             var copyIcons, copyInput;
 
-            element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).then(function (icons) {
+            element(by.css(".share-modal-links")).all(by.css(".chaise-copy-to-clipboard-btn")).then(function (icons) {
                 copyIcons = icons;
 
                 expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
@@ -578,16 +566,16 @@ exports.testSharePopup = function (sharePopupParams) {
                 // creating a new input element
                 return browser.executeScript(function () {
                     var el = document.createElement('input');
-                    el.setAttribute('id', 'copy_input');
+                    el.setAttribute('id', 'test_copy_input');
 
-                    document.getElementById("share-link").appendChild(el);
+                    document.querySelector(".share-modal-links").appendChild(el);
                 });
             }).then(function () {
                 // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
-                copyInput = element(by.id("copy_input"));
+                copyInput = element(by.id("test_copy_input"));
                 copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
 
-                return chaisePage.recordPage.getVersionedLinkText().getText();
+                return chaisePage.recordPage.getVersionedLinkElement().getText();
             }).then(function (versionedLink) {
 
                 // select the input and get it's "value" attribute to verify the pasted contents
@@ -962,8 +950,6 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         }).then(function () {
                             return confirmButton.click();
                         }).then(function () {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
-                        }).then(function () {
 
                             // make sure the rows are updated
                             return browser.wait(function() {
@@ -1215,6 +1201,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
+                // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
             }).then(function () {
                 return browser.wait(function () {
@@ -1304,7 +1291,6 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
-                unlinkSummaryModal.allowAnimations(false);
 
                 errorTitle = chaisePage.errorModal.getTitle();
                 return browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1315,7 +1301,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
 
-                modalOkBtn = chaisePage.recordPage.getErrorModalOkButton()
+                modalOkBtn = chaisePage.errorModal.getOKButton()
                 return browser.wait(EC.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
             }).then(function () {
                 // click ok
@@ -1335,6 +1321,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
             }).then(function () {
+                // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
             }).then(function () {
                 return browser.wait(function () {
@@ -1498,7 +1485,6 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 unlinkSummaryModal = element(by.css('.modal-error'));
                 return chaisePage.waitForElement(unlinkSummaryModal);
             }).then(function () {
-                unlinkSummaryModal.allowAnimations(false);
 
                 errorTitle = chaisePage.errorModal.getTitle();
                 return browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1510,7 +1496,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
-                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+                return chaisePage.clickButton(chaisePage.errorModal.getOKButton());
             }).then(function () {
                 // check modal has 2 rows
                 return browser.wait(function () {
@@ -1572,7 +1558,6 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 unlinkSummaryModal = element(by.css('.modal-error'));
                 return chaisePage.waitForElement(unlinkSummaryModal);
             }).then(function () {
-                unlinkSummaryModal.allowAnimations(false);
 
                 errorTitle = chaisePage.errorModal.getTitle();
                 return browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1584,7 +1569,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 expect(chaisePage.recordPage.getModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
-                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+                return chaisePage.clickButton(chaisePage.errorModal.getOKButton());
             }).then(function () {
                 // check modal has 1 row
                 return browser.wait(function () {
@@ -1599,6 +1584,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
             }).then(function () {
+                // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
             }).then(function () {
                 return browser.wait(function () {

@@ -748,7 +748,7 @@ describe("Other facet features, ", function() {
         });
 
         it('Error modal message must summarize the issue', function(){
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toEqual(currParams.errorMessage, "The message in modal pop is not correct");
         });
 
@@ -765,7 +765,7 @@ describe("Other facet features, ", function() {
         });
 
         it('On click of OK button the page should dismiss the error and show proper results', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+            chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then (function (){
                 // make sure it's showing proper number of values
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
@@ -1247,7 +1247,7 @@ describe("Other facet features, ", function() {
                     var uri = url.replace("recordset", "record");
                     chaisePage.refresh(uri);
 
-                    chaisePage.waitForElement(element(by.id('tblRecord')));
+                    chaisePage.waitForElement(element(by.css('.record-main-section-table')));
                     done();
                 }).catch(chaisePage.catchTestError(done));
             })
