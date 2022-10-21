@@ -10,11 +10,12 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Export from '@isrd-isi-edu/chaise/src/components/export';
 import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import RecordMainSection from '@isrd-isi-edu/chaise/src/components/record/record-main-section';
-import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
-import Title from '@isrd-isi-edu/chaise/src/components/title';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import RelatedTableHeader from '@isrd-isi-edu/chaise/src/components/record/related-table-header';
 import ShareCiteButton from '@isrd-isi-edu/chaise/src/components/share-cite-button';
+import Spinner from 'react-bootstrap/Spinner';
+import SplitView from '@isrd-isi-edu/chaise/src/components/split-view';
+import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -24,7 +25,7 @@ import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -40,7 +41,7 @@ import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { canShowInlineRelated, canShowRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -94,6 +95,7 @@ const RecordInner = ({
     updateRecordPage,
     initialized,
     page, citation,
+    columnModels,
     readMainEntity,
     reference,
     relatedModels,
@@ -128,7 +130,7 @@ const RecordInner = ({
   /**
    * used to see if there are any pending create requests
    */
-   const addRecordRequests = useRef<any>({});
+  const addRecordRequests = useRef<any>({});
 
   /**
    * used to figure out if we need to update the page after edit request or not
@@ -246,7 +248,7 @@ const RecordInner = ({
   /**
    * capture the create requests so we know when to refresh the page on focus
    */
-   const onAddIntend = ((event: CustomEvent) => {
+  const onAddIntend = ((event: CustomEvent) => {
     const id = event.detail.id;
     const containerDetails = event.detail.containerDetails;
     if (typeof id !== 'string' || !isObjectAndNotNull(containerDetails)) {
@@ -418,6 +420,128 @@ const RecordInner = ({
     });
   };
 
+  // sectionId is displayname.value
+  const scrollToSection = (displayname: string) => {
+    if (!mainContainer.current) return;
+
+    const relatedObj = determineScrollElement(displayname);
+    if (!relatedObj) return;
+
+    let delayScroll = 0;
+    if (!relatedObj.rtm.isInline && openRelatedSections.indexOf(relatedObj.rtm.index.toString()) === -1) {
+      delayScroll = 200;
+      setOpenRelatedSections((currState: string[]) => {
+        // const action = LogActions.OPEN;
+
+        return currState.concat(relatedObj.rtm.index.toString());
+      });
+    }
+    
+    const element = relatedObj.element as HTMLElement;
+    // defer scrollTo behavior so the accordion has time to open
+    // 200 seems like a good amount of time based on testing
+    setTimeout(() => {
+      mainContainer.current?.scrollTo({
+        top: element.offsetTop,
+        behavior: 'smooth',
+      });
+      
+      // flash the activeness
+      setTimeout(() => {
+        element.classList.add('row-focus');
+        setTimeout(() => {
+          element.classList.remove('row-focus');
+        }, 1600);
+      }, 100);
+    }, delayScroll)
+  }
+
+  const determineScrollElement = (displayname: string): {element: Element, rtm: RecordRelatedModel} | false => {
+    let matchingRtm;
+    // id enocde query param    
+    const htmlId = makeSafeIdAttr(displayname);
+    // "entity-" is used for record entity section
+    let el = document.querySelector('#entity-' + htmlId);
+
+    if (el) {
+      // if in entity section, grab parent
+      el = el.parentElement;
+
+      matchingRtm = columnModels.filter((cm) => {
+        return cm.column.displayname.value == displayname;
+      })[0].relatedModel;
+    } else {
+      // "rt-heading-" is used for related table section
+      el = document.querySelector('#rt-heading-' + htmlId);
+      // return if no element after checking entity section and RT section
+
+      matchingRtm = relatedModels.filter(function (rm) {
+        return rm.initialReference.displayname.value == displayname;
+      })[0];
+    }
+
+    if (!el || !matchingRtm) return false;
+
+    return {
+      element: el,
+      rtm: matchingRtm
+    }
+  }
+
+  // Function to render the summary section of the table of contents
+  // Iterates over the columnModels for any with a relatedModel
+  const renderSummaryTOC = () => {
+    return columnModels.map((cm: RecordColumnModel, index: number) => {
+      // if the column is not an inline related table, it should not be shown in ToC
+      if (!canShowInlineRelated(cm, showEmptySections)) return;
+
+      // canShowInlineRelated checks for relatedModel, so this should always be defined if this code is reached
+      const relatedPage = cm.relatedModel?.recordsetState.page;
+      const displayname = cm.column.displayname;
+
+      let tooltip = <div>Scroll to the <code>{displayname.value}</code> section (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length != 1 && 's'})</div>
+
+      return (
+        <li id={'recordSidePan-heading-' + index} className='toc-heading toc-inline-heading' onClick={() => { scrollToSection(displayname.value) }}>
+          <ChaiseTooltip
+            placement='right'
+            tooltip={tooltip}
+          >
+            <a className={relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
+              <DisplayValue value={displayname} />
+              <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>
+            </a>
+          </ChaiseTooltip>
+        </li>
+      )
+    });
+  };
+
+  const renderRelatedTOC = () => {
+    return relatedModels.map((rm: RecordRelatedModel, index: number) => {
+      if (!canShowRelated(rm, showEmptySections)) return;
+
+      const relatedPage = rm.recordsetState.page;
+      const displayname = rm.initialReference.displayname;
+
+      let tooltip = <div>Scroll to the <code>{displayname.value}</code> section (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length != 1 && 's'})</div>
+      return (
+        <li id={'recordSidePan-heading-' + index} className='toc-heading' onClick={() => { scrollToSection(displayname.value) }}>
+          <ChaiseTooltip
+            placement='right'
+            tooltip={tooltip}
+          >
+            <a className={relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
+              <DisplayValue value={displayname} />
+              <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>
+            </a>
+          </ChaiseTooltip>
+        </li>
+      )
+    })
+  };
+
+  // Function to render the full table of contents
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
       id='record-side-pan'
@@ -425,10 +549,21 @@ const RecordInner = ({
         }`}
       ref={leftRef}
     >
-      {/* TODO table of contents */}
       <div className='side-panel-container'>
         <div className='columns-container'>
-          Table Content Goes here
+          <ul>
+            <li id='main-to-top' className='toc-heading' onClick={scrollMainContainerToTop}>
+              <ChaiseTooltip placement='right' tooltip='Click to go to top of page'><a>Summary</a></ChaiseTooltip>
+            </li>
+            {renderSummaryTOC()}
+            {renderRelatedTOC()}
+            {errors.length === 0 && showRelatedSectionSpinner &&
+              <li id='rt-toc-loading' className='loading-text'>
+                <Spinner animation='border' size='sm' />
+                <span> Loading...</span>
+              </li>
+            }
+          </ul>
         </div>
       </div>
 
