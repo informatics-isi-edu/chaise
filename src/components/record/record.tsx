@@ -516,7 +516,6 @@ const RecordInner = ({
     } else {
       // "rt-heading-" is used for related table section
       el = document.querySelector('#rt-heading-' + htmlId);
-      // return if no element after checking entity section and RT section
 
       matchingRtm = relatedModels.filter(function (rm) {
         return rm.initialReference.displayname.value == displayname;
