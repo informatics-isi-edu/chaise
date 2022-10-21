@@ -209,30 +209,31 @@ const RecordInner = ({
    * check when the related section spinner is hidden meaning the requests have all finished
    */
   useEffect(() => {
+    if (showEmptySections) return;
     if (!showRelatedSectionSpinner) {
       // NOTE: set a timeout so the recordsetState can be updated before checking if there is page content
-      // setTimeout(() => {
-      //   let rm, hasRelatedContent = false;
-      //   for (let i = 0; i < columnModels.length; i++) {
-      //     rm = columnModels[i].relatedModel;
-      //     if (rm && rm.recordsetState.page.length > 0) {
-      //       hasRelatedContent = true;
-      //       break;
-      //     }
-      //   }
+      setTimeout(() => {
+        let rm, hasRelatedContent = false;
+        for (let i = 0; i < columnModels.length; i++) {
+          rm = columnModels[i].relatedModel;
+          if (rm && rm.recordsetState.page.length > 0) {
+            hasRelatedContent = true;
+            break;
+          }
+        }
 
-      //   if (!hasRelatedContent) {
-      //     for (let j = 0; j < relatedModels.length; j++) {
-      //       rm = relatedModels[j];
-      //       if (rm.recordsetState.page.length > 0) {
-      //         hasRelatedContent = true;
-      //         break;
-      //       }
-      //     }
-      //   }
+        if (!hasRelatedContent) {
+          for (let j = 0; j < relatedModels.length; j++) {
+            rm = relatedModels[j];
+            if (rm.recordsetState.page.length > 0) {
+              hasRelatedContent = true;
+              break;
+            }
+          }
+        }
 
-      //   setShowPanel(hasRelatedContent);
-      // }, 500);
+        setShowPanel(hasRelatedContent);
+      }, 500);
     }
   }, [showRelatedSectionSpinner]);
 
