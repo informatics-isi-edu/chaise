@@ -852,7 +852,7 @@ var recordsetPage = function() {
     };
 
     this.waitForInverseModalSpinner = function () {
-        var locator = element(by.css(".modal-body #spinner"));
+        var locator = element(by.css(".modal-body .recordest-main-spinner"));
         return browser.wait(protractor.ExpectedConditions.invisibilityOf(locator), browser.params.defaultTimeout);
     };
 
@@ -1267,11 +1267,11 @@ var errorModal = function () {
     var self = this;
 
     this.getToggleDetailsLink = function () {
-        return element(by.id('toggle-error-details'));
+        return element(by.css('.modal-error .toggle-error-details'));
     };
 
     this.getErrorDetails = function () {
-        return element(by.id('error-details'));
+        return element(by.css('.modal-error .error-details'));
     }
 
     this.getTitle = function () {

@@ -254,7 +254,7 @@ const ErrorModal = (): JSX.Element | null => {
         </div>
         {subMessage &&
           <button
-            className='chaise-btn chaise-btn-tertiary toggle-error-details' id='toggle-error-details'
+            className='chaise-btn chaise-btn-tertiary toggle-error-details'
             onClick={() => toggleSubMessage()}
           >
             <i className={`fa-solid fa-caret-${showSubMessage ? 'down' : 'right'}`}></i>
@@ -262,7 +262,7 @@ const ErrorModal = (): JSX.Element | null => {
           </button>
         }
         {showSubMessage &&
-          <pre id='error-details' style={{ wordWrap: 'unset' }}>{subMessage}</pre>
+          <pre className='error-details' style={{ wordWrap: 'unset' }}>{subMessage}</pre>
         }
       </Modal.Body>
       <Modal.Footer>
