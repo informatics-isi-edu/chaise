@@ -205,6 +205,38 @@ const RecordInner = ({
   }, [updateRecordPage]);
 
   /**
+   * if all related tables are empty, hide the ToC
+   * check when the related section spinner is hidden meaning the requests have all finished
+   */
+  useEffect(() => {
+    if (!showRelatedSectionSpinner) {
+      // NOTE: set a timeout so the recordsetState can be updated before checking if there is page content
+      // setTimeout(() => {
+      //   let rm, hasRelatedContent = false;
+      //   for (let i = 0; i < columnModels.length; i++) {
+      //     rm = columnModels[i].relatedModel;
+      //     if (rm && rm.recordsetState.page.length > 0) {
+      //       hasRelatedContent = true;
+      //       break;
+      //     }
+      //   }
+
+      //   if (!hasRelatedContent) {
+      //     for (let j = 0; j < relatedModels.length; j++) {
+      //       rm = relatedModels[j];
+      //       if (rm.recordsetState.page.length > 0) {
+      //         hasRelatedContent = true;
+      //         break;
+      //       }
+      //     }
+      //   }
+
+      //   setShowPanel(hasRelatedContent);
+      // }, 500);
+    }
+  }, [showRelatedSectionSpinner]);
+
+  /**
      * On window focus, remove request and update the page
      */
   const onFocus = () => {
@@ -428,6 +460,7 @@ const RecordInner = ({
     if (!relatedObj) return;
 
     let delayScroll = 0;
+    // if not inline and the related table is closed, add it to the set of open related sections to be opened
     if (!relatedObj.rtm.isInline && openRelatedSections.indexOf(relatedObj.rtm.index.toString()) === -1) {
       delayScroll = 200;
       setOpenRelatedSections((currState: string[]) => {
@@ -436,7 +469,7 @@ const RecordInner = ({
         return currState.concat(relatedObj.rtm.index.toString());
       });
     }
-    
+
     const element = relatedObj.element as HTMLElement;
     // defer scrollTo behavior so the accordion has time to open
     // 200 seems like a good amount of time based on testing
@@ -445,7 +478,7 @@ const RecordInner = ({
         top: element.offsetTop,
         behavior: 'smooth',
       });
-      
+
       // flash the activeness
       setTimeout(() => {
         element.classList.add('row-focus');
@@ -456,7 +489,7 @@ const RecordInner = ({
     }, delayScroll)
   }
 
-  const determineScrollElement = (displayname: string): {element: Element, rtm: RecordRelatedModel} | false => {
+  const determineScrollElement = (displayname: string): { element: Element, rtm: RecordRelatedModel } | false => {
     let matchingRtm;
     // id enocde query param    
     const htmlId = makeSafeIdAttr(displayname);
@@ -502,7 +535,12 @@ const RecordInner = ({
       let tooltip = <div>Scroll to the <code>{displayname.value}</code> section (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length != 1 && 's'})</div>
 
       return (
-        <li id={'recordSidePan-heading-' + index} className='toc-heading toc-inline-heading' onClick={() => { scrollToSection(displayname.value) }}>
+        <li
+          key={`toc-inline-heading-${cm.index}`}
+          id={'recordSidePan-heading-' + index}
+          className='toc-heading toc-inline-heading'
+          onClick={() => { scrollToSection(displayname.value) }}
+        >
           <ChaiseTooltip
             placement='right'
             tooltip={tooltip}
@@ -526,7 +564,12 @@ const RecordInner = ({
 
       let tooltip = <div>Scroll to the <code>{displayname.value}</code> section (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length != 1 && 's'})</div>
       return (
-        <li id={'recordSidePan-heading-' + index} className='toc-heading' onClick={() => { scrollToSection(displayname.value) }}>
+        <li
+          key={`toc-heading-${rm.index}`}
+          id={'recordSidePan-heading-' + index}
+          className='toc-heading'
+          onClick={() => { scrollToSection(displayname.value) }}
+        >
           <ChaiseTooltip
             placement='right'
             tooltip={tooltip}
