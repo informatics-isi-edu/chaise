@@ -108,9 +108,9 @@ var testParams = {
         facetIdx: 22,
         numRows: 25,
         filteredNumRows: 24,
-        secondFacetIdx: 16,
-        secondFacetOption: 0,
-        secondFacetNumOptions: 4,
+        secondFacetIdx: 6,
+        secondFacetOption: 7,
+        secondFacetNumOptions: 10,
         option: 1
     },
     recordColumns: [ "text_col", "longtext_col", "markdown_col", "int_col", "float_col", "date_col", "timestamp_col", "boolean_col", "jsonb_col", "1-o7Ye2EkulrWcCVFNHi3A", "hmZyP_Ufo3E5v_nmdTXyyA" ],
@@ -1006,6 +1006,10 @@ describe("Other facet features, ", function() {
             checkAlert(alert);
         });
 
+        /**
+         * The following test only works for ermrest installation that have
+         * `quantified_value_lists` feature.
+         */
         describe("in facet modal, ", function () {
             var modalAlert = chaisePage.recordsetPage.getModalWarningAlert(chaisePage.searchPopup.getFacetPopup());
             beforeAll(function (done) {
@@ -1057,6 +1061,10 @@ describe("Other facet features, ", function() {
             });
         });
 
+        /**
+         * The following test only works for ermrest installation that have
+         * `quantified_value_lists` feature.
+         */
         describe("in main container, ", function () {
             var secondFacetIdx = testParams.maximumLength.secondFacetIdx;
 
@@ -1082,9 +1090,9 @@ describe("Other facet features, ", function() {
 
                     return secondFacetOption.click();
                 }).then(function () {
-                        checkAlert(alert);
-                        expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
-                        done();
+                    checkAlert(alert);
+                    expect(secondFacetOption.isSelected()).toBeFalsy("the option is checked.");
+                    done();
                 }).catch(chaisePage.catchTestError(done));
 
             });
