@@ -45,6 +45,7 @@ import { canShowInlineRelated, canShowRelated } from '@isrd-isi-edu/chaise/src/u
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { CLASS_NAMES, CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 export type RecordProps = {
   /**
@@ -126,6 +127,10 @@ const RecordInner = ({
   const [openRelatedSections, setOpenRelatedSections] = useState<string[]>(Array.from(Array(reference.related.length), (e, i) => `${i}`));
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
+
+  // the original href when the page was loaded
+  // includes query parameters including 'scrollTo' for autoscroll
+  const [initialHref] = useState<string>(windowRef.location.href);
 
   /**
    * used to see if there are any pending create requests
@@ -211,29 +216,33 @@ const RecordInner = ({
   useEffect(() => {
     if (showEmptySections) return;
     if (!showRelatedSectionSpinner) {
-      // NOTE: set a timeout so the recordsetState can be updated before checking if there is page content
-      setTimeout(() => {
-        let rm, hasRelatedContent = false;
-        for (let i = 0; i < columnModels.length; i++) {
-          rm = columnModels[i].relatedModel;
-          if (rm && rm.recordsetState.page.length > 0) {
-            hasRelatedContent = true;
-            break;
-          }
-        }
+      const queryParam = getQueryParam(initialHref, "scrollTo");
+      // return if no query parameter, nothing to scroll to
+      if (queryParam) scrollToSection(queryParam);
 
-        if (!hasRelatedContent) {
-          for (let j = 0; j < relatedModels.length; j++) {
-            rm = relatedModels[j];
-            if (rm.recordsetState.page.length > 0) {
-              hasRelatedContent = true;
-              break;
-            }
-          }
-        }
+      // TODO: recordsetState soemtimes isn't updated until after the below is called, even with a 500ms delay
+      // setTimeout(() => {
+      //   let rm, hasRelatedContent = false;
+      //   for (let i = 0; i < columnModels.length; i++) {
+      //     rm = columnModels[i].relatedModel;
+      //     if (rm && rm.recordsetState.page?.length > 0) {
+      //       hasRelatedContent = true;
+      //       break;
+      //     }
+      //   }
 
-        setShowPanel(hasRelatedContent);
-      }, 500);
+      //   if (!hasRelatedContent) {
+      //     for (let j = 0; j < relatedModels.length; j++) {
+      //       rm = relatedModels[j];
+      //       if (rm.recordsetState.page?.length > 0) {
+      //         hasRelatedContent = true;
+      //         break;
+      //       }
+      //     }
+      //   }
+
+      //   setShowPanel(hasRelatedContent);
+      // }, 500);
     }
   }, [showRelatedSectionSpinner]);
 
