@@ -349,7 +349,7 @@ export class ConfigService {
       appPath = ConfigService._getValueFromContext(APP_CONTEXT_MAPPING, context);
     }
 
-    let url = `${BUILD_VARIABLES.CHAISE_BASE_PATH + appPath}/#${location.catalog}/${location.path}`;
+    let url = `${windowRef.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH + appPath}/#${location.catalog}/${location.path}`;
     const pcontext = [];
 
     const settingsObj = ConfigService.appSettings;

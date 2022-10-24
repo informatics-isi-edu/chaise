@@ -307,7 +307,7 @@
     }
   }
 
-  .related-spinner {
+  .related-section-spinner {
     color: #446c73;
     font-weight: 600;
   }
@@ -393,7 +393,7 @@
 
     // for mac and firefox
     @at-root .chaise-mac.chaise-firefox {
-      #tblRecord {
+      .record-main-section-table {
         .entity-key {
           padding-left: 20px;
           width: 20%;

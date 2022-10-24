@@ -369,7 +369,7 @@ describe('Record Add', function() {
                 allWindows = handles;
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                return chaisePage.waitForElement(element(by.id("main-content")));
+                return chaisePage.waitForElement(element(by.id("mainTable")));
             }).then(function() {
                 // this is a static page, we just want to make sure this is the correct page.
                 // we don't need to test every element.

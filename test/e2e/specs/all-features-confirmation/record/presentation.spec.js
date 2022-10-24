@@ -206,10 +206,7 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            var start = (new Date()).getTime();
-            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
-                console.log((new Date()).getTime() - start);
-            });
+            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });
 
         it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCiteAcls defined', function() {
@@ -258,20 +255,19 @@ describe('View existing record,', function() {
             browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
-            chaisePage.waitForElement(element(by.id('tblRecord')));
-            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
+            chaisePage.recordPageReady();
         });
 
         it("should show all of the related tables in the correct order.", function() {
 
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
                     return (ct == testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
-            chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
+            chaisePage.recordPage.getRelatedTables().count().then(function(count) {
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
@@ -281,8 +277,8 @@ describe('View existing record,', function() {
                 expect(showAllRTButton.getText()).toBe("Hide empty sections", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
-                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).toBe(0, "Not all the related tables were hidden");
-                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
+                expect(chaisePage.recordPage.getRelatedTables().count()).toBe(0, "Not all the related tables were hidden");
+                expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
         });
     });
@@ -303,7 +299,7 @@ describe('View existing record,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(btn){
+            chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then(function(btn){
                 return chaisePage.recordsetPageReady();
             }).then(function() {
                 return browser.driver.getCurrentUrl();
@@ -365,7 +361,6 @@ describe('View existing record,', function() {
 
         it('Side panel should hide/show by clicking pull button', function(done){
             var recPan =  chaisePage.recordPage.getSidePanel();
-            recPan.allowAnimations(false);
 
             expect(hideTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain('chaise-sidebar-close', 'Wrong icon for hide toc button');
             expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is NOT visible when it should be');

@@ -2,20 +2,18 @@ import Spinner from 'react-bootstrap/Spinner';
 
 interface SpinnerProps {
   message?: string;
-  id?: string;
   className?: string;
   spinnerSize?: 'sm';
 }
 
 const ChaiseSpinner = ({
   message,
-  id,
   className,
   spinnerSize
 }: SpinnerProps): JSX.Element => {
   const usedClassName = 'spinner-container' + (className ? ` ${className}` : '');
   return (
-    <div id={id} className={usedClassName}>
+    <div className={usedClassName}>
       <Spinner animation='border' size={spinnerSize} />
       <div className='spinner-message'>
         {message || 'Loading...'}

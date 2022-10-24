@@ -254,7 +254,7 @@ const ErrorModal = (): JSX.Element | null => {
         </div>
         {subMessage &&
           <button
-            className='chaise-btn chaise-btn-tertiary toggle-error-details' id='toggle-error-details'
+            className='chaise-btn chaise-btn-tertiary toggle-error-details'
             onClick={() => toggleSubMessage()}
           >
             <i className={`fa-solid fa-caret-${showSubMessage ? 'down' : 'right'}`}></i>
@@ -262,14 +262,14 @@ const ErrorModal = (): JSX.Element | null => {
           </button>
         }
         {showSubMessage &&
-          <pre id='error-details' style={{ wordWrap: 'unset' }}>{subMessage}</pre>
+          <pre className='error-details' style={{ wordWrap: 'unset' }}>{subMessage}</pre>
         }
       </Modal.Body>
       <Modal.Footer>
         {showOKBtn &&
           <button
             type='button' onClick={() => okCallback()}
-            className='chaise-btn chaise-btn-danger' id='error-ok-button'
+            className='chaise-btn chaise-btn-danger error-ok-button'
           >
             <span>OK</span>
           </button>
@@ -281,7 +281,7 @@ const ErrorModal = (): JSX.Element | null => {
           >
             <button
               type='button' onClick={() => reloadCallback()}
-              className='chaise-btn chaise-btn-secondary' id='error-reload-button'
+              className='chaise-btn chaise-btn-secondary error-reload-button'
             >
               <span>Reload</span>
             </button>
@@ -294,7 +294,7 @@ const ErrorModal = (): JSX.Element | null => {
           >
             <button
               type='button' onClick={() => continueCallback()}
-              className='chaise-btn chaise-btn-secondary footer-continue-btn' id='error-continue-button'
+              className='chaise-btn chaise-btn-secondary footer-continue-btn error-continue-button'
             >
               <span>{exception.errorData?.continueBtnText}</span>
             </button>

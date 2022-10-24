@@ -84,7 +84,7 @@
                 showModal({
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                     controller: "ShareCitationController",
-                    windowClass: "chaise-share-citation",
+                    windowClass: "chaise-share-citation-modal",
                     controllerAs: "ctrl",
                     resolve: {
                         params: params
@@ -247,7 +247,7 @@
             }
 
             vm.switchUserAccounts = function () {
-                $window.open(UriUtils.chaiseDeploymentPath() + 'lib/switchUserAccounts.html', '_blank');
+                $window.open(UriUtils.chaiseDeploymentPath() + 'help/?page=switch-user-accounts', '_blank');
             }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;

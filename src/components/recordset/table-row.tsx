@@ -163,10 +163,13 @@ const TableRow = ({
 
   /**
    * The JS.Elements that are used for displaying messages
+   * these are only currently used for unlink that's why we're checking parentPageReference for all
+   * NOTE if we want to use for other cases we should be mindful that AttributeGroupReference doesn't have displayname API
+   * if we want it to have one, we should add it in ermrestjs first.
    */
   const parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
-  const currentTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;
-  const currentTuple = <code><DisplayValue value={tuple.displayname}></DisplayValue></code>;
+  const currentTable =  parentPageReference ? <code><DisplayValue value={reference.displayname}></DisplayValue></code> : <></>;
+  const currentTuple =  parentPageReference ? <code><DisplayValue value={tuple.displayname}></DisplayValue></code> : <></>;
 
   let logStack: any;
   if (tupleReference) {

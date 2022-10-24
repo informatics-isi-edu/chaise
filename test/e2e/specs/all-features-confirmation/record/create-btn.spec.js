@@ -21,7 +21,7 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-create-btn:" + testParams.table_name + "/" + keys.join("&");
             browser.get(url);
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
-            chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });
 
         it('should load chaise-config.js and have editRecord=true', function() {

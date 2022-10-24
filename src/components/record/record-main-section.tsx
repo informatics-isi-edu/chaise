@@ -3,7 +3,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_record-main-section.scss';
 // components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
 import RelatedTable from '@isrd-isi-edu/chaise/src/components/record/related-table';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
@@ -76,7 +75,7 @@ const RecordMainSection = (): JSX.Element => {
 
       const entityKeyClassName = ['entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2'];
       if (hideHeader) {
-        entityKeyClassName.push(CLASS_NAMES.HIDDEN)
+        entityKeyClassName.push(CLASS_NAMES.HIDDEN);
       }
 
       const entityValueClassName = ['entity-value'];
@@ -103,7 +102,7 @@ const RecordMainSection = (): JSX.Element => {
               }
             </span>
             <div className='entity-key-icons'>
-              {showLoader(cm) && <Spinner animation='border' size='sm' className='aggregate-col-loader' />}
+              {showLoader(cm) && <Spinner animation='border' size='sm' className='table-column-spinner' />}
             </div>
           </td>
           {/* --------- entity value ---------- */}
@@ -143,13 +142,13 @@ const RecordMainSection = (): JSX.Element => {
   };
 
   return (
-    <div className={`record-display entity-container${errors.length === 0 && showMainSectionSpinner ? ' with-spinner' : ''}`}>
+    <div className={`record-main-section ${errors.length === 0 && showMainSectionSpinner ? ' with-spinner' : ''}`}>
       {errors.length === 0 && showMainSectionSpinner &&
         <div className='record-main-spinner-container'>
           <ChaiseSpinner className='record-main-spinner manual-position-spinner' />
         </div>
       }
-      <table className='table table-fixed-layout' id='tblRecord'>
+      <table className='table table-fixed-layout record-main-section-table'>
         <tbody>{renderRows()}</tbody>
       </table>
     </div>

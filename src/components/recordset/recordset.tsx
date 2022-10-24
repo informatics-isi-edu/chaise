@@ -651,7 +651,7 @@ const RecordsetInner = ({
     <div className='recordset-container app-content-container'>
       {
         errors.length === 0 && (isLoading || forceShowSpinner) &&
-        <ChaiseSpinner />
+        <ChaiseSpinner className='recordest-main-spinner' />
       }
       <div className='top-panel-container'>
         {/* recordset level alerts */}
