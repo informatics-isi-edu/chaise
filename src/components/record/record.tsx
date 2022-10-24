@@ -216,7 +216,7 @@ const RecordInner = ({
   useEffect(() => {
     if (showEmptySections) return;
     if (!showRelatedSectionSpinner) {
-      const queryParam = getQueryParam(initialHref, "scrollTo");
+      const queryParam = getQueryParam(initialHref, 'scrollTo');
       // return if no query parameter, nothing to scroll to
       if (queryParam) scrollToSection(queryParam);
 
@@ -501,7 +501,7 @@ const RecordInner = ({
 
   const determineScrollElement = (displayname: string): { element: Element, rtm: RecordRelatedModel } | false => {
     let matchingRtm;
-    // id enocde query param    
+    // id enocde query param
     const htmlId = makeSafeIdAttr(displayname);
     // "entity-" is used for record entity section
     let el = document.querySelector('#entity-' + htmlId);
@@ -537,12 +537,15 @@ const RecordInner = ({
       // if the column is not an inline related table, it should not be shown in ToC
       if (!canShowInlineRelated(cm, showEmptySections)) return;
 
-      // canShowInlineRelated checks for relatedModel, so this should always be defined if this code is reached
-      const relatedPage = cm.relatedModel?.recordsetState.page;
       const displayname = cm.column.displayname;
 
-      let tooltip = <div>Scroll to the <code>{displayname.value}</code> section (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length != 1 && 's'})</div>
+      // the related page might be null if we're still waiting for the request
+      const relatedPage = cm.relatedModel?.recordsetState.page;
 
+      let pageInfo;
+      if (relatedPage) {
+        pageInfo = <> (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length !== 1 && 's'})</>;
+      }
       return (
         <li
           key={`toc-inline-heading-${cm.index}`}
@@ -552,11 +555,11 @@ const RecordInner = ({
         >
           <ChaiseTooltip
             placement='right'
-            tooltip={tooltip}
+            tooltip={<span>Scroll to the <code>{displayname.value}</code> section{pageInfo}</span>}
           >
-            <a className={relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
+            <a className={!relatedPage || relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
               <DisplayValue value={displayname} />
-              <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>
+              {relatedPage && <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>}
             </a>
           </ChaiseTooltip>
         </li>
@@ -605,7 +608,7 @@ const RecordInner = ({
         <div className='columns-container'>
           <ul>
             <li id='main-to-top' className='toc-heading' onClick={scrollMainContainerToTop}>
-              <ChaiseTooltip placement='right' tooltip='Click to go to top of page'><a>Summary</a></ChaiseTooltip>
+              <ChaiseTooltip placement='right' tooltip='Scroll to top of the page.'><a>Summary</a></ChaiseTooltip>
             </li>
             {renderSummaryTOC()}
             {renderRelatedTOC()}
@@ -658,7 +661,7 @@ const RecordInner = ({
           <ChaiseSpinner className='related-section-spinner bottom-left-spinner' spinnerSize='sm' />
         }
         {showScrollToTopBtn &&
-          <ChaiseTooltip placement='left' tooltip='Scroll to top'>
+          <ChaiseTooltip placement='left' tooltip='Scroll to top of the page.'>
             <div className='chaise-btn chaise-btn-primary back-to-top-btn' onClick={scrollMainContainerToTop}>
               <i className='fa-solid fa-caret-up'></i>
             </div>

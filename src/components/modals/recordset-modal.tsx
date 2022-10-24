@@ -204,7 +204,7 @@ const RecordsetModal = ({
     }
   }
 
-  let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records';
+  let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records.';
   switch (displayMode) {
     case RecordsetDisplayMode.FACET_POPUP:
       submitText = 'Submit';
@@ -214,8 +214,8 @@ const RecordsetModal = ({
       submitTooltip = (
         <>
           <span>Disconnect the selected records from </span>
-          <DisplayValue value={recordsetProps.parentReference?.displayname} />:
-          <DisplayValue value={recordsetProps.parentTuple?.displayname} />.
+          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>:
+          <code><DisplayValue value={recordsetProps.parentTuple?.displayname} /></code>.
         </>
       )
       break;
@@ -224,8 +224,8 @@ const RecordsetModal = ({
       submitTooltip = (
         <>
           <span>Connect the selected records to </span>
-          <DisplayValue value={recordsetProps.parentReference?.displayname} />:
-          <DisplayValue value={recordsetProps.parentTuple?.displayname} />.
+          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>:
+          <code><DisplayValue value={recordsetProps.parentTuple?.displayname} /></code>.
         </>
       )
       break;
