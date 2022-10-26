@@ -235,7 +235,7 @@ const RecordsetTable = ({
         break;
     }
     return (
-      <th className={`actions-header ${headerClassName}`}>{inner}</th>
+      <th className={`actions-header${headerClassName ? ` ${headerClassName}`: ''}`}>{inner}</th>
     )
   }
 
