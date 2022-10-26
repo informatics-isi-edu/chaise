@@ -1,4 +1,4 @@
-const { element } = require('protractor');
+const { element, browser } = require('protractor');
 var Q = require('q');
 
 var recordEditPage = function() {
@@ -496,21 +496,13 @@ var recordPage = function() {
         return element.all(by.css('tr:not(.forced-hidden) td.entity-key > span.column-displayname > span'));
     };
 
-    this.getColumnCaptionsWithHtml = function() {
-        // TODO
-        return element.all(by.css('tr:not(.forced-hidden) td.entity-key) > span.column-displayname > span[ng-bind-html]'));
+    this.getColumnNameElement = function (columnDisplayName) {
+        const displayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.css(`.entity-row-${displayName} td.entity-key > span.column-displayname`));
     };
 
-    this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key:not(.forced-hidden) > span.column-displayname[uib-tooltip]')");
-    };
-
-    this.getColumnComment = function(el) {
-        return el.getAttribute('uib-tooltip');
-    };
-
-    this.getColumnCommentHTML = function(el) {
-        return el.getAttribute('uib-tooltip-html');
+    this.getAllColumnValues = function () {
+        return element.all(by.css('tr:not(.forced-hidden) td.entity-value'));
     };
 
     this.getColumnValue = function(columnName) {
@@ -518,7 +510,7 @@ var recordPage = function() {
     };
 
     this.getLinkChild = function(el) {
-        return browser.executeScript("return $(arguments[0]).find('a')[0];", el);
+        return el.element(by.css("a"));
     };
 
     this.getRelatedTables = function () {
@@ -552,11 +544,15 @@ var recordPage = function() {
     //      (we might only need the getDisplayedRelatedTableTitles function)
     // given that we're using ng-show, this function is returning the hidden related tables too
     this.getRelatedTableTitles = function() {
-        return browser.executeScript("return $('.related-table-accordion .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
+        return browser.executeScript(`
+          return Array.from(document.querySelectorAll('.related-table-accordion .rt-section-header .rt-displayname')).map((el) => el.textContent.trim());
+        `);
     }
     // the following function only returns the related tables that are displayed
     this.getDisplayedRelatedTableTitles = function() {
-      return browser.executeScript("return $('.related-table-accordion:not(.ng-hide):not(.forced-hidden) .rt-section-header .rt-displayname').map(function(i, a) { return a.textContent.trim(); });");
+      return browser.executeScript(`
+          return Array.from(document.querySelectorAll('.related-table-accordion:not(.forced-hidden) .rt-section-header .rt-displayname')).map((el) => el.textContent.trim());
+      `);
     }
 
     this.getRelatedTableAccordion = function(displayName) {
@@ -1368,7 +1364,7 @@ function chaisePage() {
     this.recordPageReady = function() {
         this.waitForElement(this.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.css('.record-main-section-table')));
-        this.waitForElementInverse(this.recordPage.getRelatedSectionSpinner());
+        return this.waitForElementInverse(this.recordPage.getRelatedSectionSpinner());
     }
     this.recordeditPageReady = function() {
         this.waitForClickableElement(element(by.id("submit-record-button")));
@@ -1569,6 +1565,50 @@ function chaisePage() {
       this.navigate(url);
       return browser.refresh();
     }
+
+    /**
+     * hover over the element and see if the expected tooltip shows up or not
+     * this function requires a done that will be called based on success/failure
+     */
+    this.testTooltipWithDone = function (el, expectedTooltip, done, appName) {
+        this.testTooltipReturnPromise(el, expectedTooltip, appName).then(() => {
+          done();
+        }).catch(this.catchTestError(done));
+    };
+
+    /**
+     * hover over the element and see if the expected tooltip shows up or not
+     * this function returns a promise
+     */
+    this.testTooltipReturnPromise = function (el, expectedTooltip, appName, defer) {
+        defer = defer || require('q').defer();
+        const self = this;
+        const tooltip = self.getTooltipDiv();
+        // hover over the element
+        browser.actions().mouseMove(el).perform();
+
+        // wait for tooltip to show up
+        self.waitForElement(tooltip).then(() => {
+            expect(tooltip.getText()).toBe(expectedTooltip);
+
+            // hover over an element that we know doesn't have tooltip to remove the tooltip
+            if (appName === 'record') {
+                browser.actions().mouseMove(self.recordPage.getEntityTitleElement()).perform();
+            } else if (appName === 'recordset') {
+                browser.actions().mouseMove(self.recordsetPage.getTotalCount()).perform();
+            }
+
+            // TODO what about other apps
+
+            return self.waitForElementInverse(tooltip);
+        }).then(() => {
+            defer.resolve();
+        }).catch((err) => {
+            defer.reject(err);
+        });
+
+        return defer.promise;
+    };
 };
 
 module.exports = new chaisePage();

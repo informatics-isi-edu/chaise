@@ -62,7 +62,7 @@ const RecordMainSection = (): JSX.Element => {
         cm.relatedModel.recordsetState.isInitialized;
       const idSafeDisplayname = makeSafeIdAttr(cm.column.displayname.value);
 
-      const rowClassName = ['row'];
+      const rowClassName = [`row entity-row-${idSafeDisplayname}`];
       if (!canShow(cm)) {
         rowClassName.push(CLASS_NAMES.HIDDEN);
       }

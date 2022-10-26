@@ -26,6 +26,10 @@ var testParams = {
         "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
+    inline_none_test: {
+      index: 4,
+      displayname: 'booking'
+    },
     page_size: 2,
     related_tables: [
         {
@@ -80,9 +84,6 @@ var testParams = {
             operator: "="
         },
         tables_order: ["accommodation_image", "media"]
-    },
-    multipleData: {
-        title : "Multiple Records Found"
     },
     sidePanelTest: {
       schemaName: "product-record",
@@ -283,35 +284,8 @@ describe('View existing record,', function() {
         });
     });
 
-    describe("For multiple records fetched for particular filters", function() {
-
-        beforeAll(function() {
-            browser.ignoreSynchronization=true;
-            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/luxurious=true";
-            browser.get(url);
-            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
-        });
-
-        it('A error modal window should appear with multiple records found error with correct title', function(){
-            var modalTitle = chaisePage.errorModal.getTitle();
-            expect(modalTitle.getText()).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
-
-        });
-
-        it('On click of OK button the page should redirect to recordset page', function(){
-            chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then(function(btn){
-                return chaisePage.recordsetPageReady();
-            }).then(function() {
-                return browser.driver.getCurrentUrl();
-            }).then(function(currentUrl) {
-                expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
-            }).catch(function(err) {
-                console.log(err);
-            });
-        });
-    });
-
-    describe("For side panel table of contents in Record App", function() {
+    // TODO test table of contents
+    xdescribe("For side panel table of contents in Record App", function() {
 
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;

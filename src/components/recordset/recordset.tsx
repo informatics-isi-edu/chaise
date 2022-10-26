@@ -660,7 +660,7 @@ const RecordsetInner = ({
           <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
             <div className='panel-header'>
               <div className='pull-left'>
-                <h3>Refine search</h3>
+                <h3 className='side-panel-heading'>Refine search</h3>
               </div>
               <div className='pull-right'>
                 <button
