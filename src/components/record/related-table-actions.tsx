@@ -372,7 +372,14 @@ const RelatedTableActions = ({
 
             // TODO:
             // updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
-            // recordTableUtils.update(searchPopupTableModel, true, true, true, false, logService.reloadCauses.BATCH_UNLINK);
+
+            // ask recordset to update the modal
+            if (!!container.current) {
+              fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, container.current, {
+                cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
+                pageStates: { updateResult: true, updateCount: true, updateFacets: true }
+              });
+            }
           }
 
           // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox

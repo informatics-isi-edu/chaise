@@ -288,10 +288,14 @@ const RecordsetInner = ({
     window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
     window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
 
+    window.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
+    window.addEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
+
     window.removeEventListener('focus', onFocus);
     window.addEventListener('focus', onFocus);
     return () => {
       window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
+      window.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
       window.removeEventListener('focus', onFocus);
     };
   }, [update]);
@@ -373,7 +377,18 @@ const RecordsetInner = ({
    */
   windowRef.updated = () => {
     editRequestIsDone.current = true;
-  }
+  };
+
+  /**
+   * call the update function
+   */
+  const forceUpdate = ((event: CustomEvent) => {
+    const cause = event.detail.cause;
+    const pageStates = event.detail.pageStates;
+    if (!!cause && !!pageStates) {
+      update(pageStates, null, { cause});
+    }
+  }) as EventListener;
 
   //------------------- UI related callbacks: --------------------//
 
