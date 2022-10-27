@@ -12,7 +12,8 @@
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules",
+        "templating"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -45,6 +46,9 @@
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
+          },
+          "templating": {
+            "engine": "mustache"
           }
     })
 
@@ -1536,7 +1540,8 @@
             ERMrest.setClientConfig({
                 internalHosts: chaiseConfig.internalHosts,
                 disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
-                facetPanelDisplay: chaiseConfig.facetPanelDisplay
+                facetPanelDisplay: chaiseConfig.facetPanelDisplay,
+                templating: chaiseConfig.templating
             });
         }
 

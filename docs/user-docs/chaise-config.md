@@ -45,6 +45,7 @@ If a property appears in the same configuration twice, the property defined late
    * [disableExternalLinkModal](#disableexternallinkmodal)
    * [hideGoToRID](#hidegotorid)
    * [facetPanelDisplay](#facetpaneldisplay)
+   * [templating](#templating)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
    * [exportSerivePath](#exportservicepath)
@@ -487,6 +488,26 @@ If a property appears in the same configuration twice, the property defined late
          open: ["compact/select/association"]
      }
      ```
+
+#### templating
+Use this property to change the default engine that is used for templating throughout chaise and ermrestjs.
+   - Type: Object
+   - Default behavior: `mustache` will be used as the default template engine.
+   - General syntax:
+     ```
+     templating: {
+         engine: 'handlebars' or 'mustache'
+     }
+     ```
+   - `templating` attributes:
+     - `engine`: The template engine used in ermrestjs.
+   - Sample syntax:
+     ```
+     templating: {
+         engine: 'handlebars'
+     }
+     ```
+
 
 ### Export Configuration:
  #### disableDefaultExport
