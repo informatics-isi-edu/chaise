@@ -124,7 +124,8 @@ const RecordsetTable = ({
           res.push({
             displayname: tuple.displayname,
             uniqueId: tuple.uniqueId,
-            data: tuple.data
+            data: tuple.data,
+            tupleReference: tuple.reference
           });
         }
       });
@@ -159,7 +160,7 @@ const RecordsetTable = ({
       // if it's currently selected, then we should deselect (and vice versa)
       const isSelected = rowIndex !== -1;
       if (!isSelected) {
-        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data });
+        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data, tupleReference: tuple.reference });
       } else {
         res.splice(rowIndex, 1);
       }

@@ -51,7 +51,7 @@ export type RecordestModalProps = {
    * Note: the modal won't close on submit and if that's the expected behavior,
    * you should do it in this callback.
    */
-  onSubmit: (selectedRows: SelectedRow[]) => void,
+  onSubmit: (selectedRows: SelectedRow[], setModalSubmittedRows?: any) => void,
   /**
    * Whether we should show the submit spinner or not
    */
@@ -165,7 +165,7 @@ const RecordsetModal = ({
   };
 
   const submit = () => {
-    onSubmit(submittedRows);
+    onSubmit(submittedRows, setSubmittedRows);
   };
 
   const onCancelClick = () => {

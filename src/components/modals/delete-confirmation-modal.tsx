@@ -1,4 +1,4 @@
-import Modal from 'react-bootstrap/Modal';
+  import Modal from 'react-bootstrap/Modal';
 
 type DeleteConfirmationModalProps = {
   /**
@@ -14,25 +14,29 @@ type DeleteConfirmationModalProps = {
    */
   onCancel: () => void;
   /**
-   * The confimration message
+   * The confirmation message
    */
-   message?: JSX.Element;
+  message?: JSX.Element;
   /**
    * button label prop
    */
   buttonLabel: string;
+  /**
+   * The modal title
+   */
+  title?: string;
 };
 
 /**
  * returns Modal Component - Component that renders delete comfirmation dialog
  */
-const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLabel }: DeleteConfirmationModalProps) => {
+const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLabel, title }: DeleteConfirmationModalProps) => {
   const renderedMessage = message ? message : <>Are you sure you want to delete this record?</>;
 
   return (
     <Modal size='sm' show={show} onHide={onCancel}>
       <Modal.Header>
-        <Modal.Title>Confirm Delete</Modal.Title>
+        <Modal.Title>{title ? title : 'Confirm Delete'}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className='modal-text'>{renderedMessage}</div>
