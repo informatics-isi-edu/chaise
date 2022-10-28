@@ -46,7 +46,6 @@ export const Alerts = (): JSX.Element => {
       const variant = CHAISE_ALERT_TYPE_MAPPING[alert.type];
       return (
         <Alert key={index} variant={variant} dismissible onClose={() => removeAlert(alert)}>
-          {/* TODO should it be able to render HTML? */}
           {alert.isSessionExpiredAlert ? renderSessionExpiredAlert(alert) :
             <>
               <strong className='alert-title'>{toTitlecase(alert.type)}</strong>

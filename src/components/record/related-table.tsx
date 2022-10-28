@@ -31,7 +31,6 @@ const RelatedTable = ({
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
-      // TODO the following most probably should go somewhere else:
       {...relatedModel.recordsetProps}
     >
       <RelatedTableInner relatedModel={relatedModel} tableContainerID={tableContainerID} />
@@ -80,8 +79,6 @@ const RelatedTableInner = ({
         </>
 
       }
-      {/* TODO the following was span for inline, but shouldn't matter */}
-      {/* TODO related-table and related-table-accordion classes removed  */}
       <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <div id={tableContainerID}>

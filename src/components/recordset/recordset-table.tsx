@@ -187,7 +187,6 @@ const RecordsetTable = ({
         headerClassName = 'multi-select-header';
         inner = (
           <>
-            {/* TODO test id changes to class */}
             <ChaiseTooltip
               placement='right'
               tooltip={'Select all rows on this page.'}

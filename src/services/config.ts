@@ -139,8 +139,8 @@ export class ConfigService {
     }
 
     if (ConfigService.chaiseConfig.debug === true || IS_DEV_MODE) {
-      $log.debug('=====================\nDEBUG MODE ENABLED\n=====================');
       $log.setLevel(LoggerLevels.TRACE);
+      $log.debug('=====================\nDEBUG MODE ENABLED\n=====================');
     }
 
     ConfigService._setupERMrest(ERMrest, session);

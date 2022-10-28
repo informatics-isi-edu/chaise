@@ -160,12 +160,12 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting: false,
         disableFaceting: true,
-        displayMode: RecordsetDisplayMode.RELATED,
+        displayMode: isInline ? RecordsetDisplayMode.INLINE : RecordsetDisplayMode.RELATED,
         containerDetails: { isInline, index }
       },
       logInfo: {
         logStack: LogService.getStackObject(stackNode),
-        logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
+        logStackPath: LogService.getStackPath(null, isInline ? LogStackPaths.RELATED_INLINE : LogStackPaths.RELATED)
       },
       parentTuple: mainTuple,
       parentReference: mainReference

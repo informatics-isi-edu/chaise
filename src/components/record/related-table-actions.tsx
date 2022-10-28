@@ -84,11 +84,10 @@ const RelatedTableActions = ({
     }
 
     // log the client action
-    // TODO log
-    //   logService.logClientAction({
-    //     action: logService.getActionString(logService.logActions.ADD_INTEND, tableModel.logStackPath),
-    //     stack: tableModel.logStack
-    // }, tableModel.reference.defaultLogInfo);
+    LogService.logClientAction({
+      action: LogService.getActionString(LogActions.ADD_INTEND, relatedModel.recordsetProps.logInfo.logStackPath),
+      stack: relatedModel.recordsetProps.logInfo.logStack
+    }, relatedModel.initialReference.defaultLogInfo);
 
     // Generate a unique cookie name and set it to expire after 24hrs.
     const cookieName = 'recordedit-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
@@ -161,7 +160,7 @@ const RelatedTableActions = ({
     const stackElement = LogService.getStackNode(
       LogStackTypes.RELATED,
       relatedModel.initialReference.table,
-      { source: modalReference.compressedDataSource, entity: true, picker: 1 }
+      { source: domainRef.compressedDataSource, entity: true, picker: 1 }
     );
 
     const logInfo = {

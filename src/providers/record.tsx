@@ -433,8 +433,6 @@ export default function RecordProvider({
 
       // making sure we're asking for TRS for the main entity
       reference.read(1, logParams, false, false, true).then((page: any) => {
-        $log.info(`Page: ${page}`);
-
         let recordSetLink;
         const tableDisplayName = page.reference.displayname.value;
         if (page.tuples.length < 1) {
@@ -1032,10 +1030,14 @@ export default function RecordProvider({
           if (index !== pmIndex || !pm.relatedModel) return pm;
 
           const isTableDisplay = !pm.relatedModel.isTableDisplay;
-          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_MARKDOWN : LogActions.RELATED_DISPLAY_TABLE;
+          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_TABLE : LogActions.RELATED_DISPLAY_MARKDOWN;
 
-          // TODO what about the stack?
-          // logRecordClientAction(action, )
+          // log the action
+          LogService.logClientAction({
+            action: LogService.getActionString(action, pm.relatedModel.recordsetProps.logInfo.logStackPath),
+            stack: pm.relatedModel.recordsetProps.logInfo.logStack
+          }, pm.relatedModel.initialReference.defaultLogInfo);
+
           return { ...pm, relatedModel: { ...pm.relatedModel, isTableDisplay } };
         });
       });
@@ -1045,10 +1047,13 @@ export default function RecordProvider({
         return prevModels.map((pm: RecordRelatedModel, pmIndex: number) => {
           if (index !== pmIndex) return pm;
           const isTableDisplay = !pm.isTableDisplay;
-          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_MARKDOWN : LogActions.RELATED_DISPLAY_TABLE;
+          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_TABLE : LogActions.RELATED_DISPLAY_MARKDOWN;
 
-          // TODO what about the stack?
-          // logRecordClientAction(action, )
+          // log the action
+          LogService.logClientAction({
+            action: LogService.getActionString(action, pm.recordsetProps.logInfo.logStackPath),
+            stack: pm.recordsetProps.logInfo.logStack
+          }, pm.initialReference.defaultLogInfo);
 
           return { ...pm, isTableDisplay };
         });
