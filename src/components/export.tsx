@@ -1,8 +1,9 @@
 
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 import ExportModal from '@isrd-isi-edu/chaise/src/components/modals/export-modal';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -57,6 +58,14 @@ const Export = ({
    * State Variable to store exporter object which is used to cancel export.
    */
   const [exporterObj, setExporterObj] = useState<any>(null);
+  /**
+   * when the dropdown is open, we should not use the tooltip
+   */
+  const [useTooltip, setUseTooltip] = useState(true);
+  /**
+   * whether to show the tooltip or not
+   */
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const { dispatchError } = useError();
 
@@ -175,6 +184,10 @@ const Export = ({
   };
 
   const onDropdownToggle = (nextShow: boolean) => {
+    // toggle the tooltip based on dropdown's inverse state
+    setUseTooltip(!nextShow);
+    setShowTooltip(!nextShow);
+
     // log the action
     if (nextShow) {
       LogService.logClientAction({
@@ -182,27 +195,23 @@ const Export = ({
         stack: LogService.getStackObject()
       }, reference.defaultLogInfo)
     }
-  }
-
-  const renderExportIcon = () => {
-    return <span className='chaise-btn-icon fa-solid fa-file-export' />;
   };
 
   return (
     <>
       <Dropdown className='export-menu' onToggle={onDropdownToggle}>
-        <ChaiseTooltip
-          placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
-          tooltip={MESSAGE_MAP.tooltip.export}
+        <OverlayTrigger
+          placement='bottom' overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
+          show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
         >
           <Dropdown.Toggle
             disabled={disabled || !!selectedOption || options.length === 0}
             className='chaise-btn chaise-btn-primary'
           >
-            {renderExportIcon()}
+            <span className='chaise-btn-icon fa-solid fa-file-export' />
             <span>Export</span>
           </Dropdown.Toggle>
-        </ChaiseTooltip>
+        </OverlayTrigger>
         <Dropdown.Menu>
           {options.map((option: any, index: number) => (
             <Dropdown.Item

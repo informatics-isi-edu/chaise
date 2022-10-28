@@ -8,7 +8,7 @@ const Q = require('q');
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
-        chaisePage.recordPageReady().then(function () {
+        return chaisePage.recordPageReady().then(function () {
             return chaisePage.waitForAggregates();
         });
     };
@@ -29,9 +29,17 @@ exports.testPresentation = function (tableParams) {
         expect(subtitle.getText()).toEqual(tableParams.subTitle);
     });
 
-    it ("should have the correct table tooltip.", function () {
-        expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
-    });
+    // TODO should we run tooltip tests only on CI?
+    // if (process.env.CI) {
+      it ("subTitle should have the correct table tooltip.", function (done) {
+          chaisePage.testTooltipWithDone(
+              chaisePage.recordPage.getEntitySubTitleElement(),
+              tableParams.tableComment,
+              done,
+              'record'
+          );
+      });
+    // }
 
     it ("should have the correct head title using the heuristics for record app", function (done) {
         browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
@@ -51,10 +59,9 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("should show the action buttons properly", function() {
-        var editButton = chaisePage.recordPage.getEditRecordButton(),
+        const editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
-            // TODO: change once record app migrated
             exportButton = chaisePage.recordsetPage.getExportDropdown(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
             shareButton = chaisePage.recordPage.getShareButton();
@@ -66,34 +73,16 @@ exports.testPresentation = function (tableParams) {
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
-        editButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        createButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        deleteButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        showAllRTButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        exportButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        shareButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
+        expect(editButton.isDisplayed()).toBeTruthy();
+        expect(deleteButton.isDisplayed()).toBeTruthy();
+        expect(showAllRTButton.isDisplayed()).toBeTruthy();
+        expect(exportButton.isDisplayed()).toBeTruthy();
+        expect(shareButton.isDisplayed()).toBeTruthy();
     });
 
     exports.testSharePopup(tableParams.sharePopupParams);
 
-    it("should have '2' options in the dropdown menu.", function (done) {
+    it("should have '2' options in the export dropdown menu.", function (done) {
         const exportButton = chaisePage.recordsetPage.getExportDropdown();
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
@@ -166,83 +155,72 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("should show line under columns which have a comment and inspect the comment value too", function() {
-        var columns = notNullColumns.filter(function(c) {
-            return (typeof c.comment == 'string');
-        });
-        chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
-            expect(pageColumns.length).toBe(columns.length);
-            var index = 0;
-            pageColumns.forEach(function(c) {
-                var comment = columns[index++].comment;
-                chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
-                    var exists = actualComment ? true : undefined;
-                    expect(exists).toBeDefined();
+    // TODO should we run tooltip tests only on CI?
+    // if (process.env.CI) {
+      it("should show proper tooltips for columns that have it.", function(done) {
+          const columns = notNullColumns.filter(function(c) {
+              return (typeof c.comment == 'string');
+          });
+          const testColumnTooltip = (idx) => {
+              if (idx === columns.length) {
+                  done(); return;
+              }
 
-                    // Check comment is same
-                    expect(actualComment).toBe(comment);
-                });
-            });
-        });
-    });
+              const col = columns[idx];
+              const colEl = chaisePage.recordPage.getColumnNameElement(col.title);
+              chaisePage.testTooltipReturnPromise(colEl, col.comment, 'record').then(() => {
+                  testColumnTooltip(idx + 1);
+              }).catch((err) => {
+                  done.fail(err);
+              })
+          };
+
+          testColumnTooltip(0);
+      });
+    // }
 
     it("should show inline comment for inline table with one defined", function () {
         expect(chaisePage.recordPage.getInlineRelatedTableInlineComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
     });
 
-    it("should render columns based on their markdown pattern.", function(done) {
-        var columns = tableParams.columns.filter(function(c) {return c.markdown_title;});
-        chaisePage.recordPage.getColumnCaptionsWithHtml().then(function(pageColumns) {
-            expect(pageColumns.length).toBe(columns.length, "number of captions with markdown name doesn't match.");
-            pageColumns.forEach(function(c, i) {
-                var col = columns[i];
-                c.getAttribute("innerHTML").then(function(html) {
-                    expect(html).toBe(col.markdown_title, "invalid name for column `" +  col.title + "`.");
-                    if (i === pageColumns.length - 1) done();
-                }).catch(function (err) {
-                    done.fail(err);
-                })
-            });
-        }).catch(function (err) {
-            done.fail(err);
-        })
+    it("should render column names based on their markdown pattern.", function() {
+        tableParams.columns.forEach((col) => {
+            if (!col.markdown_title) return;
+            const colEl = chaisePage.recordPage.getColumnNameElement(col.markdown_title);
+            // NOTE the actual displayname is inside two spans
+            expect(colEl.element(by.css('span span span')).getAttribute('innerHTML')).toEqual(col.markdown_title, `missmatch for title=${col.title}`);
+        });
     });
 
     it("should validate the values of each column", function () {
-        expect(element.all(by.className('entity-value')).count()).toEqual(notNullColumns.length, "length missmatch.");
-        var index = -1, columnUrl, aTag;
+        expect(chaisePage.recordPage.getAllColumnValues().count()).toEqual(notNullColumns.length, "length missmatch.");
         notNullColumns.forEach(function (column) {
             if (!column.hasOwnProperty("value")) {
                 return;
             }
 
-            var errMessage = "value mismatch for column " + column.title;
+            const errMessage = "value mismatch for column " + column.title;
+            const columnTitle = column.markdown_title ? column.markdown_title : column.title;
 
-            var columnEls;
-            if (column.type=='inline') {
-                // get the value at row 5 of the table list of values
-                columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
+            let columnEls;
+            if (column.type == 'inline' || column.match === 'html') {
+                columnEls = chaisePage.recordPage.getEntityRelatedTable(columnTitle);
                 expect(chaisePage.recordPage.getMarkdownContainer(columnEls).getAttribute('innerHTML')).toContain(column.value, errMessage);
-            } else if (column.match=='html') {
-                expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value, errMessage);
-            } else if (column.title == 'User Rating'){
-                expect(chaisePage.recordPage.getEntityRelatedTableScope('<strong>User Rating</strong>').getAttribute('innerHTML')).toBe(column.value, errMessage);
-            } else {
-                columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
+            }  else {
+                columnEls = chaisePage.recordPage.getEntityRelatedTable(columnTitle);
                 if (column.presentation) {
                     if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getMarkdownContainer(columnEls);
 
-                    chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
-                        var dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
-                        columnUrl = mustache.render(column.presentation.template, {
-                            "catalog_id": process.env.catalogId,
-                            "chaise_url": process.env.CHAISE_BASE_URL,
-                        });
-                        columnUrl += "RID=" + dataRow.RID;
-
-                        expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
-                        expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
+                    const aTag = chaisePage.recordPage.getLinkChild(columnEls);
+                    const dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
+                    let columnUrl = mustache.render(column.presentation.template, {
+                        "catalog_id": process.env.catalogId,
+                        "chaise_url": process.env.CHAISE_BASE_URL,
                     });
+                    columnUrl += "RID=" + dataRow.RID;
+
+                    expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
+                    expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
                 } else {
                     expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
                 }
@@ -308,20 +286,26 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(done){
-        var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.css('#entity-4-table .related-markdown-content')), //TODO this should be a function, it's also is assuming the order
-            bookingName = "booking";
 
+    /**
+     * NOTE this test should be improved
+     * while the rest of test cases are not making any assumption about the page,
+     * this one is assuming certain inline related entity
+     */
+    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(done){
+        const EC = protractor.ExpectedConditions,
+            displayname = tableParams.inline_none_test.displayname;
+
+        const relatedEl = chaisePage.recordPage.getEntityRelatedTable(displayname);
         var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
         var getRowDeleteBtn = function (index) {
-            return chaisePage.recordPage.getRelatedTableRowDelete(bookingName, index, true);
+            return chaisePage.recordPage.getRelatedTableRowDelete(displayname, index, true);
         }
 
-        browser.executeScript("return $('.toggle-display-link')[0].click()").then(function () {
-            return chaisePage.waitForElement(element(by.id('entity-booking')))
-        }).then(function () {
-            return chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
+        const toggleBtn = chaisePage.recordPage.getToggleDisplayLink(displayname, true);
+        chaisePage.clickButton(toggleBtn).then(function () {
+            // make sure the table shows up
+            return chaisePage.waitForElement(chaisePage.recordPage.getRelatedTable(displayname));
         }).then(function () {
             // delete the first row
             return chaisePage.clickButton(getRowDeleteBtn(0));
@@ -332,7 +316,7 @@ exports.testPresentation = function (tableParams) {
 
             // make sure there is 1 row
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTableRows(displayname).count().then(function(ct) {
                     return (ct==1);
                 });
             }, browser.params.defaultTimeout);
@@ -346,16 +330,17 @@ exports.testPresentation = function (tableParams) {
 
             // make sure there are zero rows
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTableRows(displayname).count().then(function(ct) {
                     return (ct==0);
                 });
             }, browser.params.defaultTimeout);
 
             // switch the display mode
-            return chaisePage.recordPage.getToggleDisplayLink(bookingName, true).click();
+            return chaisePage.clickButton(chaisePage.recordPage.getToggleDisplayLink(displayname, true));
         }).then(function(){
-            browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
-            expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
+            const md = chaisePage.recordPage.getMarkdownContainer(relatedEl);
+            browser.wait(EC.visibilityOf(md), browser.params.defaultTimeout);
+            expect(md.getText()).toBe('None',"Incorrect text for empty markdown!");
             done();
         }).catch(function(err){
             console.log(err);
@@ -363,18 +348,22 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    /**
+     * NOTE this test should be improved
+     * while the rest of test cases are not making any assumption about the page,
+     * this one is assuming certain inline related entity.
+     * This test case also relies on the previous `it`
+     */
     it("empty inline inbound fks should disappear when 'Hide All Related Records' was clicked.",function(done){
-        var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+        const showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+        const displayname = tableParams.inline_none_test.displayname;
 
-		chaisePage.clickButton(showAllRTButton).then(function () {
-			expect(chaisePage.recordPage.getEntityRelatedTable("booking").isPresent()).toBeFalsy();
-			return chaisePage.clickButton(showAllRTButton);
-		}).then(function () {
-			done();
-		}).catch(function(err){
-            console.log(err);
-            done.fail();
-        });
+        chaisePage.clickButton(showAllRTButton).then(function () {
+          expect(chaisePage.recordPage.getEntityRelatedTable(displayname).isDisplayed()).toBeFalsy();
+          return chaisePage.clickButton(showAllRTButton);
+        }).then(function () {
+          done();
+        }).catch(chaisePage.catchTestError(done));
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
@@ -387,22 +376,15 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("clicking the related table heading should change the heading and hide the table.", function(done) {
-        var displayName = tableParams.related_tables[0].title;
-        var rtAccordion = chaisePage.recordPage.getRelatedTableAccordion(displayName),
-            panelHeading = chaisePage.recordPage.getRelatedTableHeading(displayName),
-            panelSectionHeader = chaisePage.recordPage.getRelatedTableSectionHeader(displayName).element(by.tagName('i'));
+        const displayName = tableParams.related_tables[0].title;
+        const panelHeading = chaisePage.recordPage.getRelatedTableHeading(displayName);
 
         // related table should be open by default
-        expect(panelSectionHeader.getAttribute('class')).toContain('fa-chevron-down');
+        expect(panelHeading.getAttribute('class')).not.toContain('collapsed');
 
-        expect(rtAccordion.getAttribute("class")).toMatch("panel-open");
-
-        chaisePage.waitForElement(element(by.css(".accordion-toggle")))
-
-        chaisePage.clickButton(panelHeading.element(by.css(".accordion-toggle"))).then(function() {
-            expect(panelSectionHeader.getAttribute('class')).toContain('fa-chevron-right');
-            expect(rtAccordion.getAttribute("class")).not.toMatch("panel-open");
-
+        chaisePage.waitForElement(panelHeading);
+        chaisePage.clickButton(panelHeading).then(function() {
+            expect(panelHeading.getAttribute('class')).toContain('collapsed');
             done();
         }).catch(function (err) {
             console.log(err);
@@ -434,9 +416,10 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("should show the related table names in the correct order in the Table of Contents (including inline)", function () {
+    // TODO test table of contents
+    xit("should show the related table names in the correct order in the Table of Contents (including inline)", function () {
         expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(tableParams.tocHeaders, "list of related tables in toc is incorrect");
-    });
+    }).pend('pending table of contents');
 
     describe("regarding inline related entities, ", function () {
         beforeAll(function () {
@@ -703,15 +686,6 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                 done();
             });
 
-            it('should have the correct tooltip.', function(done){
-                chaisePage.recordPage.getColumnCommentHTML(exploreBtn).then(function(comment){
-                    expect(comment).toBe("'Explore more <code>" + params.displayname + "</code> records related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on View More button");
-                    done();
-                }).catch(function(err) {
-                    done.fail(err);
-                });
-            });
-
             if (params.viewMore){
                 it ("should always go to recordset app with correct set of filters.", function (done) {
                     exploreBtn.click().then(function () {
@@ -751,8 +725,8 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
                 it ("markdown container must be visible.", function (done) {
-                    chaisePage.waitForElement(currentEl.element(by.css('.markdown-container'))).then(function () {
-                        expect(currentEl.element(by.css('.markdown-container')).isDisplayed()).toBeTruthy("didn't have markdown");
+                    chaisePage.waitForElement(chaisePage.recordPage.getMarkdownContainer(currentEl)).then(function () {
+                        expect(chaisePage.recordPage.getMarkdownContainer(currentEl).isDisplayed()).toBeTruthy("didn't have markdown");
                         done();
                     })
 
@@ -760,44 +734,59 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                 if (params.markdownValue) {
                     it ("correct markdown values should be visible.", function (done) {
-                        expect(currentEl.element(by.css('.markdown-container')).getAttribute('innerHTML')).toEqual(params.markdownValue);
+                        expect(chaisePage.recordPage.getMarkdownContainer(currentEl).getAttribute('innerHTML')).toEqual(params.markdownValue);
                         done();
                     });
                 }
 
                 if (params.canEdit) {
-                    it ("`Edit mode` button should be visible to switch to tabular mode.", function (done) {
+                    it ("`Edit mode` button should be visible to switch to tabular mode.", function () {
                         // revert is `Display`
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Edit mode");
-                        chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display edit controls for <code>" + params.displayname + "</code> related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Edit button");
-                            done();
-                        }).catch(function(err) {
-                            done.fail(err);
-                        });
                     });
+
+                    // TODO should we run tooltip tests only on CI?
+                    // if (process.env.CI) {
+                      it ("`Edit mode` button should have the proper tooltip", function (done) {
+                          chaisePage.testTooltipWithDone(
+                              markdownToggleLink,
+                              `Display edit controls for ${params.displayname} related to this ${params.baseTable}.`,
+                              done,
+                              'record'
+                          );
+                      });
+                    // }
                 } else {
-                    it ("`Table mode` button should be visible to switch to tabular mode.", function (done) {
+                    it ("`Table mode` button should be visible to switch to tabular mode.", function () {
                         // revert is `Revert Display`
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Table mode");
-                        chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display related <code>" + params.displayname + "</code> in tabular mode.'", "Incorrect tooltip on Table Display button");
-                            done();
-                        }).catch(function(err) {
-                            done.fail(err);
-                        });
                     });
+
+                    // TODO should we run tooltip tests only on CI?
+                    // if (process.env.CI) {
+                        it ("`Table mode` button should have the proper tooltip", function (done) {
+                            chaisePage.testTooltipWithDone(
+                                markdownToggleLink,
+                                `Display related ${params.displayname} in tabular mode.`,
+                                done,
+                                'record'
+                            );
+                        });
+                    // }
                 }
 
                 it ("clicking on the toggle should change the view to tabular.", function (done) {
                     markdownToggleLink.click().then(function() {
                         expect(markdownToggleLink.getText()).toBe("Custom mode", "after toggle button missmatch.");
-                        return chaisePage.recordPage.getColumnComment(markdownToggleLink);
-                    }).then(function(comment){
-                        expect(comment).toBe("Switch back to the custom display mode", "Incorrect tooltip on Display button");
-
+                        // TODO should we run tooltip tests only on CI?
+                        // if (!process.env.CI) {
+                          return chaisePage.testTooltipReturnPromise(markdownToggleLink, "Switch back to the custom display mode.", 'record');
+                        // } else {
+                        //   return true;
+                        // }
+                    }).then(function() {
                         //TODO make sure table is visible
                         toggled = true;
                         done();
@@ -837,26 +826,25 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
         });
 
         if (typeof params.canCreate === "boolean") {
-            it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function (done) {
-                var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
+            let addBtn;
+            it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function () {
+                addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
                 expect(addBtn.isPresent()).toBe(params.canCreate);
-                if(params.canCreate){
-                    chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
-                        let expected;
-                        if (params.isAssociation) {
-                          expected = `'Connect <code>${params.displayname}</code> records to this <code>${params.baseTable}</code>.'`
-                        } else {
-                          expected = `'Create <code>${params.displayname}</code> records for this <code>${params.baseTable}</code>.'`;
-                        }
-                        expect(comment).toBe(expected, "Incorrect tooltip on Add button");
-                        done();
-                    }).catch(function(error) {
-                        console.log(error);
-                        done.fail();
-                    });
-                }
-                done();
             });
+
+            if (!params.canCreate) return;
+            // TODO should we run tooltip tests only on CI?
+            if (!process.env.CI) return;
+
+            it ("`Add/Link` button should have the proper tooltip", function (done) {
+              let expected;
+              if (params.isAssociation) {
+                  expected = `Connect ${params.displayname} records to this ${params.baseTable}.`
+              } else {
+                  expected = `Create ${params.displayname} records for this ${params.baseTable}.`;
+              }
+              chaisePage.testTooltipWithDone(addBtn, expected, done, 'record');
+          });
         }
     });
 

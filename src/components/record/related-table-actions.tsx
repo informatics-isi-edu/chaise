@@ -444,7 +444,7 @@ const RelatedTableActions = ({
       }
     } else {
       icon = 'fa-solid fa-grip';
-      tooltip = 'Switch back to the custom display mode';
+      tooltip = 'Switch back to the custom display mode.';
       label = 'Custom mode';
     }
 
