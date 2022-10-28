@@ -102,6 +102,16 @@
   }
 }
 
+.search-popup {
+  ~ .modal-error-backdrop {
+    z-index: 1061;
+  }
+
+  ~ .modal-error {
+    z-index: 1066;
+  }
+}
+
 .modal-footer .chaise-btn {
   margin-left: 5px;
 }

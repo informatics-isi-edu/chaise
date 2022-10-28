@@ -299,7 +299,6 @@ const RelatedTableActions = ({
   };
 
   const openUnlinkPureBinaryModal = () => {
-    console.log(relatedModel);
     const domainRef = relatedModel.initialReference;
 
     // the reference that we're going to create rows from
@@ -314,9 +313,9 @@ const RelatedTableActions = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: true,
+      showFaceting: false,
       disableFaceting: false,
-      displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK,
+      displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK
     };
 
     const stackElement = LogService.getStackNode(
@@ -332,15 +331,14 @@ const RelatedTableActions = ({
     };
 
     // this function is here since we need to access the outer scope here
-    const submitCB = (selectedRows: SelectedRow[], setSubmittedRows: any) => {
+    const submitCB = (selectedRows: SelectedRow[]) => {
       if (!selectedRows) return;
 
       const cc = ConfigService.chaiseConfig;
       const CONFIRM_DELETE = (cc.confirmDelete === undefined || cc.confirmDelete) ? true : false;
 
       // NOTE: This reference has to be filtered so creating the path in the ermrestJS function works properly
-      console.log(selectedRows);
-      var leafReference = selectedRows[0].tupleReference;
+      const leafReference = selectedRows[0].tupleReference;
 
       setShowPureBinarySpinner(true);
 
@@ -350,45 +348,23 @@ const RelatedTableActions = ({
 
           // Show modal popup summarizing total # of deletions succeeded and failed
           response.clickOkToDismiss = true;
-          const reloadModalRows = function () {
-            if (response.failedTupleData.length > 0) {
-              // iterate over the set of successful ids and find them in selected rows, then remove them
-              response.successTupleData.forEach((data: any) => {
-                // data is an object of key/value pairs for each piece of key information
-                // { keycol1: val, keycol2: val2, ... }
-                var idx = selectedRows.findIndex((tuple: any) => {
-                  return Object.keys(data).every((key) => {
-                    return tuple.data[key] == data[key]
-                  });
-                });
-
-                selectedRows.splice(idx, 1);
-              });
-              setSubmittedRows(selectedRows);
-            } else {
-              // if everything is successful, empty selected rows
-              setSubmittedRows([]);
-            }
-
-            // TODO:
-            // updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
-
-            // ask recordset to update the modal
-            if (!!container.current) {
-              fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, container.current, {
-                cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
-                pageStates: { updateResult: true, updateCount: true, updateFacets: true }
-              });
-            }
-          }
 
           // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
           //       - some errors could have been because of row level security
           dispatchError({ 
             error: response, 
             isDismissible: true,
-            okBtnCallback: reloadModalRows,
-            closeBtnCallback: reloadModalRows 
+            closeBtnCallback: () => {
+              // ask recordset to update the modal
+              if (!!container.current) {
+                // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
+                fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, container.current, {
+                  cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
+                  pageStates: { updateResult: true, updateCount: true, updateFacets: true },
+                  response: response
+                });
+              }
+            } 
           });
         };
 
@@ -428,23 +404,6 @@ const RelatedTableActions = ({
           },
           message: confirmMessage
         });
-        // const logObj = {
-        //   action: LogService.getActionString(LogActions.LINK, logInfo.logStackPath),
-        //   stack: logInfo.logStack
-        // };
-
-        // const createRef = derivedRef.unfilteredReference.contextualize.entryCreate;
-        // createRef.create(submissionRows, logObj).then(() => {
-        //   setAddPureBinaryModalProps(null);
-        //   // TODO better and more costum message
-        //   addAlert('Your data has been submitted. Showing you the result set...', ChaiseAlertType.SUCCESS);
-
-        //   // TODO properly send the container
-        //   updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
-        // }).catch((error: any) => {
-        //   // TODO ask josh about validateSession
-        //   dispatchError({ error: error, isDismissible: true });
-        // }).finally(() => setShowPureBinarySpinner(false));
       });
     };
     setUnlinkPureBinarySubmitCB(() => submitCB);
@@ -454,7 +413,6 @@ const RelatedTableActions = ({
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
-      getDisabledTuples: undefined,
       parentTuple: recordPage.tuples[0],
       parentReference: recordReference
     });

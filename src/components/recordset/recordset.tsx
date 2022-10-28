@@ -385,7 +385,28 @@ const RecordsetInner = ({
   const forceUpdate = ((event: CustomEvent) => {
     const cause = event.detail.cause;
     const pageStates = event.detail.pageStates;
+    const unlinkResponse = event.detail.response;
     if (!!cause && !!pageStates) {
+      if (!!unlinkResponse) {
+        if (unlinkResponse.failedTupleData.length > 0) {
+          // iterate over the set of successful ids and find them in selected rows, then remove them
+          unlinkResponse.successTupleData.forEach((data: any) => {
+            // data is an object of key/value pairs for each piece of key information
+            // { keycol1: val, keycol2: val2, ... }
+            const idx = selectedRows.findIndex((tuple: any) => {
+              return Object.keys(data).every((key) => {
+                return tuple.data[key] == data[key]
+              });
+            });
+
+            selectedRows.splice(idx, 1);
+          });
+          setSelectedRows([...selectedRows]);
+        } else {
+          // if everything is successful, empty selected rows
+          setSelectedRows([]);
+        }
+      }
       update(pageStates, null, { cause});
     }
   }) as EventListener;
