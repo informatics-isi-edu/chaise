@@ -4,6 +4,7 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 const Q = require('q');
+const { browser } = require('protractor');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
@@ -416,10 +417,13 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    // TODO test table of contents
-    xit("should show the related table names in the correct order in the Table of Contents (including inline)", function () {
-        expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(tableParams.tocHeaders, "list of related tables in toc is incorrect");
-    }).pend('pending table of contents');
+    it("should show the related table names in the correct order in the Table of Contents (including inline)", function () {
+        chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+            headings.forEach(function (heading, idx) {
+                expect(heading.getText()).toEqual(tableParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+            })
+        })
+    });
 
     describe("regarding inline related entities, ", function () {
         beforeAll(function () {
@@ -650,7 +654,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
     if (!params.isInline) {
         it("title should be correct.", function (done) {
-            var titleEl = chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname);
+            var titleEl = chaisePage.recordPage.getRelatedTableSectionHeaderDisplayname(params.displayname);
             chaisePage.waitForElement(titleEl).then(function () {
                 expect(titleEl.getText()).toBe(params.displayname, "heading missmatch.");
                 done();
@@ -917,12 +921,22 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
                     if (params.isAssociation) {
                         it ("button tooltip should be `Unlink`.", function (done) {
-                            expect(deleteBtn.getAttribute("uib-tooltip-html")).toBe('\'Disconnect <code>' + params.displayname + '</code>: <code>' + params.entityMarkdownName + '</code> from this <code>' + params.baseTable + '</code>.\'');
+                            chaisePage.testTooltipWithDone(
+                                deleteBtn,
+                                '\'Disconnect <code>' + params.displayname + '</code>: <code>' + params.entityMarkdownName + '</code> from this <code>' + params.baseTable + '</code>.\'',
+                                done,
+                                'record'
+                            );
                             done();
                         });
                     } else {
                         it ("button tooltip be `Delete`.", function (done) {
-                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe("Delete");
+                            chaisePage.testTooltipWithDone(
+                                deleteBtn,
+                                'Delete',
+                                done,
+                                'record'
+                            );
                             done();
                         });
                     }
@@ -1100,8 +1114,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
             }).then(function(ct){
                 expect(ct).toBe(params.totalCount, "association count missmatch.");
 
-                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
-                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+                expect(chaisePage.recordsetPage.getModalRecordsetTotalCount().getText()).toBe("Displaying all\n" + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
 
                 // check the state of the facet panel
                 expect(chaisePage.recordPage.getModalSidePanel().isDisplayed()).toBeTruthy("Side panel is not visible on load");
@@ -1119,9 +1132,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                 // go through the list and check their first column (which is the id)
                 disabledRows.forEach(function (r, index) {
-                    r.findElement(by.css("td:not(.action-btns)")).then(function (el) {
-                        expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
-                    });
+                    const el = r.element(by.css('td:not(.action-btns)'))
+                    expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
                 });
 
                 done();
@@ -1154,9 +1166,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                     // go through the list and check their first column (which is the id)
                     disabledRows.forEach(function (r, index) {
-                        r.findElement(by.css("td:not(.action-btns)")).then(function (el) {
-                            expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
-                        });
+                        const el = r.element(by.css('td:not(.action-btns)'));
+                        expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
                     });
 
                     // clear search
@@ -1234,8 +1245,8 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function(ct){
                 expect(ct).toBe(params.totalCount, "association count missmatch.");
 
-                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
-                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+                var totalCountText = chaisePage.recordsetPage.getModalRecordsetTotalCount().getText();
+                expect(totalCountText).toBe("Displaying all\n" + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
 
                 // check the state of the facet panel
                 expect(chaisePage.recordPage.getModalSidePanel().isDisplayed()).toBeTruthy("Side panel is not visible on load");
@@ -1248,7 +1259,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
         });
 
         it ("user should be able to select values to unlink and submit.", function (done) {
-            var modalTitle, confirmUnlinkBtn, errorTitle, modalOkBtn;
+            var modalTitle, confirmUnlinkBtn, errorTitle, modalCloseBtn;
             var modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
             // select rows 2 and 4, then remove them
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 1);
@@ -1268,7 +1279,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function (text) {
                 expect(text).toBe("Confirm Unlink");
 
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
+                expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
                 confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 return browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
@@ -1287,13 +1298,13 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function (text) {
                 // check error popup
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
+                expect(chaisePage.recordPage.getErrorModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
 
-                modalOkBtn = chaisePage.errorModal.getOKButton()
-                return browser.wait(EC.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+                modalCloseBtn = chaisePage.errorModal.getCloseButton()
+                return browser.wait(EC.elementToBeClickable(modalCloseBtn), browser.params.defaultTimeout);
             }).then(function () {
                 // click ok
-                return chaisePage.clickButton(modalOkBtn);
+                return chaisePage.clickButton(modalCloseBtn);
             }).then(function () {
                 // check modal has 3 rows
                 return browser.wait(function () {
@@ -1438,8 +1449,8 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function(ct){
                 expect(ct).toBe(params.countAfterUnlink, "association count missmatch.");
 
-                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
-                expect(totalCountText).toBe("Displaying\nall " + params.countAfterUnlink +"\nof " + params.countAfterUnlink + " records", "association count display missmatch.");
+                var totalCountText = chaisePage.recordsetPage.getModalRecordsetTotalCount().getText();
+                expect(totalCountText).toBe("Displaying all\n" + params.countAfterUnlink +"\nof " + params.countAfterUnlink + " records", "association count display missmatch.");
 
                 modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
                 // select "Television" (not deletable)
@@ -1461,7 +1472,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return modalTitle.getText();
             }).then(function (text) {
                 expect(text).toBe("Confirm Unlink");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
+                expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
                 confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 return browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
@@ -1481,10 +1492,10 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function (text) {
                 // check error popup
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
+                expect(chaisePage.recordPage.getErrorModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
-                return chaisePage.clickButton(chaisePage.errorModal.getOKButton());
+                return chaisePage.clickButton(chaisePage.errorModal.getCloseButton());
             }).then(function () {
                 // check modal has 2 rows
                 return browser.wait(function () {
@@ -1506,7 +1517,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
         it("should have rows still selected after failed delete", function (done) {
             // TODO: change once record app migrated
-            expect(chaisePage.recordsetPage.getAngularSelectedRowsFilters().count()).toBe(2);
+            expect(chaisePage.recordsetPage.getSelectedRowsFilters().count()).toBe(2);
             done();
         });
 
@@ -1518,7 +1529,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
             chaisePage.clickButton(inp2).then(function () {
                 return browser.wait(function () {
-                    return chaisePage.recordsetPage.getAngularSelectedRowsFilters().count().then(function (ct) {
+                    return chaisePage.recordsetPage.getSelectedRowsFilters().count().then(function (ct) {
                         return (ct == 1);
                     });
                 });
@@ -1534,7 +1545,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return modalTitle.getText();
             }).then(function (text) {
                 expect(text).toBe("Confirm Unlink");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 1 record?");
+                expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe("Are you sure you want to unlink 1 record?");
 
                 confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 return browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
@@ -1554,10 +1565,10 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function (text) {
                 // check error popup
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
+                expect(chaisePage.recordPage.getErrorModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
-                return chaisePage.clickButton(chaisePage.errorModal.getOKButton());
+                return chaisePage.clickButton(chaisePage.errorModal.getCloseButton());
             }).then(function () {
                 // check modal has 1 row
                 return browser.wait(function () {

@@ -568,6 +568,10 @@ var recordPage = function() {
         return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header'));
     };
 
+    this.getRelatedTableSectionHeaderDisplayname = function(displayName) {
+        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header .rt-displayname'));
+    };
+
     this.getRelatedTableInlineComment = function(displayname) {
         return this.getRelatedTableAccordion(displayname).element(by.css('.inline-tooltip'));
     }
@@ -652,7 +656,7 @@ var recordPage = function() {
     };
 
     this.getConfirmDeleteTitle = function() {
-        return element(by.css(".modal-title"));
+        return element(by.css(".confirm-delete-modal .modal-title"));
     };
 
     this.getConfirmDeleteButton = function () {
@@ -678,6 +682,14 @@ var recordPage = function() {
     this.getModalText = function() {
         return element(by.css(".modal-body"));
     };
+
+    this.getConfirmDeleteModalText = function () {
+        return element(by.css(".confirm-delete-modal .modal-body"));
+    }
+
+    this.getErrorModalText = function () {
+        return element(by.css(".modal-error .modal-body"));
+    }
 
     this.getShareModal = function() {
         return element(by.css(".chaise-share-citation-modal"));
@@ -755,7 +767,7 @@ var recordPage = function() {
     }
 
     this.getSidePanelTableTitles = function() {
-        return browser.executeScript("return $('.columns-container li.toc-heading').map(function(i, a) { return a.innerText.trim(); });");
+        return element.all(by.css('.columns-container li.toc-heading'));
     }
 
     this.getHideTocBtn = function() {
@@ -813,6 +825,10 @@ var recordsetPage = function() {
 
     this.getTotalCount = function() {
         return element(by.css('.chaise-table-header-total-count'));
+    };
+
+    this.getModalRecordsetTotalCount = function() {
+        return element(by.css('.modal-body .chaise-table-header-total-count'));
     };
 
     this.getColumnNames = function() {
@@ -930,7 +946,7 @@ var recordsetPage = function() {
     };
 
     this.getConfirmDeleteTitle = function() {
-        return element(by.css(".modal-title"));
+        return element(by.css(".confirm-delete-modal .modal-title"));
     };
 
     this.getConfirmDeleteButton = function () {
@@ -1043,7 +1059,8 @@ var recordsetPage = function() {
     }
 
     this.getSelectedRowsFilters = function () {
-        return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet"));
+        // adding ".selected-chiclet-name" to the selector to not select the clear-all-btn
+        return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet .selected-chiclet-name"));
     }
 
     //TODO: remove when record app migrated
@@ -1362,9 +1379,10 @@ function chaisePage() {
         return this.waitForElement(element(by.css(".recordset-table")));
     }
     this.recordPageReady = function() {
-        this.waitForElement(this.recordPage.getEntityTitleElement());
+        var self = this;
+        this.waitForElement(self.recordPage.getEntityTitleElement());
         this.waitForElement(element(by.css('.record-main-section-table')));
-        return this.waitForElementInverse(this.recordPage.getRelatedSectionSpinner());
+        return this.waitForElementInverse(self.recordPage.getRelatedSectionSpinner());
     }
     this.recordeditPageReady = function() {
         this.waitForClickableElement(element(by.id("submit-record-button")));

@@ -935,6 +935,7 @@ const FacetRangePicker = ({
 
     return (<OverlayTrigger
       placement='bottom'
+      trigger='hover'
       overlay={<Tooltip>Zoom</Tooltip>}
     >
       {zoomInButton}
@@ -956,6 +957,7 @@ const FacetRangePicker = ({
 
     return (<OverlayTrigger
       placement='bottom'
+      trigger='hover'
       overlay={<Tooltip>Unzoom</Tooltip>}
     >
       {zoomOutButton}
@@ -969,6 +971,7 @@ const FacetRangePicker = ({
           <div className='chaise-btn-group' style={{ 'zIndex': 1 }}>
             <OverlayTrigger
               placement='right'
+              trigger='hover'
               overlay={
                 <Tooltip>
                   {renderHistogramHelpTooltip()}
@@ -980,7 +983,7 @@ const FacetRangePicker = ({
             </OverlayTrigger>
             {renderZoomInButton()}
             {renderZoomOutButton()}
-            <OverlayTrigger placement='bottom' overlay={<Tooltip>Reset</Tooltip>}>
+            <OverlayTrigger placement='bottom' trigger='hover' overlay={<Tooltip>Reset</Tooltip>}>
               <button type='button' className='reset-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm' onClick={resetPlot}>
                 <span className='fas fa-undo'></span>
               </button>

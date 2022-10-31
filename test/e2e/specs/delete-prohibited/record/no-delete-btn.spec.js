@@ -53,9 +53,13 @@ describe('View existing record,', function() {
         });
 
         // TODO test table of contents
-        // it('Related tables should all show by default because of showWriterEmptyRelatedOnLoad=true', function () {
-        //     expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
-        // });
+        it('Related tables should all show by default because of showWriterEmptyRelatedOnLoad=true', function () {
+            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+                headings.forEach(function (heading, idx) {
+                    expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+                })
+            })
+        });
 
         if (process.env.CI) {
             it ("Should have the proper permalink in the share popup if resolverImplicitCatalog is the same as catalogId", function (done) {

@@ -270,7 +270,7 @@ const RecordsetModal = ({
             <span>Link </span>
             <Title reference={recordsetProps.initialReference} />
             <span> to </span>
-            <Title reference={recordsetProps.parentReference} /><span>:</span>
+            <Title reference={recordsetProps.parentReference} /><span>: </span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
@@ -280,7 +280,7 @@ const RecordsetModal = ({
             <span>Unlink </span>
             <Title reference={recordsetProps.initialReference} />
             <span> from </span>
-            <Title reference={recordsetProps.parentReference} /><span>:</span>
+            <Title reference={recordsetProps.parentReference} /><span>: </span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );

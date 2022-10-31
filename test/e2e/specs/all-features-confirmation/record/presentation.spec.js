@@ -204,9 +204,8 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });
 
@@ -253,9 +252,8 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var keys = [];
             keys.push(testParams.no_related_data.key.name + testParams.no_related_data.key.operator + testParams.no_related_data.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url)
             chaisePage.recordPageReady();
         });
 
@@ -289,8 +287,7 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
-            browser.ignoreSynchronization=true;
-            browser.get(url);
+            chaisePage.navigate(url);
             recSidePanelCat_5 = chaisePage.recordPage.getSidePanelItemById(5);
             hideTocBtn = chaisePage.recordPage.getHideTocBtn();
             chaisePage.waitForElement(hideTocBtn);

@@ -115,17 +115,21 @@ describe('View existing record,', function() {
         });
 
         // TODO test table of contents
-        // it ("should show the empty related association tables and table of contents on page load", function (done) {
-        //     browser.wait(function() {
-        //         return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
-        //             return (ct == testParams.tocHeaders.length);
-        //         });
-        //     }, browser.params.defaultTimeout);
-        //     expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        it ("should show the empty related association tables and table of contents on page load", function (done) {
+            browser.wait(function() {
+                return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+                    return (ct == testParams.tocHeaders.length);
+                });
+            }, browser.params.defaultTimeout);
+            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+                headings.forEach(function (heading, idx) {
+                    expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+                })
+            })
 
-        //     expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
-        //     done();
-        // });
+            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
+            done();
+        });
 
         it ("The proper permalink (browser url) should appear in the share popup if resolverImplicitCatalog is undefined", function (done) {
             var shareButton = chaisePage.recordPage.getShareButton(),
@@ -206,41 +210,45 @@ describe('View existing record,', function() {
 });
 
 // TODO test table of contents
-// var inlineParams = {
-//     table_name: "inline_table",
-//     key: {
-//         name: "id",
-//         value: "1",
-//         operator: "="
-//     },
-//     headers: ["inline_association_table"],
-//     tocHeaders: ["Summary", "inline_association_table (0)"],
-// }
-// describe('View existing record for testing "show empty sections" heuristics,', function() {
+var inlineParams = {
+    table_name: "inline_table",
+    key: {
+        name: "id",
+        value: "1",
+        operator: "="
+    },
+    headers: ["inline_association_table"],
+    tocHeaders: ["Summary", "inline_association_table (0)"],
+}
+describe('View existing record for testing "show empty sections" heuristics,', function() {
 
-//     describe("For table " + inlineParams.table_name + ",", function() {
+    describe("For table " + inlineParams.table_name + ",", function() {
 
-//         beforeAll(function () {
-//             var keys = [];
-//             keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
-//             browser.ignoreSynchronization=true;
-//             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
-//             browser.get(url);
+        beforeAll(function () {
+            var keys = [];
+            keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
+            browser.get(url);
 
-//             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
-//         });
+            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
+        });
 
 
-//         it ("should show the empty related association tables and table of contents on page load", function (done) {
-//             browser.wait(function() {
-//                 return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
-//                     return (ct == inlineParams.tocHeaders.length);
-//                 });
-//             }, browser.params.defaultTimeout);
-//             expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(inlineParams.tocHeaders, "list of related tables in toc is incorrect");
+        it ("should show the empty related association tables and table of contents on page load", function (done) {
+            browser.wait(function() {
+                return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
+                    return (ct == inlineParams.tocHeaders.length);
+                });
+            }, browser.params.defaultTimeout);
+            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+                headings.forEach(function (heading, idx) {
+                    expect(heading.getText()).toEqual(inlineParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+                })
+            })
 
-//             expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(inlineParams.headers, "list of related table accordion headers is incorret");
-//             done();
-//         });
-//     });
-// });
+            expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(inlineParams.headers, "list of related table accordion headers is incorret");
+            done();
+        });
+    });
+});

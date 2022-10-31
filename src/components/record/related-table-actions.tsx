@@ -269,7 +269,7 @@ const RelatedTableActions = ({
 
     setAddPureBinaryModalProps({
       initialReference: modalReference,
-      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize :  RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
       getDisabledTuples,
@@ -313,7 +313,7 @@ const RelatedTableActions = ({
       deletable: false,
       sortable: true,
       selectMode: RecordsetSelectMode.MULTI_SELECT,
-      showFaceting: false,
+      showFaceting: true,
       disableFaceting: false,
       displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK
     };
@@ -439,7 +439,7 @@ const RelatedTableActions = ({
         tooltip = <span>Display edit controls for {currentTable} related to this {mainTable}.</span>;
         label = 'Edit mode';
       } else {
-        tooltip = <span>Displayed related {currentTable} in tabular mode.</span>
+        tooltip = <span>Display related {currentTable} in tabular mode.</span>
         label = 'Table mode';
       }
     } else {
@@ -464,13 +464,13 @@ const RelatedTableActions = ({
   const renderCreateBtnTooltip = () => {
     if (relatedModel.canCreateDisabled) {
       const keyset = relatedModel.initialReference.origFKR.key.colset.columns;
-      let keysetString = '';
+      let keysetString: string | JSX.Element = '';
       keyset.forEach(function (col: any, idx: number) {
         keysetString += col.name;
         if (idx + 1 !== keyset.length) keysetString += ', ';
       });
 
-      keysetString = `<code>${keysetString}</code>`;
+      keysetString = <code>keysetString</code>;
       if (relatedModel.isPureBinary) {
         return <span>Unable to connect to {currentTable} records until {keysetString} in this {mainTable} is set.</span>;
       }

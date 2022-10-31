@@ -203,6 +203,7 @@ const Export = ({
         <OverlayTrigger
           placement='bottom' overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
           show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
+          trigger='hover'
         >
           <Dropdown.Toggle
             disabled={disabled || !!selectedOption || options.length === 0}

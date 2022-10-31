@@ -63,6 +63,7 @@ const RelatedTableHeader = ({
     <div className='rt-section-header'>
       <OverlayTrigger
         placement='top'
+        trigger='hover'
         overlay={<Tooltip>{renderTooltipContent()}</Tooltip>}
         onToggle={(nextshow: boolean) => {
           // Bootstrap onToggle prop to make tooltip visible or hidden

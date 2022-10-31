@@ -358,17 +358,16 @@ describe('View recordset,', function () {
                 });
             });
 
-            it('should display the permalink button & a tooltip on hovering over it', function () {
+            it('should display the permalink button & a tooltip on hovering over it', function (done) {
                 var permalink = chaisePage.recordsetPage.getPermalinkButton();
                 expect(permalink.isDisplayed()).toBe(true, "The permalink button is not visible on the recordset app");
-                browser.actions().mouseMove(permalink).perform();
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                }).catch(function (err) {
-                    console.log(err);
-                });
+
+                chaisePage.testTooltipWithDone(
+                    permalink,
+                    testParams.tooltip.permalink,
+                    done,
+                    'recordset'
+                );
             });
 
             it("should autofocus on search box", function () {
@@ -507,44 +506,40 @@ describe('View recordset,', function () {
                 });
             }
 
-            it("should show information icon next in column headers which have a comment and inspect the comment value", function () {
+            it("should show information icon next in column headers which have a comment and inspect the comment value", function (done) {
                 var columns = accommodationParams.columns.filter(function (c) {
                     return typeof c.comment == 'string';
                 });
                 chaisePage.recordsetPage.getColumnsWithTooltipIcon().then(function (pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);
                     var index = 0;
-                    pageColumns.forEach(function (c) {
+                    pageColumns.forEach(function (c, index) {
                         var comment = columns[index++].comment;
 
-                        // hover over column header
-                        browser.actions().mouseMove(c).perform();
-
-                        var tooltip = chaisePage.getTooltipDiv();
-                        chaisePage.waitForElement(tooltip).then(function () {
-                            expect(tooltip.getText()).toBe(comment);
-                            // move cursor to hide tooltip
-                            return browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                        }).then(function () {
-                            chaisePage.waitForElementInverse(tooltip);
-                        }).catch(function (err) {
-                            console.log(err);
-                        });
+                        const testColumnTooltip = (idx) => {
+                            if (index === pageColumns.length) {
+                                return;
+                            }
+              
+                            chaisePage.testTooltipReturnPromise(c, comment, 'recordset').then(() => {
+                                testColumnTooltip(index + 1);
+                            }).catch((err) => {
+                                done.fail(err);
+                            })
+                        };
+              
+                        testColumnTooltip(index);
                     });
                 });
 
                 // Check tooltip of Action column
                 var actionCol = chaisePage.recordsetPage.getActionHeaderSpan();
-                browser.actions().mouseMove(actionCol).perform();
-
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.actionCol);
-                    // move cursor to hide tooltip
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                }).catch(function (err) {
-                    console.log(err);
-                });
+                chaisePage.testTooltipWithDone(
+                    actionCol,
+                    testParams.tooltip.actionCol,
+                    done,
+                    'recordset'
+                );
             });
 
             it("apply different searches, ", function (done) {

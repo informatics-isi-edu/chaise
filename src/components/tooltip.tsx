@@ -32,6 +32,7 @@ const ChaiseTooltip = ({
   return (
     <OverlayTrigger
       placement={placement}
+      trigger='hover'
       overlay={
         <Tooltip className={className}>
           {tooltip}
