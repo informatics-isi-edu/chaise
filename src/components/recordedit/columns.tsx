@@ -4,7 +4,6 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 
 const Columns = ({ columns }) => {
-
     return (
         <div className='record-edit-column'>
             {columns.map(c => (

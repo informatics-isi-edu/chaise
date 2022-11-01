@@ -1,9 +1,11 @@
 import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
-import { useFormContext, useController } from "react-hook-form";
+import { useFormContext, useController, useWatch } from "react-hook-form";
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+
 
 /**
  * Things to consider'
@@ -36,15 +38,12 @@ const numericFieldValidation = {
 // https://github.com/react-hook-form/react-hook-form/issues/589
 const dateFieldValidation =  (value: string) => {
   const date = windowRef.moment(value, DATE_FORMAT, true);
-  return date.isValid() ? true : 'Please enter a valid date value';
+  return date.isValid() || 'Please enter a valid date value';
 };
 
-const timestampFieldValidation = {
-  validate: (value: string) => {
-    const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
-    return !timestamp.isValid();
-  },
-  message: 'Please enter a valid date and time value',
+const timestampFieldValidation = (value: string) => {
+  const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
+  return timestamp.isValid() || 'Please enter a valid date and time value';
 };
 
 const validationFunctionMap : { 
@@ -57,46 +56,44 @@ const validationFunctionMap : {
   'timestamp': timestampFieldValidation,
 };
 
-type NumericFieldProps = {
+
+
+type TextFieldProps = {
   /**
    *  the name of the field
    */
   name: string,
-  /**
-   * the type of numeric field - int | float/numeric
-   */
-  type: string, 
   /** 
-   * placeholder text for int and float input types
-   */
+  * placeholder text
+  */
   placeholder?: string,
   /**
-   * classes for styling the input element
-   */
+  * classes for styling the input element
+  */
   classes?: string,
   /**
-   * classes for styling the clear button
-   */
+  * classes for styling the clear button
+  */
   clearClasses?: string
   /**
-   * flag for disabling the input
-   */
+  * flag for disabling the input
+  */
   disableInput?: boolean,
   /**
-   * flag to show error below the input switch component
-   */
+  * flag to show error below the input switch component
+  */
   displayErrors?: boolean,
   /**
-   * the handler function called on input change
-   */
+  * the handler function called on input change
+  */
   onFieldChange?: ((value: string) => void)
 };
 
-const NumericField = ({ 
+const TextField = ({ 
   name, 
-  type, 
   placeholder, 
   classes,
+  inputClasses,
   clearClasses,
   disableInput,
   displayErrors,
@@ -143,8 +140,8 @@ const NumericField = ({
 
   return (
     <>
-      <div className={`chaise-input-control has-feedback input-switch-numeric ${disableInput ? ' input-disabled' : ''}`}>
-        <input placeholder={placeholder} className={`${classes} input-switch`} {...formInput.field} />
+      <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+        <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...formInput.field} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
           clickCallback={clearInput}
@@ -153,6 +150,124 @@ const NumericField = ({
       </div>
       { displayErrors && isTouched && error?.message && <span className='input-switch-error'>{error.message}</span> }
     </>
+  );
+};
+
+
+
+type NumericFieldProps = {
+  /**
+   *  the name of the field
+   */
+  name: string,
+  /**
+   * the type of numeric field - int | float/numeric
+   */
+  type: string, 
+  /** 
+   * placeholder text for int and float input types
+   */
+  placeholder?: string,
+  /**
+   * classes for styling the input element
+   */
+  classes?: string,
+  /**
+   * classes for styling the clear button
+   */
+  clearClasses?: string
+  /**
+   * flag for disabling the input
+   */
+  disableInput?: boolean,
+  /**
+   * flag to show error below the input switch component
+   */
+  displayErrors?: boolean,
+  /**
+   * the handler function called on input change
+   */
+  onFieldChange?: ((value: string) => void)
+};
+
+const NumericField = ({ 
+  name, 
+  type, 
+  placeholder, 
+  classes,
+  inputClasses,
+  clearClasses,
+  disableInput,
+  displayErrors,
+  value,
+  containerClasses,
+  styles,
+  onFieldChange,
+}: NumericFieldProps): JSX.Element => {
+
+  const formRef = useRef();
+
+  const { setValue, control, formState: { touchedFields } } = useFormContext();
+
+  const registerOptions = {
+    required: false,
+    pattern: validationFunctionMap[type],
+  };
+
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
+
+  const field = formInput?.field;
+
+  const fieldValue = field?.value;
+
+  const fieldState = formInput?.fieldState;
+
+  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
+  
+  const { error, isTouched } = fieldState;
+
+  const clearInput = () => setValue(name, '');
+
+  useEffect(()=>{
+    if(onFieldChange){
+      onFieldChange(fieldValue);
+    }
+
+    if(showClear!=Boolean(fieldValue)){
+      setShowClear(Boolean(fieldValue));
+    }
+  }, [fieldValue]);
+
+  useEffect(() => {
+    setValue(name, value);
+  }, [value]);
+
+  const handleChange = (v) => {
+    field.onChange(v);
+    field.onBlur();
+  };
+
+  useEffect(() => {
+    console.log('error message updated: ', name, error?.message);
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: `.input-switch-container-${name}` });
+  }, [error?.message])
+
+  return (
+    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
+      <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+        <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...field} onChange={handleChange}/>
+        <ClearInputBtn
+          btnClassName={`${clearClasses} input-switch-clear`}
+          clickCallback={clearInput}
+          show={showClear}
+        />
+      </div>
+      { displayErrors && isTouched && error?.message && <div className='input-switch-error'>{error.message}</div> }
+    </div>
   );
 };
 
@@ -190,6 +305,7 @@ type DateFieldProps = {
 const DateField = ({ 
   name, 
   classes, 
+  inputClasses,
   clearClasses,
   disableInput,
   displayErrors,
@@ -238,8 +354,8 @@ const DateField = ({
 
   return (
     <>
-      <div className={`chaise-input-control has-feedback input-switch-date ${disableInput ? ' input-disabled' : ''}`}>
-        <input type='date' className={`${classes} input-switch`} step='1' pattern='\d{4}-\d{2}-\d{2}'
+      <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+        <input type='date' className={`${inputClasses} input-switch`} step='1' pattern='\d{4}-\d{2}-\d{2}'
         min='1970-01-01' max='2999-12-31' {...formInput.field} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
@@ -295,6 +411,7 @@ const TimestampField = ({
   name, 
   value, 
   classes, 
+  inputClasses,
   timeClasses, 
   clearClasses,
   clearTimeClasses,
@@ -372,8 +489,8 @@ const TimestampField = ({
   return (
     <>
       <div className='input-switch-datetime'>
-        <div className={`chaise-input-control has-feedback input-switch-date ${disableInput ? ' input-disabled' : ''}`}>
-          <input className={`${classes} input-switch`} type='date' placeholder='YYYY-MM-DD'
+        <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+          <input className={`${inputClasses} input-switch`} type='date' placeholder='YYYY-MM-DD'
           min='1970-01-01' max='2999-12-31' step='1' defaultValue={value} disabled={disableInput} {...formInputDate}/>
           <ClearInputBtn
             btnClassName={`${clearClasses} input-switch-clear`}
@@ -381,7 +498,7 @@ const TimestampField = ({
             show={dateFieldValue}
           />
         </div>
-        <div className={`chaise-input-control has-feedback input-switch-time ${disableInput ? ' input-disabled' : ''}`}>
+        <div className={`chaise-input-control has-feedback input-switch-time ${classes} ${disableInput ? ' input-disabled' : ''}`}>
           <input className={`${timeClasses} input-switch`} type='time' placeholder='HH:MM' 
           min='00:00' max='23:59' defaultValue='00:00' disabled={disableInput} {...formInputTime}/>
           <ClearInputBtn
@@ -448,7 +565,11 @@ type InputSwitchProps = {
   /**
    * the handler function called on input change
    */
-  onFieldChange?: ((value: string) => void)
+  onFieldChange?: ((value: string) => void),
+  /**
+   * inline styling for the input switch component
+   */
+  styles?: object,
 };
 
 const InputSwitch = ({ 
@@ -456,13 +577,16 @@ const InputSwitch = ({
   name, 
   placeholder = 'Enter',
   classes = '',
+  inputClasses='',
+  containerClasses='',
   timeClasses = '',
   clearClasses,
   clearTimeClasses,
   value,
   disableInput,
   displayErrors = true,
-  onFieldChange 
+  onFieldChange,
+  styles={},
 }: InputSwitchProps): JSX.Element | null => {
 
   return (() => {
@@ -472,6 +596,7 @@ const InputSwitch = ({
         return <TimestampField 
           name={name} 
           classes={classes} 
+          inputClasses={inputClasses}
           timeClasses={timeClasses} 
           clearClasses={clearClasses}
           clearTimeClasses={clearTimeClasses}
@@ -487,17 +612,20 @@ const InputSwitch = ({
           name={name}   
           displayErrors={displayErrors} 
           classes={classes} 
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
           value={value}
           placeholder={placeholder} 
           clearClasses={clearClasses}
           disableInput={disableInput}
+          styles={styles}
           onFieldChange={onFieldChange} 
         />
       case 'date':
-        // return null;
         return <DateField 
           name={name} 
           classes={classes}
+          inputClasses={inputClasses}
           clearClasses={clearClasses}
           value={value}
           disableInput={disableInput}

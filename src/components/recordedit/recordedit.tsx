@@ -14,7 +14,11 @@ export type RecordeditProps = {
 const Recordedit = (props: RecordeditProps) : JSX.Element => {
 
   const { reference } = props;
-  console.log('record edit props:: ', props);
+
+  // (reference.columns||[]).map(v => {
+  //   console.log(v.type);
+  // })
+  console.log('record edit props:: ', props.reference.columns);
 
   const addForm = () => fireCustomEvent('add-form', '.form-container');
 
@@ -27,7 +31,7 @@ const Recordedit = (props: RecordeditProps) : JSX.Element => {
       
       <div className='record-edit-container'>
         <Columns columns={reference.columns}/>
-        <FormContainer />
+        <FormContainer columns={reference.columns}/>
       </div>
     </div>
   );

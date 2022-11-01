@@ -382,7 +382,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
                 value={absMin}
                 placeholder={absMin}
                 // disableInput={disableSubmit}
-                classes={type === 'date' || type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
+                inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
                 timeClasses='ts-time-range-min'
                 clearClasses={type === 'date' || type === 'timestamp' ? 'min-date-clear' : 'min-clear'} 
                 clearTimeClasses='min-time-clear'
@@ -398,7 +398,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
                 value={absMax}
                 placeholder={absMax}
                 // disableInput={disableSubmit}
-                classes={type === 'date' || type === 'timestamp' ? 'ts-date-range-max' : 'range-max'}
+                inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-max' : 'range-max'}
                 timeClasses='ts-time-range-max'
                 clearClasses={type === 'date' || type === 'timestamp' ? 'max-date-clear' : 'max-clear'}
                 clearTimeClasses='max-time-clear'

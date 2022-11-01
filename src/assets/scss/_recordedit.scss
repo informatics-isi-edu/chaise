@@ -17,27 +17,85 @@
 .record-edit-container{
     display: flex;
     width: 100%;
-    border: 1px solid #ccc;
+    border: 1px solid black;
 
     .form-container{
         display: flex;
         overflow-x: scroll;
         width: 100%;
 
-        .black-box{
+        .record-edit-form{
             flex-grow: 1;
             flex-shrink: 0;
-            background-color: black;
+            background-color: white;
             height: 100%;
-            margin-right: 25px;
-            margin-left: 25px;
             width: 500px;
             min-width: 250px;
-            color:white;
+            // padding: 10px;
+            color:black;
+            position: relative;
+            // border-right: 1px solid #ccc;
+            // border-bottom: 1px solid #ccc;
+
+
+            // .column-form{
+            //     flex-direction: column;
+            //     .chaise-input-control.column-cell{
+            //         border-left: none;
+            //         border-top: none;
+            //         border-right: 1px solid #ccc;
+            //         border-bottom: 1px solid #ccc;
+            //         border-radius: 0;
+            //         height: 47px;
+            //         min-height: 47px;
+
+            //         .input-switch{
+            //             border: 1px solid #ccc;
+            //             border-radius: 4px;
+            //             height: 100%;
+            //             padding: 0 10px;
+            //         }
+            //     }
+            // }
+
+
+            .column-form{
+                flex-direction: column;
+                .column-cell{
+                    border-left: none;
+                    border-top: none;
+                    border-right: 1px solid #ccc;
+                    border-bottom: 1px solid #ccc;
+                    border-radius: 0;
+                    // height: 47px;
+                    min-height: 47px;
+                    padding: 8px 10px;
+
+                }
+
+
+                .chaise-input-control.column-cell-input{
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    height: auto;
+                    padding: 0 10px;
+                    display: flex;
+                    align-items: center;
+
+                    .input-switch{
+                        height: auto;
+                    }
+                }
+            }
+
+
+            .form-cross-btn{
+                float: right;
+                border: 1px solid black;
+                padding: 0 4px;
+            }
         }
     }
-
-    
 }
 
 .record-edit-column{
@@ -47,8 +105,9 @@
 
     .column-cell{
         width: 200px;
+        border-right: 1px solid #ccc;;
+        border-bottom: 1px solid #ccc;;
+        min-height: 47px;
         height: 47px;
-        border-right: 1px solid #ccc;
-        border-bottom: 1px solid #ccc;
     }
 }
