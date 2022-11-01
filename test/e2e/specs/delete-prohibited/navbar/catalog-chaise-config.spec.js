@@ -81,8 +81,7 @@ describe('Navbar ', function() {
     }
 
     it('should hide the navbar bar if the hideNavbar query parameter is set to true', function () {
-        browser.get(url + "?hideNavbar=true");
-        browser.refresh();
+        chaisePage.refresh(url + "?hideNavbar=true");
         // browser wait for navbar if not needed, only checking recordset table is present is sufficient 
         chaisePage.recordsetPageReady()
 

@@ -17,9 +17,8 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-create-btn:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });

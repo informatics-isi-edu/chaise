@@ -26,9 +26,8 @@ describe('View existing record,', function() {
         beforeAll(function () {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
 
             chaisePage.recordPageReady();
         });
@@ -227,9 +226,8 @@ describe('View existing record for testing "show empty sections" heuristics,', f
         beforeAll(function () {
             var keys = [];
             keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
 
             chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });

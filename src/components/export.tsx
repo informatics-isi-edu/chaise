@@ -183,10 +183,11 @@ const Export = ({
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
+  // nextShow is true when the dropdown is open
   const onDropdownToggle = (nextShow: boolean) => {
     // toggle the tooltip based on dropdown's inverse state
     setUseTooltip(!nextShow);
-    setShowTooltip(!nextShow);
+    if (nextShow === true) setShowTooltip(false);
 
     // log the action
     if (nextShow) {
