@@ -133,43 +133,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
 
   } catch (err) {
     $log.warn(err);
-  }
-}
-
-/**
- * sets the style of domElements.footer
- * @param {number?} index - index pertaining to which dom element to select
- * @return {ResizeSensor} ResizeSensor object that can be used to turn it off.
- **/
-export function attachFooterResizeSensor(index?: number) {
-  try {
-    const usedIndex = typeof index === 'number' ? index : 0;
-    const mainContainer = document.querySelectorAll('.main-container')[usedIndex] as HTMLElement;
-    if (!mainContainer) return;
-
-    const mainBody = mainContainer.querySelector<HTMLElement>('.main-body');
-    if (!mainBody) return;
-
-    let setFooterTimeout: any;
-    return new ResizeSensor(mainBody, function () {
-      if (setFooterTimeout) clearTimeout(setFooterTimeout);
-      setFooterTimeout = setTimeout(function () {
-        // the footer definition has to be here.
-        // if we move it outside, it will not use the correct footer element
-        const footer = mainContainer.querySelector<HTMLElement>('.footer-container');
-        if (!footer) return;
-
-        // calculate the inner height of the app content (height of children in main-body + footer)
-        if ((mainBody.offsetHeight + footer.offsetHeight + 10) < mainContainer.offsetHeight) {
-          footer.classList.remove('position-relative');
-        } else {
-          footer.classList.add('position-relative');
-        }
-      }, 50);
-    });
-
-  } catch (err) {
-    $log.warn(err);
+    return [];
   }
 }
 

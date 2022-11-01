@@ -38,7 +38,7 @@ import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
-import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -205,7 +205,7 @@ const RecordInner = ({
   // properly set scrollable section height
   useLayoutEffect(() => {
     if (!initialized) return;
-    const resizeSensors = attachContainerHeightSensors();
+    const resizeSensors = [...attachContainerHeightSensors(parentContainer), attachMainContainerPaddingSensor(parentContainer)];
 
     const toggleScrollToTopBtn = () => {
       if (!mainContainer.current) return;
@@ -214,7 +214,7 @@ const RecordInner = ({
     mainContainer.current?.addEventListener('scroll', toggleScrollToTopBtn);
 
     return () => {
-      resizeSensors?.forEach((rs) => rs.detach());
+      resizeSensors?.forEach((rs) => !!rs && rs.detach());
 
       mainContainer.current?.removeEventListener('scroll', toggleScrollToTopBtn);
     }
