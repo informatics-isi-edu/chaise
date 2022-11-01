@@ -59,6 +59,7 @@ const Title = ({
     return (
       <OverlayTrigger
         placement='bottom-start'
+        trigger='hover'
         overlay={<Tooltip>{comment}</Tooltip>}
       >
         {renderLinkOrContainer()}

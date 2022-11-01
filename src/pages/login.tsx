@@ -139,6 +139,7 @@ const LoginPopupApp = (): JSX.Element => {
         <div className='btn-container'>
           <OverlayTrigger
             placement='bottom-start'
+            trigger='hover'
             overlay={<Tooltip>Click to sign up for {cc.termsAndConditionsConfig.groupName}.</Tooltip>}
           >
             <a className='chaise-btn chaise-btn-primary'
@@ -149,6 +150,7 @@ const LoginPopupApp = (): JSX.Element => {
           </OverlayTrigger>
           <OverlayTrigger
             placement='bottom-start'
+            trigger='hover'
             overlay={<Tooltip>Click to proceed to the application after joining the group.</Tooltip>}
           >
             <button className='chaise-btn chaise-btn-secondary'

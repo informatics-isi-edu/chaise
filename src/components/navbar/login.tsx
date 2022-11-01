@@ -189,6 +189,7 @@ const ChaiseLogin = (): JSX.Element => {
     if (enableUserTooltip && showUserTooltip) {
       return (<OverlayTrigger
         placement='bottom-end'
+        trigger='hover'
         overlay={<Tooltip>{userTooltip}</Tooltip>}
       >
         {dropdownToggleComponent}

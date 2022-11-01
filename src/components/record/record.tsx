@@ -715,7 +715,7 @@ const RecordInner = ({
                   tooltip='Click to hide table of contents'
                 >
                   <button
-                    className='chaise-btn chaise-btn-tertiary'
+                    className='chaise-btn chaise-btn-tertiary hide-toc-btn'
                     onClick={toggleSidePanel}
                   >
                     <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>

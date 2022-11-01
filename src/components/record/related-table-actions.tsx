@@ -4,6 +4,7 @@ import { MouseEvent, useState, useRef } from 'react';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
+import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 
 // hooks
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
@@ -23,6 +24,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utils
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
@@ -45,16 +47,30 @@ const RelatedTableActions = ({
     reference: recordReference, page: recordPage,
     toggleRelatedDisplayMode,
     updateRecordPage, pauseUpdateRecordPage, resumeUpdateRecordPage,
-    getRecordLogStack
+    logRecordClientAction, getRecordLogStack,
   } = useRecord();
 
   const { validateSessionBeforeMutation } = useAuthn();
   const { addAlert } = useAlert();
   const { dispatchError } = useError();
 
+  // add Pure and Binary
   const [addPureBinaryModalProps, setAddPureBinaryModalProps] = useState<RecordsetProps | null>(null);
   const [submitPureBinaryCB, setAddPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
+  // unlink Pure and Binary
+  const [unlinkPureBinaryModalProps, setUnlinkPureBinaryModalProps] = useState<RecordsetProps | null>(null);
+  const [unlinkPureBinaryCB, setUnlinkPureBinarySubmitCB] = useState<((selectedRows: SelectedRow[]) => void) | null>(null);
   const [showPureBinarySpinner, setShowPureBinarySpinner] = useState(false);
+
+  // when object is null, hide the modal
+  // object is the props for the the modal
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState<{
+    onConfirm: () => void,
+    onCancel: () => void,
+    buttonLabel: string,
+    title: string,
+    message: JSX.Element
+  } | null>(null);
 
   const container = useRef<HTMLDivElement>(null);
 
@@ -255,7 +271,7 @@ const RelatedTableActions = ({
 
     setAddPureBinaryModalProps({
       initialReference: modalReference,
-      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      initialPageLimit: modalReference.display.defaultPageSize ? modalReference.display.defaultPageSize :  RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo,
       getDisabledTuples,
@@ -264,7 +280,7 @@ const RelatedTableActions = ({
     });
   };
 
-  const closePureBinaryModal = () => {
+  const closeAddPureBinaryModal = () => {
     resumeUpdateRecordPage();
     setAddPureBinaryModalProps(null);
   };
@@ -274,9 +290,140 @@ const RelatedTableActions = ({
     e.stopPropagation();
 
     // TODO implement unlink p&b
+    if (relatedModel.isPureBinary) {
+      pauseUpdateRecordPage();
+      openUnlinkPureBinaryModal();
+      return;
+    }
 
     // TODO this is added for test purposes and should be removed
-    updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
+    // updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
+  };
+
+  const openUnlinkPureBinaryModal = () => {
+    const domainRef = relatedModel.initialReference;
+
+    // the reference that we're going to create rows from
+    const derivedRef = domainRef.derivedAssociationReference;
+    const fkToRelated = derivedRef.associationToRelatedFKR;
+
+    const modalReference = domainRef.hideFacets().contextualize.compactSelectAssociationUnlink;
+
+    const recordsetConfig: RecordsetConfig = {
+      viewable: false,
+      editable: false,
+      deletable: false,
+      sortable: true,
+      selectMode: RecordsetSelectMode.MULTI_SELECT,
+      showFaceting: true,
+      disableFaceting: false,
+      displayMode: RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK
+    };
+
+    const stackElement = LogService.getStackNode(
+      LogStackTypes.RELATED,
+      relatedModel.initialReference.table,
+      { source: modalReference.compressedDataSource, entity: true, picker: 1 }
+    );
+
+    const logInfo = {
+      logObject: null,
+      logStack: getRecordLogStack(stackElement),
+      logStackPath: LogService.getStackPath(null, LogStackPaths.UNLINK_PB_POPUP),
+    };
+
+    // this function is here since we need to access the outer scope here
+    const submitCB = (selectedRows: SelectedRow[]) => {
+      if (!selectedRows) return;
+
+      const cc = ConfigService.chaiseConfig;
+      const CONFIRM_DELETE = (cc.confirmDelete === undefined || cc.confirmDelete) ? true : false;
+
+      // NOTE: This reference has to be filtered so creating the path in the ermrestJS function works properly
+      const leafReference = selectedRows[0].tupleReference;
+
+      setShowPureBinarySpinner(true);
+
+      validateSessionBeforeMutation(() => {
+        const deleteResponse = (response: any) => {
+          setShowPureBinarySpinner(false);
+
+          // Show modal popup summarizing total # of deletions succeeded and failed
+          response.clickOkToDismiss = true;
+
+          // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
+          //       - some errors could have been because of row level security
+          dispatchError({ 
+            error: response, 
+            isDismissible: true,
+            closeBtnCallback: () => {
+              // ask recordset to update the modal
+              if (!!container.current) {
+                // NOTE: This feels very against React but the complexity of our flow control provider seems to warrant doing this
+                fireCustomEvent(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, container.current, {
+                  cause: LogReloadCauses.ENTITY_BATCH_UNLINK,
+                  pageStates: { updateResult: true, updateCount: true, updateFacets: true },
+                  response: response
+                });
+              }
+            } 
+          });
+        };
+
+        const deleteError = (err: any) => {
+          setShowPureBinarySpinner(false);
+          // errors that land here would be execution of code errors
+          // if a deletion fails/errors, that delete request is caught by ermrestJS and returned
+          //   as part of the deleteErrors object in the success cb
+          // NOTE: if one of the identifying values is empty or null, an error is thrown here
+          dispatchError({ error: err, isDismissible: true });
+        };
+
+        if (!CONFIRM_DELETE) {
+          return leafReference.deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows).then(deleteResponse).catch(deleteError);
+        }
+
+        logRecordClientAction(LogActions.UNLINK_INTEND);
+
+        const multiple = (selectedRows.length > 1 ? 's' : '');
+        const confirmMessage: JSX.Element = (
+          <>
+            Are you sure you want to unlink {selectedRows.length} record{multiple}?
+          </>
+        );
+
+        setShowDeleteConfirmationModal({
+          buttonLabel: 'Unlink',
+          title: 'Confirm Unlink',
+          onConfirm: () => {
+            setShowDeleteConfirmationModal(null);
+            return leafReference.deleteBatchAssociationTuples(relatedModel.recordsetProps.parentTuple, selectedRows).then(deleteResponse).catch(deleteError)
+          },
+          onCancel: () => {
+            setShowDeleteConfirmationModal(null);
+            setShowPureBinarySpinner(false);
+            logRecordClientAction(LogActions.UNLINK_CANCEL);
+          },
+          message: confirmMessage
+        });
+      });
+    };
+    setUnlinkPureBinarySubmitCB(() => submitCB);
+
+    setUnlinkPureBinaryModalProps({
+      initialReference: modalReference,
+      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      config: recordsetConfig,
+      logInfo,
+      parentTuple: recordPage.tuples[0],
+      parentReference: recordReference
+    });
+  }
+
+  const closeUnlinkPureBinaryModal = () => {
+    resumeUpdateRecordPage();
+    setUnlinkPureBinaryModalProps(null);
+    updateRecordPage(true, LogReloadCauses.RELATED_BATCH_UNLINK);
   };
 
   const mainTable = <code><DisplayValue value={recordReference.displayname}></DisplayValue></code>;
@@ -294,7 +441,7 @@ const RelatedTableActions = ({
         tooltip = <span>Display edit controls for {currentTable} related to this {mainTable}.</span>;
         label = 'Edit mode';
       } else {
-        tooltip = <span>Displayed related {currentTable} in tabular mode.</span>
+        tooltip = <span>Display related {currentTable} in tabular mode.</span>
         label = 'Table mode';
       }
     } else {
@@ -319,13 +466,13 @@ const RelatedTableActions = ({
   const renderCreateBtnTooltip = () => {
     if (relatedModel.canCreateDisabled) {
       const keyset = relatedModel.initialReference.origFKR.key.colset.columns;
-      let keysetString = '';
+      let keysetString: string | JSX.Element = '';
       keyset.forEach(function (col: any, idx: number) {
         keysetString += col.name;
         if (idx + 1 !== keyset.length) keysetString += ', ';
       });
 
-      keysetString = `<code>${keysetString}</code>`;
+      keysetString = <code>keysetString</code>;
       if (relatedModel.isPureBinary) {
         return <span>Unable to connect to {currentTable} records until {keysetString} in this {mainTable} is set.</span>;
       }
@@ -385,7 +532,27 @@ const RelatedTableActions = ({
           recordsetProps={addPureBinaryModalProps}
           onSubmit={submitPureBinaryCB}
           showSubmitSpinner={showPureBinarySpinner}
-          onClose={closePureBinaryModal}
+          onClose={closeAddPureBinaryModal}
+        />
+      }
+      {
+        unlinkPureBinaryModalProps && unlinkPureBinaryCB &&
+        <RecordsetModal
+          modalClassName='unlink-pure-and-binary-popup'
+          recordsetProps={unlinkPureBinaryModalProps}
+          onSubmit={unlinkPureBinaryCB}
+          showSubmitSpinner={showPureBinarySpinner}
+          onClose={closeUnlinkPureBinaryModal}
+        />
+      }
+      {showDeleteConfirmationModal &&
+        <DeleteConfirmationModal
+          show={!!showDeleteConfirmationModal}
+          message={showDeleteConfirmationModal.message}
+          buttonLabel={showDeleteConfirmationModal.buttonLabel}
+          onConfirm={showDeleteConfirmationModal.onConfirm}
+          onCancel={showDeleteConfirmationModal.onCancel}
+          title={showDeleteConfirmationModal.title}
         />
       }
     </>

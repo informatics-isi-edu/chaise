@@ -2,6 +2,7 @@ var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var EC = protractor.ExpectedConditions;
 var moment = require('moment');
+const { browser } = require('protractor');
 
 var testParams = {
     schemaName: "product-unordered-related-tables-links",
@@ -43,14 +44,14 @@ var testParams = {
     ]
 };
 
-const pageReadyCondition = chaisePage.recordPageReady();
+const pageReadyCondition = () => chaisePage.recordPageReady();
 
 describe ("Viewing exisiting record with related entities, ", function () {
     beforeAll(function (done) {
         var keys = [];
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
         var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-
+        
         chaisePage.navigate(url).then(function () {
             return pageReadyCondition();
         }).then(function () {
@@ -76,8 +77,11 @@ describe ("Viewing exisiting record with related entities, ", function () {
     });
 
     it ("should show the related table names in the correct order in the Table of Contents", function (done) {
-        // TODO fix this test case
-        expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+            headings.forEach(function (heading, idx) {
+                expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+            })
+        })
         done();
     });
 
@@ -238,18 +242,18 @@ describe ("Viewing exisiting record with related entities, ", function () {
             // we unlink rows 2 and 4 ("Air Conditioning" and "UHD TV")
             catalogId: browser.params.catalogId,
             relatedDisplayname: "association_table",
-            modalTitle: "Unlink association_table from Accommodations : Super 8 North Hollywood Motel",
+            modalTitle: "Unlink association_table from Accommodations: Super 8 North Hollywood Motel",
             totalCount: 5,
-            postDeleteMessage: "2 records successfully unlinked.\n\nClick OK to dismiss this dialog.",
+            postDeleteMessage: "2 records successfully unlinked.",
             countAfterUnlink: 3,
             rowValuesAfter: [
                 ["Television"],
                 ["Coffee Maker"],
                 ["Space Heater"]
             ],
-            failedPostDeleteMessage: "2 records could not be unlinked. Check the error details below to see more information.\n\nClick OK to dismiss this dialog.\nShow Error Details",
+            failedPostDeleteMessage: "2 records could not be unlinked. Check the error details below to see more information.\n\nShow Error Details",
             // we unlink row 5 ("Space Heater")
-            aclPostDeleteMessage: "1 record successfully unlinked.\n\nClick OK to dismiss this dialog.",
+            aclPostDeleteMessage: "1 record successfully unlinked.",
             countAfterAclUnlink: 2,
             rowValuesAfterAclRemove: [
                 ["Television"],
@@ -311,7 +315,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
             }).then(function(ct){
                 expect(ct).toBe(2, "association count missmatch for file domain table.");
 
-                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying\nfirst 2\nrecords", "hide_row_count not honored");
+                expect(chaisePage.recordsetPage.getModalRecordsetTotalCount().getText()).toBe("Displaying first\n2\nrecords", "hide_row_count not honored");
 
                 return chaisePage.recordEditPage.getModalCloseBtn().click();
             }).then(function () {
@@ -639,13 +643,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
         });
 
         it("should have the proper tooltip", function (done) {
-            chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe("'Unable to connect to <code>" + displayname + "</code> records until <code>" + columnname + "</code> in <code>" + tablename + "</code> is set.'", "Incorrect tooltip on disabled Add button");
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
+            chaisePage.testTooltipWithDone(
+                addBtn.element(by.xpath("./..")),
+                `'Unable to connect to <code>${displayname}</code> records until <code>${columnname}</code> in <code>${tablename}</code> is set.'`,
+                done,
+                'record'
+            );
         });
     });
 
@@ -671,16 +674,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
         });
 
         it("should have the proper tooltip", function (done) {
-            chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment) {
-                expect(comment).toBe(
-                  `'Unable to create <code>${displayname}</code> records for this <code>${tablename}</code> until <code>${colname}</code> in this <code>${tablename}</code> is set'`,
-                  "Incorrect tooltip on disabled Add button"
-                );
-                done();
-            }).catch(function(error) {
-                console.log(error);
-                done.fail();
-            });
+            chaisePage.testTooltipWithDone(
+                addBtn.element(by.xpath("./..")),
+                `'Unable to create <code>${displayname}</code> records for this <code>${tablename}</code> until <code>${columnname}</code> in this <code>${tablename}</code> is set'`,
+                done,
+                'record'
+            );
         });
     });
 
@@ -724,7 +723,7 @@ describe("For scroll to query parameter", function() {
     });
 
     it("should scroll to the related table.", function (done) {
-        var heading = chaisePage.recordPage.getRelatedTableAccordion(displayname);
+        var heading = chaisePage.recordPage.getRelatedTableAccordion(displayname).element(by.css('.accordion-collapse'));
 
         browser.wait(function () {
             return heading.isDisplayed().then(function (bool) {
@@ -736,7 +735,7 @@ describe("For scroll to query parameter", function() {
         }).then(function () {
             return heading.getAttribute("class")
         }).then(function(className) {
-            expect(className).toContain("panel-open", "Related table panel is not open when autoscrolled.");
+            expect(className).toContain("show", "Related table panel is not open when autoscrolled.");
             done()
         }).catch(function(error) {
             console.log(error);

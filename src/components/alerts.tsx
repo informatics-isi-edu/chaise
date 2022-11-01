@@ -33,6 +33,7 @@ export const Alerts = (): JSX.Element => {
         <a onClick={() => login()}>Log in</a>{' to continue your privileged access. '}
         <OverlayTrigger
           placement='bottom-start'
+          trigger='hover'
           overlay={<Tooltip>{tooltipText}</Tooltip>}
         >
           <i className='chaise-icon chaise-info'></i>

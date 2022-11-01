@@ -183,10 +183,11 @@ const Export = ({
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
+  // nextShow is true when the dropdown is open
   const onDropdownToggle = (nextShow: boolean) => {
     // toggle the tooltip based on dropdown's inverse state
     setUseTooltip(!nextShow);
-    setShowTooltip(!nextShow);
+    if (nextShow === true) setShowTooltip(false);
 
     // log the action
     if (nextShow) {
@@ -203,6 +204,7 @@ const Export = ({
         <OverlayTrigger
           placement='bottom' overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
           show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
+          trigger='hover'
         >
           <Dropdown.Toggle
             disabled={disabled || !!selectedOption || options.length === 0}

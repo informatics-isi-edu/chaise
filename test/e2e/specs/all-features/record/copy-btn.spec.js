@@ -1,3 +1,4 @@
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
@@ -33,10 +34,9 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var keys = [];
-            browser.ignoreSynchronization = true;
             keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             chaisePage.recordPageReady();
         });
 
@@ -55,10 +55,13 @@ describe('View existing record,', function() {
           }).catch(chaisePage.catchTestError(done));
         });
 
-        // TODO test table of contents
-        // it('should hide empty related tables on load',function(){
-        //     expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
-        // });
+        it('should hide empty related tables on load',function(){
+            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+                headings.forEach(function (heading, idx) {
+                    expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+                })
+            })
+        });
 
     });
 
@@ -68,8 +71,7 @@ describe('View existing record,', function() {
         var currentBrowserUrl;
         beforeAll(function() {
             var keys = [];
-            browser.ignoreSynchronization=true;
-            browser.get(testParams.html_table_name_record_url);
+            chaisePage.navigate(testParams.html_table_name_record_url);
             chaisePage.recordPageReady();
         });
 
@@ -90,13 +92,12 @@ describe('View existing record,', function() {
             expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
         });
 
-        // TODO test table of contents
-        // it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
-        //     chaisePage.recordPage.getColumns().then(function (cols) {
-        //         expect(cols[0].isDisplayed()).toBeFalsy("Column names are showing.");
-        //         expect(chaisePage.recordPage.getSidePanel().getAttribute("class")).toContain('close-panel', 'Side Panel is visible.');
-        //     });
-        // });
+        it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
+            chaisePage.recordPage.getColumns().then(function (cols) {
+                expect(cols[0].isDisplayed()).toBeFalsy("Column names are showing.");
+                expect(chaisePage.recordPage.getSidePanel().getAttribute("class")).toContain('close-panel', 'Side Panel is visible.');
+            });
+        });
 
         // test that no citation appears in share modal when no citation is defined on table
         // and also version link is not displayed when the table doesn't support history
@@ -165,9 +166,8 @@ describe('View existing record,', function() {
             testParams.keys.forEach(function(key) {
                 keys.push(key.name + key.operator + key.value);
             });
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             chaisePage.recordPageReady();
         });
 
@@ -178,12 +178,15 @@ describe('View existing record,', function() {
         });
 
         it ("should not have the default csv export option and only the defined template should be available", function (done) {
-            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+            const exportDropdown = chaisePage.recordsetPage.getExportDropdown()
+            exportDropdown.click().then(function () {
                 const options = chaisePage.recordsetPage.getExportOptions();
                 expect(options.count()).toBe(1, "count missmatch");
 
                 const csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
                 expect(csvOption.getText()).toBe("Defined template");
+                return exportDropdown.click();
+            }).then(function () {
                 done();
             }).catch(function(err) {
                 done.fail(err);
@@ -229,7 +232,6 @@ describe('View existing record,', function() {
 
             it("should redirect to recordedit when clicked.", function(done) {
                 var titleElement = chaisePage.recordEditPage.getEntityTitleElement();
-
                 chaisePage.clickButton(copyButton).then(function() {
                     return chaisePage.waitForElement(element(by.id('submit-record-button')));
                 }).then(function() {

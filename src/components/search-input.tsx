@@ -186,6 +186,7 @@ const SearchInput = ({
       <div className='chaise-input-group-append'>
         <OverlayTrigger
           placement='bottom-start'
+          trigger='hover'
           overlay={
             <Tooltip>
               <p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p>

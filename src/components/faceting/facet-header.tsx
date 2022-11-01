@@ -86,6 +86,7 @@ const FacetHeader = ({
     <>
       <OverlayTrigger
         placement='right'
+        trigger='hover'
         overlay={
           <Tooltip style={{ maxWidth: '50%', whiteSpace: 'nowrap' }}>
             {renderTooltipContent()}
@@ -121,6 +122,7 @@ const FacetHeader = ({
           (facetHasTimeoutError || noConstraints) &&
           <OverlayTrigger
             placement='right'
+            trigger='hover'
             overlay={
               <Tooltip>
                 {noConstraints && <span>showing facet values without any constraints applied.</span>}

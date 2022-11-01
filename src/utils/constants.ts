@@ -146,8 +146,9 @@ export const DEFAULT_DISPLAYNAME = {
 export const CUSTOM_EVENTS = {
   ROW_EDIT_INTEND: 'row-edit-intend',
   ROW_DELETE_SUCCESS: 'row-delete-success',
-  ADD_INTEND: 'add-intend'
-}
+  ADD_INTEND: 'add-intend',
+  FORCE_UPDATE_RECORDSET: 'force-update-recordset-data',
+};
 
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;

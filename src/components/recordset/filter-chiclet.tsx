@@ -70,6 +70,7 @@ const FilterChiclet = ({
       {/* icon */}
       <OverlayTrigger
         placement='bottom-start'
+        trigger='hover'
         overlay={<Tooltip>{iconTooltip}</Tooltip>}
       >
         <IconTag
@@ -84,7 +85,7 @@ const FilterChiclet = ({
         <ConditionalWrapper
           condition={titleTooltip !== undefined}
           wrapper={children => (
-            <OverlayTrigger placement='bottom-start' overlay={<Tooltip>{titleTooltip}</Tooltip>}>
+            <OverlayTrigger placement='bottom-start' trigger='hover' overlay={<Tooltip>{titleTooltip}</Tooltip>}>
               {children}
             </OverlayTrigger>
           )}
@@ -100,6 +101,7 @@ const FilterChiclet = ({
       {/* value */}
       <OverlayTrigger
         placement='bottom-start'
+        trigger='hover'
         overlay={<Tooltip>{valueTooltip ? valueTooltip : usedValue}</Tooltip>}
       >
         <span className='filter-chiclet-value chaise-btn chaise-btn-secondary'>{usedValue}</span>

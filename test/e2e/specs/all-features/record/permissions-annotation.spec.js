@@ -18,7 +18,7 @@ describe('When viewing Record app', function() {
 
     describe('for a read-only table', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -59,7 +59,7 @@ describe('When viewing Record app', function() {
 
     describe('for a create-only table', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -136,7 +136,7 @@ describe('When viewing Record app', function() {
 
     describe('for a table that allows edit and create (but no delete)', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -186,7 +186,7 @@ describe('When viewing Record app', function() {
 
     describe('for a delete-only table', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
