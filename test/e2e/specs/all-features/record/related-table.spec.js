@@ -77,7 +77,6 @@ describe ("Viewing exisiting record with related entities, ", function () {
     });
 
     it ("should show the related table names in the correct order in the Table of Contents", function (done) {
-        // TODO fix this test case
         chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
             headings.forEach(function (heading, idx) {
                 expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");

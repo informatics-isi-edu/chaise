@@ -282,8 +282,7 @@ describe('View existing record,', function() {
         });
     });
 
-    // TODO test table of contents
-    xdescribe("For side panel table of contents in Record App", function() {
+    describe("For side panel table of contents in Record App", function() {
 
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
@@ -299,7 +298,7 @@ describe('View existing record,', function() {
         });
 
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
-            var rtTableHeading = chaisePage.recordPage.getRelatedTableAccordion(testParams.sidePanelTest.tableToShow);
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableAccordion(testParams.sidePanelTest.tableToShow).element(by.css('.accordion-collapse'));
 
             browser.wait(EC.elementToBeClickable(recSidePanelCat_5), browser.params.defaultTimeout);
             recSidePanelCat_5.click().then(function(className) {
@@ -307,7 +306,7 @@ describe('View existing record,', function() {
                 expect(rtTableHeading.isDisplayed()).toBeTruthy("Category_5 heading is not visible.");
                 return rtTableHeading.getAttribute("class");
             }).then (function(className) {
-                expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
+                expect(className).toContain("show", "Related table panel is not open when clicked through TOC.");
                 done();
             }).catch( function(err) {
                 console.log(err);
@@ -317,12 +316,17 @@ describe('View existing record,', function() {
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
-                for (var i=0; i<tableNames.length; i++){
-                    tableNames[i] = tableNames[i].replace(/ +/g, " ");
-                }
-                expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
-                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder, "Order is not maintained for related tables in the side panel");
+                // for (var i=0; i<tableNames.length; i++){
+                //     tableNames[i] = tableNames[i].replace(/ +/g, " ");
+                // }
 
+                expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
+                tableNames.forEach(function (tableName, idx) {
+                    tableName.getText().then(function (name) {
+                        expect(name.replace(/ +/g, " ")).toEqual(testParams.sidePanelTest.sidePanelTableOrder[idx], "Order is not maintained for related tables in the side panel");
+                    }); 
+                })
+                
                 done();
             }).catch( function(err) {
                 console.log(err);

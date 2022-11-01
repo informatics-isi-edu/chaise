@@ -755,7 +755,7 @@ var recordPage = function() {
     }
 
     this.getSidePanelItemById = function (idx) {
-        return element(by.id("recordSidePan-" + idx));
+        return element(by.id("recordSidePan-heading-" + idx));
     }
 
     this.getSidePanelHeadings = function() {
@@ -1061,11 +1061,6 @@ var recordsetPage = function() {
     this.getSelectedRowsFilters = function () {
         // adding ".selected-chiclet-name" to the selector to not select the clear-all-btn
         return element(by.css(".selected-chiclets")).all(by.css(".selected-chiclet .selected-chiclet-name"));
-    }
-
-    //TODO: remove when record app migrated
-    this.getAngularSelectedRowsFilters = function () {
-        return element(by.css(".recordset-selected-rows")).all(by.css(".selected-chiclet"));
     }
 
     this.getFacetFilters = function () {

@@ -55,7 +55,6 @@ describe('View existing record,', function() {
           }).catch(chaisePage.catchTestError(done));
         });
 
-        // TODO test table of contents
         it('should hide empty related tables on load',function(){
             chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
                 headings.forEach(function (heading, idx) {
@@ -93,7 +92,6 @@ describe('View existing record,', function() {
             expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
         });
 
-        // TODO test table of contents
         it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
             chaisePage.recordPage.getColumns().then(function (cols) {
                 expect(cols[0].isDisplayed()).toBeFalsy("Column names are showing.");

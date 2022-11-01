@@ -113,7 +113,6 @@ describe('View existing record,', function() {
             });
         });
 
-        // TODO test table of contents
         it ("should show the empty related association tables and table of contents on page load", function (done) {
             browser.wait(function() {
                 return chaisePage.recordPage.getSidePanelHeadings().count().then(function(ct) {
@@ -208,7 +207,6 @@ describe('View existing record,', function() {
     });
 });
 
-// TODO test table of contents
 var inlineParams = {
     table_name: "inline_table",
     key: {

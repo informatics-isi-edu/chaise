@@ -52,7 +52,6 @@ describe('View existing record,', function() {
             done();
         });
 
-        // TODO test table of contents
         it('Related tables should all show by default because of showWriterEmptyRelatedOnLoad=true', function () {
             chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
                 headings.forEach(function (heading, idx) {

@@ -1516,7 +1516,6 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
         });
 
         it("should have rows still selected after failed delete", function (done) {
-            // TODO: change once record app migrated
             expect(chaisePage.recordsetPage.getSelectedRowsFilters().count()).toBe(2);
             done();
         });
