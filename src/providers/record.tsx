@@ -8,6 +8,7 @@ import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 import {
+  ChangeContainerDetails,
   CitationModel, RecordColumnModel, RecordRelatedModel,
   RecordRelatedModelRecordsetProps, RecordRequestModel
 } from '@isrd-isi-edu/chaise/src/models/record';
@@ -19,7 +20,6 @@ import {
 
 // services
 import RecordFlowControl from '@isrd-isi-edu/chaise/src/services/record-flow-control';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
@@ -71,16 +71,6 @@ export const RecordContext = createContext<{
    * Whether to show the spinner for the related section
    */
   showRelatedSectionSpinner: boolean
-  // TODO while these are not needed for now, but
-  // we might want to add them in case we have record-modal
-  /*
-   * get the appropriate log action
-   */
-  // getLogAction: (actionPath: LogActions, childStackPath?: any) => string,
-  /**
-   * get the appropriate log stack
-   */
-  // getLogStack: (childStackElement?: any, extraInfo?: any) => any,
   /**
    * The related entity models
    */
@@ -115,7 +105,7 @@ export const RecordContext = createContext<{
   /**
    * ask for the page to be updated
    */
-  updateRecordPage: (isUpdate: boolean, cause?: string, changedContainers?: any) => void,
+  updateRecordPage: (isUpdate: boolean, cause?: string, changedContainers?: ChangeContainerDetails[]) => void,
   /**
    * will pause the requests that are pending for updating the page.
    */
@@ -145,21 +135,28 @@ export default function RecordProvider({
 
   const { dispatchError } = useError();
   const [page, setPage, pageRef] = useStateRef<any>(null);
-  const [recordValues, setRecordValues, recordValuesRef] = useStateRef<any>([]);
+  const [recordValues, setRecordValues] = useState<any>([]);
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
   const [citation, setCitation] = useState<CitationModel>({
     value: null,
     isReady: false
   });
 
+  /**
+   * whether we should show the main section spinner or not
+   * if false, you can be sure that the recordsetSet is updated
+   */
   const [showMainSectionSpinner, setShowMainSectionSpinner] = useState(true);
-  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner, showRelatedSectionSpinnerRef] = useStateRef(true);
+  /**
+   * whether we should show the related section spinner or not
+   * if false, you can be sure that the recordsetSet is updated on initial page load
+   */
+  const [showRelatedSectionSpinner, setShowRelatedSectionSpinner] = useState(true);
 
   const [modelsInitialized, setModelsInitialized] = useState(false);
   const [modelsRegistered, setModelsRegistered] = useState(false);
 
-
-  const [showEmptySections, setShowEmptySections, showEmptySectionsRef] = useStateRef(false);
+  const [showEmptySections, setShowEmptySections] = useState(false);
 
   const [relatedModels, setRelatedModels, relatedModelsRef] = useStateRef<RecordRelatedModel[]>([]);
   const setRelatedModelsByIndex = (index: number, updatedVals: { [key: string]: any }) => {
@@ -193,10 +190,12 @@ export default function RecordProvider({
   const pauseProcessingRequests = useRef(false);
 
   const flowControl = useRef(new RecordFlowControl(logInfo));
-  const initializedRelatedCount = useRef(0);
-  const fetchedColsWithSecondaryRequests = useRef(0);
 
-  // set the page as initialized so we can show the models and register them
+  /**
+   * After the main read is done, the modelsInitialized will change to true
+   * signaling that all the flow-control and state related models are ready.
+   * Which means we can  set the page as initialized so we can show the models and register them.
+   */
   useEffect(() => {
     if (!modelsInitialized) return;
     setInitialized(true);
@@ -211,20 +210,53 @@ export default function RecordProvider({
 
   }, [modelsInitialized]);
 
-  // initialize the page after all the models are registered
+  /**
+   * After all the components are drawn in DOM and therefore registered,
+   * we should send the requests and initialize the record page's data.
+   */
   useEffect(() => {
     if (!modelsRegistered) return;
     updateRecordPage(false);
   }, [modelsRegistered]);
 
   /**
-   * set the state to update the page
-   * @param isUpdate
-   * @param cause
-   * @param changedContainers
+   * hide the related spinner if all are initialized
    */
-  const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: any[]) => {
-    // TODO properly use changed containers
+  useEffect(() => {
+    if (!modelsRegistered || !showRelatedSectionSpinner) return;
+    // see if there's a related model that has not been initialized yet
+    if (relatedModels.some((rm) => !rm.recordsetState.isInitialized || !rm.tableMarkdownContentInitialized)) return;
+    setShowRelatedSectionSpinner(false);
+  }, [modelsRegistered, showRelatedSectionSpinner, relatedModels]);
+
+  /**
+   * hide the main spinner if there aren't any pending requests
+   */
+  useEffect(() => {
+    if (!modelsRegistered) return;
+
+    // see if there's a column model that we're for its value
+    // NOTE the main spinner should also spin while updating, that's why we're looking at `isLoading` as well
+    const havePending = columnModels.some((cm) => (
+      cm.isLoading ||
+      (!!cm.relatedModel && (
+        !cm.relatedModel.recordsetState.isInitialized || !cm.relatedModel.tableMarkdownContentInitialized ||
+        cm.relatedModel.recordsetState.isLoading
+      ))
+    ));
+
+    if (!havePending) {
+      setShowMainSectionSpinner(false);
+    }
+  }, [modelsRegistered, columnModels]);
+
+  /**
+   * Ask flow-control to update the displayed data on page
+   * @param isUpdate whether it's the initial load or update
+   * @param cause if it's update, this will allow us to send a cause for it
+   * @param changedContainers more complicated way of sending causes to signal which part of page chagned
+   */
+  const updateRecordPage = (isUpdate: boolean, cause?: string, changedContainers?: ChangeContainerDetails[]) => {
     if (!isUpdate) {
       flowControl.current.queue.counter = 0;
       flowControl.current.queue.occupiedSlots = 0;
@@ -250,7 +282,6 @@ export default function RecordProvider({
     // inline table
     const inlineRequestModels = Object.values(flowControl.current.inlineRelatedRequestModels);
     inlineRequestModels.forEach(function (m) {
-      // TODO causes (changedContainers?)
       // the last parameter is making sure we're using the same queue for the main and inline
       m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
       if (m.hasWaitFor) {
@@ -260,7 +291,6 @@ export default function RecordProvider({
 
     // related table
     flowControl.current.relatedRequestModels.forEach(function (m) {
-      // TODO causes (changedContainers?)
       // the last parameter is making sure we're using the same queue for the main and related
       m.addUpdateCauses([cause], true, !isUpdate ? flowControl.current.queue : undefined);
       if (m.hasWaitFor) {
@@ -282,28 +312,30 @@ export default function RecordProvider({
         flowControl.current.addCauses([container.cause]);
 
         // add it to request models for aggregate and entity set
-        flowControl.current.requestModels.forEach(function (m) {
+        flowControl.current.requestModels.forEach((m) => {
           if (m.activeListModel.entityset || m.activeListModel.aggregate) {
             flowControl.current.addCausesToRequestModel(m, [container.cause]);
           }
         });
 
         // add it to inline related
-        inlineRequestModels.forEach(function (m, index) {
+        inlineRequestModels.forEach((m) => {
           let c = container.cause;
-          if (container.isInline && container.index === index) {
+          // if this is the container that changed, use self-cause instead
+          if (container.isInline && container.index === m.index) {
             c = selfCause[c];
           }
           m.addUpdateCauses([c]);
         });
 
         // add it to related
-        flowControl.current.relatedRequestModels.forEach(function (m, index) {
+        flowControl.current.relatedRequestModels.forEach((m) => {
           let c = container.cause;
-          if (!container.isInline && container.index === index) {
+          // if this is the container that changed, use self-cause instead
+          if (!container.isInline && container.index === m.index) {
             c = selfCause[c];
           }
-          m.addUpdateCauses([m]);
+          m.addUpdateCauses([c]);
         });
 
       });
@@ -317,6 +349,7 @@ export default function RecordProvider({
    * will pause the requests that are pending for updating the page.
    * Currently it's only setting a variable, but we might want to add
    * more logic later.
+   *  it's used to pause requests after opening a p&b popup.
    */
   const pauseUpdateRecordPage = () => {
     pauseProcessingRequests.current = true;
@@ -334,9 +367,9 @@ export default function RecordProvider({
   // -------------------------- flow control function ---------------------- //
   /**
    * The function that actually sends the requests
+   * @param isUpdate whether it's the initial load or update
    */
   const processRequests = (isUpdate?: boolean) => {
-    // TODO $rootScope.pauseRequests
     if (!flowControl.current.haveFreeSlot() || pauseProcessingRequests.current) {
       return;
     }
@@ -433,8 +466,6 @@ export default function RecordProvider({
 
       // making sure we're asking for TRS for the main entity
       reference.read(1, logParams, false, false, true).then((page: any) => {
-        $log.info(`Page: ${page}`);
-
         let recordSetLink;
         const tableDisplayName = page.reference.displayname.value;
         if (page.tuples.length < 1) {
@@ -530,6 +561,9 @@ export default function RecordProvider({
     });
   };
 
+  /**
+   * create the state variables and references
+   */
   const initializeModels = (tuple: any) => {
 
     let canCreateAtLeastOne = false;
@@ -652,6 +686,13 @@ export default function RecordProvider({
     setModelsInitialized(true);
   };
 
+  /**
+   * This function will make sure the captured state of related entities is always updated.
+   * used in `related-table.tsx`
+   * @param index the index of related enitiy
+   * @param isInline whether it's inline or not
+   * @param values the updated values
+   */
   const updateRelatedRecordsetState = (index: number, isInline: boolean, values: RecordRelatedModelRecordsetProps) => {
     if (isInline) {
       setColumnModelsRelatedModelByIndex(index, { recordsetState: values });
@@ -660,6 +701,11 @@ export default function RecordProvider({
     }
   };
 
+  /**
+   * Register the recordset provider functions in the request models,
+   * so we can manually call them from here.
+   * This function is called in the `related-table.tsx`
+   */
   const registerRelatedModel = (index: number, isInline: boolean,
     updateMainEntity: RecordsetProviderUpdateMainEntity,
     fetchSecondaryRequests: RecordsetProviderFetchSecondaryRequests,
@@ -701,8 +747,6 @@ export default function RecordProvider({
       * If the request errored out (timeout or other types of error) page will be undefined.
       */
       if (res.success && res.page && (!rm.hasWaitFor || rm.waitForDataLoaded)) {
-        afterRequestDone(isUpdate, isInline);
-
         const updatedValues = {
           tableMarkdownContentInitialized: true,
           tableMarkdownContent: res.page.getContent(flowControl.current.templateVariables)
@@ -890,8 +934,6 @@ export default function RecordProvider({
           pageRef.current.tuples[0]
         );
 
-        afterRequestDone(isUpdate, true);
-
         newRecordVals[obj.index] = displayValue;
       } else if (obj.inline || obj.related) {
         let ref: any, reqModel: any;
@@ -908,8 +950,6 @@ export default function RecordProvider({
         // in case the main request was slower, this will just signal so the other
         // code path can just set the values
         reqModel.waitForDataLoaded = true;
-
-        afterRequestDone(isUpdate, obj.inline ? true : false);
 
         // after this we will make sure to set the state variables based on these
         if (obj.related) {
@@ -971,27 +1011,6 @@ export default function RecordProvider({
     ))
   }
 
-  /**
-   * after inline, aggregate, entityset, or related request is done,
-   * this function should be called to set the state of spinners.
-   */
-  const afterRequestDone = (isUpdate: boolean, isInline: boolean) => {
-    if (!isInline) {
-      if (isUpdate) return;
-      ++initializedRelatedCount.current;
-      if (initializedRelatedCount.current === relatedModels.length) {
-        setShowRelatedSectionSpinner(false);
-      }
-      return;
-    }
-
-    ++fetchedColsWithSecondaryRequests.current;
-    if (fetchedColsWithSecondaryRequests.current === flowControl.current.numColsRequireSecondaryRequests) {
-      fetchedColsWithSecondaryRequests.current = 0;
-      setShowMainSectionSpinner(false);
-    }
-  }
-
   // ---------------- log related function --------------------------- //
 
   const logRecordClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
@@ -1032,10 +1051,14 @@ export default function RecordProvider({
           if (index !== pmIndex || !pm.relatedModel) return pm;
 
           const isTableDisplay = !pm.relatedModel.isTableDisplay;
-          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_MARKDOWN : LogActions.RELATED_DISPLAY_TABLE;
+          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_TABLE : LogActions.RELATED_DISPLAY_MARKDOWN;
 
-          // TODO what about the stack?
-          // logRecordClientAction(action, )
+          // log the action
+          LogService.logClientAction({
+            action: LogService.getActionString(action, pm.relatedModel.recordsetProps.logInfo.logStackPath),
+            stack: pm.relatedModel.recordsetProps.logInfo.logStack
+          }, pm.relatedModel.initialReference.defaultLogInfo);
+
           return { ...pm, relatedModel: { ...pm.relatedModel, isTableDisplay } };
         });
       });
@@ -1045,10 +1068,13 @@ export default function RecordProvider({
         return prevModels.map((pm: RecordRelatedModel, pmIndex: number) => {
           if (index !== pmIndex) return pm;
           const isTableDisplay = !pm.isTableDisplay;
-          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_MARKDOWN : LogActions.RELATED_DISPLAY_TABLE;
+          const action = isTableDisplay ? LogActions.RELATED_DISPLAY_TABLE : LogActions.RELATED_DISPLAY_MARKDOWN;
 
-          // TODO what about the stack?
-          // logRecordClientAction(action, )
+          // log the action
+          LogService.logClientAction({
+            action: LogService.getActionString(action, pm.recordsetProps.logInfo.logStackPath),
+            stack: pm.recordsetProps.logInfo.logStack
+          }, pm.initialReference.defaultLogInfo);
 
           return { ...pm, isTableDisplay };
         });

@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_md-help-app.scss';
 const MarkdownHelp = (): JSX.Element => {
 
   return (
-    <div className='twelve columns center main-body'>
+    <div className='markdown-help-page'>
       <table className='markdown-reference' id='mainTable'>
         <thead className='hdrStyle'>
           <tr>

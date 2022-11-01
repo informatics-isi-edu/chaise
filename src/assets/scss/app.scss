@@ -403,16 +403,14 @@ html {
 
   // footer
   .footer-container {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    margin-top: auto;
+    position: relative;
 
-    &.position-relative {
-      position: relative;
-      bottom: unset;
-      right: unset;
-      left: unset;
+    &.position-absolute {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
     }
 
     margin-right: -$viewport-margin;
@@ -477,7 +475,18 @@ html {
   // fix the padding issues related to the main alerts container that is outside of apps
   .app-header-container > .alerts-container {
     padding: $viewport-margin;
-    padding-bottom: 0;
+
+    /**
+     * having margin causes issues with the height logic, that's why we're trying
+     * to avoid it with the following rules:
+     */
+    padding-bottom: 10px;
+    &:empty {
+      padding-bottom: 0;
+    }
+    .alert:last-child {
+      margin: 0;
+    }
   }
 
   // top panel container for record and recordset
@@ -575,7 +584,7 @@ html {
         & ~ .main-container {
           padding-left: $main-alley;
 
-          .footer-container.position-relative {
+          .footer-container:not(.position-absolute) {
             margin-left: -$main-alley;
           }
         }
@@ -597,7 +606,7 @@ html {
           // when the side-panel is closed
           padding-left: $viewport-margin;
 
-          .footer-container.position-relative {
+          .footer-container:not(.position-absolute) {
             margin-left: -$viewport-margin;
           }
         }
@@ -605,6 +614,10 @@ html {
     }
 
     .main-container {
+      // the following two will make sure footer is pushed to bottom
+      // (in combination with margin-top: auto of footer)
+      display: flex;
+      flex-direction: column;
       flex: 1;
       position: relative;
       overflow-x: hidden;

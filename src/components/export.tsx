@@ -158,7 +158,7 @@ const Export = ({
               error.subMessage = error.message;
               error.message = 'Export failed. Please report this problem to your system administrators.';
 
-              dispatchError({ error: error });
+              dispatchError({ error, isDismissible: true });
             });
         }
         break;

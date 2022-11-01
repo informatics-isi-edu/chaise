@@ -20,10 +20,21 @@ import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-
 import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RelatedTableProps = {
+  /**
+   * the related model that we want to represent
+   */
   relatedModel: RecordRelatedModel,
+  /**
+   * the id attached to the container
+   */
   tableContainerID: string
 };
 
+/**
+ * Display a related table
+ * It will also take care of showing the "custom mode" as well and it's not
+ * just limited to tabular view.
+ */
 const RelatedTable = ({
   relatedModel,
   tableContainerID
@@ -31,7 +42,6 @@ const RelatedTable = ({
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
-      // TODO the following most probably should go somewhere else:
       {...relatedModel.recordsetProps}
     >
       <RelatedTableInner relatedModel={relatedModel} tableContainerID={tableContainerID} />
@@ -50,12 +60,20 @@ const RelatedTableInner = ({
     reference: recordReference, page : recordPage, updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
 
-  // update the recordset state in recordProvider
+  /**
+   * update the recordset state in recordProvider
+   * In here we should list every recordset provider state variables that we want to have
+   * access to in the record provider.
+   */
   useEffect(() => {
     updateRelatedRecordsetState(relatedModel.index, relatedModel.isInline, { page, isInitialized, hasTimeoutError, isLoading });
   }, [page, isInitialized, hasTimeoutError, isLoading]);
 
-  // register the recordset functions in the recordProvider
+  /**
+   * register the recordset functions in the recordProvider
+   * This function will capture references to the functions, that's why we don't need to
+   * repeat this registration.
+   */
   useEffect(() => {
     registerRelatedModel(relatedModel.index, relatedModel.isInline, updateMainEntity, fetchSecondaryRequests, addUpdateCauses);
   }, []);
@@ -78,10 +96,7 @@ const RelatedTableInner = ({
             <DisplayValue className='related-markdown-content' addClass={true} value={{ isHTML: true, value: relatedModel.tableMarkdownContent }} />
           }
         </>
-
       }
-      {/* TODO the following was span for inline, but shouldn't matter */}
-      {/* TODO related-table and related-table-accordion classes removed  */}
       <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
         <div id={tableContainerID}>

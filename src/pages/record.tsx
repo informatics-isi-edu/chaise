@@ -27,7 +27,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_ROOT_ID_NAME, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordSettings = {
   appName: 'record',
@@ -58,9 +58,16 @@ const RecordApp = (): JSX.Element => {
     if (res.pcid) logObject.pcid = res.pcid;
     if (res.ppid) logObject.ppid = res.ppid;
     if (res.isQueryParameter) logObject.cqp = 1;
-    if (res.queryParams && !session && 'promptlogin' in res.queryParams) {
-      // 'promptlogin' query parameter comes from static generated chaise record pages
+
+    // 'promptlogin' query parameter comes from static generated chaise record pages
+    if (res.queryParams && !session && QUERY_PARAMS.PROMPT_LOGIN in res.queryParams) {
       popupLogin(LogActions.LOGIN_WARNING);
+    }
+
+    // 'scrollTo' query parameter used to automatically scroll to a related section on load
+    let scrollToDisplayname : string;
+    if (res.queryParams && QUERY_PARAMS.SCROLL_TO in res.queryParams) {
+      scrollToDisplayname = res.queryParams[QUERY_PARAMS.SCROLL_TO];
     }
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
@@ -85,7 +92,7 @@ const RecordApp = (): JSX.Element => {
       LogService.config(logStack, logStackPath);
 
       // set the record props so it can start bootstraping
-      setRecordProps({ reference, logInfo: { logObject, logStack, logStackPath } });
+      setRecordProps({ reference, scrollToDisplayname, logInfo: { logObject, logStack, logStackPath } });
 
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {

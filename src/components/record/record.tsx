@@ -24,8 +24,8 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -35,9 +35,10 @@ import RecordProvider from '@isrd-isi-edu/chaise/src/providers/record';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
-import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -53,8 +54,21 @@ export type RecordProps = {
    * (used for scrollbar logic)
    */
   parentContainer?: HTMLElement;
+  /**
+   * the displayname of the section that we should scroll to after initialization
+   */
+  scrollToDisplayname?: string;
+  /**
+   * the displayed reference
+   */
   reference: any;
+  /**
+   * The log related APIs
+   */
   logInfo: {
+    /**
+     * the object that will be logged with the first request
+     */
     logObject?: any,
     logStack: any,
     logStackPath: string,
@@ -65,13 +79,14 @@ export type RecordProps = {
 const Record = ({
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
   reference,
+  scrollToDisplayname,
   logInfo
 }: RecordProps): JSX.Element => {
   return (
     <AlertsProvider>
       <RecordProvider reference={reference} logInfo={logInfo}>
         <RecordInner
-          parentContainer={parentContainer}
+          parentContainer={parentContainer} scrollToDisplayname={scrollToDisplayname}
         />
       </RecordProvider>
     </AlertsProvider>
@@ -79,18 +94,19 @@ const Record = ({
 };
 
 type RecordInnerProps = {
-  parentContainer?: HTMLElement
+  parentContainer?: HTMLElement,
+  scrollToDisplayname?: string
 };
 
 const RecordInner = ({
   parentContainer,
+  scrollToDisplayname
 }: RecordInnerProps): JSX.Element => {
   const { validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors } = useError();
 
-  // TODO: add getLogAction and getLogStack to record provider
   const {
-    showRelatedSectionSpinner,
+    showRelatedSectionSpinner, showMainSectionSpinner,
     showEmptySections,
     toggleShowEmptySections,
     updateRecordPage,
@@ -102,6 +118,17 @@ const RecordInner = ({
     relatedModels,
     logRecordClientAction, getRecordLogAction, getRecordLogStack
   } = useRecord();
+
+  /**
+   * whether we should even offer the side panel button or not
+   * before fetching data, this should be true if we don't have any related or inlines.
+   * after fetching data, this should be true if all the inline/related are hidden.
+   */
+  const [disablePanel, setDisablePanel] = useState(() => {
+    return reference && !(reference.related.length > 0 || reference.columns.some((col: any) => {
+      col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
+    }));
+  });
 
   /**
    * State variable to show or hide side panel
@@ -128,10 +155,6 @@ const RecordInner = ({
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
 
-  // the original href when the page was loaded
-  // includes query parameters including 'scrollTo' for autoscroll
-  const [initialHref] = useState<string>(windowRef.location.href);
-
   /**
    * used to see if there are any pending create requests
    */
@@ -144,8 +167,15 @@ const RecordInner = ({
 
   const mainContainer = useRef<HTMLDivElement>(null);
 
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
+
   // initialize the page
   useEffect(() => {
+    if (setupStarted.current) return;
+    setupStarted.current = true;
+
     readMainEntity().then((p: any) => {
       const tuple = p.tuples[0];
 
@@ -158,6 +188,12 @@ const RecordInner = ({
       let url = tuple.reference.contextualize.detailed.appLink;
       url = url.substring(0, url.lastIndexOf('?'));
 
+      $log.info([
+        'Default export template is accessible through `defaultExportTemplate` variable. ',
+        'To get the string value of it call `JSON.stringify(defaultExportTemplate)`'
+      ].join(''));
+      windowRef.defaultExportTemplate = reference.defaultExportTemplate;
+
       // add hideNavbar param back if true
       if (ConfigService.appSettings.hideNavbar) url += `?hideNavbar=${ConfigService.appSettings.hideNavbar}`;
       windowRef.history.replaceState({}, '', url);
@@ -169,7 +205,7 @@ const RecordInner = ({
   // properly set scrollable section height
   useLayoutEffect(() => {
     if (!initialized) return;
-    const resizeSensors = attachContainerHeightSensors();
+    const resizeSensors = [...attachContainerHeightSensors(parentContainer), attachMainContainerPaddingSensor(parentContainer)];
 
     const toggleScrollToTopBtn = () => {
       if (!mainContainer.current) return;
@@ -178,7 +214,7 @@ const RecordInner = ({
     mainContainer.current?.addEventListener('scroll', toggleScrollToTopBtn);
 
     return () => {
-      resizeSensors?.forEach((rs) => rs.detach());
+      resizeSensors?.forEach((rs) => !!rs && rs.detach());
 
       mainContainer.current?.removeEventListener('scroll', toggleScrollToTopBtn);
     }
@@ -210,41 +246,30 @@ const RecordInner = ({
   }, [updateRecordPage]);
 
   /**
-   * if all related tables are empty, hide the ToC
-   * check when the related section spinner is hidden meaning the requests have all finished
+   * When the page is fully initialized (including related section),
+   * - scroll to the section based on query parameter
+   */
+  const setupAfterPageLoadisDone = useRef(false);
+  useEffect(() => {
+    if (setupAfterPageLoadisDone.current || showRelatedSectionSpinner || showMainSectionSpinner) return;
+    setupAfterPageLoadisDone.current = true;
+
+    // scroll to section based on query parameter
+    if (!!scrollToDisplayname) {
+      scrollToSection(scrollToDisplayname, true);
+    }
+  }, [showMainSectionSpinner, showRelatedSectionSpinner]);
+
+  /**
+   * disable the side panel if there aren't any visible inline or related tables
    */
   useEffect(() => {
-    if (showEmptySections) return;
-    if (!showRelatedSectionSpinner) {
-      const queryParam = getQueryParam(initialHref, 'scrollTo');
-      // return if no query parameter, nothing to scroll to
-      if (queryParam) scrollToSection(queryParam);
-
-      // TODO: recordsetState soemtimes isn't updated until after the below is called, even with a 500ms delay
-      // setTimeout(() => {
-      //   let rm, hasRelatedContent = false;
-      //   for (let i = 0; i < columnModels.length; i++) {
-      //     rm = columnModels[i].relatedModel;
-      //     if (rm && rm.recordsetState.page?.length > 0) {
-      //       hasRelatedContent = true;
-      //       break;
-      //     }
-      //   }
-
-      //   if (!hasRelatedContent) {
-      //     for (let j = 0; j < relatedModels.length; j++) {
-      //       rm = relatedModels[j];
-      //       if (rm.recordsetState.page?.length > 0) {
-      //         hasRelatedContent = true;
-      //         break;
-      //       }
-      //     }
-      //   }
-
-      //   setShowPanel(hasRelatedContent);
-      // }, 500);
-    }
-  }, [showRelatedSectionSpinner]);
+    if (showMainSectionSpinner || showRelatedSectionSpinner) return;
+    setDisablePanel(
+      columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
+      relatedModels.every((rm) => !canShowRelated(rm, showEmptySections))
+    );
+  }, [showMainSectionSpinner, showRelatedSectionSpinner, showEmptySections, columnModels, relatedModels]);
 
   /**
      * On window focus, remove request and update the page
@@ -255,7 +280,7 @@ const RecordInner = ({
     // where in the page has been changed
     const changedContainers: any = [];
 
-    const addToChangedContainers = (details: any, causeDefs: string[]) => {
+    const addToChangedContainers = (details: { isInline: boolean, index: number }, causeDefs: string[]) => {
       changedContainers.push({
         ...details,
         cause: causeDefs[details.isInline ? 1 : 0],
@@ -283,7 +308,7 @@ const RecordInner = ({
 
     // if something has changed
     if (changedContainers.length > 0) {
-      updateRecordPage(true, '', changedContainers);
+      updateRecordPage(true, undefined, changedContainers);
     }
   };
 
@@ -388,8 +413,6 @@ const RecordInner = ({
         onDeleteConfirmation();
       }
     })
-    $log.debug('deleting tuple!');
-
     return;
   }
 
@@ -419,8 +442,10 @@ const RecordInner = ({
   /**
    * function to change state to show or hide side panel
    */
-  const hidePanel = () => {
-    setShowPanel(!showPanel);
+  const toggleSidePanel = () => {
+    const newState = !showPanel;
+    logRecordClientAction(newState ? LogActions.TOC_SHOW : LogActions.TOC_HIDE);
+    setShowPanel(newState);
   };
 
   const toggleRelatedSection = (relatedModel: RecordRelatedModel) => {
@@ -440,21 +465,21 @@ const RecordInner = ({
 
         const action = isOpen ? LogActions.CLOSE : LogActions.OPEN;
 
-        // TODO shouldn't we use logRecordCleintAction here?
-        // TODO should technically be based on the latest reference
         // log the action
-        // LogService.logClientAction({
-        //   action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
-        //   stack: relatedModel.recordsetProps.logInfo.logStack
-        // }, relatedModel.initialReference.defaultLogInfo);
+        LogService.logClientAction({
+          action: LogService.getActionString(action, relatedModel.recordsetProps.logInfo.logStackPath),
+          stack: relatedModel.recordsetProps.logInfo.logStack
+        }, relatedModel.initialReference.defaultLogInfo);
 
         return isOpen ? [...currState.slice(0, currIndex), ...currState.slice(currIndex + 1)] : currState.concat(relatedModel.index.toString());
       });
     }
   };
 
-  const scrollMainContainerToTop = () => {
+  const scrollMainContainerToTop = (action: LogActions) => {
     if (!mainContainer.current) return;
+
+    logRecordClientAction(action);
 
     mainContainer.current.scrollTo({
       top: 0,
@@ -463,11 +488,21 @@ const RecordInner = ({
   };
 
   // sectionId is displayname.value
-  const scrollToSection = (displayname: string) => {
+  const scrollToSection = (displayname: string, dontLog?: boolean) => {
     if (!mainContainer.current) return;
 
     const relatedObj = determineScrollElement(displayname);
-    if (!relatedObj) return;
+    if (!relatedObj) {
+      $log.debug(`section '${displayname}' not found for scrolling to!`);
+      return;
+    }
+
+    if (!dontLog) {
+      LogService.logClientAction({
+        action: LogService.getActionString(LogActions.TOC_SCROLL_RELATED, relatedObj.rtm.recordsetProps.logInfo.logStackPath),
+        stack: relatedObj.rtm.recordsetProps.logInfo.logStack
+      }, relatedObj.rtm.initialReference.defaultLogInfo);
+    }
 
     let delayScroll = 0;
     // if not inline and the related table is closed, add it to the set of open related sections to be opened
@@ -496,7 +531,7 @@ const RecordInner = ({
           element.classList.remove('row-focus');
         }, 1600);
       }, 100);
-    }, delayScroll)
+    }, delayScroll);
   }
 
   const determineScrollElement = (displayname: string): { element: Element, rtm: RecordRelatedModel } | false => {
@@ -504,21 +539,23 @@ const RecordInner = ({
     // id enocde query param
     const htmlId = makeSafeIdAttr(displayname);
     // "entity-" is used for record entity section
-    let el = document.querySelector('#entity-' + htmlId);
+    // we have to make sure the row is visible on the page
+    let el = document.querySelector(`tr:not(.${CLASS_NAMES.HIDDEN}) #entity-${htmlId}`);
 
     if (el) {
       // if in entity section, grab parent
       el = el.parentElement;
 
       matchingRtm = columnModels.filter((cm) => {
-        return cm.column.displayname.value == displayname;
+        return cm.column.displayname.value === displayname;
       })[0].relatedModel;
     } else {
       // "rt-heading-" is used for related table section
-      el = document.querySelector('#rt-heading-' + htmlId);
+      // we have to make sure the section is visible on the page
+      el = document.querySelector(`#rt-heading-${htmlId}:not(.${CLASS_NAMES.HIDDEN})`);
 
       matchingRtm = relatedModels.filter(function (rm) {
-        return rm.initialReference.displayname.value == displayname;
+        return rm.initialReference.displayname.value === displayname;
       })[0];
     }
 
@@ -530,88 +567,59 @@ const RecordInner = ({
     }
   }
 
-  // Function to render the summary section of the table of contents
-  // Iterates over the columnModels for any with a relatedModel
-  const renderSummaryTOC = () => {
-    return columnModels.map((cm: RecordColumnModel, index: number) => {
-      // if the column is not an inline related table, it should not be shown in ToC
-      if (!canShowInlineRelated(cm, showEmptySections)) return;
+  const renderTableOfContentsItem = (isInline: boolean, index: number) => {
+    if (isInline && !canShowInlineRelated(columnModels[index], showEmptySections)) {
+      return;
+    }
+    if (!isInline && !canShowRelated(relatedModels[index], showEmptySections)) {
+      return;
+    }
 
-      const displayname = cm.column.displayname;
+    const displayname = isInline ? columnModels[index].column.displayname : relatedModels[index].initialReference.displayname;
 
-      // the related page might be null if we're still waiting for the request
-      const relatedPage = cm.relatedModel?.recordsetState.page;
+    // the related page might be null if we're still waiting for the request
+    const relatedPage = isInline ? columnModels[index].relatedModel?.recordsetState.page : relatedModels[index].recordsetState.page;
 
-      let pageInfo;
-      if (relatedPage) {
-        pageInfo = <> (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length !== 1 && 's'})</>;
-      }
-      return (
-        <li
-          key={`toc-inline-heading-${cm.index}`}
-          id={'recordSidePan-heading-' + index}
-          className='toc-heading toc-inline-heading'
-          onClick={() => { scrollToSection(displayname.value) }}
+    let pageInfo;
+    if (relatedPage) {
+      pageInfo = <> (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length !== 1 && 's'})</>;
+    }
+
+    return (
+      <li
+        key={`toc-inline-heading-${index}`} id={`recordSidePan-heading-${index}`}
+        className={`toc-heading${isInline ? ' toc-inline-heading' : ''}`}
+        onClick={() => { scrollToSection(displayname.value) }}
+      >
+        <ChaiseTooltip
+          placement='right'
+          tooltip={<span>Scroll to the <code>{displayname.value}</code> section{pageInfo}</span>}
         >
-          <ChaiseTooltip
-            placement='right'
-            tooltip={<span>Scroll to the <code>{displayname.value}</code> section{pageInfo}</span>}
-          >
-            <a className={!relatedPage || relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
-              <DisplayValue value={displayname} />
-              {relatedPage && <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>}
-            </a>
-          </ChaiseTooltip>
-        </li>
-      )
-    });
-  };
-
-  const renderRelatedTOC = () => {
-    return relatedModels.map((rm: RecordRelatedModel, index: number) => {
-      if (!canShowRelated(rm, showEmptySections)) return;
-
-      const relatedPage = rm.recordsetState.page;
-      const displayname = rm.initialReference.displayname;
-
-      let tooltip = <div>Scroll to the <code>{displayname.value}</code> section (containing {relatedPage.length}{relatedPage.hasNext && ' or more'} record{relatedPage.length != 1 && 's'})</div>
-      return (
-        <li
-          key={`toc-heading-${rm.index}`}
-          id={'recordSidePan-heading-' + index}
-          className='toc-heading'
-          onClick={() => { scrollToSection(displayname.value) }}
-        >
-          <ChaiseTooltip
-            placement='right'
-            tooltip={tooltip}
-          >
-            <a className={relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
-              <DisplayValue value={displayname} />
-              <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>
-            </a>
-          </ChaiseTooltip>
-        </li>
-      )
-    })
-  };
+          <a className={!relatedPage || relatedPage.length === 0 ? 'empty-toc-heading' : ''}>
+            <DisplayValue value={displayname} />
+            {relatedPage && <span> ({relatedPage.length}{relatedPage.hasNext ? '+' : ''})</span>}
+          </a>
+        </ChaiseTooltip>
+      </li>
+    )
+  }
 
   // Function to render the full table of contents
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
       id='record-side-pan'
-      className={`side-panel-resizable record-toc resizable ${showPanel ? 'open-panel' : 'close-panel'
+      className={`side-panel-resizable record-toc resizable ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
         }`}
       ref={leftRef}
     >
       <div className='side-panel-container'>
         <div className='columns-container'>
           <ul>
-            <li id='main-to-top' className='toc-heading' onClick={scrollMainContainerToTop}>
+            <li id='main-to-top' className='toc-heading' onClick={() => scrollMainContainerToTop(LogActions.TOC_SCROLL_TOP)}>
               <ChaiseTooltip placement='right' tooltip='Scroll to top of the page.'><a>Summary</a></ChaiseTooltip>
             </li>
-            {renderSummaryTOC()}
-            {renderRelatedTOC()}
+            {columnModels.map((cm) => renderTableOfContentsItem(true, cm.index))}
+            {relatedModels.map((rm) => renderTableOfContentsItem(false, rm.index))}
             {errors.length === 0 && showRelatedSectionSpinner &&
               <li id='rt-toc-loading' className='loading-text'>
                 <Spinner animation='border' size='sm' />
@@ -628,7 +636,6 @@ const RecordInner = ({
   const renderMainContainer = () => (
     <div className='main-container dynamic-padding' ref={mainContainer}>
       <div className='main-body'>
-        {/* TODO there's no reason to have these two comps, needs discussion */}
         <RecordMainSection />
         {/* related section */}
         {relatedModels.length > 0 &&
@@ -662,7 +669,7 @@ const RecordInner = ({
         }
         {showScrollToTopBtn &&
           <ChaiseTooltip placement='left' tooltip='Scroll to top of the page.'>
-            <div className='chaise-btn chaise-btn-primary back-to-top-btn' onClick={scrollMainContainerToTop}>
+            <div className='chaise-btn chaise-btn-primary back-to-top-btn' onClick={() => scrollMainContainerToTop(LogActions.SCROLL_TOP)}>
               <i className='fa-solid fa-caret-up'></i>
             </div>
           </ChaiseTooltip>
@@ -693,10 +700,9 @@ const RecordInner = ({
       }
       <div className='top-panel-container'>
         <Alerts />
-        {/* TODO */}
         <div className='top-flex-panel'>
           <div
-            className={`top-left-panel ${showPanel ? 'open-panel' : 'close-panel'
+            className={`top-left-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
               }`}
           >
             <div className='panel-header'>
@@ -710,7 +716,7 @@ const RecordInner = ({
                 >
                   <button
                     className='chaise-btn chaise-btn-tertiary hide-toc-btn'
-                    onClick={hidePanel}
+                    onClick={toggleSidePanel}
                   >
                     <span className='chaise-btn-icon chaise-icon chaise-sidebar-close'></span>
                     <span>Hide panel</span>
@@ -808,13 +814,13 @@ const RecordInner = ({
                       </div>
                     }
                   </h1>
-                  {!showPanel && (
+                  {!showPanel && !disablePanel && (
                     <ChaiseTooltip
                       placement='top'
                       tooltip='Click to show table of contents'
                     >
                       <div
-                        onClick={hidePanel}
+                        onClick={toggleSidePanel}
                         className='chaise-btn chaise-btn-tertiary show-toc-btn'
                       >
                         <span className='chaise-btn-icon chaise-icon chaise-sidebar-open'></span>

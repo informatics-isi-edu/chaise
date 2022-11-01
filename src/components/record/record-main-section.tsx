@@ -88,7 +88,6 @@ const RecordMainSection = (): JSX.Element => {
       const columnDisplayname = <DisplayValue value={cm.column.displayname}></DisplayValue>;
 
       return (
-        // TODO in angularjs this used to be ng-if, but we need the related comp even if we're not showing
         <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={rowClassName.join(' ')}>
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>

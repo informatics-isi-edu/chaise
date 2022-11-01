@@ -128,7 +128,6 @@ const AppWrapperInner = ({
 
   /**
    * send a header request if we have to check download links
-   * TODO should be tested
    */
   const overrideDownloadClickBehavior = () => {
     addClickListener('a.asset-permission', function (e: Event, element: HTMLAnchorElement) {

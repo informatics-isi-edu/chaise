@@ -548,14 +548,18 @@ export default function RecordsetProvider({
       return;
     }
 
-    // make sure the logStack has the latest value
-    LogService.updateStackFilterInfo(
-      flowControl.current.getLogStack(),
-      referenceRef.current.filterLogInfo,
-      // in fullscreen mode, we want the global log stack to have filter info too
-      // (this is for requests outside of recordset component like export)
-      config.displayMode === RecordsetDisplayMode.FULLSCREEN
-    );
+    // make sure the logStack has the latest filters
+    // NOTE in related section we don't want the filter info to be captured,
+    //      as we're already doing that with 'source'
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+      LogService.updateStackFilterInfo(
+        flowControl.current.getLogStack(),
+        referenceRef.current.filterLogInfo,
+        // in fullscreen mode, we want the global log stack to have filter info too
+        // (this is for requests outside of recordset component like export)
+        config.displayMode === RecordsetDisplayMode.FULLSCREEN
+      );
+    }
 
     // update the resultset
     updateMainEntity(processRequests);
@@ -693,7 +697,7 @@ export default function RecordsetProvider({
         } else {
           return { page: result.page };
         }
-      }).then((result: {page: any, disabledRows?: any}) => {
+      }).then((result: { page: any, disabledRows?: any }) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;

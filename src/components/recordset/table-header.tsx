@@ -177,7 +177,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0
       && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
 
-    return isAddableDisplayMode && config.editable && reference && reference.canCreate;
+    return isAddableDisplayMode && reference && reference.canCreate;
   }
 
   /**

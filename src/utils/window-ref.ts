@@ -32,7 +32,11 @@ interface ICustomWindow extends Window {
   // this is the callback that is used in recordedit to communicate with
   // the parent that the update request is done and therefore the caller
   // needs to be updated/refreshed
-  updated: any
+  updated: any,
+  /**
+   * used in record page to help data-modelers with writing the annotation
+   */
+  defaultExportTemplate: any
 }
 
 declare let window: ICustomWindow;
