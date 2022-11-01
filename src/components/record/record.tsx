@@ -24,8 +24,8 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useRecord from '@isrd-isi-edu/chaise/src/hooks/record';
 
 // models
-import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordColumnModel, RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
+import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
+import { RecordRelatedModel } from '@isrd-isi-edu/chaise/src/models/record';
 
 // providers
 import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -54,8 +54,21 @@ export type RecordProps = {
    * (used for scrollbar logic)
    */
   parentContainer?: HTMLElement;
+  /**
+   * the displayname of the section that we should scroll to after initialization
+   */
+  scrollToDisplayname?: string;
+  /**
+   * the displayed reference
+   */
   reference: any;
+  /**
+   * The log related APIs
+   */
   logInfo: {
+    /**
+     * the object that will be logged with the first request
+     */
     logObject?: any,
     logStack: any,
     logStackPath: string,
@@ -66,13 +79,14 @@ export type RecordProps = {
 const Record = ({
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
   reference,
+  scrollToDisplayname,
   logInfo
 }: RecordProps): JSX.Element => {
   return (
     <AlertsProvider>
       <RecordProvider reference={reference} logInfo={logInfo}>
         <RecordInner
-          parentContainer={parentContainer}
+          parentContainer={parentContainer} scrollToDisplayname={scrollToDisplayname}
         />
       </RecordProvider>
     </AlertsProvider>
@@ -80,17 +94,19 @@ const Record = ({
 };
 
 type RecordInnerProps = {
-  parentContainer?: HTMLElement
+  parentContainer?: HTMLElement,
+  scrollToDisplayname?: string
 };
 
 const RecordInner = ({
   parentContainer,
+  scrollToDisplayname
 }: RecordInnerProps): JSX.Element => {
   const { validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors } = useError();
 
   const {
-    showRelatedSectionSpinner,
+    showRelatedSectionSpinner, showMainSectionSpinner,
     showEmptySections,
     toggleShowEmptySections,
     updateRecordPage,
@@ -102,6 +118,17 @@ const RecordInner = ({
     relatedModels,
     logRecordClientAction, getRecordLogAction, getRecordLogStack
   } = useRecord();
+
+  /**
+   * whether we should even offer the side panel button or not
+   * before fetching data, this should be true if we don't have any related or inlines.
+   * after fetching data, this should be true if all the inline/related are hidden.
+   */
+  const [disablePanel, setDisablePanel] = useState(() => {
+    return reference && !(reference.related.length > 0 || reference.columns.some((col: any) => {
+      col.isInboundForeignKey || (col.isPathColumn && col.hasPath && !col.isUnique && !col.hasAggregate)
+    }));
+  });
 
   /**
    * State variable to show or hide side panel
@@ -127,10 +154,6 @@ const RecordInner = ({
   const [openRelatedSections, setOpenRelatedSections] = useState<string[]>(Array.from(Array(reference.related.length), (e, i) => `${i}`));
 
   const [showScrollToTopBtn, setShowScrollToTopBtn] = useState(false);
-
-  // the original href when the page was loaded
-  // includes query parameters including 'scrollTo' for autoscroll
-  const [initialHref] = useState<string>(windowRef.location.href);
 
   /**
    * used to see if there are any pending create requests
@@ -223,43 +246,30 @@ const RecordInner = ({
   }, [updateRecordPage]);
 
   /**
-   * if all related tables are empty, hide the ToC
-   * check when the related section spinner is hidden meaning the requests have all finished
+   * When the page is fully initialized (including related section),
+   * - scroll to the section based on query parameter
+   */
+  const setupAfterPageLoadisDone = useRef(false);
+  useEffect(() => {
+    if (setupAfterPageLoadisDone.current || showRelatedSectionSpinner || showMainSectionSpinner) return;
+    setupAfterPageLoadisDone.current = true;
+
+    // scroll to section based on query parameter
+    if (!!scrollToDisplayname) {
+      scrollToSection(scrollToDisplayname, true);
+    }
+  }, [showMainSectionSpinner, showRelatedSectionSpinner]);
+
+  /**
+   * disable the side panel if there aren't any visible inline or related tables
    */
   useEffect(() => {
-    if (!showRelatedSectionSpinner) {
-      const queryParam = getQueryParam(initialHref, 'scrollTo');
-      // return if no query parameter, nothing to scroll to
-      if (queryParam) scrollToSection(queryParam, true);
-    }
-
-    if (showEmptySections) return;
-    if (!showRelatedSectionSpinner) {
-      // TODO: recordsetState soemtimes isn't updated until after the below is called, even with a 500ms delay
-      // setTimeout(() => {
-      //   let rm, hasRelatedContent = false;
-      //   for (let i = 0; i < columnModels.length; i++) {
-      //     rm = columnModels[i].relatedModel;
-      //     if (rm && rm.recordsetState.page?.length > 0) {
-      //       hasRelatedContent = true;
-      //       break;
-      //     }
-      //   }
-
-      //   if (!hasRelatedContent) {
-      //     for (let j = 0; j < relatedModels.length; j++) {
-      //       rm = relatedModels[j];
-      //       if (rm.recordsetState.page?.length > 0) {
-      //         hasRelatedContent = true;
-      //         break;
-      //       }
-      //     }
-      //   }
-
-      //   setShowPanel(hasRelatedContent);
-      // }, 500);
-    }
-  }, [showRelatedSectionSpinner]);
+    if (showMainSectionSpinner || showRelatedSectionSpinner) return;
+    setDisablePanel(
+      columnModels.every((cm) => (!canShowInlineRelated(cm, showEmptySections))) &&
+      relatedModels.every((rm) => !canShowRelated(rm, showEmptySections))
+    );
+  }, [showMainSectionSpinner, showRelatedSectionSpinner, showEmptySections, columnModels, relatedModels]);
 
   /**
      * On window focus, remove request and update the page
@@ -270,7 +280,7 @@ const RecordInner = ({
     // where in the page has been changed
     const changedContainers: any = [];
 
-    const addToChangedContainers = (details: any, causeDefs: string[]) => {
+    const addToChangedContainers = (details: { isInline: boolean, index: number }, causeDefs: string[]) => {
       changedContainers.push({
         ...details,
         cause: causeDefs[details.isInline ? 1 : 0],
@@ -298,7 +308,7 @@ const RecordInner = ({
 
     // if something has changed
     if (changedContainers.length > 0) {
-      updateRecordPage(true, '', changedContainers);
+      updateRecordPage(true, undefined, changedContainers);
     }
   };
 
@@ -403,8 +413,6 @@ const RecordInner = ({
         onDeleteConfirmation();
       }
     })
-    $log.debug('deleting tuple!');
-
     return;
   }
 
@@ -484,7 +492,10 @@ const RecordInner = ({
     if (!mainContainer.current) return;
 
     const relatedObj = determineScrollElement(displayname);
-    if (!relatedObj) return;
+    if (!relatedObj) {
+      $log.debug(`section '${displayname}' not found for scrolling to!`);
+      return;
+    }
 
     if (!dontLog) {
       LogService.logClientAction({
@@ -520,7 +531,7 @@ const RecordInner = ({
           element.classList.remove('row-focus');
         }, 1600);
       }, 100);
-    }, delayScroll)
+    }, delayScroll);
   }
 
   const determineScrollElement = (displayname: string): { element: Element, rtm: RecordRelatedModel } | false => {
@@ -528,21 +539,23 @@ const RecordInner = ({
     // id enocde query param
     const htmlId = makeSafeIdAttr(displayname);
     // "entity-" is used for record entity section
-    let el = document.querySelector('#entity-' + htmlId);
+    // we have to make sure the row is visible on the page
+    let el = document.querySelector(`tr:not(.${CLASS_NAMES.HIDDEN}) #entity-${htmlId}`);
 
     if (el) {
       // if in entity section, grab parent
       el = el.parentElement;
 
       matchingRtm = columnModels.filter((cm) => {
-        return cm.column.displayname.value == displayname;
+        return cm.column.displayname.value === displayname;
       })[0].relatedModel;
     } else {
       // "rt-heading-" is used for related table section
-      el = document.querySelector('#rt-heading-' + htmlId);
+      // we have to make sure the section is visible on the page
+      el = document.querySelector(`#rt-heading-${htmlId}:not(.${CLASS_NAMES.HIDDEN})`);
 
       matchingRtm = relatedModels.filter(function (rm) {
-        return rm.initialReference.displayname.value == displayname;
+        return rm.initialReference.displayname.value === displayname;
       })[0];
     }
 
@@ -595,7 +608,7 @@ const RecordInner = ({
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
       id='record-side-pan'
-      className={`side-panel-resizable record-toc resizable ${showPanel ? 'open-panel' : 'close-panel'
+      className={`side-panel-resizable record-toc resizable ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
         }`}
       ref={leftRef}
     >
@@ -689,7 +702,7 @@ const RecordInner = ({
         <Alerts />
         <div className='top-flex-panel'>
           <div
-            className={`top-left-panel ${showPanel ? 'open-panel' : 'close-panel'
+            className={`top-left-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
               }`}
           >
             <div className='panel-header'>
@@ -801,7 +814,7 @@ const RecordInner = ({
                       </div>
                     }
                   </h1>
-                  {!showPanel && (
+                  {!showPanel && !disablePanel && (
                     <ChaiseTooltip
                       placement='top'
                       tooltip='Click to show table of contents'

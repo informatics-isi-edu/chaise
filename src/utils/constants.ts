@@ -128,6 +128,11 @@ export const BODY_CLASS_NAMES = {
 
 export const APP_ROOT_ID_NAME = 'chaise-app-root';
 
+export const QUERY_PARAMS = {
+  PROMPT_LOGIN: 'promptlogin',
+  SCROLL_TO: 'scrollTo'
+};
+
 export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden'
 }

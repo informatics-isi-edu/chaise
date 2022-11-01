@@ -12,6 +12,12 @@ export default class RecordFlowControl extends FlowControl {
   requestModels: RecordRequestModel[] = [];
   inlineRelatedRequestModels: { [index: string]: RecordRelatedRequestModel } = {};
   relatedRequestModels: RecordRelatedRequestModel[] = [];
+
+  /**
+   * number of secondary requests for the main section of the page
+   * this includes the inline related and aggregates.
+   * we're using this number for the logic of showing the main section spinner
+   */
   numColsRequireSecondaryRequests = 0;
 
   /**

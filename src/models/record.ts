@@ -86,3 +86,9 @@ export interface CitationModel {
    */
   isReady: boolean
 }
+
+export interface ChangeContainerDetails {
+  isInline: boolean,
+  index: number,
+  cause: string
+}

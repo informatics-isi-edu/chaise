@@ -177,6 +177,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
   }
 }
 
+// NOTE this solutin won't work if we're going to have multiple record page instances together
 let lastRenderedTableIndex = 0;
 function allPreviousRelatedInitialized(relatedModel: RecordRelatedModel): boolean {
   if (!relatedModel.recordsetState.isInitialized || !relatedModel.tableMarkdownContentInitialized) {
@@ -184,18 +185,8 @@ function allPreviousRelatedInitialized(relatedModel: RecordRelatedModel): boolea
   }
   if (relatedModel.index === 0 || lastRenderedTableIndex === relatedModel.index - 1) {
     lastRenderedTableIndex = relatedModel.index;
-
-    // don't show the loading if it's done
-    // if (showRelatedSectionSpinnerRef.current && lastRenderedIndex.current === relatedModels.length - 1) {
-    // setShowRelatedSectionSpinner(false);
-
-    // TODO
-    // defer autoscroll to next digest cycle to ensure aggregates and images were fetched and loaded for last RT
-    // $timeout(autoScroll, 0);
-    // }
     return true;
   }
-
   return false;
 }
 

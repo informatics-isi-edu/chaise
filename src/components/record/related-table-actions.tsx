@@ -240,8 +240,11 @@ const RelatedTableActions = ({
           // TODO better and more costum message
           addAlert('Your data has been submitted. Showing you the result set...', ChaiseAlertType.SUCCESS);
 
-          // TODO properly send the container
-          updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
+          const details = relatedModel.recordsetProps.config.containerDetails!;
+          updateRecordPage(true, undefined, [{
+            ...details,
+            cause: details?.isInline ? LogReloadCauses.RELATED_INLINE_CREATE : LogReloadCauses.RELATED_CREATE
+          }]);
         }).catch((error: any) => {
           // TODO ask josh about validateSession
           dispatchError({ error: error, isDismissible: true });

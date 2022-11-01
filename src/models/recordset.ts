@@ -75,7 +75,10 @@ export type RecordsetConfig = {
   /**
    * used in record page to figure out where the edit/delete request is fired from
    */
-  containerDetails?: any,
+  containerDetails?: {
+    isInline: boolean,
+    index: number
+  },
   // TODO enable favorites
   // enableFavorites: boolean
 }
