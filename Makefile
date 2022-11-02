@@ -232,7 +232,6 @@ SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
 	$(COMMON)/login.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/record.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
@@ -280,8 +279,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
-GOOGLE_DATASET_CONFIG=google-dataset-config.js
-
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
 	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
@@ -313,7 +310,8 @@ RSYNC_FILE_LIST=common \
 
 # the same list above but also includes the config files
 RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
-	$(JS_CONFIG)
+	$(JS_CONFIG) \
+	$(VIEWER_CONFIG)
 
 .make-rsync-list:
 	$(info - creating .make-rsync-list)
