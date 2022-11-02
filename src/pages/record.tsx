@@ -65,7 +65,7 @@ const RecordApp = (): JSX.Element => {
     }
 
     // 'scrollTo' query parameter used to automatically scroll to a related section on load
-    let scrollToDisplayname : string;
+    let scrollToDisplayname: string;
     if (res.queryParams && QUERY_PARAMS.SCROLL_TO in res.queryParams) {
       scrollToDisplayname = res.queryParams[QUERY_PARAMS.SCROLL_TO];
     }
@@ -117,12 +117,7 @@ const RecordApp = (): JSX.Element => {
 
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
-  <AppWrapper
-    appSettings={recordSettings}
-    includeAlerts={true}
-    includeNavbar={true}
-    displaySpinner={true}
-  >
+  <AppWrapper appSettings={recordSettings} includeAlerts includeNavbar displaySpinner>
     <RecordApp />
   </AppWrapper>
 );

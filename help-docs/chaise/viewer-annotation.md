@@ -8,13 +8,13 @@
 
 1. Make sure that you are logged in.
 
-	![](resources/annotation-documentation-images/Login%20Check.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Login%20Check.png)
 
 2. On the left hand side, beside the image you will see a `New` button. Click on it to open the `Create annotation` panel.
 
-	![](resources/annotation-documentation-images/NewButton.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/NewButton.png)
 
-	![](resources/annotation-documentation-images/CreateAnnotationPanel.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/CreateAnnotationPanel.png)
 
 3. Fill in the following fields:
 
@@ -26,7 +26,7 @@
 
 5. Select the desired annotation shape from the `Annotation Toolbar`. You may choose from pencil icon (freehand drawing), rectangle or circle.
 
-	![](resources/annotation-documentation-images/AnnotationToolbar.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/AnnotationToolbar.png)
 
 6. Draw the shape in the desired location on the image. (You may use multiple and different shapes within the annotation). See [Draw a shape](#draw-a-shape) for more details about the different drawing options.
 
@@ -34,40 +34,40 @@
 
 8. To save your annotation, click on the `Save` button in the `Create annotation` panel.
 
-	![](resources/annotation-documentation-images/SaveButton.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/SaveButton.png)
 
 ## Edit/Delete an existing annotation {id=editdelete-an-existing-annotation}
 
 1. Make sure that you are logged in.
 
 2. Click on the `Edit Annotation` icon of the annotation that you want to edit.
-	![](resources/annotation-documentation-images/EditButton.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/EditButton.png)
 
 3. To change the color of the annotation, pick a different color from the color picker (red square). This will change the color of all the shapes of the annotation that share the original color.
 
-	![](resources/annotation-documentation-images/ColorPicker.png){.chaise-help-image}
-	![](resources/annotation-documentation-images/ColorPicker2.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/ColorPicker.png)
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/ColorPicker2.png)
 
 4. To delete a shape from this annotation, select the `Erase` tool from the annotation toolbar and click on the shape that you want to delete.
 
-	![](resources/annotation-documentation-images/DeleteButton.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/DeleteButton.png)
 
 5. To add a new shape, select the shape that you want from the annotation toolbar and start drawing it on the image.
 
-	![](resources/annotation-documentation-images/ShapeIcons.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/ShapeIcons.png)
 
 6. After you are done making your changes, click on the `Save` button in the `Edit annotation` panel.
 
 7. To delete the entire annotation, click on the `Delete` button in the `Edit annotation` panel.
 
-	![](resources/annotation-documentation-images/DeleteButton.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/DeleteButton.png)
 
 ## Draw a shape {id=draw-a-shape}
 
 ### Path
 
 1. Select the path tool (pencil icon) from the annotation tool bar.
-	![](resources/annotation-documentation-images/Path.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Path.png)
 
 2. Press and hold the left mouse button to draw the path on the image. Drag the mouse to draw the shape.
 
@@ -79,7 +79,7 @@
 
 1. Select the rectangle tool (square icon) from the annotation tool bar.
 
-	![](resources/annotation-documentation-images/Rectangle.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Rectangle.png)
 
 2. Press and hold the left mouse button to draw a rectangle on the image. Start dragging your shape with your mouse from the top-left corner to the bottom right corner of the area you want to annotate.
 
@@ -91,7 +91,7 @@
 
 1. Select the circle tool (circle icon) from the annotation tool bar.
 
-	![](resources/annotation-documentation-images/Circle.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Circle.png)
 
 2. Press and hold the left mouse button to draw the circle on the image. Start dragging your shape from the center of the area you want to annotate out to the desired radius.
 
@@ -101,7 +101,7 @@
 
 ### Line
 1. Select the line tool (line icon) from the annotation tool bar.
-	![](resources/annotation-documentation-images/Line.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Line.png)
 
 2. Press and hold the left mouse button to draw the line on the image. Drag the mouse pointer
 
@@ -114,7 +114,7 @@ to draw. As you drag the mouse, you will see the the line change its end point.
 
 ### Polygon
 1. Select the polygon tool (polygon icon) from the annotation tool bar.
-	![](resources/annotation-documentation-images/Polygon.png){.chaise-help-image}
+	![](https://github.com/informatics-isi-edu/chaise/raw/master/docs/resources/viewer-annotation/Polygon.png)
 
 2. Press and hold the left mouse button to draw the first polygon edge on the image. Drag the mouse pointer to draw.
 

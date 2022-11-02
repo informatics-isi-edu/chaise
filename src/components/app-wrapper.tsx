@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
 
 // hooks
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
-import { StrictMode, useEffect, useState } from 'react';
+import { StrictMode, useEffect, useRef, useState } from 'react';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
@@ -37,11 +37,31 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
 type AppWrapperProps = {
+  /**
+   * The app content
+   */
   children: React.ReactNode,
+  /**
+   * app-specific settings
+   */
   appSettings: ConfigServiceSettings,
+  /**
+   * whether we should add alerts provider and alerts comp
+   */
   includeAlerts?: boolean,
+  /**
+   * whether we should add navbar
+   */
   includeNavbar?: boolean,
-  displaySpinner?: boolean
+  /**
+   * whether we should display spinner while waiting for config service
+   * or just show the content.
+   */
+  displaySpinner?: boolean,
+  /**
+   * whether we should ignore hash change, or reload the page on hash change
+   */
+  ignoreHashChange?: boolean
 }
 
 const AppWrapperInner = ({
@@ -49,7 +69,8 @@ const AppWrapperInner = ({
   appSettings,
   includeAlerts,
   includeNavbar,
-  displaySpinner
+  displaySpinner,
+  ignoreHashChange
 }: AppWrapperProps): JSX.Element => {
   const { dispatchError, logTerminalError, errors } = useError();
   const [configDone, setConfigDone] = useState(false);
@@ -65,6 +86,7 @@ const AppWrapperInner = ({
       dispatchError({ error: event.reason });
     };
     const onHashChange = () => {
+      if (ignoreHashChange) return;
       windowRef.location.reload();
     };
 
@@ -206,7 +228,8 @@ const AppWrapper = ({
   appSettings,
   includeNavbar,
   includeAlerts,
-  displaySpinner
+  displaySpinner,
+  ignoreHashChange
 }: AppWrapperProps): JSX.Element => {
   return (
     <ErrorProvider>
@@ -224,6 +247,7 @@ const AppWrapper = ({
             includeAlerts={includeAlerts}
             includeNavbar={includeNavbar}
             displaySpinner={displaySpinner}
+            ignoreHashChange={ignoreHashChange}
           >
             {children}
           </AppWrapperInner>

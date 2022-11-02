@@ -1,8 +1,8 @@
 /* eslint max-classes-per-file: 0 */
 
-import { errorNames, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { errorNames, errorMessages, HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { chaiseDeploymentPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 // TODO eventually we might want to use this type instead of any
 interface ChaiseERMrestJSError {
@@ -222,7 +222,7 @@ export class DifferentUserConflictError extends ChaiseError {
 
       // TODO can we improve this?
       const link = `
-        <a id='switch-user-accounts-link' target='_blank' href='${chaiseDeploymentPath()}help/?page=switch-user-accounts'>
+        <a id='switch-user-accounts-link' target='_blank' href='${getHelpPageURL(HELP_PAGES.SWITCH_USER_ACCOUNTS)}'>
           Switch User Accounts Document
         </a>
       `;

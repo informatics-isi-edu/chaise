@@ -182,7 +182,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'helpPages', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, helpPages, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -247,7 +247,7 @@
             }
 
             vm.switchUserAccounts = function () {
-                $window.open(UriUtils.chaiseDeploymentPath() + 'help/?page=switch-user-accounts', '_blank');
+                $window.open(UriUtils.getHelpPageURL(helpPages.SWITCH_USER_ACCOUNTS.location), '_blank');
             }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;

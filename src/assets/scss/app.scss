@@ -887,6 +887,30 @@ html {
     }
   }
 
+  // used both in record and help apps
+  .back-to-top-btn {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    padding: 1px 4px;
+    font-size: 25px;
+    border-radius: 4px;
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 100;
+  }
+
+  /****** help pages *****/
+  .help-container {
+    .main-body .container {
+      // in other apps .alerts-container is adding the padding-top
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+  }
+
   /****** switch user accounts help page *******/
   .switch-user-accounts-container {
     li {

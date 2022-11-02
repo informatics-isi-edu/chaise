@@ -173,12 +173,7 @@ const LoginPopupApp = (): JSX.Element => {
 
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
-  <AppWrapper
-    appSettings={loginSettings}
-    includeAlerts={false}
-    includeNavbar={false}
-    displaySpinner={true}
-  >
+  <AppWrapper appSettings={loginSettings} displaySpinner>
     <LoginPopupApp />
   </AppWrapper>
 );

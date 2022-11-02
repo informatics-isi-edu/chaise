@@ -298,7 +298,7 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 # list of file and folders that will be sent to the given location
 RSYNC_FILE_LIST=common \
 	dist \
-	help-pages \
+	help-docs \
 	images \
 	lib \
 	recordedit \

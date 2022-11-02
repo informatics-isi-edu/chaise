@@ -150,6 +150,26 @@ export const CUSTOM_EVENTS = {
   FORCE_UPDATE_RECORDSET: 'force-update-recordset-data',
 };
 
+export const HELP_PAGES_FOLDER_LOCATION = 'help-docs';
+
+export const HELP_PAGES = {
+  MARKDOWN_HELP: {
+    title: 'Markdown Help',
+    location: 'chaise/markdown-help',
+    isComponent: true
+  },
+  SWITCH_USER_ACCOUNTS: {
+    title: 'Switch User Accounts',
+    location: 'chaise/switch-user-accounts',
+    isComponent: true
+  },
+  VIEWER_ANNOTATION: {
+    title: 'Viewer Annotation',
+    location: 'chaise/viewer-annotation',
+    isComponent: false
+  }
+}
+
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 

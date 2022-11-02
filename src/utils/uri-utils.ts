@@ -3,7 +3,7 @@
  */
 
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
-import { BUILD_VARIABLES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { BUILD_VARIABLES, HELP_PAGES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -540,4 +540,11 @@ export function addQueryParamsToURL(url: string, queryParams: {[key: string]: st
     const usedValue = urlEncode ? fixedEncodeURIComponent(queryParams[currKey]) : queryParams[currKey];
     return prev + qCharacter + usedKey + '=' + usedValue;
   }, url);
+}
+
+/**
+ * Given the page info, return the proper link to it
+ */
+export function getHelpPageURL(pageInfo: typeof HELP_PAGES.MARKDOWN_HELP) {
+  return `${chaiseDeploymentPath()}help/?page=${fixedEncodeURIComponent(pageInfo.location)}`
 }
