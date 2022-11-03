@@ -52,7 +52,7 @@ describe('Recordset add record,', function() {
         });
     });
 
-    it("verify view details link, search for a term, then verify view details link has changed", function () {
+    it("verify view details link, search for a term, then verify view details link has changed", function (done) {
         var baseUrl = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/RID=";
 
         chaisePage.recordsetPage.getRows().then(function (rows) {
@@ -84,7 +84,9 @@ describe('Recordset add record,', function() {
 
             // clear search
             return chaisePage.recordsetPage.getSearchClearButton().click();
-        });
+        }).then(function () {
+          done();
+        }).catch(chaisePage.catchTestError(done));
     });
 
     var allWindows;
@@ -148,7 +150,7 @@ describe('Recordset add record,', function() {
         })
     });
 
-    it("go back to recordset should refresh the table with the new record", function() {
+    it("go back to recordset should refresh the table with the new record", function(done) {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         /**
          * we noticed this test case started failing on saucelabs,
@@ -172,7 +174,8 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(testParams.num_rows+1);
-        });
+            done();
+        }).catch(chaisePage.catchTestError(done));
     })
 
 });

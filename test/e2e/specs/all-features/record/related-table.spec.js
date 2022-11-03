@@ -298,7 +298,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it ("Opened modal by `Link` button should honor the page_size and hide_row_count.", function (done) {
             var addRelatedRecordLink = chaisePage.recordPage.getAddRecordLink(association_with_page_size.displayname);
-            addRelatedRecordLink.click().then(function(){
+            // .click will focus on the element and therefore shows the tooltip.
+            // and that messes up other tooltip tests that we have
+            chaisePage.clickButton(addRelatedRecordLink).then(function(){
                 return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
             }).then(function () {
                 return chaisePage.recordEditPage.getModalTitle().getText();
@@ -317,13 +319,12 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
                 expect(chaisePage.recordsetPage.getModalRecordsetTotalCount().getText()).toBe("Displaying first\n2\nrecords", "hide_row_count not honored");
 
-                return chaisePage.recordEditPage.getModalCloseBtn().click();
+                return chaisePage.clickButton(chaisePage.recordEditPage.getModalCloseBtn());
             }).then(function () {
                 done();
             }).catch(function(error) {
                 console.log(error);
-                expect('There was an error in this promise chain').toBe('Please see error message.');
-                done.fail();
+                done.fail(error);
             });
         });
     });
@@ -627,7 +628,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
         beforeAll(function(done) {
             pageReadyCondition().then(function () {
                 // click show empty sections button
-                return chaisePage.recordPage.getShowAllRelatedEntitiesButton().click()
+                // .click will focus on the element and therefore shows the tooltip.
+                // and that messes up other tooltip tests that we have
+                return chaisePage.clickButton(chaisePage.recordPage.getShowAllRelatedEntitiesButton());
             }).then(function () {
                 addBtn = chaisePage.recordPage.getAddRecordLink(displayname, true);
                 done();
@@ -644,8 +647,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it("should have the proper tooltip", function (done) {
             chaisePage.testTooltipWithDone(
-                addBtn.element(by.xpath("./..")),
-                `Unable to connect to ${displayname} records until ${columnname} in ${tablename} is set.`,
+                addBtn,
+                `Unable to connect to ${displayname} records until ${columnname} in this ${tablename} is set.`,
                 done,
                 'record'
             );
@@ -675,8 +678,8 @@ describe ("Viewing exisiting record with related entities, ", function () {
 
         it("should have the proper tooltip", function (done) {
             chaisePage.testTooltipWithDone(
-                addBtn.element(by.xpath("./..")),
-                `Unable to create ${displayname} records for this ${tablename} until ${columnname} in this ${tablename} is set`,
+                addBtn,
+                `Unable to create ${displayname} records for this ${tablename} until ${columnname} in this ${tablename} is set.`,
                 done,
                 'record'
             );
@@ -688,7 +691,9 @@ describe ("Viewing exisiting record with related entities, ", function () {
             var addBtn = chaisePage.recordPage.getAddRecordLink("association_table_null_keys2", true);
             expect(addBtn.isEnabled()).toBeTruthy();
 
-            addBtn.click().then(function () {
+            // .click will focus on the element and therefore shows the tooltip.
+            // and that messes up other tooltip tests that we have
+            chaisePage.clickButton(addBtn).then(function () {
                 return browser.wait(function () {
                     return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                         return (ct == 2);

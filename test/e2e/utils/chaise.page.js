@@ -1342,6 +1342,10 @@ function chaisePage() {
         return browser.executeScript("arguments[0].click();", button);
     };
 
+    this.clickButtonAndUnblur = function (button) {
+        return browser.executeScript("arguments[0].click();", button);
+    };
+
     this.jqueryClickButton = function(button) {
         return browser.executeScript("$(arguments[0]).click();", button);
     };

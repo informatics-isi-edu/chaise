@@ -203,9 +203,9 @@ const RecordInner = ({
   }, []);
 
   // properly set scrollable section height
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!initialized) return;
-    const resizeSensors = [...attachContainerHeightSensors(parentContainer), attachMainContainerPaddingSensor(parentContainer)];
+    const resizeSensors = attachContainerHeightSensors(parentContainer);
 
     const toggleScrollToTopBtn = () => {
       if (!mainContainer.current) return;
@@ -218,6 +218,14 @@ const RecordInner = ({
 
       mainContainer.current?.removeEventListener('scroll', toggleScrollToTopBtn);
     }
+  }, [initialized]);
+
+  // make sure the right padding is correct regardless of scrollbar being there or not
+  useLayoutEffect(() => {
+    if (!initialized) return;
+    const paddingSensor = attachMainContainerPaddingSensor(parentContainer);
+
+    return () => { paddingSensor.detach(); }
   }, [initialized]);
 
   /**

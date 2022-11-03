@@ -55,12 +55,13 @@ describe('View existing record,', function() {
           }).catch(chaisePage.catchTestError(done));
         });
 
-        it('should hide empty related tables on load',function(){
+        it('should hide empty related tables on load',function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
                 headings.forEach(function (heading, idx) {
                     expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
                 })
             })
+            done();
         });
 
     });

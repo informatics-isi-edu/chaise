@@ -51,7 +51,7 @@ export function CanCreateDisabledRelated(relatedRef: any, mainTuple: any): boole
     return false;
   }
 
-  const fkr = relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference.origFKR : relatedRef.origFKR
+  const fkr = relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference.origFKR : relatedRef.origFKR;
   // some checks for whether at least one element in the array passes the test implemented by the provided function
   // if one column test passes (key data is `null` or `undefined`), the key info is invalid
   return fkr.key.colset.columns.some((col: any) => {
@@ -72,12 +72,17 @@ export function canEditRelated(relatedRef: any): boolean {
  * Whether we can delete instances of a related reference
  */
 export function canDeleteRelated(relatedRef: any): boolean {
-  if (ConfigService.chaiseConfig.editRecord === false) {
+  /**
+   * TODO this is replicating the Angularjs behavior but we should consider the following:
+   * - why do we need to check editRecord?
+   * - why deleteRecord check is backwards?
+   */
+  if (ConfigService.chaiseConfig.editRecord === false || ConfigService.chaiseConfig.deleteRecord !== true) {
     return false;
   }
 
   if (isObjectAndNotNull(relatedRef.derivedAssociationReference)) {
-    return relatedRef.derivedAssociationReference.canDelete
+    return relatedRef.derivedAssociationReference.canDelete;
   }
 
   return relatedRef.canDelete;
