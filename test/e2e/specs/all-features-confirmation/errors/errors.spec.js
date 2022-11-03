@@ -591,7 +591,7 @@ describe('Error related test cases,', function() {
                       return chaisePage.recordPageReady();
                     }
                 }).then(function () {
-                    return chaisePage.recordEditPage.getReactAlertWarning();
+                    return chaisePage.recordEditPage.getAlertWarning();
                 }).then(function (alert) {
                     return alert.getText();
                 }).then(function (text) {

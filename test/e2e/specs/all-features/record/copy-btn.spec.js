@@ -141,7 +141,7 @@ describe('View existing record,', function() {
                 // wait for dialog to open
                 chaisePage.waitForElement(shareDialog);
 
-                return chaisePage.recordEditPage.getReactAlertWarning();
+                return chaisePage.recordEditPage.getAlertWarning();
             }).then(function (alert) {
                 expect(alert.isDisplayed()).toBeTruthy("Alert warning the user that they may be seeing stale data is not present");
 

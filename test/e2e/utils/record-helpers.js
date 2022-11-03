@@ -923,7 +923,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                         it ("button tooltip should be `Unlink`.", function (done) {
                             chaisePage.testTooltipWithDone(
                                 deleteBtn,
-                                '\'Disconnect <code>' + params.displayname + '</code>: <code>' + params.entityMarkdownName + '</code> from this <code>' + params.baseTable + '</code>.\'',
+                                `Disconnect ${params.displayname}: ${params.entityMarkdownName} from this ${params.baseTable}.`,
                                 done,
                                 'record'
                             );

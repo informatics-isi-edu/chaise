@@ -253,7 +253,6 @@ const RelatedTableActions = ({
         const createRef = derivedRef.unfilteredReference.contextualize.entryCreate;
         createRef.create(submissionRows, logObj).then(() => {
           setAddPureBinaryModalProps(null);
-          // TODO better and more costum message
           addAlert('Your data has been submitted. Showing you the result set...', ChaiseAlertType.SUCCESS);
 
           const details = relatedModel.recordsetProps.config.containerDetails!;
@@ -262,7 +261,6 @@ const RelatedTableActions = ({
             cause: details?.isInline ? LogReloadCauses.RELATED_INLINE_CREATE : LogReloadCauses.RELATED_CREATE
           }]);
         }).catch((error: any) => {
-          // TODO ask josh about validateSession
           dispatchError({ error: error, isDismissible: true });
         }).finally(() => setShowPureBinarySpinner(false));
       });
@@ -289,15 +287,11 @@ const RelatedTableActions = ({
     // this is to avoid the accordion header to recieve the click
     e.stopPropagation();
 
-    // TODO implement unlink p&b
     if (relatedModel.isPureBinary) {
       pauseUpdateRecordPage();
       openUnlinkPureBinaryModal();
       return;
     }
-
-    // TODO this is added for test purposes and should be removed
-    // updateRecordPage(true, LogReloadCauses.RELATED_UPDATE);
   };
 
   const openUnlinkPureBinaryModal = () => {
@@ -353,8 +347,8 @@ const RelatedTableActions = ({
 
           // TODO: - improve partial success and use TRS to check delete rights before giving a checkbox
           //       - some errors could have been because of row level security
-          dispatchError({ 
-            error: response, 
+          dispatchError({
+            error: response,
             isDismissible: true,
             closeBtnCallback: () => {
               // ask recordset to update the modal
@@ -366,7 +360,7 @@ const RelatedTableActions = ({
                   response: response
                 });
               }
-            } 
+            }
           });
         };
 

@@ -537,7 +537,7 @@ const RecordsetInner = ({
     if (hasFilter) {
       chiclets.push(
         <FilterChiclet
-          key='filters'
+          key='filter-chiclet-custom-filters'
           identifier={'filters'}
           iconTooltip={'Clear custom filter applied'}
           title={'Custom Filter'}
@@ -553,7 +553,7 @@ const RecordsetInner = ({
       const cFacetRemovable = loc.customFacets.removable;
       chiclets.push(
         <FilterChiclet
-          key='cfacets'
+          key='filter-chiclet-custom-facets'
           identifier={'cfacets'}
           iconTooltip={cFacetRemovable ? 'Clear custom filter applied' : 'Predefined filter(s)'}
           // when it's not removable we're showing the icon and that's enough
@@ -579,7 +579,7 @@ const RecordsetInner = ({
           faf.forEach((f: any, filterIndex: number) => {
             // comma-separated values
             chicletValue.push(
-              <span key={f.uniqueId}>
+              <span key={`selected-filter-chiclet-${facetIndex}-value-${f.uniqueId}`}>
                 <DisplayValue value={f.displayname} specialNullEmpty={true} />
                 {(filterIndex !== faf.length - 1) && <span>, </span>}
               </span>
@@ -587,7 +587,7 @@ const RecordsetInner = ({
 
             // tooltip is using bullet icon as a separator
             chicletValueTooltip.push(
-              <span key={f.uniqueId}>
+              <span key={`selected-filter-chiclet-${facetIndex}-tooltip-${f.uniqueId}`}>
                 <span style={{ 'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke' }}>&bull;</span>
                 <DisplayValue value={f.displayname} specialNullEmpty={true} />
               </span>
@@ -596,7 +596,7 @@ const RecordsetInner = ({
 
           chiclets.push(
             <FilterChiclet
-              key={`facet-${facetIndex}`}
+              key={`selected-filter-chiclet-${facetIndex}`}
               identifier={facetIndex}
               iconTooltip={'Clear filter applied'}
               title={facetDisplayname}

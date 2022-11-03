@@ -1,8 +1,7 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type FilterChicletIdentifier = 'filters' | 'cfacets' | number;
 type FilterChicletProps = {
@@ -68,10 +67,9 @@ const FilterChiclet = ({
   return (
     <div className='filter-chiclet chaise-btn-group'>
       {/* icon */}
-      <OverlayTrigger
+      <ChaiseTooltip
         placement='bottom-start'
-        trigger='hover'
-        overlay={<Tooltip>{iconTooltip}</Tooltip>}
+        tooltip={iconTooltip}
       >
         <IconTag
           className={`filter-chiclet-remove chaise-btn chaise-btn-secondary ${removeClass}`}
@@ -79,15 +77,15 @@ const FilterChiclet = ({
         >
           <i className={onRemove ? 'fa-solid fa-xmark' : 'fa-solid fa-filter'}></i>
         </IconTag>
-      </OverlayTrigger>
+      </ChaiseTooltip>
       {/* title */}
       {title &&
         <ConditionalWrapper
           condition={titleTooltip !== undefined}
           wrapper={children => (
-            <OverlayTrigger placement='bottom-start' trigger='hover' overlay={<Tooltip>{titleTooltip}</Tooltip>}>
+            <ChaiseTooltip placement='bottom-start' tooltip={titleTooltip!}>
               {children}
-            </OverlayTrigger>
+            </ChaiseTooltip>
           )}
         >
           <TitleTag
@@ -99,13 +97,12 @@ const FilterChiclet = ({
         </ConditionalWrapper>
       }
       {/* value */}
-      <OverlayTrigger
+      <ChaiseTooltip
         placement='bottom-start'
-        trigger='hover'
-        overlay={<Tooltip>{valueTooltip ? valueTooltip : usedValue}</Tooltip>}
+        tooltip={<>{valueTooltip ? valueTooltip : usedValue}</>}
       >
         <span className='filter-chiclet-value chaise-btn chaise-btn-secondary'>{usedValue}</span>
-      </OverlayTrigger>
+      </ChaiseTooltip>
     </div>
   )
 }

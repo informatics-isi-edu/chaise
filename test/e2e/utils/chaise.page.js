@@ -415,21 +415,22 @@ var recordEditPage = function() {
     };
 
     this.getAlertError = function() {
-        return browser.executeScript("return $('.alert-danger:visible')[0];");
+        /**
+         * TODO while this is only used in recordedit, the submission might be
+         * very fast and therefore by the time that we're calling this it's executing in record.
+         * That's why I rewrote it to not use jQuery.
+         * Also the way it's used in test it must be executeScript, but it might be
+         * better to refactor where this function is called and then use element selector instead.
+         */
+        return browser.executeScript('return document.querySelector(\'.alert-danger\');');
     };
 
     this.getAlertErrorLinkHref = function() {
         return browser.executeScript("return $('.alert-danger:visible a')[0].getAttribute('href');");
     };
 
-    // TODO: remove when all apps migrated
     this.getAlertWarning = function() {
-        return browser.executeScript("return $('.alert-warning:visible')[0];");
-    };
-
-    // TODO: rename when all apps migrated
-    this.getReactAlertWarning = function() {
-        return element(by.css('.alert-warning.show'));
+        return element(by.css('.alert-warning'));
     };
 
     this.getViewModelRows = function() {

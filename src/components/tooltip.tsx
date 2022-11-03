@@ -20,6 +20,8 @@ type ChaiseTooltipProps = {
    * (can be used for applying custom styles to the tooltip)
    */
    className?: string,
+   show?: boolean,
+   onToggle?: (nextShow: boolean) => void
 }
 
 
@@ -28,11 +30,14 @@ const ChaiseTooltip = ({
   children,
   placement,
   className,
+  show,
+  onToggle
 }: ChaiseTooltipProps): JSX.Element => {
   return (
     <OverlayTrigger
+      show={show}
+      onToggle={onToggle}
       placement={placement}
-      trigger='hover'
       overlay={
         <Tooltip className={className}>
           {tooltip}

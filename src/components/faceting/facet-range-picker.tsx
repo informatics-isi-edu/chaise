@@ -2,10 +2,10 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
 
 // components
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import FacetCheckList from '@isrd-isi-edu/chaise/src/components/faceting/facet-check-list';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import RangeInputs from '@isrd-isi-edu/chaise/src/components/range-inputs';
-import Tooltip from 'react-bootstrap/Tooltip';
+
 
 // customizable method: use your own `Plotly` object to use minified basic distribution of plotlyjs
 import Plotly from 'plotly.js-basic-dist-min';
@@ -930,16 +930,10 @@ const FacetRangePicker = ({
       <span className='chaise-icon chaise-zoom-in'></span>
     </button>;
 
-    // if button is disabled, don't attach the OverlayTrigger
+    // if button is disabled, don't attach the tooltip
     if (compState.disableZoomIn) return (zoomInButton);
 
-    return (<OverlayTrigger
-      placement='bottom'
-      trigger='hover'
-      overlay={<Tooltip>Zoom</Tooltip>}
-    >
-      {zoomInButton}
-    </OverlayTrigger>)
+    return <ChaiseTooltip placement='bottom' tooltip='Zoom'>{zoomInButton}</ChaiseTooltip>;
   }
 
   const renderZoomOutButton = () => {
@@ -952,16 +946,10 @@ const FacetRangePicker = ({
       <span className='chaise-icon chaise-zoom-out'></span>
     </button>;
 
-    // if button is disabled, don't attach the OverlayTrigger
+    // if button is disabled, don't attach the tooltip
     if (compState.histogramDataStack.length <= 1) return (zoomOutButton);
 
-    return (<OverlayTrigger
-      placement='bottom'
-      trigger='hover'
-      overlay={<Tooltip>Unzoom</Tooltip>}
-    >
-      {zoomOutButton}
-    </OverlayTrigger>)
+    return <ChaiseTooltip placement='bottom' tooltip='Unzoom'>{zoomOutButton}</ChaiseTooltip>;
   }
 
   const renderHistogram = () => {
@@ -969,25 +957,21 @@ const FacetRangePicker = ({
       return (<>
         <div className='plotly-actions'>
           <div className='chaise-btn-group' style={{ 'zIndex': 1 }}>
-            <OverlayTrigger
+            <ChaiseTooltip
               placement='right'
-              trigger='hover'
-              overlay={
-                <Tooltip>
-                  {renderHistogramHelpTooltip()}
-                </Tooltip>
-              }>
+              tooltip={renderHistogramHelpTooltip()}
+            >
               <button type='button' className='plotly-how-to chaise-btn chaise-btn-tertiary chaise-btn-sm'>
                 <span className='chaise-icon chaise-info'></span>
               </button>
-            </OverlayTrigger>
+            </ChaiseTooltip>
             {renderZoomInButton()}
             {renderZoomOutButton()}
-            <OverlayTrigger placement='bottom' trigger='hover' overlay={<Tooltip>Reset</Tooltip>}>
+            <ChaiseTooltip placement='bottom' tooltip='Reset'>
               <button type='button' className='reset-plotly-button chaise-btn chaise-btn-primary chaise-btn-sm' onClick={resetPlot}>
                 <span className='fas fa-undo'></span>
               </button>
-            </OverlayTrigger>
+            </ChaiseTooltip>
           </div>
         </div>
         {renderPlot()}

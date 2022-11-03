@@ -1,10 +1,8 @@
 // components
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import RelatedTableActions from '@isrd-isi-edu/chaise/src/components/record/related-table-actions';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Spinner from 'react-bootstrap/Spinner';
-import Tooltip from 'react-bootstrap/Tooltip';
 
 // hooks
 import { useRef, useState } from 'react';
@@ -61,10 +59,9 @@ const RelatedTableHeader = ({
 
   return (
     <div className='rt-section-header'>
-      <OverlayTrigger
+      <ChaiseTooltip
         placement='top'
-        trigger='hover'
-        overlay={<Tooltip>{renderTooltipContent()}</Tooltip>}
+        tooltip={renderTooltipContent()}
         onToggle={(nextshow: boolean) => {
           // Bootstrap onToggle prop to make tooltip visible or hidden
           if (contentRef && contentRef.current) {
@@ -80,7 +77,7 @@ const RelatedTableHeader = ({
           {renderedDisplayname}
           {hasTooltip && <span className='chaise-icon-for-tooltip align-center-icon'></span>}
         </div>
-      </OverlayTrigger>
+      </ChaiseTooltip>
 
       <div className='rt-section-header-buttons'>
         <div className='rt-section-header-icons'>

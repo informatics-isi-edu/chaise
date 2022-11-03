@@ -51,7 +51,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         var keys = [];
         keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
         var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/" + keys.join("&");
-        
+
         chaisePage.navigate(url).then(function () {
             return pageReadyCondition();
         }).then(function () {
@@ -645,7 +645,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         it("should have the proper tooltip", function (done) {
             chaisePage.testTooltipWithDone(
                 addBtn.element(by.xpath("./..")),
-                `'Unable to connect to <code>${displayname}</code> records until <code>${columnname}</code> in <code>${tablename}</code> is set.'`,
+                `Unable to connect to ${displayname} records until ${columnname} in ${tablename} is set.`,
                 done,
                 'record'
             );
@@ -676,7 +676,7 @@ describe ("Viewing exisiting record with related entities, ", function () {
         it("should have the proper tooltip", function (done) {
             chaisePage.testTooltipWithDone(
                 addBtn.element(by.xpath("./..")),
-                `'Unable to create <code>${displayname}</code> records for this <code>${tablename}</code> until <code>${columnname}</code> in this <code>${tablename}</code> is set'`,
+                `Unable to create ${displayname} records for this ${tablename} until ${columnname} in this ${tablename} is set`,
                 done,
                 'record'
             );

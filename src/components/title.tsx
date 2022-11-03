@@ -1,7 +1,11 @@
-import React from 'react';
-import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
+// components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// models
+import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
+
+
 
 type TitleProps = {
   reference?: any,
@@ -57,13 +61,12 @@ const Title = ({
 
   if (showTooltip && comment) {
     return (
-      <OverlayTrigger
+      <ChaiseTooltip
         placement='bottom-start'
-        trigger='hover'
-        overlay={<Tooltip>{comment}</Tooltip>}
+        tooltip={comment}
       >
         {renderLinkOrContainer()}
-      </OverlayTrigger>
+      </ChaiseTooltip>
     )
   }
 

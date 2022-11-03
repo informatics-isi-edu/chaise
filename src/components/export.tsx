@@ -2,8 +2,7 @@
 // components
 import Dropdown from 'react-bootstrap/Dropdown';
 import ExportModal from '@isrd-isi-edu/chaise/src/components/modals/export-modal';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -201,10 +200,9 @@ const Export = ({
   return (
     <>
       <Dropdown className='export-menu' onToggle={onDropdownToggle}>
-        <OverlayTrigger
-          placement='bottom' overlay={<Tooltip>{MESSAGE_MAP.tooltip.export}</Tooltip>}
+        <ChaiseTooltip
+          placement='bottom' tooltip={MESSAGE_MAP.tooltip.export}
           show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
-          trigger='hover'
         >
           <Dropdown.Toggle
             disabled={disabled || !!selectedOption || options.length === 0}
@@ -213,7 +211,7 @@ const Export = ({
             <span className='chaise-btn-icon fa-solid fa-file-export' />
             <span>Export</span>
           </Dropdown.Toggle>
-        </OverlayTrigger>
+        </ChaiseTooltip>
         <Dropdown.Menu>
           {options.map((option: any, index: number) => (
             <Dropdown.Item

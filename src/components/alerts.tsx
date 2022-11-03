@@ -2,8 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_alerts.scss';
 
 // components
 import Alert from 'react-bootstrap/Alert';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -31,13 +30,12 @@ export const Alerts = (): JSX.Element => {
       <span>
         {'Your login session has expired. You are now accessing data anonymously. '}
         <a onClick={() => login()}>Log in</a>{' to continue your privileged access. '}
-        <OverlayTrigger
+        <ChaiseTooltip
           placement='bottom-start'
-          trigger='hover'
-          overlay={<Tooltip>{tooltipText}</Tooltip>}
+          tooltip={tooltipText}
         >
           <i className='chaise-icon chaise-info'></i>
-        </OverlayTrigger>
+        </ChaiseTooltip>
       </span>
     </>)
   }
