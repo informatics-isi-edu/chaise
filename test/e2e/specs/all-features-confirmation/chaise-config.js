@@ -23,6 +23,9 @@ var chaiseConfig = {
             "table": "dataset"
         }
     },
+    templating: {
+      engine: 'handlebars'
+    },
     shareCiteAcls: {
         show: ["*"],
         enable: ["*"]

@@ -192,7 +192,8 @@ export class ConfigService {
     ERMrest.setClientConfig({
       internalHosts: chaiseConfig.internalHosts,
       disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
-      facetPanelDisplay: chaiseConfig.facetPanelDisplay
+      facetPanelDisplay: chaiseConfig.facetPanelDisplay,
+      templating: chaiseConfig.templating
     });
 
     ERMrest.setClientSession(session);

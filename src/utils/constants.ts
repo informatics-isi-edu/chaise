@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug'
+  'debug', 'templating'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
@@ -62,6 +62,9 @@ export const DEFAULT_CHAISE_CONFIG = {
     show: ['*'],
     enable: ['*'],
   },
+  templating: {
+    engine: 'mustache'
+  }
 };
 
 export const dataFormats = {
