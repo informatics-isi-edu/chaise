@@ -71,6 +71,7 @@ const TableRow = ({
     maxHeight = ConfigService.chaiseConfig.maxRecordsetRowHeight || 160,
     defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
+  const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
   const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
     hideContent: true,
@@ -123,6 +124,14 @@ const TableRow = ({
     }
 
     setOverflow(tempOverflow);
+
+    // NOTE: this is intended to fix the case when there is only 1 column in the table and the resize sensor causes an extra cell to show
+    // if all overflows are false, detach the sensor
+    const justOverflows = tempOverflow.filter((overflow: boolean) => {
+      return overflow === true
+    });
+
+    if (sensor && justOverflows.length === 0) sensor.detach();
   }
 
   // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
@@ -133,15 +142,17 @@ const TableRow = ({
 
   useLayoutEffect(() => {
     if (!rowContainer.current) return;
-    const sensor = new ResizeSensor(
+    const tempSensor = new ResizeSensor(
       rowContainer.current,
       () => {
         initializeOverflows();
       }
     )
 
+    setSensor(tempSensor);
+
     return () => {
-      sensor.detach();
+      tempSensor.detach();
     }
   }, [rowValues]);
 
