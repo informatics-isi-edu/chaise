@@ -313,12 +313,14 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 	$(JS_CONFIG) \
 	$(VIEWER_CONFIG)
 
-.make-rsync-list:
+# build_version dep forces this file to regenerate in case the file list changed
+.make-rsync-list: $(BUILD_VERSION)
 	$(info - creating .make-rsync-list)
 	@> .make-rsync-list
 	@$(call add_array_to_file,$(RSYNC_FILE_LIST),.make-rsync-list)
 
-.make-rsync-list-w-config:
+# build_version dep forces this file to regenerate in case the file list changed
+.make-rsync-list-w-config: $(BUILD_VERSION)
 	$(info - creating .make-rsync-list-w-config)
 	@> .make-rsync-list-w-config
 	@$(call add_array_to_file,$(RSYNC_FILE_LIST_W_CONFIG),.make-rsync-list-w-config)
