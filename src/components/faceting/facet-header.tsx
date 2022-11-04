@@ -1,13 +1,15 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 
+// Components
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import Spinner from 'react-bootstrap/Spinner';
+
+// hooks
 import { useRef, useState } from 'react';
 
-// Components
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+// models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
-import Spinner from 'react-bootstrap/Spinner';
 
 type FacetHeaderProps = {
   /**
@@ -84,13 +86,9 @@ const FacetHeader = ({
 
   return (
     <>
-      <OverlayTrigger
+      <ChaiseTooltip
         placement='right'
-        overlay={
-          <Tooltip style={{ maxWidth: '50%', whiteSpace: 'nowrap' }}>
-            {renderTooltipContent()}
-          </Tooltip>
-        }
+        tooltip={renderTooltipContent()}
         onToggle={(nextshow: boolean) => {
           // Bootstrap onToggle prop to make tooltip visible or hidden
           if (contentRef && contentRef.current) {
@@ -111,7 +109,7 @@ const FacetHeader = ({
             )}
           </div>
         </div>
-      </OverlayTrigger>
+      </ChaiseTooltip>
       <span className='facet-header-icon'>
         {
           (isLoading && (!facetHasTimeoutError || noConstraints)) &&
@@ -119,17 +117,17 @@ const FacetHeader = ({
         }
         {
           (facetHasTimeoutError || noConstraints) &&
-          <OverlayTrigger
+          <ChaiseTooltip
             placement='right'
-            overlay={
-              <Tooltip>
+            tooltip={
+              <>
                 {noConstraints && <span>showing facet values without any constraints applied.</span>}
                 {facetHasTimeoutError && <span>Request timeout: The facet values cannot be retrieved for updates.</span>}
-              </Tooltip>
+              </>
             }
           >
             <span className='fa-solid fa-triangle-exclamation' />
-          </OverlayTrigger>
+          </ChaiseTooltip>
         }
       </span>
     </>

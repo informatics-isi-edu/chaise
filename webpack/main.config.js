@@ -12,6 +12,8 @@ if (nodeDevs.indexOf(mode) === -1) {
 module.exports = (env) => {
   const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
 
+  const recordsetExtFiles = [`${chaisePath}bundles/plotly-basic.min.js`];
+
   return getWebPackConfig(
     [
       {
@@ -21,7 +23,19 @@ module.exports = (env) => {
       {
         appName: 'recordset',
         appTitle: 'Recordset',
-        externalFiles: [`${chaisePath}bundles/plotly-basic.min.js`]
+        externalFiles: [...recordsetExtFiles]
+      },
+      {
+        appName: 'record',
+        appTitle: 'Record',
+        externalFiles: [
+          ...recordsetExtFiles,
+          `${chaisePath}google-dataset-config.js`
+        ]
+      },
+      {
+        appName: 'help',
+        appTitle: 'Wiki Pages',
       }
     ],
     mode,

@@ -1,0 +1,550 @@
+@import "helpers";
+@import "variables";
+
+.record-container {
+  $record-table-cell-padding: 5px;
+  $record-table-cell-border-width: 1px;
+  $space-between-related-sections: 5px;
+  $row-focus-border-width: 2px;
+
+  /*
+     * In case of related entities, the accordion icon is adding this much space,
+     * so we're making sure the rest of titles and content are aligned with it.
+     */
+  $record-header-padding-left: 40px;
+
+  .top-panel-container {
+    padding-bottom: 10px;
+
+    .top-flex-panel {
+      .top-left-panel.open-panel {
+        flex: 0 0 $left-panel-width-sm;
+        position: relative;
+      } // end .top-left-panel
+
+      .top-right-panel {
+        .page-action-btns {
+          height: $btn-height;
+          margin: 0;
+
+          > div {
+            display: flex;
+          }
+
+          .chaise-btn {
+            margin-left: 5px;
+          }
+        }
+
+        .title {
+          padding-top: 20px;
+
+          #page-subtitle {
+            margin: 5px 0px;
+          }
+
+          .entity-display-header {
+            position: relative;
+
+            .page-title-container {
+              width: 100%;
+              display: inline-block;
+              #page-title {
+                margin: 0px;
+              }
+            }
+
+            .record-action-btns-container {
+              font-size: 1rem;
+              padding-top: 7px;
+              width: 330px;
+            }
+          } // end .entity-display-header
+        } // end .title
+
+        .show-toc-btn {
+          margin-top: 10px;
+          padding-left: 2px;
+          padding-bottom: 0px;
+        }
+      } // end .top-right-panel
+    }
+  }
+
+  .bottom-panel-container {
+    .main-container {
+      padding-right: 20px;
+    }
+
+    /** bottom left panel **/
+    > .side-panel-resizable {
+      &.open-panel {
+        flex-basis: $left-panel-width-sm;
+      }
+
+      .side-panel-container {
+        height: 100%;
+        overflow-y: auto;
+
+        .side-panel-heading {
+          margin: 0px;
+        }
+      }
+
+      .columns-container {
+        margin-left: 10px;
+
+        ul {
+          padding-left: 0px;
+        }
+
+        .toc-heading {
+          padding: 4px 10px 4px 0px;
+          cursor: pointer;
+          font-size: $h4-font-size;
+
+          & > a.empty-toc-heading {
+            opacity: 0.55;
+          }
+
+          &:hover {
+            background-color: rgb(241, 241, 241);
+          }
+        }
+
+        .toc-inline-heading {
+          font-size: 1rem;
+          padding-left: 20px;
+        }
+
+        #rt-toc-loading {
+          padding: 10px 5px 5px;
+        }
+      }
+    }
+
+    .related-table-actions {
+      float: right;
+
+      .chaise-btn:not(:first-child) {
+        margin-left: 5px;
+      }
+
+      a.chaise-btn {
+        text-decoration: none;
+      }
+    }
+
+    /******Related Entities in record **************/
+    .related-section-container {
+      .panel-group {
+        margin-bottom: 20px;
+      }
+
+      .related-table-accordion {
+        // override the default bootstrap styles
+        box-shadow: none;
+        border-radius: 0;
+        border: 0;
+        + .related-table-accordion {
+          margin-top: $space-between-related-sections;
+        }
+
+        // row-focus will add a border of 2px,
+        // - adding -2px margin to left and right to avoid shrinkage
+        // - reducing the margin-top from 5px to 3px to avoid moving
+        &.row-focus {
+          margin-left: -$row-focus-border-width;
+          margin-right: -$row-focus-border-width;
+          margin-top: $space-between-related-sections - $row-focus-border-width;
+
+          + .related-table-accordion:not(.row-focus) {
+            margin-top: $space-between-related-sections - $row-focus-border-width;
+          }
+
+          // if there are two row-focus on top of each other, we should
+          // change the margin to account for both of their borders.
+          + .row-focus {
+            margin-top: $space-between-related-sections - ($row-focus-border-width * 2);
+          }
+        }
+
+        // the first row doesn't have margin top
+        &:first-child.row-focus {
+          margin-top: -$row-focus-border-width;
+        }
+
+        .accordion-button {
+          cursor: pointer;
+          height: 44px;
+          text-transform: inherit;
+          padding: 8px 8px 8px 8px;
+          color: $white-color;
+          border: none;
+          border-radius: inherit;
+          background: $section-background-color;
+          // Overriding accordian-button css to align right angle bracket icon to left
+          flex-direction: row-reverse;
+          justify-content: flex-end;
+
+          &:focus {
+            box-shadow: none;
+          }
+
+          // Overriding accordian-button css to align right angle bracket icon to left
+          &::after {
+            margin-right: 11px;
+            margin-left: 2px;
+            background-image: none;
+            content: "\f054"; // fa-solid fa-chevron-right
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transform: unset;
+            font-size: 1.75rem;
+            height: unset;
+          }
+
+          &:not(.collapsed)::after {
+            content: "\f078"; // fa-solid fa-chevron-down
+          }
+        }
+
+        .rt-section-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          white-space: nowrap;
+          min-width: 0; // needed to avoid overflow
+
+          .rt-displayname {
+            font-size: 1.75rem;
+            text-overflow: ellipsis;
+            overflow: hidden;
+          }
+
+          .rt-section-header-buttons {
+            position: relative;
+            padding-left: 20px;
+            margin-top: 2px;
+
+            .rt-section-header-icons {
+              position: absolute;
+              left: 0;
+              top: 5px;
+            }
+          }
+        }
+
+        .accordion-body {
+          padding-left: $record-header-padding-left;
+          padding-right: 0;
+        }
+
+        .inline-tooltip {
+          margin-bottom: 10px;
+        }
+      }
+    }
+
+    .row-focus {
+      border: $row-focus-border-width solid $primary-color !important;
+    }
+
+    .chaise-table-header {
+      padding-bottom: 5px;
+    }
+
+    .chaise-table-pagination {
+      padding-top: 10px;
+      padding-bottom: 0px;
+    }
+
+    .loading-text {
+      color: #446c73;
+      font-weight: 600;
+    }
+
+    .loading-sticky {
+      float: left;
+      position: fixed;
+      z-index: 1;
+      bottom: 0;
+      background: #d9edf7;
+      margin: 5px;
+      padding: 5px 20px;
+      border: solid #446c73 1.5px;
+    }
+  }
+
+  .delete-spinner-container {
+    $delete-spinner-backdrop-z-index: 5;
+    .delete-spinner-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: $delete-spinner-backdrop-z-index;
+      background: black;
+      opacity: 0.5;
+    }
+    .delete-spinner.spinner-container {
+      top: 50%;
+      z-index: calc($delete-spinner-backdrop-z-index + 1);
+    }
+  }
+
+  .related-section-spinner {
+    color: #446c73;
+    font-weight: 600;
+  }
+
+  /********* print ********/
+
+  @media print {
+    * {
+      -webkit-transition: none !important;
+      transition: none !important;
+    }
+
+    .bottom-panel-container {
+      height: auto !important;
+      display: block;
+    }
+
+    .top-right-panel {
+      //Action button top right corner
+      .page-action-btns {
+        display: none;
+      }
+
+      //Creat,Copy,Edit and Del Buttons
+      .title-buttons {
+        display: none;
+      }
+    }
+
+    //Sections
+    .top-left-panel {
+      display: none;
+    }
+
+    //Side panel
+    .side-panel-container {
+      display: none;
+    }
+
+    //three dots
+    .rg-right {
+      display: none;
+    }
+
+    // related action buttons
+    .related-table-actions {
+      display: none;
+    }
+
+    // back to top button
+    .back-to-top-btn {
+      display: none;
+    }
+
+    //Side space
+    #record-side-pan {
+      display: none;
+    }
+
+    //Column widths in the table
+    .bottom-panel-container {
+      .table {
+        .entity-key {
+          padding-left: 20px;
+          width: 15%;
+          min-width: 150px;
+          float: left;
+        }
+
+        .entity-value {
+          width: 85%;
+          padding-left: 15%;
+          padding-right: 8px;
+          padding-top: 8px;
+          padding-bottom: 8px;
+        }
+      }
+    }
+
+    .table-heading-icons {
+      display: none;
+    }
+
+    // for mac and firefox
+    @at-root .chaise-mac.chaise-firefox {
+      .record-main-section-table {
+        .entity-key {
+          padding-left: 20px;
+          width: 20%;
+          min-width: 150px;
+          float: left;
+        }
+
+        .entity-value {
+          width: 80%;
+          padding-left: 15%;
+          padding-right: 8px;
+          padding-top: 8px;
+          padding-bottom: 8px;
+        }
+      }
+    }
+
+    .chaise-table.table {
+      border-top: 1px solid #bbbbbb;
+      border-bottom: 1px solid #bbbbbb;
+
+      tr {
+        border-left: 1px solid #bbbbbb;
+        border-bottom: none;
+      }
+
+      > thead > tr > th,
+      > tbody > tr > th,
+      > tfoot > tr > th,
+      > thead > tr > td,
+      > tbody > tr > td,
+      > tfoot > tr > td {
+        border-top: none;
+        border-right: 1px solid #bbbbbb;
+      }
+
+      th {
+        background-color: unset !important;
+        border-top: none;
+        border-bottom: 1px solid #bbbbbb;
+      }
+    }
+
+    .rt-section-header {
+      font-size: 1.5rem !important;
+    }
+
+    //Prev and Next buttons
+    .bottom-panel-container {
+      .chaise-table-pagination {
+        display: none;
+      }
+    }
+
+    #footer {
+      display: none;
+    }
+
+    .related-table-accordion {
+      break-inside: avoid !important;
+    }
+
+    //Round blobs of links
+    .markdown-container {
+      .vocab {
+        padding: 2px !important;
+        margin: 2px !important;
+      }
+    }
+
+    #page-title {
+      font-size: 1.75rem !important;
+    }
+
+    //Removes bubbles and represents the vocab as a dot separated list
+    .related-section-container {
+      .vocab + .vocab::before {
+        content: "\2022" !important;
+        padding-right: 6px;
+      }
+
+      .markdown-container a:last-child:after {
+        content: none !important;
+      }
+    }
+
+    .chaise-icon-for-tooltip::after {
+      content: none !important;
+    }
+
+    a[href]:after {
+      content: none !important;
+    }
+
+    //Removing button styling from Display record information
+    .page-size-dropdown {
+      border: none !important;
+      padding: 0px;
+      margin-bottom: 2.5px;
+      min-width: unset !important;
+    }
+
+    //Removing the dropdown button from Display record information
+    .caret {
+      display: none !important;
+    }
+
+    .fa-chevron-down:before {
+      font-size: 1.2rem !important;
+    }
+
+    //Sort icons in record table
+    .fa-arrows-alt-v {
+      display: none;
+    }
+
+    //Hiding the 1st column (Actions) in Record Table
+    record-table th:nth-child(1),
+    record-table td:nth-child(1) {
+      display: none;
+    }
+
+    #no-results-row {
+      display: table-cell !important;
+      text-align: left !important;
+      padding-left: 150px !important;
+    }
+
+    record-table {
+      empty-cells: show !important;
+    }
+
+    //Hide in Print
+    .hide-in-print {
+      display: none !important;
+    }
+
+    //In print we hide YouTube and other videos. This class is then made visible to display the relevant info in print mode
+    .video-info-in-print {
+      /*
+            * NOTE: we're using display because visibility:hidden had aligment issues.
+            * With visibility hidden eventhough the element is invisibile, it will still take up space,
+            * and will add extra unnecessary space between the iframe and fullscreen button.
+            */
+      display: block !important;
+    }
+
+    alerts {
+      display: none !important;
+    }
+
+    @page {
+      size: auto;
+      margin: 5% 3% 5% 3%;
+
+      .markdown-container {
+        .vocab {
+          box-decoration-break: clone !important;
+        }
+      }
+
+      .record-table {
+        box-decoration-break: clone !important;
+      }
+    }
+  }
+}

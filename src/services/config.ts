@@ -139,8 +139,8 @@ export class ConfigService {
     }
 
     if (ConfigService.chaiseConfig.debug === true || IS_DEV_MODE) {
-      $log.debug('=====================\nDEBUG MODE ENABLED\n=====================');
       $log.setLevel(LoggerLevels.TRACE);
+      $log.debug('=====================\nDEBUG MODE ENABLED\n=====================');
     }
 
     ConfigService._setupERMrest(ERMrest, session);
@@ -350,7 +350,7 @@ export class ConfigService {
       appPath = ConfigService._getValueFromContext(APP_CONTEXT_MAPPING, context);
     }
 
-    let url = `${BUILD_VARIABLES.CHAISE_BASE_PATH + appPath}/#${location.catalog}/${location.path}`;
+    let url = `${windowRef.location.origin}${BUILD_VARIABLES.CHAISE_BASE_PATH + appPath}/#${location.catalog}/${location.path}`;
     const pcontext = [];
 
     const settingsObj = ConfigService.appSettings;

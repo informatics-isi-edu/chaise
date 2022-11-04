@@ -1,3 +1,4 @@
+const { browser } = require('protractor');
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordHelpers = require('../../../utils/record-helpers.js');
 var recordSetHelpers = require('../../../utils/recordset-helpers.js');
@@ -33,10 +34,9 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var keys = [];
-            browser.ignoreSynchronization = true;
             keys.push(relatedTableTestParams.key.name + relatedTableTestParams.key.operator + relatedTableTestParams.key.value);
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-max-RT:" + relatedTableTestParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             chaisePage.recordPageReady();
         });
 
@@ -47,14 +47,21 @@ describe('View existing record,', function() {
             });
         });
 
-        it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function () {
-            // TODO: change after record app migrated
-            var options = chaisePage.recordsetPage.getAngularExportOptions();
+        it ("should have only 'This record (CSV)' option in export menu because of `disableDefaultExport` chaise-config.", function (done) {
+          chaisePage.recordsetPage.getExportDropdown().click().then(function () {
+            const options = chaisePage.recordsetPage.getExportOptions();
             expect(options.count()).toBe(1, "count missmatch");
+            done();
+          }).catch(chaisePage.catchTestError(done));
         });
 
-        it('should hide empty related tables on load',function(){
-            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
+        it('should hide empty related tables on load',function(done){
+            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+                headings.forEach(function (heading, idx) {
+                    expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+                })
+            })
+            done();
         });
 
     });
@@ -65,8 +72,7 @@ describe('View existing record,', function() {
         var currentBrowserUrl;
         beforeAll(function() {
             var keys = [];
-            browser.ignoreSynchronization=true;
-            browser.get(testParams.html_table_name_record_url);
+            chaisePage.navigate(testParams.html_table_name_record_url);
             chaisePage.recordPageReady();
         });
 
@@ -84,8 +90,7 @@ describe('View existing record,', function() {
 
         // we're not using default tempaltes and csv option is disabled
         it ("export button should be disabled", function () {
-            // TODO: change after record app migrated
-            expect(chaisePage.recordsetPage.getAngularExportDropdown().getAttribute("disabled")).toBeTruthy();
+            expect(chaisePage.recordsetPage.getExportDropdown().getAttribute("disabled")).toBeTruthy();
         });
 
         it("should hide the column headers and collapse the table of contents based on table-display annotation.", function () {
@@ -99,14 +104,13 @@ describe('View existing record,', function() {
         // and also version link is not displayed when the table doesn't support history
         recordHelpers.testSharePopup({
             permalink: testParams.html_table_name_record_url,
-
             hasVersionedLink: true,
             citation: null,
             bibtextFile: null,
             title: "Share"
         });
 
-        it("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {
+        xit("open a new tab, update the current record, close the tab, and then verify the share dialog alert warning appears", function (done) {
             var allWindows;
 
             browser.driver.getCurrentUrl().then(function(url) {
@@ -137,9 +141,8 @@ describe('View existing record,', function() {
                 var shareDialog = chaisePage.recordPage.getShareModal();
                 // wait for dialog to open
                 chaisePage.waitForElement(shareDialog);
-                shareDialog.allowAnimations(false);
 
-                return chaisePage.recordEditPage.getAlertWarning()
+                return chaisePage.recordEditPage.getAlertWarning();
             }).then(function (alert) {
                 expect(alert.isDisplayed()).toBeTruthy("Alert warning the user that they may be seeing stale data is not present");
 
@@ -164,9 +167,8 @@ describe('View existing record,', function() {
             testParams.keys.forEach(function(key) {
                 keys.push(key.name + key.operator + key.value);
             });
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/editable-id:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             chaisePage.recordPageReady();
         });
 
@@ -177,14 +179,15 @@ describe('View existing record,', function() {
         });
 
         it ("should not have the default csv export option and only the defined template should be available", function (done) {
-            // TODO: change after record app migrated
-            var options = chaisePage.recordsetPage.getAngularExportOptions();
-            expect(options.count()).toBe(1, "count missmatch");
+            const exportDropdown = chaisePage.recordsetPage.getExportDropdown()
+            exportDropdown.click().then(function () {
+                const options = chaisePage.recordsetPage.getExportOptions();
+                expect(options.count()).toBe(1, "count missmatch");
 
-            // TODO: change after record app migrated
-            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
-                var csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
+                const csvOption = chaisePage.recordsetPage.getExportOption("Defined template");
                 expect(csvOption.getText()).toBe("Defined template");
+                return exportDropdown.click();
+            }).then(function () {
                 done();
             }).catch(function(err) {
                 done.fail(err);
@@ -199,11 +202,10 @@ describe('View existing record,', function() {
                 var subTitleEl = chaisePage.recordPage.getEntitySubTitleElement();
                 chaisePage.waitForElement(subTitleEl);
 
-                // page-title and page-subtitle are attached to chaise-title,
-                // subtitle structure is: chaise-title -> a -> span (therefore finding span works)
-                // title structure is: chaise-title -> span -> span (therefore we need to be more specific)
+                // subtitle is using title comp which is using display-value inside,
+                // so it will produce an extra span
                 var subtitleElement = subTitleEl.element(by.css("span")),
-                    titleElement = chaisePage.recordPage.getEntityTitleElement().element(by.css("span span"));
+                    titleElement = chaisePage.recordPage.getEntityTitleElement();
 
                 subtitleElement.getAttribute("innerHTML").then(function(html) {
                     expect(html).toBe(testParams.table_inner_html_display);
@@ -225,15 +227,13 @@ describe('View existing record,', function() {
             });
 
             it("should not show Loading... text when there are no related tables.", function() {
-                element(by.id('rt-loading')).isDisplayed().then(function (displayed) {
-                    expect(displayed).toBeFalsy();
-                });
+                const loader = chaisePage.recordPage.getRelatedSectionSpinner();
+                expect(loader.isPresent()).toBeFalsy();
             });
 
             it("should redirect to recordedit when clicked.", function(done) {
                 var titleElement = chaisePage.recordEditPage.getEntityTitleElement();
-
-                copyButton.click().then(function() {
+                chaisePage.clickButton(copyButton).then(function() {
                     return chaisePage.waitForElement(element(by.id('submit-record-button')));
                 }).then(function() {
                     return browser.driver.getCurrentUrl();

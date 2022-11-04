@@ -1,9 +1,8 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
 
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 import ExportModal from '@isrd-isi-edu/chaise/src/components/modals/export-modal';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -25,16 +24,26 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type ExportProps = {
-  reference: any;
+  reference: any,
+  /**
+   * if this is based on one tuple (record page), this should be passed
+   */
+  tuple?: any,
   /**
    * prop to make export button disable
    */
-  disabled: boolean;
+  disabled: boolean,
+  /**
+   * can be used to modify the csv option name
+   */
+  csvOptionName?: string
 };
 
 const Export = ({
   reference,
-  disabled
+  tuple,
+  disabled,
+  csvOptionName
 }: ExportProps): JSX.Element => {
   /**
    * State variable to export options
@@ -48,6 +57,14 @@ const Export = ({
    * State Variable to store exporter object which is used to cancel export.
    */
   const [exporterObj, setExporterObj] = useState<any>(null);
+  /**
+   * when the dropdown is open, we should not use the tooltip
+   */
+  const [useTooltip, setUseTooltip] = useState(true);
+  /**
+   * whether to show the tooltip or not
+   */
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const { dispatchError } = useError();
 
@@ -59,7 +76,7 @@ const Export = ({
       if (reference) {
         if (reference.csvDownloadLink) {
           options.push({
-            displayname: 'Search results (CSV)',
+            displayname: csvOptionName ? csvOptionName : 'Search results (CSV)',
             type: 'DIRECT',
           });
         }
@@ -95,10 +112,9 @@ const Export = ({
       case 'BAG':
       case 'FILE':
         setSelectedOption(option);
-        const bagName = reference.table.name;
         const exporter = new ConfigService.ERMrest.Exporter(
           reference,
-          bagName,
+          reference.table.name + (tuple ? `_${tuple.uniqueId}` : ''),
           option,
           ConfigService.chaiseConfig.exportServicePath
         );
@@ -141,7 +157,7 @@ const Export = ({
               error.subMessage = error.message;
               error.message = 'Export failed. Please report this problem to your system administrators.';
 
-              dispatchError({ error: error });
+              dispatchError({ error, isDismissible: true });
             });
         }
         break;
@@ -166,7 +182,12 @@ const Export = ({
     addAlert('Export request has been canceled.', ChaiseAlertType.WARNING);
   };
 
+  // nextShow is true when the dropdown is open
   const onDropdownToggle = (nextShow: boolean) => {
+    // toggle the tooltip based on dropdown's inverse state
+    setUseTooltip(!nextShow);
+    if (nextShow === true) setShowTooltip(false);
+
     // log the action
     if (nextShow) {
       LogService.logClientAction({
@@ -174,24 +195,20 @@ const Export = ({
         stack: LogService.getStackObject()
       }, reference.defaultLogInfo)
     }
-  }
-
-  const renderExportIcon = () => {
-    return <span className='chaise-btn-icon fa-solid fa-file-export' />;
   };
 
   return (
     <>
       <Dropdown className='export-menu' onToggle={onDropdownToggle}>
         <ChaiseTooltip
-          placement={ConfigService.appSettings.hideNavbar ? 'left' : 'top-end'}
-          tooltip={MESSAGE_MAP.tooltip.export}
+          placement='bottom' tooltip={MESSAGE_MAP.tooltip.export}
+          show={showTooltip} onToggle={(show) => setShowTooltip(useTooltip && show)}
         >
           <Dropdown.Toggle
             disabled={disabled || !!selectedOption || options.length === 0}
             className='chaise-btn chaise-btn-primary'
           >
-            {renderExportIcon()}
+            <span className='chaise-btn-icon fa-solid fa-file-export' />
             <span>Export</span>
           </Dropdown.Toggle>
         </ChaiseTooltip>

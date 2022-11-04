@@ -99,6 +99,7 @@ export const errorNames = {
   multipleDataErrorCode: 'Multiple Records Found',
   facetFilterMissing: 'No filter or facet was defined.',
   multipleDataMessage: 'There are more than 1 record found for the filters provided.',
+  invalidHelpPage: 'Help Page Not Found'
 };
 
 export const errorMessages = {
@@ -118,6 +119,7 @@ export const errorMessages = {
   systemAdminMessage: 'An unexpected error has occurred. Try clearing your cache. <br> If you continue to face this issue, please contact the system administrator.',
   viewerOSDFailed: 'Couldn\'t process the image. <br> If you continue to face this issue, please contact the system administrator.',
   viewerScreenshotFailed: 'Couldn\'t process the screenshot.',
+  invalidHelpPage: 'The requested help page cannot be found.'
 };
 
 export const BODY_CLASS_NAMES = {
@@ -129,11 +131,47 @@ export const BODY_CLASS_NAMES = {
 
 export const APP_ROOT_ID_NAME = 'chaise-app-root';
 
+export const QUERY_PARAMS = {
+  PROMPT_LOGIN: 'promptlogin',
+  SCROLL_TO: 'scrollTo'
+};
+
+export const CLASS_NAMES = {
+  HIDDEN: 'forced-hidden'
+}
+
 export const DEFAULT_DISPLAYNAME = {
   null: '<i>No value </i>',
   empty: '<i>Empty</i>',
   notNull: '<i>All records with value </i>'
 };
+
+export const CUSTOM_EVENTS = {
+  ROW_EDIT_INTEND: 'row-edit-intend',
+  ROW_DELETE_SUCCESS: 'row-delete-success',
+  ADD_INTEND: 'add-intend',
+  FORCE_UPDATE_RECORDSET: 'force-update-recordset-data',
+};
+
+export const HELP_PAGES_FOLDER_LOCATION = 'help-docs';
+
+export const HELP_PAGES = {
+  MARKDOWN_HELP: {
+    title: 'Markdown Help',
+    location: 'chaise/markdown-help',
+    isComponent: true
+  },
+  SWITCH_USER_ACCOUNTS: {
+    title: 'Switch User Accounts',
+    location: 'chaise/switch-user-accounts',
+    isComponent: true
+  },
+  VIEWER_ANNOTATION: {
+    title: 'Viewer Annotation',
+    location: 'chaise/viewer-annotation',
+    isComponent: false
+  }
+}
 
 const isIEOrEdge = /msie\s|trident\/|edge\//i.test(window.navigator.userAgent);
 export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
@@ -141,6 +179,7 @@ export const URL_PATH_LENGTH_LIMIT = (isIEOrEdge) ? 2000 : 4000;
 export const RECORDEDIT_MAX_ROWS = 200;
 export const FACET_PANEL_DEFAULT_PAGE_SIZE = 10;
 export const RECORDSET_DEAFULT_PAGE_SIZE = 25;
+export const RELATED_TABLE_DEFAULT_PAGE_SIZE = 25;
 
 // TODO if chaise is not built how we expect, this value will be undefiend.
 //      we might be able to enforce this during the npm install command of chaise

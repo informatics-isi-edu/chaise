@@ -1,19 +1,34 @@
+import { createContext, useEffect, useMemo, useRef, useState } from 'react';
+
+// hooks
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
+import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
+
+// models
 import { LogActions, LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetConfig, RecordsetDisplayMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
+import {
+  RecordsetConfig, RecordsetDisplayMode,
+  RecordsetProviderAddUpdateCauses,
+  RecordsetProviderFetchSecondaryRequests,
+  RecordsetProviderUpdateMainEntity, SelectedRow
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+
+
+// services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { RecordsetFlowControl } from '@isrd-isi-edu/chaise/src/services/table';
+import RecordsetFlowControl from '@isrd-isi-edu/chaise/src/services/recordset-flow-control';
+
+// utils
 import { RECORDSET_DEAFULT_PAGE_SIZE, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnValuesFromPage } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import Q from 'q';
-import { createContext, useEffect, useMemo, useRef, useState } from 'react';
-import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 /**
  * types related to the update function
@@ -144,16 +159,11 @@ export const RecordsetContext = createContext<{
    */
   checkReferenceURL: (ref: any, showAlert?: boolean) => boolean,
   /**
-   * the ref for the addRecordRequests
-   * can be used to see if there are any pending create requests
-   */
-  addRecordRequests: any
-  /**
    * if true, we have to forcefully show the spinner
    */
   forceShowSpinner: boolean,
   /**
-   * can be used to fore showing of the spinner
+   * can be used to force showing of the spinner
    */
   setForceShowSpinner: Function,
   /**
@@ -170,6 +180,26 @@ export const RecordsetContext = createContext<{
    * get the appropriate log stack
    */
   getLogStack: (childStackElement?: any, extraInfo?: any) => any,
+  /**
+   * manually trigger the request for the main entity
+   */
+  updateMainEntity: RecordsetProviderUpdateMainEntity,
+  /**
+   * manually trigger the update for the secondary requests
+   */
+  fetchSecondaryRequests: RecordsetProviderFetchSecondaryRequests,
+  /**
+   * manually add update cases and set the dirty flag
+   */
+  addUpdateCauses: RecordsetProviderAddUpdateCauses,
+  /**
+   * The parent page's reference
+   */
+  parentPageReference?: any,
+  /**
+   * The parent page's tuple
+   */
+  parentPageTuple?: any,
 }
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -221,7 +251,15 @@ type RecordsetProviderProps = {
   /**
    * The callback that should be called when favorites changed
    */
-  onFavoritesChanged?: Function
+  onFavoritesChanged?: Function,
+  /**
+   * The parent page's reference
+   */
+  parentReference?: any,
+  /**
+   * The parent page's tuple
+   */
+  parentTuple?: any,
 }
 
 export default function RecordsetProvider({
@@ -234,12 +272,18 @@ export default function RecordsetProvider({
   getDisabledTuples,
   initialSelectedRows,
   onSelectedRowsChanged,
-  onFavoritesChanged
+  onFavoritesChanged,
+  parentReference,
+  parentTuple
 }: RecordsetProviderProps): JSX.Element {
   const { dispatchError } = useError();
   const { addURLLimitAlert, removeURLLimitAlert } = useAlert();
 
   const [reference, setReference, referenceRef] = useStateRef<any>(initialReference);
+
+  const [parentPageReference, setPageParentReference] = useState(parentReference);
+  const [parentPageTuple, setPageParentTuple] = useState(parentTuple);
+
   /**
    * whether the component has initialized or not
    */
@@ -260,7 +304,7 @@ export default function RecordsetProvider({
       };
     })
   );
-  const setColumnModelValues = (indexes: any, values: { [key: string]: boolean }) => {
+  const setColumnModelValues = (indexes: { [key: string]: any }, values: { [key: string]: boolean }) => {
     setColumnModels(
       (prevColumnModels: any) => {
         return prevColumnModels.map((cm: any, index: number) => {
@@ -299,7 +343,7 @@ export default function RecordsetProvider({
             removeURLLimitAlert();
           }
         } else {
-          return prevRows;
+          return temp === false ? prevRows : res;
         }
 
       }
@@ -314,17 +358,21 @@ export default function RecordsetProvider({
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
-  const addRecordRequests = useRef<any>({});
-
   // call the flow-control after each reference object
   useEffect(() => {
-    updatePage();
+    processRequests();
   }, [pageLimit, reference]);
 
   // after the main data has loaded, we can get the secondary data
   useEffect(() => {
+    // TODO does this make sense?
+    // in case of related entities, record page will take care of this
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0) {
+      return;
+    }
+
     if (!isLoading && page && page.length > 0) {
-      fetchSecondaryRequests(updatePage);
+      fetchSecondaryRequests(processRequests);
     }
   }, [isLoading, page]);
 
@@ -440,12 +488,7 @@ export default function RecordsetProvider({
     }
 
     if (updateResult) {
-      if (!Number.isInteger(flowControl.current.reloadStartTime) || flowControl.current.reloadStartTime === -1) {
-        flowControl.current.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
-      }
-      if (cause && flowControl.current.reloadCauses.indexOf(cause) === -1) {
-        flowControl.current.reloadCauses.push(cause);
-      }
+      addUpdateCauses([cause]);
     }
 
     if (updateCount) {
@@ -472,38 +515,54 @@ export default function RecordsetProvider({
       $log.debug(`adding one to counter, new: ${flowControl.current.queue.counter}`);
     }
 
-    // updatePage is called as a result of updating the reference
-    // we cannot ensure that the reference is latest, so we cannot call updatePage
+    // processRequests is called as a result of updating the reference
+    // we cannot ensure that the reference is latest, so we cannot call processRequests
     if (newRef) {
-      // after react sets the reference, the useEffect will trigger updatePage
+      // after react sets the reference, the useEffect will trigger processRequests
       setReference(newRef);
     } else if (limit && typeof limit === 'number') {
       setPageLimit(limit);
     } else {
-      updatePage();
+      processRequests();
     }
 
     return true;
   };
 
-  const updatePage = () => {
+  const addUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => {
+    if (queue) {
+      flowControl.current.queue = queue;
+    }
+
+    if (setDirtyResult) {
+      flowControl.current.dirtyResult = true;
+    }
+
+    flowControl.current.addCauses(causes);
+  };
+
+  const processRequests = () => {
     printDebugMessage('running update page');
 
     if (!flowControl.current.haveFreeSlot()) {
       return;
     }
 
-    // make sure the logStack has the latest value
-    LogService.updateStackFilterInfo(
-      flowControl.current.getLogStack(),
-      referenceRef.current.filterLogInfo,
-      // in fullscreen mode, we want the global log stack to have filter info too
-      // (this is for requests outside of recordset component like export)
-      config.displayMode === RecordsetDisplayMode.FULLSCREEN
-    );
+    // make sure the logStack has the latest filters
+    // NOTE in related section we don't want the filter info to be captured,
+    //      as we're already doing that with 'source'
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+      LogService.updateStackFilterInfo(
+        flowControl.current.getLogStack(),
+        referenceRef.current.filterLogInfo,
+        // in fullscreen mode, we want the global log stack to have filter info too
+        // (this is for requests outside of recordset component like export)
+        config.displayMode === RecordsetDisplayMode.FULLSCREEN
+      );
+    }
 
     // update the resultset
-    updateMainEntity(updatePage);
+    updateMainEntity(processRequests);
 
     // the aggregates are updated when the main entity request is done
 
@@ -511,17 +570,16 @@ export default function RecordsetProvider({
     // this is because the query takes too long sometimes
     if (!referenceRef.current.display || !referenceRef.current.display.hideRowCount) {
       // update the count
-      updateTotalRowCount(updatePage);
+      updateTotalRowCount(processRequests);
     }
 
-    // TODO does this make sense?
     if (!isLoadingRef.current && pageRef.current && pageRef.current.length > 0) {
-      fetchSecondaryRequests(updatePage);
+      fetchSecondaryRequests(processRequests);
     }
 
     // fetch the facets
     if (flowControl.current.updateFacetsCallback) {
-      flowControl.current.updateFacetsCallback(flowControl, updatePage);
+      flowControl.current.updateFacetsCallback(flowControl, processRequests);
     }
 
   };
@@ -529,11 +587,11 @@ export default function RecordsetProvider({
   /**
  * Given the tableModel object, will get the values for main entity and
  * attach them to the model.
- * @param  {function} updatePageCB The update page callback which we will call after getting the result.
- * @param  {object} isTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
+ * @param  {function} processRequestsCB The update page callback which we will call after getting the result.
+ * @param  {object} notTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
-  const updateMainEntity = (updatePageCB: Function, notTerminal = false, cb?: Function) => {
+  const updateMainEntity = (processRequestsCB: Function, notTerminal = false, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -544,13 +602,13 @@ export default function RecordsetProvider({
     (function (currentCounter) {
       printDebugMessage('updating result', currentCounter);
       readMainEntity(currentCounter).then((res: any) => {
-        afterUpdateMainEntity(res, currentCounter);
+        afterUpdateMainEntity(res.success, currentCounter);
 
         setHasTimeoutError(false);
         if (cb) cb(res);
         // TODO remember last successful main request
         // when a request fails for 400 QueryTimeout, revert (change browser location) to this previous request
-        updatePageCB();
+        processRequestsCB();
       }).catch((err: any) => {
         afterUpdateMainEntity(true, currentCounter);
         if (cb) cb(self, true);
@@ -601,11 +659,13 @@ export default function RecordsetProvider({
     const act = hasCauses ? LogActions.RELOAD : LogActions.LOAD;
 
     // add reloadCauses
-    if (hasCauses) {
-      logParams.stack = LogService.addCausesToStack(flowControl.current.getLogStack(), reloadCauses, flowControl.current.reloadStartTime);
-    } else {
-      logParams.stack = flowControl.current.getLogStack();
-    }
+    const usedLogStack = hasCauses ?
+      LogService.addCausesToStack(flowControl.current.getLogStack(), reloadCauses, flowControl.current.reloadStartTime) :
+      flowControl.current.getLogStack();
+
+    const usedLogStackPath = logInfo.logStackPath;
+
+    logParams.stack = usedLogStack;
 
     // create the action
     logParams.action = flowControl.current.getLogAction(act);
@@ -624,7 +684,7 @@ export default function RecordsetProvider({
 
       referenceRef.current.read(pageLimitRef.current, logParams, false, false, getTRS, false, getUnlinkTRS).then((pageRes: any) => {
         if (current !== flowControl.current.queue.counter) {
-          defer.resolve(false);
+          defer.resolve({ success: false, page: null });
           return defer.promise;
         }
 
@@ -633,13 +693,13 @@ export default function RecordsetProvider({
         return getFavorites ? getFavorites(pageRes) : { page: pageRes };
       }).then((result: any) => {
         if (getDisabledTuples) {
-          return getDisabledTuples(self, result.page, requestCauses, reloadStartTime);
+          return getDisabledTuples(result.page, pageLimitRef.current, usedLogStack, usedLogStackPath, requestCauses, reloadStartTime);
         } else {
           return { page: result.page };
         }
-      }).then((result: any) => {
+      }).then((result: { page: any, disabledRows?: any }) => {
         if (current !== flowControl.current.queue.counter) {
-          defer.resolve(false);
+          defer.resolve({ success: false, page: null });
           return defer.promise;
         }
 
@@ -660,12 +720,7 @@ export default function RecordsetProvider({
           setDisabledRows(result.disabledRows);
         }
 
-        // globally sets when the app state is ready to interact with
-        // TODO is this needed?
-        // $rootScope.displayReady = true;
-
         // make sure we're getting the data for aggregate columns
-        // TODO
         flowControl.current.requestModels.forEach((agg: any) => {
           if (result.page.length > 0) {
             agg.processed = false;
@@ -679,7 +734,7 @@ export default function RecordsetProvider({
             // there are not matching rows, so there's no point in creating
             // aggregate requests.
             // make sure the spinner is hidden for the pending columns.
-            let updatedColumnModels: any = {};
+            const updatedColumnModels: any = {};
             agg.activeListModel.objects.forEach((obj: any) => {
               if (obj.column && columnModels[obj.index].isLoading) {
                 updatedColumnModels[obj.index] = true;
@@ -694,10 +749,10 @@ export default function RecordsetProvider({
         flowControl.current.reloadCauses = [];
         flowControl.current.reloadStartTime = -1;
 
-        defer.resolve(true);
+        defer.resolve({ success: true, page: result.page });
       }).catch((err: any) => {
         if (current !== flowControl.current.queue.counter) {
-          return defer.resolve(false);
+          return defer.resolve({ success: false, page: null });
         }
 
         setIsInitialized(true);
@@ -718,7 +773,7 @@ export default function RecordsetProvider({
   }
 
 
-  const updateTotalRowCount = (updatePageCB: Function) => {
+  const updateTotalRowCount = (processRequestsCB: Function) => {
     if (!flowControl.current.dirtyCount || !flowControl.current.haveFreeSlot()) {
       return;
     }
@@ -729,7 +784,7 @@ export default function RecordsetProvider({
     (function (curr) {
       fetchTotalRowCount(curr).then((res: any) => {
         afterUpdateTotalRowCount(res, curr);
-        updatePageCB();
+        processRequestsCB();
       }).catch(function (err: any) {
         afterUpdateTotalRowCount(true, curr);
         dispatchError({ error: err });
@@ -811,10 +866,10 @@ export default function RecordsetProvider({
    * get values for the secondary requests (aggregate columns, etc).
    * The updateMainEntity should be called on the tableModel before this function.
    * That function will generate `vm.page` which is needed for this function
-   * @param  {function} updatePageCB The update page callback which we will call after getting each result.
+   * @param  {function} processRequestsCB The update page callback which we will call after getting each result.
    * @param  {boolean} hideSpinner?  Indicates whether we should show spinner for columns or not
    */
-  const fetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => {
+  const fetchSecondaryRequests = (processRequestsCB: Function, hideSpinner?: boolean) => {
     // if the data is still loading, don't fetch the secondary requests
     if (isLoadingRef.current) return;
 
@@ -833,7 +888,7 @@ export default function RecordsetProvider({
         aggModel.processed = res;
 
         printDebugMessage(`: after aggregated value for column (index=${index}) update: ${res ? 'successful.' : 'unsuccessful.'}`);
-        updatePageCB();
+        processRequestsCB();
       }).catch((err: any) => {
         dispatchError({ error: err });
       });
@@ -851,7 +906,7 @@ export default function RecordsetProvider({
       activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
-    let updatedColumnModels: any = {};
+    const updatedColumnModels: any = {};
     activeListModel.objects.forEach((obj: any) => {
       // this is only called in recordset so it won't be related
       if (obj.column) {
@@ -937,8 +992,6 @@ export default function RecordsetProvider({
         }
       );
 
-      // TODO this is not working as expected because what's in the state
-      // is outdated...
       setColumnModelValues(indexes, { isLoading: false });
 
       // clear the causes
@@ -1041,12 +1094,14 @@ export default function RecordsetProvider({
       registerFacetCallbacks,
       printDebugMessage,
       checkReferenceURL,
-      addRecordRequests,
-      forceShowSpinner,
-      setForceShowSpinner,
-      logRecordsetClientAction,
-      getLogAction,
-      getLogStack
+      forceShowSpinner, setForceShowSpinner,
+      // log related:
+      logRecordsetClientAction, getLogAction, getLogStack,
+      // used for manually calling the flow-control in record page
+      updateMainEntity, fetchSecondaryRequests, addUpdateCauses,
+      // the following values are not supposed to change
+      // but needed by other components
+      parentPageReference, parentPageTuple
     };
   }, [
     reference, isLoading, hasTimeoutError, totalRowCountHasTimeoutError,
