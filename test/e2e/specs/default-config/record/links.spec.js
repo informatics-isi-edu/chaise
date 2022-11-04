@@ -26,17 +26,19 @@ describe('View existing record,', function() {
         beforeAll(function () {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + testParams.table_name + "/" + keys.join("&");
-            chaisePage.navigate(url);
+            browser.get(url);
 
-            chaisePage.recordPageReady();
+            chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
         if (!process.env.CI) {
             describe("regarding the export button, ", function () {
                 var exportBtn;
                 beforeAll(function () {
-                    exportBtn = chaisePage.recordsetPage.getExportDropdown();
+                    // TODO: change after record app migrated
+                    exportBtn = chaisePage.recordsetPage.getAngularExportDropdown();
                     // delete files that may have been downloaded before
                     console.log("delete existing files");
                     recordSetHelpers.deleteDownloadedFiles(testParams.file_names);
@@ -71,6 +73,7 @@ describe('View existing record,', function() {
                     }).then(function () {
                         return chaisePage.waitForElement(exportModal);
                     }).then(function () {
+                        exportModal.allowAnimations(false);
                         return chaisePage.waitForElementInverse(exportModal);
                     }).then(function () {
                         browser.wait(function() {
@@ -99,7 +102,7 @@ describe('View existing record,', function() {
                     return (ct == 3);
                 });
             }, browser.params.defaultTimeout);
-
+            
             chaisePage.recordPage.getColumns().then(function (cols) {
                 // shown column headers
                 expect(cols[0].isDisplayed()).toBeTruthy("Column header is hidden for id column");
@@ -119,11 +122,7 @@ describe('View existing record,', function() {
                     return (ct == testParams.tocHeaders.length);
                 });
             }, browser.params.defaultTimeout);
-            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
-                headings.forEach(function (heading, idx) {
-                    expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
-                })
-            })
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
 
             expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(testParams.headers, "list of related table accordion headers is incorret");
             done();
@@ -137,12 +136,14 @@ describe('View existing record,', function() {
             chaisePage.clickButton(shareButton).then(function () {
                 // wait for dialog to open
                 chaisePage.waitForElement(shareModal);
+                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
+                shareModal.allowAnimations(false);
 
                 return browser.getCurrentUrl();
             }).then(function (url) {
                 // change url
                 var permalink = browser.params.origin+"/id/"+browser.params.catalogId+"/"+chaisePage.getEntityRow("links", testParams.table_name, [{column: "id",value: "1"}]).RID;
-                expect(chaisePage.recordPage.getLiveLinkElement().getText()).toBe(permalink, "permalink url is incorrect");
+                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
 
                 return chaisePage.recordsetPage.getModalCloseBtn().click();
             }).then(function () {
@@ -154,7 +155,7 @@ describe('View existing record,', function() {
         });
 
         it("Clicking the subtitle should redirect to recordset app", function(done) {
-            var subtitleLink = chaisePage.recordPage.getEntitySubTitleElement();
+            var subtitleLink = chaisePage.recordPage.getEntitySubTitleLink();
 
             browser.wait(EC.elementToBeClickable(subtitleLink), browser.params.defaultTimeout);
 
@@ -224,10 +225,11 @@ describe('View existing record for testing "show empty sections" heuristics,', f
         beforeAll(function () {
             var keys = [];
             keys.push(inlineParams.key.name + inlineParams.key.operator + inlineParams.key.value);
+            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/links:" + inlineParams.table_name + "/" + keys.join("&");
-            chaisePage.navigate(url);
+            browser.get(url);
 
-            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
+            chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
 
@@ -237,11 +239,7 @@ describe('View existing record for testing "show empty sections" heuristics,', f
                     return (ct == inlineParams.tocHeaders.length);
                 });
             }, browser.params.defaultTimeout);
-            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
-                headings.forEach(function (heading, idx) {
-                    expect(heading.getText()).toEqual(inlineParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
-                })
-            })
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(inlineParams.tocHeaders, "list of related tables in toc is incorrect");
 
             expect(chaisePage.recordPage.getRelatedTableTitles()).toEqual(inlineParams.headers, "list of related table accordion headers is incorret");
             done();

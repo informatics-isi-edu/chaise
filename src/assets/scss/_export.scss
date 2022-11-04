@@ -1,0 +1,10 @@
+@import "variables";
+
+.dropdown-item.export-menu-item {
+  color: $black-color !important;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}

@@ -1,3 +1,5 @@
+import '@isrd-isi-edu/chaise/src/assets/scss/_export.scss';
+
 import { Button, Modal } from 'react-bootstrap';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 

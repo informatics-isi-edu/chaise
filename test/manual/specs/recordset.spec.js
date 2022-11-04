@@ -2,7 +2,8 @@ var chaisePage = require('./../../e2e/utils/chaise.page.js');
 
 describe('View recordset,', function () {
     beforeAll(function () {
-        chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:accommodation");
+        browser.ignoreSynchronization = true;
+        browser.get(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:accommodation");
 
         chaisePage.recordsetPageReady()
         chaisePage.waitForAggregates();

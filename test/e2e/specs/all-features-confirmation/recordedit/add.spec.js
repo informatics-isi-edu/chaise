@@ -364,12 +364,14 @@ describe('Record Add', function() {
 
         it("should open a new window with the help page.",function(done){
             helpBtn.click().then(function () {
+                console.log("")
                 return browser.getAllWindowHandles();
             }).then(function(handles) {
                 allWindows = handles;
+                console.log("handled");
                 return browser.switchTo().window(allWindows[1]);
             }).then(function() {
-                return chaisePage.waitForElement(element(by.id("mainTable")));
+                return chaisePage.waitForElement(element(by.id("main-content")));
             }).then(function() {
                 // this is a static page, we just want to make sure this is the correct page.
                 // we don't need to test every element.

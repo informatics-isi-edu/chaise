@@ -55,7 +55,7 @@ export class LogService {
   /**
    * Returns the appropriate stack object that should be used.
    * If childStackElement passed, it will append it to the existing logStack of the app.
-   * @param {Object=} childStackElement
+   * @param {Object} childStackElement
    * @param {Object=} logStack if passed, will be used instead of the default value of the app.
    */
   static getStackObject(childStackNode?: any, logStack?: any) {

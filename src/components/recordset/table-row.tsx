@@ -25,8 +25,6 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -65,10 +63,7 @@ const TableRow = ({
    * But if this was in recordset-table then we would need to pass these and
    * it wouldn't make any difference in terms of number of renders
    */
-  const {
-    reference, setForceShowSpinner, update, getLogStack, getLogAction,
-    parentPageTuple, parentPageReference
-  } = useRecordset();
+  const { setForceShowSpinner, update, getLogStack, getLogAction } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
   const tdPadding = 10, // +10 to account for padding on <td>
@@ -169,20 +164,7 @@ const TableRow = ({
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
     isSavedQueryPopup = config.displayMode === RecordsetDisplayMode.SAVED_QUERY_POPUP;
 
-  const eventDetails: { [key: string]: any } = { rowIndex };
-  if (config.containerDetails) eventDetails.containerDetails = config.containerDetails;
-
-  /**
-   * The JS.Elements that are used for displaying messages
-   * these are only currently used for unlink that's why we're checking parentPageReference for all
-   * NOTE if we want to use for other cases we should be mindful that AttributeGroupReference doesn't have displayname API
-   * if we want it to have one, we should add it in ermrestjs first.
-   */
-  const parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
-  const currentTable =  parentPageReference ? <code><DisplayValue value={reference.displayname}></DisplayValue></code> : <></>;
-  const currentTuple =  parentPageReference ? <code><DisplayValue value={tuple.displayname}></DisplayValue></code> : <></>;
-
-  let logStack: any;
+  let logStack : any;
   if (tupleReference) {
     logStack = getLogStack(LogService.getStackNode(LogStackTypes.ENTITY, tupleReference.table, tupleReference.filterLogInfo));
   }
@@ -223,15 +205,13 @@ const TableRow = ({
   let editCallback: null | (() => void) = null;
   if (config.editable && tuple.canUpdate) {
     editCallback = function () {
-      const requestID = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
       const newRef = tupleReference.contextualize?.entryEdit;
 
       if (newRef) {
         const editLink = addQueryParamsToURL(newRef.appLink, {
-          invalidate: requestID
+          invalidate: referrer_id
         });
-
-        fireCustomEvent(CUSTOM_EVENTS.ROW_EDIT_INTEND, rowContainer.current, { ...eventDetails, id: requestID });
 
         windowRef.open(editLink, '_blank');
 
@@ -247,16 +227,19 @@ const TableRow = ({
 
   // delete/unlink button
   let deleteCallback: null | (() => void) = null;
-  let unlinkCallback: null | (() => void) = null;
+  let unlinkCallback: null | (() => void) = null, unlinkTooltip: string;
   if (config.deletable) {
     // unlink button should only show up in related mode
     let associationRef: any;
-    if (isRelated && parentPageTuple) {
-      associationRef = tuple.getAssociationRef(parentPageTuple.data);
-    }
+    // TODO record page
+    // if (isRelated && scope.tableModel.parentTuple) {
+    //   associationRef = scope.tuple.getAssociationRef(scope.tableModel.parentTuple.data);
+    // }
 
     if (associationRef) {
       if (tuple.canUnlink) {
+        // TODO record page
+        // unlinkTooltip = "Disconnect " + scope.tableModel.reference.displayname.value + ': ' + scope.tuple.displayname.value + " from this " + scope.tableModel.parentReference.displayname.value + '.';
         // define unlink function
         unlinkCallback = function () {
           deleteOrUnlink(associationRef, isRelated, true);
@@ -279,10 +262,12 @@ const TableRow = ({
           stack: logStack
         }, reference.defaultLogInfo);
 
+        // TODO unlink should say disconnect...
         const confirmMessage: JSX.Element = (
           <>
-            {!isUnlink && <>Are you sure you want to delete {currentTable}:{currentTuple}?</>}
-            {isUnlink && <>Are you sure you want to disconnect {currentTable}:{currentTuple} from this {parentTable}?</>}
+            Are you sure you want to delete <code><DisplayValue value={reference.displayname}></DisplayValue></code>
+            <span>: </span>
+            <code><DisplayValue value={tuple.displayname}></DisplayValue></code>?
           </>
         );
 
@@ -325,12 +310,9 @@ const TableRow = ({
       stack: logStack
     };
     reference.delete(logObj).then(function deleteSuccess() {
-      if (!isRelated) {
-        // ask flow-control to update the page
-        // this will also make sure to remove the "disabled" row
-        update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
-      }
-      fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
+      // ask flow-control to update the page
+      // this will also make sure to remove the "disabled" row
+      update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
     }).catch(function (error: any) {
       setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });
@@ -460,7 +442,7 @@ const TableRow = ({
             }
             {unlinkCallback &&
               <ChaiseTooltip
-                tooltip={<>Disconnect {currentTable}:{currentTuple} from this {parentTable}.</>}
+                tooltip={unlinkTooltip}
                 placement='bottom'
               >
                 <button

@@ -112,17 +112,25 @@ exports.testFacetOptions = function (facetIdx, filterOptions, modalOptions) {
         // wait for facet to open
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(facetIdx)), browser.params.defaultTimeout);
 
+        // wait for facet checkboxes to load
+        browser.wait(function () {
+            return chaisePage.recordsetPage.getFacetOptions(facetIdx).count().then(function (ct) {
+                return ct == filterOptions.length;
+            });
+        }, browser.params.defaultTimeout);
+
         // wait for list to be fully visible
         browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(facetIdx)), browser.params.defaultTimeout);
 
-        // wait for facet checkboxes to load
-        browser.wait(function () {
-            return chaisePage.recordsetPage.getFacetOptions(facetIdx).getText().then(function (opts) {
-                return JSON.stringify(opts) === JSON.stringify(filterOptions);
-              }).catch(chaisePage.catchTestError(done));
-        }, browser.params.defaultTimeout);
+        chaisePage.recordsetPage.getFacetOptions(facetIdx).then(function (opts) {
+            opts.forEach(function (option, idx) {
+                expect(option.getText()).toEqual(filterOptions[idx], "facet options are incorrect");
+            });
 
-        done();
+            done();
+        }).catch(function (err) {
+            done.fail(err);
+        });
     });
 
     it("opening the facet modal should show the correct rows.", function (done) {
@@ -130,13 +138,17 @@ exports.testFacetOptions = function (facetIdx, filterOptions, modalOptions) {
         var showMore = chaisePage.recordsetPage.getShowMore(facetIdx);
         chaisePage.clickButton(showMore).then(function () {
             chaisePage.recordsetPage.waitForInverseModalSpinner();
-
-            // this will wait for the list to be the same as expected, otherwise will timeout
             browser.wait(function () {
-                return chaisePage.recordsetPage.getModalFirstColumn().getText().then(function (texts) {
-                    return JSON.stringify(texts) === JSON.stringify(modalOptions);
-                }).catch(chaisePage.catchTestError(done));
+                return chaisePage.recordsetPage.getModalFirstColumn().then(function (values) {
+                    return values.length == modalOptions.length;
+                });
             }, browser.params.defaultTimeout);
+
+            return chaisePage.recordsetPage.getModalFirstColumn();
+        }).then(function (values) {
+            values.forEach(function (value, idx) {
+                expect(value.getText()).toEqual(modalOptions[idx], "modal options missmatch");
+            });
 
             return chaisePage.recordsetPage.getModalCloseBtn().click();
         }).then(function () {

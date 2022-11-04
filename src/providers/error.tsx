@@ -12,6 +12,7 @@ export type LoginModalProps = {
 interface ChaiseError {
   error: any; // TODO what would be a proper type?
   isDismissible?: boolean;
+  isGlobal?: boolean; // TODO should be removed
   skipLogging?: boolean;
   okBtnCallback?: Function;
   closeBtnCallback?: Function;

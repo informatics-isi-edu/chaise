@@ -22,7 +22,7 @@ describe('View existing record,', function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
             chaisePage.navigate(url);
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
-            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
+            chaisePage.waitForElement(element(by.id('tblRecord')));
         });
 
         it("should load chaise-config.js and have deleteRecord=false, resolverImplicitCatalog=4, showWriterEmptyRelatedOnLoad=true", function() {
@@ -37,7 +37,7 @@ describe('View existing record,', function() {
             var deleteBtn = chaisePage.recordPage.getDeleteRecordButton();
             chaisePage.waitForElement(deleteBtn);
             expect(deleteBtn.isPresent()).toBeTruthy("The delete button does not show on the page.");
-            expect(deleteBtn.getAttribute("aria-disabled")).toBeTruthy("The delete button was not disabled.");
+            expect(deleteBtn.getAttribute("disabled")).toBeTruthy("The delete button was not disabled.");
         });
 
         it('Record Table of Contents panel should be hidden by default as chaiseConfig entry hideTableOfContents is true.', function(done){
@@ -52,13 +52,8 @@ describe('View existing record,', function() {
             done();
         });
 
-        it('Related tables should all show by default because of showWriterEmptyRelatedOnLoad=true', function (done) {
-            chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
-                headings.forEach(function (heading, idx) {
-                    expect(heading.getText()).toEqual(testParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
-                })
-            });
-            done();
+        it('Related tables should all show by default because of showWriterEmptyRelatedOnLoad=true', function () {
+            expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(testParams.tocHeaders, "list of related tables in toc is incorrect");
         });
 
         if (process.env.CI) {
@@ -72,7 +67,7 @@ describe('View existing record,', function() {
                     // wait for dialog to open
                     chaisePage.waitForElement(shareModal);
 
-                    expect(chaisePage.recordPage.getLiveLinkElement().getText()).toBe(permalink, "permalink url is incorrect");
+                    expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(permalink, "permalink url is incorrect");
 
                     done();
                 }).catch(function(err){
@@ -93,10 +88,10 @@ describe('View existing record,', function() {
 
                     expect(chaisePage.errorModal.getTitle().getText()).toBe("Record Not Found", "The title of no table error pop is not correct");
 
-                    var modalText = "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.";
-                    expect(chaisePage.errorModal.getBody().getText()).toBe(modalText, "The message in modal pop is not correct");
+                    var modalText = "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to dismiss this dialog.";
+                    expect(chaisePage.recordPage.getModalText().getText()).toBe(modalText, "The message in modal pop is not correct");
 
-                    return chaisePage.clickButton(chaisePage.errorModal.getCloseButton());
+                    return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
                 }).then (function (){
                     // should close modal and NOT change page
                     return browser.driver.getCurrentUrl();

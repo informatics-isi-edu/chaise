@@ -138,7 +138,7 @@
          * @param  {boolean} hideSpinner  Indicates whether we should show spinner for columns or not
          */
         function updateColumnAggregates(vm, updatePageCB, hideSpinner) {
-            if (vm.dirtyResult || !vm.hasLoaded) return;
+            if (!vm.hasLoaded) return;
             vm.aggregateModels.forEach(function (aggModel, index) {
                 if (!_haveFreeSlot(vm) || aggModel.processed) {
                     return;

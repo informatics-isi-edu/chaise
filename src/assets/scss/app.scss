@@ -96,7 +96,6 @@ html {
     font-weight: 400;
     line-height: 1;
     color: #777;
-    font-size: 65%;
   }
 
   li {
@@ -113,16 +112,13 @@ html {
   }
 
   // the last selector is added to override bootstrap default behavior
-  a,
-  a:not([href]):not([class]) {
+  a, a:not([href]):not([class]) {
     cursor: pointer;
     color: $link-color;
     text-decoration: none;
   }
   // the last selector is added to override bootstrap default behavior
-  a:focus,
-  a:hover,
-  a:not([href]):not([class]):hover {
+  a:focus, a:hover, a:not([href]):not([class]):hover {
     text-decoration: underline;
   }
 
@@ -193,11 +189,6 @@ html {
     // the icon is directly next to the text.
     content: "\00A6";
   }
-  .chaise-icon-for-tooltip.align-center-icon {
-    line-height: 20px;
-    vertical-align: middle;
-    margin: 4px;
-  }
 
   h1 .chaise-icon-for-tooltip::after {
     font-size: 0.6em;
@@ -224,12 +215,6 @@ html {
     text-align: left;
     max-width: none;
     white-space: pre-wrap;
-  }
-  .tooltip code,
-  .tooltip-inner code {
-    background: rgba(110, 118, 129);
-    color: #fff;
-    padding: 0.5px;
   }
 
   // disabled row and form
@@ -273,7 +258,7 @@ html {
   }
 
   // spinner
-  .spinner-container:not(.bottom-left-spinner) {
+  .spinner-container {
     background: $white-color;
     width: 130px;
     margin: 0 auto;
@@ -281,38 +266,13 @@ html {
     padding: 14px 0;
     border: 1px solid $border-color;
     border-radius: 7px;
-    color: $spinner-color;
-    &:not(.manual-position-spinner) {
-      top: 50vh;
-      position: absolute;
-      left: 50%;
-      margin-top: -75px;
-      margin-left: -75px;
-      z-index: 10;
-    }
-    .spinner-message {
-      color: $black-color;
-      margin-top: 15px;
-    }
-  }
-  .spinner-container.bottom-left-spinner {
-    float: left;
-    position: fixed;
-    z-index: 2;
-    bottom: 0;
-    background: #d9edf7;
-    margin: 5px;
-    padding: 5px 20px;
-    border: solid #446c73 1.5px;
-    .spinner-message {
-      display: inline-block;
-      margin-left: 5px;
-    }
-  }
-
-
-  .forced-hidden {
-    display: none !important;
+    color: #828282;
+    top: 50vh;
+    position: absolute;
+    left: 50%;
+    margin-top: -75px;
+    margin-left: -75px;
+    z-index: 10;
   }
 
   /****************** HEADER ******************/
@@ -354,9 +314,6 @@ html {
     }
   }
 
-  .float-right {
-    float: right;
-  }
   // bookmark container end
 
   /* used to replace the margin with padding on h1-4 elements */
@@ -403,14 +360,16 @@ html {
 
   // footer
   .footer-container {
-    margin-top: auto;
-    position: relative;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
 
-    &.position-absolute {
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      left: 0;
+    &.position-relative {
+      position: relative;
+      bottom: unset;
+      right: unset;
+      left: unset;
     }
 
     margin-right: -$viewport-margin;
@@ -475,18 +434,7 @@ html {
   // fix the padding issues related to the main alerts container that is outside of apps
   .app-header-container > .alerts-container {
     padding: $viewport-margin;
-
-    /**
-     * having margin causes issues with the height logic, that's why we're trying
-     * to avoid it with the following rules:
-     */
-    padding-bottom: 10px;
-    &:empty {
-      padding-bottom: 0;
-    }
-    .alert:last-child {
-      margin: 0;
-    }
+    padding-bottom: 0;
   }
 
   // top panel container for record and recordset
@@ -512,7 +460,7 @@ html {
 
         &.open-panel {
           flex: 0;
-          flex-basis: $left-panel-width-lg;
+          flex-basis:  $left-panel-width-lg;
           min-width: 170px;
 
           & + .top-right-panel {
@@ -578,13 +526,13 @@ html {
 
       &.open-panel {
         flex: 0;
-        flex-basis: $left-panel-width-lg;
+        flex-basis:  $left-panel-width-lg;
         min-width: 170px;
 
         & ~ .main-container {
           padding-left: $main-alley;
 
-          .footer-container:not(.position-absolute) {
+          .footer-container.position-relative {
             margin-left: -$main-alley;
           }
         }
@@ -606,7 +554,7 @@ html {
           // when the side-panel is closed
           padding-left: $viewport-margin;
 
-          .footer-container:not(.position-absolute) {
+          .footer-container.position-relative {
             margin-left: -$viewport-margin;
           }
         }
@@ -614,10 +562,6 @@ html {
     }
 
     .main-container {
-      // the following two will make sure footer is pushed to bottom
-      // (in combination with margin-top: auto of footer)
-      display: flex;
-      flex-direction: column;
       flex: 1;
       position: relative;
       overflow-x: hidden;
@@ -677,13 +621,6 @@ html {
   }
 
   // END remove
-
-  // copy to clipboard btn (used in share dialog)
-  .chaise-copy-to-clipboard-btn {
-    color: $primary-color;
-    font-size: 65%;
-    cursor: pointer;
-  }
 
   // chaise checkbox
   .chaise-checkbox {
@@ -886,36 +823,4 @@ html {
       }
     }
   }
-
-  // used both in record and help apps
-  .back-to-top-btn {
-    position: fixed;
-    right: 40px;
-    bottom: 40px;
-    padding: 1px 4px;
-    font-size: 25px;
-    border-radius: 4px;
-    height: 35px;
-    width: 35px;
-    cursor: pointer;
-    overflow: hidden;
-    z-index: 100;
-  }
-
-  /****** help pages *****/
-  .help-container {
-    .main-body .container {
-      // in other apps .alerts-container is adding the padding-top
-      padding-top: 20px;
-      padding-bottom: 20px;
-    }
-  }
-
-  /****** switch user accounts help page *******/
-  .switch-user-accounts-container {
-    li {
-      list-style-type: unset;
-    }
-  }
-
 }

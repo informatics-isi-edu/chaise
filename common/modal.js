@@ -84,7 +84,7 @@
                 showModal({
                     templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/shareCitation.modal.html",
                     controller: "ShareCitationController",
-                    windowClass: "chaise-share-citation-modal",
+                    windowClass: "chaise-share-citation",
                     controllerAs: "ctrl",
                     resolve: {
                         params: params
@@ -182,7 +182,7 @@
             $uibModalInstance.dismiss('cancel');
         }
     }])
-    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'helpPages', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, helpPages, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
+    .controller('ErrorModalController', ['ConfigUtils', 'Errors', 'logService', 'messageMap', 'params', 'Session', 'UriUtils', '$rootScope', '$sce', '$uibModalInstance', '$window', function ErrorModalController(ConfigUtils, Errors, logService, messageMap, params, Session, UriUtils, $rootScope, $sce, $uibModalInstance, $window) {
         var cc = ConfigUtils.getConfigJSON();
         function isErmrestErrorNeedReplace (error) {
             switch (error.constructor) {
@@ -247,7 +247,7 @@
             }
 
             vm.switchUserAccounts = function () {
-                $window.open(UriUtils.getHelpPageURL(helpPages.SWITCH_USER_ACCOUNTS.location), '_blank');
+                $window.open(UriUtils.chaiseDeploymentPath() + 'lib/switchUserAccounts.html', '_blank');
             }
         } else if ( (exception instanceof Errors.CustomError && exception.errorData.clickActionMessage) || notAllowedPermissionAccess) {
             vm.clickActionMessage = exception.errorData.clickActionMessage;

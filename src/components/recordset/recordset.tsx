@@ -41,7 +41,6 @@ import { createRedirectLinkFromPath, getRecordsetLink, transformCustomFilter } f
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getHumanizeVersionDate, getVersionDate } from '@isrd-isi-edu/chaise/src/utils/date-time-utils';
 import { getInitialFacetPanelOpen } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
-import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const Recordset = ({
   initialReference,
@@ -55,9 +54,7 @@ const Recordset = ({
   onFavoritesChanged,
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
   parentStickyArea,
-  onFacetPanelOpenChanged,
-  parentReference,
-  parentTuple
+  onFacetPanelOpenChanged
 }: RecordsetProps): JSX.Element => {
   return (
     <AlertsProvider>
@@ -71,8 +68,6 @@ const Recordset = ({
         initialSelectedRows={initialSelectedRows}
         onSelectedRowsChanged={onSelectedRowsChanged}
         onFavoritesChanged={onFavoritesChanged}
-        parentReference={parentReference}
-        parentTuple={parentTuple}
       >
         <RecordsetInner
           initialReference={initialReference}
@@ -127,6 +122,7 @@ const RecordsetInner = ({
     selectedRows,
     setSelectedRows,
     update,
+    addRecordRequests,
     forceShowSpinner
   } = useRecordset();
 
@@ -160,11 +156,6 @@ const RecordsetInner = ({
   } | null>(null);
 
   const clearSearch = useRef<() => void>(null);
-
-  /**
-   * used to see if there are any pending create requests
-   */
-  const addRecordRequests = useRef<any>({});
 
   /**
    * used to figure out if we need to update the page after edit request or not
@@ -285,17 +276,9 @@ const RecordsetInner = ({
    * update function changes
    */
   useEffect(() => {
-    window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-    window.addEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-
-    window.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
-    window.addEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
-
     window.removeEventListener('focus', onFocus);
     window.addEventListener('focus', onFocus);
     return () => {
-      window.removeEventListener(CUSTOM_EVENTS.ADD_INTEND, onAddIntend);
-      window.removeEventListener(CUSTOM_EVENTS.FORCE_UPDATE_RECORDSET, forceUpdate);
       window.removeEventListener('focus', onFocus);
     };
   }, [update]);
@@ -364,52 +347,11 @@ const RecordsetInner = ({
   };
 
   /**
-   * capture the create requests so we know when to refresh the page on focus
-   */
-  const onAddIntend = ((event: CustomEvent) => {
-    const id = event.detail.id;
-    if (typeof id !== 'string') return;
-    addRecordRequests.current[id] = 1;
-  }) as EventListener;
-
-  /**
    * The callback that recoredit app expects and calls after edit is done.
    */
   windowRef.updated = () => {
     editRequestIsDone.current = true;
-  };
-
-  /**
-   * call the update function
-   */
-  const forceUpdate = ((event: CustomEvent) => {
-    const cause = event.detail.cause;
-    const pageStates = event.detail.pageStates;
-    const unlinkResponse = event.detail.response;
-    if (!!cause && !!pageStates) {
-      if (!!unlinkResponse) {
-        if (unlinkResponse.failedTupleData.length > 0) {
-          // iterate over the set of successful ids and find them in selected rows, then remove them
-          unlinkResponse.successTupleData.forEach((data: any) => {
-            // data is an object of key/value pairs for each piece of key information
-            // { keycol1: val, keycol2: val2, ... }
-            const idx = selectedRows.findIndex((tuple: any) => {
-              return Object.keys(data).every((key) => {
-                return tuple.data[key] == data[key]
-              });
-            });
-
-            selectedRows.splice(idx, 1);
-          });
-          setSelectedRows([...selectedRows]);
-        } else {
-          // if everything is successful, empty selected rows
-          setSelectedRows([]);
-        }
-      }
-      update(pageStates, null, { cause});
-    }
-  }) as EventListener;
+  }
 
   //------------------- UI related callbacks: --------------------//
 
@@ -537,7 +479,7 @@ const RecordsetInner = ({
     if (hasFilter) {
       chiclets.push(
         <FilterChiclet
-          key='filter-chiclet-custom-filters'
+          key='filters'
           identifier={'filters'}
           iconTooltip={'Clear custom filter applied'}
           title={'Custom Filter'}
@@ -553,7 +495,7 @@ const RecordsetInner = ({
       const cFacetRemovable = loc.customFacets.removable;
       chiclets.push(
         <FilterChiclet
-          key='filter-chiclet-custom-facets'
+          key='cfacets'
           identifier={'cfacets'}
           iconTooltip={cFacetRemovable ? 'Clear custom filter applied' : 'Predefined filter(s)'}
           // when it's not removable we're showing the icon and that's enough
@@ -579,7 +521,7 @@ const RecordsetInner = ({
           faf.forEach((f: any, filterIndex: number) => {
             // comma-separated values
             chicletValue.push(
-              <span key={`selected-filter-chiclet-${facetIndex}-value-${f.uniqueId}`}>
+              <span key={f.uniqueId}>
                 <DisplayValue value={f.displayname} specialNullEmpty={true} />
                 {(filterIndex !== faf.length - 1) && <span>, </span>}
               </span>
@@ -587,7 +529,7 @@ const RecordsetInner = ({
 
             // tooltip is using bullet icon as a separator
             chicletValueTooltip.push(
-              <span key={`selected-filter-chiclet-${facetIndex}-tooltip-${f.uniqueId}`}>
+              <span key={f.uniqueId}>
                 <span style={{ 'marginRight': '2px', 'marginLeft': '3px', 'color': 'whitesmoke' }}>&bull;</span>
                 <DisplayValue value={f.displayname} specialNullEmpty={true} />
               </span>
@@ -596,7 +538,7 @@ const RecordsetInner = ({
 
           chiclets.push(
             <FilterChiclet
-              key={`selected-filter-chiclet-${facetIndex}`}
+              key={`facet-${facetIndex}`}
               identifier={facetIndex}
               iconTooltip={'Clear filter applied'}
               title={facetDisplayname}
@@ -687,7 +629,7 @@ const RecordsetInner = ({
     <div className='recordset-container app-content-container'>
       {
         errors.length === 0 && (isLoading || forceShowSpinner) &&
-        <ChaiseSpinner className='recordest-main-spinner' />
+        <ChaiseSpinner />
       }
       <div className='top-panel-container'>
         {/* recordset level alerts */}
@@ -696,7 +638,7 @@ const RecordsetInner = ({
           <div className={`top-left-panel ${panelClassName}`} ref={topLeftContainer}>
             <div className='panel-header'>
               <div className='pull-left'>
-                <h3 className='side-panel-heading'>Refine search</h3>
+                <h3>Refine search</h3>
               </div>
               <div className='pull-right'>
                 <button

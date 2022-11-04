@@ -263,6 +263,7 @@ describe('Navbar ', function() {
     xit('should display a "Log Out" link', function() {
         var logOutLink = element(by.id('logout-link'));
         browser.wait(EC.elementToBeClickable(logOutLink), browser.params.defaultTimeout).then(function() {
+            browser.ignoreSynchronization = true;
             expect(logOutLink.isDisplayed()).toBeTruthy();
         });
     }).pend("Pending until we handle tests logging in via Globus/other services");

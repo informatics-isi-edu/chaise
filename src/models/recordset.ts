@@ -1,7 +1,5 @@
-// models
 import { Displayname } from '@isrd-isi-edu/chaise/src/models//displayname'
 import { RangeOption } from '@isrd-isi-edu/chaise/src/models/range-picker'
-import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 
 export type RecordsetProps = {
   initialReference: any,
@@ -14,11 +12,7 @@ export type RecordsetProps = {
   },
   initialPageLimit?: number,
   getFavorites?: Function,
-  getDisabledTuples?: (
-    page: any, pageLimit: number, logStack: any,
-    logStackPath: string, requestCauses: any, reloadStartTime: any
-  ) => any
-  ,
+  getDisabledTuples?: Function,
   initialSelectedRows?: SelectedRow[],
   onSelectedRowsChanged?: (selectedRows: SelectedRow[]) => boolean,
   onFavoritesChanged?: Function,
@@ -72,13 +66,6 @@ export type RecordsetConfig = {
   showFaceting: boolean,
   disableFaceting: boolean,
   displayMode: RecordsetDisplayMode,
-  /**
-   * used in record page to figure out where the edit/delete request is fired from
-   */
-  containerDetails?: {
-    isInline: boolean,
-    index: number
-  },
   // TODO enable favorites
   // enableFavorites: boolean
 }
@@ -144,11 +131,6 @@ export type SelectedRow = {
   displayname: Displayname;
   uniqueId: string | null;
   data?: any; // TODO
-  tupleReference: any; // TODO
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
 }
-
-export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => void;
-export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, cb?: Function) => void;
-export type RecordsetProviderFetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => void;

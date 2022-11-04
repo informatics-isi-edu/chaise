@@ -1,24 +1,18 @@
-import { PureComponent } from 'react';
-
-// components
-import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-
-// services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import React from 'react';
+import { attachFooterResizeSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-// utils
-import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+class Footer extends React.PureComponent {
 
-class Footer extends PureComponent {
+  componentDidMount() {
+    attachFooterResizeSensor(0);
+  }
 
   render() {
-    let footerContent = '';
-    if (isStringAndNotEmpty(ConfigService.chaiseConfig.footerMarkdown)) {
-      footerContent = ConfigService.ERMrest.renderMarkdown(
-        ConfigService.chaiseConfig.footerMarkdown,
-        false
-      );
-    }
+    const footerContent = ConfigService.ERMrest.renderMarkdown(
+      ConfigService.chaiseConfig.footerMarkdown,
+      false
+    );
 
     if (!footerContent) {
       return <></>
@@ -29,8 +23,8 @@ class Footer extends PureComponent {
         <div
           id='footer'
           className='footer-content'
+          dangerouslySetInnerHTML={{ __html: footerContent }}
         >
-          <DisplayValue value={{ isHTML: true, value: footerContent }} addClass />
         </div>
       </div>
     )

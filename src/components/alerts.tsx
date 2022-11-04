@@ -1,8 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_alerts.scss';
 
 // components
-import Alert from 'react-bootstrap/Alert';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -30,12 +29,12 @@ export const Alerts = (): JSX.Element => {
       <span>
         {'Your login session has expired. You are now accessing data anonymously. '}
         <a onClick={() => login()}>Log in</a>{' to continue your privileged access. '}
-        <ChaiseTooltip
+        <OverlayTrigger
           placement='bottom-start'
-          tooltip={tooltipText}
+          overlay={<Tooltip>{tooltipText}</Tooltip>}
         >
           <i className='chaise-icon chaise-info'></i>
-        </ChaiseTooltip>
+        </OverlayTrigger>
       </span>
     </>)
   }
@@ -45,6 +44,7 @@ export const Alerts = (): JSX.Element => {
       const variant = CHAISE_ALERT_TYPE_MAPPING[alert.type];
       return (
         <Alert key={index} variant={variant} dismissible onClose={() => removeAlert(alert)}>
+          {/* TODO should it be able to render HTML? */}
           {alert.isSessionExpiredAlert ? renderSessionExpiredAlert(alert) :
             <>
               <strong className='alert-title'>{toTitlecase(alert.type)}</strong>

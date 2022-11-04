@@ -1,16 +1,10 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_check-list.scss';
 
-// components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-
-// hooks
-import { useLayoutEffect, useRef, useState } from 'react';
-
-// models
 import { FacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/models/recordset';
-
-//utils
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 type FacetCheckListProps = {
@@ -72,9 +66,10 @@ const FacetCheckListRowLabel = ({
   }
 
   return (
-    <ChaiseTooltip
+    <OverlayTrigger
+      trigger={['hover', 'focus']}
       placement='right'
-      tooltip={<DisplayValue value={tooltip} />}
+      overlay={<Tooltip><DisplayValue value={tooltip} /></Tooltip>}
       onToggle={(nextshow: boolean) => {
         if (!labelContainer.current) return;
 
@@ -97,7 +92,7 @@ const FacetCheckListRowLabel = ({
       >
         <DisplayValue value={row.displayname} specialNullEmpty={true} />
       </label>
-    </ChaiseTooltip>
+    </OverlayTrigger>
   );
 };
 
