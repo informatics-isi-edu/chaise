@@ -1,7 +1,8 @@
 import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname'
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 type FilterChicletIdentifier = 'filters' | 'cfacets' | number;
 type FilterChicletProps = {
@@ -67,9 +68,9 @@ const FilterChiclet = ({
   return (
     <div className='filter-chiclet chaise-btn-group'>
       {/* icon */}
-      <ChaiseTooltip
+      <OverlayTrigger
         placement='bottom-start'
-        tooltip={iconTooltip}
+        overlay={<Tooltip>{iconTooltip}</Tooltip>}
       >
         <IconTag
           className={`filter-chiclet-remove chaise-btn chaise-btn-secondary ${removeClass}`}
@@ -77,15 +78,15 @@ const FilterChiclet = ({
         >
           <i className={onRemove ? 'fa-solid fa-xmark' : 'fa-solid fa-filter'}></i>
         </IconTag>
-      </ChaiseTooltip>
+      </OverlayTrigger>
       {/* title */}
       {title &&
         <ConditionalWrapper
           condition={titleTooltip !== undefined}
           wrapper={children => (
-            <ChaiseTooltip placement='bottom-start' tooltip={titleTooltip!}>
+            <OverlayTrigger placement='bottom-start' overlay={<Tooltip>{titleTooltip}</Tooltip>}>
               {children}
-            </ChaiseTooltip>
+            </OverlayTrigger>
           )}
         >
           <TitleTag
@@ -97,12 +98,12 @@ const FilterChiclet = ({
         </ConditionalWrapper>
       }
       {/* value */}
-      <ChaiseTooltip
+      <OverlayTrigger
         placement='bottom-start'
-        tooltip={<>{valueTooltip ? valueTooltip : usedValue}</>}
+        overlay={<Tooltip>{valueTooltip ? valueTooltip : usedValue}</Tooltip>}
       >
         <span className='filter-chiclet-value chaise-btn chaise-btn-secondary'>{usedValue}</span>
-      </ChaiseTooltip>
+      </OverlayTrigger>
     </div>
   )
 }

@@ -26,10 +26,6 @@ var testParams = {
         "accommodation_"+chaisePage.getEntityRow("product-record", "accommodation", [{column: "id",value: "2002"}]).RID+".bib"
     ],
     related_table_name_with_page_size_annotation: "accommodation_image",
-    inline_none_test: {
-      index: 4,
-      displayname: 'booking'
-    },
     page_size: 2,
     related_tables: [
         {
@@ -84,6 +80,9 @@ var testParams = {
             operator: "="
         },
         tables_order: ["accommodation_image", "media"]
+    },
+    multipleData: {
+        title : "Multiple Records Found"
     },
     sidePanelTest: {
       schemaName: "product-record",
@@ -204,9 +203,13 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
+            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
-            chaisePage.navigate(url);
-            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
+            browser.get(url);
+            var start = (new Date()).getTime();
+            chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
+                console.log((new Date()).getTime() - start);
+            });
         });
 
         it('should load document title defined in chaise-config.js and have deleteRecord=true, resolverImplicitCatalog=2, and shareCiteAcls defined', function() {
@@ -252,21 +255,23 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var keys = [];
             keys.push(testParams.no_related_data.key.name + testParams.no_related_data.key.operator + testParams.no_related_data.key.value);
+            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name + "/" + keys.join("&");
-            chaisePage.navigate(url)
-            chaisePage.recordPageReady();
+            browser.get(url);
+            chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElementInverse(element(by.id('rt-loading')));
         });
 
         it("should show all of the related tables in the correct order.", function() {
 
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
                     return (ct == testParams.no_related_data.tables_order.length);
                 });
             }, browser.params.defaultTimeout);
             var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
 
-            chaisePage.recordPage.getRelatedTables().count().then(function(count) {
+            chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
                 expect(count).toBe(testParams.no_related_data.tables_order.length, "Number of related tables is not correct");
 
                 return chaisePage.recordPage.getRelatedTableTitles();
@@ -276,9 +281,37 @@ describe('View existing record,', function() {
                 expect(showAllRTButton.getText()).toBe("Hide empty sections", "Sow all Related tables button has wrong text");
                 return showAllRTButton.click();
             }).then(function() {
-                expect(chaisePage.recordPage.getRelatedTables().count()).toBe(0, "Not all the related tables were hidden");
-                expect(chaisePage.recordPage.getRelatedTables().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).toBe(0, "Not all the related tables were hidden");
+                expect(chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count()).not.toBe(testParams.no_related_data.tables_order.length, "The full set of related tables were not properly hidden");
             })
+        });
+    });
+
+    describe("For multiple records fetched for particular filters", function() {
+
+        beforeAll(function() {
+            browser.ignoreSynchronization=true;
+            var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-record:" + testParams.table_name +  "/luxurious=true";
+            browser.get(url);
+            chaisePage.waitForElement(element(by.css('.modal-dialog ')));
+        });
+
+        it('A error modal window should appear with multiple records found error with correct title', function(){
+            var modalTitle = chaisePage.errorModal.getTitle();
+            expect(modalTitle.getText()).toBe(testParams.multipleData.title, "The title of multiple record error pop is not correct");
+
+        });
+
+        it('On click of OK button the page should redirect to recordset page', function(){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function(btn){
+                return chaisePage.recordsetPageReady();
+            }).then(function() {
+                return browser.driver.getCurrentUrl();
+            }).then(function(currentUrl) {
+                expect(currentUrl).toContain("recordset", "The redirection from record page to recordset in case of multiple records failed");
+            }).catch(function(err) {
+                console.log(err);
+            });
         });
     });
 
@@ -286,7 +319,8 @@ describe('View existing record,', function() {
 
         beforeAll(function() {
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.sidePanelTest.schemaName + ":" + testParams.sidePanelTest.tableName +  "/id=" + testParams.sidePanelTest.id;
-            chaisePage.navigate(url);
+            browser.ignoreSynchronization=true;
+            browser.get(url);
             recSidePanelCat_5 = chaisePage.recordPage.getSidePanelItemById(5);
             hideTocBtn = chaisePage.recordPage.getHideTocBtn();
             chaisePage.waitForElement(hideTocBtn);
@@ -298,7 +332,7 @@ describe('View existing record,', function() {
         });
 
         it('On click of Related table name in TOC, page should move to the contents and open the table details', function(done){
-            var rtTableHeading = chaisePage.recordPage.getRelatedTableAccordion(testParams.sidePanelTest.tableToShow).element(by.css('.accordion-collapse'));
+            var rtTableHeading = chaisePage.recordPage.getRelatedTableAccordion(testParams.sidePanelTest.tableToShow);
 
             browser.wait(EC.elementToBeClickable(recSidePanelCat_5), browser.params.defaultTimeout);
             recSidePanelCat_5.click().then(function(className) {
@@ -306,7 +340,7 @@ describe('View existing record,', function() {
                 expect(rtTableHeading.isDisplayed()).toBeTruthy("Category_5 heading is not visible.");
                 return rtTableHeading.getAttribute("class");
             }).then (function(className) {
-                expect(className).toContain("show", "Related table panel is not open when clicked through TOC.");
+                expect(className).toContain("panel-open", "Related table panel is not open when clicked through TOC.");
                 done();
             }).catch( function(err) {
                 console.log(err);
@@ -316,17 +350,12 @@ describe('View existing record,', function() {
 
         it('Record count along with heading should match for the panel and related table content should be in correct order', function(done){
             chaisePage.recordPage.getSidePanelTableTitles().then(function(tableNames){
-                // for (var i=0; i<tableNames.length; i++){
-                //     tableNames[i] = tableNames[i].replace(/ +/g, " ");
-                // }
-
+                for (var i=0; i<tableNames.length; i++){
+                    tableNames[i] = tableNames[i].replace(/ +/g, " ");
+                }
                 expect(tableNames.length).toEqual(testParams.sidePanelTest.tocCount, "Count mismatch for number of related tables in the side panel");
-                tableNames.forEach(function (tableName, idx) {
-                    tableName.getText().then(function (name) {
-                        expect(name.replace(/ +/g, " ")).toEqual(testParams.sidePanelTest.sidePanelTableOrder[idx], "Order is not maintained for related tables in the side panel");
-                    }); 
-                })
-                
+                expect(tableNames).toEqual(testParams.sidePanelTest.sidePanelTableOrder, "Order is not maintained for related tables in the side panel");
+
                 done();
             }).catch( function(err) {
                 console.log(err);
@@ -336,6 +365,7 @@ describe('View existing record,', function() {
 
         it('Side panel should hide/show by clicking pull button', function(done){
             var recPan =  chaisePage.recordPage.getSidePanel();
+            recPan.allowAnimations(false);
 
             expect(hideTocBtn.element(by.className("chaise-icon")).getAttribute("class")).toContain('chaise-sidebar-close', 'Wrong icon for hide toc button');
             expect(recPan.getAttribute("class")).toContain('open-panel', 'Side Panel is NOT visible when it should be');

@@ -24,7 +24,9 @@ const useStateRef: UseStateRef = <S>(initialState?: S | (() => S)) => {
   /**
    * This will make sure the reference always has the latest used state variable
    */
-  ref.current = state;
+  useEffect(() => {
+    ref.current = state;
+  }, [state]);
 
   return [state, setState, ref];
 };

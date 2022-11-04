@@ -19,7 +19,7 @@ describe('Recordset add record,', function() {
         chaisePage.recordsetPageReady();
     });
 
-
+    
     it("show an inline comment instead of tooltip", function () {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
@@ -52,7 +52,7 @@ describe('Recordset add record,', function() {
         });
     });
 
-    it("verify view details link, search for a term, then verify view details link has changed", function (done) {
+    it("verify view details link, search for a term, then verify view details link has changed", function () {
         var baseUrl = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/RID=";
 
         chaisePage.recordsetPage.getRows().then(function (rows) {
@@ -84,9 +84,7 @@ describe('Recordset add record,', function() {
 
             // clear search
             return chaisePage.recordsetPage.getSearchClearButton().click();
-        }).then(function () {
-          done();
-        }).catch(chaisePage.catchTestError(done));
+        });
     });
 
     var allWindows;
@@ -143,14 +141,14 @@ describe('Recordset add record,', function() {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            chaisePage.waitForElement(element(by.css(".record-main-section-table")));
+            chaisePage.waitForElement(element(by.id("tblRecord")));
             done();
         }).catch(function (err) {
             done.fail(err);
         })
     });
 
-    it("go back to recordset should refresh the table with the new record", function(done) {
+    it("go back to recordset should refresh the table with the new record", function() {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         /**
          * we noticed this test case started failing on saucelabs,
@@ -174,8 +172,7 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(testParams.num_rows+1);
-            done();
-        }).catch(chaisePage.catchTestError(done));
+        });
     })
 
 });

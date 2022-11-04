@@ -4,9 +4,6 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_table-header.scss';
 import Dropdown from 'react-bootstrap/Dropdown';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
-// hooks
-import { useRef } from 'react';
-
 // models
 import { RecordsetConfig, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 
@@ -17,10 +14,9 @@ import useRecordset from '@isrd-isi-edu/chaise/src/hooks/recordset';
 import { LogActions, LogReloadCauses } from '@isrd-isi-edu/chaise/src/models/log';
 import { fixedEncodeURIComponent } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { CUSTOM_EVENTS, RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDEDIT_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { generateRandomInteger } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 
 type TableHeaderProps = {
@@ -31,10 +27,8 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   const {
     logRecordsetClientAction,
     colValues, page, pageLimit, totalRowCountHasTimeoutError,
-    reference, totalRowCount, update, isLoading
+    reference, totalRowCount, update, addRecordRequests, isLoading
   } = useRecordset();
-
-  const container = useRef<HTMLDivElement>(null);
 
   const pageLimits = [10, 25, 50, 75, 100, 200];
   if (pageLimits.indexOf(pageLimit) === -1) {
@@ -58,7 +52,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
 
   const handlePageLimitChange: any = (value: any) => {
     // log the action
-    logRecordsetClientAction(LogActions.PAGE_SIZE_SELECT, null, { 'page-size': value });
+    logRecordsetClientAction(LogActions.PAGE_SIZE_SELECT, null, {'page-size': value});
 
     // ask recordset provider to update the data
     const cause = LogReloadCauses.PAGE_LIMIT;
@@ -136,15 +130,9 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     const newRef = reference.table?.reference?.contextualize?.entryCreate;
     let appLink = newRef.appLink;
 
-    if (!!container.current) {
-      const eventDetails: { [key: string]: any } = { id: referrer_id };
-
-      // currently containerDetails is not used for this code path,
-      // but for completeness I added the following:
-      if (config.containerDetails) eventDetails.containerDetails = config.containerDetails;
-
-      fireCustomEvent(CUSTOM_EVENTS.ADD_INTEND, container.current, eventDetails);
-    }
+    // add to the list of requests so when we focus, we know whether we need
+    // to update the page or not
+    addRecordRequests.current[referrer_id] = 1;
 
     if (appLink) {
       appLink = appLink + (appLink.indexOf('?') === -1 ? '?' : '&') +
@@ -177,7 +165,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     const isAddableDisplayMode = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0
       && config.displayMode !== RecordsetDisplayMode.PURE_BINARY_POPUP_UNLINK;
 
-    return isAddableDisplayMode && reference && reference.canCreate;
+    return isAddableDisplayMode && config.editable && reference && reference.canCreate;
   }
 
   /**
@@ -209,7 +197,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
   };
 
   return (
-    <div className='chaise-table-header row' ref={container}>
+    <div className='chaise-table-header row'>
       <div
         className={
           'chaise-table-header-total-count col-xs-12 col-sm-6' +

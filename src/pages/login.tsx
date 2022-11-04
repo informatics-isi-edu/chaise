@@ -1,10 +1,10 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_login-app.scss';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
@@ -44,14 +44,7 @@ const LoginPopupApp = (): JSX.Element => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSpinner, setShowSpinner] = useState(false);
 
-  // since we're using strict mode, the useEffect is getting called twice in dev mode
-  // this is to guard against it
-  const setupStarted = useRef<boolean>(false);
-
   useEffect(() => {
-    if (setupStarted.current) return;
-    setupStarted.current = true;
-
     const validConfig = validateTermsAndConditionsConfig(cc.termsAndConditionsConfig);
     let hasGroup = false;
 
@@ -137,25 +130,25 @@ const LoginPopupApp = (): JSX.Element => {
           After completing enrollment on that page, come back and click the <b>Proceed</b> button to begin using the new features of this site.
         </p>
         <div className='btn-container'>
-          <ChaiseTooltip
+          <OverlayTrigger
             placement='bottom-start'
-            tooltip={<>Click to sign up for {cc.termsAndConditionsConfig.groupName}.</>}
+            overlay={<Tooltip>Click to sign up for {cc.termsAndConditionsConfig.groupName}.</Tooltip>}
           >
             <a className='chaise-btn chaise-btn-primary'
               href={cc.termsAndConditionsConfig.joinUrl}
               target='_blank'
               rel='noreferrer'>Sign Up
             </a>
-          </ChaiseTooltip>
-          <ChaiseTooltip
+          </OverlayTrigger>
+          <OverlayTrigger
             placement='bottom-start'
-            tooltip='Click to proceed to the application after joining the group.'
+            overlay={<Tooltip>Click to proceed to the application after joining the group.</Tooltip>}
           >
             <button className='chaise-btn chaise-btn-secondary'
               onClick={() => reLogin()}
             >Proceed
             </button>
-          </ChaiseTooltip>
+          </OverlayTrigger>
         </div>
         {showSpinner && <ChaiseSpinner />}
       </div>
@@ -171,7 +164,12 @@ const LoginPopupApp = (): JSX.Element => {
 
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
-  <AppWrapper appSettings={loginSettings} displaySpinner>
+  <AppWrapper
+    appSettings={loginSettings}
+    includeAlerts={false}
+    includeNavbar={false}
+    displaySpinner={true}
+  >
     <LoginPopupApp />
   </AppWrapper>
 );

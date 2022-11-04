@@ -15,7 +15,6 @@ describe("Domain filter pattern support,", function () {
         browser.wait(EC.elementToBeClickable(fk));
         fk.click().then(function () {
             chaisePage.waitForElement(fkModal)
-            // TODO allowAnimations only works for angularjs and should be removed after migration
             fkModal.allowAnimations(false);
 
             modal = chaisePage.recordEditPage.getModalTitle();

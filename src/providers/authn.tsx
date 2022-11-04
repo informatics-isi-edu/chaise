@@ -30,8 +30,8 @@ export const AuthnContext = createContext<{
   logout: (action: string) => void;
   logoutWithoutRedirect: (action: string) => void;
   modalLogin: (
-    notifyErmrestCB: sessionCbFunction,
-    notifyErmrestRejectCB: sessionCbFunction | null,
+    notifyErmrestCB: sessionCbFunction, 
+    notifyErmrestRejectCB: sessionCbFunction | null, 
     logAction: string
   ) => void;
   popupLogin: (logAction: string | null, postLoginCB?: sessionCbFunction) => void;
@@ -136,7 +136,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   // the prompt expiration token does not exist OR it has expired
   const showPreviousSessionAlert = () => {
     return (
-      AuthnStorageService.keyExistsInStorage(PREVIOUS_SESSION_KEY) &&
+      AuthnStorageService.keyExistsInStorage(PREVIOUS_SESSION_KEY) && 
       (!AuthnStorageService.keyExistsInStorage(PROMPT_EXPIRATION_KEY) || AuthnStorageService.expiredToken(PROMPT_EXPIRATION_KEY)));
   }
 
@@ -162,8 +162,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         getSession('').then((response: any) => {
           // TODO: make sure this works how we expect with state variables
           if (!shouldReloadPageAfterLogin(session)) {
-            // TODO: discuss this code path
-            // alert(`${response.client.full_name} logged in`);
+            alert(`${response.client.full_name} logged in`);
           } else {
             windowRef.location.reload();
           }

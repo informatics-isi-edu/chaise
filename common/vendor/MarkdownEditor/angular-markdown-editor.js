@@ -32,7 +32,7 @@
     'use strict';
 
     angular.module('angular-markdown-editor', [])
-    .directive('markdownEditor', ['$rootScope', 'ERMrest', 'helpPages', 'modalUtils', 'UriUtils', function($rootScope, ERMrest, helpPages, modalUtils, UriUtils) {
+    .directive('markdownEditor', ['$rootScope', 'ERMrest', 'modalUtils', 'UriUtils', function($rootScope, ERMrest, modalUtils, UriUtils) {
 
         /**
          * Add new extra buttons: Strikethrough & Table
@@ -53,7 +53,7 @@
                                 glyph: "glyphicon glyphicon-question-sign"
                             },
                             callback: function(e) {
-                                window.open(UriUtils.getHelpPageURL(helpPages.MARKDOWN_HELP.location));
+                                window.open(UriUtils.chaiseDeploymentPath() + 'recordedit/mdHelp.html');
                             }
                         }, {
                             name: 'cmdPreview',

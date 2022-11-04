@@ -10,7 +10,6 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import {
   ChaiseError, CustomError, DifferentUserConflictError, ForbiddenAssetAccess,
-  InvalidHelpPage,
   NoRecordError, NoRecordRidError, UnauthorizedAssetAccess
 } from '@isrd-isi-edu/chaise/src/models/errors';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -61,12 +60,7 @@ const ErrorModal = (): JSX.Element | null => {
   // ----------- map error to proper modal properties ------------------//
 
   const showLogin = !session && !(
-    exception instanceof DifferentUserConflictError ||
-    exception instanceof InvalidHelpPage
-  );
-
-  const skipMaybeNeedLoginMessage = (
-    exception instanceof InvalidHelpPage
+    exception instanceof DifferentUserConflictError
   );
 
   // ---------------- message, submessage, and pageName ---------------//
@@ -105,7 +99,7 @@ const ErrorModal = (): JSX.Element | null => {
   /**
    * if user is not logged in add info that they might need to login
    */
-  if (!skipMaybeNeedLoginMessage && !session) {
+  if (!session) {
     if (exception instanceof NoRecordError || exception instanceof NoRecordRidError) {
       // if no logged in user, change the message
       const messageReplacement = (exception instanceof NoRecordError ? MESSAGE_MAP.noRecordForFilter : MESSAGE_MAP.noRecordForRid);
@@ -254,7 +248,7 @@ const ErrorModal = (): JSX.Element | null => {
         </div>
         {subMessage &&
           <button
-            className='chaise-btn chaise-btn-tertiary toggle-error-details'
+            className='chaise-btn chaise-btn-tertiary toggle-error-details' id='toggle-error-details'
             onClick={() => toggleSubMessage()}
           >
             <i className={`fa-solid fa-caret-${showSubMessage ? 'down' : 'right'}`}></i>
@@ -262,14 +256,14 @@ const ErrorModal = (): JSX.Element | null => {
           </button>
         }
         {showSubMessage &&
-          <pre className='error-details' style={{ wordWrap: 'unset' }}>{subMessage}</pre>
+          <pre id='error-details' style={{ wordWrap: 'unset' }}>{subMessage}</pre>
         }
       </Modal.Body>
       <Modal.Footer>
         {showOKBtn &&
           <button
             type='button' onClick={() => okCallback()}
-            className='chaise-btn chaise-btn-danger error-ok-button'
+            className='chaise-btn chaise-btn-danger' id='error-ok-button'
           >
             <span>OK</span>
           </button>
@@ -281,7 +275,7 @@ const ErrorModal = (): JSX.Element | null => {
           >
             <button
               type='button' onClick={() => reloadCallback()}
-              className='chaise-btn chaise-btn-secondary error-reload-button'
+              className='chaise-btn chaise-btn-secondary' id='error-reload-button'
             >
               <span>Reload</span>
             </button>
@@ -294,7 +288,7 @@ const ErrorModal = (): JSX.Element | null => {
           >
             <button
               type='button' onClick={() => continueCallback()}
-              className='chaise-btn chaise-btn-secondary footer-continue-btn error-continue-button'
+              className='chaise-btn chaise-btn-secondary footer-continue-btn' id='error-continue-button'
             >
               <span>{exception.errorData?.continueBtnText}</span>
             </button>

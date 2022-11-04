@@ -30,11 +30,7 @@ const DisplayValue = ({
     }
   }
 
-  const usedClassNames: string[] = [];
-  if (className) usedClassNames.push(className);
-  if (addClass) usedClassNames.push('markdown-container');
-
-  const usedClassName = usedClassNames.length > 0 ? usedClassNames.join(' ') : undefined;
+  const usedClassName = className ? className : (addClass ? 'markdown-container': '');
 
   if (value?.isHTML && value?.value) {
     return (
@@ -44,7 +40,7 @@ const DisplayValue = ({
       </span>
     )
   }
-  return <span className={usedClassName}>{value?.value}</span>
+  return <span>{value?.value}</span>
 }
 
 export default DisplayValue;

@@ -23,8 +23,7 @@
   }
 
   // show not-allowed cursor and not allow click
-  &[disabled],
-  &.disabled {
+  &[disabled] {
     cursor: not-allowed;
     &:active {
       pointer-events: none;
@@ -40,9 +39,7 @@
   }
 
   &.chaise-btn.chaise-btn-primary[disabled],
-  &.chaise-btn.chaise-btn-secondary[disabled],
-  &.chaise-btn.chaise-btn-primary.disabled,
-  &.chaise-btn.chaise-btn-secondary.disabled {
+  &.chaise-btn.chaise-btn-secondary[disabled] {
     color: $disabled-color;
     background-color: $disabled-background-color;
     border-color: $disabled-background-color;
@@ -53,8 +50,7 @@
     border: none;
     background: transparent;
 
-    &[disabled],
-    &.disabled {
+    &[disabled] {
       color: $disabled-color;
     }
 
@@ -106,14 +102,4 @@
 // override the default behavior of dropdowns in bootstrap
 .show > button.chaise-btn.btn.dropdown-toggle:focus {
   box-shadow: none;
-}
-
-// export dropdown item
-.dropdown-item.export-menu-item {
-  color: $black-color !important;
-
-  &:hover,
-  &:focus {
-    text-decoration: none;
-  }
 }

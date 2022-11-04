@@ -222,7 +222,8 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
+            chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
             chaisePage.waitForElement(clearAll);
@@ -273,6 +274,8 @@ describe("Other facet features, ", function() {
                 // wait for request to return
                 browser.wait(EC.visibilityOf(clearAll), browser.params.defaultTimeout);
 
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
+
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                         return ct == testParams.filter_secondary_key.numRows;
@@ -288,6 +291,7 @@ describe("Other facet features, ", function() {
 
         it ("the selected value should be selected on the modal.", function (done) {
             chaisePage.clickButton(chaisePage.recordsetPage.getShowMore(idx)).then(function () {
+                chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getModalOptions().count().then(function(ct) {
                         return ct == 12;
@@ -368,7 +372,8 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
 
             // using browser.get with the same uri doesn't work, so we should just refresh
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
             browser.wait(EC.elementToBeClickable(clearAll));
@@ -420,12 +425,19 @@ describe("Other facet features, ", function() {
                         chaisePage.clickButton(sortBtn).then(function () {
                             chaisePage.recordsetPage.waitForInverseModalSpinner();
 
-                            // this will wait for the list to be the same as expected, otherwise will timeout
                             browser.wait(function () {
-                                return chaisePage.recordsetPage.getModalFirstColumn().getText().then(function (texts) {
-                                    return JSON.stringify(texts) === JSON.stringify(params.modalOptionsSortedByScalar);
-                                }).catch(chaisePage.catchTestError(done));
+                                return chaisePage.recordsetPage.getModalFirstColumn().then(function(values) {
+                                    return values.length == params.modalOptionsSortedByScalar.length;
+                                });
                             }, browser.params.defaultTimeout);
+
+                            browser.sleep(50);
+
+                            return chaisePage.recordsetPage.getModalFirstColumn();
+                        }).then(function (values) {
+                            values.forEach(function (val, idx) {
+                                expect(val.getText()).toEqual(params.modalOptionsSortedByScalar[idx], "modal options missmatch");
+                            });
 
                             done();
                         }).catch(chaisePage.catchTestError(done));
@@ -485,7 +497,7 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -604,7 +616,7 @@ describe("Other facet features, ", function() {
 
         beforeAll(function (done) {
             // using browser.get with the same uri doesn't work, so we should just refresh
-            chaisePage.navigate(uri)
+            chaisePage.refresh(uri)
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -685,7 +697,7 @@ describe("Other facet features, ", function() {
 
         beforeAll(function(done) {
             var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
             done();
         });
@@ -726,7 +738,7 @@ describe("Other facet features, ", function() {
 
         beforeAll(function() {
             var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElement(element(by.css('.modal-dialog ')));
         });
 
@@ -736,7 +748,7 @@ describe("Other facet features, ", function() {
         });
 
         it('Error modal message must summarize the issue', function(){
-            var modalText = chaisePage.errorModal.getBody();
+            var modalText = chaisePage.recordPage.getModalText();
             expect(modalText.getText()).toEqual(currParams.errorMessage, "The message in modal pop is not correct");
         });
 
@@ -753,9 +765,7 @@ describe("Other facet features, ", function() {
         });
 
         it('On click of OK button the page should dismiss the error and show proper results', function(done){
-            const modalOkBtn = chaisePage.errorModal.getOKButton();
-            browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
-            chaisePage.clickButton(modalOkBtn).then (function (){
+            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
                 // make sure it's showing proper number of values
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getRows().count().then(function(ct) {
@@ -778,7 +788,7 @@ describe("Other facet features, ", function() {
         beforeAll(function (done) {
             var uri = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
 
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element.all(by.id("spinner")).first());
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -845,7 +855,7 @@ describe("Other facet features, ", function() {
 
             uri += "/" + customFilterParams.ermrestFilter;
 
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
         });
 
@@ -969,7 +979,7 @@ describe("Other facet features, ", function() {
         };
 
         beforeAll(function (done) {
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -1115,7 +1125,7 @@ describe("Other facet features, ", function() {
         describe("from recordset app with multiple records", function () {
 
             beforeAll(function (done) {
-                chaisePage.navigate(uri);
+                chaisePage.refresh(uri);
                 chaisePage.waitForElementInverse(element(by.id("spinner")));
 
                 clearAll = chaisePage.recordsetPage.getClearAllFilters();
@@ -1153,13 +1163,13 @@ describe("Other facet features, ", function() {
             var hidePanelBtn, showPanelBtn;
 
             beforeAll(function (done) {
-                chaisePage.navigate(uri);
+                chaisePage.refresh(uri);
 
                 chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "recordedit");
-                    chaisePage.navigate(uri);
+                    chaisePage.refresh(uri);
 
                     chaisePage.recordeditPageReady();
 
@@ -1243,9 +1253,9 @@ describe("Other facet features, ", function() {
 
                 browser.getCurrentUrl().then(function (url) {
                     var uri = url.replace("recordset", "record");
-                    chaisePage.navigate(uri);
+                    chaisePage.refresh(uri);
 
-                    chaisePage.waitForElement(element(by.css('.record-main-section-table')));
+                    chaisePage.waitForElement(element(by.id('tblRecord')));
                     done();
                 }).catch(chaisePage.catchTestError(done));
             })
@@ -1286,14 +1296,16 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row to associate", function (done) {
-                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
+                // TODO: change selector once R is migrated to react
+                chaisePage.clickButton(chaisePage.recordsetPage.getAngularFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getRecordsetTableModalOptions().count().then(function (ct) {
                             return (ct == 1);
                         });
                     });
 
-                    return chaisePage.recordsetPage.getFacetFilters();
+                    // TODO: change selector once R is migrated to react
+                    return chaisePage.recordsetPage.getAngularFacetFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.associationPopupFacetFilter, "Filter for selected rows is incorrect");
 
@@ -1302,7 +1314,8 @@ describe("Other facet features, ", function() {
                     return chaisePage.clickButton(rowCheckbox);
                 }).then(function () {
                     //verify selected row filter
-                    return chaisePage.recordsetPage.getSelectedRowsFilters();
+                    // TODO: change selector once R is migrated to react
+                    return chaisePage.recordsetPage.getAngularSelectedRowsFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.associationPopupSelectedRowsFilter, "Filter for facet is incorrect");
                     // NOTE: we don't test add here because we aren't trying to test mutating data, but whether the popup behaves appropriately with faceting
@@ -1322,7 +1335,7 @@ describe("Other facet features, ", function() {
 
             uri += "/*::cfacets::" + customFacetParams.cfacetBlob;
 
-            chaisePage.navigate(uri);
+            chaisePage.refresh(uri);
             chaisePage.waitForElementInverse(element(by.id("spinner")));
         });
 

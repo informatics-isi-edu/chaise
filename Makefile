@@ -186,14 +186,19 @@ test: test-ALL_TESTS
 # HTML files that need to be created
 HTML=viewer/index.html \
 	 recordedit/index.html \
-	 $(DIST)/chaise-dependencies.html
+	 record/index.html \
+	 recordedit/mdHelp.html \
+	 lib/switchUserAccounts.html \
+	 $(DIST)/chaise-dependencies.html \
+	 help/index.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORDEDIT_JS_SOURCE_MIN) \
-	$(DIST)/$(VIEWER_JS_SOURCE_MIN)
+	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
+	$(DIST)/$(HELP_JS_SOURCE_MIN)
 
 SOURCE=src
 
@@ -232,6 +237,7 @@ SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
 	$(COMMON)/login.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
+	$(COMMON)/record.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
@@ -279,6 +285,8 @@ $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
+GOOGLE_DATASET_CONFIG=google-dataset-config.js
+
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
 	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
@@ -298,9 +306,10 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 # list of file and folders that will be sent to the given location
 RSYNC_FILE_LIST=common \
 	dist \
-	help-docs \
+	help \
 	images \
 	lib \
+	record \
 	recordedit \
 	scripts \
 	sitemap \
@@ -310,8 +319,7 @@ RSYNC_FILE_LIST=common \
 
 # the same list above but also includes the config files
 RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
-	$(JS_CONFIG) \
-	$(VIEWER_CONFIG)
+	$(JS_CONFIG)
 
 .make-rsync-list:
 	$(info - creating .make-rsync-list)
@@ -326,6 +334,33 @@ RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
 # vendor files that will be treated externally in webpack
 WEBPACK_EXTERNAL_VENDOR_FILES= \
 	$(MODULES)/plotly.js-basic-dist-min/plotly-basic.min.js
+
+# -------------------------- record app -------------------------- #
+RECORD_ROOT=record
+
+RECORD_JS_SOURCE=$(RECORD_ROOT)/record.app.js \
+	$(RECORD_ROOT)/record.utils.js \
+	$(RECORD_ROOT)/record.controller.js
+
+RECORD_JS_SOURCE_MIN=record.min.js
+$(DIST)/$(RECORD_JS_SOURCE_MIN): $(RECORD_JS_SOURCE)
+	$(call bundle_js_files,$(RECORD_JS_SOURCE_MIN),$(RECORD_JS_SOURCE))
+
+RECORD_JS_VENDOR_ASSET=
+
+RECORD_CSS_SOURCE=
+
+.make-record-includes: $(BUILD_VERSION)
+	$(info - creating .make-record-includes)
+	@> .make-record-includes
+	@$(call add_css_link,.make-record-includes,$(RECORD_CSS_SOURCE))
+	@$(call add_js_script, .make-record-includes,$(SHARED_JS_VENDOR_BASE) $(RECORD_JS_VENDOR_ASSET) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(GOOGLE_DATASET_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(RECORD_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-record-includes)
+
+record/index.html: record/index.html.in .make-record-includes
+	$(info - creating record/index.html)
+	@$(call build_html, .make-record-includes, record/index.html)
+
 
 # -------------------------- recordedit app -------------------------- #
 RECORDEDIT_ROOT=recordedit
@@ -362,6 +397,22 @@ RECORDEDIT_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.
 recordedit/index.html: recordedit/index.html.in .make-recordedit-includes
 	$(info - creating recordedit/index.html)
 	@$(call build_html,.make-recordedit-includes,recordedit/index.html)
+
+# -------------------------- markdown help app -------------------------- #
+MDHELP_JS_SOURCE=$(RECORDEDIT_ROOT)/mdHelp.app.js
+
+MDHELP_CSS_SOURCE=$(RECORDEDIT_ROOT)/mdHelpStyle.min.css
+
+.make-mdhelp-includes: $(BUILD_VERSION)
+	@> .make-mdhelp-includes
+	$(info - creating .make-mdhelp-includes)
+	@$(call add_css_link,.make-mdhelp-includes,$(MDHELP_CSS_SOURCE))
+	@$(call add_js_script,.make-mdhelp-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(MDHELP_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-mdhelp-includes)
+
+recordedit/mdHelp.html: recordedit/mdHelp.html.in .make-mdhelp-includes
+	$(info - creating recordedit/mdHelp.html)
+	@$(call build_html, .make-mdhelp-includes, recordedit/mdHelp.html)
 
 # -------------------------- viewer app -------------------------- #
 VIEWER_ROOT=viewer
@@ -406,6 +457,43 @@ VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.
 viewer/index.html: viewer/index.html.in .make-viewer-includes
 	$(info - creating viewer/index.html)
 	@$(call build_html, .make-viewer-includes, viewer/index.html)
+
+# -------------------------- switch user help app -------------------------- #
+SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
+
+.make-switchuser-includes: $(BUILD_VERSION)
+	@> .make-switchuser-includes
+	$(info - creating .make-switchuser-includes)
+	@$(call add_css_link,.make-switchuser-includes,)
+	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
+	@$(call add_ermrestjs_script,.make-switchuser-includes)
+
+lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
+	$(info - creating lib/switchUserAccounts.html)
+	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
+
+# -------------------------- help app -------------------------- #
+HELP_JS_SOURCE=help/help.app.js
+
+HELP_JS_SOURCE_MIN=help.min.js
+$(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
+	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
+
+HELP_CSS_SOURCE=
+
+HELP_VENDOR_ASSET=
+
+.make-help-includes: $(BUILD_VERSION)
+	@> .make-help-includes
+	$(info - creating .make-help-includes)
+	@$(call add_css_link,.make-help-includes,$(HELP_CSS_SOURCE))
+	@$(call add_js_script,.make-help-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(HELP)/$(HELP_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(HELP_JS_SOURCE_MIN))
+	@$(call add_ermrestjs_script,.make-help-includes)
+
+help/index.html: help/index.html.in .make-help-includes
+	$(info - creating help/index.html)
+	@$(call build_html,.make-help-includes,help/index.html)
+
 
 # -------------------------- utility functions -------------------------- #
 

@@ -124,8 +124,7 @@ const RecordsetTable = ({
           res.push({
             displayname: tuple.displayname,
             uniqueId: tuple.uniqueId,
-            data: tuple.data,
-            tupleReference: tuple.reference
+            data: tuple.data
           });
         }
       });
@@ -160,7 +159,7 @@ const RecordsetTable = ({
       // if it's currently selected, then we should deselect (and vice versa)
       const isSelected = rowIndex !== -1;
       if (!isSelected) {
-        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data, tupleReference: tuple.reference });
+        res.push({ displayname: tuple.displayname, uniqueId: tuple.uniqueId, data: tuple.data });
       } else {
         res.splice(rowIndex, 1);
       }
@@ -188,6 +187,7 @@ const RecordsetTable = ({
         headerClassName = 'multi-select-header';
         inner = (
           <>
+            {/* TODO test id changes to class */}
             <ChaiseTooltip
               placement='right'
               tooltip={'Select all rows on this page.'}
@@ -235,7 +235,7 @@ const RecordsetTable = ({
         break;
     }
     return (
-      <th className={`actions-header${headerClassName ? ` ${headerClassName}`: ''}`}>{inner}</th>
+      <th className={`actions-header ${headerClassName}`}>{inner}</th>
     )
   }
 
@@ -290,7 +290,7 @@ const RecordsetTable = ({
               </ChaiseTooltip>
             }
             {!col.hasError && col.isLoading &&
-              <span className='table-column-spinner'><Spinner animation='border' size='sm' /></span>
+              <span className='table-column-spinner'><Spinner size='sm' animation='border' /></span>
             }
             {!col.hasError && !col.isLoading && canSort &&
               <span className='column-sort-icon'>{renderColumnSortIcon(col)}</span>

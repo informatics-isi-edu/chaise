@@ -6,7 +6,7 @@ type ClearInputBtnProps = {
   show: boolean
 }
 
-const ClearInputBtn = ({
+export const ClearInputBtn = ({
   btnClassName,
   clickCallback,
   show
@@ -29,5 +29,3 @@ const ClearInputBtn = ({
     </div>
   )
 }
-
-export default ClearInputBtn;

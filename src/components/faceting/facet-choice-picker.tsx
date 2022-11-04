@@ -8,7 +8,7 @@ import SearchInput from '@isrd-isi-edu/chaise/src/components/search-input';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import useIsFirstRender from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
+import { useIsFirstRender } from '@isrd-isi-edu/chaise/src/hooks/is-first-render';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useVarRef from '@isrd-isi-edu/chaise/src/hooks/var-ref';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
@@ -258,18 +258,18 @@ const FacetChoicePicker = ({
     // we will set the checkboxRows to the value of this variable at the end
     const updatedRows: FacetCheckBoxRow[] = [];
 
-    // add not-null filter if it should be added
-    if (!facetColumnRef.current.hideNotNullChoice) {
-      updatedRows.push(getNotNullFacetCheckBoxRow(facetColumnRef.current.hasNotNullFilter));
+    // add not-null filter if it should be added and already has not been selected
+    if (!facetColumnRef.current.hideNotNullChoice && !facetColumnRef.current.hasNotNullFilter) {
+      updatedRows.push(getNotNullFacetCheckBoxRow());
     }
 
-    // add null filter if it should be added
-    if (!facetColumnRef.current.hideNullChoice) {
+    // add null filter if it should be added and already has not been selected
+    if (!facetColumnRef.current.hideNullChoice && !facetColumnRef.current.hasNullFilter) {
       updatedRows.push(getNullFacetCheckBoxRow(facetColumnRef.current.hasNullFilter));
     }
 
-    // add the already selected facets (except null and not-null since they are already added)
-    updatedRows.push(...getAppliedFilters().filter((f) => !f.isNotNull && f.uniqueId !== null));
+    // add the already selected facets
+    updatedRows.push(...getAppliedFilters());
 
     // maxCheckboxLen: Maximum number of checkboxes that we could show
     // (PAGE_SIZE + if not-null is allowed + if null is allowed)

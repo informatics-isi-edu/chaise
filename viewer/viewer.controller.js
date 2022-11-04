@@ -4,8 +4,8 @@
     angular.module('chaise.viewer')
 
     .controller('ViewerController',
-        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'helpPages', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
-        function (AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, helpPages, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
+        ['AlertsService', 'context', 'DataUtils', 'errorMessages', 'Errors', 'ErrorService', 'logService', 'messageMap', 'UiUtils', 'UriUtils', 'viewerAppUtils', '$window', '$rootScope','$scope', '$timeout',
+        function (AlertsService, context, DataUtils, errorMessages, Errors, ErrorService, logService, messageMap, UiUtils, UriUtils, viewerAppUtils, $window, $rootScope, $scope, $timeout) {
 
         var vm = this;
         var iframe = $window.frames[0];
@@ -60,7 +60,7 @@
                         });
                         break;
                     case "openDrawingHelpPage":
-                        $window.open(UriUtils.getHelpPageURL(helpPages.VIEWER_ANNOTATION.location), '_blank');
+                        $window.open(UriUtils.chaiseDeploymentPath() + "help/?page=viewer-annotation", '_blank');
                         break;
                     case "hideChannelList":
                         $scope.$apply(function(){

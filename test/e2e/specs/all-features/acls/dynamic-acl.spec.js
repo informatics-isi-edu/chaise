@@ -247,9 +247,9 @@ var testRecordEditDelete = function (id, editable, deletable) {
         var button = recordPage.getEditRecordButton();
         expect(button.isPresent()).toEqual(true, "edit button missing");
         if (editable) {
-            expect(button.getAttribute("aria-disabled")).toBe('false', "edit button disabled");
+            expect(button.getAttribute("disabled")).toBeFalsy("edit button disabled");
         } else {
-            expect(button.getAttribute("aria-disabled")).toBeTruthy('true', "edit button enabled");
+            expect(button.getAttribute("disabled")).toBeTruthy("edit button enabled");
         }
 
         done();
@@ -259,9 +259,9 @@ var testRecordEditDelete = function (id, editable, deletable) {
         var button = recordPage.getDeleteRecordButton();
         expect(button.isPresent()).toEqual(true, "delete button missing");
         if (deletable) {
-            expect(button.getAttribute("aria-disabled")).toBe('false', "delete button disabled");
+            expect(button.getAttribute("disabled")).toBeFalsy("delete button disabled");
         } else {
-            expect(button.getAttribute("aria-disabled")).toBe('true', "delete button enabled");
+            expect(button.getAttribute("disabled")).toBeTruthy("delete button enabled");
         }
 
         done();

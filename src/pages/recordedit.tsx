@@ -16,7 +16,7 @@ const recordeditSettings = {
   overrideExternalLinkBehavior: true
 };
 
-const RecordeditApp = (): JSX.Element => {
+const RecordeditApp = () : JSX.Element => {
 
   const { dispatchError } = useError();
 
@@ -30,7 +30,7 @@ const RecordeditApp = (): JSX.Element => {
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
       $log.info('reference resolved');
-    }).catch((err: any) => {
+    }).catch((err: any)=> {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
         err.errorData.redirectUrl = createRedirectLinkFromPath(err.errorData.redirectPath);
       }
@@ -45,7 +45,12 @@ const RecordeditApp = (): JSX.Element => {
 };
 
 ReactDOM.render(
-  <AppWrapper appSettings={recordeditSettings} includeAlerts includeNavbar displaySpinner>
+  <AppWrapper
+    appSettings={recordeditSettings}
+    includeAlerts={true}
+    includeNavbar={true}
+    displaySpinner={true}
+  >
     <RecordeditApp />
   </AppWrapper>,
   document.getElementById('chaise-app-root'),

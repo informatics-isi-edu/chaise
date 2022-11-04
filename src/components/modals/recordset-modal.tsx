@@ -1,11 +1,11 @@
 // components
-import Modal from 'react-bootstrap/Modal';
-import Spinner from 'react-bootstrap/Spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
+import Modal from 'react-bootstrap/Modal';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
+import { RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
-import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -13,8 +13,6 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 // models
 import { RecordsetDisplayMode, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordsetProps } from '@isrd-isi-edu/chaise/src/models/recordset';
-import { Displayname } from '@isrd-isi-edu/chaise/src/models/displayname';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
@@ -48,18 +46,10 @@ export type RecordestModalProps = {
   onSelectedRowsChanged?: (SelectedRow: SelectedRow[]) => boolean,
   /**
    * The function that will be called on submit
-   * Note: the modal won't close on submit and if that's the expected behavior,
-   * you should do it in this callback.
    */
   onSubmit: (selectedRows: SelectedRow[]) => void,
   /**
-   * Whether we should show the submit spinner or not
-   */
-  showSubmitSpinner?: boolean,
-  /**
-   * The function that will be called when user clicks on "cancel" button
-   * Note: the modal won't close by itself and if that's the expected behavior,
-   * you should do it in this callback.
+   * The function that will be called on closing the modal
    */
   onClose: () => void
 }
@@ -80,7 +70,6 @@ const RecordsetModal = ({
   comment,
   onSelectedRowsChanged,
   onSubmit,
-  showSubmitSpinner,
   onClose
 }: RecordestModalProps) => {
 
@@ -204,7 +193,7 @@ const RecordsetModal = ({
     }
   }
 
-  let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records.';
+  let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records';
   switch (displayMode) {
     case RecordsetDisplayMode.FACET_POPUP:
       submitText = 'Submit';
@@ -214,8 +203,8 @@ const RecordsetModal = ({
       submitTooltip = (
         <>
           <span>Disconnect the selected records from </span>
-          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>:
-          <code><DisplayValue value={recordsetProps.parentTuple?.displayname} /></code>.
+          <DisplayValue value={recordsetProps.parentReference?.displayname} />:
+          <DisplayValue value={recordsetProps.parentTuple?.displayname} />.
         </>
       )
       break;
@@ -224,8 +213,8 @@ const RecordsetModal = ({
       submitTooltip = (
         <>
           <span>Connect the selected records to </span>
-          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>:
-          <code><DisplayValue value={recordsetProps.parentTuple?.displayname} /></code>.
+          <DisplayValue value={recordsetProps.parentReference?.displayname} />:
+          <DisplayValue value={recordsetProps.parentTuple?.displayname} />.
         </>
       )
       break;
@@ -270,7 +259,7 @@ const RecordsetModal = ({
             <span>Link </span>
             <Title reference={recordsetProps.initialReference} />
             <span> to </span>
-            <Title reference={recordsetProps.parentReference} /><span>: </span>
+            <Title reference={recordsetProps.parentReference} /><span>:</span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
@@ -280,7 +269,7 @@ const RecordsetModal = ({
             <span>Unlink </span>
             <Title reference={recordsetProps.initialReference} />
             <span> from </span>
-            <Title reference={recordsetProps.parentReference} /><span>: </span>
+            <Title reference={recordsetProps.parentReference} /><span>:</span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
@@ -306,12 +295,6 @@ const RecordsetModal = ({
       onHide={onClose}
       ref={modalContainer}
     >
-      {showSubmitSpinner &&
-        <div className='modal-submit-spinner-container'>
-          <div className='modal-submit-spinner-backdrop'></div>
-          <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
-        </div>
-      }
       <Modal.Header ref={modalHeader}>
         <div className='top-panel-container'>
           <div className='top-flex-panel'>
@@ -327,10 +310,9 @@ const RecordsetModal = ({
                       <button
                         id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
                         type='button' onClick={submit}
-                        disabled={disableSubmit || showSubmitSpinner}
+                        disabled={disableSubmit}
                       >
-                        {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
-                        {showSubmitSpinner && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
+                        <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                         <span>{submitText}</span>
                       </button>
                     </ChaiseTooltip>
@@ -341,7 +323,7 @@ const RecordsetModal = ({
                   >
                     <button
                       className='chaise-btn chaise-btn-secondary pull-right modal-close' type='button'
-                      onClick={() => onCancelClick()} disabled={showSubmitSpinner}
+                      onClick={() => onCancelClick()}
                     >
                       <strong className='chaise-btn-icon'>X</strong>
                       <span>Cancel</span>
