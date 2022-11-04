@@ -4,14 +4,12 @@ var mustache = require('../../../../ermrestjs/vendor/mustache.min.js');
 var fs = require('fs');
 var EC = protractor.ExpectedConditions;
 const Q = require('q');
+const { browser } = require('protractor');
 
 exports.testPresentation = function (tableParams) {
     var notNullColumns = tableParams.columns.filter(function (c) { return !c.hasOwnProperty("value") || c.value != null; });
     var pageReadyCondition = function () {
-        return chaisePage.waitForElementInverse(element(by.id("spinner"))).then(function () {
-            // make sure the last related entity is visible
-            return chaisePage.waitForElementInverse(element(by.id('rt-loading')));
-        }).then(function () {
+        return chaisePage.recordPageReady().then(function () {
             return chaisePage.waitForAggregates();
         });
     };
@@ -32,8 +30,13 @@ exports.testPresentation = function (tableParams) {
         expect(subtitle.getText()).toEqual(tableParams.subTitle);
     });
 
-    it ("should have the correct table tooltip.", function () {
-        expect(chaisePage.recordPage.getEntitySubTitleTooltip()).toBe(tableParams.tableComment);
+    it ("subTitle should have the correct table tooltip.", function (done) {
+        chaisePage.testTooltipWithDone(
+            chaisePage.recordPage.getEntitySubTitleElement(),
+            tableParams.tableComment,
+            done,
+            'record'
+        );
     });
 
     it ("should have the correct head title using the heuristics for record app", function (done) {
@@ -54,11 +57,10 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("should show the action buttons properly", function() {
-        var editButton = chaisePage.recordPage.getEditRecordButton(),
+        const editButton = chaisePage.recordPage.getEditRecordButton(),
             createButton = chaisePage.recordPage.getCreateRecordButton(),
             deleteButton = chaisePage.recordPage.getDeleteRecordButton(),
-            // TODO: change once record app migrated
-            exportButton = chaisePage.recordsetPage.getAngularExportDropdown(),
+            exportButton = chaisePage.recordsetPage.getExportDropdown(),
             showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton(),
             shareButton = chaisePage.recordPage.getShareButton();
 
@@ -69,41 +71,21 @@ exports.testPresentation = function (tableParams) {
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
         browser.wait(EC.elementToBeClickable(shareButton), browser.params.defaultTimeout);
 
-        editButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        createButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        deleteButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        showAllRTButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        exportButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
-
-        shareButton.isDisplayed().then(function (bool) {
-            expect(bool).toBeTruthy();
-        });
+        expect(editButton.isDisplayed()).toBeTruthy();
+        expect(deleteButton.isDisplayed()).toBeTruthy();
+        expect(showAllRTButton.isDisplayed()).toBeTruthy();
+        expect(exportButton.isDisplayed()).toBeTruthy();
+        expect(shareButton.isDisplayed()).toBeTruthy();
     });
 
     exports.testSharePopup(tableParams.sharePopupParams);
 
-    it("should have '2' options in the dropdown menu.", function (done) {
-        // TODO: change once record app migrated
-        var exportButton = chaisePage.recordsetPage.getAngularExportDropdown();
+    it("should have '2' options in the export dropdown menu.", function (done) {
+        const exportButton = chaisePage.recordsetPage.getExportDropdown();
         browser.wait(EC.elementToBeClickable(exportButton), browser.params.defaultTimeout);
 
         chaisePage.clickButton(exportButton).then(function () {
-            // TODO: change once record app migrated
-            expect(chaisePage.recordsetPage.getAngularExportOptions().count()).toBe(2, "incorrect number of export options");
+            expect(chaisePage.recordsetPage.getExportOptions().count()).toBe(2, "incorrect number of export options");
             // close the dropdown
             return exportButton.click();
         }).then(function () {
@@ -116,8 +98,7 @@ exports.testPresentation = function (tableParams) {
 
     if (!process.env.CI) {
         it("should have 'This record (CSV)' as a download option and download the file.", function(done) {
-            // TODO: change once record app migrated
-            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var csvOption = chaisePage.recordsetPage.getExportOption("This record (CSV)");
                 expect(csvOption.getText()).toBe("This record (CSV)");
                 return csvOption.click();
@@ -137,8 +118,7 @@ exports.testPresentation = function (tableParams) {
         });
 
         it("should have 'BDBag' as a download option and download the file.", function(done) {
-            // TODO: change once record app migrated
-            chaisePage.recordsetPage.getAngularExportDropdown().click().then(function () {
+            chaisePage.recordsetPage.getExportDropdown().click().then(function () {
                 var bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
                 expect(bagOption.getText()).toBe("BDBag");
                 return bagOption.click();
@@ -163,7 +143,7 @@ exports.testPresentation = function (tableParams) {
     }
 
     it("should render columns which are specified to be visible and in order", function() {
-        chaisePage.recordPage.getAllColumnCaptions().then(function(pageColumns) {
+        chaisePage.recordPage.getAllColumnNames().then(function(pageColumns) {
             expect(pageColumns.length).toBe(notNullColumns.length);
             var index = 0;
             pageColumns.forEach(function(c) {
@@ -173,83 +153,69 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("should show line under columns which have a comment and inspect the comment value too", function() {
-        var columns = notNullColumns.filter(function(c) {
+    it("should show proper tooltips for columns that have it.", function(done) {
+        const columns = notNullColumns.filter(function(c) {
             return (typeof c.comment == 'string');
         });
-        chaisePage.recordPage.getColumnsWithUnderline().then(function(pageColumns) {
-            expect(pageColumns.length).toBe(columns.length);
-            var index = 0;
-            pageColumns.forEach(function(c) {
-                var comment = columns[index++].comment;
-                chaisePage.recordPage.getColumnComment(c).then(function(actualComment) {
-                    var exists = actualComment ? true : undefined;
-                    expect(exists).toBeDefined();
+        const testColumnTooltip = (idx) => {
+            if (idx === columns.length) {
+                done(); return;
+            }
 
-                    // Check comment is same
-                    expect(actualComment).toBe(comment);
-                });
-            });
-        });
+            const col = columns[idx];
+            const colEl = chaisePage.recordPage.getColumnNameElement(col.title);
+            chaisePage.testTooltipReturnPromise(colEl, col.comment, 'record').then(() => {
+                testColumnTooltip(idx + 1);
+            }).catch((err) => {
+                done.fail(err);
+            })
+        };
+
+        testColumnTooltip(0);
     });
 
     it("should show inline comment for inline table with one defined", function () {
         expect(chaisePage.recordPage.getInlineRelatedTableInlineComment(tableParams.inlineTableWithCommentName).getText()).toBe(tableParams.inlineTableComment, "inline comment is not correct");
     });
 
-    it("should render columns based on their markdown pattern.", function(done) {
-        var columns = tableParams.columns.filter(function(c) {return c.markdown_title;});
-        chaisePage.recordPage.getColumnCaptionsWithHtml().then(function(pageColumns) {
-            expect(pageColumns.length).toBe(columns.length, "number of captions with markdown name doesn't match.");
-            pageColumns.forEach(function(c, i) {
-                var col = columns[i];
-                c.getAttribute("innerHTML").then(function(html) {
-                    expect(html).toBe(col.markdown_title, "invalid name for column `" +  col.title + "`.");
-                    if (i === pageColumns.length - 1) done();
-                }).catch(function (err) {
-                    done.fail(err);
-                })
-            });
-        }).catch(function (err) {
-            done.fail(err);
-        })
+    it("should render column names based on their markdown pattern.", function() {
+        tableParams.columns.forEach((col) => {
+            if (!col.markdown_title) return;
+            const colEl = chaisePage.recordPage.getColumnNameElement(col.markdown_title);
+            // NOTE the actual displayname is inside two spans
+            expect(colEl.element(by.css('span span span')).getAttribute('innerHTML')).toEqual(col.markdown_title, `missmatch for title=${col.title}`);
+        });
     });
 
     it("should validate the values of each column", function () {
-        expect(element.all(by.className('entity-value')).count()).toEqual(notNullColumns.length, "length missmatch.");
-        var index = -1, columnUrl, aTag;
+        expect(chaisePage.recordPage.getAllColumnValues().count()).toEqual(notNullColumns.length, "length missmatch.");
         notNullColumns.forEach(function (column) {
             if (!column.hasOwnProperty("value")) {
                 return;
             }
 
-            var errMessage = "value mismatch for column " + column.title;
+            const errMessage = "value mismatch for column " + column.title;
+            const columnTitle = column.markdown_title ? column.markdown_title : column.title;
 
-            var columnEls;
-            if (column.type=='inline') {
-                // get the value at row 5 of the table list of values
-                columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
+            let columnEls;
+            if (column.type == 'inline' || column.match === 'html') {
+                columnEls = chaisePage.recordPage.getEntityRelatedTable(columnTitle);
                 expect(chaisePage.recordPage.getMarkdownContainer(columnEls).getAttribute('innerHTML')).toContain(column.value, errMessage);
-            } else if (column.match=='html') {
-                expect(chaisePage.recordPage.getEntityRelatedTableScope(column.title).getAttribute('innerHTML')).toBe(column.value, errMessage);
-            } else if (column.title == 'User Rating'){
-                expect(chaisePage.recordPage.getEntityRelatedTableScope('<strong>User Rating</strong>').getAttribute('innerHTML')).toBe(column.value, errMessage);
-            } else {
-                columnEls = chaisePage.recordPage.getEntityRelatedTable(column.title);
+            }  else {
+                columnEls = chaisePage.recordPage.getEntityRelatedTable(columnTitle);
                 if (column.presentation) {
                     if (column.presentation.type === "inline") columnEls = chaisePage.recordPage.getMarkdownContainer(columnEls);
 
-                    chaisePage.recordPage.getLinkChild(columnEls).then(function (aTag) {
-                        var dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
-                        columnUrl = mustache.render(column.presentation.template, {
-                            "catalog_id": process.env.catalogId,
-                            "chaise_url": process.env.CHAISE_BASE_URL,
-                        });
-                        columnUrl += "RID=" + dataRow.RID;
-
-                        expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
-                        expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
+                    const aTag = chaisePage.recordPage.getLinkChild(columnEls);
+                    const dataRow = chaisePage.getEntityRow("product-record", column.presentation.table_name, column.presentation.key_value);
+                    let columnUrl = mustache.render(column.presentation.template, {
+                        "catalog_id": process.env.catalogId,
+                        "chaise_url": process.env.CHAISE_BASE_URL,
                     });
+                    columnUrl += "RID=" + dataRow.RID;
+
+                    expect(aTag.getAttribute('href')).toContain(columnUrl, errMessage + " for url");
+                    expect(aTag.getText()).toEqual(column.value, errMessage + " for caption");
                 } else {
                     expect(columnEls.getAttribute('innerText')).toBe(column.value, errMessage);
                 }
@@ -271,13 +237,13 @@ exports.testPresentation = function (tableParams) {
         var displayName, tableCount, title,
             relatedTables = tableParams.related_tables;
 
-        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getLoadingElement())), browser.params.defaultTimeout);
+        browser.wait(EC.not(EC.visibilityOf(chaisePage.recordPage.getRelatedSectionSpinner())), browser.params.defaultTimeout);
         browser.wait(function() {
-            return chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(ct) {
+            return chaisePage.recordPage.getRelatedTables().count().then(function(ct) {
                 return (ct=relatedTables.length);
             });
         }, browser.params.defaultTimeout);
-        chaisePage.recordPage.getRelatedTablesWithPanelandHeading().count().then(function(count) {
+        chaisePage.recordPage.getRelatedTables().count().then(function(count) {
             expect(count).toBe(relatedTables.length,'Mismatch in Related table count!');
             tableCount = count;
 
@@ -315,20 +281,26 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(done){
-        var EC = protractor.ExpectedConditions,
-            markdownEntity = element(by.id('entity-4-markdown')), //TODO this should be a function, it's also is assuming the order
-            bookingName = "booking";
 
+    /**
+     * NOTE this test should be improved
+     * while the rest of test cases are not making any assumption about the page,
+     * this one is assuming certain inline related entity
+     */
+    it("visible column related table with inline inbound fk should display 'None' in markdown display mode if no data was found.",function(done){
+        const EC = protractor.ExpectedConditions,
+            displayname = tableParams.inline_none_test.displayname;
+
+        const relatedEl = chaisePage.recordPage.getEntityRelatedTable(displayname);
         var confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
         var getRowDeleteBtn = function (index) {
-            return chaisePage.recordPage.getRelatedTableRowDelete(bookingName, index, true);
+            return chaisePage.recordPage.getRelatedTableRowDelete(displayname, index, true);
         }
 
-        browser.executeScript("return $('.toggle-display-link')[0].click()").then(function () {
-            return chaisePage.waitForElement(element(by.id('entity-booking')))
-        }).then(function () {
-            return chaisePage.waitForElement(element(by.id("rt-" + bookingName)));
+        const toggleBtn = chaisePage.recordPage.getToggleDisplayLink(displayname, true);
+        chaisePage.clickButton(toggleBtn).then(function () {
+            // make sure the table shows up
+            return chaisePage.waitForElement(chaisePage.recordPage.getRelatedTable(displayname));
         }).then(function () {
             // delete the first row
             return chaisePage.clickButton(getRowDeleteBtn(0));
@@ -336,11 +308,10 @@ exports.testPresentation = function (tableParams) {
             browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
             return chaisePage.clickButton(confirmButton);
         }).then(function () {
-            chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             // make sure there is 1 row
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTableRows(displayname).count().then(function(ct) {
                     return (ct==1);
                 });
             }, browser.params.defaultTimeout);
@@ -351,20 +322,20 @@ exports.testPresentation = function (tableParams) {
             browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
             return chaisePage.clickButton(confirmButton);
         }).then(function () {
-            chaisePage.waitForElementInverse(element(by.id("spinner")));
 
             // make sure there are zero rows
             browser.wait(function() {
-                return chaisePage.recordPage.getRelatedTableRows(bookingName).count().then(function(ct) {
+                return chaisePage.recordPage.getRelatedTableRows(displayname).count().then(function(ct) {
                     return (ct==0);
                 });
             }, browser.params.defaultTimeout);
 
             // switch the display mode
-            return chaisePage.recordPage.getToggleDisplayLink(bookingName, true).click();
+            return chaisePage.clickButton(chaisePage.recordPage.getToggleDisplayLink(displayname, true));
         }).then(function(){
-            browser.wait(EC.visibilityOf(markdownEntity), browser.params.defaultTimeout);
-            expect(markdownEntity.getText()).toBe('None',"Incorrect text for empty markdown!");
+            const md = chaisePage.recordPage.getMarkdownContainer(relatedEl);
+            browser.wait(EC.visibilityOf(md), browser.params.defaultTimeout);
+            expect(md.getText()).toBe('None',"Incorrect text for empty markdown!");
             done();
         }).catch(function(err){
             console.log(err);
@@ -372,18 +343,22 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
+    /**
+     * NOTE this test should be improved
+     * while the rest of test cases are not making any assumption about the page,
+     * this one is assuming certain inline related entity.
+     * This test case also relies on the previous `it`
+     */
     it("empty inline inbound fks should disappear when 'Hide All Related Records' was clicked.",function(done){
-        var showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+        const showAllRTButton = chaisePage.recordPage.getShowAllRelatedEntitiesButton();
+        const displayname = tableParams.inline_none_test.displayname;
 
-		chaisePage.clickButton(showAllRTButton).then(function () {
-			expect(chaisePage.recordPage.getEntityRelatedTable("booking").isPresent()).toBeFalsy();
-			return chaisePage.clickButton(showAllRTButton);
-		}).then(function () {
-			done();
-		}).catch(function(err){
-            console.log(err);
-            done.fail();
-        });
+        chaisePage.clickButton(showAllRTButton).then(function () {
+          expect(chaisePage.recordPage.getEntityRelatedTable(displayname).isDisplayed()).toBeFalsy();
+          return chaisePage.clickButton(showAllRTButton);
+        }).then(function () {
+          done();
+        }).catch(chaisePage.catchTestError(done));
     });
 
     // Related tables are contextualized with `compact/brief`, but if that is not specified it will inherit from `compact`
@@ -396,22 +371,15 @@ exports.testPresentation = function (tableParams) {
     });
 
     it("clicking the related table heading should change the heading and hide the table.", function(done) {
-        var displayName = tableParams.related_tables[0].title;
-        var rtAccordion = chaisePage.recordPage.getRelatedTableAccordion(displayName),
-            panelHeading = chaisePage.recordPage.getRelatedTableHeading(displayName),
-            panelSectionHeader = chaisePage.recordPage.getRelatedTableSectionHeader(displayName).element(by.tagName('i'));
+        const displayName = tableParams.related_tables[0].title;
+        const panelHeading = chaisePage.recordPage.getRelatedTableHeading(displayName);
 
         // related table should be open by default
-        expect(panelSectionHeader.getAttribute('class')).toContain('fa-chevron-down');
+        expect(panelHeading.getAttribute('class')).not.toContain('collapsed');
 
-        expect(rtAccordion.getAttribute("class")).toMatch("panel-open");
-
-        chaisePage.waitForElement(element(by.css(".accordion-toggle")))
-
-        chaisePage.clickButton(panelHeading.element(by.css(".accordion-toggle"))).then(function() {
-            expect(panelSectionHeader.getAttribute('class')).toContain('fa-chevron-right');
-            expect(rtAccordion.getAttribute("class")).not.toMatch("panel-open");
-
+        chaisePage.waitForElement(panelHeading);
+        chaisePage.clickButton(panelHeading).then(function() {
+            expect(panelHeading.getAttribute('class')).toContain('collapsed');
             done();
         }).catch(function (err) {
             console.log(err);
@@ -443,8 +411,13 @@ exports.testPresentation = function (tableParams) {
         });
     });
 
-    it("should show the related table names in the correct order in the Table of Contents (including inline)", function () {
-        expect(chaisePage.recordPage.getSidePanelTableTitles()).toEqual(tableParams.tocHeaders, "list of related tables in toc is incorrect");
+    it("should show the related table names in the correct order in the Table of Contents (including inline)", function (done) {
+        chaisePage.recordPage.getSidePanelTableTitles().then(function (headings) {
+            headings.forEach(function (heading, idx) {
+                expect(heading.getText()).toEqual(tableParams.tocHeaders[idx], "related table heading with index: " + idx + " in toc is incorrect");
+            })
+        })
+        done();
     });
 
     describe("regarding inline related entities, ", function () {
@@ -489,9 +462,6 @@ exports.testSharePopup = function (sharePopupParams) {
                 // wait for dialog to open
                 return chaisePage.waitForElement(shareModal);
             }).then(function () {
-                // disable animations in modal so that it doesn't "fade out" (instead it instantly disappears when closed) which we can't track with waitFor conditions
-                shareModal.allowAnimations(false);
-
                 done();
             }).catch(function(err){
                 console.log(err);
@@ -503,7 +473,7 @@ exports.testSharePopup = function (sharePopupParams) {
             // verify modal dialog contents
             var modalTitle = chaisePage.recordEditPage.getModalTitle();
             chaisePage.waitForElement(modalTitle).then(function () {
-                return chaisePage.recordPage.waitForCitation();                
+                return chaisePage.recordPage.waitForCitation();
             }).then(function () {
                 // make sure the loader is not displayed
                 expect(modalTitle.getText()).toBe(sharePopupParams.title, "Share citation modal title is incorrect");
@@ -543,13 +513,13 @@ exports.testSharePopup = function (sharePopupParams) {
                     // verify versioned link
                     // NOTE this is conditional because in some cases the version link is not based on resolver and is not easy to test
                     if (sharePopupParams.verifyVersionedLink) {
-                        expect(chaisePage.recordPage.getVersionedLinkText().getText()).toContain(sharePopupParams.permalink, "versioned link url does not contain the permalink");
+                        expect(chaisePage.recordPage.getVersionedLinkElement().getText()).toContain(sharePopupParams.permalink, "versioned link url does not contain the permalink");
                     }
                 }
 
                 // verify permalink
                 expect(subheaders[sharePopupParams.hasVersionedLink ? 1 : 0].getText()).toContain("Live Link", "versioned link header is incorrect");
-                expect(chaisePage.recordPage.getPermalinkText().getText()).toBe(sharePopupParams.permalink, "permalink url is incorrect");
+                expect(chaisePage.recordPage.getLiveLinkElement().getText()).toBe(sharePopupParams.permalink, "permalink url is incorrect");
 
                 done();
             }).catch(function (err) {
@@ -559,7 +529,7 @@ exports.testSharePopup = function (sharePopupParams) {
 
         var numCopyIcons = sharePopupParams.hasVersionedLink ? 2 : 1;
         it("should have " + numCopyIcons + " copy to clipboard icons visible.", function (done) {
-            expect(element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
+            expect(element(by.css(".share-modal-links")).all(by.css(".chaise-copy-to-clipboard-btn")).count()).toBe(numCopyIcons, "wrong number of copy to clipboard icons");
             done();
         });
 
@@ -567,7 +537,7 @@ exports.testSharePopup = function (sharePopupParams) {
         xit("should have 2 copy to clipboard icons visible and verify they copy the content.", function () {
             var copyIcons, copyInput;
 
-            element(by.id("share-link")).all(by.css(".chaise-copy-to-clipboard-btn")).then(function (icons) {
+            element(by.css(".share-modal-links")).all(by.css(".chaise-copy-to-clipboard-btn")).then(function (icons) {
                 copyIcons = icons;
 
                 expect(icons.length).toBe(2, "wrong number of copy to clipboard icons");
@@ -578,16 +548,16 @@ exports.testSharePopup = function (sharePopupParams) {
                 // creating a new input element
                 return browser.executeScript(function () {
                     var el = document.createElement('input');
-                    el.setAttribute('id', 'copy_input');
+                    el.setAttribute('id', 'test_copy_input');
 
-                    document.getElementById("share-link").appendChild(el);
+                    document.querySelector(".share-modal-links").appendChild(el);
                 });
             }).then(function () {
                 // use the browser to send the keys "ctrl/cmd" + "v" to paste contents
-                copyInput = element(by.id("copy_input"));
+                copyInput = element(by.id("test_copy_input"));
                 copyInput.sendKeys(protractor.Key.chord(protractor.Key.SHIFT, protractor.Key.INSERT));
 
-                return chaisePage.recordPage.getVersionedLinkText().getText();
+                return chaisePage.recordPage.getVersionedLinkElement().getText();
             }).then(function (versionedLink) {
 
                 // select the input and get it's "value" attribute to verify the pasted contents
@@ -679,7 +649,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
     if (!params.isInline) {
         it("title should be correct.", function (done) {
-            var titleEl = chaisePage.recordPage.getRelatedTableSectionHeader(params.displayname);
+            var titleEl = chaisePage.recordPage.getRelatedTableSectionHeaderDisplayname(params.displayname);
             chaisePage.waitForElement(titleEl).then(function () {
                 expect(titleEl.getText()).toBe(params.displayname, "heading missmatch.");
                 done();
@@ -713,15 +683,6 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
             it('should be displayed.', function (done) {
                 expect(exploreBtn.isDisplayed()).toBeTruthy("view more is not visible.");
                 done();
-            });
-
-            it('should have the correct tooltip.', function(done){
-                chaisePage.recordPage.getColumnCommentHTML(exploreBtn).then(function(comment){
-                    expect(comment).toBe("'Explore more <code>" + params.displayname + "</code> records related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on View More button");
-                    done();
-                }).catch(function(err) {
-                    done.fail(err);
-                });
             });
 
             if (params.viewMore){
@@ -763,53 +724,59 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
 
             if (params.isMarkdown || (params.isInline && !params.isTableMode)) {
                 it ("markdown container must be visible.", function (done) {
-                    chaisePage.waitForElement(currentEl.element(by.css('.markdown-container'))).then(function () {
-                        expect(currentEl.element(by.css('.markdown-container')).isDisplayed()).toBeTruthy("didn't have markdown");
+                    chaisePage.waitForElement(chaisePage.recordPage.getMarkdownContainer(currentEl)).then(function () {
+                        expect(chaisePage.recordPage.getMarkdownContainer(currentEl).isDisplayed()).toBeTruthy("didn't have markdown");
                         done();
                     })
-                    
+
                 });
 
                 if (params.markdownValue) {
                     it ("correct markdown values should be visible.", function (done) {
-                        expect(currentEl.element(by.css('.markdown-container')).getAttribute('innerHTML')).toEqual(params.markdownValue);
+                        expect(chaisePage.recordPage.getMarkdownContainer(currentEl).getAttribute('innerHTML')).toEqual(params.markdownValue);
                         done();
                     });
                 }
 
                 if (params.canEdit) {
-                    it ("`Edit mode` button should be visible to switch to tabular mode.", function (done) {
+                    it ("`Edit mode` button should be visible to switch to tabular mode.", function () {
                         // revert is `Display`
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Edit mode");
-                        chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display edit controls for <code>" + params.displayname + "</code> related to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Edit button");
-                            done();
-                        }).catch(function(err) {
-                            done.fail(err);
-                        });
+                    });
+
+                    it ("`Edit mode` button should have the proper tooltip", function (done) {
+                        chaisePage.testTooltipWithDone(
+                            markdownToggleLink,
+                            `Display edit controls for ${params.displayname} related to this ${params.baseTable}.`,
+                            done,
+                            'record'
+                        );
                     });
                 } else {
-                    it ("`Table mode` button should be visible to switch to tabular mode.", function (done) {
+                    it ("`Table mode` button should be visible to switch to tabular mode.", function () {
                         // revert is `Revert Display`
                         expect(markdownToggleLink.isDisplayed()).toBeTruthy();
                         expect(markdownToggleLink.getText()).toBe("Table mode");
-                        chaisePage.recordPage.getColumnCommentHTML(markdownToggleLink).then(function(comment){
-                            expect(comment).toBe("'Display related <code>" + params.displayname + "</code> in tabular mode.'", "Incorrect tooltip on Table Display button");
-                            done();
-                        }).catch(function(err) {
-                            done.fail(err);
-                        });
+                    });
+
+                    it ("`Table mode` button should have the proper tooltip", function (done) {
+                        chaisePage.testTooltipWithDone(
+                            markdownToggleLink,
+                            `Display related ${params.displayname} in tabular mode.`,
+                            done,
+                            'record'
+                        );
                     });
                 }
 
                 it ("clicking on the toggle should change the view to tabular.", function (done) {
-                    markdownToggleLink.click().then(function() {
+                    // .click will focus on the element and therefore shows the tooltip.
+                    // and that messes up other tooltip tests that we have
+                    chaisePage.clickButton(markdownToggleLink).then(function() {
                         expect(markdownToggleLink.getText()).toBe("Custom mode", "after toggle button missmatch.");
-                        return chaisePage.recordPage.getColumnComment(markdownToggleLink);
-                    }).then(function(comment){
-                        expect(comment).toBe("Switch back to the custom display mode", "Incorrect tooltip on Display button");
-
+                        return chaisePage.testTooltipReturnPromise(markdownToggleLink, "Switch back to the custom display mode.", 'record');
+                    }).then(function() {
                         //TODO make sure table is visible
                         toggled = true;
                         done();
@@ -849,20 +816,23 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
         });
 
         if (typeof params.canCreate === "boolean") {
-            it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function (done) {
-                var addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
+            let addBtn;
+            it ("`Add` button should be " + (params.canCreate ? "visible." : "invisible."), function () {
+                addBtn = chaisePage.recordPage.getAddRecordLink(params.displayname, params.isInline);
                 expect(addBtn.isPresent()).toBe(params.canCreate);
-                if(params.canCreate){
-                    chaisePage.recordPage.getColumnCommentHTML(addBtn.element(by.xpath("./.."))).then(function(comment){
-                        expect(comment).toBe("'Connect <code>" + params.displayname + "</code> records to this <code>" + params.baseTable + "</code>.'", "Incorrect tooltip on Add button");
-                        done();
-                    }).catch(function(error) {
-                        console.log(error);
-                        done.fail();
-                    });
-                }
-                done();
             });
+
+            if (!params.canCreate) return;
+
+            it ("`Add/Link` button should have the proper tooltip", function (done) {
+              let expected;
+              if (params.isAssociation) {
+                  expected = `Connect ${params.displayname} records to this ${params.baseTable}.`
+              } else {
+                  expected = `Create ${params.displayname} records for this ${params.baseTable}.`;
+              }
+              chaisePage.testTooltipWithDone(addBtn, expected, done, 'record');
+          });
         }
     });
 
@@ -934,14 +904,24 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                     });
 
                     if (params.isAssociation) {
-                        it ("button tooltip should be `Unlink`.", function (done) {
-                            expect(deleteBtn.getAttribute("uib-tooltip-html")).toBe('\'Disconnect <code>' + params.displayname + '</code>: <code>' + params.entityMarkdownName + '</code> from this <code>' + params.baseTable + '</code>.\'');
-                            done();
+                        // TODO this test case was very slow and sometimes it would just not work
+                        xit ("button tooltip should be `Unlink`.", function (done) {
+                            chaisePage.testTooltipWithDone(
+                                deleteBtn,
+                                `Disconnect ${params.displayname}: ${params.entityMarkdownName} from this ${params.baseTable}.`,
+                                done,
+                                'record'
+                            );
                         });
                     } else {
-                        it ("button tooltip be `Delete`.", function (done) {
-                            expect(deleteBtn.getAttribute("uib-tooltip")).toBe("Delete");
-                            done();
+                        // TODO this test case was very slow and sometimes it would just not work
+                        xit ("button tooltip be `Delete`.", function (done) {
+                            chaisePage.testTooltipWithDone(
+                                deleteBtn,
+                                'Delete',
+                                done,
+                                'record'
+                            );
                         });
                     }
 
@@ -955,8 +935,6 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                             return browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
                         }).then(function () {
                             return confirmButton.click();
-                        }).then(function () {
-                            return chaisePage.waitForElementInverse(element(by.id("spinner")));
                         }).then(function () {
 
                             // make sure the rows are updated
@@ -991,7 +969,9 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
     // if it was markdown, we are changing the view, change it back.
     afterAll(function (done) {
         if (toggled && !noRows) {
-            markdownToggleLink.click().then(function() {
+            // .click will focus on the element and therefore shows the tooltip.
+            // and that messes up other tooltip tests that we have
+            chaisePage.clickButton(markdownToggleLink).then(function() {
                 done();
             }).catch(function(error) {
                 console.log(error);
@@ -1019,7 +999,9 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
             var recordeditUrl = browser.params.url + '/recordedit/#' + browser.params.catalogId + "/" + params.schemaName + ":" + params.tableName;
 
             expect(addBtn.isDisplayed()).toBeTruthy("add button is not displayed");
-            addBtn.click().then(function () {
+            // .click will focus on the element and therefore shows the tooltip.
+            // and that messes up other tooltip tests that we have
+            chaisePage.clickButton(addBtn).then(function () {
                 // This Add link opens in a new tab so we have to track the windows in the browser...
                 return browser.getAllWindowHandles();
             }).then(function(handles) {
@@ -1103,7 +1085,9 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
     describe("Add feature, ", function () {
         it ("clicking on `Link` button should open up a modal.", function (done) {
             var addBtn = chaisePage.recordPage.getAddRecordLink(params.relatedDisplayname);
-            addBtn.click().then(function () {
+            // .click will focus on the element and therefore shows the tooltip.
+            // and that messes up other tooltip tests that we have
+            chaisePage.clickButton(addBtn).then(function () {
                 return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
             }).then(function () {
                 return chaisePage.recordEditPage.getModalTitle().getText();
@@ -1120,8 +1104,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
             }).then(function(ct){
                 expect(ct).toBe(params.totalCount, "association count missmatch.");
 
-                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
-                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+                expect(chaisePage.recordsetPage.getModalRecordsetTotalCount().getText()).toBe("Displaying all\n" + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
 
                 // check the state of the facet panel
                 expect(chaisePage.recordPage.getModalSidePanel().isDisplayed()).toBeTruthy("Side panel is not visible on load");
@@ -1139,9 +1122,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                 // go through the list and check their first column (which is the id)
                 disabledRows.forEach(function (r, index) {
-                    r.findElement(by.css("td:not(.action-btns)")).then(function (el) {
-                        expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
-                    });
+                    const el = r.element(by.css('td:not(.action-btns)'))
+                    expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
                 });
 
                 done();
@@ -1157,7 +1139,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
                 var searchInp = chaisePage.recordsetPage.getMainSearchInput(modal),
                     searchSubmitBtn = chaisePage.recordsetPage.getSearchSubmitButton(modal);
                 searchInp.sendKeys(params.search.term).then(function () {
-                    return searchSubmitBtn.click();  
+                    return searchSubmitBtn.click();
                 }).then(function () {
 
                     // tests the count
@@ -1174,9 +1156,8 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                     // go through the list and check their first column (which is the id)
                     disabledRows.forEach(function (r, index) {
-                        r.findElement(by.css("td:not(.action-btns)")).then(function (el) {
-                            expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
-                        });
+                        const el = r.element(by.css('td:not(.action-btns)'));
+                        expect(el.getText()).toMatch(params.disabledRows[index], "missmatch disabled row index=" + index);
                     });
 
                     // clear search
@@ -1209,6 +1190,7 @@ exports.testAddAssociationTable = function (params, isInline, pageReadyCondition
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalSubmit());
             }).then(function () {
+                // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
             }).then(function () {
                 return browser.wait(function () {
@@ -1236,7 +1218,9 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
     describe("Batch Unlink feature, ", function () {
         it ("clicking on `Unlink records` button should open up a modal.", function (done) {
             var unlinkBtn = chaisePage.recordPage.getUnlinkRecordsLink(params.relatedDisplayname);
-            unlinkBtn.click().then(function () {
+            // .click will focus on the element and therefore shows the tooltip.
+            // and that messes up other tooltip tests that we have
+            chaisePage.clickButton(unlinkBtn).then(function () {
                 return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
             }).then(function () {
                 return chaisePage.recordEditPage.getModalTitle().getText();
@@ -1253,8 +1237,8 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function(ct){
                 expect(ct).toBe(params.totalCount, "association count missmatch.");
 
-                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
-                expect(totalCountText).toBe("Displaying\nall " + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
+                var totalCountText = chaisePage.recordsetPage.getModalRecordsetTotalCount().getText();
+                expect(totalCountText).toBe("Displaying all\n" + params.totalCount +"\nof " + params.totalCount + " records", "association count display missmatch.");
 
                 // check the state of the facet panel
                 expect(chaisePage.recordPage.getModalSidePanel().isDisplayed()).toBeTruthy("Side panel is not visible on load");
@@ -1267,7 +1251,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
         });
 
         it ("user should be able to select values to unlink and submit.", function (done) {
-            var modalTitle, confirmUnlinkBtn, errorTitle, modalOkBtn;
+            var modalTitle, confirmUnlinkBtn, errorTitle, modalCloseBtn;
             var modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
             // select rows 2 and 4, then remove them
             var inp = chaisePage.recordsetPage.getModalRecordsetTableOptionByIndex(modal, 1);
@@ -1287,7 +1271,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function (text) {
                 expect(text).toBe("Confirm Unlink");
 
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
+                expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
                 confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 return browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
@@ -1298,7 +1282,6 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function () {
                 var unlinkSummaryModal = element(by.css('.modal-error'));
                 chaisePage.waitForElement(unlinkSummaryModal);
-                unlinkSummaryModal.allowAnimations(false);
 
                 errorTitle = chaisePage.errorModal.getTitle();
                 return browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1307,13 +1290,13 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
             }).then(function (text) {
                 // check error popup
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
+                expect(chaisePage.recordPage.getErrorModalText().getText()).toBe(params.postDeleteMessage, "The message in modal pop is not correct");
 
-                modalOkBtn = chaisePage.recordPage.getErrorModalOkButton()
-                return browser.wait(EC.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+                modalCloseBtn = chaisePage.errorModal.getCloseButton()
+                return browser.wait(EC.elementToBeClickable(modalCloseBtn), browser.params.defaultTimeout);
             }).then(function () {
                 // click ok
-                return chaisePage.clickButton(modalOkBtn);
+                return chaisePage.clickButton(modalCloseBtn);
             }).then(function () {
                 // check modal has 3 rows
                 return browser.wait(function () {
@@ -1329,6 +1312,7 @@ exports.testBatchUnlinkAssociationTable = function (params, isInline, pageReadyC
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
             }).then(function () {
+                // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
             }).then(function () {
                 return browser.wait(function () {
@@ -1439,7 +1423,9 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             var modal, modalTitle, confirmUnlinkBtn, unlinkSummaryModal, errorTitle;
             var unlinkBtn = chaisePage.recordPage.getUnlinkRecordsLink(params.relatedDisplayname);
             browser.wait(EC.elementToBeClickable(unlinkBtn), browser.params.defaultTimeout).then(function () {
-                return unlinkBtn.click();
+                // .click will focus on the element and therefore shows the tooltip.
+                // and that messes up other tooltip tests that we have
+                return chaisePage.clickButton(unlinkBtn);
             }).then(function () {
                 return chaisePage.waitForElement(chaisePage.recordEditPage.getModalTitle());
             }).then(function () {
@@ -1457,8 +1443,8 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function(ct){
                 expect(ct).toBe(params.countAfterUnlink, "association count missmatch.");
 
-                var totalCountText = chaisePage.recordsetPage.getTotalCount().getText();
-                expect(totalCountText).toBe("Displaying\nall " + params.countAfterUnlink +"\nof " + params.countAfterUnlink + " records", "association count display missmatch.");
+                var totalCountText = chaisePage.recordsetPage.getModalRecordsetTotalCount().getText();
+                expect(totalCountText).toBe("Displaying all\n" + params.countAfterUnlink +"\nof " + params.countAfterUnlink + " records", "association count display missmatch.");
 
                 modal = chaisePage.searchPopup.getUnlinkPureBinaryPopup();
                 // select "Television" (not deletable)
@@ -1480,7 +1466,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return modalTitle.getText();
             }).then(function (text) {
                 expect(text).toBe("Confirm Unlink");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
+                expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe("Are you sure you want to unlink 2 records?");
 
                 confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 return browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
@@ -1492,7 +1478,6 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 unlinkSummaryModal = element(by.css('.modal-error'));
                 return chaisePage.waitForElement(unlinkSummaryModal);
             }).then(function () {
-                unlinkSummaryModal.allowAnimations(false);
 
                 errorTitle = chaisePage.errorModal.getTitle();
                 return browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1501,10 +1486,10 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function (text) {
                 // check error popup
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
+                expect(chaisePage.recordPage.getErrorModalText().getText()).toBe(params.failedPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
-                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+                return chaisePage.clickButton(chaisePage.errorModal.getCloseButton());
             }).then(function () {
                 // check modal has 2 rows
                 return browser.wait(function () {
@@ -1525,8 +1510,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
         });
 
         it("should have rows still selected after failed delete", function (done) {
-            // TODO: change once record app migrated
-            expect(chaisePage.recordsetPage.getAngularSelectedRowsFilters().count()).toBe(2);
+            expect(chaisePage.recordsetPage.getSelectedRowsFilters().count()).toBe(2);
             done();
         });
 
@@ -1538,7 +1522,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
             chaisePage.clickButton(inp2).then(function () {
                 return browser.wait(function () {
-                    return chaisePage.recordsetPage.getAngularSelectedRowsFilters().count().then(function (ct) {
+                    return chaisePage.recordsetPage.getSelectedRowsFilters().count().then(function (ct) {
                         return (ct == 1);
                     });
                 });
@@ -1554,7 +1538,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 return modalTitle.getText();
             }).then(function (text) {
                 expect(text).toBe("Confirm Unlink");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe("Are you sure you want to unlink 1 record?");
+                expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe("Are you sure you want to unlink 1 record?");
 
                 confirmUnlinkBtn = chaisePage.recordPage.getConfirmDeleteButton();
                 return browser.wait(EC.elementToBeClickable(confirmUnlinkBtn), browser.params.defaultTimeout);
@@ -1566,7 +1550,6 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
                 unlinkSummaryModal = element(by.css('.modal-error'));
                 return chaisePage.waitForElement(unlinkSummaryModal);
             }).then(function () {
-                unlinkSummaryModal.allowAnimations(false);
 
                 errorTitle = chaisePage.errorModal.getTitle();
                 return browser.wait(EC.visibilityOf(errorTitle), browser.params.defaultTimeout);
@@ -1575,10 +1558,10 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
             }).then(function (text) {
                 // check error popup
                 expect(text).toBe("Batch Unlink Summary", "The title of batch unlink summary popup is not correct");
-                expect(chaisePage.recordPage.getModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
+                expect(chaisePage.recordPage.getErrorModalText().getText()).toBe(params.aclPostDeleteMessage, "The message in modal pop is not correct");
 
                 // click ok
-                return chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton());
+                return chaisePage.clickButton(chaisePage.errorModal.getCloseButton());
             }).then(function () {
                 // check modal has 1 row
                 return browser.wait(function () {
@@ -1593,6 +1576,7 @@ exports.testBatchUnlinkDynamicAclsAssociationTable = function (params, isInline,
 
                 return chaisePage.clickButton(chaisePage.recordsetPage.getModalCancel());
             }).then(function () {
+                // TODO why is this needed?
                 return browser.wait(EC.presenceOf(element(by.id('page-title'))), browser.params.defaultTimeout);
             }).then(function () {
                 return browser.wait(function () {

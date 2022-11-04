@@ -1,8 +1,8 @@
 /* eslint max-classes-per-file: 0 */
 
-import { errorNames, errorMessages } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { errorNames, errorMessages, HELP_PAGES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { chaiseDeploymentPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { chaiseDeploymentPath, fixedEncodeURIComponent, getHelpPageURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 
 // TODO eventually we might want to use this type instead of any
 interface ChaiseERMrestJSError {
@@ -120,7 +120,7 @@ export class NoRecordError extends ChaiseError {
    * @param  {array} filters  Filters used during retrival of data
    * @param  {string} message Error message
    */
-  constructor(filters: any, tableDisplayName: string, redirectUrl: string, message: string) {
+  constructor(filters: any, tableDisplayName: string, redirectUrl: string, message?: string) {
     let noDataMessage = (message === undefined) ? errorMessages.noDataMessage : message;
     if (filters) {
       for (let k = 0; k < filters.length; k++) {
@@ -222,7 +222,7 @@ export class DifferentUserConflictError extends ChaiseError {
 
       // TODO can we improve this?
       const link = `
-        <a id='switch-user-accounts-link' target='_blank' href='${chaiseDeploymentPath()}'lib/switchUserAccounts.html'>
+        <a id='switch-user-accounts-link' target='_blank' href='${getHelpPageURL(HELP_PAGES.SWITCH_USER_ACCOUNTS)}'>
           Switch User Accounts Document
         </a>
       `;
@@ -253,5 +253,16 @@ export class DifferentUserConflictError extends ChaiseError {
         continueCB
       }
     )
+  }
+}
+
+
+export class InvalidHelpPage extends ChaiseError {
+  constructor(message?: string, subMessage?: string) {
+    super(
+      errorNames.invalidHelpPage,
+      message || errorMessages.invalidHelpPage,
+      subMessage
+    );
   }
 }

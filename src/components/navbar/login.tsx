@@ -6,8 +6,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Dropdown from 'react-bootstrap/Dropdown';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ProfileModal from '@isrd-isi-edu/chaise/src/components/modals/profile-modal';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -187,12 +186,12 @@ const ChaiseLogin = (): JSX.Element => {
     const dropdownToggleComponent = <Dropdown.Toggle className='nav-link' as='a'>{displayName}</Dropdown.Toggle>;
 
     if (enableUserTooltip && showUserTooltip) {
-      return (<OverlayTrigger
+      return (<ChaiseTooltip
         placement='bottom-end'
-        overlay={<Tooltip>{userTooltip}</Tooltip>}
+        tooltip={userTooltip}
       >
         {dropdownToggleComponent}
-      </OverlayTrigger>)
+      </ChaiseTooltip>)
     }
 
     return (dropdownToggleComponent);

@@ -10,11 +10,21 @@ var testParams = {
     multipleRecordsTable : "multiple_records",
     tableNotFound : "accommodation_not_found",
     conflict : "Conflict",
-    deletionErrTextBooking : "This entry cannot be deleted as it is still referenced from the booking table. All dependent entries must be removed before this item can be deleted. If you have trouble removing dependencies please contact the site administrator.\n\nClick OK to go to the Accommodations.\nShow Error Details",
-    deletionErrTextAccommodationImg : "This entry cannot be deleted as it is still referenced from the accommodation_image table. All dependent entries must be removed before this item can be deleted.\n\nClick OK to go to the Accommodations.\nShow Error Details",
+    deletionErrTextBooking : [
+        "This entry cannot be deleted as it is still referenced from the booking table. " +
+        "All dependent entries must be removed before this item can be deleted. " +
+        "If you have trouble removing dependencies please contact the site administrator.\n\n" +
+        "Show Error Details"
+    ],
+    deletionErrTextAccommodationImg : [
+        "This entry cannot be deleted as it is still referenced from the accommodation_image table. " +
+        "All dependent entries must be removed before this item can be deleted. " +
+        "If you have trouble removing dependencies please contact the site administrator.\n\n" +
+        "Show Error Details"
+    ],
     uniqueConstraint : "Error The entry cannot be created/updated. Please use a different ID for this record.",
-    recordNotFoundModalText : "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to show the list of all records.\nShow Error Details",
-    multipleRecordFoundModalText : "There are more than 1 record found for the filters provided.\n\nClick OK to show all the matched records.\nShow Error Details",
+    recordNotFoundModalText : "The record does not exist or may be hidden.\nIf you continue to face this issue, please contact the system administrator.\n\nClick OK to show the list of all records.",
+    multipleRecordFoundModalText : "There are more than 1 record found for the filters provided.\n\nClick OK to show all the matched records.",
     tableNotFoundModalText : function() { return "Table " + this.tableNotFound + " not found in schema.\n\nClick OK to go to the Home Page."},
     sizeNotValidModalText : function() { return "'limit' must be greater than 0\n\nClick OK to go to the " + this.multipleRecordsTable + ".\nClick Reload to start over."},
     negativeLimitErrorText : "'limit' must be greater than 0\n\nClick OK to go to the Home Page.",
@@ -53,10 +63,11 @@ describe('Error related test cases,', function() {
 
     describe("For no record found in Record app", function() {
 
-        beforeAll(function() {
+        beforeAll(function(done) {
             url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name +  "/id=11223312121";
             chaisePage.navigate(url);
             chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
+            done();
         });
 
         it('An error modal window should appear with Record Not Found title', function(){
@@ -65,24 +76,12 @@ describe('Error related test cases,', function() {
         });
 
         it('Error modal text indicates users about error and provides them with navigation options', function(){
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toBe(testParams.recordNotFoundModalText, "The message in modal pop is not correct");
         });
 
-        it('Error modal should Show Error Details', function(done){
-            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
-            var errorDetails = chaisePage.errorModal.getErrorDetails();
-            chaisePage.waitForElement(showDetails);
-            showDetails.click().then(function(){
-                chaisePage.waitForElement(errorDetails);
-                expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
-                expect(errorDetails.getText()).toContain("Error", "error missmatch.");
-                done();
-            }).catch(chaisePage.catchTestError(done));
-        });
-
         it('On click of OK button the page should redirect to recordset page', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+            chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var newapplink = url.replace("record", "recordset"),
@@ -108,12 +107,12 @@ describe('Error related test cases,', function() {
         });
 
         it('Error modal text indicates users about error and provides them with navigation options', function(){
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toBe(testParams.tableNotFoundModalText(), "The message in modal pop is not correct");
         });
 
         it('On click of OK button the page should redirect Home page', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+            chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
@@ -130,10 +129,11 @@ describe('Error related test cases,', function() {
 
     describe("For multiple records error in Record app", function() {
 
-        beforeAll(function() {
+        beforeAll(function(done) {
             url = browser.params.url + "/record/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable +  "/id=10007";
             chaisePage.navigate(url);
             chaisePage.waitForElement(element(by.css('.modal-error .modal-dialog')));
+            done();
         });
 
         it('An error modal window should appear with Multiple Records Found title', function(){
@@ -142,24 +142,14 @@ describe('Error related test cases,', function() {
         });
 
         it('Error modal text indicates users about error and provides them with navigation options', function(){
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toBe(testParams.multipleRecordFoundModalText, "The message in modal pop is not correct");
         });
 
-        it('Error modal should Show Error Details', function(done){
-            var showDetails = chaisePage.errorModal.getToggleDetailsLink();
-            var errorDetails = chaisePage.errorModal.getErrorDetails();
-            chaisePage.waitForElement(showDetails);
-            showDetails.click().then(function(){
-                chaisePage.waitForElement(errorDetails);
-                expect(showDetails.getText()).toBe(testParams.hideErrors, "The Show/Hide message in modal pop is not correct");
-                expect(errorDetails.getText()).toContain("Error", "error missmatch.");
-                done();
-            }).catch(chaisePage.catchTestError(done));
-        });
-
         it('On click of OK button the page should redirect to recordset page', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then (function (){
+            var modalOkBtn = chaisePage.errorModal.getOKButton();
+            browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
+            modalOkBtn.click().then(function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 var newapplink = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.multipleRecordsTable;
@@ -183,12 +173,12 @@ describe('Error related test cases,', function() {
         });
 
         it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toBe(testParams.negativeLimitErrorText, "The message in modal pop is not correct");
         });
 
         it('On click of OK button the page should redirect to Home page', function(done){
-            chaisePage.recordPage.getErrorModalOkButton().click().then (function (){
+            chaisePage.errorModal.getOKButton().click().then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var homeAppUrl = browser.params.url,
@@ -220,7 +210,7 @@ describe('Error related test cases,', function() {
             }).then(function (text) {
                 expect(text).toBe("Confirm Delete", "Deleteion confirmation pop-up could not be opened!");
                 chaisePage.recordPage.getConfirmDeleteButton().click();
-                errModalClass =  chaisePage.recordPage.getModalText();
+                errModalClass =  chaisePage.errorModal.getBody();
                 chaisePage.waitForElement(errModalClass);
                 return errModalClass.getText();
             }).then(function (errorText) {
@@ -233,7 +223,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of Reload button the page should reload itself in Recordedit app', function(done){
-            chaisePage.clickButton(chaisePage.recordPage.getErrorModalReloadButton()).then (function (){
+            chaisePage.clickButton(chaisePage.errorModal.getReloadButton()).then (function (){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 expect(currentUrl).toBe(currentUrl, "Reload button could not refresh the recordedit page.");
@@ -251,11 +241,11 @@ describe('Error related test cases,', function() {
         });
 
         it('After clicking back button initial page should appear', function(done){
-            var modalOkBtn = chaisePage.recordPage.getErrorModalOkButton();
+            var modalOkBtn = chaisePage.errorModal.getOKButton();
 
             browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
 
-            chaisePage.clickButton(modalOkBtn).then(function () {
+            modalOkBtn.click().then(function () {
                 return chaisePage.recordsetPageReady();
             }).then(function () {
                 return browser.navigate().back();
@@ -291,7 +281,7 @@ describe('Error related test cases,', function() {
                 browser.wait(EC.presenceOf(confirmBtn), browser.params.defaultTimeout);
                 return confirmBtn.click();
             }).then(function () {
-                errModalClass =  chaisePage.recordPage.getModalText();
+                errModalClass =  chaisePage.errorModal.getBody();
                 return chaisePage.waitForElement(errModalClass);
             }).then(function() {
                 return errModalClass.getText();
@@ -355,7 +345,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should reload the page without paging condition but with invalid filter conditions', function(done){
-          const modalOkBtn = element(by.id('error-ok-button'));
+          const modalOkBtn = chaisePage.errorModal.getOKButton();
           // make sure ok button is clickable
           browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
           chaisePage.clickButton(modalOkBtn).then(function(){
@@ -372,7 +362,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should redirect to RecordSet', function(done){
-          const modalOkBtn = element(by.id('error-ok-button'));
+          const modalOkBtn = chaisePage.errorModal.getOKButton();
           // make sure ok button is clickable
           browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
           chaisePage.clickButton(modalOkBtn).then(function(){
@@ -411,7 +401,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should reload the page without paging conditions', function(done){
-          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function () {
+          chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then(function () {
               return browser.driver.getCurrentUrl();
           }).then (function(currentUrl) {
              recordsetPage = pageTestUrl.slice(0, pageTestUrl.search('@'));
@@ -447,7 +437,7 @@ describe('Error related test cases,', function() {
       });
 
       it('On click of OK button the page should reload the page without paging conditions', function(done){
-          chaisePage.clickButton(chaisePage.recordPage.getErrorModalOkButton()).then(function() {
+          chaisePage.clickButton(chaisePage.errorModal.getOKButton()).then(function() {
               // we cannot use recordPageReady because of the error,
               // we just make sure the url is correct
               return browser.wait(function () {
@@ -497,7 +487,7 @@ describe('Error related test cases,', function() {
         });
 
         it ("error modal should not display the raw message", function () {
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toBe(params.message, "The message in modal pop is not correct");
         });
 
@@ -532,7 +522,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to recordset page', function(done){
-            const modalOkBtn = element(by.id('error-ok-button'));
+            const modalOkBtn = chaisePage.errorModal.getOKButton();
             // make sure ok button is clickable
             browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
             modalOkBtn.click().then(function(){
@@ -564,13 +554,13 @@ describe('Error related test cases,', function() {
         });
 
         it('Error modal text indicates users about error and provides them with navigation options to Home Page', function(){
-            var modalText = chaisePage.recordPage.getModalText();
+            var modalText = chaisePage.errorModal.getBody();
             expect(modalText.getText()).toBe(testParams.sizeNotValidModalText(), "The message in modal pop is not correct");
         });
 
         it('On click of OK button the page should redirect to RecordSet', function(done){
             // This has to be .click(), if we use clickButton then it won't show the alert
-            chaisePage.recordPage.getErrorModalOkButton().click().then(function(){
+            chaisePage.errorModal.getOKButton().click().then(function(){
                 return browser.switchTo().alert().accept();
             }).then(function(){
                 return browser.driver.getCurrentUrl();
@@ -592,19 +582,16 @@ describe('Error related test cases,', function() {
                     return browser.manage().deleteCookie('webauthn');
                 }).then(function () {
                     // refresh the page
-                    browser.refresh()
-
-                    // TODO: fix when all apps migrated and alerts only show one way
+                    return browser.navigate().refresh();
+                }).then(function () {
+                    // make sure the app is ready
                     if (app === 'recordset') {
-                        chaisePage.recordsetPageReady();
-                        return browser.wait(function() {
-                            return chaisePage.recordEditPage.getReactAlertWarning();
-                        }, browser.params.defaultTimeout);
+                      return chaisePage.recordsetPageReady();
                     } else {
-                        return browser.wait(function() {
-                            return chaisePage.recordEditPage.getAlertWarning();
-                        }, browser.params.defaultTimeout);
+                      return chaisePage.recordPageReady();
                     }
+                }).then(function () {
+                    return chaisePage.recordEditPage.getAlertWarning();
                 }).then(function (alert) {
                     return alert.getText();
                 }).then(function (text) {

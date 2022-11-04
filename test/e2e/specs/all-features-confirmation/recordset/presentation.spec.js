@@ -268,11 +268,11 @@ describe('View recordset,', function () {
                 chaisePage.waitForAggregates();
             });
 
-            it ("should not show the total count if hide_row_count is true.", function () {
-                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n"+ activeListData.length + "\nrecords", "hide_row_count not honored");
+            it("should not show the total count if hide_row_count is true.", function () {
+                expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe("Displaying all\n" + activeListData.length + "\nrecords", "hide_row_count not honored");
             });
 
-            it ("should show correct table rows.", function (done) {
+            it("should show correct table rows.", function (done) {
                 chaisePage.recordsetPage.getRows().then(function (rows) {
                     expect(rows.length).toBe(activeListData.length, "row length missmatch.");
                     rows.forEach(function (row, rowIndex) {
@@ -296,7 +296,7 @@ describe('View recordset,', function () {
                 }).catch(chaisePage.catchTestError(done));
             });
 
-            it ("going to a page with no results, the loader for columns should hide.", function (done) {
+            it("going to a page with no results, the loader for columns should hide.", function (done) {
                 chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + activeListParams.schemaName + ":" + activeListParams.table_name + "/main_id=03");
                 chaisePage.recordsetPageReady()
                 chaisePage.waitForAggregates();
@@ -358,17 +358,16 @@ describe('View recordset,', function () {
                 });
             });
 
-            it('should display the permalink button & a tooltip on hovering over it', function () {
+            it('should display the permalink button & a tooltip on hovering over it', function (done) {
                 var permalink = chaisePage.recordsetPage.getPermalinkButton();
                 expect(permalink.isDisplayed()).toBe(true, "The permalink button is not visible on the recordset app");
-                browser.actions().mouseMove(permalink).perform();
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.permalink, "Incorrect tooltip on the Permalink button");
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                }).catch(function (err) {
-                    console.log(err);
-                });
+
+                chaisePage.testTooltipWithDone(
+                    permalink,
+                    testParams.tooltip.permalink,
+                    done,
+                    'recordset'
+                );
             });
 
             it("should autofocus on search box", function () {
@@ -394,11 +393,11 @@ describe('View recordset,', function () {
                 });
             });
 
-            it("should show correct table rows", function() {
-                chaisePage.recordsetPage.getRows().then(function(rows) {
+            it("should show correct table rows", function () {
+                chaisePage.recordsetPage.getRows().then(function (rows) {
                     expect(rows.length).toBe(4, "rows length missmatch.");
                     for (var i = 0; i < rows.length; i++) {
-                        (function(index) {
+                        (function (index) {
                             rows[index].all(by.tagName("td")).then(function (cells) {
                                 expect(cells.length).toBe(accommodationParams.columns.length + 1, "cells length missmatch for row=" + index);
                                 expect(cells[1].getText()).toBe(accommodationParams.data[index].title, "title column missmatch for row=" + index);
@@ -434,19 +433,16 @@ describe('View recordset,', function () {
                 });
             });
 
-            it("should display the Export dropdown button with proper tooltip.", function(done) {
+            it("should display the Export dropdown button with proper tooltip.", function (done) {
                 const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                 expect(exportDropdown.isDisplayed()).toBe(true, "The export dropdown button is not visible on the recordset app");
-                browser.actions().mouseMove(exportDropdown).perform();
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.exportDropdown, "Incorrect tooltip on the export dropdown button");
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                    done();
-                }).catch(function (err) {
-                    console.log(err);
-                    done.fail();
-                });
+
+                chaisePage.testTooltipWithDone(
+                    exportDropdown,
+                    testParams.tooltip.exportDropdown,
+                    done,
+                    'recordset'
+                );
             });
 
             it("should have '2' options in the dropdown menu.", function (done) {
@@ -465,14 +461,14 @@ describe('View recordset,', function () {
             });
 
             if (!process.env.CI) {
-                it("should have 'CSV' as a download option and download the file.", function(done) {
+                it("should have 'CSV' as a download option and download the file.", function (done) {
                     const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                     exportDropdown.click().then(function () {
                         const csvOption = element(by.partialLinkText('Search results (CSV)'));
                         expect(csvOption.getText()).toBe("Search results (CSV)");
                         return csvOption.click();
                     }).then(function () {
-                        browser.wait(function() {
+                        browser.wait(function () {
                             return fs.existsSync(process.env.PWD + "/test/e2e/Accommodations.csv");
                         }, browser.params.defaultTimeout).then(function () {
                             done();
@@ -485,7 +481,7 @@ describe('View recordset,', function () {
                     });
                 });
 
-                it("should have 'BDBag' as a download option and download the file.", function(done) {
+                it("should have 'BDBag' as a download option and download the file.", function (done) {
                     const exportDropdown = chaisePage.recordsetPage.getExportDropdown();
                     exportDropdown.click().then(function () {
                         const bagOption = chaisePage.recordsetPage.getExportOption("BDBag");
@@ -496,7 +492,7 @@ describe('View recordset,', function () {
                     }).then(function () {
                         return chaisePage.waitForElementInverse(chaisePage.recordsetPage.getExportModal());
                     }).then(function () {
-                        return browser.wait(function() {
+                        return browser.wait(function () {
                             return fs.existsSync(process.env.PWD + "/test/e2e/accommodation.zip");
                         }, browser.params.defaultTimeout);
                     }).then(function () {
@@ -507,44 +503,40 @@ describe('View recordset,', function () {
                 });
             }
 
-            it("should show information icon next in column headers which have a comment and inspect the comment value", function () {
+            it("should show information icon next in column headers which have a comment and inspect the comment value", function (done) {
                 var columns = accommodationParams.columns.filter(function (c) {
                     return typeof c.comment == 'string';
                 });
                 chaisePage.recordsetPage.getColumnsWithTooltipIcon().then(function (pageColumns) {
                     expect(pageColumns.length).toBe(columns.length);
-                    var index = 0;
-                    pageColumns.forEach(function (c) {
-                        var comment = columns[index++].comment;
 
-                        // hover over column header
-                        browser.actions().mouseMove(c).perform();
+                    const testColumnTooltip = (index) => {
+                        if (index === pageColumns.length) {
+                            done(); return;
+                        }
 
-                        var tooltip = chaisePage.getTooltipDiv();
-                        chaisePage.waitForElement(tooltip).then(function () {
-                            expect(tooltip.getText()).toBe(comment);
-                            // move cursor to hide tooltip
-                            return browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                        }).then(function () {
-                            chaisePage.waitForElementInverse(tooltip);
-                        }).catch(function (err) {
-                            console.log(err);
-                        });
-                    });
+                        var columnElement = pageColumns[index]
+                        var comment = columns[index].comment;
+                        chaisePage.testTooltipReturnPromise(columnElement, comment, 'recordset').then(() => {
+                            testColumnTooltip(index + 1);
+                        }).catch((err) => {
+                            done.fail(err);
+                        })
+                    };
+
+                    testColumnTooltip(0);
                 });
+            });
 
+            it("have coorect tooltip for action column", function (done) {
                 // Check tooltip of Action column
                 var actionCol = chaisePage.recordsetPage.getActionHeaderSpan();
-                browser.actions().mouseMove(actionCol).perform();
-
-                var tooltip = chaisePage.getTooltipDiv();
-                chaisePage.waitForElement(tooltip).then(function () {
-                    expect(tooltip.getText()).toBe(testParams.tooltip.actionCol);
-                    // move cursor to hide tooltip
-                    browser.actions().mouseMove(chaisePage.recordsetPage.getTotalCount()).perform();
-                }).catch(function (err) {
-                    console.log(err);
-                });
+                chaisePage.testTooltipWithDone(
+                    actionCol,
+                    testParams.tooltip.actionCol,
+                    done,
+                    'recordset'
+                );
             });
 
             it("apply different searches, ", function (done) {

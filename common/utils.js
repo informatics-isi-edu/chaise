@@ -235,6 +235,24 @@
         INT_8_MAX: 9223372036854775807
     })
 
+    .constant('helpPages', {
+        MARKDOWN_HELP: {
+            title: 'Markdown Help',
+            location: 'chaise/markdown-help',
+            isComponent: true
+        },
+        SWITCH_USER_ACCOUNTS: {
+            title: 'Switch User Accounts',
+            location: 'chaise/switch-user-accounts',
+            isComponent: true
+        },
+        VIEWER_ANNOTATION: {
+            title: 'Viewer Annotation',
+            location: 'chaise/viewer-annotation',
+            isComponent: false
+        }
+    })
+
     // should be used in combination with ng-bind-html
     // if we use ng-bind-html without this filter:
     //  - it will throw error when encounterd and "unsafe" html, while with this, we fail silently.
@@ -1173,6 +1191,13 @@
             return origin + "/" + uri;
         }
 
+        /**
+         * given the pageLocation, return the url to the help page.
+         */
+        function getHelpPageURL(pageLocation) {
+          return chaiseDeploymentPath() + 'help/?page=' + fixedEncodeURIComponent(pageLocation);
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -1198,7 +1223,8 @@
             splitVersionFromCatalog: splitVersionFromCatalog,
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
-            getAbsoluteURL: getAbsoluteURL
+            getAbsoluteURL: getAbsoluteURL,
+            getHelpPageURL: getHelpPageURL
         }
     }])
 
