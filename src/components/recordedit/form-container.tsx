@@ -4,6 +4,9 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import {fireCustomEvent} from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 import { useForm, FormProvider } from "react-hook-form";
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+
 
 const getFormDefaultValues = (name,  columns) => {
   const formValues = {};
@@ -53,7 +56,7 @@ const Form = ({ name, columns, classes = '', idx, f, hideCross, hMap }) => {
               <InputSwitch
                 key={c?.displayname?.value || i}  
                 displayErrors={true}
-                name={`${name}-${c?.displayname?.value || i}`}
+                name={`${name}-${makeSafeIdAttr(c?.displayname?.value)}`}
                 type='int'
                 containerClasses={'column-cell'}
                 // value={0}
@@ -93,14 +96,44 @@ const BlackBox = ({ idx, f, hideCross }) => {
   );
 };
 
+const generateInitialHMap = (columns) => {
+  const hMap = {};
+  columns.forEach(c => {
+    hMap[c?.displayname?.value] = [-1];
+  });
+  return hMap;
+}
+
+const handleAddForm = (hMap) => {
+  const hMapCpy = simpleDeepCopy(hMap);
+  hMapCpy.keys().forEach(k => {
+    hMapCpy[k].append(-1);
+  });
+  return hMapCpy;
+}
+
+const handleDeleteForm = (hMap, idx) => {
+  const hMapCpy = simpleDeepCopy(hMap);
+  hMapCpy.keys().forEach(k => {
+    hMapCpy[k].splice(idx,1);
+  });
+  return hMapCpy;
+}
+
 const FormContainer = ({ columns }) => {
   /*
-    Here a unique key to reference each form will be stored in the forms state variable
+    Here a unique key to reference each form will be stored in the forms state variable : f_i
   */
+  
   const [forms, setForms] = useState([1]);
 
-  // explain hmap here
-  const [hMap, setHMap] = useState({});
+  /**
+   * the height array is an array where h[i] is :
+   * -1: auto height
+   * value: height in px for that 
+   */
+
+  const [hMap, setHMap] = useState(generateInitialHMap(columns));
 
   // key: [auto auto 67]
 
@@ -108,6 +141,9 @@ const FormContainer = ({ columns }) => {
 
   const addForm = () => {
     setForms(forms => [...forms, forms.length+1]);
+    setHMap(hMap => {
+      return handleAddForm(hMap);
+    });
   };
 
 
@@ -119,6 +155,7 @@ const FormContainer = ({ columns }) => {
       forms.splice(idx, 1);
       return [...forms];
     });
+    setHMap(hMap => )
   }
 
   const handleHeightAdjustment = (event) => {
@@ -130,13 +167,13 @@ const FormContainer = ({ columns }) => {
 
     console.log({colName, height});
 
-    if(!(colName in hMap) || hMap[colName]!=height){    
-      setHMap(hMap => {
-        const newHMap = {...hMap, [colName]: height };
-        console.log({newHMap})
-        return newHMap;
-      });
-    }
+    // if(!(colName in hMap) || hMap[colName]!=height){    
+    //   setHMap(hMap => {
+    //     const newHMap = {...hMap, [colName]: height };
+    //     console.log({newHMap})
+    //     return newHMap;
+    //   });
+    // }
   }
 
   useEffect(() => {

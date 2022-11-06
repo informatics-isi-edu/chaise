@@ -99,13 +99,12 @@ const TextField = ({
   displayErrors,
   value,
   onFieldChange,
-}: NumericFieldProps): JSX.Element => {
+}: TextFieldProps): JSX.Element => {
 
   const { setValue, control } = useFormContext();
 
   const registerOptions = {
     required: false,
-    pattern: validationFunctionMap[type],
   };
 
   const formInput = useController({
@@ -207,7 +206,7 @@ const NumericField = ({
 
   const formRef = useRef();
 
-  const { setValue, control, formState: { touchedFields } } = useFormContext();
+  const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
 
   const registerOptions = {
     required: false,
@@ -230,7 +229,10 @@ const NumericField = ({
   
   const { error, isTouched } = fieldState;
 
-  const clearInput = () => setValue(name, '');
+  const clearInput = () => {
+    setValue(name, '');
+    clearErrors(name);
+  }
 
   useEffect(()=>{
     if(onFieldChange){
@@ -631,6 +633,18 @@ const InputSwitch = ({
           disableInput={disableInput}
           onFieldChange={onFieldChange} 
         />
+      case 'text':
+        return null;
+        return <TextField
+          name={name} 
+          classes={classes}
+          inputClasses={inputClasses}
+          clearClasses={clearClasses}
+          value={value}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange} 
+        />
+
       default:
         return null
     }
