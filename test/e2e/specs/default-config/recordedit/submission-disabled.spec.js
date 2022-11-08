@@ -29,16 +29,14 @@ describe("For error handling strategies on submission,", function() {
         // NOTE: adding this test here because eventually we are going to change the behavior
         // of updating an entity with no changes. Currently the update function throws an error,
         // whereas, later we will be disabling the submission button until changes were made in the form
-        it("warn the user when submitting data when no data was changed.", function() {
-            chaisePage.recordEditPage.submitForm();
-
-            browser.wait(function() {
-                return chaisePage.recordEditPage.getAlertWarning();
-            }, browser.params.defaultTimeout).then(function(error) {
-                return error.getText();
-            }).then(function(text) {
-                expect(text.indexOf("Warning No data was changed in the update request. Please check the form content and resubmit the data.")).toBeGreaterThan(-1, "The alert warning message was incorrect");
-            });
+        it("warn the user when submitting data when no data was changed.", function(done) {
+            chaisePage.recordEditPage.submitForm().then(() => {
+                const alert = chaisePage.recordEditPage.getAlertWarning();
+                return chaisePage.waitForElement(alert);
+            }).then(() => {
+                done();
+                expect(alert.getText()).toEqual("Warning No data was changed in the update request. Please check the form content and resubmit the data.");
+            }).catch(chaisePage.catchTestError(done));
         });
     });
 
@@ -54,7 +52,7 @@ describe("For error handling strategies on submission,", function() {
             chaisePage.recordeditPageReady();
         });
 
-        it("a conflict error should show an alert with a link to the conflicting record.", function() {
+        it("a conflict error should show an alert with a link to the conflicting record.", function(done) {
             chaisePage.recordEditPage.getInputForAColumn(testParams.conflict_column, 0).then(function(idInput) {
                 idInput.sendKeys(testParams.conflict_key);
                 expect(idInput.getAttribute('value')).toBe(testParams.conflict_key, "input does not show the correct value");
@@ -67,7 +65,9 @@ describe("For error handling strategies on submission,", function() {
 
                 var duplicate_uri = uri.replace('recordedit', 'record') + '/' + testParams.conflict_column + '=' + testParams.conflict_key;
                 expect(chaisePage.recordEditPage.getAlertErrorLinkHref()).toContain(duplicate_uri, "link to duplicate record is incorrect");
-            });
+
+                done();
+            }).catch(chaisePage.catchTestError(done));
         });
     });
 });

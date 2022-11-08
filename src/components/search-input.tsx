@@ -1,10 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Tooltip from 'react-bootstrap/Tooltip';
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// components
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+
+// hooks
+import { useEffect, useRef, useState } from 'react';
+
+// models
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
+
+// utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type SearchInputProps = {
@@ -138,10 +144,9 @@ const SearchInput = ({
     }
 
     return (
-      <OverlayTrigger
-        trigger={['hover', 'focus']}
+      <ChaiseTooltip
         placement='bottom-start'
-        overlay={<Tooltip>{inner}</Tooltip>}
+        tooltip={<>inner</>}
         onToggle={(nextshow: boolean) => {
           if (!placeholderEl.current) return;
 
@@ -160,7 +165,7 @@ const SearchInput = ({
         >
           {inner}
         </span>
-      </OverlayTrigger>
+      </ChaiseTooltip>
     );
   }
   return (
@@ -184,15 +189,15 @@ const SearchInput = ({
         />
       </div>
       <div className='chaise-input-group-append'>
-        <OverlayTrigger
+        <ChaiseTooltip
           placement='bottom-start'
-          overlay={
-            <Tooltip>
+          tooltip={
+            <>
               <p>Use space to separate between conjunctive terms, | (no spaces) to separate disjunctive terms and quotations for exact phrases.</p>
               <p>For example, <i><b>usc 1234</b></i> returns all records containing &ldquo;usc&rdquo; and &ldquo;1234&rdquo;.</p>
               <p><i><b>usc|1234</b></i> returns all records containing &ldquo;usc&rdquo; or &ldquo;1234&rdquo;.</p>
               <p><i><b>&ldquo;usc 1234&rdquo;</b></i> returns all records containing &ldquo;usc 1234&rdquo;.</p>
-            </Tooltip>
+            </>
           }
         >
           <button
@@ -201,7 +206,7 @@ const SearchInput = ({
           >
             <span className='chaise-btn-icon fa-solid fa-magnifying-glass' />
           </button>
-        </OverlayTrigger>
+        </ChaiseTooltip>
       </div>
     </div>
   );

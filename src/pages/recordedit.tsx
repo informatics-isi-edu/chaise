@@ -91,7 +91,7 @@ const RecordeditApp = (): JSX.Element => {
   return <Recordedit {...recordeditProps} />;
 };
 
-
+// TOSO: make sure this is what we want
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
   <AppWrapper

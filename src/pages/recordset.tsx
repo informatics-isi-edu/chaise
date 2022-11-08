@@ -158,12 +158,7 @@ const RecordsetApp = (): JSX.Element => {
 
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
-  <AppWrapper
-    appSettings={recordsetSettings}
-    includeAlerts={true}
-    includeNavbar={true}
-    displaySpinner={true}
-  >
+  <AppWrapper appSettings={recordsetSettings} includeAlerts includeNavbar displaySpinner>
     <RecordsetApp />
   </AppWrapper>
 );

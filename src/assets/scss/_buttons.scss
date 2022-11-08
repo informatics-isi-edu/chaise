@@ -107,3 +107,13 @@
 .show > button.chaise-btn.btn.dropdown-toggle:focus {
   box-shadow: none;
 }
+
+// export dropdown item
+.dropdown-item.export-menu-item {
+  color: $black-color !important;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+  }
+}

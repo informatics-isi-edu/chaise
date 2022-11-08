@@ -185,16 +185,13 @@ test: test-ALL_TESTS
 
 # HTML files that need to be created
 HTML=viewer/index.html \
-	 lib/switchUserAccounts.html \
-	 $(DIST)/chaise-dependencies.html \
-	 help/index.html
+	 $(DIST)/chaise-dependencies.html
 
 # the minified files that need to be created
 MIN=$(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) \
 	$(DIST)/$(SHARED_JS_SOURCE_MIN) \
 	$(DIST)/$(RECORD_JS_SOURCE_MIN) \
-	$(DIST)/$(VIEWER_JS_SOURCE_MIN) \
-	$(DIST)/$(HELP_JS_SOURCE_MIN)
+	$(DIST)/$(VIEWER_JS_SOURCE_MIN)
 
 SOURCE=src
 
@@ -233,7 +230,6 @@ SHARED_JS_SOURCE=$(DIST)/$(MAKEFILE_VAR) \
 	$(COMMON)/login.js \
 	$(COMMON)/modal.js \
 	$(COMMON)/navbar.js \
-	$(COMMON)/record.js \
 	$(COMMON)/recordCreate.js \
 	$(COMMON)/resizable.js \
 	$(COMMON)/storage.js \
@@ -281,8 +277,6 @@ $(JS_CONFIG): chaise-config-sample.js
 	cp -n chaise-config-sample.js $(JS_CONFIG) || true
 	touch $(JS_CONFIG)
 
-GOOGLE_DATASET_CONFIG=google-dataset-config.js
-
 $(DIST)/$(MAKEFILE_VAR): $(BUILD_VERSION)
 	$(info - creating makefile_variables.js)
 	@echo 'var chaiseBuildVariables = {};' > $(DIST)/$(MAKEFILE_VAR)
@@ -302,7 +296,7 @@ $(DIST)/chaise-dependencies.html: $(BUILD_VERSION)
 # list of file and folders that will be sent to the given location
 RSYNC_FILE_LIST=common \
 	dist \
-	help \
+	help-docs \
 	images \
 	lib \
 	scripts \
@@ -313,14 +307,17 @@ RSYNC_FILE_LIST=common \
 
 # the same list above but also includes the config files
 RSYNC_FILE_LIST_W_CONFIG=$(RSYNC_FILE_LIST) \
-	$(JS_CONFIG)
+	$(JS_CONFIG) \
+	$(VIEWER_CONFIG)
 
-.make-rsync-list:
+# build_version dep forces this file to regenerate in case the file list changed
+.make-rsync-list: $(BUILD_VERSION)
 	$(info - creating .make-rsync-list)
 	@> .make-rsync-list
 	@$(call add_array_to_file,$(RSYNC_FILE_LIST),.make-rsync-list)
 
-.make-rsync-list-w-config:
+# build_version dep forces this file to regenerate in case the file list changed
+.make-rsync-list-w-config: $(BUILD_VERSION)
 	$(info - creating .make-rsync-list-w-config)
 	@> .make-rsync-list-w-config
 	@$(call add_array_to_file,$(RSYNC_FILE_LIST_W_CONFIG),.make-rsync-list-w-config)
@@ -372,43 +369,6 @@ VIEWER_CSS_SOURCE=$(COMMON)/vendor/MarkdownEditor/styles/bootstrap-markdown.min.
 viewer/index.html: viewer/index.html.in .make-viewer-includes
 	$(info - creating viewer/index.html)
 	@$(call build_html, .make-viewer-includes, viewer/index.html)
-
-# -------------------------- switch user help app -------------------------- #
-SWITCH_USER_JS_SOURCE=lib/switchUserAccounts.app.js
-
-.make-switchuser-includes: $(BUILD_VERSION)
-	@> .make-switchuser-includes
-	$(info - creating .make-switchuser-includes)
-	@$(call add_css_link,.make-switchuser-includes,)
-	@$(call add_js_script,.make-switchuser-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN)  $(SWITCH_USER_JS_SOURCE))
-	@$(call add_ermrestjs_script,.make-switchuser-includes)
-
-lib/switchUserAccounts.html: lib/switchUserAccounts.html.in .make-switchuser-includes
-	$(info - creating lib/switchUserAccounts.html)
-	@$(call build_html,.make-switchuser-includes,lib/switchUserAccounts.html)
-
-# -------------------------- help app -------------------------- #
-HELP_JS_SOURCE=help/help.app.js
-
-HELP_JS_SOURCE_MIN=help.min.js
-$(DIST)/$(HELP_JS_SOURCE_MIN): $(HELP_JS_SOURCE)
-	$(call bundle_js_files,$(HELP_JS_SOURCE_MIN),$(HELP_JS_SOURCE))
-
-HELP_CSS_SOURCE=
-
-HELP_VENDOR_ASSET=
-
-.make-help-includes: $(BUILD_VERSION)
-	@> .make-help-includes
-	$(info - creating .make-help-includes)
-	@$(call add_css_link,.make-help-includes,$(HELP_CSS_SOURCE))
-	@$(call add_js_script,.make-help-includes,$(SHARED_JS_VENDOR_BASE) $(DIST)/$(SHARED_JS_VENDOR_ASSET_MIN) $(HELP)/$(HELP_VENDOR_ASSET) $(JS_CONFIG) $(DIST)/$(SHARED_JS_SOURCE_MIN) $(DIST)/$(HELP_JS_SOURCE_MIN))
-	@$(call add_ermrestjs_script,.make-help-includes)
-
-help/index.html: help/index.html.in .make-help-includes
-	$(info - creating help/index.html)
-	@$(call build_html,.make-help-includes,help/index.html)
-
 
 # -------------------------- utility functions -------------------------- #
 

@@ -1,4 +1,5 @@
 {
+    "comment": "this schema must only used with chaise-config that has templating.engine:handlebars",
     "schema_name": "active_list_schema",
     "tables": {
         "main": {
@@ -195,7 +196,6 @@
                             "sourcekey": "self_link_id",
                             "display": {
                                 "markdown_pattern": "current: [{{{$self.rowName}}}({{{$self.values._int_col}}}, {{{$self.values.int_col}}})]({{{$self.uri.detailed}}}), id: {{{main_id}}}, array: {{{array_d_scalar_i1}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_scalar_i1"]
                             },
                             "markdown_name": "self_link_id"
@@ -211,7 +211,6 @@
                             "sourcekey": "normal_col_int_col_2",
                             "display": {
                                 "markdown_pattern": "current cnt: {{{_cnt_i1}}} - {{{$self}}}, {{{$_self}}}, cnt_i1: {{{_cnt_i1}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": "cnt_i1"
                             },
                             "markdown_name": "normal_col_int_col_2"
@@ -227,7 +226,6 @@
                             "sourcekey": "outbound_entity_o2",
                             "display": {
                                 "markdown_pattern": "current: [{{{$self.rowName}}}({{{$self.values._int_col}}}, {{{$self.values.int_col}}})]({{{$self.uri.detailed}}}), self_link_rowname: {{{self_link_rowname.values.int_col}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["cnt_i1", "self_link_rowname"]
                             },
                             "markdown_name": "outbound_entity_o2"
@@ -243,7 +241,6 @@
                             "sourcekey": "outbound_scalar_o2",
                             "display": {
                                 "markdown_pattern": "{{#if $self}}current: {{{$self}}}, {{{$_self}}}, max_i1: {{{max_i1}}}, array i1: {{#each array_d_entity_i1}}[{{{this.rowName}}}({{{this.values._int_col}}}, {{{this.values.int_col}}})]({{{this.uri.detailed}}}){{#unless @last}}, {{/unless}}{{/each}}{{/if}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_entity_i1", "max_i1"]
                             },
                             "markdown_name": "outbound_scalar_o2"
@@ -259,7 +256,6 @@
                             "sourcekey": "all_outbound_entity_o2_o1",
                             "display": {
                                 "markdown_pattern": "{{#if $self}}current: [{{{$self.rowName}}}({{{$self.values._int_col}}}, {{{$self.values.int_col}}})]({{{$self.uri.detailed}}}), array: {{#each _array_d_scalar_i2}}{{#unless @first}}| {{/unless}}{{{this}}}{{/each}}{{/if}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_scalar_i2", "entity_set_i2"]
                             },
                             "markdown_name": "all_outbound_entity_o2_o1"
@@ -272,7 +268,6 @@
                             "sourcekey": "all_outbound_scalar_o2_o1",
                             "display": {
                                 "markdown_pattern": "{{#if $self}}current: {{{$self}}}, {{{$_self}}}, o1_o1_o1: {{{all_outbound_entity_o1_o1_o1.rowName}}}, o2_o1: {{{all_outbound_scalar_o2_o1}}}{{/if}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["all_outbound_entity_o1_o1_o1", "all_outbound_scalar_o2_o1"]
                             },
                             "markdown_name": "all_outbound_scalar_o2_o1"
@@ -285,7 +280,6 @@
                             "sourcekey": "array_d_entity_i2",
                             "display": {
                                 "markdown_pattern": "{{#if $self}}current: {{#each $self}}[{{{this.rowName}}}({{{this.values._int_col}}}, {{{this.values.int_col}}})]({{{this.uri.detailed}}}){{#unless @last}}, {{/unless}}{{/each}}, cnt: {{{cnt_d_i2}}}{{/if}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_entity_i2", "cnt_d_i2", "cnt_d_i2"]
                             },
                             "markdown_name": "array_d_entity_i2"
@@ -298,7 +292,6 @@
                             "sourcekey": "array_d_scalar_i2",
                             "display": {
                                 "markdown_pattern": "{{#if $self}}current: {{{$self}}} - {{#each $_self}}{{#unless @first}}| {{/unless}}{{{this}}}{{/each}}, max: {{{max_i2}}}{{/if}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["max_i2"]
                             },
                             "markdown_name": "array_d_scalar_i2"
@@ -311,7 +304,6 @@
                             "sourcekey": "cnt_i2",
                             "display": {
                                 "markdown_pattern": "current: {{{$self}}}, {{{$_self}}}, cnt_i1: {{{_cnt_i1}}}, array_i3: {{{array_d_entity_i3.0.rowName}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_entity_i3", "cnt_i1"]
                             },
                             "markdown_name": "cnt_i2"
@@ -324,7 +316,6 @@
                             "sourcekey": "cnt_d_i2",
                             "display": {
                                 "markdown_pattern": "current: {{{$self}}}, {{{$_self}}}, cnt_i1: {{{cnt_i1}}}, cnt_i2: {{{_cnt_i2}}}, array_i4: {{{array_d_scalar_i4}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_scalar_i4", "cnt_i1", "cnt_i2"]
                             },
                             "markdown_name": "cnt_d_i2"
@@ -337,7 +328,6 @@
                             "sourcekey": "min_i2",
                             "display": {
                                 "markdown_pattern": "current: {{{$self}}}, {{{$_self}}}, {{{all_outbound_entity_o2_o1.values.int_col}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["id", "all_outbound_entity_o2_o1", "cnt_i2"]
                             },
                             "markdown_name": "min_i2"
@@ -350,7 +340,6 @@
                             "sourcekey": "max_i2",
                             "display": {
                                 "markdown_pattern": "current: {{{$self}}}, {{{$_self}}}",
-                                "template_engine": "handlebars",
                                 "wait_for": ["array_d_entity_i1", "array_d_scalar_i4"]
                             },
                             "markdown_name": "max_i2"
@@ -471,8 +460,7 @@
                             "entity": false,
                             "aggregate": "array_d",
                             "display": {
-                                "markdown_pattern": "{{{$self}}} - {{#each $_self}}{{#unless @first}}| {{/unless}}{{{this}}}{{/each}}",
-                                "template_engine": "handlebars"
+                                "markdown_pattern": "{{{$self}}} - {{#each $_self}}{{#unless @first}}| {{/unless}}{{{this}}}{{/each}}"
                             },
                             "array_options": {
                                 "max_length": 2

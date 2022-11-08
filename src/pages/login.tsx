@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // components
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
@@ -137,25 +137,25 @@ const LoginPopupApp = (): JSX.Element => {
           After completing enrollment on that page, come back and click the <b>Proceed</b> button to begin using the new features of this site.
         </p>
         <div className='btn-container'>
-          <OverlayTrigger
+          <ChaiseTooltip
             placement='bottom-start'
-            overlay={<Tooltip>Click to sign up for {cc.termsAndConditionsConfig.groupName}.</Tooltip>}
+            tooltip={<>Click to sign up for {cc.termsAndConditionsConfig.groupName}.</>}
           >
             <a className='chaise-btn chaise-btn-primary'
               href={cc.termsAndConditionsConfig.joinUrl}
               target='_blank'
               rel='noreferrer'>Sign Up
             </a>
-          </OverlayTrigger>
-          <OverlayTrigger
+          </ChaiseTooltip>
+          <ChaiseTooltip
             placement='bottom-start'
-            overlay={<Tooltip>Click to proceed to the application after joining the group.</Tooltip>}
+            tooltip='Click to proceed to the application after joining the group.'
           >
             <button className='chaise-btn chaise-btn-secondary'
               onClick={() => reLogin()}
             >Proceed
             </button>
-          </OverlayTrigger>
+          </ChaiseTooltip>
         </div>
         {showSpinner && <ChaiseSpinner />}
       </div>
@@ -171,12 +171,7 @@ const LoginPopupApp = (): JSX.Element => {
 
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
-  <AppWrapper
-    appSettings={loginSettings}
-    includeAlerts={false}
-    includeNavbar={false}
-    displaySpinner={true}
-  >
+  <AppWrapper appSettings={loginSettings} displaySpinner>
     <LoginPopupApp />
   </AppWrapper>
 );

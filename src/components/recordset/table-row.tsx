@@ -25,6 +25,8 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { addQueryParamsToURL } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { getRandomInt } from '@isrd-isi-edu/chaise/src/utils/math-utils';
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { CUSTOM_EVENTS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type TableRowProps = {
   config: RecordsetConfig,
@@ -74,6 +76,7 @@ const TableRow = ({
     maxHeight = ConfigService.chaiseConfig.maxRecordsetRowHeight || 160,
     defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
+  const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
   const [readMoreObj, setReadMoreObj] = useState<ReadMoreStateProps>({
     hideContent: true,
@@ -126,6 +129,14 @@ const TableRow = ({
     }
 
     setOverflow(tempOverflow);
+
+    // NOTE: this is intended to fix the case when there is only 1 column in the table and the resize sensor causes an extra cell to show
+    // if all overflows are false, detach the sensor
+    const justOverflows = tempOverflow.filter((overflow: boolean) => {
+      return overflow === true
+    });
+
+    if (sensor && justOverflows.length === 0) sensor.detach();
   }
 
   // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
@@ -136,15 +147,17 @@ const TableRow = ({
 
   useLayoutEffect(() => {
     if (!rowContainer.current) return;
-    const sensor = new ResizeSensor(
+    const tempSensor = new ResizeSensor(
       rowContainer.current,
       () => {
         initializeOverflows();
       }
     )
 
+    setSensor(tempSensor);
+
     return () => {
-      sensor.detach();
+      tempSensor.detach();
     }
   }, [rowValues]);
 
@@ -156,12 +169,18 @@ const TableRow = ({
     isRelated = config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0,
     isSavedQueryPopup = config.displayMode === RecordsetDisplayMode.SAVED_QUERY_POPUP;
 
+  const eventDetails: { [key: string]: any } = { rowIndex };
+  if (config.containerDetails) eventDetails.containerDetails = config.containerDetails;
+
   /**
    * The JS.Elements that are used for displaying messages
+   * these are only currently used for unlink that's why we're checking parentPageReference for all
+   * NOTE if we want to use for other cases we should be mindful that AttributeGroupReference doesn't have displayname API
+   * if we want it to have one, we should add it in ermrestjs first.
    */
-  const parentTable = parentPageTuple ? <code><DisplayValue value={parentPageTuple.displayname}></DisplayValue></code> : <></>;
-  const currentTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;
-  const currentTuple = <code><DisplayValue value={tuple.displayname}></DisplayValue></code>;
+  const parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
+  const currentTable =  parentPageReference ? <code><DisplayValue value={reference.displayname}></DisplayValue></code> : <></>;
+  const currentTuple =  parentPageReference ? <code><DisplayValue value={tuple.displayname}></DisplayValue></code> : <></>;
 
   let logStack: any;
   if (tupleReference) {
@@ -204,13 +223,15 @@ const TableRow = ({
   let editCallback: null | (() => void) = null;
   if (config.editable && tuple.canUpdate) {
     editCallback = function () {
-      const referrer_id = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
+      const requestID = 'recordset-' + getRandomInt(0, Number.MAX_SAFE_INTEGER);
       const newRef = tupleReference.contextualize?.entryEdit;
 
       if (newRef) {
         const editLink = addQueryParamsToURL(newRef.appLink, {
-          invalidate: referrer_id
+          invalidate: requestID
         });
+
+        fireCustomEvent(CUSTOM_EVENTS.ROW_EDIT_INTEND, rowContainer.current, { ...eventDetails, id: requestID });
 
         windowRef.open(editLink, '_blank');
 
@@ -304,9 +325,12 @@ const TableRow = ({
       stack: logStack
     };
     reference.delete(logObj).then(function deleteSuccess() {
-      // ask flow-control to update the page
-      // this will also make sure to remove the "disabled" row
-      update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
+      if (!isRelated) {
+        // ask flow-control to update the page
+        // this will also make sure to remove the "disabled" row
+        update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
+      }
+      fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
     }).catch(function (error: any) {
       setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });

@@ -39,13 +39,13 @@ If a property appears in the same configuration twice, the property defined late
    * [editRecord](#editRecord)
    * [deleteRecord](#deleteRecord)
    * [allowErrorDismissal](#allowerrordismissal)
-   * [maxRelatedTablesOpen](#maxrelatedtablesopen)
    * [showWriterEmptyRelatedOnLoad](#showwriteremptyrelatedonload)
    * [showFaceting](#showfaceting)
    * [hideTableOfContents](#hidetableofcontents)
    * [disableExternalLinkModal](#disableexternallinkmodal)
    * [hideGoToRID](#hidegotorid)
    * [facetPanelDisplay](#facetpaneldisplay)
+   * [templating](#templating)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
    * [exportSerivePath](#exportservicepath)
@@ -422,15 +422,6 @@ If a property appears in the same configuration twice, the property defined late
      allowErrorDismissal: true
      ```
 
- #### maxRelatedTablesOpen
- It defines maximum number of expanded related table on a page during initial loading. If related tables exceed this value then all of them shall be collapsed.
-   - Type: Integer
-   - Default behavior: all related tables will be expanded on load
-   - Sample syntax:
-     ```
-     maxRelatedTablesOpen: 5
-     ```
-
  #### showWriterEmptyRelatedOnLoad
  This property only applies to users with write permission to the main record being viewed. Set to `false` to hide all empty related tables on record page load ignoring the heuristics defined for writers. Set to `true` to show all empty related tables on record page load ignoring the heuristics.
    - Type: Boolean
@@ -497,6 +488,26 @@ If a property appears in the same configuration twice, the property defined late
          open: ["compact/select/association"]
      }
      ```
+
+#### templating
+Use this property to change the default engine that is used for templating throughout chaise and ermrestjs.
+   - Type: Object
+   - Default behavior: `mustache` will be used as the default template engine.
+   - General syntax:
+     ```
+     templating: {
+         engine: 'handlebars' or 'mustache'
+     }
+     ```
+   - `templating` attributes:
+     - `engine`: The template engine used in ermrestjs.
+   - Sample syntax:
+     ```
+     templating: {
+         engine: 'handlebars'
+     }
+     ```
+
 
 ### Export Configuration:
  #### disableDefaultExport

@@ -17,11 +17,10 @@ describe('View existing record,', function() {
         beforeAll(function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
-            browser.ignoreSynchronization=true;
             var url = browser.params.url + "/record/#" + browser.params.catalogId + "/product-delete-btn:" + testParams.table_name + "/" + keys.join("&");
-            browser.get(url);
+            chaisePage.navigate(url);
             table = browser.params.defaultSchema.content.tables[testParams.table_name];
-            chaisePage.waitForElement(element(by.id('tblRecord')));
+            chaisePage.waitForElement(element(by.css('.record-main-section-table')));
         });
 
         it("should load chaise-config.js and have confirmDelete=true", function() {
@@ -32,7 +31,7 @@ describe('View existing record,', function() {
 
         describe("Clicking the delete record button ,", function() {
             var allWindows, EC = protractor.ExpectedConditions;
-            
+
             // etags are not supported in ermrestjs
             xit("should display a modal when attempting to delete a record that has been modified by someone else beforehand", function() {
                 // Set up a mismatching ETag scenario before attempting delete to ensure that
@@ -84,7 +83,7 @@ describe('View existing record,', function() {
                     chaisePage.waitForElement(refreshBtn);
                     return refreshBtn.click();
                 }).then(function() {
-                    return chaisePage.waitForElement(element(by.id('tblRecord')));
+                    return chaisePage.waitForElement(element(by.css('.record-main-section-table')));
                 }).then(function() {
                     changedValue = chaisePage.recordPage.getColumnValue('summary');
                     expect(changedValue.getText()).toBe('as;dkfa;sljk als;dkj f;alsdjf a;');
@@ -99,11 +98,11 @@ describe('View existing record,', function() {
                     deleteReccordBtn = chaisePage.recordPage.getDeleteRecordButton(),
                     config;
 
-                chaisePage.waitForElement(element(by.id('tblRecord'))).then(function() {
+                chaisePage.waitForElement(element(by.css('.record-main-section-table'))).then(function() {
                     return browser.executeScript('return chaiseConfig;');
                 }).then(function(chaiseConfig) {
                     config = chaiseConfig;
-                    
+
                     browser.wait(EC.visibilityOf(deleteReccordBtn), browser.params.defaultTimeout);
                     return deleteReccordBtn.click();
                 }).then(function () {

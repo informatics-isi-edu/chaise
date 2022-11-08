@@ -17,26 +17,40 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 
 // utils
 import { displayCustomModeRelated } from '@isrd-isi-edu/chaise/src/utils/record-utils';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type RelatedTableProps = {
-  relatedModel: RecordRelatedModel
+  /**
+   * the related model that we want to represent
+   */
+  relatedModel: RecordRelatedModel,
+  /**
+   * the id attached to the container
+   */
+  tableContainerID: string
 };
 
+/**
+ * Display a related table
+ * It will also take care of showing the "custom mode" as well and it's not
+ * just limited to tabular view.
+ */
 const RelatedTable = ({
-  relatedModel
+  relatedModel,
+  tableContainerID
 }: RelatedTableProps): JSX.Element => {
   return (
     <RecordsetProvider
       initialReference={relatedModel.initialReference}
-      // TODO the following most probably should go somewhere else:
       {...relatedModel.recordsetProps}
     >
-      <RelatedTableInner relatedModel={relatedModel} />
+      <RelatedTableInner relatedModel={relatedModel} tableContainerID={tableContainerID} />
     </RecordsetProvider>
   )
 }
 const RelatedTableInner = ({
   relatedModel,
+  tableContainerID
 }: RelatedTableProps) => {
   const {
     page, isInitialized, hasTimeoutError, isLoading,
@@ -46,12 +60,20 @@ const RelatedTableInner = ({
     reference: recordReference, page : recordPage, updateRelatedRecordsetState, registerRelatedModel
   } = useRecord();
 
-  // update the recordset state in recordProvider
+  /**
+   * update the recordset state in recordProvider
+   * In here we should list every recordset provider state variables that we want to have
+   * access to in the record provider.
+   */
   useEffect(() => {
     updateRelatedRecordsetState(relatedModel.index, relatedModel.isInline, { page, isInitialized, hasTimeoutError, isLoading });
   }, [page, isInitialized, hasTimeoutError, isLoading]);
 
-  // register the recordset functions in the recordProvider
+  /**
+   * register the recordset functions in the recordProvider
+   * This function will capture references to the functions, that's why we don't need to
+   * repeat this registration.
+   */
   useEffect(() => {
     registerRelatedModel(relatedModel.index, relatedModel.isInline, updateMainEntity, fetchSecondaryRequests, addUpdateCauses);
   }, []);
@@ -59,11 +81,10 @@ const RelatedTableInner = ({
   const usedRef = relatedModel.initialReference;
   const displayCustomMode = displayCustomModeRelated(relatedModel);
 
-  const contaienrClassName = relatedModel.isInline && relatedModel.isTableDisplay ? '' : '';
-
   return (
-    <div className={contaienrClassName}>
-      {usedRef.commentDisplay === 'inline' && usedRef.comment &&
+    <div>
+      {/* in case of inline, the comments are already handled */}
+      {!relatedModel.isInline && usedRef.commentDisplay === 'inline' && usedRef.comment &&
         <div className='inline-tooltip'>{usedRef.comment}</div>
       }
       {displayCustomMode &&
@@ -75,16 +96,15 @@ const RelatedTableInner = ({
             <DisplayValue className='related-markdown-content' addClass={true} value={{ isHTML: true, value: relatedModel.tableMarkdownContent }} />
           }
         </>
-
       }
-      {/* TODO the following was span for inline, but shouldn't matter */}
-      {/* TODO related-table and related-table-accordion classes removed  */}
-      <div className={`related-table-content ${displayCustomMode ? 'forced-hidden' : ''}`} style={{ display: displayCustomMode ? 'none' : 'block' }}>
+      <div className={`related-table-content ${displayCustomMode ? CLASS_NAMES.HIDDEN : ''}`}>
         <TableHeader config={relatedModel.recordsetProps.config}></TableHeader>
-        <RecordsetTable
-          config={relatedModel.recordsetProps.config}
-          initialSortObject={usedRef.location.sortObject}
-        />
+        <div id={tableContainerID}>
+          <RecordsetTable
+            config={relatedModel.recordsetProps.config}
+            initialSortObject={usedRef.location.sortObject}
+          />
+        </div>
       </div>
     </div >
   )

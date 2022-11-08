@@ -42,6 +42,10 @@
 
   .chaise-table-header-buttons-span {
     margin: 0px 5px;
+
+    &:last-child {
+      margin-right: 0;
+    }
   }
 
   .chaise-table-header-spinner {

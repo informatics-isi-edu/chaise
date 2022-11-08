@@ -96,6 +96,7 @@ html {
     font-weight: 400;
     line-height: 1;
     color: #777;
+    font-size: 65%;
   }
 
   li {
@@ -402,16 +403,14 @@ html {
 
   // footer
   .footer-container {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    margin-top: auto;
+    position: relative;
 
-    &.position-relative {
-      position: relative;
-      bottom: unset;
-      right: unset;
-      left: unset;
+    &.position-absolute {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      left: 0;
     }
 
     margin-right: -$viewport-margin;
@@ -476,7 +475,18 @@ html {
   // fix the padding issues related to the main alerts container that is outside of apps
   .app-header-container > .alerts-container {
     padding: $viewport-margin;
-    padding-bottom: 0;
+
+    /**
+     * having margin causes issues with the height logic, that's why we're trying
+     * to avoid it with the following rules:
+     */
+    padding-bottom: 10px;
+    &:empty {
+      padding-bottom: 0;
+    }
+    .alert:last-child {
+      margin: 0;
+    }
   }
 
   // top panel container for record and recordset
@@ -574,7 +584,7 @@ html {
         & ~ .main-container {
           padding-left: $main-alley;
 
-          .footer-container.position-relative {
+          .footer-container:not(.position-absolute) {
             margin-left: -$main-alley;
           }
         }
@@ -596,7 +606,7 @@ html {
           // when the side-panel is closed
           padding-left: $viewport-margin;
 
-          .footer-container.position-relative {
+          .footer-container:not(.position-absolute) {
             margin-left: -$viewport-margin;
           }
         }
@@ -604,6 +614,10 @@ html {
     }
 
     .main-container {
+      // the following two will make sure footer is pushed to bottom
+      // (in combination with margin-top: auto of footer)
+      display: flex;
+      flex-direction: column;
       flex: 1;
       position: relative;
       overflow-x: hidden;
@@ -663,6 +677,13 @@ html {
   }
 
   // END remove
+
+  // copy to clipboard btn (used in share dialog)
+  .chaise-copy-to-clipboard-btn {
+    color: $primary-color;
+    font-size: 65%;
+    cursor: pointer;
+  }
 
   // chaise checkbox
   .chaise-checkbox {
@@ -865,4 +886,36 @@ html {
       }
     }
   }
+
+  // used both in record and help apps
+  .back-to-top-btn {
+    position: fixed;
+    right: 40px;
+    bottom: 40px;
+    padding: 1px 4px;
+    font-size: 25px;
+    border-radius: 4px;
+    height: 35px;
+    width: 35px;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 100;
+  }
+
+  /****** help pages *****/
+  .help-container {
+    .main-body .container {
+      // in other apps .alerts-container is adding the padding-top
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
+  }
+
+  /****** switch user accounts help page *******/
+  .switch-user-accounts-container {
+    li {
+      list-style-type: unset;
+    }
+  }
+
 }

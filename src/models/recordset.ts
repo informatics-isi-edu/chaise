@@ -72,6 +72,13 @@ export type RecordsetConfig = {
   showFaceting: boolean,
   disableFaceting: boolean,
   displayMode: RecordsetDisplayMode,
+  /**
+   * used in record page to figure out where the edit/delete request is fired from
+   */
+  containerDetails?: {
+    isInline: boolean,
+    index: number
+  },
   // TODO enable favorites
   // enableFavorites: boolean
 }
@@ -137,6 +144,7 @@ export type SelectedRow = {
   displayname: Displayname;
   uniqueId: string | null;
   data?: any; // TODO
+  tupleReference: any; // TODO
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
 }

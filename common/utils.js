@@ -8,11 +8,12 @@
         "navbarBrandImage", "logoutURL", "maxRecordsetRowHeight", "dataBrowser",
         "confirmDelete", "hideSearchTextFacet", "editRecord", "deleteRecord", "defaultCatalog", "defaultTables",
         "signUpURL", "navbarBanner", "navbarMenu", "sidebarPosition", "attributesSidebarHeading",
-        "allowErrorDismissal", "footerMarkdown", "maxRelatedTablesOpen", "showFaceting", "hideTableOfContents",
+        "allowErrorDismissal", "footerMarkdown", "showFaceting", "hideTableOfContents",
         "resolverImplicitCatalog", "disableDefaultExport", "exportServicePath", "assetDownloadPolicyURL",
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
-        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules"
+        "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules",
+        "templating"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -45,6 +46,9 @@
           "shareCiteAcls": {
               "show": ["*"],
               "enable": ["*"]
+          },
+          "templating": {
+            "engine": "mustache"
           }
     })
 
@@ -229,6 +233,24 @@
         INT_4_MAX: 2147483647,
         INT_8_MIN: -9223372036854775808,
         INT_8_MAX: 9223372036854775807
+    })
+
+    .constant('helpPages', {
+        MARKDOWN_HELP: {
+            title: 'Markdown Help',
+            location: 'chaise/markdown-help',
+            isComponent: true
+        },
+        SWITCH_USER_ACCOUNTS: {
+            title: 'Switch User Accounts',
+            location: 'chaise/switch-user-accounts',
+            isComponent: true
+        },
+        VIEWER_ANNOTATION: {
+            title: 'Viewer Annotation',
+            location: 'chaise/viewer-annotation',
+            isComponent: false
+        }
     })
 
     // should be used in combination with ng-bind-html
@@ -1169,6 +1191,13 @@
             return origin + "/" + uri;
         }
 
+        /**
+         * given the pageLocation, return the url to the help page.
+         */
+        function getHelpPageURL(pageLocation) {
+          return chaiseDeploymentPath() + 'help/?page=' + fixedEncodeURIComponent(pageLocation);
+        }
+
         return {
             appNamefromUrlPathname: appNamefromUrlPathname,
             appTagToURL: appTagToURL,
@@ -1194,7 +1223,8 @@
             splitVersionFromCatalog: splitVersionFromCatalog,
             stripSortAndQueryParams: stripSortAndQueryParams,
             getRecordsetLink: getRecordsetLink,
-            getAbsoluteURL: getAbsoluteURL
+            getAbsoluteURL: getAbsoluteURL,
+            getHelpPageURL: getHelpPageURL
         }
     }])
 
@@ -1536,7 +1566,8 @@
             ERMrest.setClientConfig({
                 internalHosts: chaiseConfig.internalHosts,
                 disableExternalLinkModal: chaiseConfig.disableExternalLinkModal,
-                facetPanelDisplay: chaiseConfig.facetPanelDisplay
+                facetPanelDisplay: chaiseConfig.facetPanelDisplay,
+                templating: chaiseConfig.templating
             });
         }
 

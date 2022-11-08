@@ -159,11 +159,6 @@ export const RecordsetContext = createContext<{
    */
   checkReferenceURL: (ref: any, showAlert?: boolean) => boolean,
   /**
-   * the ref for the addRecordRequests
-   * can be used to see if there are any pending create requests
-   */
-  addRecordRequests: any
-  /**
    * if true, we have to forcefully show the spinner
    */
   forceShowSpinner: boolean,
@@ -309,7 +304,7 @@ export default function RecordsetProvider({
       };
     })
   );
-  const setColumnModelValues = (indexes: { [key: string]: boolean }, values: { [key: string]: boolean }) => {
+  const setColumnModelValues = (indexes: { [key: string]: any }, values: { [key: string]: boolean }) => {
     setColumnModels(
       (prevColumnModels: any) => {
         return prevColumnModels.map((cm: any, index: number) => {
@@ -362,8 +357,6 @@ export default function RecordsetProvider({
   const [totalRowCountHasTimeoutError, setHasCountTimeoutError] = useState(false);
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
-
-  const addRecordRequests = useRef<any>({});
 
   // call the flow-control after each reference object
   useEffect(() => {
@@ -544,16 +537,8 @@ export default function RecordsetProvider({
     if (setDirtyResult) {
       flowControl.current.dirtyResult = true;
     }
-    // the time that will be logged with the request
-    if (!Number.isInteger(flowControl.current.reloadStartTime) || flowControl.current.reloadStartTime === -1) {
-      flowControl.current.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
-    }
 
-    causes.forEach((cause) => {
-      if (cause && flowControl.current.reloadCauses.indexOf(cause) === -1) {
-        flowControl.current.reloadCauses.push(cause);
-      }
-    });
+    flowControl.current.addCauses(causes);
   };
 
   const processRequests = () => {
@@ -563,14 +548,18 @@ export default function RecordsetProvider({
       return;
     }
 
-    // make sure the logStack has the latest value
-    LogService.updateStackFilterInfo(
-      flowControl.current.getLogStack(),
-      referenceRef.current.filterLogInfo,
-      // in fullscreen mode, we want the global log stack to have filter info too
-      // (this is for requests outside of recordset component like export)
-      config.displayMode === RecordsetDisplayMode.FULLSCREEN
-    );
+    // make sure the logStack has the latest filters
+    // NOTE in related section we don't want the filter info to be captured,
+    //      as we're already doing that with 'source'
+    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) !== 0) {
+      LogService.updateStackFilterInfo(
+        flowControl.current.getLogStack(),
+        referenceRef.current.filterLogInfo,
+        // in fullscreen mode, we want the global log stack to have filter info too
+        // (this is for requests outside of recordset component like export)
+        config.displayMode === RecordsetDisplayMode.FULLSCREEN
+      );
+    }
 
     // update the resultset
     updateMainEntity(processRequests);
@@ -708,7 +697,7 @@ export default function RecordsetProvider({
         } else {
           return { page: result.page };
         }
-      }).then((result: {page: any, disabledRows?: any}) => {
+      }).then((result: { page: any, disabledRows?: any }) => {
         if (current !== flowControl.current.queue.counter) {
           defer.resolve({ success: false, page: null });
           return defer.promise;
@@ -917,7 +906,7 @@ export default function RecordsetProvider({
       activeListModel = aggModel.activeListModel;
 
     // show spinner for all the dependent columns
-    let updatedColumnModels: any = {};
+    const updatedColumnModels: any = {};
     activeListModel.objects.forEach((obj: any) => {
       // this is only called in recordset so it won't be related
       if (obj.column) {
@@ -1003,8 +992,6 @@ export default function RecordsetProvider({
         }
       );
 
-      // TODO this is not working as expected because what's in the state
-      // is outdated...
       setColumnModelValues(indexes, { isLoading: false });
 
       // clear the causes
@@ -1107,7 +1094,6 @@ export default function RecordsetProvider({
       registerFacetCallbacks,
       printDebugMessage,
       checkReferenceURL,
-      addRecordRequests,
       forceShowSpinner, setForceShowSpinner,
       // log related:
       logRecordsetClientAction, getLogAction, getLogStack,

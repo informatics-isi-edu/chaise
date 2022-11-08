@@ -18,7 +18,7 @@ describe('When viewing Record app', function() {
 
     describe('for a read-only table', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_read_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -59,7 +59,7 @@ describe('When viewing Record app', function() {
 
     describe('for a create-only table', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_create_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -69,31 +69,30 @@ describe('When viewing Record app', function() {
         it('should display the share button', function() {
             var permalink = recordPage.getShareButton();
             expect(permalink.isDisplayed()).toBeTruthy();
-            expect(permalink.getAttribute("disabled")).toBeFalsy();
         });
 
         it('should display the Create button', function() {
             var button = recordPage.getCreateRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeFalsy();
+            expect(button.getAttribute("aria-disabled")).toBe('false');
         });
 
         it('should display the Edit button as disabled', function() {
             var button = recordPage.getEditRecordButton();
             expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.getAttribute("aria-disabled")).toBe('true');
         });
 
         it('should display the Copy button', function() {
             var button = recordPage.getCopyRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeFalsy();
+            expect(button.getAttribute("aria-disabled")).toBe('false');
         });
 
         it('should display the Delete button as disabled', function() {
             var button = recordPage.getDeleteRecordButton();
             expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.getAttribute("aria-disabled")).toBe('true');
         });
 
         describe('the related tables', function() {
@@ -137,7 +136,7 @@ describe('When viewing Record app', function() {
 
     describe('for a table that allows edit and create (but no delete)', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_update_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -155,25 +154,25 @@ describe('When viewing Record app', function() {
             // a user can edit, the user can also create.
             var button = recordPage.getCreateRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeFalsy();
+            expect(button.getAttribute("aria-disabled")).toBe('false');
         });
 
         it('should display the Edit button', function() {
             var button = recordPage.getEditRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeFalsy();
+            expect(button.getAttribute("aria-disabled")).toBe('false');
         });
 
         it('should display the Copy button', function() {
             var button = recordPage.getCopyRecordButton();
             expect(button.isDisplayed()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeFalsy();
+            expect(button.getAttribute("aria-disabled")).toBe('false');
         });
 
         it('should display the Delete button as disabled', function() {
             var button = recordPage.getDeleteRecordButton();
             expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.getAttribute("aria-disabled")).toBe('true');
         });
 
         it('should show an "Edit mode" toggle link if a related table has a row_markdown_pattern', function() {
@@ -187,7 +186,7 @@ describe('When viewing Record app', function() {
 
     describe('for a delete-only table', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
+            chaisePage.navigate(browser.params.url + "/record/#" + browser.params.catalogId + "/multi-permissions:main_delete_table/" + testParams.key.columnName + testParams.key.operator + testParams.key.value);
             var title = chaisePage.recordPage.getEntityTitleElement();
             chaisePage.waitForElement(title).then(function() {
                 expect(title.isDisplayed()).toBeTruthy();
@@ -202,19 +201,19 @@ describe('When viewing Record app', function() {
         it('should display the Create button as disabled', function() {
             var button = recordPage.getCreateRecordButton();
             expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.getAttribute("aria-disabled")).toBe('true');
         });
 
         it('should display the Edit button as disabled', function() {
             var button = recordPage.getEditRecordButton();
             expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.getAttribute("aria-disabled")).toBe('true');
         });
 
         it('should display the Copy button as disabled', function() {
             var button = recordPage.getCopyRecordButton();
             expect(button.isPresent()).toBeTruthy();
-            expect(button.getAttribute("disabled")).toBeTruthy();
+            expect(button.getAttribute("aria-disabled")).toBe('true');
         });
 
         it('should display the Delete button', function() {

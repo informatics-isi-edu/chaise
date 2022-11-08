@@ -1,3 +1,5 @@
+@import "variables";
+
 // don't add border to the modal header
 .modal-header {
   border-bottom: none;
@@ -6,6 +8,11 @@
     display: block;
     text-align: center;
   }
+}
+
+.modal-title {
+  font-size: $h2-font-size !important;
+  font-weight: normal;
 }
 
 // uploader
@@ -95,6 +102,16 @@
   }
 }
 
+.search-popup {
+  ~ .modal-error-backdrop {
+    z-index: 1061;
+  }
+
+  ~ .modal-error {
+    z-index: 1066;
+  }
+}
+
 .modal-footer .chaise-btn {
   margin-left: 5px;
 }
@@ -110,12 +127,18 @@
 
 
 /******* Popup modal for share ********/
-.chaise-share-citation {
+.chaise-share-citation-modal {
   ul {
+    word-break: break-word;
     padding-left: 10px;
   }
 
-  #share-link h2 {
+  h2, h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .share-modal-links h2 {
     margin-top: 5px;
   }
 
@@ -255,6 +278,24 @@
   .progress-bar {
     background-size: 1.75rem 1.75rem;
     background-color: #4674a7;
+  }
+}
+
+.modal-submit-spinner-container {
+  $modal-submit-spinner-backdrop-z-index: 100;
+  .modal-submit-spinner-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: $modal-submit-spinner-backdrop-z-index;
+    background: black;
+    opacity: 0.5;
+  }
+  .modal-submit-spinner.spinner-container {
+    top: 50% !important;
+    z-index: calc($modal-submit-spinner-backdrop-z-index + 1) !important;
   }
 }
 

@@ -4,6 +4,8 @@ exports.getConfig = function(options) {
     sauceKey: process.env.SAUCE_ACCESS_KEY,
     framework: 'jasmine2',
     capabilities: {
+      commandTimeout: 300,
+      // idleTimeout: 90,
       //browserName: 'internet explorer',
       //browserName: 'firefox',
       browserName: 'chrome',
@@ -11,7 +13,10 @@ exports.getConfig = function(options) {
       timeZone: 'Los Angeles', // specify the timezone the browser should execute in
       //using firefox causes problems - not showing the right result and -
       //Apache log shows firefox is not requesting the server.
-      'chromeOptions' : {
+      chromeOptions: {
+          // args is defined as empty so any additional args are "pushed" instead of replacing the object.
+          // see conditions below for setting screen resolution and using headless mode
+          args: [],
           // Set download path and avoid prompting for download even though
           // this is already the default on Chrome but for completeness
           prefs: {
@@ -53,10 +58,21 @@ exports.getConfig = function(options) {
     }
   };
 
-  // setting screen size when running the tests locally to be consistent across different laptops and external displays
-  // tests are currently optimzed for this screen size
-  // this is the same as `screenResolution` above to make sure we test the same in CI environment as locally
-  if (!process.env.CI) config.capabilities.chromeOptions.args = ['--window-size=1280,960'];
+  if (config.capabilities.chromeOptions) {
+    // setting screen size when running the tests locally to be consistent across different laptops and external displays
+    // tests are currently optimzed for this screen size
+    // this is the same as `screenResolution` above to make sure we test the same in CI environment as locally
+    if (!process.env.CI) {
+      config.capabilities.chromeOptions.args.push('--window-size=1280,960');
+    }
+  
+    // using chrome in headless mode
+    // environment variables are of type "string" so verify the value is the string "true" instead of boolean true
+    if (process.env.HEADLESS == "true") {
+      config.capabilities.chromeOptions.args.push('--headless');
+      config.capabilities.chromeOptions.args.push('--disable-gpu');
+    }
+  }
 
   Object.assign(config, options);
 
