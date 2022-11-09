@@ -117,6 +117,11 @@ const RecordsetModal = ({
   const [submittedRows, setSubmittedRows] = useState<any>([]);
 
   /**
+   * when the submit button is pressed, we should hide it so it doesn't block other elements.
+   */
+  const [showSubmitTooltip, setShowSubmitTooltip] = useState(false);
+
+  /**
    * Whether the submit button should be disabled or not
    */
   const [disableSubmit, setDisableSubmit] = useState(() => {
@@ -323,6 +328,8 @@ const RecordsetModal = ({
                     <ChaiseTooltip
                       placement='bottom'
                       tooltip={submitTooltip}
+                      onToggle={(nextShow: boolean) => (setShowSubmitTooltip(nextShow && !(disableSubmit || showSubmitSpinner)))}
+                      show={showSubmitTooltip && !(disableSubmit || showSubmitSpinner)}
                     >
                       <button
                         id='multi-select-submit-btn' className='chaise-btn chaise-btn-primary'
