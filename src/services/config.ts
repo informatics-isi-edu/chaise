@@ -17,7 +17,7 @@ import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-sto
 
 export interface AppSettings {
   appName: string,
-  appTitle: string,
+  appTitle?: string,
   hideNavbar?: boolean,
   openLinksInTab?: boolean,
   overrideDownloadClickBehavior?: boolean,
@@ -30,7 +30,7 @@ export interface AppSettings {
  */
 export interface ConfigServiceSettings {
   appName: string,
-  appTitle: string,
+  appTitle?: string,
   hideNavbar?: boolean,
   overrideHeadTitle?: boolean,
   overrideDownloadClickBehavior?: boolean,

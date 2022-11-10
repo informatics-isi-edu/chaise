@@ -20,7 +20,7 @@ import { InvalidHelpPage } from '@isrd-isi-edu/chaise/src/models/errors';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
-import { APP_ROOT_ID_NAME, HELP_PAGES, HELP_PAGES_FOLDER_LOCATION } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { ID_NAMES, HELP_PAGES, HELP_PAGES_FOLDER_LOCATION } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { chaiseDeploymentPath, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -169,7 +169,7 @@ const HelpApp = (): JSX.Element => {
   );
 };
 
-const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
 root.render(
   <AppWrapper appSettings={helpSettings} includeNavbar displaySpinner ignoreHashChange>
     <HelpApp />

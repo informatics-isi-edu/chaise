@@ -1,26 +1,20 @@
-// Navbar App
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { createRoot } from 'react-dom/client';
 
-import '@isrd-isi-edu/chaise/src/assets/scss/app.scss';
+// components
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import ChaiseNavbar from '@isrd-isi-edu/chaise/src/components/navbar/navbar';
+// utils
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
-// TODO should use the appwrapper
-
-const NavbarLib = (): JSX.Element => {
-
-  return (
-    <div>
-      <ChaiseNavbar />
-    </div>
-  );
+const navbarLibSettings = {
+  appName: 'navbar'
 };
 
-ReactDOM.render(
-  <React.StrictMode>
-    <NavbarLib />
-  </React.StrictMode>,
-  document.getElementById('chaise-navbar-app-root'),
+// TODO more specific id?
+const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
+root.render(
+  <AppWrapper appSettings={navbarLibSettings} includeNavbar ignoreHashChange>
+    {/* navbar is already included and we don't want anything else */}
+    {/* (this comment is needed since appwrapper expects children) */}
+  </AppWrapper>
 );

@@ -12,7 +12,7 @@ const webpack = require('webpack');
  * - CHAISE_BASE_PATH: The base path of chaise in the server, e.g. /chaise/
  * - BUILD_VERSION: A randomly generated string signifying the build version.
  *
- * @param {Array.<{appName:string, bundleName?:string, appConfigLocation?: string, externalFiles?: string[]}>} appConfigs
+ * @param {Array.<{appName:string, bundleName?:string, appTitle?: string, appConfigLocation?: string, externalFiles?: string[]}>} appConfigs
  *  the app configurations
  * @param {'development'|'production'} mode
  * @param {Object} env the environment variables
@@ -23,7 +23,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
   const ermrestjsPath = env.BUILD_VARIABLES.ERMRESTJS_BASE_PATH;
   const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
   const buildVersion = env.BUILD_VARIABLES.BUILD_VERSION;
-  const isDevMode = (mode === 'development') ;
+  const isDevMode = (mode === 'development');
 
   options = options || {};
   if (typeof options.pathPrefix !== 'string' || options.pathPrefix.length === 0) {
@@ -41,7 +41,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
 
     // create the entry
     entries[bundleName] = {
-      import: path.join(options.pathPrefix, 'src', 'pages', `${ac.appName}.tsx`)
+      import: path.join(options.pathPrefix, 'src', ac.isLib ? 'libs' : 'pages', `${ac.appName}.tsx`)
     };
 
     const appConfig = ac.appConfigLocation ? `<script src='${ac.appConfigLocation}?v=${buildVersion}'></script>` : '';
@@ -56,8 +56,13 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
-        template: path.join(__dirname, '..', 'src', 'pages', 'main.html'),
-        filename: `../${ac.appName}/index.html`,
+        template: path.join(__dirname, '..', 'src', ac.isLib ? 'libs' : 'pages', 'main.html'),
+        // the filename path is relative to the "output" define below which is the "bundles" folder.
+        // we want the libs to be inside the lib folder so they don't clash with apps
+        filename: `../${ac.isLib ? 'lib/' : ''}${ac.appName}/index.html`,
+        // in lib mode, we are manually controlling the injection
+        inject: ac.isLib ? false : true,
+        // scriptLoading: ac.isLib ? 'blocking' : 'defer',
         app_name: ac.appName,
         title: ac.appTitle,
         ermrestjs: [
@@ -69,8 +74,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         external_files: externalFiles,
         chunks: [bundleName]
       })
-    )
-
+    );
   });
 
   return {
@@ -78,14 +82,22 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
     mode,
     entry: entries,
     output: {
+      // we're outputting generated files into a separate bundles folder
+      // so we have full control over it on the server and can replace the whole
+      // file if we want to (using rsync --delete)
       path: path.resolve(options.pathPrefix, 'dist', 'react', 'bundles'),
+      // contenthash will help with avoiding to send unchanged files to server
       filename: '[name].[contenthash].js',
-      clean: true
+      clean: true,
+      // the path that will be prepended to the output css and js files
+      // we're defining this to ensure absolute paths instead of relative
+      publicPath: `${chaisePath}bundles/`
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
       alias: {
         ...options.pathAliases,
+        // the line below will make sure we can include chaise files using the package full name
         '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
       },
     },
@@ -126,6 +138,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         CHAISE_BUILD_VARIABLES: JSON.stringify(env.BUILD_VARIABLES),
       }),
       new MiniCssExtractPlugin({
+        // contenthash will help with avoiding to send unchanged files to server
         filename: '[name].[contenthash].css'
       })
     ],
