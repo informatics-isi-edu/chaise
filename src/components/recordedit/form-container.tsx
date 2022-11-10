@@ -1,14 +1,19 @@
-
-import { useEffect, useState, useRef } from 'react';
+// components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import {fireCustomEvent} from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
+
+// hooks
+import { useEffect, useState, useRef } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
+
+// utils
+import { fireCustomEvent, getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 
-const getFormDefaultValues = (name,  columns) => {
+
+const getFormDefaultValues = (name, columns) => {
   const formValues = {};
   columns.forEach(c => {
     formValues[`${name}-{c}`] = '';
@@ -42,27 +47,37 @@ const Form = ({ name, columns, classes = '', idx, f, hideCross, hMap }) => {
     delayError: undefined
   });
 
-  return(
-    <FormProvider {...methods} > 
-      <form className='record-edit-form' onSubmit={methods.handleSubmit(console.log)}>
+  const onSubmit = (data: any) => {
+    console.log('on submit')
+    console.log(data);
+  }
+  const onInvalid = (err: any) => {
+    console.log("on invalid")
+    console.log(err);
+  }
+
+  return (
+    <FormProvider {...methods} >
+      <form id='recordedit-form' className='record-edit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
         {/* {!hideCross && <CrossBtn handleClick={handleCrossClick}/>} */}
-        <div className={`column-form ${classes}`}>  
-          {columns.map((c,i) => {
+        <div className={`column-form ${classes}`}>
+          {columns.map((c, i) => {
 
             const colName = c?.displayname?.value || i;
-            const height = colName in hMap ? `${hMap[colName]}px` : 'auto'; 
+            const height = colName in hMap ? `${hMap[colName]}px` : 'auto';
 
             return (
               <InputSwitch
-                key={c?.displayname?.value || i}  
+                key={c?.displayname?.value || i}
                 displayErrors={true}
                 name={`${name}-${makeSafeIdAttr(c?.displayname?.value)}`}
-                type='int'
-                containerClasses={'column-cell'}
+                type={getInputType(c.type)}
+                // type='int'
+                containerClasses={'column-cell entity-value'}
                 // value={0}
                 classes='column-cell-input'
                 placeholder={0}
-                styles={{'height' : height}}
+                styles={{ 'height': height }}
               />
             );
           })}
@@ -87,11 +102,11 @@ const CrossBtn = ({ handleClick }) => (
 const BlackBox = ({ idx, f, hideCross }) => {
 
   const handleCrossClick = () => fireCustomEvent('remove-form', '.form-container', { idx: f });
-    
+
   return (
     <div className='black-box'>
-      <span>{`sample form container ${idx+1}`}</span>
-      {!hideCross && <CrossBtn handleClick={handleCrossClick}/>}
+      <span>{`sample form container ${idx + 1}`}</span>
+      {!hideCross && <CrossBtn handleClick={handleCrossClick} />}
     </div>
   );
 };
@@ -115,7 +130,7 @@ const handleAddForm = (hMap) => {
 const handleDeleteForm = (hMap, idx) => {
   const hMapCpy = simpleDeepCopy(hMap);
   hMapCpy.keys().forEach(k => {
-    hMapCpy[k].splice(idx,1);
+    hMapCpy[k].splice(idx, 1);
   });
   return hMapCpy;
 }
@@ -124,7 +139,7 @@ const FormContainer = ({ columns }) => {
   /*
     Here a unique key to reference each form will be stored in the forms state variable : f_i
   */
-  
+
   const [forms, setForms] = useState([1]);
 
   /**
@@ -140,7 +155,7 @@ const FormContainer = ({ columns }) => {
   // deep copy logic
 
   const addForm = () => {
-    setForms(forms => [...forms, forms.length+1]);
+    setForms(forms => [...forms, forms.length + 1]);
     setHMap(hMap => {
       return handleAddForm(hMap);
     });
@@ -148,24 +163,24 @@ const FormContainer = ({ columns }) => {
 
 
   const removeForm = (event) => {
-    console.log({event});
+    console.log({ event });
     const f = event.detail.idx;
     setForms(forms => {
       const idx = forms.indexOf(f);
       forms.splice(idx, 1);
       return [...forms];
     });
-    setHMap(hMap => )
+    // setHMap(hMap => )
   }
 
   const handleHeightAdjustment = (event) => {
-    console.log('height adjustment: ', {event});
+    console.log('height adjustment: ', { event });
     const ele = document.querySelector(event.detail.inputFieldName)
     const height = ele?.offsetHeight || 0;
-    
+
     const colName = event.detail.inputFieldName.split('-').slice(-1)[0];
 
-    console.log({colName, height});
+    console.log({ colName, height });
 
     // if(!(colName in hMap) || hMap[colName]!=height){    
     //   setHMap(hMap => {
@@ -187,7 +202,7 @@ const FormContainer = ({ columns }) => {
 
 
 
-    return ()=> {
+    return () => {
       formContainer.removeEventListener('add-form', addForm);
       formContainer.removeEventListener('remove-form', removeForm);
       formContainer.removeEventListener('input-switch-error-update', handleHeightAdjustment);
@@ -195,10 +210,10 @@ const FormContainer = ({ columns }) => {
   }, []);
 
   const hideCrossBtn = forms.length == 1;
-  
-  const elements = forms.map((f, idx) => <Form name={f} hMap={hMap} columns={columns} idx={idx} key={f} f={f} hideCross={hideCrossBtn}/>)
 
-  return(
+  const elements = forms.map((f, idx) => <Form name={f} hMap={hMap} columns={columns} idx={idx} key={f} f={f} hideCross={hideCrossBtn} />)
+
+  return (
     <div className='form-container'>
       {elements}
     </div>

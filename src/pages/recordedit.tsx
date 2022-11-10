@@ -68,7 +68,7 @@ const RecordeditApp = (): JSX.Element => {
       // TODO set log related properties
 
 
-      setRecordeditProps({ reference });
+      setRecordeditProps({ reference, initialized: true });
 
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
@@ -91,7 +91,7 @@ const RecordeditApp = (): JSX.Element => {
   return <Recordedit {...recordeditProps} />;
 };
 
-// TOSO: make sure this is what we want
+// TODO: make sure this is what we want
 const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
 root.render(
   <AppWrapper

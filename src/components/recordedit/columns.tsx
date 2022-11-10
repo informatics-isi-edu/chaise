@@ -3,16 +3,16 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 
-const Columns = ({ columns }) => {
-    return (
-        <div className='record-edit-column'>
-            {columns.map(c => (
-                <>
-                    <DisplayValue value={c?.displayname} className='column-cell'/>
-              </>
-            ))}
-        </div>
-    );
+const Columns = ({ columns }: { columns: any }) => {
+  return (
+    <div className='entity-key-column'>
+      {columns.map((c: any, idx: number) => (
+        <span key={idx} className='entity-key'>
+          <DisplayValue value={c?.displayname} />
+        </span>
+      ))}
+    </div>
+  );
 }
 
 export default Columns;
