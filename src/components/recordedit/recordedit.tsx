@@ -9,25 +9,46 @@ import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
+
+// providers
+import AlertsProvider from '@isrd-isi-edu/chaise/src/providers/alerts';
+import RecordeditProvider from '@isrd-isi-edu/chaise/src/providers/recordedit';
 
 // utils
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
-
 export type RecordeditProps = {
-  initialized: boolean
-  reference: any
+  parentContainer?: HTMLElement;
+  reference: any;
 }
 
-const Recordedit = (props: RecordeditProps): JSX.Element => {
+const Recordedit = ({
+  parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
+  reference
+}: RecordeditProps): JSX.Element => {
+  return (
+    <AlertsProvider>
+      <RecordeditProvider reference={reference}>
+        <RecordeditInner parentContainer={parentContainer} />
+      </RecordeditProvider>
+    </AlertsProvider>
+  )
+}
 
-  const { initialized, reference } = props;
+export type RecordeditInnerProps = {
+  parentContainer?: HTMLElement;
+}
+
+const RecordeditInner = ({
+  parentContainer
+}: RecordeditInnerProps): JSX.Element => {
+
+  const { initialized, reference } = useRecordedit()
 
   // const { getValues, handleSubmit } = useFormContext();
 
-  const parentContainer = document.querySelector('#chaise-app-root') as HTMLElement
   const mainContainer = useRef<HTMLDivElement>(null);
 
   // properly set scrollable section height
@@ -51,7 +72,7 @@ const Recordedit = (props: RecordeditProps): JSX.Element => {
   // (reference.columns||[]).map(v => {
   //   console.log(v.type);
   // })
-  console.log('record edit props:: ', props.reference.columns);
+  console.log('record edit props:: ', reference.columns);
 
   const addForm = () => fireCustomEvent('add-form', '.form-container');
 

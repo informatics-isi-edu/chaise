@@ -68,7 +68,7 @@ const RecordeditApp = (): JSX.Element => {
       // TODO set log related properties
 
 
-      setRecordeditProps({ reference, initialized: true });
+      setRecordeditProps({ reference });
 
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {

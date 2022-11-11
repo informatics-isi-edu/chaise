@@ -45,11 +45,13 @@ const numericFieldValidation = {
 
 // https://github.com/react-hook-form/react-hook-form/issues/589
 const dateFieldValidation =  (value: string) => {
+  if (!value) return;
   const date = windowRef.moment(value, DATE_FORMAT, true);
   return date.isValid() || 'Please enter a valid date value';
 };
 
 const timestampFieldValidation = (value: string) => {
+  if (!value) return;
   const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
   return timestamp.isValid() || 'Please enter a valid date and time value';
 };
@@ -456,7 +458,7 @@ const TimestampField = ({
     
     const sub = watch((data, options) => {
       // not sure what this is doing??
-      if (options.name && options.name in [`${name}-date`, `${name}-date`]) {
+      if (options.name && options.name in [`${name}-date`, `${name}-time`]) {
         const dateVal = data[`${name}-date`];
         let timeVal = data[`${name}-time`];
         if (dateVal && !timeVal) timeVal = '00:00';

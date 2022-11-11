@@ -3,6 +3,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 
 // hooks
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { useEffect, useState, useRef } from 'react';
 import { useForm, FormProvider } from "react-hook-form";
 
@@ -14,14 +15,19 @@ import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 
 const getFormDefaultValues = (name, columns) => {
+  // TODO: initialize inputs
   const formValues = {};
   columns.forEach(c => {
+    // initialize inputs based on different types
     formValues[`${name}-{c}`] = '';
   });
   return formValues;
 };
 
+// TODO FormProps
 const Form = ({ name, columns, classes = '', idx, f, hideCross, hMap }) => {
+
+  const { onSubmit, onInvalid } = useRecordedit();
 
   // type FormDefaultValues = {
   //   [`${name}-min`]: RangeOptions['absMin'];
@@ -46,15 +52,6 @@ const Form = ({ name, columns, classes = '', idx, f, hideCross, hMap }) => {
     shouldUseNativeValidation: false,
     delayError: undefined
   });
-
-  const onSubmit = (data: any) => {
-    console.log('on submit')
-    console.log(data);
-  }
-  const onInvalid = (err: any) => {
-    console.log("on invalid")
-    console.log(err);
-  }
 
   return (
     <FormProvider {...methods} >
