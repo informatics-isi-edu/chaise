@@ -5,6 +5,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import Recordset from '@isrd-isi-edu/chaise/src/components/recordset/recordset';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -203,7 +204,7 @@ const RecordsetModal = ({
     }
   }
 
-  let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records';
+  let submitText = 'Save', submitTooltip: string | JSX.Element = 'Apply the selected records.';
   switch (displayMode) {
     case RecordsetDisplayMode.FACET_POPUP:
       submitText = 'Submit';
@@ -213,8 +214,8 @@ const RecordsetModal = ({
       submitTooltip = (
         <>
           <span>Disconnect the selected records from </span>
-          <DisplayValue value={recordsetProps.parentReference?.displayname} />:
-          <DisplayValue value={recordsetProps.parentTuple?.displayname} />.
+          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>:
+          <code><DisplayValue value={recordsetProps.parentTuple?.displayname} /></code>.
         </>
       )
       break;
@@ -223,8 +224,8 @@ const RecordsetModal = ({
       submitTooltip = (
         <>
           <span>Connect the selected records to </span>
-          <DisplayValue value={recordsetProps.parentReference?.displayname} />:
-          <DisplayValue value={recordsetProps.parentTuple?.displayname} />.
+          <code><DisplayValue value={recordsetProps.parentReference?.displayname} /></code>:
+          <code><DisplayValue value={recordsetProps.parentTuple?.displayname} /></code>.
         </>
       )
       break;
@@ -269,7 +270,7 @@ const RecordsetModal = ({
             <span>Link </span>
             <Title reference={recordsetProps.initialReference} />
             <span> to </span>
-            <Title reference={recordsetProps.parentReference} /><span>:</span>
+            <Title reference={recordsetProps.parentReference} /><span>: </span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
@@ -279,7 +280,7 @@ const RecordsetModal = ({
             <span>Unlink </span>
             <Title reference={recordsetProps.initialReference} />
             <span> from </span>
-            <Title reference={recordsetProps.parentReference} /><span>:</span>
+            <Title reference={recordsetProps.parentReference} /><span>: </span>
             <Title displayname={recordsetProps.parentTuple?.displayname} />
           </div>
         );
@@ -305,6 +306,12 @@ const RecordsetModal = ({
       onHide={onClose}
       ref={modalContainer}
     >
+      {showSubmitSpinner &&
+        <div className='modal-submit-spinner-container'>
+          <div className='modal-submit-spinner-backdrop'></div>
+          <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
+        </div>
+      }
       <Modal.Header ref={modalHeader}>
         <div className='top-panel-container'>
           <div className='top-flex-panel'>
@@ -323,7 +330,7 @@ const RecordsetModal = ({
                         disabled={disableSubmit || showSubmitSpinner}
                       >
                         {!showSubmitSpinner && <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>}
-                        {showSubmitSpinner && <Spinner animation='border' size='sm' />}
+                        {showSubmitSpinner && <span className='chaise-btn-icon'><Spinner animation='border' size='sm' /></span>}
                         <span>{submitText}</span>
                       </button>
                     </ChaiseTooltip>

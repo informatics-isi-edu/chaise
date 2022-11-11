@@ -1,4 +1,4 @@
-import { ClearInputBtn } from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { useEffect, useState, useRef } from 'react';

@@ -470,33 +470,36 @@ describe('Record Add', function() {
             it("should show a resultset table with " + (testParams.max_input_rows+1) + " entities.", function() {
 
                 var intInput = chaisePage.recordEditPage.getInputById(0, "int");
-                intInput.sendKeys("1");
+                intInput.sendKeys("1").then(function () {
+                    return chaisePage.recordEditPage.clearInput(multiFormInput);
+                }).then(function () {
+                    browser.sleep(10);
 
-                chaisePage.recordEditPage.clearInput(multiFormInput);
-                browser.sleep(10);
-                multiFormInput.sendKeys(testParams.max_input_rows);
-
-                chaisePage.clickButton(multiFormSubmitButton).then(function() {
+                    return multiFormInput.sendKeys(testParams.max_input_rows);
+                }).then(function () {
+                    return chaisePage.clickButton(multiFormSubmitButton);
+                }).then(function() {
                     // wait for dom to finish rendering the forms
-                    browser.wait(function() {
+                    return browser.wait(function() {
                         return chaisePage.recordEditPage.getForms().count().then(function(ct) {
                             return (ct == testParams.max_input_rows+1);
                         });
                     }, browser.params.defaultTimeout);
+                }).then(function () {
 
-                    chaisePage.recordEditPage.submitForm();
-
+                    return chaisePage.recordEditPage.submitForm();
+                }).then(function () {
                     return browser.driver.getCurrentUrl();
                 }).then(function(url) {
                     expect(url.startsWith(process.env.CHAISE_BASE_URL + "/recordedit/")).toBe(true);
 
                     // so DOM can render table
-                    browser.wait(function() {
+                    return browser.wait(function() {
                         return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                             return (ct == testParams.max_input_rows+1);
                         });
                     }, browser.params.defaultTimeout);
-
+                }).then(function () {
                     return chaisePage.recordsetPage.getRows().count();
                 }).then(function(ct) {
                     expect(ct).toBe(testParams.max_input_rows+1);

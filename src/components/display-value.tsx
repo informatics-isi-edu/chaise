@@ -36,12 +36,14 @@ const DisplayValue = ({
   if (className) usedClassNames.push(className);
   if (addClass) usedClassNames.push('markdown-container');
 
+  const usedClassName = usedClassNames.length > 0 ? usedClassNames.join(' ') : undefined;
+
   if (value?.isHTML && value?.value) {
     return (
       <span
         style={styles}
         dangerouslySetInnerHTML={{ __html: value.value }}
-        className={usedClassNames.join(' ')}>
+        className={usedClassName}>
       </span>
     )
   }

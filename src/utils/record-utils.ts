@@ -51,7 +51,7 @@ export function CanCreateDisabledRelated(relatedRef: any, mainTuple: any): boole
     return false;
   }
 
-  const fkr = relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference.origFKR : relatedRef.origFKR
+  const fkr = relatedRef.derivedAssociationReference ? relatedRef.derivedAssociationReference.origFKR : relatedRef.origFKR;
   // some checks for whether at least one element in the array passes the test implemented by the provided function
   // if one column test passes (key data is `null` or `undefined`), the key info is invalid
   return fkr.key.colset.columns.some((col: any) => {
@@ -72,12 +72,17 @@ export function canEditRelated(relatedRef: any): boolean {
  * Whether we can delete instances of a related reference
  */
 export function canDeleteRelated(relatedRef: any): boolean {
-  if (ConfigService.chaiseConfig.editRecord === false) {
+  /**
+   * TODO this is replicating the Angularjs behavior but we should consider the following:
+   * - why do we need to check editRecord?
+   * - why deleteRecord check is backwards?
+   */
+  if (ConfigService.chaiseConfig.editRecord === false || ConfigService.chaiseConfig.deleteRecord !== true) {
     return false;
   }
 
   if (isObjectAndNotNull(relatedRef.derivedAssociationReference)) {
-    return relatedRef.derivedAssociationReference.canDelete
+    return relatedRef.derivedAssociationReference.canDelete;
   }
 
   return relatedRef.canDelete;
@@ -113,6 +118,17 @@ export function displayCustomModeRelated(relatedModel: RecordRelatedModel): bool
 }
 
 /**
+ * Given a reference return the page limit that we should use
+ */
+export function getRelatedPageLimit(ref: any) {
+  let initialPageLimit = ref.display.defaultPageSize;
+  if (!initialPageLimit) {
+    initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
+  }
+  return initialPageLimit
+}
+
+/**
  * create a related record model
  * @param ref the refernce
  * @param index the index of the model in its list
@@ -120,10 +136,6 @@ export function displayCustomModeRelated(relatedModel: RecordRelatedModel): bool
  * @param mainTuple the main tuple data
  */
 export function generateRelatedRecordModel(ref: any, index: number, isInline: boolean, mainTuple: any, mainReference: any): RecordRelatedModel {
-  let initialPageLimit = ref.display.defaultPageSize;
-  if (!initialPageLimit) {
-    initialPageLimit = RELATED_TABLE_DEFAULT_PAGE_SIZE;
-  }
   const stackNode = LogService.getStackNode(
     LogStackTypes.RELATED,
     ref.table,
@@ -144,7 +156,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
       hasTimeoutError: false,
     },
     recordsetProps: {
-      initialPageLimit,
+      initialPageLimit: getRelatedPageLimit(ref),
       config: {
         viewable: true,
         editable: true,
@@ -153,11 +165,12 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
         selectMode: RecordsetSelectMode.NO_SELECT,
         showFaceting: false,
         disableFaceting: true,
-        displayMode: RecordsetDisplayMode.RELATED
+        displayMode: isInline ? RecordsetDisplayMode.INLINE : RecordsetDisplayMode.RELATED,
+        containerDetails: { isInline, index }
       },
       logInfo: {
         logStack: LogService.getStackObject(stackNode),
-        logStackPath: LogService.getStackPath(null, LogStackPaths.RELATED)
+        logStackPath: LogService.getStackPath(null, isInline ? LogStackPaths.RELATED_INLINE : LogStackPaths.RELATED)
       },
       parentTuple: mainTuple,
       parentReference: mainReference
@@ -169,6 +182,7 @@ export function generateRelatedRecordModel(ref: any, index: number, isInline: bo
   }
 }
 
+// NOTE this solutin won't work if we're going to have multiple record page instances together
 let lastRenderedTableIndex = 0;
 function allPreviousRelatedInitialized(relatedModel: RecordRelatedModel): boolean {
   if (!relatedModel.recordsetState.isInitialized || !relatedModel.tableMarkdownContentInitialized) {
@@ -176,18 +190,8 @@ function allPreviousRelatedInitialized(relatedModel: RecordRelatedModel): boolea
   }
   if (relatedModel.index === 0 || lastRenderedTableIndex === relatedModel.index - 1) {
     lastRenderedTableIndex = relatedModel.index;
-
-    // don't show the loading if it's done
-    // if (showRelatedSectionSpinnerRef.current && lastRenderedIndex.current === relatedModels.length - 1) {
-    // setShowRelatedSectionSpinner(false);
-
-    // TODO
-    // defer autoscroll to next digest cycle to ensure aggregates and images were fetched and loaded for last RT
-    // $timeout(autoScroll, 0);
-    // }
     return true;
   }
-
   return false;
 }
 

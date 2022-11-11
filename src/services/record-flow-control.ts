@@ -1,21 +1,24 @@
 // models
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import { RecordRelatedRequestModel, RecordRequestModel } from '@isrd-isi-edu/chaise/src/models/record';
-import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import FlowControl from '@isrd-isi-edu/chaise/src/services/flow-control';
 
-export default class RecordFlowControl {
+export default class RecordFlowControl extends FlowControl {
   dirtyMain = false;
-  reloadCauses: string[];
-  reloadStartTime: number;
 
   requestModels: RecordRequestModel[] = [];
   inlineRelatedRequestModels: { [index: string]: RecordRelatedRequestModel } = {};
   relatedRequestModels: RecordRelatedRequestModel[] = [];
-  mainHasSecondaryRequests = false;
+
+  /**
+   * number of secondary requests for the main section of the page
+   * this includes the inline related and aggregates.
+   * we're using this number for the logic of showing the main section spinner
+   */
+  numColsRequireSecondaryRequests = 0;
 
   /**
    * the initial values for the templateVariables
@@ -30,13 +33,6 @@ export default class RecordFlowControl {
    */
   entitySetResults: any;
 
-  queue: FlowControlQueueInfo;
-
-  logStack: any;
-  logStackPath: string;
-  logObject: any;
-  logAppMode: string | undefined;
-
   constructor(
     logInfo: {
       logObject?: any,
@@ -46,56 +42,25 @@ export default class RecordFlowControl {
     },
     queue?: FlowControlQueueInfo,
   ) {
-
-    this.queue = queue ? queue : new FlowControlQueueInfo(6);
-
-    this.reloadStartTime = -1;
-    this.reloadCauses = [];
-
-    this.logStack = logInfo.logStack;
-    this.logStackPath = logInfo.logStackPath;
-    this.logObject = logInfo.logObject;
-    this.logAppMode = logInfo.logAppMode;
+    super(logInfo, queue);
   }
 
-  /**
-  * returns true if we have free slots for requests.
-  * @return {boolean}
-  */
-  haveFreeSlot(printMessage = true) {
-    const res = this.queue.occupiedSlots < this.queue.maxRequests;
-    if (!res && printMessage) {
-      $log.debug('No free slot available.');
+  addCausesToRequestModel(m: RecordRequestModel, causes: any[]) {
+    // the time that will be logged with the request
+    if (!Number.isInteger(m.reloadStartTime) || m.reloadStartTime === -1) {
+      m.reloadStartTime = ConfigService.ERMrest.getElapsedTime();
     }
-    return res;
+
+    if (!Array.isArray(m.reloadCauses)) {
+      m.reloadCauses = [];
+    }
+    causes.forEach((cause) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      if (typeof cause === 'string' && !!cause && m.reloadCauses!.indexOf(cause) === -1) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        m.reloadCauses!.push(cause);
+      }
+    });
   }
 
-  /**
-   * Return the action string that should be used for logs.
-   * @param {Object} vm - the vm object
-   * @param {String} actionPath - the ui context and verb
-   * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
-   */
-  getLogAction(actionPath: LogActions, childStackPath?: any): string {
-    let stackPath = this.logStackPath;
-    if (childStackPath) {
-      stackPath = LogService.getStackPath(stackPath, childStackPath);
-    }
-    const appMode = this.logAppMode ? this.logAppMode : undefined;
-    return LogService.getActionString(actionPath, stackPath, appMode);
-  }
-
-  /**
-   * Returns the stack object that should be used
-   */
-  getLogStack(childStackElement?: any, extraInfo?: any): any {
-    let stack = this.logStack;
-    if (childStackElement) {
-      stack = this.logStack.concat(childStackElement);
-    }
-    if (extraInfo) {
-      return LogService.addExtraInfoToStack(stack, extraInfo);
-    }
-    return stack;
-  }
 }

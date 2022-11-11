@@ -19,7 +19,7 @@ describe('Recordset add record,', function() {
         chaisePage.recordsetPageReady();
     });
 
-    
+
     it("show an inline comment instead of tooltip", function () {
         expect(chaisePage.recordsetPage.getPageTitleInlineComment().getText()).toBe("Recordset inline comment", "inline comment is not shown or is incorrect");
     });
@@ -52,7 +52,7 @@ describe('Recordset add record,', function() {
         });
     });
 
-    it("verify view details link, search for a term, then verify view details link has changed", function () {
+    it("verify view details link, search for a term, then verify view details link has changed", function (done) {
         var baseUrl = '/record/#' + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name + "/RID=";
 
         chaisePage.recordsetPage.getRows().then(function (rows) {
@@ -84,12 +84,14 @@ describe('Recordset add record,', function() {
 
             // clear search
             return chaisePage.recordsetPage.getSearchClearButton().click();
-        });
+        }).then(function () {
+          done();
+        }).catch(chaisePage.catchTestError(done));
     });
 
     var allWindows;
     it("click on the add button should open a new tab to recordedit", function(done) {
-
+        var rows;
         var EC = protractor.ExpectedConditions;
         var addRecordLink = chaisePage.recordsetPage.getAddRecordLink();
         browser.wait(EC.presenceOf(addRecordLink), browser.params.defaultTimeout);
@@ -117,14 +119,14 @@ describe('Recordset add record,', function() {
         }).then(function() {
             return chaisePage.recordsetPageReady();
         }).then(function() {
-            var rows = chaisePage.recordsetPage.getRows();
+            rows = chaisePage.recordsetPage.getRows();
 
-            browser.wait(function () {
+            return browser.wait(function () {
                 return rows.count().then(function (ct) {
                     return (ct == 5)
                 });
             });
-            
+        }).then(function () {
             return rows.get(0).all(by.css(".select-action-button"));
         }).then(function(selectButtons) {
             selectButtons[0].click();
@@ -141,14 +143,14 @@ describe('Recordset add record,', function() {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page
-            chaisePage.waitForElement(element(by.id("tblRecord")));
+            chaisePage.waitForElement(element(by.css(".record-main-section-table")));
             done();
         }).catch(function (err) {
             done.fail(err);
         })
     });
 
-    it("go back to recordset should refresh the table with the new record", function() {
+    it("go back to recordset should refresh the table with the new record", function(done) {
         // ... before closing this new tab and switching back to the original Record app's tab so that the next it spec can run properly
         /**
          * we noticed this test case started failing on saucelabs,
@@ -163,17 +165,17 @@ describe('Recordset add record,', function() {
         }).then(function() {
             return chaisePage.recordsetPage.getPageTitleElement().click();
         }).then(function () {
-
-            browser.wait(function() {
+            return browser.wait(function() {
                 return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                     return (ct == testParams.num_rows+1);
                 });
             }, browser.params.defaultTimeout);
-
+        }).then(function () {
             return chaisePage.recordsetPage.getRows();
         }).then(function(rows) {
             expect(rows.length).toBe(testParams.num_rows+1);
-        });
+            done();
+        }).catch(chaisePage.catchTestError(done));
     })
 
 });

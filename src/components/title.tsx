@@ -1,14 +1,19 @@
-import React from 'react';
-import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
+// components
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
-import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+
+// models
+import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/displayname';
+
+
 
 type TitleProps = {
   reference?: any,
   displayname?: DisplaynameType,
   comment?: string,
   addLink?: boolean,
-  link?: string
+  link?: string,
+  className?: string
 }
 
 const Title = ({
@@ -16,7 +21,8 @@ const Title = ({
   displayname,
   comment,
   addLink,
-  link
+  link,
+  className
 }: TitleProps): JSX.Element => {
 
   let showTooltip = comment ? true : false;
@@ -41,24 +47,26 @@ const Title = ({
 
   const renderDisplayname = <DisplayValue value={displayname} />;
 
-  const className = showTooltip && comment ? 'chaise-icon-for-tooltip': '';
+  const usedClassNames: string[] = [];
+  if (className) usedClassNames.push(className);
+  if (showTooltip && comment) usedClassNames.push('chaise-icon-for-tooltip');
 
   const renderLinkOrContainer = () => {
     if (addLink) {
-      return <a className={className} href={link}>{renderDisplayname}</a>;
+      return <a className={usedClassNames.join(' ')} href={link}>{renderDisplayname}</a>;
     }
-    return <span className={className}>{renderDisplayname}</span>
+    return <span className={usedClassNames.join(' ')}>{renderDisplayname}</span>
   }
 
 
   if (showTooltip && comment) {
     return (
-      <OverlayTrigger
+      <ChaiseTooltip
         placement='bottom-start'
-        overlay={<Tooltip>{comment}</Tooltip>}
+        tooltip={comment}
       >
         {renderLinkOrContainer()}
-      </OverlayTrigger>
+      </ChaiseTooltip>
     )
   }
 

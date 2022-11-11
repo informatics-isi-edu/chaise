@@ -35,7 +35,6 @@
     })
 
     .factory('Errors', ['ConfigUtils', 'errorNames', 'errorMessages', 'messageMap', function(ConfigUtils, errorNames, errorMessages, messageMap) {
-        var dcctx = ConfigUtils.getContextJSON();
 
         // errorData object holds additional information viz. stacktrace, redirectUrl
         // Make sure to check cross-browser cmpatibility for stack attribute of Error Object
@@ -237,7 +236,7 @@
              * @type {string}
              * @desc   Error message
              */
-            this.message = dcctx.user + errorMessages.forbiddenAssetRetrieval;
+            this.message = ConfigUtils.getContextJSON().user + errorMessages.forbiddenAssetRetrieval;
 
             /**
              * @type {string}

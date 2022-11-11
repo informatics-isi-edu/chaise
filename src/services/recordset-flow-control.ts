@@ -1,30 +1,22 @@
-/* eslint max-classes-per-file: 0 */
-
-// modesl
+// models
 import { LogActions, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 
 // servies
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import FlowControl from '@isrd-isi-edu/chaise/src/services/flow-control';
 
 // utils
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 
-export default class RecordsetFlowControl {
+export default class RecordsetFlowControl extends FlowControl {
   dirtyResult = false;
   dirtyCount = false;
   dirtyFacets = false;
   requestModels: any = [];
-  reloadCauses: any;
+
   recountCauses: any;
-  reloadStartTime: number;
   recountStartTime: number;
-  queue: FlowControlQueueInfo;
-  logStack: any;
-  logStackPath: string;
-  logObject: any;
-  logAppMode: string | undefined;
 
   updateFacetsCallback?: Function;
   updateFacetStatesCallback?: Function;
@@ -50,6 +42,8 @@ export default class RecordsetFlowControl {
     },
     queue?: any
   ) {
+    super(logInfo, queue);
+
     if (reference.activeList) {
       reference.activeList.requests.forEach((activeListModel: any) => {
         // we cannot capture the whole stack object here since it might get updated
@@ -73,60 +67,11 @@ export default class RecordsetFlowControl {
     }
 
     // log related
-    this.reloadCauses = [];
+
     this.recountCauses = [];
-    this.reloadStartTime = -1;
     this.recountStartTime = -1;
 
     // can be used to refer to this current instance of table
     this.internalID = generateUUID();
-
-    this.queue = queue ? queue : new FlowControlQueueInfo();
-
-    this.logStack = logInfo.logStack;
-    this.logStackPath = logInfo.logStackPath;
-    this.logObject = logInfo.logObject;
-    this.logAppMode = logInfo.logAppMode;
-  }
-
-  /**
-  * returns true if we have free slots for requests.
-  * @return {boolean}
-  */
-  haveFreeSlot(printMessage = true) {
-    const res = this.queue.occupiedSlots < this.queue.maxRequests;
-    if (!res && printMessage) {
-      $log.debug('No free slot available.');
-    }
-    return res;
-  }
-
-  /**
-   * Return the action string that should be used for logs.
-   * @param {Object} vm - the vm object
-   * @param {String} actionPath - the ui context and verb
-   * @param {String=} childStackPath - if we're getting the action for child (facet, pseudo-column)
-   */
-  getLogAction(actionPath: LogActions, childStackPath?: any): string {
-    let stackPath = this.logStackPath;
-    if (childStackPath) {
-      stackPath = LogService.getStackPath(stackPath, childStackPath);
-    }
-    const appMode = this.logAppMode ? this.logAppMode : undefined;
-    return LogService.getActionString(actionPath, stackPath, appMode);
-  }
-
-  /**
-   * Returns the stack object that should be used
-   */
-  getLogStack(childStackElement?: any, extraInfo?: any): any {
-    let stack = this.logStack;
-    if (childStackElement) {
-      stack = this.logStack.concat(childStackElement);
-    }
-    if (extraInfo) {
-      return LogService.addExtraInfoToStack(stack, extraInfo);
-    }
-    return stack;
   }
 }

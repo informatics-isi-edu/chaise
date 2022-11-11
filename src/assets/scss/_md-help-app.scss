@@ -1,0 +1,419 @@
+.markdown-help-page {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 2em auto;
+  padding: 0 20px;
+  display: block;
+  border: 2px solid #31b7e1;
+  box-sizing: border-box;
+  text-align: center;
+  .markdown-reference {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0;
+
+    .more-details-row td {
+      text-align: center;
+      border-bottom: 0;
+    }
+  }
+
+  /*
+  * Below is the unminified CSS that was pasted at the top of the old document
+  */
+  .hdrStyle,
+  dfn {
+    font-style: italic;
+  }
+
+  .hdrStyle,
+  b,
+  strong {
+    font-weight: 700;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.1rem;
+  }
+
+  html {
+    font-family: sans-serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  article,
+  aside,
+  details,
+  figcaption,
+  figure,
+  footer,
+  header,
+  hgroup,
+  main,
+  menu,
+  nav,
+  section,
+  summary {
+    display: block;
+  }
+
+  audio,
+  canvas,
+  progress,
+  video {
+    display: inline-block;
+    vertical-align: baseline;
+  }
+
+  audio:not([controls]) {
+    display: none;
+    height: 0;
+  }
+
+  [hidden],
+  template {
+    display: none;
+  }
+
+  a {
+    background-color: transparent;
+  }
+
+  a:active,
+  a:hover {
+    outline: 0;
+  }
+
+  abbr[title] {
+    border-bottom: 1px dotted;
+  }
+
+  h1 {
+    margin: 0.67em 0;
+  }
+
+  mark {
+    background: #ff0;
+    color: #000;
+  }
+
+  small {
+    font-size: 80%;
+  }
+
+  sub,
+  sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  sup {
+    top: -0.5em;
+  }
+
+  sub {
+    bottom: -0.25em;
+  }
+
+  img {
+    border: 0;
+  }
+
+  svg:not(:root) {
+    overflow: hidden;
+  }
+
+  figure {
+    margin: 1em 40px;
+  }
+
+  hr {
+    -moz-box-sizing: content-box;
+    box-sizing: content-box;
+    height: 0;
+  }
+
+  #fullpage,
+  .section,
+  .slide {
+    height: 100%;
+  }
+
+  pre {
+    overflow: auto;
+  }
+
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  .highlight-pre {
+    background-color: #fff !important;
+    border: 0 !important;
+  }
+
+  .code-block,
+  code {
+    background: #f1f1f1;
+  }
+
+  .hdrStyle {
+    color: #0792bc;
+    text-decoration: underline;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+
+  h1 {
+    font-size: 4rem;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 3.3rem;
+    line-height: 1.25;
+  }
+
+  h3 {
+    font-size: 2.8rem;
+    line-height: 1.3;
+  }
+
+  h4 {
+    font-size: 2.4rem;
+    line-height: 1.35;
+    letter-spacing: -0.08rem;
+  }
+
+  h5 {
+    font-size: 1.9rem;
+    line-height: 1.5;
+    letter-spacing: -0.05rem;
+  }
+
+  h6 {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+
+  p {
+    margin-top: 0;
+  }
+
+  a {
+    color: #1eaedb;
+  }
+
+  a:hover {
+    color: #0fa0ce;
+  }
+
+  ol,
+  ul {
+    padding-left: 1.8em;
+    margin-top: 0.5em;
+  }
+
+  code {
+    padding: 0.2rem 0.5rem;
+    margin: 0 0.2rem;
+    white-space: nowrap;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+  }
+
+  pre > code {
+    display: block;
+    padding: 1rem 1.5rem;
+    white-space: pre;
+  }
+
+  td,
+  th {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e1e1e1;
+  }
+
+  td:first-child,
+  th:first-child {
+    padding-left: 0;
+  }
+
+  td:last-child,
+  th:last-child {
+    padding-right: 0;
+  }
+
+  .button,
+  button {
+    margin-bottom: 1rem;
+  }
+
+  blockquote,
+  dl,
+  fieldset,
+  figure,
+  form,
+  input,
+  p,
+  pre,
+  select,
+  table,
+  textarea {
+    margin-bottom: 1.5rem;
+  }
+
+  .u-full-width {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .u-max-full-width {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .u-pull-right {
+    float: right;
+  }
+
+  .u-pull-left {
+    float: left;
+  }
+
+  hr {
+    margin-top: 3rem;
+    margin-bottom: 3.5rem;
+    border-width: 0;
+    border-top: 1px solid #e1e1e1;
+  }
+
+  .main-container:after,
+  .row:after,
+  .u-cf {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .slide {
+    min-height: 100%;
+    display: none;
+  }
+
+  .active {
+    display: block;
+  }
+
+  html > body .slide {
+    height: auto;
+  }
+
+  blockquote {
+    border-left: 5px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+  }
+
+  blockquote:before {
+    color: #ccc;
+    font-size: 4em;
+    line-height: 0.1em;
+    margin-right: 0.25em;
+    vertical-align: -0.4em;
+  }
+
+  .code-block {
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    font-size: 90%;
+    padding: 0.2rem 0.5rem;
+    font-family: "Roboto Mono", Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+  }
+
+  .custom-hr {
+    border-top: 3px solid #e1e1e1;
+    margin-top: 1rem;
+  }
+
+  p {
+    margin-bottom: 1.5em;
+  }
+
+  .spaces {
+    color: #888;
+  }
+
+  .editor {
+    width: 100%;
+    max-width: 100%;
+    height: 11.7em;
+    border: 1px solid #666;
+    margin-bottom: 0;
+  }
+
+  .editor,
+  .html-pad,
+  .rawInput,
+  code,
+  kbd,
+  pre,
+  samp {
+    font: 1em / normal "Roboto Mono", Monaco, Menlo, "Ubuntu Mono", Consolas, source-code-pro, monospace;
+  }
+
+  .rawInput {
+    font-size: 0.9em;
+  }
+
+  .render-pad h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .smaller-h1 {
+    font-size: 2.2rem;
+  }
+
+  .smaller-h2 {
+    font-size: 2rem;
+    font-weight: 400;
+  }
+
+  #render_pad_8-3 ol {
+    padding-left: 40px;
+  }
+
+  .hljs-tag,
+  .hljs-title {
+    color: maroon !important;
+    font-weight: 400 !important;
+  }
+}

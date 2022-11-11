@@ -15,11 +15,12 @@ describe("Domain filter pattern support,", function () {
         browser.wait(EC.elementToBeClickable(fk));
         fk.click().then(function () {
             chaisePage.waitForElement(fkModal)
+            // TODO allowAnimations only works for angularjs and should be removed after migration
             fkModal.allowAnimations(false);
 
             modal = chaisePage.recordEditPage.getModalTitle();
-            browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
-
+            return browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
+        }).then(function () {
             return modal.getText();
         }).then(function (text) {
             expect(text.indexOf("Select")).toBeGreaterThan(-1);
