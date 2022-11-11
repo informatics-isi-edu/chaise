@@ -33,7 +33,7 @@ const Columns = ({ columns }: { columns: any }) => {
   }
 
   useEffect(() => {
-    const columnContainer = document.querySelector('.record-edit-column') as HTMLElement;
+    const columnContainer = document.querySelector('.entity-key-column') as HTMLElement;
     columnContainer.addEventListener('update-record-column-height', handleHeightUpdate);
 
     return () => {

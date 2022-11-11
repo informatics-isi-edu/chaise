@@ -14,18 +14,28 @@ import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 
 
-const getFormDefaultValues = (name, columns) => {
+const getFormDefaultValues = (name: string, columns: any[]) => {
   // TODO: initialize inputs
-  const formValues = {};
+  const formValues: any = {};
   columns.forEach(c => {
+    const colname = makeSafeIdAttr(c?.displayname?.value)
     // initialize inputs based on different types
-    formValues[`${name}-{c}`] = '';
+    formValues[`${name}-0-${colname}`] = '';
   });
+  console.log(formValues);
   return formValues;
 };
 
-// TODO FormProps
-const Form = ({ columns, classes = '', idx, f, hideCross, hMap }) => {
+type FormProps = {
+  columns: any[],
+  classes?: string,
+  idx: number,
+  f: number,
+  hideCross: boolean,
+  hMap: any
+}
+
+const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => {
 
   const { onSubmit, onInvalid } = useRecordedit();
 
@@ -44,7 +54,7 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }) => {
   const methods = useForm<any>({
     mode: 'all',
     reValidateMode: 'onChange',
-    defaultValues: getFormDefaultValues(f, columns),
+    defaultValues: getFormDefaultValues('' + f, columns),
     resolver: undefined,
     context: undefined,
     criteriaMode: "firstError",
@@ -70,6 +80,7 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }) => {
                 displayErrors={true}
                 name={`${f}-${idx}-${colName}`}
                 type={getInputType(c.type)}
+                // type='numeric'
                 containerClasses={'column-cell entity-value'}
                 // value={0}
                 classes='column-cell-input'
@@ -85,7 +96,11 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }) => {
 
 };
 
-const CrossBtn = ({ handleClick }) => (
+type CrossBtnProps = {
+  handleClick: () => void
+}
+
+const CrossBtn = ({ handleClick }: CrossBtnProps): JSX.Element => (
   <ChaiseTooltip
     placement='bottom'
     tooltip='Click to remove this record from the form.'
@@ -96,7 +111,13 @@ const CrossBtn = ({ handleClick }) => (
   </ChaiseTooltip>
 );
 
-const BlackBox = ({ idx, f, hideCross }) => {
+type BlackBoxProps = {
+  idx: string,
+  f: string,
+  hideCross: boolean
+}
+
+const BlackBox = ({ idx, f, hideCross }: BlackBoxProps): JSX.Element => {
 
   const handleCrossClick = () => fireCustomEvent('remove-form', '.form-container', { idx, f_idx: f });
     
@@ -108,8 +129,8 @@ const BlackBox = ({ idx, f, hideCross }) => {
   );
 };
 
-const generateInitialHMap = (columns) => {
-  const hMap = {};
+const generateInitialHMap = (columns: any[]) => {
+  const hMap: any = {};
   columns.forEach(c => {
     const colname = makeSafeIdAttr(c?.displayname?.value);
     hMap[colname] = [-1];
@@ -117,7 +138,7 @@ const generateInitialHMap = (columns) => {
   return hMap;
 }
 
-const handleHMapAddForm = (hMap) => {
+const handleHMapAddForm = (hMap: any) => {
   const hMapCpy = simpleDeepCopy(hMap);
   Object.keys(hMapCpy).forEach(k => {
     hMapCpy[k].push(-1);
@@ -125,7 +146,7 @@ const handleHMapAddForm = (hMap) => {
   return hMapCpy;
 }
 
-const handleHMapDeleteForm = (hMap, idx) => {
+const handleHMapDeleteForm = (hMap: any, idx: string) => {
   const hMapCpy = simpleDeepCopy(hMap);
   Object.keys(hMapCpy).forEach(k => {
     hMapCpy[k].splice(idx,1);
@@ -133,17 +154,21 @@ const handleHMapDeleteForm = (hMap, idx) => {
   return hMapCpy;
 }
 
-const handleUpdateHMap = (hMap, colName, idx, value) => {
+const handleUpdateHMap = (hMap: any, colName: string, idx: string, value: number) => {
   const hMapCpy = simpleDeepCopy(hMap);
   
   hMapCpy[colName][idx] = value;
 
-  fireCustomEvent('update-record-column-height', '.record-edit-column', { colName, height: Math.max(...hMapCpy[colName]) });
+  fireCustomEvent('update-record-column-height', '.entity-key-column', { colName, height: Math.max(...hMapCpy[colName]) });
 
   return hMapCpy;
 }
 
-const FormContainer = ({ columns }) => {
+type FormContainerProps = {
+  columns: any[]
+}
+
+const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
   /*
     Here a unique key to reference each form will be stored in the forms state variable : f_i
   */
@@ -160,29 +185,30 @@ const FormContainer = ({ columns }) => {
 
   const addForm = () => {
     setForms(forms => [...forms, forms[forms.length-1]+1]);
-    setHMap(hMap => {
+    setHMap((hMap: any) => {
       return handleHMapAddForm(hMap);
     });
   };
 
-  const removeForm = (event) => {
+  // TODO: event type
+  const removeForm = (event: any) => {
     const f = event.detail.f_idx;
     const idx = event.detail.idx;
     setForms(forms => {
       forms.splice(idx, 1);
       return [...forms];
     });
-    setHMap(hMap => {
+    setHMap((hMap: any) => {
       return handleHMapDeleteForm(hMap, idx);
     });
   }
 
-  const handleHeightAdjustment = (event) => {
+  const handleHeightAdjustment = (event: any) => {
     const fieldName = event.detail.inputFieldName;
 
     const msgCleared = event.detail.msgCleared;
 
-    const ele = document.querySelector(`.input-switch-container-${fieldName}`);
+    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
     
     const height = ele?.offsetHeight || 0;
     
@@ -195,10 +221,10 @@ const FormContainer = ({ columns }) => {
     const colName = result[3];
 
     // how to handle this ? get default heights
-    const heghtSet = height == 47 || msgCleared ? -1 : height;
+    const heightSet = height == 47 || msgCleared ? -1 : height;
 
-    setHMap(hMap => {
-      return handleUpdateHMap(hMap, colName, idx, heghtSet);
+    setHMap((hMap: any) => {
+      return handleUpdateHMap(hMap, colName, idx, heightSet);
     });
   }
 

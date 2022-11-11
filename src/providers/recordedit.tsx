@@ -82,7 +82,7 @@ export default function RecordeditProvider({
       console.log(formIdx);
       const currRow: any = {};
       reference.columns.forEach((col: any) => {
-        currRow[col.name] = data[formIdx + '-' + col.displayname.value] || null
+        currRow[col.name] = data[formIdx + '-0-' + col.displayname.value] || null
       })
 
       submissionRows.push(currRow);

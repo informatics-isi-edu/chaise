@@ -60,8 +60,11 @@ const validationFunctionMap : {
   [key: string]: any;
 } = {
   'int': integerFieldValidation,
+  'integer2': integerFieldValidation,
+  'integer4': integerFieldValidation,
+  'integer8': integerFieldValidation,
   'float': numericFieldValidation,
-  'numeric': numericFieldValidation,
+  'number': numericFieldValidation,
   'date': dateFieldValidation,
   'timestamp': timestampFieldValidation,
 };
