@@ -218,8 +218,15 @@ const AppWrapperInner = ({
  * The app wrapper. it will take care of:
  *  - getting the session
  *  - configuring chaise and ermrestjs
- *  - adding alert and error providers
+ *  - adding error providers
+ * The following are the optional things that we can ask
+ * app-wrapper to do:
  *  - showing the navbar
+ *  - showing alerts
+ *
+ * By default we will also reload the page on hash change, if
+ * that's not desirable use the ignoreHashChange prop
+ *
  * @param appSettings
  * @returns
  */

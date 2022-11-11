@@ -260,7 +260,6 @@ The following is the overall structure of the project:
 │   │   └── <feature>.ts
 │   ├── pages
 │   │   ├── <app>.tsx
-│   │   └── main.html
 │   ├── providers
 │   │   └── <feeature>.tsx
 │   ├── services
@@ -269,8 +268,8 @@ The following is the overall structure of the project:
 │   │   └── <function>.ts
 │   └── vendor
 ├── webpack
+│   ├── templates
 │   ├── app.config.js
-│   ├── lib.config.js
 │   └── main.configjs
 ├── Makefile
 └── package.json
@@ -314,7 +313,7 @@ This section will go over how we think the NPM modules should be managed.
 Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
 
 ### Main HTML
-The instantiation and bundle of dependencies should be almost the same for each app. The build process using webpack will generate the outer HTML based on `pages/main.html`. Each app attaches to the element with `id` equal to `chaise-app-root` defined in `main.html`.
+The instantiation and bundle of dependencies should be the same for each app. The build process using webpack will generate the outer HTML based on `webpack/templates/main.html`. Each app attaches to the element with `id` equal to `chaise-app-root` defined in `main.html`.
 
 ### App Wrapper
 Each app in Chaise is instantiated and configured the same way as far as creating the outer HTML and <head> tag, wrapping the app in the proper providers, configuring Chaise and ermrestJS, and fetching the session. To help manage parts of this, we created a component called `AppWrapper` to wrap each app for setup and configuration.
