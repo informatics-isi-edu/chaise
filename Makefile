@@ -300,7 +300,6 @@ RSYNC_FILE_LIST=common \
 	dist \
 	help-docs \
 	images \
-	lib \
 	recordedit \
 	scripts \
 	sitemap \

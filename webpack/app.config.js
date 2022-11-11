@@ -6,13 +6,22 @@ const webpack = require('webpack');
 
 /**
  * Return the webpack config object that can be used for creating chaise-app/lib bundles
+ * appConfigs is an array of objects with the following required props:
+ *   - appName: the name of the app. used to find the <appName>.tsx associated with it
+ * and the following optional props:
+ *   - appTitle: (string) Added to the default title tag.
+ *   - bundleName: (string) if defined, will be used to name the bundle. Otherwise we will use appName.
+ *   - externalFiles: (array of strings) the extra files that we should add script tag for
+ *   - appConfigLocation: (string) the app-specific config file that we should add script tag for
+ *   - isLib: (boolean) whether this is a library or an app.
+ *
  * env variables that are required for calling this function:
  * - BUILD_VARIABLES: An object with the following properties:
  * - ERMRESTJS_BASE_PATH: The base path of ermrestjs in the server, e.g. /ermrestjs/
  * - CHAISE_BASE_PATH: The base path of chaise in the server, e.g. /chaise/
  * - BUILD_VERSION: A randomly generated string signifying the build version.
  *
- * @param {Array.<{appName:string, bundleName?:string, appTitle?: string, appConfigLocation?: string, externalFiles?: string[]}>} appConfigs
+ * @param {Object} appConfigs
  *  the app configurations
  * @param {'development'|'production'} mode
  * @param {Object} env the environment variables
@@ -44,19 +53,24 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       import: path.join(options.pathPrefix, 'src', ac.isLib ? 'libs' : 'pages', `${ac.appName}.tsx`)
     };
 
-    const appConfig = ac.appConfigLocation ? `<script src='${ac.appConfigLocation}?v=${buildVersion}'></script>` : '';
-
-    let externalFiles = '';
-    if (Array.isArray(ac.externalFiles)) {
-      externalFiles = ac.externalFiles.reduce((prev, curr) => {
-        return `${prev}<script src='${curr}?v=${buildVersion}'></script>\n`
-      }, '')
-    }
+    // script tags that will be injected directly to the page
+    const externalFiles = [
+      // ermrestjs
+      `${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}`,
+      `${ermrestjsPath}ermrest.min.js?v=${buildVersion}`,
+      // chaise-config
+      `${chaisePath}chaise-config.js?v=${buildVersion}`,
+      // the specific app config file
+      ...ac.appConfigLocation ? [`${ac.appConfigLocation}?v=${buildVersion}`] : [],
+      // external files that the app might need
+      ...Array.isArray(ac.externalFiles) ? ac.externalFiles.map((f) => `${f}?v=${buildVersion}`) : []
+    ];
 
     // create the html plugin
     appHTMLPlugins.push(
       new HtmlWebpackPlugin({
-        template: path.join(__dirname, '..', 'src', ac.isLib ? 'libs' : 'pages', 'main.html'),
+        chunks: [bundleName],
+        template: path.join(__dirname, 'templates', ac.isLib ? 'lib.html' : 'app.html'),
         // the filename path is relative to the "output" define below which is the "bundles" folder.
         // we want the libs to be inside the lib folder so they don't clash with apps
         filename: `../${ac.isLib ? 'lib/' : ''}${ac.appName}/index.html`,
@@ -65,16 +79,26 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         // scriptLoading: ac.isLib ? 'blocking' : 'defer',
         app_name: ac.appName,
         title: ac.appTitle,
-        ermrestjs: [
-          `<script src='${ermrestjsPath}ermrest.vendor.min.js?v=${buildVersion}'></script>`,
-          `<script src='${ermrestjsPath}ermrest.min.js?v=${buildVersion}'></script>`,
-        ].join('\n'),
-        chaise_config: `<script src='${chaisePath}chaise-config.js?v=${buildVersion}'></script>`,
-        app_config: appConfig,
-        external_files: externalFiles,
-        chunks: [bundleName]
+        external_files: externalFiles.map((f) => `<script src="${f}"></script>`).join('\n'),
       })
     );
+
+    if (ac.isLib) {
+      // the javascript file that can be used to dynamically load the dependencies
+      appHTMLPlugins.push(
+        new HtmlWebpackPlugin({
+          chunks: [bundleName],
+          template: path.join(__dirname, 'templates', 'dynamic-load.js'),
+          // the filename path is relative to the "output" define below which is the "bundles" folder.
+          // we want the libs to be inside the lib folder so they don't clash with apps
+          filename: `../lib/${ac.appName}/${ac.appName}.includes.js`,
+          // we don't want webpack to inject assets automatically
+          inject: false,
+          // in this mode, we want the string version so we can append the webpack files to it
+          external_files: JSON.stringify(externalFiles)
+        })
+      );
+    }
   });
 
   return {

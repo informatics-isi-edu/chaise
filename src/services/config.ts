@@ -15,6 +15,9 @@ import { setupHead, setWindowName } from '@isrd-isi-edu/chaise/src/utils/head-in
 import $log, { LoggerLevels } from '@isrd-isi-edu/chaise/src/services/logger';
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
 
+// this will ensure that we're configuring ermrestjs as soon as this file loads.
+windowRef.ERMrest.configure(axios, Q);
+
 export interface AppSettings {
   appName: string,
   appTitle?: string,
@@ -119,8 +122,6 @@ export class ConfigService {
 
     // setup ermrest
     const ERMrest = windowRef.ERMrest;
-
-    ERMrest.configure(axios, Q);
 
     await ERMrest.onload();
     const cc = ConfigService._setChaiseConfig();
