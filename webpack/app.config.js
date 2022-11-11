@@ -46,7 +46,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
 
   // define entries and add plugins based on appConfigs
   appConfigs.forEach((ac) => {
-    const bundleName = ac.bundleName || ac.appName;
+    const bundleName = ac.bundleName ? ac.bundleName : ac.appName;
 
     // create the entry
     entries[bundleName] = {
@@ -72,11 +72,10 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
         chunks: [bundleName],
         template: path.join(__dirname, 'templates', ac.isLib ? 'lib.html' : 'app.html'),
         // the filename path is relative to the "output" define below which is the "bundles" folder.
-        // we want the libs to be inside the lib folder so they don't clash with apps
-        filename: `../${ac.isLib ? 'lib/' : ''}${ac.appName}/index.html`,
+        // we want the libs to be inside the `lib` folder so they don't clash with apps
+        filename: ac.isLib ? `../lib/${ac.appName}/${ac.appName}-dependencies.html` : `../${ac.appName}/index.html`,
         // in lib mode, we are manually controlling the injection
         inject: ac.isLib ? false : true,
-        // scriptLoading: ac.isLib ? 'blocking' : 'defer',
         app_name: ac.appName,
         title: ac.appTitle,
         external_files: externalFiles.map((f) => `<script src="${f}"></script>`).join('\n'),
@@ -91,7 +90,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
           template: path.join(__dirname, 'templates', 'dynamic-load.js'),
           // the filename path is relative to the "output" define below which is the "bundles" folder.
           // we want the libs to be inside the lib folder so they don't clash with apps
-          filename: `../lib/${ac.appName}/${ac.appName}.includes.js`,
+          filename: `../lib/${ac.appName}/${ac.appName}.dependencies.js`,
           // we don't want webpack to inject assets automatically
           inject: false,
           // in this mode, we want the string version so we can append the webpack files to it
