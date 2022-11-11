@@ -254,7 +254,6 @@ const NumericField = ({
   };
 
   useEffect(() => {
-    console.log('error message updated: ', name, error?.message);
     fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
   }, [error?.message])
 

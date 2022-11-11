@@ -185,6 +185,7 @@ const FormContainer = ({ columns }) => {
 
     const colName = result[3];
 
+    // how to handle this ? get default heights
     const heghtSet = height == 47 || msgCleared ? -1 : height;
 
     setHMap(hMap => {

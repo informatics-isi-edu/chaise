@@ -22,14 +22,9 @@ const updateColumnHeight = (hMap, colName, value) => {
 const Columns = ({ columns }) => {
   const [hMap, setHMap] = useState(generateInitialHMap(columns));
 
-  console.log(hMap);
-
   const handleHeightUpdate = (event) => {
-    console.log('handleHeightUpdate', event.detail);
     const colName = event.detail.colName;
     const height = event.detail.height;
-
-    console.log(hMap[colName], height, 'here here');
 
     setHMap(hMap => {
       return updateColumnHeight(hMap, colName, height);
