@@ -41,11 +41,11 @@ const Columns = ({ columns }: { columns: any }) => {
     }
   }, []);
 
-  const renderColumnHeader = (column: any, heightparam: string) => {
+  const renderColumnHeader = (column: any) => {
     const headerClassName = `column-displayname${column.comment ? ' chaise-icon-for-tooltip' : ''}`;
     return (
       <span className={headerClassName}>
-        <DisplayValue value={column.displayname} styles={{ 'height': heightparam }} />
+        <DisplayValue value={column.displayname} />
         {column.comment ? ' ' : ''}
       </span>
     )
@@ -59,16 +59,16 @@ const Columns = ({ columns }: { columns: any }) => {
         const heightparam = height == -1 ? 'auto' : `${height}px`;
 
         return (
-          <span key={colName} className='entity-key'>
+          <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
             {!c.nullok && !c.inputDisabled && <span className='text-danger'><b>*</b> </span>}
             {c.comment ?
               <ChaiseTooltip
                 placement='right'
                 tooltip={c.comment}
               >
-                {renderColumnHeader(c, heightparam)}
+                {renderColumnHeader(c)}
               </ChaiseTooltip> :
-              renderColumnHeader(c, heightparam)
+              renderColumnHeader(c)
             }
           </span>
         )
