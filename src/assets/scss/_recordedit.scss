@@ -7,7 +7,7 @@
 
     .form-container {
         display: flex;
-        // overflow-x: scroll;
+        overflow-x: auto;
         width: 100%;
 
         .record-edit-form {
@@ -15,7 +15,6 @@
             flex-shrink: 0;
             background-color: white;
             height: 100%;
-            width: 500px;
             min-width: 250px;
             // padding: 10px;
             color: black;
@@ -149,9 +148,6 @@
         position: relative;
         padding-right: 15px; // so table is padded properly on load
         padding-top: 15px;
-
-        overflow-x: auto;
-        overflow-y: auto;
         margin-bottom: 40px; // margin at bottom of page so edit form isn't touching the bottom of viewport
 
         .entity-key-column {
@@ -178,11 +174,39 @@
             }
         }
 
+        .form-header {
+            height: 47px;
+            border-top: 1px solid $border-color;
+            color: $disabled-color;
+            font-weight: normal;
+            font-size: 1rem;
+        }
+
+        .entity-value.form-header {
+            .remove-form-btn {
+                float: right;
+                padding: 1px 7px 0px 7px;
+            }
+
+            .disabled-row-icon {
+                margin: 6px 10px 0 0;
+                font-size: 1.3em;
+            }
+        }
+
         .entity-value,
         .match-entity-value {
             word-wrap: break-word;
             min-width: 250px;
             border-right: 1px solid $border-color;
+            border-bottom: 1px solid $border-color;
+
+            // border-left: none;
+            // border-top: none;
+
+            border-radius: 0;
+            min-height: 47px;
+            padding: 8px 10px;
         }
 
         .entity-value {
@@ -211,11 +235,6 @@
         //     max-width: none;
 
         //     > tbody {
-        //         &:first-child > tr.shift-form:first-child > td {
-        //             color: $disabled-color;
-        //             font-weight: normal;
-        //             font-size: 1rem;
-        //         }
 
         //         // style for bottom of table (entity-values)
         //         &:last-child {
@@ -242,18 +261,7 @@
 
         //         > tr {
         //             > td {
-        //                 &.form-header {
-        //                     height: 47px;
-
-        //                     .remove-form-btn {
-        //                         padding: 1px 7px 0px 7px;
-        //                     }
-
-        //                     .disabled-row-icon {
-        //                         margin: 6px 10px 0 0;
-        //                         font-size: 1.3em;
-        //                     }
-        //                 }
+        //                
 
 
 

@@ -373,7 +373,6 @@ const DateField = ({
 
 
   useEffect(() => {
-    console.log('value change date useEffect triggered', value, name);
     setValue(name, value);
   }, [value])
 
@@ -520,7 +519,7 @@ const TimestampField = ({
       <div className='input-switch-datetime'>
         <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
           <input className={`${inputClasses} input-switch`} type='date' placeholder='YYYY-MM-DD'
-          min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date + value?.time} disabled={disableInput} {...formInputDate}/>
+          min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} disabled={disableInput} {...formInputDate}/>
           <ClearInputBtn
             btnClassName={`${clearClasses} input-switch-clear`}
             clickCallback={clearDate}

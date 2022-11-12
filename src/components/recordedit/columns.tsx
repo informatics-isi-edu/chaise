@@ -29,7 +29,6 @@ const Columns = ({ columns }: { columns: any }) => {
     setHMap((hMap: any) => {
       return updateColumnHeight(hMap, colName, height);
     });
-
   }
 
   useEffect(() => {
@@ -53,6 +52,7 @@ const Columns = ({ columns }: { columns: any }) => {
 
   return (
     <div className='entity-key-column'>
+      <span className='form-header entity-key'>Record Number</span>
       {columns.map((c: any, idx: number) => {
         const colName = makeSafeIdAttr(c?.displayname?.value);
         const height = hMap[colName];

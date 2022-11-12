@@ -10,7 +10,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+// import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
 // import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -38,7 +38,8 @@ export const RecordeditContext = createContext<{
    */
   // columnModels: RecordColumnModel[],
   onSubmit: (data: any) => void,
-  onInvalid: (data: any) => void
+  onInvalid: (data: any) => void,
+  MAX_ROWS_TO_ADD: number
 } | null>(null);
 
 type RecordeditProviderProps = {
@@ -102,7 +103,7 @@ export default function RecordeditProvider({
   }
 
   const onInvalid = (data: any) => {
-    console.log("on invalid");
+    console.log('on invalid');
     console.log(data)
   }
 
@@ -138,7 +139,8 @@ export default function RecordeditProvider({
     //   getRecordLogAction,
     //   getRecordLogStack,
       onSubmit,
-      onInvalid
+      onInvalid,
+      MAX_ROWS_TO_ADD: 201
     };
   }, [
     // main entity:

@@ -5,7 +5,7 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { useEffect, useState, useRef } from 'react';
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider } from 'react-hook-form';
 
 // utils
 import { fireCustomEvent, getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -22,7 +22,6 @@ const getFormDefaultValues = (name: string, columns: any[]) => {
     // initialize inputs based on different types
     formValues[`${name}-0-${colname}`] = '';
   });
-  console.log(formValues);
   return formValues;
 };
 
@@ -49,15 +48,13 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => 
    * Need to find a way to dynamically generate the type for FormDefaultValue based on the types of the columns
    */
 
-  const handleCrossClick = () => fireCustomEvent('remove-form', '.form-container', { idx, f_idx: f });
-
   const methods = useForm<any>({
     mode: 'all',
     reValidateMode: 'onChange',
     defaultValues: getFormDefaultValues('' + f, columns),
     resolver: undefined,
     context: undefined,
-    criteriaMode: "firstError",
+    criteriaMode: 'firstError',
     shouldUnregister: false,
     shouldUseNativeValidation: false,
     delayError: undefined
@@ -66,8 +63,8 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => 
   return (
     <FormProvider {...methods} >
       <form id='recordedit-form' className='record-edit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
-        {/* {!hideCross && <CrossBtn handleClick={handleCrossClick}/>} */}
-        <div className={`column-form ${classes}`}>  
+        <div className={`column-form ${classes}`}>
+          <RecordeditFormHeader idx={idx} f={f} hideCross={hideCross}></RecordeditFormHeader>
           {columns.map((c: any) => {
 
             const colName = makeSafeIdAttr(c?.displayname?.value);
@@ -76,7 +73,7 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => 
 
             return (
               <InputSwitch
-                key={colName}  
+                key={colName}
                 displayErrors={true}
                 name={`${f}-${idx}-${colName}`}
                 type={getInputType(c.type)}
@@ -85,7 +82,7 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => 
                 // value={0}
                 classes='column-cell-input'
                 placeholder={0}
-                styles={{'height' : heightparam}}
+                styles={{ 'height': heightparam }}
               />
             );
           })}
@@ -96,35 +93,29 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => 
 
 };
 
-type CrossBtnProps = {
-  handleClick: () => void
-}
-
-const CrossBtn = ({ handleClick }: CrossBtnProps): JSX.Element => (
-  <ChaiseTooltip
-    placement='bottom'
-    tooltip='Click to remove this record from the form.'
-  >
-    <span className='selected-chiclet-remove form-cross-btn' onClick={handleClick}>
-      <i className='fa-solid fa-xmark selected-chiclet-remove-icon' />
-    </span>
-  </ChaiseTooltip>
-);
-
-type BlackBoxProps = {
-  idx: string,
-  f: string,
+type RecordeditFormHeaderProps = {
+  idx: number,
+  f: number,
   hideCross: boolean
 }
 
-const BlackBox = ({ idx, f, hideCross }: BlackBoxProps): JSX.Element => {
+const RecordeditFormHeader = ({ idx, f, hideCross }: RecordeditFormHeaderProps): JSX.Element => {
 
   const handleCrossClick = () => fireCustomEvent('remove-form', '.form-container', { idx, f_idx: f });
-    
+
   return (
-    <div className='black-box'>
-      <span>{`sample form container ${idx + 1}`}</span>
-      {!hideCross && <CrossBtn handleClick={handleCrossClick} />}
+    <div className='form-header entity-value'>
+      <span>{idx + 1}</span>
+      {!hideCross && 
+        <ChaiseTooltip
+          placement='bottom'
+          tooltip='Click to remove this record from the form.'
+        >
+          <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={handleCrossClick}>
+            <i className='fa-solid fa-xmark' />
+          </button>
+        </ChaiseTooltip>
+      }
     </div>
   );
 };
@@ -138,25 +129,27 @@ const generateInitialHMap = (columns: any[]) => {
   return hMap;
 }
 
-const handleHMapAddForm = (hMap: any) => {
+const handleHMapAddForm = (hMap: any, count: number) => {
   const hMapCpy = simpleDeepCopy(hMap);
-  Object.keys(hMapCpy).forEach(k => {
-    hMapCpy[k].push(-1);
-  });
+  for (let i = 0; i < count; i++) {
+    Object.keys(hMapCpy).forEach(k => {
+      hMapCpy[k].push(-1);
+    });
+  }
   return hMapCpy;
 }
 
 const handleHMapDeleteForm = (hMap: any, idx: string) => {
   const hMapCpy = simpleDeepCopy(hMap);
   Object.keys(hMapCpy).forEach(k => {
-    hMapCpy[k].splice(idx,1);
+    hMapCpy[k].splice(idx, 1);
   });
   return hMapCpy;
 }
 
 const handleUpdateHMap = (hMap: any, colName: string, idx: string, value: number) => {
   const hMapCpy = simpleDeepCopy(hMap);
-  
+
   hMapCpy[colName][idx] = value;
 
   fireCustomEvent('update-record-column-height', '.entity-key-column', { colName, height: Math.max(...hMapCpy[colName]) });
@@ -173,7 +166,7 @@ const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
     Here a unique key to reference each form will be stored in the forms state variable : f_i
   */
 
-  const [forms, setForms] = useState([1]);
+  const [forms, setForms] = useState<number[]>([1]);
 
   /**
    * the height array is an array where h[i] is :
@@ -183,10 +176,17 @@ const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
 
   const [hMap, setHMap] = useState(generateInitialHMap(columns));
 
-  const addForm = () => {
-    setForms(forms => [...forms, forms[forms.length-1]+1]);
+  // TODO: fix event type
+  const addForm = (event: any) => {
+    const count = event.detail.count;
+    const tempForms: number[] = forms;
+    for (let i = 0; i < count; i++) {
+      // get the last value in tempForms and increment by 1
+      tempForms.push(tempForms[tempForms.length - 1] + 1)
+    }
+    setForms(tempForms);
     setHMap((hMap: any) => {
-      return handleHMapAddForm(hMap);
+      return handleHMapAddForm(hMap, count);
     });
   };
 
@@ -209,9 +209,9 @@ const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
     const msgCleared = event.detail.msgCleared;
 
     const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
-    
+
     const height = ele?.offsetHeight || 0;
-    
+
     const r = /(\d*)-(\d*)-(.*)/;
 
     const result = r.exec(fieldName) || [];
@@ -234,7 +234,7 @@ const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
     formContainer.addEventListener('remove-form', removeForm);
     formContainer.addEventListener('input-switch-error-update', handleHeightAdjustment);
 
-    return ()=> {
+    return () => {
       formContainer.removeEventListener('add-form', addForm);
       formContainer.removeEventListener('remove-form', removeForm);
       formContainer.removeEventListener('input-switch-error-update', handleHeightAdjustment);
@@ -242,8 +242,8 @@ const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
   }, []);
 
   const hideCrossBtn = forms.length == 1;
-  
-  const elements = forms.map((f, idx) => <Form f={f} hMap={hMap} columns={columns} idx={idx} key={f} hideCross={hideCrossBtn}/>)
+
+  const elements = forms.map((f, idx) => <Form f={f} hMap={hMap} columns={columns} idx={idx} key={f} hideCross={hideCrossBtn} />)
 
   return (
     <div className='form-container'>
