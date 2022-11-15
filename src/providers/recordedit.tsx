@@ -68,38 +68,34 @@ export default function RecordeditProvider({
 
   useEffect(() => {
     if (!reference) return;
-    setInitialized(true); 
+    setInitialized(true);
   }, [reference])
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: any, event: any) => {
+    event.preventDefault();
+
     console.log('on submit')
     console.log(data);
-    const submissionRows: any[] = [];
+
+    // TODO: gather data and push to submissionRows in provider
     const columnKeys = Object.keys(data);
 
-    console.log(columnKeys);
-    let formIdx = 1;
-    while (columnKeys.find((key) => key.includes('' + formIdx))) {
-      console.log(formIdx);
-      const currRow: any = {};
-      reference.columns.forEach((col: any) => {
-        currRow[col.name] = data[formIdx + '-0-' + col.displayname.value] || null
-      })
-
-      submissionRows.push(currRow);
-
-      formIdx++;
-    }
-    console.log(submissionRows);
-
-    validateSessionBeforeMutation(() => {
-      reference.create(submissionRows).then((response: AnalyserNode) => {
-        console.log(response);
-      }).catch((err: any) => {
-        console.log(err);
-      })
-
+    const currRow: any = {};
+    reference.columns.forEach((col: any) => {
+      // TODO: fix indexing
+      currRow[col.name] = data['1-0-' + col.displayname.value] || null
     });
+
+    console.log(currRow);
+
+    // validateSessionBeforeMutation(() => {
+    //   reference.create(submissionRows).then((response: AnalyserNode) => {
+    //     console.log(response);
+    //   }).catch((err: any) => {
+    //     console.log(err);
+    //   })
+
+    // });
   }
 
   const onInvalid = (data: any) => {
@@ -133,11 +129,11 @@ export default function RecordeditProvider({
       reference,
       initialized,
       // columnModels,
-    
-    //   // log related:
-    //   logRecordClientAction,
-    //   getRecordLogAction,
-    //   getRecordLogStack,
+
+      //   // log related:
+      //   logRecordClientAction,
+      //   getRecordLogAction,
+      //   getRecordLogStack,
       onSubmit,
       onInvalid,
       MAX_ROWS_TO_ADD: 201

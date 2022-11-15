@@ -105,6 +105,14 @@ const RecordeditInner = ({
     fireCustomEvent('add-form', '.form-container', { count: numberFormstoAdd });
   }
 
+  const submitForms = () => {
+    const formSubmits = document.querySelectorAll('.recordedit-form-submit');
+    console.log(formSubmits);
+    formSubmits.forEach((submit: any) => {
+      submit.click();
+    });
+  }
+
   return (
     <div className='recordedit-container app-content-container'>
       <div className='top-panel-container'>
@@ -125,13 +133,8 @@ const RecordeditInner = ({
                 {initialized && <button
                   id='submit-record-button'
                   className='chaise-btn chaise-btn-primary'
-                  type='submit'
-                  form='recordedit-form'
-                  onClick={
-                    () => {
-                      console.log('submit each form')
-                    }
-                  }
+                  type='button'
+                  onClick={submitForms}
                 >
                   <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                   <span>Save</span>

@@ -62,7 +62,13 @@ const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => 
 
   return (
     <FormProvider {...methods} >
-      <form id='recordedit-form' className='record-edit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
+      <form id={`recordedit-form-${f}`} className='recordedit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
+        <button 
+          className='recordedit-form-submit' 
+          type='submit' 
+          form={`recordedit-form-${f}`} 
+          style={{display: 'none', visibility: 'hidden'}}
+        ></button>
         <div className={`column-form ${classes}`}>
           <RecordeditFormHeader idx={idx} f={f} hideCross={hideCross}></RecordeditFormHeader>
           {columns.map((c: any) => {
