@@ -25,6 +25,14 @@
                             <div class="top-right-panel">
                                 <div class="title-container meta-icons">
                                     <div class="title-buttons">
+                                        <div class="bulk-delete-container" ng-if="form.editMode && displayReady" tooltip-placement="bottom-right" uib-tooltip="Delete the displayed set of records.">
+                                            <button id="bulk-delete-button" class="chaise-btn chaise-btn-primary chaise-btn-danger"
+                                              ng-disabled="form.submissionButtonDisabled || showBulkDeleteSpinner" ng-click="::form.bulkDelete()"
+                                            >
+                                                <span class="chaise-btn-icon fa-regular fa-trash-alt"></span>
+                                                <span>Delete</span>
+                                          </button>
+                                        </div>
                                         <button id="submit-record-button" class="chaise-btn chaise-btn-primary" type="submit" ng-disabled="form.submissionButtonDisabled || !displayReady" ng-click="::form.submit()" ng-attr-tooltip-placement="bottom-right" ng-attr-uib-tooltip="Save this data on the server">
                                             <span class="chaise-btn-icon fa-solid fa-check-to-slot"></span>
                                             <span>Save</span>

@@ -116,7 +116,7 @@ const ErrorModal = (): JSX.Element | null => {
   }
 
   // --------------- the click action message -------------------//
-  let clickActionMessage = exception.errorData?.clickActionMessage;
+  let clickActionMessage = errorWrapper.okBtnActionMessage || exception.errorData?.clickActionMessage;
   if (!isStringAndNotEmpty(clickActionMessage)) {
     if (exception instanceof windowRef.ERMrest.InvalidFilterOperatorError) {
       clickActionMessage = MESSAGE_MAP.clickActionMessage.noRecordsFound;

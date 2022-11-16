@@ -174,6 +174,10 @@
             vm.deleteBtn = "Unlink";
         }
 
+        if (params.batchDelete && params.count > 1) {
+            vm.message = "Are you sure you want to delete all " + params.count + " of the displayed records?";
+        }
+
         function ok() {
             $uibModalInstance.close();
         }
@@ -257,6 +261,17 @@
             vm.clickActionMessage = messageMap.clickActionMessage.unsupportedFilters;
         } else if (ERMrest && exception instanceof ERMrest.BatchUnlinkResponse) {
             vm.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+        } else if (ERMrest && exception instanceof ERMrest.BatchDeleteResponse) {
+            // TODO in react implementation we should not use this method and
+            // just pass the message (okBtnActionMessage) alongside the callback
+            // if all deleted, ok button will go to recordset
+            if (exception.failedTupleData.length === 0) {
+              vm.clickActionMessage = messageMap.clickActionMessage.okGoToRecordset;
+            }
+            // otherwise it will just dismiss
+            else {
+                vm.clickActionMessage = messageMap.clickActionMessage.dismissDialog;
+            }
         } else if (ERMrest && isErmrestErrorNeedReplace(exception)) {
             vm.clickActionMessage = messageMap.clickActionMessage.messageWReplace.replace('@errorStatus', vm.params.errorStatus);
         } else {

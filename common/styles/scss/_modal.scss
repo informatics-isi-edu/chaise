@@ -209,3 +209,9 @@ body.error-open loading-spinner {
         width: 130px;
     }
 }
+
+.bulk-delete-confirm-popup {
+  ul li {
+    list-style-type: inherit;
+  }
+}

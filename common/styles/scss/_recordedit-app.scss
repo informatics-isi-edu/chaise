@@ -12,6 +12,15 @@
         padding: 0;
     }
 
+    .title-buttons {
+      .bulk-delete-container {
+        display: inline-block;
+        button[disabled] {
+          pointer-events: none;
+        }
+      }
+    }
+
     .form-controls {
         display: flex;
         align-items: flex-end;

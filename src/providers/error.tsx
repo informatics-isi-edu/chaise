@@ -13,6 +13,7 @@ interface ChaiseError {
   error: any; // TODO what would be a proper type?
   isDismissible?: boolean;
   skipLogging?: boolean;
+  okBtnActionMessage?: string; // TODO can be used for bulk delete
   okBtnCallback?: Function;
   closeBtnCallback?: Function;
 }
