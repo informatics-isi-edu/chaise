@@ -114,13 +114,4 @@ describe('When viewing RecordEdit app', function() {
         });
     });
 
-    // navigate away from the recordedit page so it doesn't interfere with other tests
-    afterAll(function (done) {
-        chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:main_update_table");
-        browser.switchTo().alert().then(function (alert) {
-            alert.accept();
-        }).catch(function () {}).finally(function () {
-            done();
-        });
-    });
 });

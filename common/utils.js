@@ -13,7 +13,7 @@
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
         "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules",
-        "templating"
+        "templating", "hideRecordeditLeaveAlert"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -49,7 +49,8 @@
           },
           "templating": {
             "engine": "mustache"
-          }
+          },
+          "hideRecordeditLeaveAlert": false
     })
 
     .constant("appTagMapping", {

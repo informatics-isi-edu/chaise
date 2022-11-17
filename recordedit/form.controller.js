@@ -1239,11 +1239,13 @@
             }, TIMER_INTERVAL, false);
         });
 
-        $window.addEventListener("beforeunload", function(e) {
-            if(vm.successfulSubmission){
-                return undefined;
-            }
-            e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
-        });
+        if (chaiseConfig.hideRecordeditLeaveAlert !== true) {
+            $window.addEventListener("beforeunload", function(e) {
+                if(vm.successfulSubmission || chaiseConfig.hideRecordeditLeaveAlert === true){
+                    return undefined;
+                }
+                e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
+            });
+        }
     }]);
 })();

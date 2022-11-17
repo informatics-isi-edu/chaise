@@ -16,6 +16,7 @@ var chaiseConfig = {
     systemColumnsDisplayENTRY: ['RCB', 'RMB', 'RMT'], //testing case-insensitive properties
     disableExternalLinkModal: true,
     logClientActions: false,
+    hideRecordeditLeaveAlert: true,
     footerMarkdown:"**Please check** [Privacy Policy](/privacy-policy/){target='_blank'}",
     defaultTables: {
         "1": {

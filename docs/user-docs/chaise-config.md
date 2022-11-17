@@ -46,6 +46,7 @@ If a property appears in the same configuration twice, the property defined late
    * [hideGoToRID](#hidegotorid)
    * [facetPanelDisplay](#facetpaneldisplay)
    * [templating](#templating)
+   * [hideRecordeditLeaveAlert](#hiderecordeditleavealert)
  * [Export Configuration:](#export-configuration)
    * [disableDefaultExport](#disabledefaultexport)
    * [exportSerivePath](#exportservicepath)
@@ -508,6 +509,22 @@ Use this property to change the default engine that is used for templating throu
      }
      ```
 
+#### hideRecordeditLeaveAlert
+Use this property to avoid recordedit app from showing an alert when users are trying to navigate away.
+   - Type: Boolean
+   - Default behavior: Recordedit app will warn users when they are about to navigate away from recordedit to preserve the editted content.
+   - General syntax:
+     ```
+     hideRecordeditLeaveAlert: true
+     ```
+   - `templating` attributes:
+     - `engine`: The template engine used in ermrestjs.
+   - Sample syntax:
+     ```
+     templating: {
+         engine: 'handlebars'
+     }
+     ```
 
 ### Export Configuration:
  #### disableDefaultExport

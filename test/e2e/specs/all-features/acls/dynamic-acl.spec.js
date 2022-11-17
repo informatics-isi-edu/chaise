@@ -296,20 +296,6 @@ var getRecordEditURL = function (filter) {
    return browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table/" + filter + "/@sort(id)";
 };
 
-const closeAlertAndNavigate = (navURL) => {
-  return new Promise((resolve, reject) => {
-    chaisePage.navigate(navURL).then(() => {
-        return browser.switchTo().alert();
-    }).then((alert) => {
-        return alert.accept();
-    }).catch(() => {
-        // do nothing
-    }).finally(() => {
-        resolve();
-    });
-  });
-}
-
 /******************** recordset helpers ************************/
 
 var testRecordSetEditDelete = function (uriFilter, rowCount, displayBulkEdit, expectedEditable, expectedDeletable) {
@@ -528,7 +514,7 @@ describe("regarding dynamic ACL support, ", function () {
 
         describe("when some of the columns in the row cannot be edited", function () {
             beforeAll(function (done) {
-                closeAlertAndNavigate(getRecordEditURL("id=1;id=6")).then(() => {
+                chaisePage.navigate(getRecordEditURL("id=1;id=6")).then(() => {
                     return chaisePage.recordeditPageReady();
                 }).then(function () {
                     return browser.wait(function() {
@@ -594,7 +580,7 @@ describe("regarding dynamic ACL support, ", function () {
 
         describe('when some rows cannot be deleted', function () {
             beforeAll((done) => {
-              closeAlertAndNavigate(getRecordEditURL("id=7;id=8;id=9")).then(() => {
+              chaisePage.navigate(getRecordEditURL("id=7;id=8;id=9")).then(() => {
                   return chaisePage.recordeditPageReady();
               }).then(function () {
                   return browser.wait(function() {
@@ -660,13 +646,6 @@ describe("regarding dynamic ACL support, ", function () {
                   }, browser.params.defaultTimeout);
                   done();
                 }).catch(chaisePage.catchTestError(done));
-            });
-        });
-
-        // navigate away from the recordedit page so it doesn't interfere with other tests
-        afterAll(function (done) {
-            closeAlertAndNavigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table").then(() => {
-              done();
             });
         });
     });

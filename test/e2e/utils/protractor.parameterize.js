@@ -239,7 +239,7 @@ exports.parameterize = function(config, configParams) {
             // Visit the default page and set the authorization cookie if required
             if (testConfiguration.authCookie) {
                 console.log("setting up cookie");
-                require('./chaise.page.js').performLogin(testConfiguration.authCookie, false, defer);
+                require('./chaise.page.js').performLogin(testConfiguration.authCookie, defer);
             } else {
                 defer.resolve();
             }
