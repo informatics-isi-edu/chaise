@@ -16,7 +16,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
 /**
- * Things to consider'
+ * Things to consider
  * 1. need to move the defaultvalue logic to the HOC component
  * 2. how to handle validate on change for each field
  * 3. how to handle merging validation logic for date n time inputs for type timestamp
@@ -69,8 +69,6 @@ const validationFunctionMap : {
   'timestamp': timestampFieldValidation,
 };
 
-
-
 type TextFieldProps = {
   /**
    *  the name of the field
@@ -110,15 +108,16 @@ const TextField = ({
   placeholder, 
   classes,
   inputClasses,
-  containerClasses,
   clearClasses,
   disableInput,
   displayErrors,
   value,
+  containerClasses,
+  styles,
   onFieldChange,
 }: TextFieldProps): JSX.Element => {
 
-  const { setValue, control } = useFormContext();
+  const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
 
   const registerOptions = {
     required: false,
@@ -130,7 +129,9 @@ const TextField = ({
     rules: registerOptions,
   });
 
-  const fieldValue = formInput?.field?.value;
+  const field = formInput?.field;
+  
+  const fieldValue = field?.value;
 
   const fieldState = formInput?.fieldState;
 
@@ -138,7 +139,10 @@ const TextField = ({
   
   const { error, isTouched } = fieldState;
   
-  const clearInput = () => setValue(name, '');
+  const clearInput = () => {
+    setValue(name, '');
+    clearErrors(name);
+  }
 
   useEffect(()=>{
     if(onFieldChange){
@@ -152,12 +156,21 @@ const TextField = ({
 
   useEffect(() => {
     setValue(name, value);
-  }, [value])
+  }, [value]);
+
+  const handleChange = (v: any) => {
+    field.onChange(v);
+    field.onBlur();
+  };
+
+  useEffect(() => {
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+  }, [error?.message]);
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`}>
+    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
       <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...formInput.field} />
+        <input placeholder={placeholder}className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
           clickCallback={clearInput}
@@ -210,8 +223,6 @@ const DisabledField = ({
     </div>
   )
 }
-
-
 
 type NumericFieldProps = {
   /**
@@ -267,10 +278,8 @@ const NumericField = ({
   onFieldChange,
 }: NumericFieldProps): JSX.Element => {
 
-  const formRef = useRef();
-
   const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
-
+  
   const registerOptions = {
     required: false,
     pattern: validationFunctionMap[type],
@@ -369,7 +378,7 @@ type DateFieldProps = {
 };
 
 const DateField = ({ 
-  name, 
+  name,
   classes, 
   inputClasses,
   containerClasses,
@@ -378,9 +387,11 @@ const DateField = ({
   displayErrors,
   value,
   onFieldChange,
+  styles,
 }: DateFieldProps): JSX.Element => {
 
-  const { setValue, control } = useFormContext();
+  const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
+
 
   const registerOptions = {
     required: false,
@@ -393,7 +404,9 @@ const DateField = ({
     rules: registerOptions,
   });
 
-  const fieldValue = formInput?.field?.value;
+  const field = formInput?.field;
+  
+  const fieldValue = field?.value;
 
   const fieldState = formInput?.fieldState;
 
@@ -401,7 +414,10 @@ const DateField = ({
   
   const { error, isTouched } = fieldState;
 
-  const clearInput = () => setValue(name, '');
+  const clearInput = () => {
+    setValue(name, '');
+    clearErrors(name);
+  };
 
   useEffect(()=>{
     if(onFieldChange){
@@ -413,16 +429,24 @@ const DateField = ({
     }
   }, [fieldValue]);
 
-
   useEffect(() => {
     setValue(name, value);
-  }, [value])
+  }, [value]);
+
+  const handleChange = (v: any) => {
+    field.onChange(v);
+    field.onBlur();
+  };
+
+  useEffect(() => {
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+  }, [error?.message])
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`}>
+    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
       <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <input type='date' className={`${inputClasses} input-switch`} step='1' pattern='\d{4}-\d{2}-\d{2}'
-        min='1970-01-01' max='2999-12-31' {...formInput.field} />
+        <input className={`${inputClasses} input-switch`} {...field} onChange={handleChange} type='date' step='1' pattern='\d{4}-\d{2}-\d{2}'
+        min='1970-01-01' max='2999-12-31' />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
           clickCallback={clearInput}
