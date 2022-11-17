@@ -12,6 +12,25 @@
         padding: 0;
     }
 
+    .delete-spinner-container {
+      $delete-spinner-backdrop-z-index: 5;
+      .delete-spinner-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        z-index: $delete-spinner-backdrop-z-index;
+        background: black;
+        opacity: 0.5;
+      }
+
+      #delete-spinner {
+        top: 50%;
+        z-index: calc($delete-spinner-backdrop-z-index + 1);
+      }
+    }
+
     .title-buttons {
       .bulk-delete-container {
         display: inline-block;

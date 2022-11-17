@@ -477,6 +477,10 @@ var recordEditPage = function() {
     this.getRecordSetTable = function() {
         return element(by.className('recordset-table'));
     };
+
+    this.getBulkDeleteButton = function () {
+      return element(by.id('bulk-delete-button'));
+    };
 };
 
 var recordPage = function() {
@@ -1274,6 +1278,10 @@ var SearchPopup = function () {
 
 var errorModal = function () {
     var self = this;
+
+    this.getElement = function () {
+        return element(by.css('.modal-error'));
+    };
 
     this.getToggleDetailsLink = function () {
         return element(by.css('.modal-error .toggle-error-details'));

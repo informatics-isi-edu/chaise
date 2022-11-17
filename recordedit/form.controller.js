@@ -34,6 +34,7 @@
         vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
+        vm.canShowBulkDelete = vm.editMode && chaiseConfig.deleteRecord === true;
         vm.bulkDelete = bulkDelete;
         vm.showBulkDeleteSpinner = false;
 
@@ -270,13 +271,13 @@
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
 
-        function sendBulkDeleteRequest(tuples) {
+        function sendBulkDeleteRequest() {
           vm.showBulkDeleteSpinner = true;
 
           var onDeleteSuccess = function (response) {
               // if all was removed, then we cannot dismiss the modal
               var isDismissible = response.failedTupleData.length !== 0;
-              var onDeleteModalClose = function () {
+              var removeDeletedRows = function () {
                   // remove the forms that have been deleted
                   response.successTupleData.forEach(function (data) {
                       // data is an object of key/value pairs for each piece of key information
@@ -292,15 +293,15 @@
                       }
                   });
               };
+              var goToRecordset = function () {
+                $window.location = $rootScope.reference.contextualize.compact.appLink
+              }
               ErrorService.handleException(
                   response,
                   isDismissible,
                   false,
-                  isDismissible ? onDeleteModalClose : function () {
-                      // go to recordset
-                      $window.location = $rootScope.reference.contextualize.compact.appLink
-                  },
-                  isDismissible ? onDeleteModalClose : null
+                  isDismissible ? removeDeletedRows : goToRecordset,
+                  isDismissible ? removeDeletedRows : goToRecordset
               );
           };
 
@@ -309,23 +310,17 @@
             stack: logService.getStackObject()
           };
 
-          // Session.validateSessionBeforeMutation(function () {
+          Session.validateSessionBeforeMutation(function () {
             $rootScope.reference.delete($rootScope.tuples, logObj).then(onDeleteSuccess).catch(function (err) {
                 throw err;
             }).finally(function () {
                 vm.showBulkDeleteSpinner = true;
             })
-          // });
+          });
         }
 
         function bulkDelete() {
             var confirmDelete = (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
-
-            var deletableRecords = [];
-            $rootScope.tuples.forEach(function (t, i) {
-              if (!t.canDelete) return;
-              deletableRecords.push({index: i, rowName: t.displayname.value});
-            });
 
             if (!confirmDelete) {
                 // send the request
@@ -333,18 +328,11 @@
                 return;
             }
 
-            var confirmParams = {
-                batchDelete: true,
-                totalCount: $rootScope.tuples.length,
-                deletableRecords: deletableRecords,
-                tableDisplayname: $rootScope.reference.displayname
-            };
-
             modalUtils.showModal({
                 animation: false,
                 templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
                 controller: 'ConfirmDeleteController',
-                windowClass: "bulk-delete-confirm-popup",
+                windowClass: "confirm-delete-modal bulk-delete-confirm-popup",
                 controllerAs: 'ctrl',
                 resolve: {
                     params: { batchDelete:true, count: $rootScope.tuples.length }

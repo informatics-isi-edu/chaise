@@ -2669,7 +2669,8 @@
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
             scope: {
-                message: "@?"
+                message: "@?",
+                spinnerId: '@?'
             },
             link: function (scope, elem, attrs) {
                 scope.spinnerPath = UriUtils.chaiseDeploymentPath() + "common/styles/images/loader.gif";

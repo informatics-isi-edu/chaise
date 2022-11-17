@@ -16,6 +16,10 @@
         <div class="recordedit-container" ng-if="reference && (reference.canCreate || reference.canUpdate)" ng-controller="FormController as form">
             <div class="form-container">
                 <div class="app-content-container" ng-hide="form.resultset">
+                    <div class='delete-spinner-container' ng-if='form.showBulkDeleteSpinner'>
+                      <div class='delete-spinner-backdrop'></div>
+                      <loading-spinner message='Deleting...' spinner-id='delete-spinner'></loading-spinner>
+                    </div>
                     <loading-spinner ng-show="form.submissionButtonDisabled || showSpinner"></loading-spinner>
                     <div class="top-panel-container">
                         <alerts alerts="form.alerts"></alerts>
@@ -25,9 +29,9 @@
                             <div class="top-right-panel">
                                 <div class="title-container meta-icons">
                                     <div class="title-buttons">
-                                        <div class="bulk-delete-container" ng-if="form.editMode && displayReady" tooltip-placement="bottom-right" uib-tooltip="Delete the displayed set of records.">
+                                        <div class="bulk-delete-container" ng-if="form.canShowBulkDelete && displayReady && reference.canDelete" tooltip-placement="bottom-right" uib-tooltip="Delete the displayed set of records.">
                                             <button id="bulk-delete-button" class="chaise-btn chaise-btn-primary chaise-btn-danger"
-                                              ng-disabled="form.submissionButtonDisabled || showBulkDeleteSpinner" ng-click="::form.bulkDelete()"
+                                              ng-disabled="form.submissionButtonDisabled || form.showBulkDeleteSpinner" ng-click="::form.bulkDelete()"
                                             >
                                                 <span class="chaise-btn-icon fa-regular fa-trash-alt"></span>
                                                 <span>Delete</span>

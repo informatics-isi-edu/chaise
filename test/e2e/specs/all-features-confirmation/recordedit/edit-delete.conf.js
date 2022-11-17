@@ -3,8 +3,8 @@ var pConfig = require('./../../../utils/protractor.configuration.js');
 var config = pConfig.getConfig({
     configFileName: 'recordedit/edit.dev.json',
     specs: [
-        // "delete.spec.js",
-        "edit.spec.js"
+        "edit.spec.js",
+        "delete.spec.js",
     ],
     setBaseUrl: function(browser, data) {
       browser.params.url = process.env.CHAISE_BASE_URL;
