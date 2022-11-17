@@ -1078,7 +1078,7 @@ describe('View recordset,', function () {
     describe("For window ID and page ID", function () {
         var windowId, pageId;
 
-        beforeEach(function () {
+        beforeEach(function (done) {
             var keys = [];
             keys.push(accommodationParams.key.name + accommodationParams.key.operator + accommodationParams.key.value);
             chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/product-recordset:" + accommodationParams.table_name + "/" + keys.join("&") + "@sort(" + accommodationParams.sortby + ")")
@@ -1090,7 +1090,8 @@ describe('View recordset,', function () {
                 return chaisePage.getPageId();
             }).then(function (id) {
                 pageId = id;
-            });
+                done();
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it("clicking view action should change current window with the same window ID and a new page ID.", function (done) {

@@ -328,14 +328,14 @@ const TableRow = ({
       action: getRowLogAction(actionVerb),
       stack: logStack
     };
-    reference.delete(logObj).then(function deleteSuccess() {
+    reference.delete(null, logObj).then(() => {
       if (!isRelated) {
         // ask flow-control to update the page
         // this will also make sure to remove the "disabled" row
         update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
       }
       fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
-    }).catch(function (error: any) {
+    }).catch((error: any) => {
       setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });
     }).finally(() => {

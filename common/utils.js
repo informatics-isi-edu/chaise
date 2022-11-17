@@ -13,7 +13,7 @@
         "includeCanonicalTag", "systemColumnsDisplayCompact", "systemColumnsDisplayDetailed", "systemColumnsDisplayEntry",
         "logClientActions", "disableExternalLinkModal", "internalHosts", "hideGoToRID", "showWriterEmptyRelatedOnLoad",
         "showSavedQueryUI", "savedQueryConfig", "termsAndConditionsConfig", "loggedInMenu", "facetPanelDisplay", "configRules",
-        "templating"
+        "templating", "hideRecordeditLeaveAlert"
     ])
 
     .constant("defaultChaiseConfig", {
@@ -49,7 +49,8 @@
           },
           "templating": {
             "engine": "mustache"
-          }
+          },
+          "hideRecordeditLeaveAlert": false
     })
 
     .constant("appTagMapping", {
@@ -116,7 +117,7 @@
             "messageWReplace": "Click <b>OK</b> to reload this page without @errorStatus.",
             "multipleRecords": "Click <b>OK</b> to show all the matched records.",
             "noRecordsFound": "Click <b>OK</b> to show the list of all records.",
-            "okBtnMessage": "Click <b>OK</b> to go to the Recordset.",
+            "okGoToRecordset": "Click <b>OK</b> to go to the Recordset.",
             "pageRedirect": "Click <b>OK</b> to go to the ",
             "reloadMessage": "Click <b>Reload</b> to start over.",
             "unsupportedFilters": "Click <b>OK</b> to continue with the subset of filter criteria which are supported at this time."
@@ -2669,7 +2670,8 @@
             restrict: 'E',
             templateUrl: UriUtils.chaiseDeploymentPath() + 'common/templates/spinner.html',
             scope: {
-                message: "@?"
+                message: "@?",
+                spinnerId: '@?'
             },
             link: function (scope, elem, attrs) {
                 scope.spinnerPath = UriUtils.chaiseDeploymentPath() + "common/styles/images/loader.gif";

@@ -34,6 +34,10 @@
         vm.clearInput = clearInput;
         vm.clearForeignKey = clearForeignKey;
 
+        vm.canShowBulkDelete = vm.editMode && chaiseConfig.deleteRecord === true;
+        vm.bulkDelete = bulkDelete;
+        vm.showBulkDeleteSpinner = false;
+
         // placeholder for the color picker callbacks
         vm.toggleColorPickerCallbacks = [{}];
 
@@ -123,11 +127,11 @@
                     resultsReference.filterLogInfo
                 );
 
-                // create the link based on the initial link that users used to 
+                // create the link based on the initial link that users used to
                 // navigate to this page for edit mode so it has the filters
                 if (vm.editMode) {
                     vm.resultsetRecordsetLink = $rootScope.reference.contextualize.compact.appLink;
-                } 
+                }
                 // for create and copy mode we want unfiltered links
                 else {
                     vm.resultsetRecordsetLink = $rootScope.reference.unfilteredReference.contextualize.compact.appLink;
@@ -267,20 +271,82 @@
             recordCreate.addRecords(vm.editMode, null, vm.recordEditModel, false, $rootScope.reference, $rootScope.tuples, context.queryParams, vm, onSuccess, context.logObject);
         }
 
-        function onDelete() {
-            var uri;
-            var ref = $rootScope.reference.unfilteredReference.contextualize.compact;
+        function sendBulkDeleteRequest() {
+          vm.showBulkDeleteSpinner = true;
 
-            if (chaiseConfig.showFaceting) {
-                uri = ref.appLink;
-            } else {
-                var table = ref.table;
-                var encode = UriUtils.fixedEncodeURIComponent;
-                uri = "../search/#" + table.schema.catalog.id + '/' + encode(table.schema.name) + ':' + encode(table.name);
+          var onDeleteSuccess = function (response) {
+              // if all was removed, then we cannot dismiss the modal
+              var isDismissible = response.failedTupleData.length !== 0;
+              var removeDeletedRows = function () {
+                  // remove the forms that have been deleted
+                  response.successTupleData.forEach(function (data) {
+                      // data is an object of key/value pairs for each piece of key information
+                      // { keycol1: val, keycol2: val2, ... }
+                      var idx = $rootScope.tuples.findIndex(function (tuple) {
+                          return Object.keys(data).every(function (key) {
+                              return tuple.data[key] == data[key]
+                          });
+                      });
+
+                      if (idx >= 0) {
+                          spliceRows(idx);
+                      }
+                  });
+              };
+              var goToRecordset = function () {
+                $window.location = $rootScope.reference.contextualize.compact.appLink
+              }
+              ErrorService.handleException(
+                  response,
+                  isDismissible,
+                  false,
+                  isDismissible ? removeDeletedRows : goToRecordset,
+                  isDismissible ? removeDeletedRows : goToRecordset
+              );
+          };
+
+          var logObj = {
+            action: logService.getActionString(logService.logActions.DELETE),
+            stack: logService.getStackObject()
+          };
+
+          Session.validateSessionBeforeMutation(function () {
+            $rootScope.reference.delete($rootScope.tuples, logObj).then(onDeleteSuccess).catch(function (err) {
+                throw err;
+            }).finally(function () {
+                vm.showBulkDeleteSpinner = true;
+            })
+          });
+        }
+
+        function bulkDelete() {
+            var confirmDelete = (chaiseConfig.confirmDelete === undefined || chaiseConfig.confirmDelete) ? true : false;
+
+            if (!confirmDelete) {
+                // send the request
+                sendBulkDeleteRequest();
+                return;
             }
 
-            $rootScope.showSpinner = false;
-            $window.location.href = uri;
+            modalUtils.showModal({
+                animation: false,
+                templateUrl:  UriUtils.chaiseDeploymentPath() + "common/templates/delete-link/confirm_delete.modal.html",
+                controller: 'ConfirmDeleteController',
+                windowClass: "confirm-delete-modal bulk-delete-confirm-popup",
+                controllerAs: 'ctrl',
+                resolve: {
+                    params: { batchDelete:true, count: $rootScope.tuples.length }
+                },
+                size: 'md'
+            }, function onSuccess() {
+                sendBulkDeleteRequest();
+            }, function onError() {
+                // this will only be called on close of the confirm modal
+                logService.logClientAction({
+                    action: logService.getActionString(logService.logActions.DELETE_CANCEL),
+                    stack: logService.getStackObject()
+                }, $rootScope.reference.defaultLogInfo);
+            }, false);
         }
 
         // NOTE: If changes are made to this function, changes should also be made to the similar function in the inputSwitch directive
@@ -1173,11 +1239,13 @@
             }, TIMER_INTERVAL, false);
         });
 
-        $window.addEventListener("beforeunload", function(e) {
-            if(vm.successfulSubmission){
-                return undefined;
-            }
-            e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
-        });
+        if (chaiseConfig.hideRecordeditLeaveAlert !== true) {
+            $window.addEventListener("beforeunload", function(e) {
+                if(vm.successfulSubmission || chaiseConfig.hideRecordeditLeaveAlert === true){
+                    return undefined;
+                }
+                e.returnValue = "Do you want to leave this page? Changes you have made will not be saved.";
+            });
+        }
     }]);
 })();

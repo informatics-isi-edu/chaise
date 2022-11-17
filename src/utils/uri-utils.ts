@@ -293,7 +293,9 @@ export function resolvePermalink(tuple: any, reference: any, version?: string) {
   }
 
   // if it's a number (isNaN tries to parse to integer before checking) and is the same as current catalog
-  if (!Number.isNaN(resolverId) && resolverId === currCatalog) {
+  // currCatalog is a string,that's why we have to do == check not ===
+  // eslint-disable-next-line eqeqeq
+  if (!Number.isNaN(resolverId) && resolverId == currCatalog) {
     return `${windowRef.location.origin}/id/${tuple.data.RID}${version || ''}`;
   }
 

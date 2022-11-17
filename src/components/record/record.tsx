@@ -434,7 +434,7 @@ const RecordInner = ({
       action: getRecordLogAction(LogActions.DELETE),
       stack: getRecordLogStack()
     };
-    reference.delete(logObj).then(function deleteSuccess() {
+    reference.delete(null, logObj).then(function deleteSuccess() {
       // Get an appLink from a reference to the table that the existing reference came from
       const unfilteredRefAppLink = reference.table.reference.contextualize.compact.appLink;
       // $rootScope.showSpinner = false;
