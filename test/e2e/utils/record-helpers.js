@@ -183,7 +183,7 @@ exports.testPresentation = function (tableParams) {
             if (!col.markdown_title) return;
             const colEl = chaisePage.recordPage.getColumnNameElement(col.markdown_title);
             // NOTE the actual displayname is inside two spans
-            expect(colEl.element(by.css('span span span')).getAttribute('innerHTML')).toEqual(col.markdown_title, `missmatch for title=${col.title}`);
+            expect(colEl.element(by.css('span span')).getAttribute('innerHTML')).toEqual(col.markdown_title, `missmatch for title=${col.title}`);
         });
     });
 

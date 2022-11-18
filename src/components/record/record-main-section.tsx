@@ -85,21 +85,23 @@ const RecordMainSection = (): JSX.Element => {
         entityValueClassName.push('col-xs-8 col-sm-8 col-md-9 col-lg-10');
       }
 
-      const columnDisplayname = <DisplayValue value={cm.column.displayname}></DisplayValue>;
+      const columnDisplayname = (
+        <span className={`column-displayname ${hasTooltip ? 'chaise-icon-for-tooltip' : ''}`}>
+          <DisplayValue value={cm.column.displayname}></DisplayValue>
+          {/* NOTE the extra space is needed for proper spacing between icon and text */}
+          {hasTooltip ? ' ' : ''}
+        </span>
+      );
 
       return (
         <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={rowClassName.join(' ')}>
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>
-            <span className={`column-displayname ${hasTooltip ? 'chaise-icon-for-tooltip' : ''}`}>
-              {hasTooltip ?
-                <ChaiseTooltip placement='right' tooltip={cm.column.comment}>
-                  {/* NOTE the extra space is needed for proper spacing between icon and */}
-                  <span>{columnDisplayname}{' '}</span>
-                </ChaiseTooltip> :
-                <span>{columnDisplayname}</span>
-              }
-            </span>
+            {hasTooltip ?
+              <ChaiseTooltip placement='right' tooltip={cm.column.comment}>
+                {columnDisplayname}
+              </ChaiseTooltip> : columnDisplayname
+            }
             <div className='entity-key-icons'>
               {showLoader(cm) && <Spinner animation='border' size='sm' className='table-column-spinner' />}
             </div>
