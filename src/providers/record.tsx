@@ -398,14 +398,14 @@ export default function RecordProvider({
       // inline
       if (activeListModel.inline) {
         const rm = flowControl.current.inlineRelatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, true));
+        rm.updateMainEntity(processRequests, !isUpdate, true, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, true));
         continue;
       }
 
       // related
       if (activeListModel.related) {
         const rm = flowControl.current.relatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, false));
+        rm.updateMainEntity(processRequests, !isUpdate, true, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, false));
         continue;
       }
 
