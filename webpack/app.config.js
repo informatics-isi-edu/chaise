@@ -6,6 +6,7 @@ const webpack = require('webpack');
 
 /**
  * Return the webpack config object that can be used for creating chaise-app/lib bundles
+ *
  * appConfigs is an array of objects with the following required props:
  *   - appName: the name of the app. used to find the <appName>.tsx associated with it
  * and the following optional props:
@@ -21,25 +22,36 @@ const webpack = require('webpack');
  * - CHAISE_BASE_PATH: The base path of chaise in the server, e.g. /chaise/
  * - BUILD_VERSION: A randomly generated string signifying the build version.
  *
+ * options props:
+ * - urlBasePath: the base path of accessing the app (e.g. /chaise/ or /deriva-webapps/).
+ *                if missing, we will use CHAISE_BASE_PATH.
+ * - rootFolderLocation: the location of root folder. used to find the code (e.g. ../src)
+ * - resolveAliases: the aliases that will be used in import statements.
+ *
  * @param {Object} appConfigs
  *  the app configurations
  * @param {'development'|'production'} mode
  * @param {Object} env the environment variables
- * @param {{pathPrefix?: string, pathAliases?: Object}?} options optional parameter to modify the prefix and alaises
+ * @param {Object?} options optional parameter to modify the prefix and alaises
  * @returns the webpack config
  */
 const getWebPackConfig = (appConfigs, mode, env, options) => {
+  const isDevMode = (mode === 'development');
+
   const ermrestjsPath = env.BUILD_VARIABLES.ERMRESTJS_BASE_PATH;
   const chaisePath = env.BUILD_VARIABLES.CHAISE_BASE_PATH;
   const buildVersion = env.BUILD_VARIABLES.BUILD_VERSION;
-  const isDevMode = (mode === 'development');
 
   options = options || {};
-  if (typeof options.pathPrefix !== 'string' || options.pathPrefix.length === 0) {
-    options.pathPrefix = path.resolve(__dirname, '..');
+
+  if (typeof options.urlBasePath !== 'string' || options.urlBasePath.length === 0) {
+    options.urlBasePath = chaisePath;
   }
-  if (!options.pathAliases || typeof options.pathAliases !== 'object') {
-    options.pathAliases = {};
+  if (typeof options.rootFolderLocation !== 'string' || options.rootFolderLocation.length === 0) {
+    options.rootFolderLocation = path.resolve(__dirname, '..');
+  }
+  if (!options.resolveAliases || typeof options.resolveAliases !== 'object') {
+    options.resolveAliases = {};
   }
 
   const entries = {}, appHTMLPlugins = [];
@@ -50,7 +62,7 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
 
     // create the entry
     entries[bundleName] = {
-      import: path.join(options.pathPrefix, 'src', ac.isLib ? 'libs' : 'pages', `${ac.appName}.tsx`)
+      import: path.join(options.rootFolderLocation, 'src', ac.isLib ? 'libs' : 'pages', `${ac.appName}.tsx`)
     };
 
     // script tags that will be injected directly to the page
@@ -108,18 +120,18 @@ const getWebPackConfig = (appConfigs, mode, env, options) => {
       // we're outputting generated files into a separate bundles folder
       // so we have full control over it on the server and can replace the whole
       // file if we want to (using rsync --delete)
-      path: path.resolve(options.pathPrefix, 'dist', 'react', 'bundles'),
+      path: path.resolve(options.rootFolderLocation, 'dist', 'react', 'bundles'),
       // contenthash will help with avoiding to send unchanged files to server
       filename: '[name].[contenthash].js',
       clean: true,
       // the path that will be prepended to the output css and js files
       // we're defining this to ensure absolute paths instead of relative
-      publicPath: `${chaisePath}bundles/`
+      publicPath: `${options.urlBasePath}bundles/`
     },
     resolve: {
       extensions: ['.ts', '.tsx', '.js'],
       alias: {
-        ...options.pathAliases,
+        ...options.resolveAliases,
         // the line below will make sure we can include chaise files using the package full name
         '@isrd-isi-edu/chaise': path.resolve(__dirname, '..')
       },
