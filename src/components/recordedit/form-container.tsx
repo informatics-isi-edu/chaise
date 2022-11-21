@@ -11,108 +11,73 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { fireCustomEvent, getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { FormSelect } from 'react-bootstrap';
 
-
-
-const getFormDefaultValues = (name: string, columns: any[]) => {
-  // TODO: initialize inputs
-  const formValues: any = {};
-  columns.forEach(c => {
-    const colname = makeSafeIdAttr(c?.displayname?.value)
-    // initialize inputs based on different types
-    formValues[`${name}-0-${colname}`] = '';
-  });
-  return formValues;
-};
-
-type FormProps = {
-  columns: any[],
-  classes?: string,
-  idx: number,
-  f: number,
-  hideCross: boolean,
-  hMap: any
+const getInputTypeOrDisabled = (column: any) => {
+  if (column.inputDisabled) {
+    // TODO: if showSelectAll, disable input
+    // TODO: create column models, no column model, enable!
+    // TODO: is editMode and user cannot update this row, disable
+    return 'disabled';
+  }
+  return getInputType(column.type);
 }
 
-const Form = ({ columns, classes = '', idx, f, hideCross, hMap }: FormProps) => {
+type ChaiseFormProps = {
+  classes?: string,
+  idx: number,
+}
 
-  const { onSubmit, onInvalid } = useRecordedit();
+const ChaiseForm = ({ classes = '', idx }: ChaiseFormProps) => {
 
-  // type FormDefaultValues = {
-  //   [`${name}-min`]: RangeOptions['absMin'];
-  //   [`${name}-max`]: RangeOptions['absMax'];
-  // };
+  const { columnModels, formsHeightMap } = useRecordedit()
 
-  /**
-   * TODO
-   * Need to find a way to dynamically generate the type for FormDefaultValue based on the types of the columns
-   */
+  const renderInputs = () => {
+    return columnModels.map((cm: any) => {
+      const colName = makeSafeIdAttr(cm.column.displayname.value);
+      const height = Math.max(...formsHeightMap[colName]);
+      const heightparam = height == -1 ? 'auto' : `${height}px`;
 
-  const methods = useForm<any>({
-    mode: 'all',
-    reValidateMode: 'onChange',
-    defaultValues: getFormDefaultValues('' + f, columns),
-    resolver: undefined,
-    context: undefined,
-    criteriaMode: 'firstError',
-    shouldUnregister: false,
-    shouldUseNativeValidation: false,
-    delayError: undefined
-  });
+      return (
+        <InputSwitch
+          key={colName}
+          displayErrors={true}
+          name={`${idx}-${colName}`}
+          type={getInputTypeOrDisabled(cm.column)}
+          // type='numeric'
+          containerClasses={'column-cell entity-value'}
+          // value={0}
+          classes='column-cell-input'
+          placeholder={0}
+          styles={{ 'height': heightparam }}
+        />
+      );
+    })
+  }
+
 
   return (
-    <FormProvider {...methods} >
-      <form id={`recordedit-form-${f}`} className='recordedit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
-        <button 
-          className='recordedit-form-submit' 
-          type='submit' 
-          form={`recordedit-form-${f}`} 
-          style={{display: 'none', visibility: 'hidden'}}
-        ></button>
-        <div className={`column-form ${classes}`}>
-          <RecordeditFormHeader idx={idx} f={f} hideCross={hideCross}></RecordeditFormHeader>
-          {columns.map((c: any) => {
-
-            const colName = makeSafeIdAttr(c?.displayname?.value);
-            const height = Math.max(...hMap[colName]);
-            const heightparam = height == -1 ? 'auto' : `${height}px`;
-
-            return (
-              <InputSwitch
-                key={colName}
-                displayErrors={true}
-                name={`${f}-${idx}-${colName}`}
-                type={getInputType(c.type)}
-                // type='numeric'
-                containerClasses={'column-cell entity-value'}
-                // value={0}
-                classes='column-cell-input'
-                placeholder={0}
-                styles={{ 'height': heightparam }}
-              />
-            );
-          })}
-        </div>
-      </form>
-    </FormProvider>
+    <div className={`column-form ${classes}`}>
+      <RecordeditFormHeader idx={idx}></RecordeditFormHeader>
+      {renderInputs()}
+    </div>
   );
 
 };
 
 type RecordeditFormHeaderProps = {
-  idx: number,
-  f: number,
-  hideCross: boolean
+  idx: number
 }
 
-const RecordeditFormHeader = ({ idx, f, hideCross }: RecordeditFormHeaderProps): JSX.Element => {
+const RecordeditFormHeader = ({ idx }: RecordeditFormHeaderProps): JSX.Element => {
 
-  const handleCrossClick = () => fireCustomEvent('remove-form', '.form-container', { idx, f_idx: f });
+  const { forms, removeForm } = useRecordedit();
+  const handleCrossClick = () => removeForm(idx);
 
   return (
     <div className='form-header entity-value'>
       <span>{idx + 1}</span>
-      {!hideCross && 
+      {forms.length > 1 &&
         <ChaiseTooltip
           placement='bottom'
           tooltip='Click to remove this record from the form.'
@@ -126,134 +91,90 @@ const RecordeditFormHeader = ({ idx, f, hideCross }: RecordeditFormHeaderProps):
   );
 };
 
-const generateInitialHMap = (columns: any[]) => {
-  const hMap: any = {};
-  columns.forEach(c => {
-    const colname = makeSafeIdAttr(c?.displayname?.value);
-    hMap[colname] = [-1];
-  });
-  return hMap;
-}
-
-const handleHMapAddForm = (hMap: any, count: number) => {
-  const hMapCpy = simpleDeepCopy(hMap);
-  for (let i = 0; i < count; i++) {
-    Object.keys(hMapCpy).forEach(k => {
-      hMapCpy[k].push(-1);
+const getFormDefaultValues = (forms: number[], columnModels: any[]) => {
+  // TODO: initialize inputs
+  const formValues: any = {};
+  forms.forEach((form: number, idx: number) => {
+    columnModels.forEach((cm: any) => {
+      const colname = makeSafeIdAttr(cm.column.displayname.value)
+      // TODO: initialize inputs based on different types
+      formValues[`${idx}-${colname}`] = '';
     });
-  }
-  return hMapCpy;
-}
+  })
+  return formValues;
+};
 
-const handleHMapDeleteForm = (hMap: any, idx: string) => {
-  const hMapCpy = simpleDeepCopy(hMap);
-  Object.keys(hMapCpy).forEach(k => {
-    hMapCpy[k].splice(idx, 1);
-  });
-  return hMapCpy;
-}
+const FormContainer = (): JSX.Element => {
 
-const handleUpdateHMap = (hMap: any, colName: string, idx: string, value: number) => {
-  const hMapCpy = simpleDeepCopy(hMap);
+  const {
+    columnModels, forms,
+    formsHeightMap, updateFormsHeightMap,
+    onSubmit, onInvalid
+  } = useRecordedit();
 
-  hMapCpy[colName][idx] = value;
-
-  fireCustomEvent('update-record-column-height', '.entity-key-column', { colName, height: Math.max(...hMapCpy[colName]) });
-
-  return hMapCpy;
-}
-
-type FormContainerProps = {
-  columns: any[]
-}
-
-const FormContainer = ({ columns }: FormContainerProps): JSX.Element => {
-  /*
-    Here a unique key to reference each form will be stored in the forms state variable : f_i
-  */
-
-  const [forms, setForms] = useState<number[]>([1]);
+  // type FormDefaultValues = {
+  //   [`${name}-min`]: RangeOptions['absMin'];
+  //   [`${name}-max`]: RangeOptions['absMax'];
+  // };
 
   /**
-   * the height array is an array where h[i] is :
-   * -1: auto height
-   * value: height in px for that 
+   * TODO
+   * Need to find a way to dynamically generate the type for FormDefaultValue based on the types of the columns
    */
-
-  const [hMap, setHMap] = useState(generateInitialHMap(columns));
-
-  // TODO: fix event type
-  const addForm = (event: any) => {
-    const count = event.detail.count;
-    const tempForms: number[] = forms;
-    for (let i = 0; i < count; i++) {
-      // get the last value in tempForms and increment by 1
-      tempForms.push(tempForms[tempForms.length - 1] + 1)
-    }
-    setForms(tempForms);
-    setHMap((hMap: any) => {
-      return handleHMapAddForm(hMap, count);
-    });
-  };
-
-  // TODO: event type
-  const removeForm = (event: any) => {
-    const f = event.detail.f_idx;
-    const idx = event.detail.idx;
-    setForms(forms => {
-      forms.splice(idx, 1);
-      return [...forms];
-    });
-    setHMap((hMap: any) => {
-      return handleHMapDeleteForm(hMap, idx);
-    });
-  }
-
-  const handleHeightAdjustment = (event: any) => {
-    const fieldName = event.detail.inputFieldName;
-
-    const msgCleared = event.detail.msgCleared;
-
-    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
-
-    const height = ele?.offsetHeight || 0;
-
-    const r = /(\d*)-(\d*)-(.*)/;
-
-    const result = r.exec(fieldName) || [];
-
-    const idx = result[2];
-
-    const colName = result[3];
-
-    // how to handle this ? get default heights
-    const heightSet = height == 47 || msgCleared ? -1 : height;
-
-    setHMap((hMap: any) => {
-      return handleUpdateHMap(hMap, colName, idx, heightSet);
-    });
-  }
+  const methods = useForm<any>({
+    mode: 'all',
+    reValidateMode: 'onChange',
+    defaultValues: getFormDefaultValues(forms, columnModels),
+    resolver: undefined,
+    context: undefined,
+    criteriaMode: 'firstError',
+    shouldUnregister: false,
+    shouldUseNativeValidation: false,
+    delayError: undefined
+  });
 
   useEffect(() => {
     const formContainer = document.querySelector('.form-container') as HTMLElement;
-    formContainer.addEventListener('add-form', addForm);
-    formContainer.addEventListener('remove-form', removeForm);
     formContainer.addEventListener('input-switch-error-update', handleHeightAdjustment);
 
     return () => {
-      formContainer.removeEventListener('add-form', addForm);
-      formContainer.removeEventListener('remove-form', removeForm);
       formContainer.removeEventListener('input-switch-error-update', handleHeightAdjustment);
     }
   }, []);
 
-  const hideCrossBtn = forms.length == 1;
+  const handleHeightAdjustment = (event: any) => {
+    const fieldName = event.detail.inputFieldName;
+    const msgCleared = event.detail.msgCleared;
 
-  const elements = forms.map((f, idx) => <Form f={f} hMap={hMap} columns={columns} idx={idx} key={f} hideCross={hideCrossBtn} />)
+    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
+    const height = ele?.offsetHeight || 0;
+    // how to handle this ? get default heights
+    const newHeight = height == 47 || msgCleared ? -1 : height;
+
+    // execute the regexp to get individual values from the inputFieldName
+    const r = /(\d*)-(.*)/;
+    const result = r.exec(fieldName) || [];
+    const idx = result[1];
+    const colName = result[2];
+
+    updateFormsHeightMap(colName, idx, newHeight);
+  }
+
+  const renderFormProvider = () => {
+    return (
+      <FormProvider {...methods} >
+        <form id='recordedit-form' className='recordedit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
+          {forms.map((f: number, idx: number) =>
+            <ChaiseForm key={f} idx={idx} />
+          )}
+        </form>
+      </FormProvider>
+    )
+  }
 
   return (
     <div className='form-container'>
-      {elements}
+      {renderFormProvider()}
     </div>
   );
 }

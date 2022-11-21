@@ -3,7 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordedit.scss';
 // components
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import Columns from '@isrd-isi-edu/chaise/src/components/recordedit/columns';
+import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
@@ -53,7 +53,10 @@ const RecordeditInner = ({
 }: RecordeditInnerProps): JSX.Element => {
 
   const { addAlert } = useAlert();
-  const { initialized, reference, MAX_ROWS_TO_ADD } = useRecordedit()
+  const { 
+    reference, columnModels, initialized, 
+    forms, addForm, MAX_ROWS_TO_ADD 
+  } = useRecordedit()
 
   const mainContainer = useRef<HTMLDivElement>(null);
   const copyFormRef = useRef<HTMLInputElement>(null);
@@ -76,16 +79,16 @@ const RecordeditInner = ({
     return () => { paddingSensor.detach(); }
   }, [initialized]);
 
-  const addForm = () => {
-    const numberFormstoAdd = copyFormRef.current?.value  || 1;
+  const callAddForm = () => {
+    const numberFormsToAdd = copyFormRef.current?.value || 1;
 
     // log the button was clicked
     // let action = LogActions.FORM_CLONE,
     //   stack = LogService.getStackObject();
 
-    // if (numberFormstoAdd > 1) {
+    // if (numberFormsToAdd > 1) {
     //   action = LogActions.FORM_CLONE_X;
-    //   stack = LogService.addExtraInfoToStack(null, { clone: numberFormstoAdd });
+    //   stack = LogService.addExtraInfoToStack(null, { clone: numberFormsToAdd });
     // }
 
     // LogService.logClientAction({
@@ -95,22 +98,14 @@ const RecordeditInner = ({
 
     // TODO: need access to # of forms
     // refactor so provider manages the forms
-    const numberForms = 1;
-    if ((numberFormstoAdd as number + numberForms) > MAX_ROWS_TO_ADD) {
-      const alertMessage = `Cannot add ${numberFormstoAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
+    const numberForms = forms.length;
+    if ((numberFormsToAdd as number + numberForms) > MAX_ROWS_TO_ADD) {
+      const alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
       addAlert(alertMessage, ChaiseAlertType.ERROR);
       return true;
     }
 
-    fireCustomEvent('add-form', '.form-container', { count: numberFormstoAdd });
-  }
-
-  const submitForms = () => {
-    const formSubmits = document.querySelectorAll('.recordedit-form-submit');
-    console.log(formSubmits);
-    formSubmits.forEach((submit: any) => {
-      submit.click();
-    });
+    addForm(numberFormsToAdd);
   }
 
   return (
@@ -133,8 +128,8 @@ const RecordeditInner = ({
                 {initialized && <button
                   id='submit-record-button'
                   className='chaise-btn chaise-btn-primary'
-                  type='button'
-                  onClick={submitForms}
+                  type='submit'
+                  form='recordedit-form'
                 >
                   <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                   <span>Save</span>
@@ -175,7 +170,7 @@ const RecordeditInner = ({
                     <button
                       id='copy-rows-submit'
                       className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                      onClick={addForm}
+                      onClick={callAddForm}
                       type='button'
                     >
                       <span>Clone</span>
@@ -192,10 +187,12 @@ const RecordeditInner = ({
         {/* This is here so the spacing can be done in one place for all the apps */}
         <div className='side-panel-resizable close-panel'></div>
         {/* <!-- Form section --> */}
-        <div id='form-section' className='main-container' ref={mainContainer}>
-          <Columns columns={reference.columns} />
-          <FormContainer columns={reference.columns} />
-        </div>
+        {initialized && columnModels.length > 0 && 
+          <div id='form-section' className='main-container' ref={mainContainer}>
+            <KeyColumn />
+            <FormContainer />
+          </div>
+        }
       </div>
     </div>
   );

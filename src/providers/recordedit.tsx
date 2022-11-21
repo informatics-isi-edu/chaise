@@ -5,6 +5,8 @@ import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 
 // models
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { createImportSpecifier } from 'typescript';
 // import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 // import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 // import { MultipleRecordError, NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
@@ -13,6 +15,8 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 // import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 // import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
@@ -33,10 +37,17 @@ export const RecordeditContext = createContext<{
    * Whether the data for the main entity is fetched or not
    */
   initialized: boolean,
+  forms: number[],
+  addForm: Function,
+  removeForm: Function,
+  keysHeightMap: any,
+  updateKeysHeightMap: Function,
+  formsHeightMap: any,
+  updateFormsHeightMap: Function,
   /**
    * The column models
    */
-  // columnModels: RecordColumnModel[],
+  columnModels: RecordeditColumnModel[],
   onSubmit: (data: any) => void,
   onInvalid: (data: any) => void,
   MAX_ROWS_TO_ADD: number
@@ -63,44 +74,143 @@ export default function RecordeditProvider({
   const { dispatchError } = useError();
 
   const [page, setPage, pageRef] = useStateRef<any>(null);
-  const [recordValues, setRecordValues] = useState<any>([]);
+  const [columnModels, setColumnModels] = useState<any[]>([])
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
+
+  // an array of unique keys to for referencing each form
+  const [forms, setForms] = useState<number[]>([1]);
+  /*
+   * Object to keep track of height changes for each column name display cell
+   *  - each key is the column name 
+   *  - each value is -1 if not changed or the corresponding height value to apply
+   */
+  const [keysHeightMap, setKeysHeightMap] = useState<any>({})
+
+  /*
+   * Object to keep track of height changes for each column name display cell
+   *  - each key is the column name 
+   *  - each value is -1 if not changed or the corresponding height value to apply
+   */
+  const [formsHeightMap, setFormsHeightMap] = useState<any>({})
 
   useEffect(() => {
     if (!reference) return;
+
+    const tempColumnModels: any[] = [];
+    reference.columns.forEach((column: any) => {
+      tempColumnModels.push({
+        column: column
+      })
+    })
+    setColumnModels([...tempColumnModels]);
+
+    // generate initial forms hmap
+    const tempKeysHMap: any = {};
+    const tempFormsHMap: any = {};
+    tempColumnModels.forEach((cm: any) => {
+      const colname = makeSafeIdAttr(cm.column.displayname.value);
+      tempKeysHMap[colname] = -1;
+      tempFormsHMap[colname] = [-1];
+    });
+
+    setKeysHeightMap(tempKeysHMap);
+    setFormsHeightMap(tempFormsHMap);
+
+    console.log("recordedit initialized");
     setInitialized(true);
   }, [reference])
 
-  const onSubmit = (data: any, event: any) => {
-    event.preventDefault();
-
+  const onSubmit = (data: any) => {
     console.log('on submit')
     console.log(data);
 
-    // TODO: gather data and push to submissionRows in provider
-    const columnKeys = Object.keys(data);
+    const submissionRows: any[] = []
+    forms.forEach((f: number, idx: number) => {
+      const currRow: any = {};
+      reference.columns.forEach((col: any) => {
+        // TODO: fix indexing
+        currRow[col.name] = data[idx + '-' + col.displayname.value] || null
+      });
+      submissionRows.push(currRow);
+    })
 
-    const currRow: any = {};
-    reference.columns.forEach((col: any) => {
-      // TODO: fix indexing
-      currRow[col.name] = data['1-0-' + col.displayname.value] || null
+    console.log(submissionRows);
+
+    validateSessionBeforeMutation(() => {
+      reference.create(submissionRows).then((response: any) => {
+        console.log(response);
+      }).catch((err: any) => {
+        console.log(err);
+        dispatchError({ error: err });
+      })
+
     });
-
-    console.log(currRow);
-
-    // validateSessionBeforeMutation(() => {
-    //   reference.create(submissionRows).then((response: AnalyserNode) => {
-    //     console.log(response);
-    //   }).catch((err: any) => {
-    //     console.log(err);
-    //   })
-
-    // });
   }
 
   const onInvalid = (data: any) => {
     console.log('on invalid');
     console.log(data)
+  }
+
+  const addForm = (count: number) => {
+    // add 'count' number of forms
+    setForms((forms: any) => {
+      for (let i = 0; i < count; i++) {
+        forms.push(forms[forms.length - 1] + 1)
+      }
+
+      return [...forms]
+    })
+
+    // for each form added, push another '-1' into the array for each column
+    setFormsHeightMap((formsHeightMap: any) => {
+      const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
+      for (let i = 0; i < count; i++) {
+        Object.keys(formsHeightMapCpy).forEach(k => {
+          formsHeightMapCpy[k].push(-1);
+        });
+      }
+      return formsHeightMapCpy;
+    });
+  };
+
+  // TODO: event type
+  const removeForm = (idx: number) => {
+    // remove the form at 'idx'
+    setForms((forms: any) => {
+      forms.splice(idx, 1);
+
+      return [...forms];
+    });
+
+    // remove the entry at 'idx' in the array for each column
+    setFormsHeightMap((formsHeightMap: any) => {
+      const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
+      Object.keys(formsHeightMapCpy).forEach(k => {
+        formsHeightMapCpy[k].splice(idx, 1);
+      });
+      return formsHeightMapCpy;
+    });
+  }
+
+  const updateKeysHeightMap = (colName: string, height: number) => {
+    setKeysHeightMap((keysHeightMap: any) => {
+      const hMapCopy = simpleDeepCopy(keysHeightMap);
+      hMapCopy[colName] = height;
+      return hMapCopy;
+    })
+  }
+
+  const updateFormsHeightMap = (colName: string, idx: number, height: any) => {
+    setFormsHeightMap((formsHeightMap: any) => {
+      // return handleUpdateHMap(hMap, colName, idx, heightSet);
+      const hMapCpy = simpleDeepCopy(formsHeightMap);
+      hMapCpy[colName][idx] = height;
+  
+      updateKeysHeightMap(colName, Math.max(...hMapCpy[colName]));
+  
+      return hMapCpy;
+    });
   }
 
   // ---------------- log related function --------------------------- //
@@ -125,10 +235,16 @@ export default function RecordeditProvider({
     return {
       // main entity:
       page,
-      recordValues,
+      columnModels,
       reference,
       initialized,
-      // columnModels,
+      forms,
+      addForm,
+      removeForm,
+      keysHeightMap,
+      updateKeysHeightMap,
+      formsHeightMap,
+      updateFormsHeightMap,
 
       //   // log related:
       //   logRecordClientAction,
@@ -140,7 +256,8 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    page, recordValues, initialized,
+    page, columnModels, initialized, 
+    forms, keysHeightMap, formsHeightMap,
   ]);
 
   return (

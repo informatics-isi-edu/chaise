@@ -169,6 +169,48 @@ const TextField = ({
   );
 };
 
+type DisabledFieldProps = {
+  classes?: string;
+  containerClasses?: string;
+  inputClasses?: string;
+  name: string;
+  placeholder: string;
+}
+
+const DisabledField = ({
+  classes,
+  containerClasses,
+  inputClasses,
+  name, 
+  placeholder
+}: DisabledFieldProps): JSX.Element => {
+
+  const { setValue, control } = useFormContext();
+
+  const registerOptions = {
+    required: false
+  };
+
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
+  
+  return (
+    <div className={`${containerClasses} input-switch-container-${name}`}>
+      <div className={`chaise-input-control input-disabled ${classes}`}>
+        <input 
+          className={`${inputClasses} input-switch`}
+          disabled={true}
+          placeholder={placeholder}
+          {...formInput.field}
+        />
+      </div>
+    </div>
+  )
+}
+
 
 
 type NumericFieldProps = {
@@ -663,6 +705,14 @@ const InputSwitch = ({
           disableInput={disableInput}
           onFieldChange={onFieldChange} 
         />
+      case 'disabled':
+          return <DisabledField 
+            name={name}
+            classes={classes}
+            inputClasses={inputClasses}
+            containerClasses={containerClasses}
+            placeholder='Automatically Generated'
+          />
       case 'text':
       default:
         return <TextField
