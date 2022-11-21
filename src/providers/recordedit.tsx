@@ -44,6 +44,7 @@ export const RecordeditContext = createContext<{
   updateKeysHeightMap: Function,
   formsHeightMap: any,
   updateFormsHeightMap: Function,
+  handleInputHeightAdjustment: Function,
   /**
    * The column models
    */
@@ -201,9 +202,8 @@ export default function RecordeditProvider({
     })
   }
 
-  const updateFormsHeightMap = (colName: string, idx: number, height: any) => {
+  const updateFormsHeightMap = (colName: string, idx: string, height: any) => {
     setFormsHeightMap((formsHeightMap: any) => {
-      // return handleUpdateHMap(hMap, colName, idx, heightSet);
       const hMapCpy = simpleDeepCopy(formsHeightMap);
       hMapCpy[colName][idx] = height;
   
@@ -211,6 +211,21 @@ export default function RecordeditProvider({
   
       return hMapCpy;
     });
+  }
+
+  const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean) => {
+    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
+    const height = ele?.offsetHeight || 0;
+    // how to handle this ? get default heights
+    const newHeight = height == 47 || msgCleared ? -1 : height;
+
+    // execute the regexp to get individual values from the inputFieldName
+    const r = /(\d*)-(.*)/;
+    const result = r.exec(fieldName) || [];
+    const idx = result[1];
+    const colName = result[2];
+
+    updateFormsHeightMap(colName, idx, newHeight);
   }
 
   // ---------------- log related function --------------------------- //
@@ -245,6 +260,7 @@ export default function RecordeditProvider({
       updateKeysHeightMap,
       formsHeightMap,
       updateFormsHeightMap,
+      handleInputHeightAdjustment,
 
       //   // log related:
       //   logRecordClientAction,

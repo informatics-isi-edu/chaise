@@ -24,23 +24,23 @@ const KeyColumn = (): JSX.Element => {
   return (
     <div className='entity-key-column'>
       <span className='form-header entity-key'>Record Number</span>
-      {columnModels.map((cm: any, idx: number) => {
-        const c = cm.column; 
-        const colName = makeSafeIdAttr(c?.displayname?.value);
+      {columnModels.map((cm: any) => {
+        const column = cm.column; 
+        const colName = makeSafeIdAttr(column?.displayname?.value);
         const height = keysHeightMap[colName];
         const heightparam = height == -1 ? 'auto' : `${height}px`;
 
         return (
           <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
-            {!c.nullok && !c.inputDisabled && <span className='text-danger'><b>*</b> </span>}
-            {c.comment ?
+            {!column.nullok && !column.inputDisabled && <span className='text-danger'><b>*</b> </span>}
+            {column.comment ?
               <ChaiseTooltip
                 placement='right'
-                tooltip={c.comment}
+                tooltip={column.comment}
               >
-                {renderColumnHeader(c)}
+                {renderColumnHeader(column)}
               </ChaiseTooltip> :
-              renderColumnHeader(c)
+              renderColumnHeader(column)
             }
           </span>
         )

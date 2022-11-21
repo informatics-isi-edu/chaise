@@ -4,14 +4,12 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 
 // hooks
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 
 // utils
-import { fireCustomEvent, getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
-import { FormSelect } from 'react-bootstrap';
 
 const getInputTypeOrDisabled = (column: any) => {
   if (column.inputDisabled) {
@@ -26,11 +24,30 @@ const getInputTypeOrDisabled = (column: any) => {
 type ChaiseFormProps = {
   classes?: string,
   idx: number,
+  allowRemove: boolean
 }
 
-const ChaiseForm = ({ classes = '', idx }: ChaiseFormProps) => {
+const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
-  const { columnModels, formsHeightMap } = useRecordedit()
+  const { columnModels, formsHeightMap, removeForm } = useRecordedit()
+
+  const renderFormHeader = () => {
+    return (
+      <div className='form-header entity-value'>
+        <span>{idx + 1}</span>
+        {allowRemove &&
+          <ChaiseTooltip
+            placement='bottom'
+            tooltip='Click to remove this record from the form.'
+          >
+            <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm(idx)}>
+              <i className='fa-solid fa-xmark' />
+            </button>
+          </ChaiseTooltip>
+        }
+      </div>
+    )
+  }
 
   const renderInputs = () => {
     return columnModels.map((cm: any) => {
@@ -58,37 +75,11 @@ const ChaiseForm = ({ classes = '', idx }: ChaiseFormProps) => {
 
   return (
     <div className={`column-form ${classes}`}>
-      <RecordeditFormHeader idx={idx}></RecordeditFormHeader>
+      {renderFormHeader()}
       {renderInputs()}
     </div>
   );
 
-};
-
-type RecordeditFormHeaderProps = {
-  idx: number
-}
-
-const RecordeditFormHeader = ({ idx }: RecordeditFormHeaderProps): JSX.Element => {
-
-  const { forms, removeForm } = useRecordedit();
-  const handleCrossClick = () => removeForm(idx);
-
-  return (
-    <div className='form-header entity-value'>
-      <span>{idx + 1}</span>
-      {forms.length > 1 &&
-        <ChaiseTooltip
-          placement='bottom'
-          tooltip='Click to remove this record from the form.'
-        >
-          <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={handleCrossClick}>
-            <i className='fa-solid fa-xmark' />
-          </button>
-        </ChaiseTooltip>
-      }
-    </div>
-  );
 };
 
 const getFormDefaultValues = (forms: number[], columnModels: any[]) => {
@@ -104,11 +95,11 @@ const getFormDefaultValues = (forms: number[], columnModels: any[]) => {
   return formValues;
 };
 
-const FormContainer = (): JSX.Element => {
+const ChaiseFormContainer = (): JSX.Element => {
 
   const {
     columnModels, forms,
-    formsHeightMap, updateFormsHeightMap,
+    handleInputHeightAdjustment,
     onSubmit, onInvalid
   } = useRecordedit();
 
@@ -133,6 +124,7 @@ const FormContainer = (): JSX.Element => {
     delayError: undefined
   });
 
+  // TODO: how to refactor this when the event being fired in input switch might be in the case of apps that are not recordedit
   useEffect(() => {
     const formContainer = document.querySelector('.form-container') as HTMLElement;
     formContainer.addEventListener('input-switch-error-update', handleHeightAdjustment);
@@ -146,18 +138,8 @@ const FormContainer = (): JSX.Element => {
     const fieldName = event.detail.inputFieldName;
     const msgCleared = event.detail.msgCleared;
 
-    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
-    const height = ele?.offsetHeight || 0;
-    // how to handle this ? get default heights
-    const newHeight = height == 47 || msgCleared ? -1 : height;
-
-    // execute the regexp to get individual values from the inputFieldName
-    const r = /(\d*)-(.*)/;
-    const result = r.exec(fieldName) || [];
-    const idx = result[1];
-    const colName = result[2];
-
-    updateFormsHeightMap(colName, idx, newHeight);
+    // call provider function
+    handleInputHeightAdjustment(fieldName, msgCleared);
   }
 
   const renderFormProvider = () => {
@@ -165,7 +147,7 @@ const FormContainer = (): JSX.Element => {
       <FormProvider {...methods} >
         <form id='recordedit-form' className='recordedit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
           {forms.map((f: number, idx: number) =>
-            <ChaiseForm key={f} idx={idx} />
+            <ChaiseForm key={f} idx={idx} allowRemove={forms.length>1} />
           )}
         </form>
       </FormProvider>
@@ -179,4 +161,4 @@ const FormContainer = (): JSX.Element => {
   );
 }
 
-export default FormContainer;
+export default ChaiseFormContainer;

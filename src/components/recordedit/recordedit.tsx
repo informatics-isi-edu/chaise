@@ -4,7 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_recordedit.scss';
 import Alerts from '@isrd-isi-edu/chaise/src/components/alerts';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
-import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
+import ChaiseFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 
 // hooks
@@ -24,7 +24,6 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 export type RecordeditProps = {
   parentContainer?: HTMLElement;
@@ -190,7 +189,7 @@ const RecordeditInner = ({
         {initialized && columnModels.length > 0 && 
           <div id='form-section' className='main-container' ref={mainContainer}>
             <KeyColumn />
-            <FormContainer />
+            <ChaiseFormContainer />
           </div>
         }
       </div>
