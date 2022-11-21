@@ -79,7 +79,8 @@ const RecordeditInner = ({
   }, [initialized]);
 
   const callAddForm = () => {
-    const numberFormsToAdd = copyFormRef.current?.value || 1;
+    // converts to number type. If NaN is returned, 1 is used instead
+    const numberFormsToAdd: number = Number(copyFormRef.current?.value) || 1;
 
     // log the button was clicked
     // let action = LogActions.FORM_CLONE,
@@ -98,7 +99,7 @@ const RecordeditInner = ({
     // TODO: need access to # of forms
     // refactor so provider manages the forms
     const numberForms = forms.length;
-    if ((numberFormsToAdd as number + numberForms) > MAX_ROWS_TO_ADD) {
+    if ((numberFormsToAdd + numberForms) > MAX_ROWS_TO_ADD) {
       const alertMessage = `Cannot add ${numberFormsToAdd} records. Please input a value between 1 and ${MAX_ROWS_TO_ADD - numberForms}, inclusive.`;
       addAlert(alertMessage, ChaiseAlertType.ERROR);
       return true;

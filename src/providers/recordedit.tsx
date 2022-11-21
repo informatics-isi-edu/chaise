@@ -122,9 +122,6 @@ export default function RecordeditProvider({
   }, [reference])
 
   const onSubmit = (data: any) => {
-    console.log('on submit')
-    console.log(data);
-
     const submissionRows: any[] = []
     forms.forEach((f: number, idx: number) => {
       const currRow: any = {};
@@ -135,7 +132,6 @@ export default function RecordeditProvider({
       submissionRows.push(currRow);
     })
 
-    console.log(submissionRows);
 
     validateSessionBeforeMutation(() => {
       reference.create(submissionRows).then((response: any) => {
