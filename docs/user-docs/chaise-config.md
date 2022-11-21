@@ -513,17 +513,9 @@ Use this property to change the default engine that is used for templating throu
 Use this property to avoid recordedit app from showing an alert when users are trying to navigate away.
    - Type: Boolean
    - Default behavior: Recordedit app will warn users when they are about to navigate away from recordedit to preserve the editted content.
-   - General syntax:
-     ```
-     hideRecordeditLeaveAlert: true
-     ```
-   - `templating` attributes:
-     - `engine`: The template engine used in ermrestjs.
    - Sample syntax:
      ```
-     templating: {
-         engine: 'handlebars'
-     }
+     hideRecordeditLeaveAlert: true
      ```
 
 ### Export Configuration:
