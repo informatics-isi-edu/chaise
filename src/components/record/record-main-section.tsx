@@ -73,16 +73,16 @@ const RecordMainSection = (): JSX.Element => {
         rowClassName.push('hidden-header');
       }
 
-      const entityKeyClassName = ['entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2'];
+      const entityKeyClassName = ['entity-key col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2'];
       if (hideHeader) {
         entityKeyClassName.push(CLASS_NAMES.HIDDEN);
       }
 
       const entityValueClassName = ['entity-value'];
       if (hideHeader) {
-        entityValueClassName.push('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+        entityValueClassName.push('col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12');
       } else {
-        entityValueClassName.push('col-xs-8 col-sm-8 col-md-9 col-lg-10');
+        entityValueClassName.push('col-8 col-sm-8 col-md-9 col-lg-9 col-xl-10');
       }
 
       const columnDisplayname = (

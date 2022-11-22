@@ -765,7 +765,7 @@ const RecordsetInner = ({
                   <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
                 }
                 <div className='row'>
-                  <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
+                  <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-6'>
                     <SearchInput
                       initialSearchTerm={initialReference.location.searchTerm}
                       searchCallback={changeSearch}
