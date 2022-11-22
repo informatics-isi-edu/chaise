@@ -32,7 +32,7 @@ const KeyColumn = (): JSX.Element => {
 
         return (
           <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
-            {!column.nullok && !column.inputDisabled && <span className='text-danger'><b>*</b> </span>}
+            {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
             {column.comment ?
               <ChaiseTooltip
                 placement='right'

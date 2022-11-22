@@ -11,6 +11,7 @@ import { useFormContext, useController, useWatch } from 'react-hook-form';
 import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
 
 // utils
+import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -185,7 +186,7 @@ const DisabledField = ({
   placeholder
 }: DisabledFieldProps): JSX.Element => {
 
-  const { setValue, control } = useFormContext();
+  const { control } = useFormContext();
 
   const registerOptions = {
     required: false
@@ -647,7 +648,7 @@ type InputSwitchProps = {
 const InputSwitch = ({ 
   type,
   name, 
-  placeholder = 'Enter',
+  placeholder,
   classes = '',
   inputClasses='',
   containerClasses='',
@@ -711,7 +712,7 @@ const InputSwitch = ({
             classes={classes}
             inputClasses={inputClasses}
             containerClasses={containerClasses}
-            placeholder='Automatically Generated'
+            placeholder={placeholder as string}
           />
       case 'text':
       default:

@@ -1,3 +1,6 @@
 export interface RecordeditColumnModel {
-  column: any,
+  column: any;
+  isDisabled: boolean;
+  isRequired: boolean;
+  inputType: string;
 }

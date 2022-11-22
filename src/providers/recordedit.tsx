@@ -16,6 +16,7 @@ import { createImportSpecifier } from 'typescript';
 
 // utilities
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { columnToColumnModel } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 // import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -75,7 +76,7 @@ export default function RecordeditProvider({
   const { dispatchError } = useError();
 
   const [page, setPage, pageRef] = useStateRef<any>(null);
-  const [columnModels, setColumnModels] = useState<any[]>([])
+  const [columnModels, setColumnModels] = useState<RecordeditColumnModel[]>([])
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
 
   // an array of unique keys to for referencing each form
@@ -97,11 +98,9 @@ export default function RecordeditProvider({
   useEffect(() => {
     if (!reference) return;
 
-    const tempColumnModels: any[] = [];
+    const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
-      tempColumnModels.push({
-        column: column
-      })
+      tempColumnModels.push(columnToColumnModel(column));
     })
     setColumnModels([...tempColumnModels]);
 
