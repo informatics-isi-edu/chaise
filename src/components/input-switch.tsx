@@ -363,6 +363,7 @@ type DateFieldProps = {
   clearClasses?: string,
   inputClasses?: string,
   containerClasses?: string,
+  styles?: any,
   /**
    * flag for disabling the input
    */
@@ -445,7 +446,7 @@ const DateField = ({
   return (
     <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
       <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <input className={`${inputClasses} input-switch`} {...field} onChange={handleChange} type='date' step='1' pattern='\d{4}-\d{2}-\d{2}'
+        <input className={`${inputClasses} input-switch ${showClear ? 'date-input-show-clear' : ''}`} {...field} onChange={handleChange} type='date' step='1' pattern='\d{4}-\d{2}-\d{2}'
         min='1970-01-01' max='2999-12-31' />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
@@ -489,10 +490,15 @@ type TimestampFieldProps = {
    * the default date value
    */
   value: TimeStamp,
+  styles?: any,
   /**
    * flag for disabling the input
    */
   disableInput?: boolean,
+  /**
+   * flag to show error below the input switch component
+   */
+  displayErrors?: boolean,
   /**
    * the handler function called on input change
    */
@@ -509,101 +515,165 @@ const TimestampField = ({
   clearClasses,
   clearTimeClasses,
   disableInput,
+  displayErrors,
+  styles,
   onFieldChange 
 }: TimestampFieldProps): JSX.Element => {
 
-  const { 
-    register,
-    formState,
-    getFieldState,
-    setValue,
-    getValues,
-    watch 
-  } = useFormContext();
+  const { setValue, control, formState: { touchedFields }, clearErrors, watch } = useFormContext();
 
   useEffect(() => {
     
     const sub = watch((data, options) => {
       // not sure what this is doing??
-      if (options.name && options.name in [`${name}-date`, `${name}-time`]) {
+      if (options.name && (options.name == `${name}-date` || options.name == `${name}-time`)) {
         const dateVal = data[`${name}-date`];
+        if (!dateVal) return;
         let timeVal = data[`${name}-time`];
         if (dateVal && !timeVal) timeVal = '00:00';
         setValue(name, `${dateVal}T${timeVal}`); 
       }
-
-      if (options.name === `${name}-date`) {
-        setValue('lastName', 'bill')
-      }
     });
-
 
     return () => sub.unsubscribe();
   }, [watch]);
 
+  useEffect(() => {
+
+  }, []);
+
   const registerOptions = {
     disabled: disableInput,
+    required: false,
     validate: validationFunctionMap['timestamp'],
   };
 
   const registerOptionsDate = {
     disabled: disableInput,
+    required: false,
   };
 
   const registerOptionsTime = {
     disabled: disableInput,
+    required: false,
   };
 
-  const formInput = register(name, registerOptions); 
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
 
-  const formInputDate = register(`${name}-date`, registerOptionsDate); 
+  const formInputDate = useController({
+    name: `${name}-date`,
+    control,
+    rules: registerOptionsDate,
+  });
 
-  const formInputTime = register(`${name}-time`, registerOptionsTime); 
+  const formInputTime = useController({
+    name: `${name}-time`,
+    control,
+    rules: registerOptionsTime,
+  });
 
-  const { error } = getFieldState(name, formState);
-
-  const { isTouched: isDateTouched } = getFieldState(`${name}-date`, formState);
-
-  const { isTouched: isTimeTouched } = getFieldState(`${name}-time`, formState);
-
-  const clearDate = () => setValue(`${name}-date`, '');
+  const field = formInput?.field;
   
-  const clearTime = () => setValue(`${name}-time`, '');
+  const fieldValue = field?.value;
 
-  const fieldValue = getValues(name);
+  const fieldState = formInput?.fieldState;
 
-  const dateFieldValue = getValues(`${name}-date`);
+  const { error } = fieldState;
 
-  const timeFieldValue = getValues(`${name}-time`);
+  const dateField = formInputDate?.field;
+
+  const dateFieldValue = dateField?.value;
+
+  const dateFieldState = formInputDate?.fieldState;
+
+  const timeFieldState = formInputTime?.fieldState;
+
+  const timeField = formInputTime?.field;
+
+  const timeFieldValue = timeField?.value;
+
+  const { isTouched: isDateTouched } = dateFieldState;
+
+  const { isTouched: isTimeTouched } = timeFieldState;
+
+  const [showClear, setShowClear] = useState<any>({ time: Boolean(timeFieldValue), date: Boolean(dateFieldValue) });
 
   useEffect(() => {
-    onFieldChange && onFieldChange(fieldValue);
-  }, [fieldValue]);
- 
+    setValue(`${name}-date`, value);
+  }, [value]);
+
+  useEffect(()=>{
+    if(onFieldChange){
+      onFieldChange(dateFieldValue);
+    }
+
+    if(showClear.date!=Boolean(dateFieldValue)){
+      setShowClear({...showClear, date: Boolean(dateFieldValue)});
+    }
+  }, [dateFieldValue]);
+
+  useEffect(()=>{
+    if(onFieldChange){
+      onFieldChange(timeFieldValue);
+    }
+
+    if(showClear.time!=Boolean(timeFieldValue)){
+      setShowClear({...showClear, time: Boolean(timeFieldValue)});
+    }
+  }, [timeFieldValue]);
+
+  const handleDateChange = (v: any) => {
+    dateField.onChange(v);
+    dateField.onBlur();
+  };
+
+  const handleTimeChange = (v: any) => {
+    timeField.onChange(v);
+    timeField.onBlur();
+  };
+
+  useEffect(() => {
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+  }, [error?.message])
+
+  const clearDate = () => {
+    setValue(`${name}-date`, '');
+    clearErrors(`${name}-date`);
+  }
+  
+  const clearTime = () => {
+    setValue(`${name}-time`, '');
+    clearErrors(`${name}-time`);
+  }
+
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`}>
+    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
       <div className='input-switch-datetime'>
         <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-          <input className={`${inputClasses} input-switch`} type='date' placeholder='YYYY-MM-DD'
-          min='1970-01-01' max='2999-12-31' step='1' defaultValue={value?.date} disabled={disableInput} {...formInputDate}/>
+          <input className={`${inputClasses} input-switch ${showClear.date ? 'date-input-show-clear' : ''}`} type='date' min='1970-01-01' max='2999-12-31' step='1' 
+          {...dateField} onChange={handleDateChange}/>
           <ClearInputBtn
             btnClassName={`${clearClasses} input-switch-clear`}
             clickCallback={clearDate}
-            show={dateFieldValue}
+            show={showClear.date}
           />
         </div>
         <div className={`chaise-input-control has-feedback input-switch-time ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-          <input className={`${timeClasses} input-switch`} type='time' placeholder='HH:MM' 
-          min='00:00' max='23:59' defaultValue='00:00' disabled={disableInput} {...formInputTime}/>
+          <input className={`${timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`} type='time' min='00:00' max='23:59' defaultValue='00:00' 
+          {...formInputTime} onChange={handleTimeChange}/>
           <ClearInputBtn
             btnClassName={`${clearTimeClasses} input-switch-clear`}
             clickCallback={clearTime}
-            show={timeFieldValue}
+            show={showClear.time}
           />
         </div>
-        <input type='hidden' {...formInput}/>
+        <input {...field} type='hidden' />
       </div>
-      { (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error'>{error.message}</span> }
+      { displayErrors && (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error'>{error.message}</span> }
     </div>
   );
 };
@@ -698,6 +768,7 @@ const InputSwitch = ({
           clearTimeClasses={clearTimeClasses}
           value={value as TimeStamp}
           disableInput={disableInput}
+          styles={styles}
           onFieldChange={onFieldChange} 
         />
       case 'integer2':
@@ -727,6 +798,8 @@ const InputSwitch = ({
           clearClasses={clearClasses}
           value={value as string}
           disableInput={disableInput}
+          displayErrors={displayErrors}
+          styles={styles}
           onFieldChange={onFieldChange} 
         />
       case 'disabled':
