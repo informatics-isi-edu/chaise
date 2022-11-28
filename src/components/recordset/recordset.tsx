@@ -793,6 +793,8 @@ const RecordsetInner = ({
         right={renderMainContainer}
         minWidth={200}
         maxWidth={40}
+        // NOTE the following must have the same value as the one in css.
+        // which is $left-panel-width-lg variable in _variables.scss
         initialWidth={21}
         className='bottom-panel-container'
         convertMaxWidth

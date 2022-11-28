@@ -616,7 +616,7 @@ const RecordInner = ({
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
       id='record-side-pan'
-      className={`side-panel-resizable record-toc resizable ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
+      className={`side-panel-resizable record-toc resizable small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
         }`}
       ref={leftRef}
     >
@@ -710,7 +710,7 @@ const RecordInner = ({
         <Alerts />
         <div className='top-flex-panel'>
           <div
-            className={`top-left-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
+            className={`top-left-panel small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
               }`}
           >
             <div className='panel-header'>
@@ -849,7 +849,9 @@ const RecordInner = ({
         right={renderMainContainer}
         minWidth={200}
         maxWidth={40}
-        initialWidth={21}
+        // NOTE the following must have the same value as the one in css.
+        // which is $left-panel-width-sm variable in _variables.scss
+        initialWidth={15}
         className='bottom-panel-container'
         convertMaxWidth
         convertInitialWidth

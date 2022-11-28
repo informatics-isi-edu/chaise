@@ -748,7 +748,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                     it ("`Edit mode` button should have the proper tooltip", function (done) {
                         chaisePage.testTooltipWithDone(
                             markdownToggleLink,
-                            `Display edit controls for ${params.displayname} related to this ${params.baseTable}.`,
+                            `Display edit controls for ${params.displayname} records related to this ${params.baseTable}.`,
                             done,
                             'record'
                         );
