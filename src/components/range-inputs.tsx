@@ -12,7 +12,7 @@ import { RangeOptions, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-p
 // services
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-import { useForm, FormProvider, useWatch } from "react-hook-form";
+import { useForm, FormProvider, useWatch } from 'react-hook-form';
 
 
 // const INTEGER_REGEXP = /^\-?\d+$/;
@@ -274,7 +274,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     defaultValues: defVals,
     resolver: undefined,
     context: undefined,
-    criteriaMode: "firstError",
+    criteriaMode: 'firstError',
     shouldUnregister: false,
     shouldUseNativeValidation: false,
     delayError: undefined

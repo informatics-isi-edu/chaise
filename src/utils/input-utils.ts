@@ -2,6 +2,15 @@
  * Utility functions related to inputs
  */
 
+// constants
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+
+// models
+import { TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
+
+// utils
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
 /**
  * Recursively sets the display type for inputs (currently for recordedit)
  * @param {Object} type - the type object defining the columns type
@@ -75,11 +84,25 @@ export function getDisabledInputValue(column: any) {
   // inputDisabled might be an object with a message so avoid using above `isDisabled` function
   const disabled = column.inputDisabled;
   if (disabled) {
-      if (typeof disabled === 'object') return disabled.message;
-      return '';
+    if (typeof disabled === 'object') return disabled.message;
+    return '';
   } else if (column.isForeignKey) {
-      return 'Select a value';
+    return 'Select a value';
   } else if (column.isAsset) {
-      return 'No file Selected';
+    return 'No file Selected';
   }
+}
+
+export function formatDatetime(value: string, options: TimestampOptions) {
+  if (value) {
+    // create a moment object (value should be string format)
+    const momentObj = options.currentMomentFormat ? windowRef.moment(value, options.currentMomentFormat) : windowRef.moment(value);
+    return {
+      date: momentObj.format(dataFormats.date),
+      time: momentObj.format(dataFormats.time24),
+      datetime: momentObj.format(options.outputMomentFormat)
+    };
+  }
+
+  return null;
 }

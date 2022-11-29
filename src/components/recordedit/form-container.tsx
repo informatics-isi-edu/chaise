@@ -4,7 +4,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import { useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
@@ -69,7 +69,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
         //   placeholder = value;
         // }
       }
-      
+
 
       return (
         <InputSwitch
@@ -98,47 +98,14 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
 };
 
-const getFormDefaultValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
-  // TODO: initialize inputs
-  const formValues: any = {};
-  forms.forEach((form: number, idx: number) => {
-    columnModels.forEach((cm: RecordeditColumnModel) => {
-      const colname = makeSafeIdAttr(cm.column.displayname.value)
-      // TODO: initialize inputs based on different types
-      formValues[`${idx}-${colname}`] = '';
-    });
-  })
-  return formValues;
-};
-
 const ChaiseFormContainer = (): JSX.Element => {
 
   const {
-    columnModels, forms,
-    handleInputHeightAdjustment,
-    onSubmit, onInvalid
+    forms, handleInputHeightAdjustment,
+    onSubmitValid, onSubmitInvalid
   } = useRecordedit();
 
-  // type FormDefaultValues = {
-  //   [`${name}-min`]: RangeOptions['absMin'];
-  //   [`${name}-max`]: RangeOptions['absMax'];
-  // };
-
-  /**
-   * TODO
-   * Need to find a way to dynamically generate the type for FormDefaultValue based on the types of the columns
-   */
-  const methods = useForm<any>({
-    mode: 'all',
-    reValidateMode: 'onChange',
-    defaultValues: getFormDefaultValues(forms, columnModels),
-    resolver: undefined,
-    context: undefined,
-    criteriaMode: 'firstError',
-    shouldUnregister: false,
-    shouldUseNativeValidation: false,
-    delayError: undefined
-  });
+  const { handleSubmit } = useFormContext()
 
   // TODO: how to refactor this when the event being fired in input switch might be in the case of apps that are not recordedit
   useEffect(() => {
@@ -158,21 +125,13 @@ const ChaiseFormContainer = (): JSX.Element => {
     handleInputHeightAdjustment(fieldName, msgCleared);
   }
 
-  const renderFormProvider = () => {
-    return (
-      <FormProvider {...methods} >
-        <form id='recordedit-form' className='recordedit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
-          {forms.map((f: number, idx: number) =>
-            <ChaiseForm key={f} idx={idx} allowRemove={forms.length>1} />
-          )}
-        </form>
-      </FormProvider>
-    )
-  }
-
   return (
     <div className='form-container'>
-      {renderFormProvider()}
+      <form id='recordedit-form' className='recordedit-form' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}>
+        {forms.map((f: number, idx: number) =>
+          <ChaiseForm key={f} idx={idx} allowRemove={forms.length > 1} />
+        )}
+      </form>
     </div>
   );
 }

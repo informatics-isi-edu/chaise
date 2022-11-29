@@ -4,3 +4,8 @@ export interface RecordeditColumnModel {
   isRequired: boolean;
   inputType: string;
 }
+
+export interface TimestampOptions {
+  currentMomentFormat?: string;
+  outputMomentFormat: string;
+}
