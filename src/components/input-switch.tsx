@@ -98,6 +98,7 @@ type TextFieldProps = {
   */
   displayErrors?: boolean,
   value: string,
+  styles?: any,
   /**
   * the handler function called on input change
   */
@@ -118,7 +119,7 @@ const TextField = ({
   onFieldChange,
 }: TextFieldProps): JSX.Element => {
 
-  const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
+  const { setValue, control, clearErrors } = useFormContext();
 
   const registerOptions = {
     required: false,
@@ -156,6 +157,7 @@ const TextField = ({
   }, [fieldValue]);
 
   useEffect(() => {
+    if (value === undefined) return;
     setValue(name, value);
   }, [value]);
 
@@ -178,7 +180,7 @@ const TextField = ({
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <span className='input-switch-error'>{error.message}</span> }
+      { displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
     </div>
   );
 };
@@ -279,7 +281,7 @@ const NumericField = ({
   onFieldChange,
 }: NumericFieldProps): JSX.Element => {
 
-  const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
+  const { setValue, control, clearErrors } = useFormContext();
   
   const registerOptions = {
     required: false,
@@ -318,6 +320,7 @@ const NumericField = ({
   }, [fieldValue]);
 
   useEffect(() => {
+    if (value === undefined) return;
     setValue(name, value);
   }, [value]);
 
@@ -340,7 +343,7 @@ const NumericField = ({
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <div className='input-switch-error'>{error.message}</div> }
+      { displayErrors && isTouched && error?.message && <div className='input-switch-error text-danger'>{error.message}</div> }
     </div>
   );
 };
@@ -392,7 +395,7 @@ const DateField = ({
   styles,
 }: DateFieldProps): JSX.Element => {
 
-  const { setValue, control, formState: { touchedFields }, clearErrors } = useFormContext();
+  const { setValue, control, clearErrors } = useFormContext();
 
 
   const registerOptions = {
@@ -432,6 +435,7 @@ const DateField = ({
   }, [fieldValue]);
 
   useEffect(() => {
+    if (value === undefined) return;
     setValue(name, value);
   }, [value]);
 
@@ -455,7 +459,7 @@ const DateField = ({
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <span className='input-switch-error'>{error.message}</span> }
+      { displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
     </div>
   );
 };
@@ -521,7 +525,7 @@ const TimestampField = ({
   onFieldChange 
 }: TimestampFieldProps): JSX.Element => {
 
-  const { setValue, control, formState: { touchedFields }, clearErrors, watch } = useFormContext();
+  const { setValue, control, clearErrors, watch } = useFormContext();
 
   useEffect(() => {
     
@@ -538,10 +542,6 @@ const TimestampField = ({
 
     return () => sub.unsubscribe();
   }, [watch]);
-
-  useEffect(() => {
-
-  }, []);
 
   const registerOptions = {
     disabled: disableInput,
@@ -578,32 +578,24 @@ const TimestampField = ({
   });
 
   const field = formInput?.field;
-  
   const fieldValue = field?.value;
-
   const fieldState = formInput?.fieldState;
-
   const { error } = fieldState;
 
   const dateField = formInputDate?.field;
-
   const dateFieldValue = dateField?.value;
-
   const dateFieldState = formInputDate?.fieldState;
-
-  const timeFieldState = formInputTime?.fieldState;
-
-  const timeField = formInputTime?.field;
-
-  const timeFieldValue = timeField?.value;
-
   const { isTouched: isDateTouched } = dateFieldState;
 
+  const timeField = formInputTime?.field;
+  const timeFieldValue = timeField?.value;
+  const timeFieldState = formInputTime?.fieldState;
   const { isTouched: isTimeTouched } = timeFieldState;
 
   const [showClear, setShowClear] = useState<any>({ time: Boolean(timeFieldValue), date: Boolean(dateFieldValue) });
 
   useEffect(() => {
+    if (value === undefined) return;
     setValue(`${name}-date`, value);
   }, [value]);
 
@@ -664,8 +656,8 @@ const TimestampField = ({
           />
         </div>
         <div className={`chaise-input-control has-feedback input-switch-time ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-          <input className={`${timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`} type='time' min='00:00' max='23:59' defaultValue='00:00' 
-          {...formInputTime} onChange={handleTimeChange}/>
+          <input className={`${timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`} type='time' min='00:00' max='23:59'
+          {...timeField} onChange={handleTimeChange}/>
           <ClearInputBtn
             btnClassName={`${clearTimeClasses} input-switch-clear`}
             clickCallback={clearTime}
@@ -674,7 +666,7 @@ const TimestampField = ({
         </div>
         <input {...field} type='hidden' />
       </div>
-      { displayErrors && (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error'>{error.message}</span> }
+      { displayErrors && (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
     </div>
   );
 };

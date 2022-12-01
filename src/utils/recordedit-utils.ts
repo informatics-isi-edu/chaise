@@ -243,6 +243,7 @@ export function populateCreateInitialValues(
         if (colModel.inputType === 'disabled') {
           values[`${formIdx}-${column.name}`] = initialModelValue?.datetime || '';
         } else {
+          values[`${formIdx}-${column.name}`] = '';
           values[`${formIdx}-${column.name}-date`] = initialModelValue?.date || '';
           values[`${formIdx}-${column.name}-time`] = initialModelValue?.time || '';
         }

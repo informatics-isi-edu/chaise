@@ -36,7 +36,7 @@ export const RecordeditContext = createContext<{
   /* Array of numbers for initalizing form data */
   forms: number[],
   /* callback to add a form to the forms array */
-  addForm: (count: number) => void,
+  addForm: (count: number) => number[],
   /* callback to remove a form from the forms array */
   removeForm: (index: number) => void,
   /* Object to keep track of height changes for each column name display cell */
@@ -308,15 +308,19 @@ export default function RecordeditProvider({
 
   // NOTE: most likely not needed
   const onSubmitInvalid = (data: any) => {
-    console.log('on invalid');
     console.log(data);
+
+    const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
+    addAlert(invalidMessage, ChaiseAlertType.ERROR);
   }
 
   const addForm = (count: number) => {
+    const newFormIndexValues: number[] = [];
     // add 'count' number of forms
-    setForms((forms: any) => {
+    setForms((forms: number[]) => {
       for (let i = 0; i < count; i++) {
-        forms.push(forms[forms.length - 1] + 1)
+        forms.push(forms[forms.length - 1] + 1);
+        newFormIndexValues.push(forms.length - 1);
       }
 
       return [...forms]
@@ -332,6 +336,8 @@ export default function RecordeditProvider({
       }
       return formsHeightMapCpy;
     });
+
+    return newFormIndexValues;
   };
 
   // TODO: event type
@@ -456,7 +462,7 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     reference, page, columnModels, initialized,
-    forms, keysHeightMap, formsHeightMap,
+    forms, keysHeightMap, formsHeightMap
   ]);
 
   return (

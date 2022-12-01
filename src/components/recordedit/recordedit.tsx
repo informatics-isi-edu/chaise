@@ -25,6 +25,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 export type RecordeditProps = {
   parentContainer?: HTMLElement;
@@ -136,7 +137,28 @@ const RecordeditInner = ({
       return true;
     }
 
-    addForm(numberFormsToAdd);
+    // the indices used for tracking input values in react-hook-form
+    const newFormIndexValues: number[] = addForm(numberFormsToAdd);
+
+    // the index for the data from last form being cloned
+    const lastFormIdx = newFormIndexValues[0] - 1;
+
+    const tempFormValues: any = methods.getValues();
+    // add data to tempFormValues to initailize new forms
+    for (let i = 0; i < newFormIndexValues.length; i++) {
+      const formIndex = newFormIndexValues[i];
+      columnModels.forEach((cm: RecordeditColumnModel) => {
+        const colName = cm.column.name;
+        tempFormValues[`${formIndex}-${colName}`] = tempFormValues[`${lastFormIdx}-${colName}`] || '';
+
+        if (cm.column.type.name.indexOf('timestamp') !== -1) {
+          tempFormValues[`${formIndex}-${colName}-date`] = tempFormValues[`${lastFormIdx}-${colName}-date`] || '';
+          tempFormValues[`${formIndex}-${colName}-time`] = tempFormValues[`${lastFormIdx}-${colName}-time`] || '';
+        }
+      });
+    }
+
+    methods.reset(tempFormValues)
   }
 
   return (
