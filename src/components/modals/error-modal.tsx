@@ -29,10 +29,15 @@ function isErmrestErrorNeedReplace(error: any) {
 }
 
 const ErrorModal = (): JSX.Element | null => {
-  const { errors, hideError, logTerminalError } = useError();
+  const { errors, hideError, logTerminalError, loginModal } = useError();
   const { popupLogin, session } = useAuthn();
   const [showSubMessage, setShowSubMessage] = useState(false);
   const cc = ConfigService.chaiseConfig;
+
+  // don't show errors when the loginModal is displayed
+  if (loginModal) {
+    return null;
+  }
 
   // only show the first thrown error
   const errorWrapper = errors[0];
