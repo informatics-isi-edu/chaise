@@ -106,3 +106,13 @@ export function formatDatetime(value: string, options: TimestampOptions) {
 
   return null;
 }
+
+export function formatInt(value: string) {
+  const intVal = parseInt(value, 10);
+  return !isNaN(intVal) ? intVal : null;
+}
+
+export function formatFloat(value: string) {
+  const floatVal = parseFloat(value);
+  return !isNaN(floatVal) ? floatVal : null;
+}

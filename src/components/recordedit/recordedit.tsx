@@ -25,20 +25,33 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 export type RecordeditProps = {
+  appMode: string;
   parentContainer?: HTMLElement;
+  queryParams?: any;
   reference: any;
+  /* The log related APIs */
+  logInfo: {
+    logAppMode?: string;
+    /* the object that will be logged with the first request */
+    logObject?: any;
+    logStack: any;
+    logStackPath: string;
+  }
 }
 
 const Recordedit = ({
+  appMode,
   parentContainer = document.querySelector('#chaise-app-root') as HTMLElement,
-  reference
+  queryParams,
+  reference,
+  logInfo
 }: RecordeditProps): JSX.Element => {
   return (
     <AlertsProvider>
-      <RecordeditProvider reference={reference}>
+      <RecordeditProvider reference={reference} logInfo={logInfo} appMode={appMode} queryParams={queryParams}>
         <RecordeditInner parentContainer={parentContainer} />
       </RecordeditProvider>
     </AlertsProvider>
@@ -55,7 +68,7 @@ const RecordeditInner = ({
 
   const { addAlert } = useAlert();
   const {
-    reference, columnModels, initialized,
+    appMode, reference, page, columnModels, initialized,
     forms, addForm, getInitialFormValues, MAX_ROWS_TO_ADD
   } = useRecordedit()
 
@@ -190,14 +203,9 @@ const RecordeditInner = ({
                   </button>
                 </div>
                 <h1 id='page-title'>
-                  {/* TODO: edit mode
-                          <span>{{ form.editMode ? 'Edit ' : 'Create new ' }}</span> 
-                          */}
-                  <span>Create new </span>
-                  <Title addLink={true} reference={reference}></Title>
-                  {/* <span ng-if='displayname'>:
-                  <chaise-title displayname='displayname'></chaise-title>
-                </span> */}
+                  <span>{ appMode === appModes.EDIT ? 'Edit ' : 'Create new ' }</span> 
+                  <Title addLink={true} reference={reference}></Title>{page?.tuples.length === 1 ? ': ' : ''}
+                  {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname}></Title>}
                 </h1>
               </div>
               <div className='form-controls'>

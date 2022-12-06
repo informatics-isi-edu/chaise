@@ -13,10 +13,13 @@ import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
+import { LogAppModes, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
+import { appModes } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { AuthnStorageService } from '@isrd-isi-edu/chaise/src/services/authn-storage';
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -56,8 +59,22 @@ const RecordeditApp = (): JSX.Element => {
     if (res.isQueryParameter) logObject.cqp = 1;
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
-      // TODO should be changed, we're assuming create mode right now
-      const reference = response.contextualize.entryCreate;
+      let appMode = appModes.CREATE;
+      let reference = response;
+      const location = reference.location;
+
+      if (location.filter || location.facets) {
+        appMode = res.queryParams.prefill ? appModes.CREATE : (res.queryParams.copy ? appModes.COPY : appModes.EDIT);
+      } else if (res.queryParams.limit) {
+        appMode = appModes.EDIT;
+      }
+
+      if (appMode === appModes.EDIT) {
+        reference = response.contextualize.entryEdit;
+      } else if (appMode === appModes.CREATE || appMode === appModes.COPY) {
+        reference = response.contextualize.entryCreate;
+      }
+
 
       // TODO update head title
 
@@ -65,10 +82,35 @@ const RecordeditApp = (): JSX.Element => {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
       }
 
-      // TODO set log related properties
 
+      let logAppMode = LogAppModes.EDIT;
+      if (appMode === appModes.COPY) {
+        logAppMode = LogAppModes.CREATE_COPY;
+      } else if (appMode === appModes.CREATE) {
+        if (res.queryParams.invalidate && res.queryParams.prefill) {
+          logAppMode = LogAppModes.CREATE_PRESELECT;
+        } else {
+          logAppMode = LogAppModes.CREATE;
+        }
+      }
 
-      setRecordeditProps({ reference });
+      const logStack = [
+        LogService.getStackNode(
+          LogStackTypes.SET,
+          reference.table,
+          reference.filterLogInfo,
+        ),
+      ];
+      const logStackPath = LogStackTypes.SET;
+
+      // // set the global log stack and log stack path
+      LogService.config(logStack, logStackPath);
+
+      const queryParams = res.queryParams || {};
+      setRecordeditProps({ 
+        reference, appMode, queryParams, 
+        logInfo: { logAppMode, logObject, logStack, logStackPath } 
+      });
 
     }).catch((err: any) => {
       if (isObjectAndKeyDefined(err.errorData, 'redirectPath')) {
