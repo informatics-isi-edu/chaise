@@ -164,7 +164,7 @@ const TextField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'text' });
   }, [error?.message]);
 
   return (
@@ -326,7 +326,7 @@ const NumericField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'number' });  
   }, [error?.message])
 
   return (
@@ -440,7 +440,7 @@ const DateField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'date' });  
   }, [error?.message])
 
   return (
@@ -637,7 +637,7 @@ const TimestampField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'timestamp' });  
   }, [error?.message])
 
   const clearDate = () => {

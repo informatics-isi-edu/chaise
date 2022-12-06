@@ -7,8 +7,20 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // utils
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { getInputType, DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+
 
 const KeyColumn = (): JSX.Element => {
+  const getInputTypeOrDisabled = (column: any) => {
+    if (column.inputDisabled) {
+      // TODO: if showSelectAll, disable input
+      // TODO: create column models, no column model, enable!
+      // TODO: is editMode and user cannot update this row, disable
+      return 'timestamp';
+    }
+    return getInputType(column.type);
+  }
+
   const { columnModels, keysHeightMap } = useRecordedit();
 
   const renderColumnHeader = (column: any) => {
@@ -23,15 +35,19 @@ const KeyColumn = (): JSX.Element => {
 
   return (
     <div className='entity-key-column'>
-      <span className='form-header entity-key'>Record Number</span>
+      <div className='form-header entity-key'>Record Number</div>
       {columnModels.map((cm: any) => {
         const column = cm.column; 
         const colName = makeSafeIdAttr(column?.displayname?.value);
         const height = keysHeightMap[colName];
-        const heightparam = height == -1 ? 'auto' : `${height}px`;
+        const colType = getInputTypeOrDisabled(column);
+        const defaultHeight = DEFAULT_HEGHT_MAP[colType];
+        
+        const heightparam = height == -1 ? defaultHeight : `${height}px`;
+        console.log({ colType, defaultHeight, heightparam, height });
 
         return (
-          <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
+          <div key={colName} className='entity-key' style={{ 'height': heightparam }}>
             {!column.nullok && !column.inputDisabled && <span className='text-danger'><b>*</b> </span>}
             {column.comment ?
               <ChaiseTooltip
@@ -42,7 +58,7 @@ const KeyColumn = (): JSX.Element => {
               </ChaiseTooltip> :
               renderColumnHeader(column)
             }
-          </span>
+          </div>
         )
       })}
 

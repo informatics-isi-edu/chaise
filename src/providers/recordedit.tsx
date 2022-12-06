@@ -17,6 +17,7 @@ import { createImportSpecifier } from 'typescript';
 // utilities
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 // import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
@@ -209,11 +210,15 @@ export default function RecordeditProvider({
     });
   }
 
-  const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean) => {
+  const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean, fieldType: string) => {
+    
     const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
     const height = ele?.offsetHeight || 0;
     // how to handle this ? get default heights
-    const newHeight = height == 47 || msgCleared ? -1 : height;
+
+    const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
+    console.log({defaultHeight})
+    const newHeight = height == defaultHeight || msgCleared ? -1 : height;
 
     // execute the regexp to get individual values from the inputFieldName
     const r = /(\d*)-(.*)/;

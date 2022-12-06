@@ -16,7 +16,7 @@ const getInputTypeOrDisabled = (column: any) => {
     // TODO: if showSelectAll, disable input
     // TODO: create column models, no column model, enable!
     // TODO: is editMode and user cannot update this row, disable
-    return 'timestamp';
+    return 'number';
   }
   return getInputType(column.type);
 }
@@ -137,9 +137,10 @@ const ChaiseFormContainer = (): JSX.Element => {
   const handleHeightAdjustment = (event: any) => {
     const fieldName = event.detail.inputFieldName;
     const msgCleared = event.detail.msgCleared;
-
+    
+    const fieldType = event.detail.type;
     // call provider function
-    handleInputHeightAdjustment(fieldName, msgCleared);
+    handleInputHeightAdjustment(fieldName, msgCleared, fieldType);
   }
 
   const renderFormProvider = () => {

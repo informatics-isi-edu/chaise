@@ -375,3 +375,26 @@ export function getInputType(type: any): string {
 
   return inputType;
 }
+
+/**
+ * Map type to default heights for different inputs (currently for recordedit)
+ */
+export const DEFAULT_HEGHT_MAP = {
+  'number': 47,
+  'date': 47,
+  'timestamp': 66.68,
+  'text': 47 ,
+  'timestamptz': 82,
+  'float4': 47,
+  'float8': 47,
+  'numeric': 47,
+  'integer2': 47,
+  'integer4': 47,
+  'integer8': 47,
+  'boolean': 47,
+  'markdown': 47,
+  'longtext': 47,
+  'json': 47,
+  'color': 47, 
+  'shorttext': 47
+}
