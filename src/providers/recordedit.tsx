@@ -314,16 +314,15 @@ export default function RecordeditProvider({
       }
 
       if (appMode === appModes.EDIT) {
-        console.log(submissionRows);
-        console.log(tuples);
         const tempTuples = [...tuples];
 
+        // TODO submissionRowsCopy for upload
         /**
-         * After uploading files, the returned submissionRowsCopy contains
+         * After uploading files, the returned submissionRows contains
          * new file data. This includes filename, filebyte, and md5.
          * The following makes sure that all the data are updated.
          * That's why this for loop must be after uploading files and not before.
-         * And we cannot just pass submissionRowsCopy to update function, because
+         * And we cannot just pass submissionRows to update function, because
          * update function only accepts array of tuples (and not just key-value pair).
          */
         for (let i = 0; i < submissionRows.length; i++) {
@@ -446,7 +445,6 @@ export default function RecordeditProvider({
 
       initialModel = populateEditInitialValues(columnModels, reference.columns, page.tuples, appMode === appModes.COPY);
 
-      console.log(tempTuples);
       setTuples([...tempTuples]);
     }
 
