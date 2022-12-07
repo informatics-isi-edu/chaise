@@ -34,10 +34,9 @@ const DeleteConfirmationModal = ({ show, onConfirm, onCancel, message, buttonLab
   const renderedMessage = message ? message : <>Are you sure you want to delete this record?</>;
 
   return (
-    <Modal 
-      className='confirm-delete-modal' 
-      size='sm' 
-      show={show} 
+    <Modal
+      className='confirm-delete-modal'
+      show={show}
       onHide={onCancel}
     >
       <Modal.Header>

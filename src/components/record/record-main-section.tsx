@@ -73,33 +73,35 @@ const RecordMainSection = (): JSX.Element => {
         rowClassName.push('hidden-header');
       }
 
-      const entityKeyClassName = ['entity-key col-xs-4 col-sm-4 col-md-3 col-lg-2'];
+      const entityKeyClassName = ['entity-key col-4 col-sm-4 col-md-3 col-lg-3 col-xl-2'];
       if (hideHeader) {
         entityKeyClassName.push(CLASS_NAMES.HIDDEN);
       }
 
       const entityValueClassName = ['entity-value'];
       if (hideHeader) {
-        entityValueClassName.push('col-xs-12 col-sm-12 col-md-12 col-lg-12');
+        entityValueClassName.push('col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12');
       } else {
-        entityValueClassName.push('col-xs-8 col-sm-8 col-md-9 col-lg-10');
+        entityValueClassName.push('col-8 col-sm-8 col-md-9 col-lg-9 col-xl-10');
       }
 
-      const columnDisplayname = <DisplayValue value={cm.column.displayname}></DisplayValue>;
+      const columnDisplayname = (
+        <span className={`column-displayname ${hasTooltip ? 'chaise-icon-for-tooltip' : ''}`}>
+          <DisplayValue value={cm.column.displayname}></DisplayValue>
+          {/* NOTE the extra space is needed for proper spacing between icon and text */}
+          {hasTooltip ? ' ' : ''}
+        </span>
+      );
 
       return (
         <tr key={`col-${index}`} id={`row-${cm.column.name}`} className={rowClassName.join(' ')}>
           {/* --------- entity key ---------- */}
           <td className={entityKeyClassName.join(' ')}>
-            <span className={`column-displayname ${hasTooltip ? 'chaise-icon-for-tooltip' : ''}`}>
-              {hasTooltip ?
-                <ChaiseTooltip placement='right' tooltip={cm.column.comment}>
-                  {/* NOTE the extra space is needed for proper spacing between icon and */}
-                  <span>{columnDisplayname}{' '}</span>
-                </ChaiseTooltip> :
-                <span>{columnDisplayname}</span>
-              }
-            </span>
+            {hasTooltip ?
+              <ChaiseTooltip placement='right' tooltip={cm.column.comment}>
+                {columnDisplayname}
+              </ChaiseTooltip> : columnDisplayname
+            }
             <div className='entity-key-icons'>
               {showLoader(cm) && <Spinner animation='border' size='sm' className='table-column-spinner' />}
             </div>

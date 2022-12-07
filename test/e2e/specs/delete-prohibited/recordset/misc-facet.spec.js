@@ -1238,7 +1238,6 @@ describe("Other facet features, ", function() {
 
             beforeAll(function (done) {
                 chaisePage.navigate(uri);
-                browser.switchTo().alert().accept();
                 chaisePage.waitForUrl('facets', browser.params.defaultTimeout);
 
                 browser.getCurrentUrl().then(function (url) {

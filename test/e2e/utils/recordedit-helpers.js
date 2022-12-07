@@ -40,7 +40,7 @@ var EC = protractor.ExpectedConditions;
  */
 exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
     beforeAll(function () {
-        chaisePage.recordeditPageReady();   
+        chaisePage.recordeditPageReady();
     });
 
     var visibleFields = [];
@@ -152,25 +152,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
     });
-
-    if (tableParams.table_name === "accommodation") {
-        it("should give a warning when leaving the edit page with unsaved changes", function (done) {
-            var EC = protractor.ExpectedConditions;
-            var ratingInput = element(by.name("rating"));
-            browser.wait(EC.visibilityOf(ratingInput, browser.params.defaultTimeout));
-            ratingInput.sendKeys("5");
-            browser.refresh();
-            browser.switchTo().alert().then(function (alert) {
-                alert.accept();
-            }).then(function () {
-                browser.wait(EC.visibilityOf(ratingInput, browser.params.defaultTimeout));
-                done();
-            }).catch(function (error) {
-                console.log(error);
-                done.fail();
-            });
-        });
-    }
 
     var testMultipleRecords = function(recordIndex) {
 

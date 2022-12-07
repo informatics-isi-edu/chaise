@@ -765,7 +765,7 @@ const RecordsetInner = ({
                   <SelectedRows rows={selectedRows} removeCallback={clearSelectedRow} />
                 }
                 <div className='row'>
-                  <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-xs-6'>
+                  <div className='recordset-main-search col-lg-4 col-md-5 col-sm-6 col-6'>
                     <SearchInput
                       initialSearchTerm={initialReference.location.searchTerm}
                       searchCallback={changeSearch}
@@ -793,6 +793,8 @@ const RecordsetInner = ({
         right={renderMainContainer}
         minWidth={200}
         maxWidth={40}
+        // NOTE the following must have the same value as the one in css.
+        // which is $left-panel-width-lg variable in _variables.scss
         initialWidth={21}
         className='bottom-panel-container'
         convertMaxWidth

@@ -244,16 +244,16 @@ describe ("Viewing exisiting record with related entities, ", function () {
             relatedDisplayname: "association_table",
             modalTitle: "Unlink association_table from Accommodations: Super 8 North Hollywood Motel",
             totalCount: 5,
-            postDeleteMessage: "2 records successfully unlinked.",
+            postDeleteMessage: "All of the 2 chosen records successfully unlinked.",
             countAfterUnlink: 3,
             rowValuesAfter: [
                 ["Television"],
                 ["Coffee Maker"],
                 ["Space Heater"]
             ],
-            failedPostDeleteMessage: "2 records could not be unlinked. Check the error details below to see more information.\n\nShow Error Details",
+            failedPostDeleteMessage: "None of the 2 chosen records could be unlinked. Check the error details below to see more information.\n\nShow Error Details",
             // we unlink row 5 ("Space Heater")
-            aclPostDeleteMessage: "1 record successfully unlinked.",
+            aclPostDeleteMessage: "The chosen record successfully unlinked.",
             countAfterAclUnlink: 2,
             rowValuesAfterAclRemove: [
                 ["Television"],

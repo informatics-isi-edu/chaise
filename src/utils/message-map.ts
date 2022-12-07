@@ -34,7 +34,7 @@ export const MESSAGE_MAP = {
     messageWReplace: 'Click <b>OK</b> to reload this page without @errorStatus.',
     multipleRecords: 'Click <b>OK</b> to show all the matched records.',
     noRecordsFound: 'Click <b>OK</b> to show the list of all records.',
-    okBtnMessage: 'Click <b>OK</b> to go to the Recordset.',
+    okGoToRecordset: 'Click <b>OK</b> to go to the Recordset.',
     pageRedirect: 'Click <b>OK</b> to go to the ',
     reloadMessage: 'Click <b>Reload</b> to start over.',
     unsupportedFilters: 'Click <b>OK</b> to continue with the subset of filter criteria which are supported at this time.',

@@ -358,6 +358,20 @@ export default function RecordsetProvider({
 
   const flowControl = useRef(new RecordsetFlowControl(initialReference, logInfo));
 
+  /**
+   * in some cases we don't want the following useEffect to automatically fetch the
+   * secondary requests.
+   * For example, in case of record page, we want record provider to
+   * trigger the update of secondary requests when we're updating the whole page.
+   * So when we call updateMainEntity, we also set this flag to true to make sure
+   * this useEffect doesn't trigger the update of aggregates. And then record provider
+   * itself will manually call fetchSecondaryRequests which will set this flag to false
+   * again.
+   * This way, when users change the sort, recordset provider can handle the aggregates
+   * as the record provider is not aware of this user action.
+   */
+  const dontAutomaticallyFetchSecondary = useRef(false);
+
   // call the flow-control after each reference object
   useEffect(() => {
     processRequests();
@@ -365,9 +379,8 @@ export default function RecordsetProvider({
 
   // after the main data has loaded, we can get the secondary data
   useEffect(() => {
-    // TODO does this make sense?
-    // in case of related entities, record page will take care of this
-    if (config.displayMode.indexOf(RecordsetDisplayMode.RELATED) === 0) {
+    // if the updatePage said that we shouldn't then don't
+    if (dontAutomaticallyFetchSecondary.current) {
       return;
     }
 
@@ -591,11 +604,12 @@ export default function RecordsetProvider({
  * @param  {object} notTerminal  Indicates whether we should show a terminal error or not for 400 QueryTimeoutError
  * @param {object} cb a callback that will be called after the read is done and is successful.
  */
-  const updateMainEntity = (processRequestsCB: Function, notTerminal = false, cb?: Function) => {
+  const updateMainEntity = (processRequestsCB: Function, notTerminal = false, dontFetchSecondary = false, cb?: Function) => {
     if (!flowControl.current.dirtyResult || !flowControl.current.haveFreeSlot()) {
       return;
     }
 
+    dontAutomaticallyFetchSecondary.current = (dontFetchSecondary === true);
     flowControl.current.queue.occupiedSlots++;
     flowControl.current.dirtyResult = false;
 
@@ -870,6 +884,8 @@ export default function RecordsetProvider({
    * @param  {boolean} hideSpinner?  Indicates whether we should show spinner for columns or not
    */
   const fetchSecondaryRequests = (processRequestsCB: Function, hideSpinner?: boolean) => {
+    dontAutomaticallyFetchSecondary.current = false;
+
     // if the data is still loading, don't fetch the secondary requests
     if (isLoadingRef.current) return;
 

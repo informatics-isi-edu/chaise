@@ -170,7 +170,7 @@ const ColorField = ({
         </ChaiseTooltip>
       </div>
       <Overlay placement='bottom-start' target={colorMainInput.current} show={showColorPopup} ref={colorPopup}>
-        {({ ...props }) => (
+        {({ placement, arrowProps, show: _show, popper, ...props }) => (
           // `props` are passed from Overlay to its child. it will attach the css rules for positioning and etc.
           <div {...props} className='popover chaise-color-picker-popup'>
             <HexColorPicker color={fieldValue} onChange={handleChange} />

@@ -515,6 +515,10 @@ html {
           flex-basis: $left-panel-width-lg;
           min-width: 170px;
 
+          &.small-panel {
+            flex-basis: $left-panel-width-sm;
+          }
+
           & + .top-right-panel {
             padding-left: $main-alley;
           }
@@ -580,6 +584,10 @@ html {
         flex: 0;
         flex-basis: $left-panel-width-lg;
         min-width: 170px;
+
+        &.small-panel {
+          flex-basis: $left-panel-width-sm;
+        }
 
         & ~ .main-container {
           padding-left: $main-alley;

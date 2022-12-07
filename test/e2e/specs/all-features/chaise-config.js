@@ -20,6 +20,7 @@ var chaiseConfig = {
         open: ["compact/select/association"]
     },
     logClientActions: false,
+    hideRecordeditLeaveAlert: true,
     navbarMenu: {
         children: [
             {

@@ -19,6 +19,9 @@ var EC = protractor.ExpectedConditions;
  *  4: editable, non-delete
  *  5: all visible columns are non-editable
  *  6: name cannot be editted
+ *  7: editable, non-delete
+ *  8: editable, deletable
+ *  9: editable, non-delete
  *
  * dynamic_acl_related_table:
  *  1: editable, deletable
@@ -59,7 +62,7 @@ var aclConfig = {
                 "tables": {
                     "dynamic_acl_main_table": {
                         "acl_bindings": {
-                            // row 1, 3, 5, 6 can be deleted
+                            // row 1, 3, 5, 6, 8 can be deleted
                             "deletable_rows": {
                                 "types": ["delete"],
                                 "projection": [
@@ -68,14 +71,15 @@ var aclConfig = {
                                             {"filter": "id", "operand": 1},
                                             {"filter": "id", "operand": 3},
                                             {"filter": "id", "operand": 5},
-                                            {"filter": "id", "operand": 6}
+                                            {"filter": "id", "operand": 6},
+                                            {"filter": "id", "operand": 8}
                                         ]
                                     },
                                     "id"
                                 ],
                                 "projection_type": "nonnull"
                             },
-                            // row 1, 4, 5, 6 can be updated
+                            // row 1, 4, 5, 6, 7, 8, 9 can be updated
                             "updatable_rows": {
                                 "types": ["update"],
                                 "projection": [
@@ -85,6 +89,9 @@ var aclConfig = {
                                             {"filter": "id", "operand": 4},
                                             {"filter": "id", "operand": 5},
                                             {"filter": "id", "operand": 6},
+                                            {"filter": "id", "operand": 7},
+                                            {"filter": "id", "operand": 8},
+                                            {"filter": "id", "operand": 9}
                                         ]
                                     },
                                     "id"
@@ -507,14 +514,7 @@ describe("regarding dynamic ACL support, ", function () {
 
         describe("when some of the columns in the row cannot be edited", function () {
             beforeAll(function (done) {
-                chaisePage.navigate(getRecordEditURL("id=1;id=6")).then(function () {
-                    // just in case the other test failed and didn't submit
-                    return browser.switchTo().alert()
-                }).then(function (alert) {
-                    return alert.accept();
-                }).catch(function () {
-                    // do nothing
-                }).finally(function () {
+                chaisePage.navigate(getRecordEditURL("id=1;id=6")).then(() => {
                     return chaisePage.recordeditPageReady();
                 }).then(function () {
                     return browser.wait(function() {
@@ -576,18 +576,76 @@ describe("regarding dynamic ACL support, ", function () {
                     done.fail(err);
                 });
             });
-        })
+        });
 
-        // navigate away from the recordedit page so it doesn't interfere with other tests
-        afterAll(function (done) {
-            chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/multi-permissions:dynamic_acl_main_table").then(function () {
-                return browser.switchTo().alert();
-            }).then(function (alert) {
-                return alert.accept();
-            }).catch(function () {
-                // do nothing
-            }).finally(function () {
-                done();
+        describe('when some rows cannot be deleted', function () {
+            beforeAll((done) => {
+              chaisePage.navigate(getRecordEditURL("id=7;id=8;id=9")).then(() => {
+                  return chaisePage.recordeditPageReady();
+              }).then(function () {
+                  return browser.wait(function() {
+                      return recordEditPage.getAllColumnNames().count().then(function(ct) {
+                          return (ct == 3);
+                      });
+                  }, browser.params.defaultTimeout);
+              }).then(function () {
+                  done();
+              }).catch(function (err) {
+                  done.fail(err);
+              });
+            });
+
+            it ('Bulk delete button should be present and user should be able to click it', function (done) {
+                const bulkDeleteBtn = chaisePage.recordEditPage.getBulkDeleteButton();
+                const confirmModalTitle = chaisePage.recordPage.getConfirmDeleteTitle();
+                expect(bulkDeleteBtn.isDisplayed()).toBeTruthy();
+                bulkDeleteBtn.click().then(() => {
+
+                  browser.wait(EC.visibilityOf(confirmModalTitle), browser.params.defaultTimeout);
+
+                  const confirmButton = chaisePage.recordPage.getConfirmDeleteButton();
+                  browser.wait(EC.visibilityOf(confirmButton), browser.params.defaultTimeout);
+
+                  expect(chaisePage.recordPage.getConfirmDeleteModalText().getText()).toBe('Are you sure you want to delete all 3 of the displayed records?');
+
+                  return chaisePage.clickButton(confirmButton);
+                }).then(() => {
+                  done();
+                }).catch(chaisePage.catchTestError(done));
+
+            });
+
+            it ('After the delete is done, user should see the proper message', (done) => {
+                const batchDeleteSummary = chaisePage.errorModal.getElement();
+                const summaryTitle = chaisePage.errorModal.getTitle();
+
+                chaisePage.waitForElement(batchDeleteSummary).then(() => {
+                    return chaisePage.waitForElement(summaryTitle);
+                }).then(() => {
+                    expect(summaryTitle.getText()).toEqual('Batch Delete Summary', 'title missmatch');
+                    const expectedBody = [
+                      '1 record successfully deleted. 2 records could not be deleted. Check the error details below to see more information.',
+                      '\nClick OK to dismiss this dialog.',
+                      'Show Error Details'
+                    ].join('\n');
+                    expect(chaisePage.errorModal.getBody().getText()).toBe(expectedBody, 'body missmatch');
+                    done();
+                  }).catch(chaisePage.catchTestError(done));
+            });
+
+            it ('clicking on "ok" button should remove the deleted rows', (done) => {
+                const summaryCloseBtn = chaisePage.errorModal.getOKButton();
+                browser.wait(EC.elementToBeClickable(summaryCloseBtn), browser.params.defaultTimeout).then(() => {
+                    return chaisePage.clickButton(summaryCloseBtn);
+                }).then(() => {
+                    browser.wait(function() {
+                      return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                          // only one row was deletable
+                          return (ct == 2);
+                      });
+                  }, browser.params.defaultTimeout);
+                  done();
+                }).catch(chaisePage.catchTestError(done));
             });
         });
     });
@@ -596,7 +654,7 @@ describe("regarding dynamic ACL support, ", function () {
     describe('When viewing Recordset app for a table with dynamic acls, ', function() {
         describe("when some of the displayed rows are not editable/deletable, ", function () {
             // NOTE recordset doesn't ask for tcrs and therefore cannot accurately guess the acl for id=5
-            testRecordSetEditDelete("", 6, true, [true, false, false, true, true, true], [true, false, true, false, true, true]);
+            testRecordSetEditDelete("id=1;id=2;id=3;id=4;id=5;id=6", 6, true, [true, false, false, true, true, true], [true, false, true, false, true, true]);
         });
 
         describe("when none of the displayed rows are editable, ", function () {

@@ -101,7 +101,10 @@ var chaiseConfig = {
                 navbarBrand: "/"
             }
         }
-    ]
+    ],
+    templating: {
+        engine: 'handlebars'
+    }
 };
 
 if (typeof module === 'object' && module.exports && typeof require === 'function') {

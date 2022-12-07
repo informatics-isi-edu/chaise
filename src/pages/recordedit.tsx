@@ -25,7 +25,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const recordeditSettings = {
@@ -107,9 +107,9 @@ const RecordeditApp = (): JSX.Element => {
       LogService.config(logStack, logStackPath);
 
       const queryParams = res.queryParams || {};
-      setRecordeditProps({ 
-        reference, appMode, queryParams, 
-        logInfo: { logAppMode, logObject, logStack, logStackPath } 
+      setRecordeditProps({
+        reference, appMode, queryParams,
+        logInfo: { logAppMode, logObject, logStack, logStackPath }
       });
 
     }).catch((err: any) => {
@@ -134,7 +134,7 @@ const RecordeditApp = (): JSX.Element => {
 };
 
 // TODO: make sure this is what we want
-const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
 root.render(
   <AppWrapper
     appSettings={recordeditSettings}

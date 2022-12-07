@@ -20,7 +20,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 import { queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 const loginSettings = {
@@ -169,7 +169,7 @@ const LoginPopupApp = (): JSX.Element => {
   );
 };
 
-const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
 root.render(
   <AppWrapper appSettings={loginSettings} displaySpinner>
     <LoginPopupApp />
