@@ -28,14 +28,14 @@ const useClickOutside = <T extends HTMLElement = HTMLElement>(
       startedInside = !!ref.current && ref.current.contains(event.target);
     };
 
-    document.addEventListener("mousedown", validateEventStart);
-    document.addEventListener("touchstart", validateEventStart);
-    document.addEventListener("click", listener);
+    document.addEventListener('mousedown', validateEventStart);
+    document.addEventListener('touchstart', validateEventStart);
+    document.addEventListener('click', listener);
 
     return () => {
-      document.removeEventListener("mousedown", validateEventStart);
-      document.removeEventListener("touchstart", validateEventStart);
-      document.removeEventListener("click", listener);
+      document.removeEventListener('mousedown', validateEventStart);
+      document.removeEventListener('touchstart', validateEventStart);
+      document.removeEventListener('click', listener);
     };
   }, [ref, handler]);
 };

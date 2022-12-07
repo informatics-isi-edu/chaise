@@ -2,7 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import ColorField from '@isrd-isi-edu/chaise/src/components/inputs/color-field';
+import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';

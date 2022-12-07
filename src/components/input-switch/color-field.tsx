@@ -130,7 +130,7 @@ const ColorField = ({
    * function for it.
    */
   const renderPreview = (cls?: string) => {
-    let className = `chaise-color-picker-preview`;
+    let className = 'chaise-color-picker-preview';
     if (!isStringAndNotEmpty(fieldValue)) className += ' no-color';
     if (cls) className += ` ${cls}`;
     return (
