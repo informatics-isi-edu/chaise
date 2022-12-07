@@ -310,7 +310,7 @@ export default function RecordeditProvider({
 
       const submitErrorCB = (err: any) => {
         console.log(err);
-        dispatchError({ error: err });
+        addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR) );
       }
 
       if (appMode === appModes.EDIT) {
