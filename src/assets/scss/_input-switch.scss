@@ -69,42 +69,43 @@
       cursor: pointer;
     }
   }
+}
 
-  .popover {
-    padding: 10px;
-    top: 40px;
-    left: 10px;
+.chaise-color-picker-popup {
+  background-color: white;
+  padding: 10px;
+  top: 40px;
+  left: 10px;
 
-    // change the default spacing of color picker
-    .react-colorful {
-      height: 184px;
-      width: 184px;
+  // change the default spacing of color picker
+  .react-colorful {
+    height: 184px;
+    width: 184px;
 
-      .react-colorful__pointer {
-        height: 16px;
-        width: 16px;
-      }
-      .react-colorful__hue {
-        height: 14px;
-      }
+    .react-colorful__pointer {
+      height: 16px;
+      width: 16px;
     }
+    .react-colorful__hue {
+      height: 14px;
+    }
+  }
 
-    .popover-controls {
-      input {
-        width: 100%;
-        margin-top: 5px;
-      }
-      .popover-buttons {
-        margin-top: 5px;
-        margin-left: 10px;
-        display: flex;
-        justify-content: space-between;
+  .popover-controls {
+    input {
+      width: 100%;
+      margin-top: 5px;
+    }
+    .popover-buttons {
+      margin-top: 5px;
+      margin-left: 10px;
+      display: flex;
+      justify-content: space-between;
 
-        .chaise-btn {
-          height: 25px !important;
-          padding: 2px 10px;
-          width: 55px !important;
-        }
+      .chaise-btn {
+        height: 25px !important;
+        padding: 2px 10px;
+        width: 55px !important;
       }
     }
   }

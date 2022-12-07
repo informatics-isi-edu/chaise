@@ -2,6 +2,7 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import { HexColorPicker, HexColorInput } from 'react-colorful';
+import Overlay from 'react-bootstrap/Overlay';
 
 // hooks
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -11,7 +12,6 @@ import useClickOutside from '@isrd-isi-edu/chaise/src/hooks/click-outside';
 // utils
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-
 
 type ColorFieldProps = {
   /**
@@ -84,7 +84,6 @@ const ColorField = ({
 
   const { error, isTouched } = fieldState;
 
-  const [showHexSign, setShowHexSign] = useState(false);
   const [showColorPopup, setShowColorPopup] = useState(false);
   const toggleColorPopup = (e: any) => {
     e.preventDefault();
@@ -93,7 +92,13 @@ const ColorField = ({
   };
   const close = useCallback(() => setShowColorPopup(false), []);
 
+  // used by Overlay to position the popup
+  const colorMainInput = useRef<any>();
+
+  // used for the outside click
   const colorPopup = useRef<any>();
+
+  // close the popup when clicked outside
   useClickOutside(colorPopup, close);
 
   const clearInput = () => {
@@ -126,21 +131,26 @@ const ColorField = ({
   }, [error?.message]);
 
   /**
-   * since we have the preview button in both places, I decided to create a
-   * function for it.
+   * The color preview rectangle. used in two places
+   * @param cls the class that we should add to the element
+   * @param isMain if true, this is the main input and we will attach the `ref` (used for positioning the popup).
    */
-  const renderPreview = (cls?: string) => {
+  const renderPreview = (cls?: string, isMain?: boolean) => {
     let className = 'chaise-color-picker-preview';
+    // if value is empty, show special background image instead of the color
     if (!isStringAndNotEmpty(fieldValue)) className += ' no-color';
     if (cls) className += ` ${cls}`;
     return (
-      <div className={className} style={{ backgroundColor: `${fieldValue}` }} />
-    )
+      <div className={className} style={{ backgroundColor: `${fieldValue}` }} {...(isMain && { ref: colorMainInput })} />
+    );
   };
 
+  /**
+   * the text input for writing the color hex value. used in two places
+   */
   const renderInput = () => {
-    return <HexColorInput color={fieldValue} onChange={handleChange} prefixed />;
-  }
+    return <HexColorInput className={inputClasses} placeholder={placeholder} color={fieldValue} onChange={handleChange} prefixed />;
+  };
 
   return (
     <div className={`${containerClasses} chaise-input-group input-switch-color input-switch-container-${name}`} style={styles}>
@@ -148,14 +158,9 @@ const ColorField = ({
         className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}
         onClick={toggleColorPopup}
       >
-        {renderPreview()}
-        {/* <span className='hex-sign'>#</span> */}
+        {renderPreview('', true)}
         {renderInput()}
-        <ClearInputBtn
-          btnClassName={`${clearClasses} input-switch-clear`}
-          clickCallback={(e: any) => { e.stopPropagation(); clearInput(); }}
-          show={showClear}
-        />
+        <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
       </div>
       <div className='chaise-input-group-append' onClick={toggleColorPopup}>
         <ChaiseTooltip placement='bottom' tooltip='Select a color.'>
@@ -164,30 +169,26 @@ const ColorField = ({
           </button>
         </ChaiseTooltip>
       </div>
-      {showColorPopup &&
-        <div className='popover' ref={colorPopup}>
-          <HexColorPicker color={fieldValue} onChange={handleChange} />
-          {/* <span>color is {fieldValue}</span> */}
-          <div className='popover-controls'>
-            {renderInput()}
-            <div className='popover-buttons'>
-              {renderPreview('chaise-btn')}
-              <ChaiseTooltip
-                placement='bottom'
-                tooltip='Clear the value.'
-              >
-                <button className='chaise-btn chaise-btn-secondary' type='button' onClick={clearInput}>Clear</button>
-              </ChaiseTooltip>
-              <ChaiseTooltip
-                placement='bottom'
-                tooltip='Close the color picker.'
-              >
-                <button className='chaise-btn chaise-btn-secondary' type='button' onClick={toggleColorPopup}>Close</button>
-              </ChaiseTooltip>
+      <Overlay placement='bottom-start' target={colorMainInput.current} show={showColorPopup} ref={colorPopup}>
+        {({ ...props }) => (
+          // `props` are passed from Overlay to its child. it will attach the css rules for positioning and etc.
+          <div {...props} className='popover chaise-color-picker-popup'>
+            <HexColorPicker color={fieldValue} onChange={handleChange} />
+            <div className='popover-controls'>
+              {renderInput()}
+              <div className='popover-buttons'>
+                {renderPreview('chaise-btn')}
+                <ChaiseTooltip placement='bottom' tooltip='Clear the value.'>
+                  <button className='chaise-btn chaise-btn-secondary' type='button' onClick={clearInput}>Clear</button>
+                </ChaiseTooltip>
+                <ChaiseTooltip placement='bottom' tooltip='Close the color picker.'>
+                  <button className='chaise-btn chaise-btn-secondary' type='button' onClick={toggleColorPopup}>Close</button>
+                </ChaiseTooltip>
+              </div>
             </div>
           </div>
-        </div>
-      }
+        )}
+      </Overlay>
       {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div >
   );

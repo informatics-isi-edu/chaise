@@ -186,11 +186,11 @@ const RecordeditInner = ({
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
                 <div className='recordedit-title-buttons title-buttons'>
-                  {/* TODO: proper submission workflow, submission disabled, tooltip, 
-                          ng-disabled='form.submissionButtonDisabled || !displayReady' 
-                          ng-click='::form.submit()' 
-                          ng-attr-tooltip-placement='bottom-right' 
-                          ng-attr-uib-tooltip='Save this data on the server'> 
+                  {/* TODO: proper submission workflow, submission disabled, tooltip,
+                          ng-disabled='form.submissionButtonDisabled || !displayReady'
+                          ng-click='::form.submit()'
+                          ng-attr-tooltip-placement='bottom-right'
+                          ng-attr-uib-tooltip='Save this data on the server'>
                           */}
                   <button
                     id='submit-record-button'
@@ -203,15 +203,14 @@ const RecordeditInner = ({
                   </button>
                 </div>
                 <h1 id='page-title'>
-                  <span>{ appMode === appModes.EDIT ? 'Edit ' : 'Create new ' }</span> 
+                  <span>{appMode === appModes.EDIT ? 'Edit ' : 'Create new '}</span>
                   <Title addLink={true} reference={reference}></Title>{page?.tuples.length === 1 ? ': ' : ''}
                   {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname}></Title>}
                 </h1>
               </div>
               <div className='form-controls'>
                 <span><span className='text-danger'><b>*</b></span> indicates required field</span>
-                {/* if not edit mode */}
-                <div className='add-forms chaise-input-group'>
+                {appMode !== appModes.EDIT && <div className='add-forms chaise-input-group'>
                   <span className='chaise-input-group-prepend'>
                     <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
                   </span>
@@ -226,7 +225,7 @@ const RecordeditInner = ({
                   <span className='chaise-input-group-append'>
                     {/* TODO: if any of the columns is showing spinner, that means it's waiting for some
                             data and therefore we should just disable the addMore button.
-                            ng-disabled='!form.canAddMore'  
+                            ng-disabled='!form.canAddMore'
                             */}
                     <ChaiseTooltip tooltip='Duplicate rightmost form the specified number of times.' placement='bottom-end'>
                       <button
@@ -239,7 +238,7 @@ const RecordeditInner = ({
                       </button>
                     </ChaiseTooltip>
                   </span>
-                </div>
+                </div>}
               </div>
             </div>
           </div>
