@@ -3,27 +3,36 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 type ClearInputBtnProps = {
   btnClassName?: string,
   clickCallback: Function,
-  show: boolean
+  /**
+   * the boolean condition to show it or not
+   */
+  show: boolean,
+  /**
+   * the customized tooltip for the button
+   */
+  tooltip?: string,
 }
 
 const ClearInputBtn = ({
   btnClassName,
   clickCallback,
-  show
+  show,
+  tooltip
 }: ClearInputBtnProps) => {
   if (!show) {
     return <></>
   }
 
+  tooltip = tooltip ? tooltip : 'Clear the input.';
   return (
     <div className='chaise-input-control-feedback'>
       <ChaiseTooltip
         placement='bottom'
-        tooltip='Clear input'
+        tooltip={tooltip}
       >
         <span
           className={'remove-input-btn fa-solid fa-xmark ' + btnClassName}
-          {... (clickCallback && { onClick: () => clickCallback() })}
+          {... (clickCallback && { onClick: (e: any) => clickCallback(e) })}
         ></span>
       </ChaiseTooltip>
     </div>
