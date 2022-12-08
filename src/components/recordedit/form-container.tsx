@@ -11,7 +11,7 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { getDisabledInputValue, getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
@@ -24,16 +24,6 @@ type ChaiseFormProps = {
 const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
   const { columnModels, formsHeightMap, removeForm } = useRecordedit();
-
-  const getInputTypeOrDisabled = (columnModel: RecordeditColumnModel) => {
-    if (columnModel.isDisabled) {
-      // TODO: if columnModel.showSelectAll, disable input
-      // TODO: create column models, no column model, enable!
-      // TODO: is editMode and user cannot update this row, disable
-      return 'disabled';
-    }
-    return columnModel.inputType;
-  }
 
   const renderFormHeader = () => {
     return (
@@ -57,10 +47,10 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
     return columnModels.map((cm: RecordeditColumnModel) => {
       const colName = makeSafeIdAttr(cm.column.displayname.value);
       const height = Math.max(...formsHeightMap[colName]);
-      const heightparam = height == -1 ? 'auto' : `${height}px`;
+      const heightparam = height === -1 ? 'auto' : `${height}px`;
 
       const inputType = getInputTypeOrDisabled(cm);
-      console.log({ inputType, colName })
+
       let placeholder;
       if (inputType == 'disabled') {
         placeholder = getDisabledInputValue(cm.column);

@@ -47,7 +47,7 @@ export const RecordeditContext = createContext<{
   /* Object to keep track of height changes for each input cell */
   formsHeightMap: any,
   /* callback to manipulate the forms height map */
-  handleInputHeightAdjustment: (fieldName: string, msgCleared: boolean) => void,
+  handleInputHeightAdjustment: (fieldName: string, msgCleared: boolean, fieldType: string) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   /* callback for react-hook-form to call when forms are valid */
@@ -386,7 +386,6 @@ export default function RecordeditProvider({
     // how to handle this ? get default heights
 
     const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
-    console.log({defaultHeight})
     const newHeight = height == defaultHeight || msgCleared ? -1 : height;
 
     // execute the regexp to get individual values from the inputFieldName

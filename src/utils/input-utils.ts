@@ -6,7 +6,7 @@
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
-import { TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -76,6 +76,16 @@ export function isDisabled(column: any): boolean {
   return column.inputDisabled ? true : false;
 }
 
+export function getInputTypeOrDisabled(columnModel: RecordeditColumnModel): string {
+  if (columnModel.isDisabled) {
+    // TODO: if columnModel.showSelectAll, disable input
+    // TODO: create column models, no column model, enable!
+    // TODO: is editMode and user cannot update this row, disable
+    return 'disabled';
+  }
+  return columnModel.inputType;
+}
+
 /**
  * return the disabled input value based on input type
  * @param column the column object from ermrestJS
@@ -110,7 +120,7 @@ export function formatDatetime(value: string, options: TimestampOptions) {
 /**
  * Map type to default heights for different inputs (currently for recordedit)
  */
-export const DEFAULT_HEGHT_MAP = {
+export const DEFAULT_HEGHT_MAP: any = {
   'number': 47,
   'date': 47,
   'timestamp': 82,
