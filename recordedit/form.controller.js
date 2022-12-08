@@ -889,6 +889,7 @@
                             var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
                             model.submissionRows[rowIndex][referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
+                            if (!value) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
                         }
 
                         row[column.name] = value ? value.displayname.value : null;
