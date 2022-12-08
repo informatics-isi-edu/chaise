@@ -21,7 +21,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { columnToColumnModel, populateCreateInitialValues } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
