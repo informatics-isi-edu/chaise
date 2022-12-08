@@ -41,7 +41,7 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getNotNullFacetCheckBoxRow } from '@isrd-isi-edu/chaise/src/utils/faceting-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { ResizeSensor } from 'css-element-queries';
-import { getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 const FacetRangePicker = ({
   dispatchFacetUpdate,

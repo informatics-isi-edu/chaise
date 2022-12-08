@@ -7,7 +7,9 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // utils
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { getInputType, DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+
+import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 
 const KeyColumn = (): JSX.Element => {
@@ -44,11 +46,12 @@ const KeyColumn = (): JSX.Element => {
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];
         
         const heightparam = height == -1 ? defaultHeight : `${height}px`;
-        console.log({ colType, defaultHeight, heightparam, height });
+        
 
+        // try changing to div if height adjustment does not work
         return (
-          <div key={colName} className='entity-key' style={{ 'height': heightparam }}>
-            {!column.nullok && !column.inputDisabled && <span className='text-danger'><b>*</b> </span>}
+          <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
+            {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
             {column.comment ?
               <ChaiseTooltip
                 placement='right'
@@ -58,7 +61,7 @@ const KeyColumn = (): JSX.Element => {
               </ChaiseTooltip> :
               renderColumnHeader(column)
             }
-          </div>
+          </span>
         )
       })}
 

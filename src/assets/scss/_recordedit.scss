@@ -6,8 +6,8 @@
     width: 100%;
 
     .form-container {
-        overflow-x: auto;
         width: 100%;
+        overflow-x: auto;
 
         .recordedit-form {
             display: flex;
@@ -63,7 +63,6 @@
                 .chaise-input-control.column-cell-input {
                     border: 1px solid #ccc;
                     border-radius: 4px;
-                    height: auto;
                     padding: 0 10px;
                     display: flex;
                     align-items: center;
@@ -89,13 +88,6 @@
 #recordedit .app-container {
     .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
         padding: 5px 3px;
-    }
-
-    .main-container {
-        overflow-y: auto;
-        overflow-x: hidden;
-        // changes a style from app.scss
-        flex-direction: row;
     }
 
     .form-controls {
@@ -143,6 +135,13 @@
     //     }
     // }
 
+    .main-container {
+        overflow-y: auto;
+        overflow-x: hidden;
+        // changes a style from app.scss
+        flex-direction: row;
+    }
+
     #form-section {
         width: 100%;
         position: relative;
@@ -167,6 +166,8 @@
 
                 min-height: 47px;
                 height: 47px;
+
+                flex: none;
             }
 
             .match-entity-key.select-all-opened {

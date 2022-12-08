@@ -1,25 +1,19 @@
 // components
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
+import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
+
+// models
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { getInputType } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
-const getInputTypeOrDisabled = (column: any) => {
-  if (column.inputDisabled) {
-    // TODO: if showSelectAll, disable input
-    // TODO: create column models, no column model, enable!
-    // TODO: is editMode and user cannot update this row, disable
-    return 'number';
-  }
-  return getInputType(column.type);
-}
 
 type ChaiseFormProps = {
   classes?: string,
@@ -29,7 +23,17 @@ type ChaiseFormProps = {
 
 const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
-  const { columnModels, formsHeightMap, removeForm } = useRecordedit()
+  const { columnModels, formsHeightMap, removeForm } = useRecordedit();
+
+  const getInputTypeOrDisabled = (columnModel: RecordeditColumnModel) => {
+    if (columnModel.isDisabled) {
+      // TODO: if columnModel.showSelectAll, disable input
+      // TODO: create column models, no column model, enable!
+      // TODO: is editMode and user cannot update this row, disable
+      return 'disabled';
+    }
+    return columnModel.inputType;
+  }
 
   const renderFormHeader = () => {
     return (
@@ -50,22 +54,36 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
   }
 
   const renderInputs = () => {
-    return columnModels.map((cm: any) => {
+    return columnModels.map((cm: RecordeditColumnModel) => {
       const colName = makeSafeIdAttr(cm.column.displayname.value);
       const height = Math.max(...formsHeightMap[colName]);
       const heightparam = height == -1 ? 'auto' : `${height}px`;
+
+      const inputType = getInputTypeOrDisabled(cm);
+      console.log({ inputType, colName })
+      let placeholder;
+      if (inputType == 'disabled') {
+        placeholder = getDisabledInputValue(cm.column);
+
+        // TODO: extend this for edit mode
+        // if value is empty string and we are in edit mode, use the previous value
+        // if (placeholder == '' && context.mode == context.modes.EDIT) {
+        //   placeholder = value;
+        // }
+      }
+
 
       return (
         <InputSwitch
           key={colName}
           displayErrors={true}
           name={`${idx}-${colName}`}
-          type={getInputTypeOrDisabled(cm.column)}
+          type={inputType}
           // type='numeric'
           containerClasses={'column-cell entity-value'}
           // value={0}
           classes='column-cell-input'
-          placeholder={0}
+          placeholder={placeholder}
           styles={{ 'height': heightparam }}
         />
       );
@@ -82,47 +100,14 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
 };
 
-const getFormDefaultValues = (forms: number[], columnModels: any[]) => {
-  // TODO: initialize inputs
-  const formValues: any = {};
-  forms.forEach((form: number, idx: number) => {
-    columnModels.forEach((cm: any) => {
-      const colname = makeSafeIdAttr(cm.column.displayname.value)
-      // TODO: initialize inputs based on different types
-      formValues[`${idx}-${colname}`] = '';
-    });
-  })
-  return formValues;
-};
-
 const ChaiseFormContainer = (): JSX.Element => {
 
   const {
-    columnModels, forms,
-    handleInputHeightAdjustment,
-    onSubmit, onInvalid
+    forms, handleInputHeightAdjustment,
+    onSubmitValid, onSubmitInvalid
   } = useRecordedit();
 
-  // type FormDefaultValues = {
-  //   [`${name}-min`]: RangeOptions['absMin'];
-  //   [`${name}-max`]: RangeOptions['absMax'];
-  // };
-
-  /**
-   * TODO
-   * Need to find a way to dynamically generate the type for FormDefaultValue based on the types of the columns
-   */
-  const methods = useForm<any>({
-    mode: 'all',
-    reValidateMode: 'onChange',
-    defaultValues: getFormDefaultValues(forms, columnModels),
-    resolver: undefined,
-    context: undefined,
-    criteriaMode: 'firstError',
-    shouldUnregister: false,
-    shouldUseNativeValidation: false,
-    delayError: undefined
-  });
+  const { handleSubmit } = useFormContext()
 
   // TODO: how to refactor this when the event being fired in input switch might be in the case of apps that are not recordedit
   useEffect(() => {
@@ -143,21 +128,13 @@ const ChaiseFormContainer = (): JSX.Element => {
     handleInputHeightAdjustment(fieldName, msgCleared, fieldType);
   }
 
-  const renderFormProvider = () => {
-    return (
-      <FormProvider {...methods} >
-        <form id='recordedit-form' className='recordedit-form' onSubmit={methods.handleSubmit(onSubmit, onInvalid)}>
-          {forms.map((f: number, idx: number) =>
-            <ChaiseForm key={f} idx={idx} allowRemove={forms.length>1} />
-          )}
-        </form>
-      </FormProvider>
-    )
-  }
-
   return (
     <div className='form-container'>
-      {renderFormProvider()}
+      <form id='recordedit-form' className='recordedit-form' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}>
+        {forms.map((f: number, idx: number) =>
+          <ChaiseForm key={f} idx={idx} allowRemove={forms.length > 1} />
+        )}
+      </form>
     </div>
   );
 }
