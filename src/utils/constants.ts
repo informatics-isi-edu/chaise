@@ -129,8 +129,6 @@ export const BODY_CLASS_NAMES = {
   iframe: 'chaise-iframe',
 };
 
-export const APP_ROOT_ID_NAME = 'chaise-app-root';
-
 export const QUERY_PARAMS = {
   PROMPT_LOGIN: 'promptlogin',
   SCROLL_TO: 'scrollTo'
@@ -138,7 +136,11 @@ export const QUERY_PARAMS = {
 
 export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden'
-}
+};
+
+export const ID_NAMES = {
+  APP_ROOT: 'chaise-app-root'
+};
 
 export const DEFAULT_DISPLAYNAME = {
   null: '<i>No value </i>',

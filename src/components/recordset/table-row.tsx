@@ -174,13 +174,17 @@ const TableRow = ({
 
   /**
    * The JS.Elements that are used for displaying messages
-   * these are only currently used for unlink that's why we're checking parentPageReference for all
-   * NOTE if we want to use for other cases we should be mindful that AttributeGroupReference doesn't have displayname API
-   * if we want it to have one, we should add it in ermrestjs first.
+   * NOTE facet popup is sometimes using AttributeGroupReference API which doesn't have displayname.
+   * That's why this try-catch is added to guard against it.
    */
-  const parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
-  const currentTable =  parentPageReference ? <code><DisplayValue value={reference.displayname}></DisplayValue></code> : <></>;
-  const currentTuple =  parentPageReference ? <code><DisplayValue value={tuple.displayname}></DisplayValue></code> : <></>;
+  let parentTable: JSX.Element, currentTable: JSX.Element, currentTuple: JSX.Element;
+  try {
+    parentTable = parentPageReference ? <code><DisplayValue value={parentPageReference.displayname}></DisplayValue></code> : <></>;
+    currentTable = <code><DisplayValue value={reference.displayname}></DisplayValue></code>;
+    currentTuple = <code><DisplayValue value={tuple.displayname}></DisplayValue></code>;
+  } catch (exp) {
+    parentTable = currentTable = currentTuple = <></>;
+  }
 
   let logStack: any;
   if (tupleReference) {
@@ -324,14 +328,14 @@ const TableRow = ({
       action: getRowLogAction(actionVerb),
       stack: logStack
     };
-    reference.delete(logObj).then(function deleteSuccess() {
+    reference.delete(null, logObj).then(() => {
       if (!isRelated) {
         // ask flow-control to update the page
         // this will also make sure to remove the "disabled" row
         update({ updateResult: true, updateCount: true, updateFacets: true }, null, { cause: LogReloadCauses.ENTITY_DELETE });
       }
       fireCustomEvent(CUSTOM_EVENTS.ROW_DELETE_SUCCESS, rowContainer.current, eventDetails);
-    }).catch(function (error: any) {
+    }).catch((error: any) => {
       setWaitingForDelete(false);
       dispatchError({ error: error, isDismissible: true });
     }).finally(() => {

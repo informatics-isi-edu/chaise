@@ -1,7 +1,7 @@
 <div class="modal-header">
     <h2 class="modal-title">{{ctrl.title}}</h2>
 </div>
-<div class="modal-body">{{ctrl.message}}</div>
+<div class="modal-body"><span compile="ctrl.message"></span></div>
 <div class="modal-footer">
     <button id="delete-confirmation" class="chaise-btn chaise-btn-danger" type="button" ng-click="ctrl.ok()">{{ctrl.deleteBtn}}</button>
     <button class="chaise-btn chaise-btn-secondary" type="button" ng-click="ctrl.cancel()">Cancel</button>

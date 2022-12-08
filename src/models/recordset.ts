@@ -150,5 +150,5 @@ export type SelectedRow = {
 }
 
 export type RecordsetProviderAddUpdateCauses = (causes: any[], setDirtyResult?: boolean, queue?: FlowControlQueueInfo) => void;
-export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, cb?: Function) => void;
+export type RecordsetProviderUpdateMainEntity = (updatePageCB: Function, notTerminal?: boolean, dontFetchSecondary?: boolean, cb?: Function) => void;
 export type RecordsetProviderFetchSecondaryRequests = (updatePageCB: Function, hideSpinner?: boolean) => void;

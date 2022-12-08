@@ -296,36 +296,6 @@
   }
 }
 
-.chaise-input-control.chaise-color-picker {
-    padding-left: 0;
-    padding-top: 0;
-
-    .sp-original-input-container {
-        cursor: pointer;
-        width: 100%;
-        .sp-colorize-container {
-            width: 40px !important;
-            height: 28px !important;
-            border-radius: 3px 0 0 3px !important;
-            border: 0 !important;
-        }
-
-        input {
-            padding-top: 5px;
-            padding-left: 5px;
-        }
-    }
-}
-
-.chaise-color-picker-popup {
-    button.sp-cancel, button.sp-choose {
-        font-weight: normal;
-        @include chaise-btn();
-        @include chaise-btn-sm();
-        @include chaise-btn-secondary();
-    }
-}
-
 
 // Readonly controls as plain text
 //

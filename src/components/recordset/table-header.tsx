@@ -212,7 +212,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
     <div className='chaise-table-header row' ref={container}>
       <div
         className={
-          'chaise-table-header-total-count col-xs-12 col-sm-6' +
+          'chaise-table-header-total-count col-12 col-sm-6' +
           (page && page.tuples.length > 0 ? ' with-page-size-dropdown' : '')
         }
       >
@@ -230,7 +230,7 @@ const TableHeader = ({ config }: TableHeaderProps): JSX.Element => {
           }
         </span>
       </div>
-      <div className='col-xs-12 col-sm-6'>
+      <div className='col-12 col-sm-6'>
         <div
           className='chaise-table-header-buttons'
         >

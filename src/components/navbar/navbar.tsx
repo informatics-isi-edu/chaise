@@ -365,8 +365,8 @@ const ChaiseNavbar = (): JSX.Element => {
             {' '}
             {renderBrandingHTML()}
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls='navbar-dark-example'>Menu</Navbar.Toggle>
-          <Navbar.Collapse id='navbar-dark-example'>
+          <Navbar.Toggle aria-controls='chaise-navbar-collapse-btn'>Menu</Navbar.Toggle>
+          <Navbar.Collapse id='chaise-navbar-collapse-btn'>
             <Nav className='navbar-menu-options nav' id='menubarHeader'>
               {renderNavbarMenuDropdowns()}
             </Nav>

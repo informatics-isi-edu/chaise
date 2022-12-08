@@ -118,6 +118,7 @@ const RecordsetTable = ({
 
     setSelectedRows((currRows: SelectedRow[]) => {
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      if (!page) return res;
       page.tuples.forEach((tuple: any, index: number) => {
         if (isRowDisabled[index]) return;
         if (!isRowSelected[index]) {
@@ -141,6 +142,7 @@ const RecordsetTable = ({
 
     setSelectedRows((currRows: SelectedRow[]) => {
       const res: SelectedRow[] = Array.isArray(currRows) ? [...currRows] : [];
+      if (!page) return res;
       page.tuples.forEach((tuple: any) => {
         const rowIndex = res.findIndex((obj: SelectedRow) => obj.uniqueId === tuple.uniqueId);
         if (rowIndex !== -1) res.splice(rowIndex, 1);

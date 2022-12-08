@@ -515,6 +515,10 @@ html {
           flex-basis: $left-panel-width-lg;
           min-width: 170px;
 
+          &.small-panel {
+            flex-basis: $left-panel-width-sm;
+          }
+
           & + .top-right-panel {
             padding-left: $main-alley;
           }
@@ -580,6 +584,10 @@ html {
         flex: 0;
         flex-basis: $left-panel-width-lg;
         min-width: 170px;
+
+        &.small-panel {
+          flex-basis: $left-panel-width-sm;
+        }
 
         & ~ .main-container {
           padding-left: $main-alley;
@@ -900,6 +908,26 @@ html {
     cursor: pointer;
     overflow: hidden;
     z-index: 100;
+  }
+
+  // an spinner with backdrop blocking the whole app content
+  // used in record and recordedit apps
+  .app-blocking-spinner-container {
+    $delete-spinner-backdrop-z-index: 5;
+    .app-blocking-spinner-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      z-index: $delete-spinner-backdrop-z-index;
+      background: black;
+      opacity: 0.5;
+    }
+    .spinner-container {
+      top: 50%;
+      z-index: calc($delete-spinner-backdrop-z-index + 1);
+    }
   }
 
   /****** help pages *****/

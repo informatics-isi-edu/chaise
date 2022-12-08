@@ -183,7 +183,7 @@ exports.testPresentation = function (tableParams) {
             if (!col.markdown_title) return;
             const colEl = chaisePage.recordPage.getColumnNameElement(col.markdown_title);
             // NOTE the actual displayname is inside two spans
-            expect(colEl.element(by.css('span span span')).getAttribute('innerHTML')).toEqual(col.markdown_title, `missmatch for title=${col.title}`);
+            expect(colEl.element(by.css('span span')).getAttribute('innerHTML')).toEqual(col.markdown_title, `missmatch for title=${col.title}`);
         });
     });
 
@@ -748,7 +748,7 @@ exports.testRelatedTable = function (params, pageReadyCondition) {
                     it ("`Edit mode` button should have the proper tooltip", function (done) {
                         chaisePage.testTooltipWithDone(
                             markdownToggleLink,
-                            `Display edit controls for ${params.displayname} related to this ${params.baseTable}.`,
+                            `Display edit controls for ${params.displayname} records related to this ${params.baseTable}.`,
                             done,
                             'record'
                         );

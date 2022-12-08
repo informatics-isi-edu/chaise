@@ -17,11 +17,6 @@
     padding-bottom: 10px;
 
     .top-flex-panel {
-      .top-left-panel.open-panel {
-        flex: 0 0 $left-panel-width-sm;
-        position: relative;
-      } // end .top-left-panel
-
       .top-right-panel {
         .page-action-btns {
           height: $btn-height;
@@ -78,9 +73,6 @@
 
     /** bottom left panel **/
     > .side-panel-resizable {
-      &.open-panel {
-        flex-basis: $left-panel-width-sm;
-      }
 
       .side-panel-container {
         height: 100%;
@@ -273,24 +265,6 @@
       margin: 5px;
       padding: 5px 20px;
       border: solid #446c73 1.5px;
-    }
-  }
-
-  .delete-spinner-container {
-    $delete-spinner-backdrop-z-index: 5;
-    .delete-spinner-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      z-index: $delete-spinner-backdrop-z-index;
-      background: black;
-      opacity: 0.5;
-    }
-    .delete-spinner.spinner-container {
-      top: 50%;
-      z-index: calc($delete-spinner-backdrop-z-index + 1);
     }
   }
 

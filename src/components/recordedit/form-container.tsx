@@ -34,7 +34,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
             placement='bottom'
             tooltip='Click to remove this record from the form.'
           >
-            <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm(idx)}>
+            <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm([idx])}>
               <i className='fa-solid fa-xmark' />
             </button>
           </ChaiseTooltip>

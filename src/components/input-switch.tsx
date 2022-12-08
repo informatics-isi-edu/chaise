@@ -2,6 +2,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -22,7 +23,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
  * 2. how to handle validate on change for each field
  * 3. how to handle merging validation logic for date n time inputs for type timestamp
  * 4. handle integrating these fields into a formik component
- * 5. how to create a HOC that handles/manages multiple forms  
+ * 5. how to create a HOC that handles/manages multiple forms
  */
 
 const INTEGER_REGEXP = /^\-?\d+$/;
@@ -57,7 +58,7 @@ const timestampFieldValidation = (value: string) => {
   return timestamp.isValid() || 'Please enter a valid date and time value';
 };
 
-const validationFunctionMap : { 
+const validationFunctionMap : {
   [key: string]: any;
 } = {
   'int': integerFieldValidation,
@@ -75,7 +76,7 @@ type TextFieldProps = {
    *  the name of the field
    */
   name: string,
-  /** 
+  /**
   * placeholder text
   */
   placeholder?: string,
@@ -105,9 +106,9 @@ type TextFieldProps = {
   onFieldChange?: ((value: string) => void)
 };
 
-const TextField = ({ 
-  name, 
-  placeholder, 
+const TextField = ({
+  name,
+  placeholder,
   classes,
   inputClasses,
   clearClasses,
@@ -132,15 +133,15 @@ const TextField = ({
   });
 
   const field = formInput?.field;
-  
+
   const fieldValue = field?.value;
 
   const fieldState = formInput?.fieldState;
 
   const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
-  
+
   const { error, isTouched } = fieldState;
-  
+
   const clearInput = () => {
     setValue(name, '');
     clearErrors(name);
@@ -197,7 +198,7 @@ const DisabledField = ({
   classes,
   containerClasses,
   inputClasses,
-  name, 
+  name,
   placeholder
 }: DisabledFieldProps): JSX.Element => {
 
@@ -212,11 +213,11 @@ const DisabledField = ({
     control,
     rules: registerOptions,
   });
-  
+
   return (
     <div className={`${containerClasses} input-switch-container-${name}`}>
       <div className={`chaise-input-control input-disabled ${classes}`}>
-        <input 
+        <input
           className={`${inputClasses} input-switch`}
           disabled={true}
           placeholder={placeholder}
@@ -235,8 +236,8 @@ type NumericFieldProps = {
   /**
    * the type of numeric field - int | float/numeric
    */
-  type: string, 
-  /** 
+  type: string,
+  /**
    * placeholder text for int and float input types
    */
   placeholder?: string,
@@ -266,10 +267,10 @@ type NumericFieldProps = {
   onFieldChange?: ((value: string) => void)
 };
 
-const NumericField = ({ 
-  name, 
-  type, 
-  placeholder, 
+const NumericField = ({
+  name,
+  type,
+  placeholder,
   classes,
   inputClasses,
   clearClasses,
@@ -282,7 +283,7 @@ const NumericField = ({
 }: NumericFieldProps): JSX.Element => {
 
   const { setValue, control, clearErrors } = useFormContext();
-  
+
   const registerOptions = {
     required: false,
     pattern: validationFunctionMap[type],
@@ -301,7 +302,7 @@ const NumericField = ({
   const fieldState = formInput?.fieldState;
 
   const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
-  
+
   const { error, isTouched } = fieldState;
 
   const clearInput = () => {
@@ -382,9 +383,9 @@ type DateFieldProps = {
   onFieldChange?: ((value: string) => void)
 };
 
-const DateField = ({ 
+const DateField = ({
   name,
-  classes, 
+  classes,
   inputClasses,
   containerClasses,
   clearClasses,
@@ -410,13 +411,13 @@ const DateField = ({
   });
 
   const field = formInput?.field;
-  
+
   const fieldValue = field?.value;
 
   const fieldState = formInput?.fieldState;
 
   const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
-  
+
   const { error, isTouched } = fieldState;
 
   const clearInput = () => {
@@ -469,7 +470,7 @@ type TimestampFieldProps = {
    *  the name of the field
    */
   name: string,
-  /** 
+  /**
    * placeholder text for numeric and date fields
    */
   placeholder?: string,
@@ -510,25 +511,25 @@ type TimestampFieldProps = {
   onFieldChange?: ((value: string) => void)
 };
 
-const TimestampField = ({ 
-  name, 
-  value, 
-  classes, 
+const TimestampField = ({
+  name,
+  value,
+  classes,
   inputClasses,
   containerClasses,
-  timeClasses, 
+  timeClasses,
   clearClasses,
   clearTimeClasses,
   disableInput,
   displayErrors,
   styles,
-  onFieldChange 
+  onFieldChange
 }: TimestampFieldProps): JSX.Element => {
 
   const { setValue, control, clearErrors, watch } = useFormContext();
 
   useEffect(() => {
-    
+
     const sub = watch((data, options) => {
       // not sure what this is doing??
       if (options.name && (options.name == `${name}-date` || options.name == `${name}-time`)) {
@@ -536,7 +537,7 @@ const TimestampField = ({
         if (!dateVal) return;
         let timeVal = data[`${name}-time`];
         if (dateVal && !timeVal) timeVal = '00:00';
-        setValue(name, `${dateVal}T${timeVal}`); 
+        setValue(name, `${dateVal}T${timeVal}`);
       }
     });
 
@@ -637,7 +638,7 @@ const TimestampField = ({
     setValue(`${name}-date`, '');
     clearErrors(`${name}-date`);
   }
-  
+
   const clearTime = () => {
     setValue(`${name}-time`, '');
     clearErrors(`${name}-time`);
@@ -647,7 +648,7 @@ const TimestampField = ({
     <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
       <div className='input-switch-datetime'>
         <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-          <input className={`${inputClasses} input-switch ${showClear.date ? 'date-input-show-clear' : ''}`} type='date' min='1970-01-01' max='2999-12-31' step='1' 
+          <input className={`${inputClasses} input-switch ${showClear.date ? 'date-input-show-clear' : ''}`} type='date' min='1970-01-01' max='2999-12-31' step='1'
           {...dateField} onChange={handleDateChange}/>
           <ClearInputBtn
             btnClassName={`${clearClasses} input-switch-clear`}
@@ -687,7 +688,7 @@ type InputSwitchProps = {
    *  the name of the field
    */
   name: string,
-  /** 
+  /**
    * placeholder text for numeric and date fields
    */
   placeholder?: RangeOption | string,
@@ -709,7 +710,7 @@ type InputSwitchProps = {
    * classes for styling the clear button for time field
    */
   clearTimeClasses?: string
-  /** 
+  /**
    * the default date value being used in case of date and timestamp types
    */
   value?: RangeOption | string,
@@ -731,9 +732,9 @@ type InputSwitchProps = {
   styles?: object,
 };
 
-const InputSwitch = ({ 
+const InputSwitch = ({
   type,
-  name, 
+  name,
   placeholder,
   classes = '',
   inputClasses='',
@@ -751,40 +752,40 @@ const InputSwitch = ({
   return (() => {
     switch (type) {
       case 'timestamp':
-        return <TimestampField 
-          name={name} 
-          classes={classes} 
+        return <TimestampField
+          name={name}
+          classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
-          timeClasses={timeClasses} 
+          timeClasses={timeClasses}
           clearClasses={clearClasses}
           clearTimeClasses={clearTimeClasses}
           value={value as TimeStamp}
           disableInput={disableInput}
           styles={styles}
-          onFieldChange={onFieldChange} 
+          onFieldChange={onFieldChange}
         />
       case 'integer2':
       case 'integer4':
       case 'integer8':
       case 'number':
-        return <NumericField 
+        return <NumericField
           type={type}
-          name={name}   
-          displayErrors={displayErrors} 
-          classes={classes} 
+          name={name}
+          displayErrors={displayErrors}
+          classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           value={value as string}
-          placeholder={placeholder as string} 
+          placeholder={placeholder as string}
           clearClasses={clearClasses}
           disableInput={disableInput}
           styles={styles}
-          onFieldChange={onFieldChange} 
+          onFieldChange={onFieldChange}
         />
       case 'date':
-        return <DateField 
-          name={name} 
+        return <DateField
+          name={name}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
@@ -793,27 +794,38 @@ const InputSwitch = ({
           disableInput={disableInput}
           displayErrors={displayErrors}
           styles={styles}
-          onFieldChange={onFieldChange} 
+          onFieldChange={onFieldChange}
         />
       case 'disabled':
-          return <DisabledField 
+          return <DisabledField
             name={name}
             classes={classes}
             inputClasses={inputClasses}
             containerClasses={containerClasses}
             placeholder={placeholder as string}
           />
-      case 'text':
-      default:
-        return <TextField
-          name={name} 
+      case 'color':
+        return <ColorField
+          name={name}
           classes={classes}
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
           value={value as string}
           disableInput={disableInput}
-          onFieldChange={onFieldChange} 
+          onFieldChange={onFieldChange}
+        />
+      case 'text':
+      default:
+        return <TextField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          value={value as string}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange}
         />
     }
   })();

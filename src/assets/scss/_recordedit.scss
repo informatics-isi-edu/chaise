@@ -8,6 +8,7 @@
     .form-container {
         width: 100%;
         overflow-x: auto;
+        height: fit-content;
 
         .recordedit-form {
             display: flex;
@@ -147,7 +148,9 @@
         position: relative;
         padding-right: 15px; // so table is padded properly on load
         padding-top: 15px;
-        margin-bottom: 40px; // margin at bottom of page so edit form isn't touching the bottom of viewport
+        // padding at bottom of page so edit form isn't touching the bottom of viewport
+        // padding instead of margin so it doesn't mess with scrollable area
+        padding-bottom: 40px;
 
         .entity-key-column {
             display: flex;
@@ -262,7 +265,7 @@
 
         //         > tr {
         //             > td {
-        //                
+        //
 
 
 

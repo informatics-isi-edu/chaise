@@ -5,7 +5,7 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 /**
  * @param   {Node=} parentContainer - the parent container. if undefined `body` will be used.
@@ -21,7 +21,7 @@ import { APP_ROOT_ID_NAME } from '@isrd-isi-edu/chaise/src/utils/constants';
  */
 export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
   try {
-    const appRootId = `#${APP_ROOT_ID_NAME}`;
+    const appRootId = `#${ID_NAMES.APP_ROOT}`;
 
     // get the parentContainer and its usable height
     if (!parentContainer || parentContainer === document.querySelector(appRootId)) {
@@ -145,7 +145,7 @@ export function attachContainerHeightSensors(parentContainer?: any, parentContai
  * They can be missaligned if the scrollbar is visible and takes space.
  */
 export function attachMainContainerPaddingSensor(parentContainer?: HTMLElement) {
-  const container = parentContainer ? parentContainer : document.querySelector(`#${APP_ROOT_ID_NAME}`) as HTMLElement;
+  const container = parentContainer ? parentContainer : document.querySelector(`#${ID_NAMES.APP_ROOT}`) as HTMLElement;
   const mainContainer = container.querySelector('.main-container') as HTMLElement;
   const topRightPanel = container.querySelector('.top-right-panel') as HTMLElement;
   let mainContainerPaddingTimeout: any;

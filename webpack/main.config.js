@@ -41,6 +41,18 @@ module.exports = (env) => {
       {
         appName: 'help',
         appTitle: 'Wiki Pages',
+      },
+      {
+        appName: 'navbar',
+        bundleName: 'navbar-lib',
+        appTitle: 'Navbar standalone library',
+        isLib: true
+      },
+      {
+        appName: 'login',
+        bundleName: 'login-lib',
+        appTitle: 'Login standalone library',
+        isLib: true
       }
     ],
     mode,

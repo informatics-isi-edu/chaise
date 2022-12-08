@@ -140,3 +140,13 @@ export const DEFAULT_HEGHT_MAP: any = {
   'shorttext': 47, 
   'disabled': 47
 }
+
+export function formatInt(value: string) {
+  const intVal = parseInt(value, 10);
+  return !isNaN(intVal) ? intVal : null;
+}
+
+export function formatFloat(value: string) {
+  const floatVal = parseFloat(value);
+  return !isNaN(floatVal) ? floatVal : null;
+}
