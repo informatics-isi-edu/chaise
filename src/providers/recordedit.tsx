@@ -36,16 +36,18 @@ export const RecordeditContext = createContext<{
   reference: any,
   /* the main page from reading the reference */
   page: any,
+  /* the tuples correspondeing to the displayed form */
+  tuples: any,
   /* the created column models from reference.columns */
   columnModels: RecordeditColumnModel[],
   /* Whether the data for the main entity is fetched and the model is initialized  */
   initialized: boolean,
   /* Array of numbers for initalizing form data */
   forms: number[],
-  /* callback to add a form to the forms array */
+  /* callback to add form(s) to the forms array */
   addForm: (count: number) => number[],
-  /* callback to remove a form from the forms array */
-  removeForm: (index: number) => void,
+  /* callback to remove from(s) from the forms array */
+  removeForm: (indexes: number[]) => void,
   /* Object to keep track of height changes for each column name display cell */
   keysHeightMap: any,
   /* callback to manipulate the keys height map */
@@ -101,13 +103,13 @@ export default function RecordeditProvider({
   const [forms, setForms] = useState<number[]>([1]);
   /*
    * Object to keep track of height changes for each column name display cell
-   *  - each key is the column name 
+   *  - each key is the column name
    *  - each value is -1 if not changed or the corresponding height value to apply
    */
   const [keysHeightMap, setKeysHeightMap] = useState<any>({})
   /*
    * Object to keep track of height changes for each input cell
-   *  - each key is the column name 
+   *  - each key is the column name
    *  - each value is an array
    *    - the length of the arrays is equal to the total number of forms
    *    - each value in the  array is 1 if not changed or the corresponding height value to apply
@@ -310,7 +312,7 @@ export default function RecordeditProvider({
 
       const submitErrorCB = (err: any) => {
         console.log(err);
-        addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR) );
+        addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
       }
 
       if (appMode === appModes.EDIT) {
@@ -376,19 +378,15 @@ export default function RecordeditProvider({
   };
 
   // TODO: event type
-  const removeForm = (idx: number) => {
-    // remove the form at 'idx'
-    setForms((forms: any) => {
-      forms.splice(idx, 1);
-
-      return [...forms];
-    });
+  const removeForm = (indexes: number[]) => {
+    // remove the forms based on the given indexes
+    setForms(forms => forms.filter(({ }, i: number) => !indexes.includes(i)));
 
     // remove the entry at 'idx' in the array for each column
     setFormsHeightMap((formsHeightMap: any) => {
       const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
       Object.keys(formsHeightMapCpy).forEach(k => {
-        formsHeightMapCpy[k].splice(idx, 1);
+        formsHeightMapCpy[k] = formsHeightMapCpy[k].filter(({ }, i: number) => !indexes.includes(i));
       });
       return formsHeightMapCpy;
     });
@@ -480,7 +478,7 @@ export default function RecordeditProvider({
       columnModels,
       initialized,
 
-      // form 
+      // form
       forms,
       addForm,
       removeForm,

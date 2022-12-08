@@ -701,8 +701,8 @@ const RecordInner = ({
   return (
     <div className='record-container app-content-container'>
       {errors.length === 0 && showDeleteSpinner &&
-        <div className='delete-spinner-container'>
-          <div className='delete-spinner-backdrop'></div>
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
           <ChaiseSpinner className='delete-spinner' message='Deleting...' />
         </div>
       }
