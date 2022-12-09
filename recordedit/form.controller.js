@@ -889,7 +889,12 @@
                             var foreignTableCol = column.foreignKey.mapping.get(referenceCol);
 
                             model.submissionRows[rowIndex][referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
-                            if (!value) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
+                            // Similar to above in `clearForeignKey()`
+                            // Comment from above: 
+                            //     // this conditional is for clearing `tuple.data` for update
+                            //     // we rely on the data property to compare against the old data to verify what has changed
+                            // NOTE: when migrating this functionality, write one function that handles clearing the data and call it in both places
+                            if (!value && $rootScope.tuples && $rootScope.tuples[rowIndex]) $rootScope.tuples[rowIndex].data[referenceCol.name] = null;
                         }
 
                         row[column.name] = value ? value.displayname.value : null;
