@@ -147,6 +147,11 @@ var recordEditPage = function() {
         return element(by.id("select-all-apply-"+columnDisplayName));
     }
 
+    this.getSelectAllClear = function (name) {
+        var columnDisplayName = makeSafeIdAttr(name);
+        return element(by.id("select-all-clear-"+columnDisplayName));
+    }
+
     this.getSelectAllCancel = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
         return element(by.id("select-all-cancel-"+columnDisplayName));
