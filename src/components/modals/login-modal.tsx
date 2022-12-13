@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -26,9 +25,7 @@ const LoginModal = (): JSX.Element => {
     }
   }
 
-  if (!loginModal) {
-    return <></>;
-  }
+  if (!loginModal) return <></>
 
   return (
     <Modal

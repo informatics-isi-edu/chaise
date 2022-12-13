@@ -162,7 +162,8 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         getSession('').then((response: any) => {
           if (!shouldReloadPageAfterLogin(session)) {
             // NOTE: this blindly closes the login modal (assuming it's open)
-            //   - `modalInstance` might be null for some reason
+            //   - TODO: we want to check `loginModal` before closing so we aren't assuming it's there
+            //     - `loginModal` is null when this function is defined and that variable state is being captured
             //   - this should be extended to check if errors are present and close errors if no login modal
             //     - maybe it should do both?
             hideLoginModal();
