@@ -33,6 +33,7 @@ import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '
 import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 export type RecordeditProps = {
   appMode: string;
@@ -288,7 +289,8 @@ const RecordeditInner = ({
       const formIndex = newFormIndexValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
         const colName = cm.column.name;
-        tempFormValues[`${formIndex}-${colName}`] = tempFormValues[`${lastFormIdx}-${colName}`] || '';
+        // should be able to handle falsy values
+        tempFormValues[`${formIndex}-${colName}`] =  replaceNullOrUndefined(tempFormValues[`${lastFormIdx}-${colName}`], '');
 
         if (cm.column.type.name.indexOf('timestamp') !== -1) {
           tempFormValues[`${formIndex}-${colName}-date`] = tempFormValues[`${lastFormIdx}-${colName}-date`] || '';

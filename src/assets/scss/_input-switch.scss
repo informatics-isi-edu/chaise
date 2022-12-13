@@ -108,3 +108,15 @@
     }
   }
 }
+
+.input-switch-boolean {
+  // remove the default bootstrap caret
+  .dropdown-toggle::after {
+    content: none !important;
+  }
+
+  // make sure the menu expands the whole row
+  .dropdown-menu {
+    width: 100%;
+  }
+}

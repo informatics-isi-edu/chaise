@@ -13,7 +13,7 @@ import { RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/sr
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
-import { formatDatetime, formatFloat, formatInt, getInputType, isDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { formatBoolean, formatDatetime, formatFloat, formatInt, getInputType, replaceNullOrUndefined, isDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
@@ -39,21 +39,9 @@ export function columnToColumnModel(column: any): RecordeditColumnModel {
     type = getInputType(column.type);
   }
 
-  // if (type == 'boolean') {
-  //   var trueVal = InputUtils.formatBoolean(column, true),
-  //     falseVal = InputUtils.formatBoolean(column, false),
-  //     booleanArray = [trueVal, falseVal];
-
-  //   // create map
-  //   var booleanMap = {};
-  //   booleanMap[trueVal] = true;
-  //   booleanMap[falseVal] = false;
-  // }
 
   return {
     // allInput: undefined,
-    // booleanArray: booleanArray || [],
-    // booleanMap: booleanMap || {},
     column: column,
     isDisabled: isInputDisabled,
     isRequired: !column.nullok && !isInputDisabled,
@@ -66,11 +54,11 @@ export function columnToColumnModel(column: any): RecordeditColumnModel {
 }
 
 /**
- * 
- * @returns 
+ *
+ * @returns
  * @param columnModels
  * @param forms
- * @param prefillQueryParam 
+ * @param prefillQueryParam
  * --not implemented - used by viewer app @param initialValues
  */
 export function populateCreateInitialValues(
@@ -161,11 +149,6 @@ export function populateCreateInitialValues(
           initialModelValue = formatDatetime(defaultValue, tsOptions);
           isTimestamp = true;
           break;
-        // case 'boolean':
-        //     if (defaultValue != null) {
-        //         initialModelValue = InputUtils.formatBoolean(column, defaultValue);
-        //     }
-        //     break;
         default:
           if (column.isAsset) {
             const metaObj: any = {};
@@ -251,7 +234,7 @@ export function populateCreateInitialValues(
           values[`${formIdx}-${column.name}-time`] = initialModelValue?.time || '';
         }
       } else {
-        values[`${formIdx}-${column.name}`] = initialModelValue || '';
+        values[`${formIdx}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
       }
     }
   });
@@ -310,7 +293,7 @@ export function populateEditInitialValues(
 
       // Transform column values for use in view model
       const options: TimestampOptions = { outputMomentFormat: '' }
-      let isTimestamp = false;
+      let isTimestamp = false
       switch (column.type.name) {
         case 'timestamp':
           value = formatDatetime(tupleValues[i], options);
@@ -332,9 +315,6 @@ export function populateEditInitialValues(
         case 'numeric':
           // If input is disabled, there's no need to transform the column value.
           value = isDisabled ? tupleValues[i] : formatFloat(tupleValues[i]);
-          break;
-        case 'boolean':
-          // value = formatBoolean(column, tupleValues[i]);
           break;
         default:
           // the structure for asset type columns is an object with a 'url' property
@@ -378,9 +358,9 @@ export function populateEditInitialValues(
           values[`${tupleIndex}-${column.name}-time`] = value?.time || '';
         }
       } else {
-        values[`${tupleIndex}-${column.name}`] = value || '';
+        values[`${tupleIndex}-${column.name}`] = replaceNullOrUndefined(value, '');
       }
-      
+
     });
   });
 

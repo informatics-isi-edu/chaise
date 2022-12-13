@@ -136,8 +136,8 @@ export const DEFAULT_HEGHT_MAP: any = {
   'markdown': 47,
   'longtext': 47,
   'json': 47,
-  'color': 47, 
-  'shorttext': 47, 
+  'color': 47,
+  'shorttext': 47,
   'disabled': 47
 }
 
@@ -149,4 +149,19 @@ export function formatInt(value: string) {
 export function formatFloat(value: string) {
   const floatVal = parseFloat(value);
   return !isNaN(floatVal) ? floatVal : null;
+}
+
+/**
+ * given the column and a valid, return the displayed value.
+ * checks for preformat config before returning true/falsew
+ */
+export function formatBoolean(column: any, value: any) {
+  return column.formatvalue(value);
+}
+
+/**
+ * If the value is not null or undefined, return it. otherwise return the alt.
+ */
+export function replaceNullOrUndefined(val: any, alt: any) {
+  return (val === null || val === undefined) ? alt : val;
 }

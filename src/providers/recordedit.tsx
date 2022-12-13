@@ -24,7 +24,7 @@ import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { columnToColumnModel, populateCreateInitialValues, populateEditInitialValues } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { DEFAULT_HEGHT_MAP, replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -413,7 +413,7 @@ export default function RecordeditProvider({
   }
 
   const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean, fieldType: string) => {
-    
+
     const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
     const height = ele?.offsetHeight || 0;
     // how to handle this ? get default heights

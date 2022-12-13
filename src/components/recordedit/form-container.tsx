@@ -75,6 +75,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
           classes='column-cell-input'
           placeholder={placeholder}
           styles={{ 'height': heightparam }}
+          columnModel={cm}
         />
       );
     })
@@ -112,7 +113,7 @@ const ChaiseFormContainer = (): JSX.Element => {
   const handleHeightAdjustment = (event: any) => {
     const fieldName = event.detail.inputFieldName;
     const msgCleared = event.detail.msgCleared;
-    
+
     const fieldType = event.detail.type;
     // call provider function
     handleInputHeightAdjustment(fieldName, msgCleared, fieldType);
