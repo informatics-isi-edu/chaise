@@ -252,7 +252,8 @@ export default function RecordeditProvider({
       const currRow: any = {};
       reference.columns.forEach((col: any) => {
         // TODO: fix indexing
-        currRow[col.name] = data[idx + '-' + col.displayname.value] || null
+        const v = data[idx + '-' + col.displayname.value];
+        currRow[col.name] = (v === undefined || v === '') ? null : v;
       });
       submissionRows.push(currRow);
     });

@@ -12,7 +12,7 @@ import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedi
 
 // utils
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
-import { formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { ERROR_MESSAGES, formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 
 type BooleanFieldProps = {
@@ -71,7 +71,12 @@ const BooleanField = ({
   const { setValue, control, clearErrors } = useFormContext();
 
   const registerOptions = {
-    required: columnModel?.isRequired,
+    /**
+     * TODO this is not working properly. while the formInput.formState is reporting the
+     * error, the formInput.fieldState is not. we need to fix this issue for all the
+     * inputs that we have. none of them are properly setting this boolean.
+     */
+    required: columnModel?.isRequired ? ERROR_MESSAGES.REQUIRED : false,
   };
 
   const formInput = useController({
@@ -132,7 +137,7 @@ const BooleanField = ({
           <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
             {typeof fieldValue === 'boolean' ?
               displayedOptions[rawOptions.indexOf(fieldValue)] :
-              <span className='chaise-input-placeholder'>Select a value</span>
+              <span className='chaise-input-placeholder'>{placeholder ? placeholder : 'Select a value'}</span>
             }
             <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
           </div>
@@ -155,7 +160,7 @@ const BooleanField = ({
           ))}
         </Dropdown.Menu>
       </Dropdown>
-      <input {...field} type='hidden' />
+      <input className={inputClasses} {...field} type='hidden' />
       {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div >
   );

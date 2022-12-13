@@ -14,7 +14,7 @@ import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-pi
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { ERROR_MESSAGES, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -39,12 +39,12 @@ const DATE_FORMAT = 'YYYY-MM-DD';
 
 const integerFieldValidation = {
   value:  INTEGER_REGEXP,
-  message: 'Please enter a valid integer value'
+  message: ERROR_MESSAGES.INVALID_INTEGER
 };
 
 const numericFieldValidation = {
   value: FLOAT_REGEXP,
-  message: 'Please enter a valid decimal value'
+  message: ERROR_MESSAGES.INVALID_NUMERIC
 };
 
 
@@ -52,13 +52,13 @@ const numericFieldValidation = {
 const dateFieldValidation =  (value: string) => {
   if (!value) return;
   const date = windowRef.moment(value, DATE_FORMAT, true);
-  return date.isValid() || 'Please enter a valid date value';
+  return date.isValid() || ERROR_MESSAGES.INVALID_DATE;
 };
 
 const timestampFieldValidation = (value: string) => {
   if (!value) return;
   const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
-  return timestamp.isValid() || 'Please enter a valid date and time value';
+  return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
 };
 
 const validationFunctionMap : {
@@ -176,7 +176,7 @@ const TextField = ({
 
   return (
     <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
-      <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+      <div className={`chaise-input-control has-feedback input-switch-text ${classes} ${disableInput ? ' input-disabled' : ''}`}>
         <input placeholder={placeholder}className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
@@ -267,7 +267,7 @@ type NumericFieldProps = {
   /**
    * the handler function called on input change
    */
-  onFieldChange?: ((value: string) => void)
+  onFieldChange?: ((value: string) => void),
 };
 
 const NumericField = ({

@@ -141,6 +141,14 @@ export const DEFAULT_HEGHT_MAP: any = {
   'disabled': 47
 }
 
+export const ERROR_MESSAGES = {
+  REQUIRED: 'Please enter a value for this field.',
+  INVALID_INTEGER: 'Please enter a valid integer value.',
+  INVALID_NUMERIC: 'Please enter a valid decimal value.',
+  INVALID_DATE: 'Please enter a valid date value.',
+  INVALID_TIMESTAMP: 'Please enter a valid date and time value.'
+}
+
 export function formatInt(value: string) {
   const intVal = parseInt(value, 10);
   return !isNaN(intVal) ? intVal : null;
