@@ -164,8 +164,6 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
             // NOTE: this blindly closes the login modal (assuming it's open)
             //   - TODO: we want to check `loginModal` before closing so we aren't assuming it's there
             //     - `loginModal` is null when this function is defined and that variable state (null) is being captured when defining this function
-            //   - this should be extended to check if errors are present and close errors if no login modal
-            //     - maybe it should do both?
             hideLoginModal();
           } else {
             windowRef.location.reload();
