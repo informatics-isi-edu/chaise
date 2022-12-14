@@ -136,9 +136,17 @@ export const DEFAULT_HEGHT_MAP: any = {
   'markdown': 47,
   'longtext': 47,
   'json': 47,
-  'color': 47, 
-  'shorttext': 47, 
+  'color': 47,
+  'shorttext': 47,
   'disabled': 47
+}
+
+export const ERROR_MESSAGES = {
+  REQUIRED: 'Please enter a value for this field.',
+  INVALID_INTEGER: 'Please enter a valid integer value.',
+  INVALID_NUMERIC: 'Please enter a valid decimal value.',
+  INVALID_DATE: 'Please enter a valid date value.',
+  INVALID_TIMESTAMP: 'Please enter a valid date and time value.'
 }
 
 export function formatInt(value: string) {
@@ -149,4 +157,19 @@ export function formatInt(value: string) {
 export function formatFloat(value: string) {
   const floatVal = parseFloat(value);
   return !isNaN(floatVal) ? floatVal : null;
+}
+
+/**
+ * given the column and a valid, return the displayed value.
+ * checks for preformat config before returning true/falsew
+ */
+export function formatBoolean(column: any, value: any) {
+  return column.formatvalue(value);
+}
+
+/**
+ * If the value is not null or undefined, return it. otherwise return the alt.
+ */
+export function replaceNullOrUndefined(val: any, alt: any) {
+  return (val === null || val === undefined) ? alt : val;
 }

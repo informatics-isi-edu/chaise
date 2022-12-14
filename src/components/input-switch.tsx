@@ -3,6 +3,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
+import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -10,11 +11,13 @@ import { useFormContext, useController, useWatch } from 'react-hook-form';
 
 // models
 import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { ERROR_MESSAGES, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
 
 
 /**
@@ -36,12 +39,12 @@ const DATE_FORMAT = 'YYYY-MM-DD';
 
 const integerFieldValidation = {
   value:  INTEGER_REGEXP,
-  message: 'Please enter a valid integer value'
+  message: ERROR_MESSAGES.INVALID_INTEGER
 };
 
 const numericFieldValidation = {
   value: FLOAT_REGEXP,
-  message: 'Please enter a valid decimal value'
+  message: ERROR_MESSAGES.INVALID_NUMERIC
 };
 
 
@@ -49,13 +52,13 @@ const numericFieldValidation = {
 const dateFieldValidation =  (value: string) => {
   if (!value) return;
   const date = windowRef.moment(value, DATE_FORMAT, true);
-  return date.isValid() || 'Please enter a valid date value';
+  return date.isValid() || ERROR_MESSAGES.INVALID_DATE;
 };
 
 const timestampFieldValidation = (value: string) => {
   if (!value) return;
   const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
-  return timestamp.isValid() || 'Please enter a valid date and time value';
+  return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
 };
 
 const validationFunctionMap : {
@@ -173,7 +176,7 @@ const TextField = ({
 
   return (
     <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
-      <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+      <div className={`chaise-input-control has-feedback input-switch-text ${classes} ${disableInput ? ' input-disabled' : ''}`}>
         <input placeholder={placeholder}className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
@@ -264,7 +267,7 @@ type NumericFieldProps = {
   /**
    * the handler function called on input change
    */
-  onFieldChange?: ((value: string) => void)
+  onFieldChange?: ((value: string) => void),
 };
 
 const NumericField = ({
@@ -331,7 +334,7 @@ const NumericField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'number' });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'number' });
   }, [error?.message])
 
   return (
@@ -446,7 +449,7 @@ const DateField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'date' });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'date' });
   }, [error?.message])
 
   return (
@@ -631,7 +634,7 @@ const TimestampField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'timestamp' });  
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'timestamp' });
   }, [error?.message])
 
   const clearDate = () => {
@@ -730,6 +733,11 @@ type InputSwitchProps = {
    * inline styling for the input switch component
    */
   styles?: object,
+  /**
+   * The column model that is used for this input
+   * boolean and foreignkey inputs need this. other types might need it as well.
+   */
+  columnModel?: RecordeditColumnModel
 };
 
 const InputSwitch = ({
@@ -747,6 +755,7 @@ const InputSwitch = ({
   displayErrors = true,
   onFieldChange,
   styles={},
+  columnModel,
 }: InputSwitchProps): JSX.Element | null => {
 
   return (() => {
@@ -796,14 +805,6 @@ const InputSwitch = ({
           styles={styles}
           onFieldChange={onFieldChange}
         />
-      case 'disabled':
-          return <DisabledField
-            name={name}
-            classes={classes}
-            inputClasses={inputClasses}
-            containerClasses={containerClasses}
-            placeholder={placeholder as string}
-          />
       case 'color':
         return <ColorField
           name={name}
@@ -815,6 +816,26 @@ const InputSwitch = ({
           disableInput={disableInput}
           onFieldChange={onFieldChange}
         />
+      case 'boolean':
+        return <BooleanField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          value={value as string}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange}
+          columnModel={columnModel}
+        />
+      case 'disabled':
+          return <DisabledField
+            name={name}
+            classes={classes}
+            inputClasses={inputClasses}
+            containerClasses={containerClasses}
+            placeholder={placeholder as string}
+          />
       case 'text':
       default:
         return <TextField
