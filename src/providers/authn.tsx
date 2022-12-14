@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
@@ -60,6 +60,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const { dispatchError, showLoginModal, hideLoginModal, setLoginFunction } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
+  const popupWindowRef = useRef<Window | null>(null); // the popup window used for login
   const _changeCbs: any = {};
   let _counter = 0;
 
@@ -182,11 +183,19 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // top should just have some small offset if there's available space
     const popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
 
+    // close the existing popup (if any)
+    if (popupWindowRef.current) {
+      popupWindowRef.current.close();
+    }
+
     // open a window with proper position and width and height
     const win = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
 
     // focus on the opened window
     win?.focus();
+
+    // keep track of the window, so we ensure only one is opened at a time.
+    popupWindowRef.current = win;
 
     _logInHelper(win, postLoginCB, 'popUp', null, logAction);
   };

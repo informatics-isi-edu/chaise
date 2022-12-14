@@ -202,7 +202,7 @@ const ShareCiteModal = ({
                 />
               </ChaiseTooltip>
             </h3>
-            <a className='share-item-value share-modal-live-link' ng-href={liveLink}>{liveLink}</a>
+            <a className='share-item-value share-modal-live-link' href={liveLink}>{liveLink}</a>
           </li>
           {!citationReady &&
             <li className='citation-loader'>
