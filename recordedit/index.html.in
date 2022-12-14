@@ -34,7 +34,7 @@
                                             <span>Save</span>
                                         </button>
                                         <div class="bulk-delete-container" ng-if="form.canShowBulkDelete && displayReady && reference.canDelete" tooltip-placement="bottom-right" uib-tooltip="Delete the displayed set of records.">
-                                            <button id="bulk-delete-button" class="chaise-btn chaise-btn-primary chaise-btn-danger"
+                                            <button id="bulk-delete-button" class="chaise-btn chaise-btn-primary"
                                               ng-disabled="form.submissionButtonDisabled || form.showBulkDeleteSpinner" ng-click="::form.bulkDelete()"
                                             >
                                                 <span class="chaise-btn-icon fa-regular fa-trash-alt"></span>
