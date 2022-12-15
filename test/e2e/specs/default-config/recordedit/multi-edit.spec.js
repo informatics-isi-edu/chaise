@@ -2,7 +2,7 @@ var testConfiguration = browser.params.configuration;
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
 var moment = require('moment');
-
+var EC = protractor.ExpectedConditions
 
 var currentTimestampTime = moment().format("x");
 var testParams = {
@@ -11,6 +11,8 @@ var testParams = {
             table_name: "multi-edit-table",
             tableComment: "Table to represent adding multiple entities",
             sortColumns: "id",
+            testFkClear: "true",
+            fkColumnName: "fk_to_f1",
             keys: [
                 {name: "id", value: "1000", operator: "="},
                 {name: "id", value: "1001", operator: "="}
@@ -19,7 +21,7 @@ var testParams = {
                     "int": {"value": "7", "input": "4"},
                     "text": {"value": "test text", "input": "modified val"},
                     "json_col":{"value":JSON.stringify({"name":"testing json column"},undefined,2),"input" : "{\"name\":\"This is the edited value of json\"}"},
-                    "jsonb_col":{"value":JSON.stringify({"name":"testing jsonB column"},undefined,2),"input" : "{\"name\":\"This is the edited value of jsonB\"}"}
+                    "jsonb_col":{"value":JSON.stringify({"name":"testing jsonB column"},undefined,2),"input" : "{\"name\":\"This is the edited value of jsonB\"}"},
                 }, {
                     "int": {"value": "12", "input": "66"},
                     "text": {"value": "description", "input": "description 2"},
@@ -28,8 +30,8 @@ var testParams = {
                 }
             ],
             results: [
-                ["1000", "modified val", "4",JSON.stringify({"name":"This is the edited value of json"},undefined,2),JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2)],
-                ["1001", "description 2", "66",JSON.stringify({"quantity":"6"},undefined,2),JSON.stringify({"quantity":"9"},undefined,2)]
+                ["1000", "modified val", "4", JSON.stringify({"name":"This is the edited value of json"},undefined,2), JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2), "1"],
+                ["1001", "description 2", "66", JSON.stringify({"quantity":"6"},undefined,2), JSON.stringify({"quantity":"9"},undefined,2), "2"]
             ]
         }, {
             table_name: "multi-edit-table",
@@ -53,9 +55,9 @@ var testParams = {
                 }
             ],
             results: [
-                ["1000", "changed it again", "5",JSON.stringify({"name":"This is the edited value of json"},undefined,2),JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2)],
-                ["1001", "description 3", "768",JSON.stringify({"quantity":"6"},undefined,2),JSON.stringify({"quantity":"9"},undefined,2)],
-                ["1002", "I am number 3", "934",JSON.stringify(979.998,undefined,2),JSON.stringify(98.00243,undefined,2)]
+                ["1000", "changed it again", "5", JSON.stringify({"name":"This is the edited value of json"},undefined,2), JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2), ""],
+                ["1001", "description 3", "768", JSON.stringify({"quantity":"6"},undefined,2), JSON.stringify({"quantity":"9"},undefined,2), ""],
+                ["1002", "I am number 3", "934", JSON.stringify(979.998,undefined,2), JSON.stringify(98.00243,undefined,2), ""]
             ]
         }, {
             table_name: 'table_w_multiple_assets',
@@ -215,7 +217,7 @@ describe('Edit multiple existing record,', function() {
 
 
                         if (hasFile) {
-                            browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.keys.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                            browser.wait(EC.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.keys.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
                         }
 
                         // Make sure the table shows up with the expected # of rows
@@ -282,6 +284,51 @@ describe('Edit multiple existing record,', function() {
                     });
                 });
             });
+
+            if (tableParams.testFkClear) {
+                describe("User should be able to clear all foreign key values using select all,", function () {
+                    beforeAll(function(done) {
+                        browser.refresh();
+
+                        chaisePage.recordeditPageReady();
+                        done();
+                    });
+
+                    it("open the select all form and click 'clear all'", function (done) {
+                        const colName = tableParams.fkColumnName;
+                        const cancelBtn = chaisePage.recordEditPage.getSelectAllCancel(colName),
+                            clearAllBtn = chaisePage.recordEditPage.getSelectAllClear(colName);
+
+                        chaisePage.recordEditPage.getColumnSelectAllButton(colName).click().then(function () {
+                            browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
+
+                            return clearAllBtn.click();
+                        }).then(function () {
+                            cancelBtn.click();
+                            
+                            done();
+                        }).catch(function (err) {
+                            console.log(err);
+                            done.fail();
+                        });
+                    });
+
+                    it("should submit the form and show " + tableParams.keys.length + " rows updated", function (done) {
+                         // submit form
+                         chaisePage.recordEditPage.submitForm();
+ 
+                         // Make sure the table shows up with the expected # of rows
+                         browser.wait(function() {
+                             return chaisePage.recordsetPage.getRows().count().then(function(ct) {
+                                 return (ct == tableParams.keys.length);
+                             });
+                         }, browser.params.defaultTimeout);
+                         
+                         expect(chaisePage.recordsetPage.getRows().count()).toBe(tableParams.keys.length, "Incorrect number of rows showing after update");
+                         done();
+                    })
+                });
+            }
 
             // delete files
             if (tableParams.files && tableParams.files.length > 0) {
