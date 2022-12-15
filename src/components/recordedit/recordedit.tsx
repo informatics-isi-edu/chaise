@@ -214,7 +214,7 @@ const RecordeditInner = ({
         isDismissible: !allDeleted,
         okBtnActionMessage: allDeleted ? MESSAGE_MAP.clickActionMessage.okGoToRecordset : undefined,
         okBtnCallback: allDeleted ? fullSuccesCB : partialSuccessCB,
-        closeBtnCallback: allDeleted ? fullSuccesCB: partialSuccessCB
+        closeBtnCallback: allDeleted ? fullSuccesCB : partialSuccessCB
       });
     }).catch((error: any) => {
       dispatchError({ error: error, isDismissible: true });
@@ -290,7 +290,7 @@ const RecordeditInner = ({
       columnModels.forEach((cm: RecordeditColumnModel) => {
         const colName = cm.column.name;
         // should be able to handle falsy values
-        tempFormValues[`${formIndex}-${colName}`] =  replaceNullOrUndefined(tempFormValues[`${lastFormIdx}-${colName}`], '');
+        tempFormValues[`${formIndex}-${colName}`] = replaceNullOrUndefined(tempFormValues[`${lastFormIdx}-${colName}`], '');
 
         if (cm.column.type.name.indexOf('timestamp') !== -1) {
           tempFormValues[`${formIndex}-${colName}-date`] = tempFormValues[`${lastFormIdx}-${colName}-date`] || '';
@@ -320,12 +320,6 @@ const RecordeditInner = ({
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
                 <div className='recordedit-title-buttons title-buttons'>
-                  {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
-                    <button className='chaise-btn chaise-btn-primary chaise-btn-danger' onClick={onBulkDeleteButtonClick}>
-                      <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
-                      <span>Delete</span>
-                    </button>
-                  </ChaiseTooltip>}
                   {/* TODO: proper submission workflow, submission disabled, tooltip,
                           ng-disabled='form.submissionButtonDisabled || !displayReady'
                           ng-click='::form.submit()'
@@ -341,6 +335,12 @@ const RecordeditInner = ({
                     <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                     <span>Save</span>
                   </button>
+                  {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
+                    <button className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
+                      <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
+                      <span>Delete</span>
+                    </button>
+                  </ChaiseTooltip>}
                 </div>
                 <h1 id='page-title'>
                   <span>{appMode === appModes.EDIT ? 'Edit ' : 'Create new '}</span>
