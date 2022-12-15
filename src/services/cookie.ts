@@ -17,6 +17,11 @@ export class CookieService {
       value = JSON.stringify(value);
     }
     /**
+     * This is the server requirement for the cookie:
+     * https://www.rfc-editor.org/rfc/rfc6265#page-8
+     *    ; US-ASCII characters excluding CTLs,
+     *    ; whitespace DQUOTE, comma, semicolon,
+     *    ; and backslash
      * while fully url-encoding is not required, we have to make sure certain
      * characeters are not part of the value. Doing the full url-encode is more
      * straightforward and seems to be the convention.
