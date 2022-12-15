@@ -8,7 +8,10 @@ const LoginModal = (): JSX.Element => {
   const { dispatchError, loginModal, hideLoginModal } = useError();
   const { popupLogin } = useAuthn();
 
-  const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL, () => { onExited('login') });
+  const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL);
+  // TODO: Call onExited to process any attached callbacks
+  //    This wasn't working properly in angularJS where this callback would be ignored when the modal popup login was being shown
+  // const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL, () => { onExited('login') });
 
   const cancel = () => onExited('cancel');
 
