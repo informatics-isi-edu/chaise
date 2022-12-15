@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -117,8 +117,13 @@ export default function RecordeditProvider({
    */
   const [formsHeightMap, setFormsHeightMap] = useState<any>({})
 
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
+
   useEffect(() => {
-    if (!reference) return;
+    if (!reference || setupStarted.current) return;
+    setupStarted.current = true;
 
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
@@ -247,6 +252,8 @@ export default function RecordeditProvider({
   }, [reference])
 
   const onSubmitValid = (data: any) => {
+    console.log(data);
+    console.log(forms);
     const submissionRows: any[] = []
     forms.forEach((f: number, idx: number) => {
       const currRow: any = {};
@@ -338,7 +345,7 @@ export default function RecordeditProvider({
           }
         }
 
-        reference.update(tuples).then(submitSuccessCB).catch(submitErrorCB);
+        reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB);
       } else {
         reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB);
       }
@@ -356,18 +363,19 @@ export default function RecordeditProvider({
   const addForm = (count: number) => {
     const newFormIndexValues: number[] = [];
     // add 'count' number of forms
-    setForms((forms: number[]) => {
+    setForms((previous: number[]) => {
+      // TODO: why is this triggering twice in edit mode while NODE_ENV="development"?
       for (let i = 0; i < count; i++) {
-        forms.push(forms[forms.length - 1] + 1);
-        newFormIndexValues.push(forms.length - 1);
+        previous.push(previous[previous.length - 1] + 1);
+        newFormIndexValues.push(previous.length - 1);
       }
 
-      return [...forms]
+      return [...previous]
     })
 
     // for each form added, push another '-1' into the array for each column
-    setFormsHeightMap((formsHeightMap: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
+    setFormsHeightMap((previous: any) => {
+      const formsHeightMapCpy = simpleDeepCopy(previous);
       for (let i = 0; i < count; i++) {
         Object.keys(formsHeightMapCpy).forEach(k => {
           formsHeightMapCpy[k].push(-1);
@@ -379,32 +387,33 @@ export default function RecordeditProvider({
     return newFormIndexValues;
   };
 
-  // TODO: event type
   const removeForm = (indexes: number[]) => {
     // remove the forms based on the given indexes
-    setForms(forms => forms.filter(({ }, i: number) => !indexes.includes(i)));
+    setForms((previous: number[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
     // remove the entry at 'idx' in the array for each column
-    setFormsHeightMap((formsHeightMap: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
+    setFormsHeightMap((previous: any) => {
+      const formsHeightMapCpy = simpleDeepCopy(previous);
       Object.keys(formsHeightMapCpy).forEach(k => {
         formsHeightMapCpy[k] = formsHeightMapCpy[k].filter(({ }, i: number) => !indexes.includes(i));
       });
       return formsHeightMapCpy;
     });
+
+    setTuples((previous: any[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
   }
 
   const updateKeysHeightMap = (colName: string, height: number) => {
-    setKeysHeightMap((keysHeightMap: any) => {
-      const hMapCopy = simpleDeepCopy(keysHeightMap);
+    setKeysHeightMap((previous: any) => {
+      const hMapCopy = simpleDeepCopy(previous);
       hMapCopy[colName] = height;
       return hMapCopy;
     })
   }
 
   const updateFormsHeightMap = (colName: string, idx: string, height: string | number) => {
-    setFormsHeightMap((formsHeightMap: any) => {
-      const hMapCpy = simpleDeepCopy(formsHeightMap);
+    setFormsHeightMap((previous: any) => {
+      const hMapCpy = simpleDeepCopy(previous);
       hMapCpy[colName][idx] = height;
 
       updateKeysHeightMap(colName, Math.max(...hMapCpy[colName]));

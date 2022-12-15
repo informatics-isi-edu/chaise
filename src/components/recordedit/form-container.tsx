@@ -52,7 +52,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
       const inputType = getInputTypeOrDisabled(cm);
 
       let placeholder;
-      if (inputType == 'disabled') {
+      if (inputType === 'disabled') {
         placeholder = getDisabledInputValue(cm.column);
 
         // TODO: extend this for edit mode

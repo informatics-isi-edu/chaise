@@ -33,7 +33,7 @@ const INTEGER_REGEXP = /^\-?\d+$/;
 
 const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
 
-const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm';
+const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 
 const DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -660,7 +660,7 @@ const TimestampField = ({
           />
         </div>
         <div className={`chaise-input-control has-feedback input-switch-time ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-          <input className={`${timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`} type='time' min='00:00' max='23:59'
+          <input className={`${timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`} type='time' min='00:00:00' max='23:59:59' step='1'
           {...timeField} onChange={handleTimeChange}/>
           <ClearInputBtn
             btnClassName={`${clearTimeClasses} input-switch-clear`}
