@@ -26,6 +26,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
   const { columnModels, formsHeightMap, removeForm } = useRecordedit();
 
   const getInputTypeOrDisabled = (columnModel: RecordeditColumnModel) => {
+    return 'longtext';
     if (columnModel.isDisabled) {
       // TODO: if columnModel.showSelectAll, disable input
       // TODO: create column models, no column model, enable!
@@ -60,7 +61,6 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
       const heightparam = height == -1 ? 'auto' : `${height}px`;
 
       const inputType = getInputTypeOrDisabled(cm);
-      console.log({ inputType, colName })
       let placeholder;
       if (inputType == 'disabled') {
         placeholder = getDisabledInputValue(cm.column);
@@ -80,7 +80,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
           name={`${idx}-${colName}`}
           type={inputType}
           // type='numeric'
-          containerClasses={'column-cell entity-value'}
+          containerClasses={'column-cell longtext'} //entity-value'}
           // value={0}
           classes='column-cell-input'
           placeholder={placeholder}
@@ -124,6 +124,7 @@ const ChaiseFormContainer = (): JSX.Element => {
     const msgCleared = event.detail.msgCleared;
     
     const fieldType = event.detail.type;
+
     // call provider function
     handleInputHeightAdjustment(fieldName, msgCleared, fieldType);
   }

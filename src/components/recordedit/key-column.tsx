@@ -14,6 +14,7 @@ import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 const KeyColumn = (): JSX.Element => {
   const getInputTypeOrDisabled = (column: any) => {
+    return 'longtext';
     if (column.inputDisabled) {
       // TODO: if showSelectAll, disable input
       // TODO: create column models, no column model, enable!
@@ -44,11 +45,7 @@ const KeyColumn = (): JSX.Element => {
         const height = keysHeightMap[colName];
         const colType = getInputTypeOrDisabled(column);
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];
-        
         const heightparam = height == -1 ? defaultHeight : `${height}px`;
-        console.log({ colType, defaultHeight, heightparam });
-
-        // try changing to div if height adjustment does not work
         return (
           <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}

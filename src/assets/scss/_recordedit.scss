@@ -56,7 +56,15 @@
                     // height: 47px;
                     min-height: 47px;
                     padding: 8px 10px;
+                }
 
+
+
+                textarea{
+                    min-height: 139px;
+                    display: flex;
+                    width: 100%;
+                    border: 1px solid #ccc;
                 }
 
 
@@ -69,6 +77,19 @@
 
                     .input-switch {
                         height: auto;
+                    }
+                }
+
+
+                // CSS fixes for lontext to override classes from common css file - for Josh to refer to
+                .column-cell.longtext{
+                    min-height: 139px;
+
+                    .chaise-input-control.column-cell-input.chaise-input-control{
+                        padding: 0;
+                        height: auto;
+
+
                     }
                 }
             }

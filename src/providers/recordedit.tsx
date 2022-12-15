@@ -386,7 +386,7 @@ export default function RecordeditProvider({
     // how to handle this ? get default heights
 
     const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
-    console.log({defaultHeight})
+    
     const newHeight = height == defaultHeight || msgCleared ? -1 : height;
 
     // execute the regexp to get individual values from the inputFieldName
