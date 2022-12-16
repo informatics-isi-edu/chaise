@@ -69,7 +69,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
           name={`${idx}-${colName}`}
           type={inputType}
           // type='numeric'
-          containerClasses={'column-cell longtext'} //entity-value'}
+          containerClasses={'column-cell entity-value'}
           // value={0}
           classes='column-cell-input'
           placeholder={placeholder}

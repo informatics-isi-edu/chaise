@@ -155,7 +155,7 @@ const LongTextField = ({
   }, [error?.message]);
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${name} input-switch-longtext-container`} style={styles}>
       <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaRef}>
         <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
