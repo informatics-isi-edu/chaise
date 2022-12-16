@@ -9,6 +9,8 @@ export interface RecordeditColumnModel {
   isDisabled: boolean;
   isRequired: boolean;
   inputType: string;
+  logStackNode: any;
+  logStackPathChild: string;
 }
 
 export interface TimestampOptions {

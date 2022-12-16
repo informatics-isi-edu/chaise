@@ -1,0 +1,229 @@
+// components
+import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
+import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
+
+// hooks
+import { useEffect, useState } from 'react';
+import { useFormContext, useController } from 'react-hook-form';
+
+// models
+import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import {
+  RecordsetConfig, RecordsetDisplayMode,
+  RecordsetSelectMode, SelectedRow, RecordsetProps
+} from '@isrd-isi-edu/chaise/src/models/recordset';
+import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
+
+// services
+import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+
+// utils
+import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+
+
+type ForeignkeyFieldProps = {
+  /**
+   *  the name of the field
+   */
+  name: string,
+  /**
+  * placeholder text
+  */
+  placeholder?: string,
+  /**
+  * classes for styling the input element
+  */
+  classes?: string,
+  inputClasses?: string,
+  containerClasses?: string,
+  /**
+  * classes for styling the clear button
+  */
+  clearClasses?: string
+  /**
+  * flag for disabling the input
+  */
+  disableInput?: boolean,
+  /**
+  * flag to show error below the input switch component
+  */
+  displayErrors?: boolean,
+  value: string,
+  styles?: any,
+  /**
+  * the handler function called on input change
+  */
+  onFieldChange?: ((value: string) => void),
+  /**
+   * The column model representing this field in the form.
+   */
+  columnModel: RecordeditColumnModel,
+};
+
+const ForeignkeyField = ({
+  name,
+  placeholder,
+  classes,
+  inputClasses,
+  clearClasses,
+  disableInput,
+  displayErrors,
+  value,
+  containerClasses,
+  styles,
+  onFieldChange,
+  columnModel
+}: ForeignkeyFieldProps): JSX.Element => {
+
+
+  const { setValue, control, clearErrors } = useFormContext();
+
+  const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
+
+  const registerOptions = {
+    /**
+     * TODO this is not working properly. while the formInput.formState is reporting the
+     * error, the formInput.fieldState is not. we need to fix this issue for all the
+     * inputs that we have. none of them are properly setting this boolean.
+     */
+    required: columnModel?.isRequired ? ERROR_MESSAGES.REQUIRED : false,
+  };
+
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
+
+  const field = formInput?.field;
+
+  const fieldValue = field?.value;
+
+  const fieldState = formInput?.fieldState;
+
+  const [showClear, setShowClear] = useState<boolean>(typeof fieldValue !== 'boolean');
+
+  const { error, isTouched } = fieldState;
+
+  const clearInput = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setValue(name, '');
+    clearErrors(name);
+  }
+
+  useEffect(() => {
+    if (onFieldChange) {
+      onFieldChange(fieldValue);
+    }
+    if (showClear != Boolean(fieldValue)) {
+      setShowClear(Boolean(fieldValue));
+    }
+  }, [fieldValue]);
+
+  useEffect(() => {
+    if (value === undefined) return;
+    setValue(name, value);
+  }, [value]);
+
+  const handleChange = (v: any) => {
+    field.onChange(v);
+    field.onBlur();
+  };
+
+  useEffect(() => {
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });
+  }, [error?.message]);
+
+  const openRecordsetModal = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const recordsetConfig: RecordsetConfig = {
+      viewable: false,
+      editable: false,
+      deletable: false,
+      sortable: true,
+      selectMode: RecordsetSelectMode.SINGLE_SELECT,
+      showFaceting: true,
+      disableFaceting: false,
+      // TODO create vs edit
+      displayMode: RecordsetDisplayMode.FK_POPUP_CREATE
+    };
+
+    const andFilters: any = [];
+    // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+    columnModel.column.foreignKey.key.colset.columns.forEach((col: any) => {
+      andFilters.push({ source: col.name, hidden: true, not_null: true });
+    });
+
+    // TODO proper domain-filter support
+    // columnModel.filteredRef(submissionRow, rowForeignKeyData);
+    const ref = columnModel.column.filteredRef({}, {}).addFacets(andFilters);
+
+    setRecordsetModalProps({
+      initialReference: ref.contextualize.compactSelectForeignKey,
+      initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
+      config: recordsetConfig,
+      logInfo: {
+        logObject: null,
+        // TODO parent log stack
+        logStack: getColumnModelLogStack(columnModel, null),
+        // TODO parent log stack path
+        logStackPath: LogService.getStackPath(null, LogStackPaths.FOREIGN_KEY_POPUP)
+      }
+    });
+  };
+
+  const hideRecordsetModal = () => {
+    setRecordsetModalProps(null);
+  };
+
+  const onDataSelected = (selectedRows: SelectedRow[]) => {
+    // close the modal
+    hideRecordsetModal();
+
+    const selectedRow = selectedRows[0];
+    // TODO the raw values should be selected
+    // the issue here is that there might be multiple raw values!
+
+    // for now this is just changing the displayed tuple displayname
+    handleChange(selectedRow.displayname.value);
+  }
+
+  return (
+    <div className={`${containerClasses} input-switch-foreignkey input-switch-container-${name}`} style={styles}>
+      <div className='chaise-input-group' onClick={openRecordsetModal}>
+        <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+          {Boolean(fieldValue) ?
+            fieldValue :
+            <span className='chaise-input-placeholder'>{placeholder ? placeholder : 'Select a value'}</span>
+          }
+          <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
+        </div>
+        <div className='chaise-input-group-append'>
+          <button className='chaise-btn chaise-btn-primary' role='button' type='button'>
+            <span className='chaise-btn-icon fa-solid fa-chevron-down' />
+          </button>
+        </div>
+      </div>
+      <input className={inputClasses} {...field} type='hidden' />
+      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
+      {
+        recordsetModalProps &&
+        <RecordsetModal
+          modalClassName='foreignkey-popup'
+          recordsetProps={recordsetModalProps}
+          onClose={hideRecordsetModal}
+          onSubmit={onDataSelected}
+          displayname={columnModel?.column.displayname}
+        />
+      }
+    </div >
+  );
+};
+
+export default ForeignkeyField;

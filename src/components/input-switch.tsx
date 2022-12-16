@@ -4,6 +4,7 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
+import ForeignkeyField from '@isrd-isi-edu/chaise/src/components/input-switch/foreignkey-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -818,6 +819,20 @@ const InputSwitch = ({
         />
       case 'boolean':
         return <BooleanField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          value={value as string}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange}
+          columnModel={columnModel}
+        />
+      case 'popup-select':
+        // TODO columnModel is required, this should be refactored better?
+        if (!columnModel) return <></>;
+        return <ForeignkeyField
           name={name}
           classes={classes}
           inputClasses={inputClasses}

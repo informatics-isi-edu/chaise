@@ -374,7 +374,7 @@ const TableRow = ({
               className='select-action-button chaise-btn chaise-btn-primary chaise-btn-sm icon-btn'
               onClick={() => onSelectChange(tuple)}
             >
-              <span className='chaise-btn-icon fa-solid fa-check'></span>
+              <span className='chaise-btn-icon fa-regular fa-square-check'></span>
             </button>
           </ChaiseTooltip>
         )

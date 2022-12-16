@@ -48,9 +48,32 @@ export function columnToColumnModel(column: any): RecordeditColumnModel {
     inputType: type,
     // highlightRow: false,
     // showSelectAll: false,
-    // logStackNode: stackNode, // should not be used directly, take a look at getColumnModelLogStack
-    // logStackPathChild: stackPath // should not be used directly, use getColumnModelLogAction getting the action string
+    logStackNode: stackNode, // should not be used directly, take a look at getColumnModelLogStack
+    logStackPathChild: stackPath // should not be used directly, use getColumnModelLogAction getting the action string
   };
+}
+
+/**
+ * Given a columnModel and the parent model that it belongs to, return the log stack that should be used.
+ * NOTES:
+ *   - The parentModel might have a logStack object that is different from $rootScope,
+ *     so this function will merge the columnModel.logStackNode with its parent object.
+ *   - In some cases (currently viewer annotation form), the logStack that is present on the
+ *     parentModel might change, so we cannot create the whole stack while creating the columnModel.
+ *     So while creating columnModel I'm just creating the node and on run time the parentLogStack will be added.
+ *
+ */
+export function getColumnModelLogStack(colModel: RecordeditColumnModel, parentStack: any) {
+  return LogService.getStackObject(colModel.logStackNode, parentStack);
+}
+
+/**
+* Given a columnModel and the parent model that is belogns to, returns the action string that should be used.
+* Take a look at the Notes on getColumnModelLogStack function for more info
+*/
+export function getColumnModelLogAction(action: string, colModel: RecordeditColumnModel, parentLogStackPath: string | null) {
+  const logStackPath = LogService.getStackPath(parentLogStackPath, colModel.logStackPathChild);
+  return LogService.getActionString(action, logStackPath);
 }
 
 /**

@@ -139,6 +139,9 @@ const RecordsetModal = ({
 
   useEffect(() => {
     if (selectMode === RecordsetSelectMode.SINGLE_SELECT) {
+      // on initial load this will be called, and the following is to guard
+      // against it.
+      if (submittedRows.length === 0) return;
       submit();
     }
     else {

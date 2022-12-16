@@ -144,7 +144,7 @@ export type SelectedRow = {
   displayname: Displayname;
   uniqueId: string | null;
   data?: any; // TODO
-  tupleReference: any; // TODO
+  tupleReference?: any; // TODO
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
 }
