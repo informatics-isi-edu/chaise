@@ -432,7 +432,7 @@ const RelatedTableActions = ({
     if (displayCustomModeRelated(relatedModel)) {
       icon = 'fas fa-table';
       if (relatedModel.canEdit) {
-        tooltip = <span>Display edit controls for {currentTable} related to this {mainTable}.</span>;
+        tooltip = <span>Display edit controls for {currentTable} records related to this {mainTable}.</span>;
         label = 'Edit mode';
       } else {
         tooltip = <span>Display related {currentTable} in tabular mode.</span>

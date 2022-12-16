@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -9,24 +8,15 @@ const LoginModal = (): JSX.Element => {
   const { dispatchError, loginModal, hideLoginModal } = useError();
   const { popupLogin } = useAuthn();
 
-  const [closeMessage, setCloseMessage] = useState<string | null>(null)
-  const [show, setShow] = useState<boolean>(true);
+  const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL, () => { onExited('login') });
 
-  const login = () => {
-    setCloseMessage('login');
-    popupLogin(LogActions.LOGIN_LOGIN_MODAL);
-  };
+  const cancel = () => onExited('cancel');
 
-  const cancel = () => {
-    setCloseMessage('cancel');
-    setShow(false);
-  };
-
-  const onExited = () => {
+  const onExited = (message: string) => {
     hideLoginModal(); // sets modal to null after it's been hidden
-    if (closeMessage === 'login' && loginModal?.onModalCloseSuccess) {
+    if (message === 'login' && loginModal?.onModalCloseSuccess) {
       loginModal.onModalCloseSuccess()
-    } else if (closeMessage === 'cancel' && loginModal?.onModalClose) {
+    } else if (message === 'cancel' && loginModal?.onModalClose) {
       loginModal.onModalClose('cancel');
     } else {
       // TODO needs discussion
@@ -35,18 +25,15 @@ const LoginModal = (): JSX.Element => {
     }
   }
 
-  if (!loginModal) {
-    return <></>;
-  }
+  if (!loginModal) return <></>
 
   return (
     <Modal
       className='modal-login-instruction'
       backdropClassName='modal-login-instruction-backdrop'
-      show={show}
+      show={true}
       backdrop='static'
       keyboard={false}
-      onExited={onExited}
     >
       <Modal.Header>
         <Modal.Title as='h2'>{loginModal.title}</Modal.Title>

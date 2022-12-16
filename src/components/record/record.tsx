@@ -434,7 +434,7 @@ const RecordInner = ({
       action: getRecordLogAction(LogActions.DELETE),
       stack: getRecordLogStack()
     };
-    reference.delete(logObj).then(function deleteSuccess() {
+    reference.delete(null, logObj).then(function deleteSuccess() {
       // Get an appLink from a reference to the table that the existing reference came from
       const unfilteredRefAppLink = reference.table.reference.contextualize.compact.appLink;
       // $rootScope.showSpinner = false;
@@ -616,7 +616,7 @@ const RecordInner = ({
   const renderTableOfContents = (leftRef: React.RefObject<HTMLDivElement>) => (
     <div
       id='record-side-pan'
-      className={`side-panel-resizable record-toc resizable ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
+      className={`side-panel-resizable record-toc resizable small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
         }`}
       ref={leftRef}
     >
@@ -701,8 +701,8 @@ const RecordInner = ({
   return (
     <div className='record-container app-content-container'>
       {errors.length === 0 && showDeleteSpinner &&
-        <div className='delete-spinner-container'>
-          <div className='delete-spinner-backdrop'></div>
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
           <ChaiseSpinner className='delete-spinner' message='Deleting...' />
         </div>
       }
@@ -710,7 +710,7 @@ const RecordInner = ({
         <Alerts />
         <div className='top-flex-panel'>
           <div
-            className={`top-left-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
+            className={`top-left-panel small-panel ${showPanel && !disablePanel ? 'open-panel' : 'close-panel'
               }`}
           >
             <div className='panel-header'>
@@ -849,7 +849,9 @@ const RecordInner = ({
         right={renderMainContainer}
         minWidth={200}
         maxWidth={40}
-        initialWidth={21}
+        // NOTE the following must have the same value as the one in css.
+        // which is $left-panel-width-sm variable in _variables.scss
+        initialWidth={15}
         className='bottom-panel-container'
         convertMaxWidth
         convertInitialWidth

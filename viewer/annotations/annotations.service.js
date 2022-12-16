@@ -4,7 +4,7 @@
     angular.module('chaise.viewer')
 
     .factory('AnnotationsService', [
-        '$window', '$q', '$rootScope', 'logService', 
+        '$window', '$q', '$rootScope', 'logService',
         function($window, $q, $rootScope, logService) {
         var origin = $window.location.origin;
         var iframe = $window.frames[0];
@@ -92,7 +92,7 @@
                 action: getAnnotationLogAction(logService.logActions.DELETE, item),
                 stack: getAnnotationLogStack(item)
             };
-            item.tuple.reference.delete(logObj).then(function () {
+            item.tuple.reference.delete(null, logObj).then(function () {
                 defer.resolve();
             }).catch(function (err) {
                 defer.reject(err);

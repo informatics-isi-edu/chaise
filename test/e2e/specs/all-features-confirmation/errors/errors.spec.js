@@ -526,9 +526,6 @@ describe('Error related test cases,', function() {
             // make sure ok button is clickable
             browser.wait(protractor.ExpectedConditions.elementToBeClickable(modalOkBtn), browser.params.defaultTimeout);
             modalOkBtn.click().then(function(){
-                // doing .click() triggers the browser to show the alert
-                return browser.switchTo().alert().accept();
-            }).then(function () {
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
                 var newapplink = url.replace("recordedit", "recordset"),
@@ -559,10 +556,7 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to RecordSet', function(done){
-            // This has to be .click(), if we use clickButton then it won't show the alert
             chaisePage.errorModal.getOKButton().click().then(function(){
-                return browser.switchTo().alert().accept();
-            }).then(function(){
                 return browser.driver.getCurrentUrl();
             }).then (function(currentUrl) {
               var newapplink = url.replace("recordedit", "recordset"),
@@ -596,7 +590,7 @@ describe('Error related test cases,', function() {
                     return alert.getText();
                 }).then(function (text) {
                     expect(text).toContain("Your login session has expired. You are now accessing data anonymously", "alert message missmatch");
-                    return chaisePage.performLogin(process.env.AUTH_COOKIE, false);
+                    return chaisePage.performLogin(process.env.AUTH_COOKIE);
                 }).then(function () {
                     done();
                 }).catch(chaisePage.catchTestError(done));

@@ -729,7 +729,7 @@
 
             var loc = new ERMrest.AttributeGroupLocation(
                 pImageRef.location.service,
-                catalog.id,
+                catalog,
                 locationPath,
                 null, //search object
                 sortObj,

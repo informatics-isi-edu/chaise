@@ -9,20 +9,10 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
-import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 
 const KeyColumn = (): JSX.Element => {
-  const getInputTypeOrDisabled = (column: any) => {
-    return 'longtext';
-    if (column.inputDisabled) {
-      // TODO: if showSelectAll, disable input
-      // TODO: create column models, no column model, enable!
-      // TODO: is editMode and user cannot update this row, disable
-      return 'disabled';
-    }
-    return getInputType(column.type);
-  }
 
   const { columnModels, keysHeightMap } = useRecordedit();
 
@@ -43,7 +33,7 @@ const KeyColumn = (): JSX.Element => {
         const column = cm.column; 
         const colName = makeSafeIdAttr(column?.displayname?.value);
         const height = keysHeightMap[colName];
-        const colType = getInputTypeOrDisabled(column);
+        const colType = getInputTypeOrDisabled(cm);
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];
         const heightparam = height == -1 ? defaultHeight : `${height}px`;
         return (

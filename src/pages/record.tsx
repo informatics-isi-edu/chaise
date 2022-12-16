@@ -27,7 +27,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { APP_ROOT_ID_NAME, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordSettings = {
   appName: 'record',
@@ -115,7 +115,7 @@ const RecordApp = (): JSX.Element => {
   return <Record {...recordProps} />;
 };
 
-const root = createRoot(document.getElementById(APP_ROOT_ID_NAME) as HTMLElement);
+const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
 root.render(
   <AppWrapper appSettings={recordSettings} includeAlerts includeNavbar displaySpinner>
     <RecordApp />

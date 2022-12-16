@@ -398,14 +398,14 @@ export default function RecordProvider({
       // inline
       if (activeListModel.inline) {
         const rm = flowControl.current.inlineRelatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, true));
+        rm.updateMainEntity(processRequests, !isUpdate, true, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, true));
         continue;
       }
 
       // related
       if (activeListModel.related) {
         const rm = flowControl.current.relatedRequestModels[activeListModel.index];
-        rm.updateMainEntity(processRequests, !isUpdate, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, false));
+        rm.updateMainEntity(processRequests, !isUpdate, true, afterUpdateRelatedEntity(!!isUpdate, reqModel, rm.index, false));
         continue;
       }
 
@@ -440,9 +440,8 @@ export default function RecordProvider({
   /**
    * Read data for the main entity
    * @param {boolean} isUpdate whether this is update request or load
-   * @param {boolean} addDatasetJsonLD whether we should add the dataset json-ld or not
    */
-  const readMainEntity = (isUpdate: boolean, addDatasetJsonLD?: boolean) => {
+  const readMainEntity = (isUpdate: boolean) => {
     return new Promise<any>((resolve, reject) => {
 
       setShowMainSectionSpinner(true);
@@ -537,7 +536,8 @@ export default function RecordProvider({
         flowControl.current.reloadCauses = [];
         flowControl.current.reloadStartTime = -1;
 
-        if (addDatasetJsonLD) {
+        // initial request should attach the google json-ld
+        if (!isUpdate) {
           attachGoogleDatasetJsonLd(reference, tuple, flowControl.current.templateVariables);
         }
 

@@ -13,7 +13,25 @@
                     ]
                 }
             ],
-            "foreign_keys": [],
+            "foreign_keys": [
+                {
+                    "names": [["multi-edit", "multi_edit_fk1"]],
+                    "foreign_key_columns": [
+                        {
+                            "column_name": "fk_to_f1",
+                            "table_name": "multi-edit-table",
+                            "schema_name": "multi-edit"
+                        }
+                    ],
+                    "referenced_columns": [
+                        {
+                            "column_name": "id",
+                            "table_name": "f1",
+                            "schema_name": "multi-edit"
+                        }
+                    ]
+                }
+            ],
             "table_name": "multi-edit-table",
             "schema_name": "multi-edit",
             "column_definitions": [
@@ -43,8 +61,7 @@
                     "type": {
                         "typename": "int"
                     }
-                },
-                {
+                }, {
                   "name": "json_col",
                   "default": null,
                   "nullok": true,
@@ -52,8 +69,7 @@
                     "typename": "json"
                   },
                   "annotations": {}
-                },
-                {
+                }, {
                   "name": "jsonb_col",
                   "default": null,
                   "nullok": true,
@@ -61,11 +77,17 @@
                     "typename": "jsonb"
                   },
                   "annotations": {}
+                }, {
+                    "name": "fk_to_f1",
+                    "nullok": true,
+                    "type": {
+                        "typename": "int4"
+                    }
                 }
             ],
             "annotations": {
                 "tag:isrd.isi.edu,2016:visible-columns" : {
-                    "*": ["id", "text", "int","json_col","jsonb_col"]
+                    "*": ["id", "text", "int", "json_col", "jsonb_col", ["multi-edit", "multi_edit_fk1"]]
                 }
             }
         },
@@ -219,11 +241,41 @@
                     ]
                 }
             }
+        },
+        "f1": {
+            "kind": "table",
+            "table_name": "f1",
+            "schema_name": "multi-edit",
+            "comment": "main table has fk to this table",
+            "keys": [
+                {"unique_columns": ["id"]},
+                {"unique_columns": ["term"]}
+            ],
+            "foreign_keys": [
+            ],
+            "column_definitions": [
+                {
+                    "name": "id",
+                    "nullok": false,
+                    "type": {
+                        "typename": "serial4"
+                    }
+                },
+                {
+                    "name": "term",
+                    "nullok": false,
+                    "type": {
+                        "typename": "text"
+                    }
+                }
+            ],
+            "annotations": {}
         }
     },
     "table_names": [
         "multi-edit-table",
-        "table_w_multiple_assets"
+        "table_w_multiple_assets",
+        "f1"
     ],
     "comment": null,
     "annotations": {}

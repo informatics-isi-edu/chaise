@@ -11,7 +11,7 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { getDisabledInputValue, getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
@@ -25,17 +25,6 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
   const { columnModels, formsHeightMap, removeForm } = useRecordedit();
 
-  const getInputTypeOrDisabled = (columnModel: RecordeditColumnModel) => {
-    return 'longtext';
-    if (columnModel.isDisabled) {
-      // TODO: if columnModel.showSelectAll, disable input
-      // TODO: create column models, no column model, enable!
-      // TODO: is editMode and user cannot update this row, disable
-      return 'disabled';
-    }
-    return columnModel.inputType;
-  }
-
   const renderFormHeader = () => {
     return (
       <div className='form-header entity-value'>
@@ -45,7 +34,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
             placement='bottom'
             tooltip='Click to remove this record from the form.'
           >
-            <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm(idx)}>
+            <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm([idx])}>
               <i className='fa-solid fa-xmark' />
             </button>
           </ChaiseTooltip>
@@ -58,7 +47,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
     return columnModels.map((cm: RecordeditColumnModel) => {
       const colName = makeSafeIdAttr(cm.column.displayname.value);
       const height = Math.max(...formsHeightMap[colName]);
-      const heightparam = height == -1 ? 'auto' : `${height}px`;
+      const heightparam = height === -1 ? 'auto' : `${height}px`;
 
       const inputType = getInputTypeOrDisabled(cm);
       let placeholder;
@@ -85,6 +74,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
           classes='column-cell-input'
           placeholder={placeholder}
           styles={{ 'height': heightparam }}
+          columnModel={cm}
         />
       );
     })
@@ -122,7 +112,7 @@ const ChaiseFormContainer = (): JSX.Element => {
   const handleHeightAdjustment = (event: any) => {
     const fieldName = event.detail.inputFieldName;
     const msgCleared = event.detail.msgCleared;
-    
+
     const fieldType = event.detail.type;
 
     // call provider function

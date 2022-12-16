@@ -64,7 +64,7 @@
                     }, function onSuccess(res) {
                         scope.$root.showSpinner = true;
                         // user accepted prompt to delete
-                        reference.delete(logObj).then(function deleteSuccess() {
+                        reference.delete(null, logObj).then(function deleteSuccess() {
                             scope.$root.showSpinner = false;
                             // tell parent controller data updated
                             scope.$emit('record-deleted', emmitedMessageArgs);
@@ -72,7 +72,7 @@
                     }, onError, false);
                 } else {
                     scope.$root.showSpinner = true;
-                    reference.delete(logObj).then(function deleteSuccess() {
+                    reference.delete(null, logObj).then(function deleteSuccess() {
                         scope.$root.showSpinner = false;
                         // tell parent controller data updated
                         scope.$emit('record-deleted', emmitedMessageArgs);

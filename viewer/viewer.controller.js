@@ -26,6 +26,15 @@
             openAnnotations();
         });
 
+        // this will make sure the resize can properly go over iframe
+        var iframeElement = document.querySelector('iframe#osd');
+        $rootScope.$on('angular-resizable.resizeStart', function () {
+          iframeElement.style.pointerEvents = 'none';
+        });
+        $rootScope.$on('angular-resizable.resizeEnd', function () {
+          iframeElement.style.pointerEvents = 'inherit';
+        });
+
         $window.addEventListener('message', function channelControllerListener(event) {
             if (event.origin === window.location.origin) {
                 var data = event.data.content;

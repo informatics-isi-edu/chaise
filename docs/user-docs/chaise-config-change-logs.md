@@ -2,6 +2,14 @@ The file contains changes made to chaise-config parameters.
 - Refer to [chaise-config.d](chaise-config.md) for currently supported parameters
 - Refer to [chaise-config-deprecated.md](chaise-config-deprecated.md) for deprecated parameters
 
+#### 11/17/2022 ####
+
+###### PR Link
+  - [chaise](https://github.com/informatics-isi-edu/chaise/pull/2252)
+
+###### Added
+  - `hideRecordeditLeaveAlert` property was added to suppress the displayed alert when users are about to navigate away from recordedit to preserve the editted content.
+
 #### 10/07/2022 ####
 
 ###### PR Link

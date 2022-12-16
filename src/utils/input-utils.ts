@@ -6,7 +6,7 @@
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
-import { TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -76,6 +76,16 @@ export function isDisabled(column: any): boolean {
   return column.inputDisabled ? true : false;
 }
 
+export function getInputTypeOrDisabled(columnModel: RecordeditColumnModel): string {
+  if (columnModel.isDisabled) {
+    // TODO: if columnModel.showSelectAll, disable input
+    // TODO: create column models, no column model, enable!
+    // TODO: is editMode and user cannot update this row, disable
+    return 'disabled';
+  }
+  return columnModel.inputType;
+}
+
 /**
  * return the disabled input value based on input type
  * @param column the column object from ermrestJS
@@ -110,7 +120,7 @@ export function formatDatetime(value: string, options: TimestampOptions) {
 /**
  * Map type to default heights for different inputs (currently for recordedit)
  */
-export const DEFAULT_HEGHT_MAP = {
+export const DEFAULT_HEGHT_MAP: any = {
   'number': 47,
   'date': 47,
   'timestamp': 82,
@@ -129,4 +139,37 @@ export const DEFAULT_HEGHT_MAP = {
   'color': 47, 
   'shorttext': 47, 
   'disabled': 47
+}
+
+export const ERROR_MESSAGES = {
+  REQUIRED: 'Please enter a value for this field.',
+  INVALID_INTEGER: 'Please enter a valid integer value.',
+  INVALID_NUMERIC: 'Please enter a valid decimal value.',
+  INVALID_DATE: 'Please enter a valid date value.',
+  INVALID_TIMESTAMP: 'Please enter a valid date and time value.'
+}
+
+export function formatInt(value: string) {
+  const intVal = parseInt(value, 10);
+  return !isNaN(intVal) ? intVal : null;
+}
+
+export function formatFloat(value: string) {
+  const floatVal = parseFloat(value);
+  return !isNaN(floatVal) ? floatVal : null;
+}
+
+/**
+ * given the column and a valid, return the displayed value.
+ * checks for preformat config before returning true/falsew
+ */
+export function formatBoolean(column: any, value: any) {
+  return column.formatvalue(value);
+}
+
+/**
+ * If the value is not null or undefined, return it. otherwise return the alt.
+ */
+export function replaceNullOrUndefined(val: any, alt: any) {
+  return (val === null || val === undefined) ? alt : val;
 }

@@ -10,6 +10,7 @@ var chaiseConfig = {
     maxRecordsetRowHeight: 100,
     disableExternalLinkModal: true,
     logClientActions: false,
+    hideRecordeditLeaveAlert: true,
     hideTableOfContents: true,
     showWriterEmptyRelatedOnLoad: true,
     loggedInMenu: {

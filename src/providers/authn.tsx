@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
 
 // models
@@ -57,9 +57,10 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
-  const { dispatchError, showLoginModal, setLoginFunction } = useError();
+  const { dispatchError, showLoginModal, hideLoginModal, setLoginFunction } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
+  const popupWindowRef = useRef<Window | null>(null); // the popup window used for login
   const _changeCbs: any = {};
   let _counter = 0;
 
@@ -160,10 +161,11 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
       postLoginCB = () => {
         // fetches the session of the user that just logged in
         getSession('').then((response: any) => {
-          // TODO: make sure this works how we expect with state variables
           if (!shouldReloadPageAfterLogin(session)) {
-            // TODO: discuss this code path
-            // alert(`${response.client.full_name} logged in`);
+            // NOTE: this blindly closes the login modal (assuming it's open)
+            //   - TODO: we want to check `loginModal` before closing so we aren't assuming it's there
+            //     - `loginModal` is null when this function is defined and that variable state (null) is being captured when defining this function
+            hideLoginModal();
           } else {
             windowRef.location.reload();
           }
@@ -181,11 +183,19 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
     // top should just have some small offset if there's available space
     const popupTop = (topOffset + popupHeight) < screen.availHeight ? topOffset : 0;
 
+    // close the existing popup (if any)
+    if (popupWindowRef.current) {
+      popupWindowRef.current.close();
+    }
+
     // open a window with proper position and width and height
     const win = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${popupLeft},top=${popupTop}`);
 
     // focus on the opened window
     win?.focus();
+
+    // keep track of the window, so we ensure only one is opened at a time.
+    popupWindowRef.current = win;
 
     _logInHelper(win, postLoginCB, 'popUp', null, logAction);
   };

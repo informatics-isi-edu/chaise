@@ -13,6 +13,7 @@ interface ChaiseError {
   error: any; // TODO what would be a proper type?
   isDismissible?: boolean;
   skipLogging?: boolean;
+  okBtnActionMessage?: string; // TODO can be used for bulk delete
   okBtnCallback?: Function;
   closeBtnCallback?: Function;
 }
@@ -29,7 +30,7 @@ export const ErrorContext = createContext<{
   loginModal: LoginModalProps | null;
   showLoginModal: (props: LoginModalProps) => void;
   hideLoginModal: () => void;
-  setLoginFunction: Function;
+  setLoginFunction: (cb: Function) => void;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -50,10 +51,8 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
   const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);
 
   let callLoginFunction: Function;
-  const showLoginModal = (props: LoginModalProps)  => {
-    if (!loginModal) {
-      setLoginModal(props);
-    }
+  const showLoginModal = (props: LoginModalProps) => {
+    if (!loginModal) setLoginModal(props);
   };
 
   const hideLoginModal = () => {

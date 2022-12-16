@@ -14,7 +14,6 @@
   $record-header-padding-left: 40px;
 
   .record-main-section {
-
     $record-main-spinner-height: 97px;
 
     position: relative;
@@ -29,7 +28,6 @@
       .record-main-spinner {
         height: $record-main-spinner-height;
       }
-
     }
 
     > table {
@@ -38,7 +36,7 @@
       width: 100%;
 
       // reduce the spacing of table cells (overrides bootstrap default)
-      > tbody > tr {
+      > tbody > tr.row {
         border-top: $record-table-cell-border-width solid $border-color;
         margin: 0px;
 
@@ -81,21 +79,20 @@
             padding-top: $record-table-cell-padding;
           }
         }
-      }
 
-      .entity-key {
-        padding-left: $record-header-padding-left;
-        min-width: 150px;
-        border-bottom-width: 0px;
-        position: relative;
-        padding-right: 15px;
+        .entity-key {
+          padding-left: $record-header-padding-left;
+          border-bottom-width: 0px;
+          position: relative;
+          padding-right: 15px;
 
-        .entity-key-icons {
-          position: absolute;
-          right: 0px;
-          top: 5px;
-          .spinner-border {
-            color: #828282;
+          .entity-key-icons {
+            position: absolute;
+            right: 0px;
+            top: 5px;
+            .spinner-border {
+              color: #828282;
+            }
           }
         }
       }
