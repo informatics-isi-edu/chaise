@@ -1,53 +1,67 @@
 @import "variables";
 
 .chaise-input-control {
-    .input-switch {
-        padding-right: 0;
-        height: auto;
-    }
+  .input-switch {
+    padding-right: 0;
+    height: auto;
+  }
 
-    .input-switch-clear {
-        position: absolute;
-        top: 2px;
-        right: 6px;
-        cursor: pointer;
-    }
+  .input-switch-clear {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    cursor: pointer;
+  }
 }
 
-.input-switch-datetime{
-    .chaise-input-control{
-        .input-switch-clear{
-            top: -2px;
-        }
-    }
+// CSS fixes for lontext to override classes from common css file - for Josh to refer to
+.input-switch-longtext-container .chaise-input-control {
+  height: auto;
+  padding: 0 !important;
+
+  textarea {
+    padding: 10px !important;
+    min-height: 139px;
+    display: flex;
+    width: 100%;
+    border: none;
+  }
 }
 
 .input-switch-datetime {
-    flex-direction: column;
+  flex-direction: column;
 
-    .chaise-input-control {
-        min-height: auto;
-    }
+  .chaise-input-control {
+    min-height: auto;
 
-    .chaise-input-control:first-child {
-        margin-bottom: 5px;
+    .input-switch-clear {
+      top: -2px;
     }
+  }
+
+  .chaise-input-control:first-child {
+    margin-bottom: 5px;
+  }
 }
 
-.input-switch-date, .input-switch-datetime {
-    .date-input-show-clear, .time-input-show-clear{
-        margin-right: 10px;
-    }
+.input-switch-date,
+.input-switch-datetime {
+
+  .date-input-show-clear,
+  .time-input-show-clear {
+    margin-right: 10px;
+  }
 }
 
 
 .chaise-firefox .input-switch-date.chaise-input-control.has-feedback,
 .chaise-firefox .input-switch-time.chaise-input-control.has-feedback {
-    padding-right: $input-remove-width;
+  padding-right: $input-remove-width;
 }
 
 .input-switch-color {
   position: relative;
+
   .hex-sign {
     color: $placeholder-color;
   }
@@ -84,6 +98,7 @@
       height: 16px;
       width: 16px;
     }
+
     .react-colorful__hue {
       height: 14px;
     }
@@ -94,6 +109,7 @@
       width: 100%;
       margin-top: 5px;
     }
+
     .popover-buttons {
       margin-top: 5px;
       margin-left: 10px;
@@ -110,6 +126,7 @@
 }
 
 .input-switch-boolean {
+
   // remove the default bootstrap caret
   .dropdown-toggle::after {
     content: none !important;

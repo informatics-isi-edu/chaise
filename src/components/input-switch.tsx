@@ -19,6 +19,9 @@ import { ERROR_MESSAGES, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+import { ResizeSensor } from 'css-element-queries';
+
+
 
 
 /**
@@ -74,6 +77,98 @@ const validationFunctionMap : {
   'date': dateFieldValidation,
   'timestamp': timestampFieldValidation,
 };
+
+const LongTextField = ({ 
+  name, 
+  placeholder, 
+  classes,
+  inputClasses,
+  clearClasses,
+  disableInput,
+  displayErrors,
+  value,
+  containerClasses,
+  styles,
+  onFieldChange,
+}: TextFieldProps): JSX.Element => {
+  const { setValue, control, clearErrors } = useFormContext();
+
+  const textAreaRef = useRef(null);
+
+  const registerOptions = {
+    required: false,
+  };
+
+  const formInput = useController({
+    name,
+    control,
+    rules: registerOptions,
+  });
+
+  const field = formInput?.field;
+  
+  const fieldValue = field?.value;
+
+  const fieldState = formInput?.fieldState;
+
+  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
+  
+  const { error, isTouched } = fieldState;
+
+  useEffect(() => {
+    const textAreaElement = textAreaRef.current;
+    const sensor = new ResizeSensor(textAreaElement, () => {
+      fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: false, type: 'longtext' });
+    });
+
+    return () => {
+      sensor.detach();
+    }
+  }, []);
+
+  const clearInput = () => {
+    setValue(name, '');
+    clearErrors(name);
+  }
+
+  useEffect(()=>{
+    if(onFieldChange){
+      onFieldChange(fieldValue);
+    }
+
+    if(showClear!=Boolean(fieldValue)){
+      setShowClear(Boolean(fieldValue));
+    }
+  }, [fieldValue]);
+
+  useEffect(() => {
+    if (value === undefined) return;
+    setValue(name, value);
+  }, [value]);
+
+  const handleChange = (v: any) => {
+    field.onChange(v);
+    field.onBlur();
+  };
+
+  useEffect(() => {
+    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'longtext' });
+  }, [error?.message]);
+
+  return (
+    <div className={`${containerClasses} input-switch-container-${name} input-switch-longtext-container`} style={styles}>
+      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaRef}>
+        <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
+        <ClearInputBtn
+          btnClassName={`${clearClasses} input-switch-clear`}
+          clickCallback={clearInput}
+          show={showClear}
+        />
+      </div>
+      { displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
+    </div>
+  );
+}
 
 type TextFieldProps = {
   /**
@@ -177,8 +272,8 @@ const TextField = ({
 
   return (
     <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
-      <div className={`chaise-input-control has-feedback input-switch-text ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <input placeholder={placeholder}className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
+      <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+        <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
           clickCallback={clearInput}
@@ -851,6 +946,17 @@ const InputSwitch = ({
             containerClasses={containerClasses}
             placeholder={placeholder as string}
           />
+      case 'longtext':
+        return <LongTextField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          value={value as string}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange} 
+        />
       case 'text':
       default:
         return <TextField
