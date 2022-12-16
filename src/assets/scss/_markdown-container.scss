@@ -114,6 +114,12 @@
   a.download {
     @include chaise-btn();
     @include chaise-btn-primary();
+
+    // override the button style and allow user text selection
+    user-select: auto;
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
   }
 
   a.download-alt:not(.download), a[download]:not(.download) {

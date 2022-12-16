@@ -40,11 +40,9 @@
   // touch action
   -ms-touch-action: manipulation;
   touch-action: manipulation;
-  // on user select
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+
+  // download buttons don't have the
+  // rule that disallows user selection
 
   // allow the caption to wrap
   white-space: normal;
