@@ -125,6 +125,7 @@ export const DEFAULT_HEGHT_MAP: any = {
   'date': 47,
   'timestamp': 82,
   'text': 47 ,
+  'longtext': 158,
   'timestamptz': 82,
   'float4': 47,
   'float8': 47,
@@ -133,11 +134,10 @@ export const DEFAULT_HEGHT_MAP: any = {
   'integer4': 47,
   'integer8': 47,
   'boolean': 47,
-  'markdown': 47,
-  'longtext': 47,
-  'json': 47,
-  'color': 47,
-  'shorttext': 47,
+  'markdown': 182,
+  'json': 139,
+  'color': 47, 
+  'shorttext': 47, 
   'disabled': 47
 }
 

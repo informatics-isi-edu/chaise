@@ -9,7 +9,7 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
-import { getInputType, getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 
 const KeyColumn = (): JSX.Element => {
@@ -35,11 +35,7 @@ const KeyColumn = (): JSX.Element => {
         const height = keysHeightMap[colName];
         const colType = getInputTypeOrDisabled(cm);
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];
-        
         const heightparam = height == -1 ? defaultHeight : `${height}px`;
-        console.log({ colType, defaultHeight, heightparam });
-
-        // try changing to div if height adjustment does not work
         return (
           <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
