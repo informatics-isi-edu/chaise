@@ -359,13 +359,15 @@ export default function RecordeditProvider({
   }
 
   const addForm = (count: number) => {
-    const newFormIndexValues: number[] = [];
+    const newFormValues: number[] = [];
     // add 'count' number of forms
     setForms((previous: number[]) => {
       // TODO: why is this triggering twice in edit mode while NODE_ENV="development"?
       for (let i = 0; i < count; i++) {
-        previous.push(previous[previous.length - 1] + 1);
-        newFormIndexValues.push(previous.length - 1);
+        // last value in 'forms' incremented by 1
+        const formValue = previous[previous.length - 1] + 1;
+        previous.push(formValue);
+        newFormValues.push(formValue);
       }
 
       return [...previous]
@@ -382,7 +384,7 @@ export default function RecordeditProvider({
       return formsHeightMapCpy;
     });
 
-    return newFormIndexValues;
+    return newFormValues;
   };
 
   const removeForm = (indexes: number[]) => {
