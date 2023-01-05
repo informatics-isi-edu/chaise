@@ -468,9 +468,12 @@ endef
 $(BUILD_VERSION):
 
 # make sure the latest webdriver is installed
+# - we fixed the version since this is the latest version that works with
+#   the protractor version that we're using.
+# - we're only using chrome, so we're ignoring gecko installation.
 .PHONY: update-webdriver
 update-webdriver:
-	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0
+	node_modules/protractor/bin/webdriver-manager update --versions.standalone 3.6.0 --gecko false
 
 # install packages (honors NOD_ENV)
 # using clean-install instead of install to ensure usage of pacakge-lock.json
