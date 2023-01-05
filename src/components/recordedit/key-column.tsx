@@ -36,6 +36,8 @@ const KeyColumn = (): JSX.Element => {
         const colType = getInputTypeOrDisabled(cm);
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];
         const heightparam = height == -1 ? defaultHeight : `${height}px`;
+
+        // try changing to div if height adjustment does not work
         return (
           <span key={colName} className='entity-key' style={{ 'height': heightparam }}>
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}

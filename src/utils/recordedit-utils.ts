@@ -126,7 +126,8 @@ export function populateCreateInitialValues(
   // }
 
   // populate defaults
-  forms.forEach((formValue: number, formIdx: number) => {
+  // NOTE: should only be 1 form
+  forms.forEach((formValue: number) => {
     for (let i = 0; i < columnModels.length; i++) {
       // default model initialiation is null
       let initialModelValue = null;
@@ -250,14 +251,14 @@ export function populateCreateInitialValues(
       if (isTimestamp) {
         // string implies the input is disabled
         if (colModel.inputType === 'disabled') {
-          values[`${formIdx}-${column.name}`] = initialModelValue?.datetime || '';
+          values[`${formValue}-${column.name}`] = initialModelValue?.datetime || '';
         } else {
-          values[`${formIdx}-${column.name}`] = '';
-          values[`${formIdx}-${column.name}-date`] = initialModelValue?.date || '';
-          values[`${formIdx}-${column.name}-time`] = initialModelValue?.time || '';
+          values[`${formValue}-${column.name}`] = '';
+          values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
+          values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
         }
       } else {
-        values[`${formIdx}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
+        values[`${formValue}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
       }
     }
   });
@@ -267,6 +268,7 @@ export function populateCreateInitialValues(
 
 export function populateEditInitialValues(
   columnModels: RecordeditColumnModel[],
+  forms: number[],
   columns: any[],
   tuples: any[],
   isCopy: boolean
@@ -281,7 +283,9 @@ export function populateEditInitialValues(
 
   const canUpdateRows: any[] = [];
   const foreignKeyData: any[] = [];
-  tuples.forEach((tuple: any, tupleIndex: number) => {
+  forms.forEach((formValue: any, formIndex: number) => {
+    const tupleIndex = formIndex, tuple = tuples[tupleIndex];
+
     if (!isCopy) canUpdateRows[tupleIndex] = {};
 
     const tupleValues = tuple.values;
@@ -374,14 +378,14 @@ export function populateEditInitialValues(
       if (isTimestamp) {
         // string implies the input is disabled
         if (colModel.inputType === 'disabled') {
-          values[`${tupleIndex}-${column.name}`] = value?.datetime || '';
+          values[`${formValue}-${column.name}`] = value?.datetime || '';
         } else {
-          values[`${tupleIndex}-${column.name}`] = '';
-          values[`${tupleIndex}-${column.name}-date`] = value?.date || '';
-          values[`${tupleIndex}-${column.name}-time`] = value?.time || '';
+          values[`${formValue}-${column.name}`] = '';
+          values[`${formValue}-${column.name}-date`] = value?.date || '';
+          values[`${formValue}-${column.name}-time`] = value?.time || '';
         }
       } else {
-        values[`${tupleIndex}-${column.name}`] = replaceNullOrUndefined(value, '');
+        values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
       }
 
     });

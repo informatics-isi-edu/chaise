@@ -17,11 +17,12 @@ import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type ChaiseFormProps = {
   classes?: string,
+  formNumber: number,
   idx: number,
   allowRemove: boolean
 }
 
-const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
+const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormProps) => {
 
   const { columnModels, formsHeightMap, removeForm } = useRecordedit();
 
@@ -51,7 +52,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
 
       const inputType = getInputTypeOrDisabled(cm);
       let placeholder;
-      if (inputType == 'disabled') {
+      if (inputType === 'disabled') {
         placeholder = getDisabledInputValue(cm.column);
 
         // TODO: extend this for edit mode
@@ -66,7 +67,7 @@ const ChaiseForm = ({ classes = '', idx, allowRemove }: ChaiseFormProps) => {
         <InputSwitch
           key={colName}
           displayErrors={true}
-          name={`${idx}-${colName}`}
+          name={`${formNumber}-${colName}`}
           type={inputType}
           // type='numeric'
           containerClasses={'column-cell entity-value'}
@@ -123,7 +124,7 @@ const ChaiseFormContainer = (): JSX.Element => {
     <div className='form-container'>
       <form id='recordedit-form' className='recordedit-form' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}>
         {forms.map((f: number, idx: number) =>
-          <ChaiseForm key={f} idx={idx} allowRemove={forms.length > 1} />
+          <ChaiseForm key={f} formNumber={f} idx={idx} allowRemove={forms.length > 1} />
         )}
       </form>
     </div>

@@ -1,5 +1,5 @@
 // hooks
-import { createContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useEffect, useMemo, useRef, useState } from 'react';
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
 import useError from '@isrd-isi-edu/chaise/src/hooks/error';
@@ -117,8 +117,13 @@ export default function RecordeditProvider({
    */
   const [formsHeightMap, setFormsHeightMap] = useState<any>({})
 
+  // since we're using strict mode, the useEffect is getting called twice in dev mode
+  // this is to guard against it
+  const setupStarted = useRef<boolean>(false);
+
   useEffect(() => {
-    if (!reference) return;
+    if (!reference || setupStarted.current) return;
+    setupStarted.current = true;
 
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
@@ -248,11 +253,11 @@ export default function RecordeditProvider({
 
   const onSubmitValid = (data: any) => {
     const submissionRows: any[] = []
-    forms.forEach((f: number, idx: number) => {
+    // f is the number in forms array that is 
+    forms.forEach((f: number) => {
       const currRow: any = {};
       reference.columns.forEach((col: any) => {
-        // TODO: fix indexing
-        const v = data[idx + '-' + col.displayname.value];
+        const v = data[f + '-' + col.displayname.value];
         currRow[col.name] = (v === undefined || v === '') ? null : v;
       });
       submissionRows.push(currRow);
@@ -338,7 +343,7 @@ export default function RecordeditProvider({
           }
         }
 
-        reference.update(tuples).then(submitSuccessCB).catch(submitErrorCB);
+        reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB);
       } else {
         reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB);
       }
@@ -356,18 +361,19 @@ export default function RecordeditProvider({
   const addForm = (count: number) => {
     const newFormIndexValues: number[] = [];
     // add 'count' number of forms
-    setForms((forms: number[]) => {
+    setForms((previous: number[]) => {
+      // TODO: why is this triggering twice in edit mode while NODE_ENV="development"?
       for (let i = 0; i < count; i++) {
-        forms.push(forms[forms.length - 1] + 1);
-        newFormIndexValues.push(forms.length - 1);
+        previous.push(previous[previous.length - 1] + 1);
+        newFormIndexValues.push(previous.length - 1);
       }
 
-      return [...forms]
+      return [...previous]
     })
 
     // for each form added, push another '-1' into the array for each column
-    setFormsHeightMap((formsHeightMap: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
+    setFormsHeightMap((previous: any) => {
+      const formsHeightMapCpy = simpleDeepCopy(previous);
       for (let i = 0; i < count; i++) {
         Object.keys(formsHeightMapCpy).forEach(k => {
           formsHeightMapCpy[k].push(-1);
@@ -379,32 +385,36 @@ export default function RecordeditProvider({
     return newFormIndexValues;
   };
 
-  // TODO: event type
   const removeForm = (indexes: number[]) => {
     // remove the forms based on the given indexes
-    setForms(forms => forms.filter(({ }, i: number) => !indexes.includes(i)));
+    setForms((previous: number[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
     // remove the entry at 'idx' in the array for each column
-    setFormsHeightMap((formsHeightMap: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(formsHeightMap);
+    setFormsHeightMap((previous: any) => {
+      const formsHeightMapCpy = simpleDeepCopy(previous);
       Object.keys(formsHeightMapCpy).forEach(k => {
         formsHeightMapCpy[k] = formsHeightMapCpy[k].filter(({ }, i: number) => !indexes.includes(i));
       });
       return formsHeightMapCpy;
     });
+
+    setTuples((previous: any[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
+
+    // TODO: should this cleanup the form data?
+    //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
   }
 
   const updateKeysHeightMap = (colName: string, height: number) => {
-    setKeysHeightMap((keysHeightMap: any) => {
-      const hMapCopy = simpleDeepCopy(keysHeightMap);
+    setKeysHeightMap((previous: any) => {
+      const hMapCopy = simpleDeepCopy(previous);
       hMapCopy[colName] = height;
       return hMapCopy;
     })
   }
 
   const updateFormsHeightMap = (colName: string, idx: string, height: string | number) => {
-    setFormsHeightMap((formsHeightMap: any) => {
-      const hMapCpy = simpleDeepCopy(formsHeightMap);
+    setFormsHeightMap((previous: any) => {
+      const hMapCpy = simpleDeepCopy(previous);
       hMapCpy[colName][idx] = height;
 
       updateKeysHeightMap(colName, Math.max(...hMapCpy[colName]));
@@ -446,7 +456,8 @@ export default function RecordeditProvider({
         tempTuples.push(shallowTuple);
       }
 
-      initialModel = populateEditInitialValues(columnModels, reference.columns, page.tuples, appMode === appModes.COPY);
+      // using page.tuples here instead of forms
+      initialModel = populateEditInitialValues(columnModels, forms, reference.columns, page.tuples, appMode === appModes.COPY);
 
       setTuples([...tempTuples]);
     }
