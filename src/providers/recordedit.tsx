@@ -255,11 +255,11 @@ export default function RecordeditProvider({
     console.log(data);
     console.log(forms);
     const submissionRows: any[] = []
-    forms.forEach((f: number, idx: number) => {
+    // f is the number in forms array that is 
+    forms.forEach((f: number) => {
       const currRow: any = {};
       reference.columns.forEach((col: any) => {
-        // TODO: fix indexing
-        const v = data[idx + '-' + col.displayname.value];
+        const v = data[f + '-' + col.displayname.value];
         currRow[col.name] = (v === undefined || v === '') ? null : v;
       });
       submissionRows.push(currRow);
@@ -401,6 +401,9 @@ export default function RecordeditProvider({
     });
 
     setTuples((previous: any[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
+
+    // TODO: should this cleanup the form data?
+    //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
   }
 
   const updateKeysHeightMap = (colName: string, height: number) => {
@@ -455,7 +458,8 @@ export default function RecordeditProvider({
         tempTuples.push(shallowTuple);
       }
 
-      initialModel = populateEditInitialValues(columnModels, reference.columns, page.tuples, appMode === appModes.COPY);
+      // using page.tuples here instead of forms
+      initialModel = populateEditInitialValues(columnModels, forms, reference.columns, page.tuples, appMode === appModes.COPY);
 
       setTuples([...tempTuples]);
     }
