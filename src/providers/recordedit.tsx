@@ -252,8 +252,6 @@ export default function RecordeditProvider({
   }, [reference])
 
   const onSubmitValid = (data: any) => {
-    console.log(data);
-    console.log(forms);
     const submissionRows: any[] = []
     // f is the number in forms array that is 
     forms.forEach((f: number) => {

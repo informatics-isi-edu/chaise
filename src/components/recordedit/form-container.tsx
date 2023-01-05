@@ -51,7 +51,6 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
       const heightparam = height === -1 ? 'auto' : `${height}px`;
 
       const inputType = getInputTypeOrDisabled(cm);
-
       let placeholder;
       if (inputType === 'disabled') {
         placeholder = getDisabledInputValue(cm.column);
@@ -116,6 +115,7 @@ const ChaiseFormContainer = (): JSX.Element => {
     const msgCleared = event.detail.msgCleared;
 
     const fieldType = event.detail.type;
+
     // call provider function
     handleInputHeightAdjustment(fieldName, msgCleared, fieldType);
   }
