@@ -4,6 +4,7 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { generateUUID } from '@isrd-isi-edu/chaise/src/utils/math-utils';
 import { BODY_CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getURLHashFragment, isSameOrigin, stripSortAndQueryParams } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 /**
 * Will return a promise that is resolved when the setup is done
@@ -90,6 +91,34 @@ function addBodyClasses() {
   }
 }
 
+/**
+ * add schema name and table name classes to the app-container
+ * this could be done in the appWrapper comp itself, but that would cause multiple
+ * renders. so I decided to do it this way instead.
+ * @param reference the reference object
+ * @param appName name of the app ('record' | 'recordset' | 'recordedit')
+ */
+export function addAppContainerClasses(reference: any, appName: string) {
+  const s = makeSafeIdAttr(reference.table.schema.name), t = makeSafeIdAttr(reference.table.name);
+  // NOTE: classList.add doesn't accept whitespace as classname that's why we're using array
+  let addedClass: string[] = [];
+  switch (appName) {
+    case 'record':
+      addedClass = [`r_s_${s}`, `r_t_${t}`];
+      break;
+    case 'recordset':
+      addedClass = [`rs_s_${s}`, `rs_t_${t}`];
+      break;
+    case 'recordedit':
+      addedClass = [`re_s_${s}`, `re_t_${t}`];
+      break;
+    default:
+      break;
+  }
+  if (addedClass.length === 0) return;
+  document.querySelector('.app-container')?.classList.add(...addedClass);
+}
+
 function addTitle(title?: string) {
   const chaiseConfig = ConfigService.chaiseConfig;
 
@@ -121,7 +150,7 @@ function addCanonicalTag() {
 * make sure links open in new tab
 */
 export function openLinksInTab() {
-  addClickListener('a[href]', (e : Event, element: any) => {
+  addClickListener('a[href]', (e: Event, element: any) => {
     element.target = '_blank';
   });
 }

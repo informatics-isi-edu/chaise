@@ -18,7 +18,7 @@ import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedi
 import { ERROR_MESSAGES, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { ResizeSensor } from 'css-element-queries';
 
 
@@ -42,7 +42,7 @@ const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 const DATE_FORMAT = 'YYYY-MM-DD';
 
 const integerFieldValidation = {
-  value:  INTEGER_REGEXP,
+  value: INTEGER_REGEXP,
   message: ERROR_MESSAGES.INVALID_INTEGER
 };
 
@@ -53,7 +53,7 @@ const numericFieldValidation = {
 
 
 // https://github.com/react-hook-form/react-hook-form/issues/589
-const dateFieldValidation =  (value: string) => {
+const dateFieldValidation = (value: string) => {
   if (!value) return;
   const date = windowRef.moment(value, DATE_FORMAT, true);
   return date.isValid() || ERROR_MESSAGES.INVALID_DATE;
@@ -65,7 +65,7 @@ const timestampFieldValidation = (value: string) => {
   return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
 };
 
-const validationFunctionMap : {
+const validationFunctionMap: {
   [key: string]: any;
 } = {
   'int': integerFieldValidation,
@@ -78,9 +78,9 @@ const validationFunctionMap : {
   'timestamp': timestampFieldValidation,
 };
 
-const LongTextField = ({ 
-  name, 
-  placeholder, 
+const LongTextField = ({
+  name,
+  placeholder,
   classes,
   inputClasses,
   clearClasses,
@@ -106,19 +106,24 @@ const LongTextField = ({
   });
 
   const field = formInput?.field;
-  
+
   const fieldValue = field?.value;
 
   const fieldState = formInput?.fieldState;
 
   const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
-  
+
   const { error, isTouched } = fieldState;
 
   useEffect(() => {
     const textAreaElement = textAreaRef.current;
+    if (!textAreaElement) return;
     const sensor = new ResizeSensor(textAreaElement, () => {
-      fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: false, type: 'longtext' });
+      fireCustomEvent(
+        'input-switch-error-update',
+        `.input-switch-container-${makeSafeIdAttr(name)}`,
+        { inputFieldName: name, msgCleared: false, type: 'longtext' }
+      );
     });
 
     return () => {
@@ -131,12 +136,12 @@ const LongTextField = ({
     clearErrors(name);
   }
 
-  useEffect(()=>{
-    if(onFieldChange){
+  useEffect(() => {
+    if (onFieldChange) {
       onFieldChange(fieldValue);
     }
 
-    if(showClear!=Boolean(fieldValue)){
+    if (showClear != Boolean(fieldValue)) {
       setShowClear(Boolean(fieldValue));
     }
   }, [fieldValue]);
@@ -152,11 +157,15 @@ const LongTextField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'longtext' });
+    fireCustomEvent(
+      'input-switch-error-update',
+      `.input-switch-container-${makeSafeIdAttr(name)}`,
+      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'longtext' }
+    );
   }, [error?.message]);
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name} input-switch-longtext-container`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)} input-switch-longtext-container`} style={styles}>
       <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaRef}>
         <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
@@ -165,7 +174,7 @@ const LongTextField = ({
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
+      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>
   );
 }
@@ -246,12 +255,12 @@ const TextField = ({
     clearErrors(name);
   }
 
-  useEffect(()=>{
-    if(onFieldChange){
+  useEffect(() => {
+    if (onFieldChange) {
       onFieldChange(fieldValue);
     }
 
-    if(showClear!=Boolean(fieldValue)){
+    if (showClear != Boolean(fieldValue)) {
       setShowClear(Boolean(fieldValue));
     }
   }, [fieldValue]);
@@ -267,11 +276,15 @@ const TextField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'text' });
+    fireCustomEvent(
+      'input-switch-error-update',
+      `.input-switch-container-${makeSafeIdAttr(name)}`,
+      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'text' }
+    );
   }, [error?.message]);
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
         <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
@@ -280,7 +293,7 @@ const TextField = ({
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
+      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>
   );
 };
@@ -314,7 +327,7 @@ const DisabledField = ({
   });
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`}>
       <div className={`chaise-input-control input-disabled ${classes}`}>
         <input
           className={`${inputClasses} input-switch`}
@@ -409,12 +422,12 @@ const NumericField = ({
     clearErrors(name);
   }
 
-  useEffect(()=>{
-    if(onFieldChange){
+  useEffect(() => {
+    if (onFieldChange) {
       onFieldChange(fieldValue);
     }
 
-    if(showClear!=Boolean(fieldValue)){
+    if (showClear != Boolean(fieldValue)) {
       setShowClear(Boolean(fieldValue));
     }
   }, [fieldValue]);
@@ -430,20 +443,24 @@ const NumericField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'number' });
+    fireCustomEvent(
+      'input-switch-error-update',
+      `.input-switch-container-${makeSafeIdAttr(name)}`,
+      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'number' }
+    );
   }, [error?.message])
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...field} onChange={handleChange}/>
+        <input placeholder={placeholder} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
           clickCallback={clearInput}
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <div className='input-switch-error text-danger'>{error.message}</div> }
+      {displayErrors && isTouched && error?.message && <div className='input-switch-error text-danger'>{error.message}</div>}
     </div>
   );
 };
@@ -524,12 +541,12 @@ const DateField = ({
     clearErrors(name);
   };
 
-  useEffect(()=>{
-    if(onFieldChange){
+  useEffect(() => {
+    if (onFieldChange) {
       onFieldChange(fieldValue);
     }
 
-    if(showClear!=Boolean(fieldValue)){
+    if (showClear != Boolean(fieldValue)) {
       setShowClear(Boolean(fieldValue));
     }
   }, [fieldValue]);
@@ -545,21 +562,26 @@ const DateField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'date' });
+    fireCustomEvent(
+      'input-switch-error-update',
+      `.input-switch-container-${makeSafeIdAttr(name)}`,
+      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'date' }
+    );
   }, [error?.message])
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <input className={`${inputClasses} input-switch ${showClear ? 'date-input-show-clear' : ''}`} {...field} onChange={handleChange} type='date' step='1' pattern='\d{4}-\d{2}-\d{2}'
-        min='1970-01-01' max='2999-12-31' />
+        <input className={`${inputClasses} input-switch ${showClear ? 'date-input-show-clear' : ''}`} {...field}
+          onChange={handleChange} type='date' step='1' pattern='\d{4}-\d{2}-\d{2}'
+          min='1970-01-01' max='2999-12-31' />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}
           clickCallback={clearInput}
           show={showClear}
         />
       </div>
-      { displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
+      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>
   );
 };
@@ -699,23 +721,23 @@ const TimestampField = ({
     setValue(`${name}-date`, value);
   }, [value]);
 
-  useEffect(()=>{
-    if(onFieldChange){
+  useEffect(() => {
+    if (onFieldChange) {
       onFieldChange(dateFieldValue);
     }
 
-    if(showClear.date!=Boolean(dateFieldValue)){
-      setShowClear({...showClear, date: Boolean(dateFieldValue)});
+    if (showClear.date != Boolean(dateFieldValue)) {
+      setShowClear({ ...showClear, date: Boolean(dateFieldValue) });
     }
   }, [dateFieldValue]);
 
-  useEffect(()=>{
-    if(onFieldChange){
+  useEffect(() => {
+    if (onFieldChange) {
       onFieldChange(timeFieldValue);
     }
 
-    if(showClear.time!=Boolean(timeFieldValue)){
-      setShowClear({...showClear, time: Boolean(timeFieldValue)});
+    if (showClear.time != Boolean(timeFieldValue)) {
+      setShowClear({ ...showClear, time: Boolean(timeFieldValue) });
     }
   }, [timeFieldValue]);
 
@@ -730,7 +752,11 @@ const TimestampField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'timestamp' });
+    fireCustomEvent(
+      'input-switch-error-update',
+      `.input-switch-container-${makeSafeIdAttr(name)}`,
+      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'timestamp' }
+    );
   }, [error?.message])
 
   const clearDate = () => {
@@ -744,11 +770,11 @@ const TimestampField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       <div className='input-switch-datetime'>
         <div className={`chaise-input-control has-feedback input-switch-date ${classes} ${disableInput ? ' input-disabled' : ''}`}>
           <input className={`${inputClasses} input-switch ${showClear.date ? 'date-input-show-clear' : ''}`} type='date' min='1970-01-01' max='2999-12-31' step='1'
-          {...dateField} onChange={handleDateChange}/>
+            {...dateField} onChange={handleDateChange} />
           <ClearInputBtn
             btnClassName={`${clearClasses} input-switch-clear`}
             clickCallback={clearDate}
@@ -757,7 +783,7 @@ const TimestampField = ({
         </div>
         <div className={`chaise-input-control has-feedback input-switch-time ${classes} ${disableInput ? ' input-disabled' : ''}`}>
           <input className={`${timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`} type='time' min='00:00:00' max='23:59:59' step='1'
-          {...timeField} onChange={handleTimeChange}/>
+            {...timeField} onChange={handleTimeChange} />
           <ClearInputBtn
             btnClassName={`${clearTimeClasses} input-switch-clear`}
             clickCallback={clearTime}
@@ -766,7 +792,7 @@ const TimestampField = ({
         </div>
         <input {...field} type='hidden' />
       </div>
-      { displayErrors && (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error text-danger'>{error.message}</span> }
+      {displayErrors && (isDateTouched || isTimeTouched) && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>
   );
 };
@@ -841,8 +867,8 @@ const InputSwitch = ({
   name,
   placeholder,
   classes = '',
-  inputClasses='',
-  containerClasses='',
+  inputClasses = '',
+  containerClasses = '',
   timeClasses = '',
   clearClasses,
   clearTimeClasses,
@@ -850,7 +876,7 @@ const InputSwitch = ({
   disableInput,
   displayErrors = true,
   onFieldChange,
-  styles={},
+  styles = {},
   columnModel,
 }: InputSwitchProps): JSX.Element | null => {
 
@@ -939,13 +965,13 @@ const InputSwitch = ({
           columnModel={columnModel}
         />
       case 'disabled':
-          return <DisabledField
-            name={name}
-            classes={classes}
-            inputClasses={inputClasses}
-            containerClasses={containerClasses}
-            placeholder={placeholder as string}
-          />
+        return <DisabledField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          placeholder={placeholder as string}
+        />
       case 'longtext':
         return <LongTextField
           name={name}
@@ -955,7 +981,7 @@ const InputSwitch = ({
           clearClasses={clearClasses}
           value={value as string}
           disableInput={disableInput}
-          onFieldChange={onFieldChange} 
+          onFieldChange={onFieldChange}
         />
       case 'text':
       default:

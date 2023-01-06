@@ -5,25 +5,15 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 
 const LoginModal = (): JSX.Element => {
-  const { dispatchError, loginModal, hideLoginModal } = useError();
+  const { dispatchError, loginModal, closeLoginModal } = useError();
   const { popupLogin } = useAuthn();
 
-  const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL, () => { onExited('login') });
+  const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL);
+  // TODO: Call closeLoginModal to process any attached callbacks
+  //    This wasn't working properly in angularJS where this callback would be ignored when the modal popup login was being shown
+  // const login = () => popupLogin(LogActions.LOGIN_LOGIN_MODAL, () => { closeLoginModal('login') });
 
-  const cancel = () => onExited('cancel');
-
-  const onExited = (message: string) => {
-    hideLoginModal(); // sets modal to null after it's been hidden
-    if (message === 'login' && loginModal?.onModalCloseSuccess) {
-      loginModal.onModalCloseSuccess()
-    } else if (message === 'cancel' && loginModal?.onModalClose) {
-      loginModal.onModalClose('cancel');
-    } else {
-      // TODO needs discussion
-      // https://github.com/informatics-isi-edu/chaise/issues/2091#issuecomment-868144407
-      // dispatchError({ error: new Error('You cannot proceed without logging in.') })
-    }
-  }
+  const cancel = () => closeLoginModal('cancel');
 
   if (!loginModal) return <></>
 

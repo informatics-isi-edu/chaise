@@ -25,6 +25,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
@@ -75,8 +76,8 @@ const RecordeditApp = (): JSX.Element => {
         reference = response.contextualize.entryCreate;
       }
 
-
-      // TODO update head title
+      // add schema and table name classes to app-container
+      addAppContainerClasses(reference, recordeditSettings.appName);
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);

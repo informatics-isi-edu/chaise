@@ -57,7 +57,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
   const PROMPT_EXPIRATION_KEY = 'promptExpiration'; // name of key for prompt expiration value
   const PREVIOUS_SESSION_KEY = 'previousSession'; // name of key for previous session boolean
 
-  const { dispatchError, showLoginModal, hideLoginModal, setLoginFunction } = useError();
+  const { dispatchError, showLoginModal, closeLoginModal, setLoginFunction } = useError();
   const [session, setSession] = useState<Session | null>(null); // current session object
   const [prevSession, setPrevSession] = useState<Session | null>(null); // previous session object
   const popupWindowRef = useRef<Window | null>(null); // the popup window used for login
@@ -162,10 +162,7 @@ export default function AuthnProvider({ children }: AuthnProviderProps): JSX.Ele
         // fetches the session of the user that just logged in
         getSession('').then((response: any) => {
           if (!shouldReloadPageAfterLogin(session)) {
-            // NOTE: this blindly closes the login modal (assuming it's open)
-            //   - TODO: we want to check `loginModal` before closing so we aren't assuming it's there
-            //     - `loginModal` is null when this function is defined and that variable state (null) is being captured when defining this function
-            hideLoginModal();
+            closeLoginModal('login');
           } else {
             windowRef.location.reload();
           }

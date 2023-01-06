@@ -46,7 +46,7 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
 
   const renderInputs = () => {
     return columnModels.map((cm: RecordeditColumnModel) => {
-      const colName = makeSafeIdAttr(cm.column.displayname.value);
+      const colName = cm.column.name;
       const height = Math.max(...formsHeightMap[colName]);
       const heightparam = height === -1 ? 'auto' : `${height}px`;
 

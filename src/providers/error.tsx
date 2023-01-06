@@ -1,4 +1,5 @@
 import { createContext, useMemo, useState } from 'react';
+import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -29,7 +30,8 @@ export const ErrorContext = createContext<{
   logTerminalError: (error: any) => void;
   loginModal: LoginModalProps | null;
   showLoginModal: (props: LoginModalProps) => void;
-  hideLoginModal: () => void;
+  closeLoginModal: (message: string) => void;
+  removeLoginModal: () => void;
   setLoginFunction: (cb: Function) => void;
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
@@ -48,14 +50,27 @@ type ErrorProviderProps = {
 export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Element {
   const [errors, setErrors] = useState<ChaiseError[]>([]);
   const [dontAllowOtherErrors, setDontAllowOtherErrors] = useState(false);
-  const [loginModal, setLoginModal] = useState<null|LoginModalProps>(null);
+  const [loginModal, setLoginModal, loginModalRef] = useStateRef<null|LoginModalProps>(null);
 
   let callLoginFunction: Function;
   const showLoginModal = (props: LoginModalProps) => {
     if (!loginModal) setLoginModal(props);
   };
 
-  const hideLoginModal = () => {
+  const closeLoginModal = (message: string) => {
+    removeLoginModal(); // sets modal to null after it's been hidden
+    if (message === 'login' && loginModalRef.current?.onModalCloseSuccess) {
+      loginModalRef.current.onModalCloseSuccess()
+    } else if (message === 'cancel' && loginModalRef.current?.onModalClose) {
+      loginModalRef.current.onModalClose('cancel');
+    } else {
+      // TODO needs discussion
+      // https://github.com/informatics-isi-edu/chaise/issues/2091#issuecomment-868144407
+      // dispatchError({ error: new Error('You cannot proceed without logging in.') })
+    }
+  }
+
+  const removeLoginModal = () => {
     setLoginModal(null);
   };
 
@@ -127,7 +142,8 @@ export default function ErrorProvider({ children }: ErrorProviderProps): JSX.Ele
       logTerminalError,
       loginModal,
       showLoginModal,
-      hideLoginModal,
+      closeLoginModal,
+      removeLoginModal,
       setLoginFunction
     };
   }, [errors, loginModal])

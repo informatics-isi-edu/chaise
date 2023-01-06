@@ -278,23 +278,23 @@ const RecordeditInner = ({
     }
 
     // the indices used for tracking input values in react-hook-form
-    const newFormIndexValues: number[] = addForm(numberFormsToAdd);
+    const newFormValues: number[] = addForm(numberFormsToAdd);
 
     // the index for the data from last form being cloned
-    const lastFormIdx = newFormIndexValues[0] - 1;
+    const lastFormValue = newFormValues[0] - 1;
 
     const tempFormValues: any = methods.getValues();
     // add data to tempFormValues to initailize new forms
-    for (let i = 0; i < newFormIndexValues.length; i++) {
-      const formIndex = newFormIndexValues[i];
+    for (let i = 0; i < newFormValues.length; i++) {
+      const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
         const colName = cm.column.name;
         // should be able to handle falsy values
-        tempFormValues[`${formIndex}-${colName}`] = replaceNullOrUndefined(tempFormValues[`${lastFormIdx}-${colName}`], '');
+        tempFormValues[`${formValue}-${colName}`] = replaceNullOrUndefined(tempFormValues[`${lastFormValue}-${colName}`], '');
 
         if (cm.column.type.name.indexOf('timestamp') !== -1) {
-          tempFormValues[`${formIndex}-${colName}-date`] = tempFormValues[`${lastFormIdx}-${colName}-date`] || '';
-          tempFormValues[`${formIndex}-${colName}-time`] = tempFormValues[`${lastFormIdx}-${colName}-time`] || '';
+          tempFormValues[`${formValue}-${colName}-date`] = tempFormValues[`${lastFormValue}-${colName}-date`] || '';
+          tempFormValues[`${formValue}-${colName}-time`] = tempFormValues[`${lastFormValue}-${colName}-time`] || '';
         }
       });
     }

@@ -387,6 +387,7 @@ const RecordsetTable = ({
     const tableSchemaNames = `s_${makeSafeIdAttr(reference.table.schema.name)} t_${makeSafeIdAttr(reference.table.name)}`;
     return classNameString + ' ' + tableSchemaNames;
   }
+
   return (
     <div className='recordset-table-container' ref={tableContainer}>
       <div className='chaise-table-top-scroll-wrapper'>
