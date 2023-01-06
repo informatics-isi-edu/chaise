@@ -22,9 +22,9 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { columnToColumnModel, populateCreateInitialValues, populateEditInitialValues } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { DEFAULT_HEGHT_MAP, replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { columnToColumnModel, populateCreateInitialValues,
+  populateEditInitialValues, populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -135,17 +135,13 @@ export default function RecordeditProvider({
     const tempKeysHMap: any = {};
     const tempFormsHMap: any = {};
     tempColumnModels.forEach((cm: any) => {
-      const colname = makeSafeIdAttr(cm.column.displayname.value);
+      const colname = cm.column.name;
       tempKeysHMap[colname] = -1;
       tempFormsHMap[colname] = [-1];
     });
 
     setKeysHeightMap(tempKeysHMap);
     setFormsHeightMap(tempFormsHMap);
-
-    // TODO: table and schema names to attach to app-container
-    // idSafeTableName = makeSafeIdAttr(reference.table.name);
-    // idSafeSchemaName = makeSafeIdAttr(reference.table.schema.name);
 
     const ERMrest = windowRef.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
@@ -194,6 +190,7 @@ export default function RecordeditProvider({
             headTitle = 'Create new ' + getDisplaynameInnerText(reference.displayname);
           }
 
+          // TODO this should not be done when we want to have recordedit in modal
           // send string to prepend to "headTitle"
           // For editing ==1 record - "Edit <table>: <rowname>"
           // For editing >1 record  - "Edit <table>"
@@ -233,6 +230,7 @@ export default function RecordeditProvider({
       }
     } else if (appMode === appModes.CREATE) {
       if (reference.canCreate) {
+        // TODO this should not be done when we want to have recordedit in modal
         updateHeadTitle('Create new ' + reference.displayname.value);
 
         console.log('recordedit initialized');
@@ -253,14 +251,9 @@ export default function RecordeditProvider({
 
   const onSubmitValid = (data: any) => {
     const submissionRows: any[] = []
-    // f is the number in forms array that is 
+    // f is the number in forms array that is
     forms.forEach((f: number) => {
-      const currRow: any = {};
-      reference.columns.forEach((col: any) => {
-        const v = data[f + '-' + col.displayname.value];
-        currRow[col.name] = (v === undefined || v === '') ? null : v;
-      });
-      submissionRows.push(currRow);
+      submissionRows.push(populateSubmissionRow(reference, f, data));
     });
 
     validateSessionBeforeMutation(() => {
@@ -362,15 +355,15 @@ export default function RecordeditProvider({
     const newFormValues: number[] = [];
     // add 'count' number of forms
     setForms((previous: number[]) => {
-      // TODO: why is this triggering twice in edit mode while NODE_ENV="development"?
+      const res = [...previous];
       for (let i = 0; i < count; i++) {
         // last value in 'forms' incremented by 1
-        const formValue = previous[previous.length - 1] + 1;
-        previous.push(formValue);
+        const formValue = res[res.length - 1] + 1;
+        res.push(formValue);
         newFormValues.push(formValue);
       }
 
-      return [...previous]
+      return [...res];
     })
 
     // for each form added, push another '-1' into the array for each column

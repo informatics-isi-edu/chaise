@@ -30,8 +30,8 @@ const KeyColumn = (): JSX.Element => {
     <div className='entity-key-column'>
       <div className='form-header entity-key'>Record Number</div>
       {columnModels.map((cm: any) => {
-        const column = cm.column; 
-        const colName = makeSafeIdAttr(column?.displayname?.value);
+        const column = cm.column;
+        const colName = column.name;
         const height = keysHeightMap[colName];
         const colType = getInputTypeOrDisabled(cm);
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];

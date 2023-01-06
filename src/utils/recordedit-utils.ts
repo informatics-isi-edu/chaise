@@ -261,7 +261,8 @@ export function populateEditInitialValues(
   const canUpdateRows: any[] = [];
   const foreignKeyData: any[] = [];
   forms.forEach((formValue: any, formIndex: number) => {
-    const tupleIndex = formIndex, tuple = tuples[tupleIndex];
+    const tupleIndex = formIndex;
+    const tuple = tuples[tupleIndex];
 
     if (!isCopy) canUpdateRows[tupleIndex] = {};
 
@@ -369,4 +370,20 @@ export function populateEditInitialValues(
   });
 
   return { values };
+}
+
+/**
+ * populate the raw data that can be submitted to ermrestjs
+ * @param reference the reference object
+ * @param formNumber indicate which form the data belongs to
+ * @param formData the data for all the displayed fields
+ * @returns
+ */
+export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
+  const submissionRow: any = {};
+  reference.columns.forEach((col: any) => {
+    const v = formData[formNumber + '-' + col.name];
+    submissionRow[col.name] = (v === undefined || v === '') ? null : v;
+  });
+  return submissionRow;
 }
