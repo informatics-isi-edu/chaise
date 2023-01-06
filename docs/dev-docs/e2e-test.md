@@ -163,6 +163,13 @@ multiCapabilities: [{
     'browserName': 'chrome'
   }],
 ```
+
+> While protractor can run in multiple browsers, we're only using Chrome for our e2e tests. To test Firefox, we would have to:
+> - Change the `make update-webdriver` command to also install gecko drivers.
+> - Change the configuration to properly set the browser settings in Firefox the same as Chrome (window size, etc.)
+> - Make sure test specs are working properly on Firefox as well.
+
+
 To specify which test specs to run, use
 ```sh
 specs: [

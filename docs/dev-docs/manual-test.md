@@ -151,6 +151,7 @@ The UX currently doesn't update the user when their session state has changed. I
 ## Testing workflow
 For each of the pages listed below, the following should be done to verify that the appropriate errors occur and dialogs are shown:
 
+### Cases with a different user after logging in
  - Navigate to a creation form that requires a user to be logged in ([Example](https://dev.rebuildingakidney.org/chaise/recordedit/#2/RNASeq:Study))
    - fill in the required fields
    - open another tab and log out of the application
@@ -164,7 +165,7 @@ For each of the pages listed below, the following should be done to verify that 
    - click the "login" button and log in as the orignial user
    - the data should submit properly after that
 
- - Navigate to a record page that requires a user to be logged in to mutate one of the related entities ([Example](https://dev.rebuildingakidney.org/~jchudy/chaise/record/#2/Gene_Expression:Specimen/RID=N-GXA4))
+ - Navigate to a record page that requires a user to be logged in to mutate one of the related entities ([Example](https://dev.rebuildingakidney.org/chaise/record/#2/Gene_Expression:Specimen/RID=N-GXA4))
    - click "add record" for a related entity that is pure and binary. The "Anatomical Source" related entity should be pure and binary
    - select 1 or more rows to link to the specimen
    - open another tab and log out of the application
@@ -175,7 +176,7 @@ For each of the pages listed below, the following should be done to verify that 
    - go back to the original tab and click "continue" once the login state has been resolved
    - the rows should be properly added after clicking continue
 
- - Navigate to a page with rows that can be deleted ([Example](https://dev.rebuildingakidney.org/~jchudy/chaise/recordset/#2/Gene_Expression:Specimen/))
+ - Navigate to a page with rows that can be deleted ([Example](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen/))
    - open another tab and log out of the application
    - go back to the original tab and delete one of the rows
    - a login dialog should be shown instead of an error
@@ -185,6 +186,58 @@ For each of the pages listed below, the following should be done to verify that 
    - go back to the original tab and click "continue" once the login state has been resolved
    - either the confirm dialog will show, or the row will be deleted
      - hopefully you followed the link above and removed a row on dev :)
+
+### Cases with a no user when going to the application (app requires a logged in user)
+ - Navigate to a recordset page that requires a logged in user to use the application ([Example](https://smite-dev.eitm.org/chaise/recordset/#1/Study:Study))
+   - a login dialog should be shown instead of an error
+   - login to a user
+   - the app should refresh and the user should be able to interact with it normally
+
+ - Navigate to a record page that requires a logged in user to use the application ([Example](https://smite-dev.eitm.org/chaise/record/#1/Study:Study/RID=94C))
+   - a login dialog should be shown instead of an error
+   - login to a user
+   - the app should refresh and the user should be able to interact with it normally
+
+### Cases with the same user after logging in from a stale session (app requires a logged in user)
+ - Navigate to a recordset page that requires a logged in user to use the application. The user should be logged in to begin this task ([Example](https://smite-dev.eitm.org/chaise/recordset/#1/Study:Study))
+   - open another tab and log out of the application
+   - go back to the original tab and initiate a sort request by clicking on a column header
+   - a login dialog should be shown instead of an error
+   - login to the **same** user
+   - the login modal should dissappear and the sort request should return and update the page
+
+ - Navigate to a recordset page that requires a logged in user to use the application. The user should be logged in to begin this task ([Example](https://smite-dev.eitm.org/chaise/recordset/#1/Study:Study))
+   - click "show details" or "show more" for one of the facets
+   - open another tab and log out of the application
+   - go back to the original tab and initiate a sort request in the modal by clicking on a column header
+   - a login dialog should be shown instead of an error
+   - login to the **same** user
+   - the login modal should dissappear and the sort request should return and update the contents of the modal
+
+ - Navigate to a record page that requires a logged in user to use the application. The user should be logged in to begin this task ([Example](https://smite-dev.eitm.org/chaise/record/#1/Study:Study/RID=94C))
+   - open another tab and log out of the application
+   - go back to the original tab and try to delete one of the related rows
+   - a login dialog should be shown instead of an error
+   - login to the **same** user
+   - the login modal should dissappear and the delete request should continue
+
+- Navigate to a record page that requires a logged in user to use the application. The user should be logged in to begin this task ([Example](https://smite-dev.eitm.org/chaise/record/#1/Study:Protocol/RID=95Y))
+   - click "link records" for one of the related entities
+   - open another tab and log out of the application
+   - go back to the original tab and try to link one of the rows shown
+   - a login dialog should be shown instead of an error
+   - login to the **same** user
+   - the login modal should dissappear and the link request should continue
+
+### Cases with the same user after logging in from a stale session (no user required to use the app)
+ - Navigate to a record page. The user should be logged in to begin this task ([Example](https://dev.rebuildingakidney.org/chaise/record/#2/Antibody:Antibodies/RID=Q-BH9Y))
+   - click "link records" for one of the related entities
+   - open another tab and log out of the application
+   - go back to the original tab and try to link one of the rows shown
+   - a login dialog should be shown instead of an error
+   - login to the **same** user
+   - the login modal should dissappear and the link request should continue
+
 
 # Testing row level security
 

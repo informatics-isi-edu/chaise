@@ -71,6 +71,8 @@
   }
 }
 
+
+
 /******* Popup modal for error ********/
 // NOTE less than the navbar z-index
 .modal-error-backdrop {
@@ -103,11 +105,13 @@
 }
 
 .search-popup {
-  ~ .modal-error-backdrop {
+  ~ .modal-error-backdrop,
+  ~ .modal-login-instruction-backdrop {
     z-index: 1061;
   }
 
-  ~ .modal-error {
+  ~ .modal-error,
+  ~ .modal-login-instruction {
     z-index: 1066;
   }
 }

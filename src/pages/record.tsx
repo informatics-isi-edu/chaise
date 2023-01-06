@@ -24,7 +24,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
@@ -72,6 +72,9 @@ const RecordApp = (): JSX.Element => {
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
       const reference = response.contextualize.detailed;
+
+      // add schema and table name classes to app-container
+      addAppContainerClasses(reference, recordSettings.appName);
 
       updateHeadTitle(`${getDisplaynameInnerText(reference.displayname)}: pending...`);
 

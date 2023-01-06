@@ -27,7 +27,7 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { RECORDSET_DEAFULT_PAGE_SIZE, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 
@@ -63,6 +63,9 @@ const RecordsetApp = (): JSX.Element => {
 
     ConfigService.ERMrest.resolve(res.ermrestUri).then((response: any) => {
       const reference = response.contextualize.compact;
+
+      // add schema and table name classes to app-container
+      addAppContainerClasses(reference, recordsetSettings.appName);
 
       updateHeadTitle(getDisplaynameInnerText(reference.displayname));
 
