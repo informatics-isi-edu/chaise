@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useFormContext, useController } from 'react-hook-form';
 
 // models
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import {
   RecordsetConfig, RecordsetDisplayMode,
   RecordsetSelectMode, SelectedRow, RecordsetProps
@@ -16,13 +16,13 @@ import { LogStackPaths } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-
 
 type ForeignkeyFieldProps = {
   /**
@@ -61,6 +61,19 @@ type ForeignkeyFieldProps = {
    * The column model representing this field in the form.
    */
   columnModel: RecordeditColumnModel,
+  /**
+   * the mode of the app
+   */
+  appMode?: string,
+  formNumber?: number,
+  parentReference?: any,
+  parentTuple?: any,
+  // TODO should be used by viewer app
+  // (types should be modified based on viewer app changes)
+  // popupSelectCallbacks?: {
+  //   getDisabledTuples?: any,
+  //   onSelectedRowsChanged?: any
+  // }
 };
 
 const ForeignkeyField = ({
@@ -75,7 +88,11 @@ const ForeignkeyField = ({
   containerClasses,
   styles,
   onFieldChange,
-  columnModel
+  columnModel,
+  appMode,
+  formNumber,
+  parentReference,
+  parentTuple
 }: ForeignkeyFieldProps): JSX.Element => {
 
 
@@ -150,12 +167,12 @@ const ForeignkeyField = ({
       selectMode: RecordsetSelectMode.SINGLE_SELECT,
       showFaceting: true,
       disableFaceting: false,
-      // TODO create vs edit
-      displayMode: RecordsetDisplayMode.FK_POPUP_CREATE
+      displayMode: (appMode === appModes.EDIT) ? RecordsetDisplayMode.FK_POPUP_EDIT : RecordsetDisplayMode.FK_POPUP_CREATE,
     };
 
     const andFilters: any = [];
     // loop through all columns that make up the key information for the association with the leaf table and create non-null filters
+    // this is to ensure the selected row has a value for the foreignkey
     columnModel.column.foreignKey.key.colset.columns.forEach((col: any) => {
       andFilters.push({ source: col.name, hidden: true, not_null: true });
     });
@@ -165,6 +182,8 @@ const ForeignkeyField = ({
     const ref = columnModel.column.filteredRef({}, {}).addFacets(andFilters);
 
     setRecordsetModalProps({
+      parentReference,
+      parentTuple,
       initialReference: ref.contextualize.compactSelectForeignKey,
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
@@ -187,8 +206,22 @@ const ForeignkeyField = ({
     hideRecordsetModal();
 
     const selectedRow = selectedRows[0];
-    // TODO the raw values should be selected
-    // the issue here is that there might be multiple raw values!
+
+    // this is just to hide the ts errors and shouldn't happen
+    if (!selectedRow.data) {
+      $log.error('the selected row doesn\'t have data!');
+      return;
+    }
+
+    // TODO capture the foreignkeyData
+
+    // find the raw value of the fk columns that correspond to the selected row
+    // since we've already added a not-null hidden filter, the values will be not-null.
+    columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
+      const referencedCol = columnModel.column.foreignKey.mapping.get(col);
+      // TODO maybe we want to formalize this way of naming the fields? like a function or something
+      setValue(`${formNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
+    });
 
     // for now this is just changing the displayed tuple displayname
     handleChange(selectedRow.displayname.value);

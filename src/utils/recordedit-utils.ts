@@ -403,10 +403,21 @@ export function populateEditInitialValues(
  * @returns
  */
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
-  const submissionRow: any = {};
-  reference.columns.forEach((col: any) => {
+  const setSubmission = (col: any) => {
     const v = formData[formNumber + '-' + col.name];
     submissionRow[col.name] = (v === undefined || v === '') ? null : v;
+  }
+
+  const submissionRow: any = {};
+  reference.columns.forEach((col: any) => {
+    // we should get the raw column values (not the displayed rowname)
+    if (col.isForeignKey) {
+      col.foreignKey.colset.columns.forEach((fkCol: any) => {
+        setSubmission(fkCol);
+      });
+    } else {
+      setSubmission(col);
+    }
   });
   return submissionRow;
 }
