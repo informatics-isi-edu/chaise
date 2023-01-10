@@ -1,6 +1,7 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
+import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -23,6 +24,7 @@ import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type ForeignkeyFieldProps = {
   /**
@@ -129,6 +131,10 @@ const ForeignkeyField = ({
     e.stopPropagation();
     e.preventDefault();
     setValue(name, '');
+    // make sure the underlying raw columns are also emptied.
+    columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
+      setValue(`${formNumber}-${col.name}`, '');
+    });
     clearErrors(name);
   }
 
@@ -231,8 +237,8 @@ const ForeignkeyField = ({
     <div className={`${containerClasses} input-switch-foreignkey input-switch-container-${name}`} style={styles}>
       <div className='chaise-input-group' onClick={openRecordsetModal}>
         <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-          {Boolean(fieldValue) ?
-            fieldValue :
+          {isStringAndNotEmpty(fieldValue) ?
+            <DisplayValue value={{value: fieldValue, isHTML: true}} /> :
             <span className='chaise-input-placeholder'>{placeholder ? placeholder : 'Select a value'}</span>
           }
           <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />

@@ -17,6 +17,7 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 // services
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 
 // utilities
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
@@ -258,35 +259,36 @@ export default function RecordeditProvider({
 
     validateSessionBeforeMutation(() => {
       const submitSuccessCB = (response: any) => {
-        console.log(response);
+        // TODO should be removed
+        $log.info(response);
 
-        // if (isUpdate) {
-        //   var data = checkUpdate(submissionRowsCopy, rsTuples);
-        //   try {
-        //     // check if there is a window that opened the current one
-        //     // make sure the update function is defined for that window
-        //     // verify whether we still have a valid vaue to call that function with
-        //     if (window.opener && window.opener.updated && rsQueryParams.invalidate) {
-        //       window.opener.updated(rsQueryParams.invalidate);
-        //     }
-        //   } catch (exp) {
-        //     // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
-        //     // And if it's from another origin, we don't need to call updated since it's not
-        //     // the same row that we wanted to update in recordset (table directive)
-        //   }
-        // } else {
-        //   if (!isModalUpdate) {
-        //     $cookies.remove(rsQueryParams.prefill);
+        if (appMode === appModes.EDIT) {
+          // TODO should most probably be added when we implement assets
+          // const data = checkUpdate(submissionRowsCopy, rsTuples);
+          try {
+            // check if there is a window that opened the current one
+            // make sure the update function is defined for that window
+            // verify whether we still have a valid vaue to call that function with
+            if (window.opener && window.opener.updated && queryParams.invalidate) {
+              window.opener.updated(queryParams.invalidate);
+            }
+          } catch (exp) {
+            // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+            // And if it's from another origin, we don't need to call updated since it's not
+            // the same row that we wanted to update in recordset (table directive)
+          }
+        } else {
+          // cleanup the prefill query parameter
+          if (queryParams.prefill) {
+            CookieService.deleteCookie(queryParams.prefill);
+          }
 
-
-        //     // add cookie indicating record added
-        //     if (rsQueryParams.invalidate) {
-        //       $cookies.put(rsQueryParams.invalidate, submissionRowsCopy.length, {
-        //         expires: new Date(Date.now() + (60 * 60 * 24 * 1000))
-        //       });
-        //     }
-        //   }
-        // }
+          // add cookie indicating record successfully added
+          if (queryParams.invalidate) {
+            // the value of the cookie is not important as other apps are just looking for the cookie name
+            CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
+          }
+        }
 
         const page = response.successful;
         // const failedPage = response.failed;
@@ -307,6 +309,7 @@ export default function RecordeditProvider({
           windowRef.location = redirectUrl + qCharacter + 'pcid=' + contextHeaderParams.cid + '&ppid=' + contextHeaderParams.pid;
         } else {
           // TODO: multi create view post create
+          $log.info('successfully saved!');
         }
       }
 

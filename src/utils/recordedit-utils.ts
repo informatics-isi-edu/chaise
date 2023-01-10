@@ -13,7 +13,8 @@ import { RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/sr
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utilities
-import { formatBoolean, formatDatetime, formatFloat, formatInt, getInputType, replaceNullOrUndefined, isDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { formatDatetime, formatFloat, formatInt, getInputType,
+  replaceNullOrUndefined, isDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
