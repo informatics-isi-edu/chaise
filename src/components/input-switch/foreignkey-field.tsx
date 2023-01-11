@@ -23,7 +23,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { getColumnModelLogStack, populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type ForeignkeyFieldProps = {
@@ -70,6 +70,7 @@ type ForeignkeyFieldProps = {
   formNumber?: number,
   parentReference?: any,
   parentTuple?: any,
+  foreignKeyData?: any,
   // TODO should be used by viewer app
   // (types should be modified based on viewer app changes)
   // popupSelectCallbacks?: {
@@ -94,11 +95,13 @@ const ForeignkeyField = ({
   appMode,
   formNumber,
   parentReference,
-  parentTuple
+  parentTuple,
+  foreignKeyData
 }: ForeignkeyFieldProps): JSX.Element => {
 
+  const usedFormNumber = typeof formNumber === 'number' ? formNumber : 1;
 
-  const { setValue, control, clearErrors } = useFormContext();
+  const { setValue, control, clearErrors, getValues } = useFormContext();
 
   const [recordsetModalProps, setRecordsetModalProps] = useState<RecordsetProps | null>(null);
 
@@ -133,7 +136,7 @@ const ForeignkeyField = ({
     setValue(name, '');
     // make sure the underlying raw columns are also emptied.
     columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
-      setValue(`${formNumber}-${col.name}`, '');
+      setValue(`${usedFormNumber}-${col.name}`, '');
     });
     clearErrors(name);
   }
@@ -183,9 +186,10 @@ const ForeignkeyField = ({
       andFilters.push({ source: col.name, hidden: true, not_null: true });
     });
 
-    // TODO proper domain-filter support
-    // columnModel.filteredRef(submissionRow, rowForeignKeyData);
-    const ref = columnModel.column.filteredRef({}, {}).addFacets(andFilters);
+    // domain-filter support
+    const linkedData = foreignKeyData && foreignKeyData.current ? foreignKeyData.current[name] : {};
+    const submissionRow = populateSubmissionRow(parentReference, usedFormNumber, getValues());
+    const ref = columnModel.column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
 
     setRecordsetModalProps({
       parentReference,
@@ -219,14 +223,17 @@ const ForeignkeyField = ({
       return;
     }
 
-    // TODO capture the foreignkeyData
+    // TODO capture the foreignKeyData
+    if (foreignKeyData && foreignKeyData.current) {
+      foreignKeyData.current[name] = selectedRow.data;
+    }
 
     // find the raw value of the fk columns that correspond to the selected row
     // since we've already added a not-null hidden filter, the values will be not-null.
     columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
       const referencedCol = columnModel.column.foreignKey.mapping.get(col);
       // TODO maybe we want to formalize this way of naming the fields? like a function or something
-      setValue(`${formNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
+      setValue(`${usedFormNumber}-${col.name}`, selectedRow.data[referencedCol.name]);
     });
 
     // for now this is just changing the displayed tuple displayname

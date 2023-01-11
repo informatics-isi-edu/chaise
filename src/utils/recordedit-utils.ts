@@ -277,13 +277,11 @@ export function populateEditInitialValues(
   // initialize row objects {column-name: value,...}
   const values: any = {};
 
-  // needs to be initialized so foreign keys can be set
-  // these are the values that we're sending to ermrestjs,
-  // chaise should not use these values and we should just populate the values
-  // model.submissionRows[tupleIndex] = {};
+  // the data associated with the foreignkeys
+  const foreignKeyData: any = {};
 
   const canUpdateRows: any[] = [];
-  const foreignKeyData: any[] = [];
+
   forms.forEach((formValue: any, formIndex: number) => {
     const tupleIndex = formIndex;
     const tuple = tuples[tupleIndex];
@@ -293,7 +291,9 @@ export function populateEditInitialValues(
     const tupleValues = tuple.values;
 
     // attach the foreign key data of the tuple
-    foreignKeyData[tupleIndex] = tuple.linkedData;
+    Object.keys(tuple.linkedData).forEach((k) => {
+      foreignKeyData[`${formValue}-${k}`] = tuple.linkedData[k];
+    });
 
     columnModels.forEach((colModel: RecordeditColumnModel) => {
       const column = colModel.column;
@@ -390,10 +390,21 @@ export function populateEditInitialValues(
         values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
       }
 
+      // capture the raw values of the columns that create the fk relationship
+      // the `value` above is what users sees and not the raw value that we will
+      // send to the database.
+      if (column.isForeignKey) {
+        if (value !== null || value !== undefined) {
+          column.foreignKey.colset.columns.forEach((col: any) => {
+            values[`${formValue}-${col.name}`] = tuple.data[col.name];
+          });
+        }
+      }
+
     });
   });
 
-  return { values };
+  return { values, foreignKeyData };
 }
 
 /**

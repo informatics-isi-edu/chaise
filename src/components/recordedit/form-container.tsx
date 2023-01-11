@@ -24,7 +24,7 @@ type ChaiseFormProps = {
 
 const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormProps) => {
 
-  const { columnModels, formsHeightMap, removeForm, appMode, reference, tuples } = useRecordedit();
+  const { columnModels, formsHeightMap, removeForm, appMode, reference, tuples, foreignKeyData } = useRecordedit();
 
   const renderFormHeader = () => {
     return (
@@ -89,6 +89,7 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
           formNumber={formNumber}
           parentReference={reference}
           parentTuple={parentTuple}
+          foreignKeyData={foreignKeyData}
         />
       );
     })

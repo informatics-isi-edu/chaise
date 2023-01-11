@@ -40,6 +40,12 @@ export const RecordeditContext = createContext<{
   page: any,
   /* the tuples correspondeing to the displayed form */
   tuples: any,
+  /**
+   * the raw data of outbound foreign keys. used in foreignkey-field to support domain-filter
+   * it's a key-value object and follows the same format as the form values.
+   * the key is in the format of `${formNumber}-{colName}` and value is an object.
+   */
+  foreignKeyData: any,
   /* the created column models from reference.columns */
   columnModels: RecordeditColumnModel[],
   /* Whether the data for the main entity is fetched and the model is initialized  */
@@ -117,6 +123,8 @@ export default function RecordeditProvider({
    *    - each value in the  array is 1 if not changed or the corresponding height value to apply
    */
   const [formsHeightMap, setFormsHeightMap] = useState<any>({})
+
+  const foreignKeyData = useRef<any>({});
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -489,6 +497,7 @@ export default function RecordeditProvider({
       reference,
       page,
       tuples,
+      foreignKeyData,
       columnModels,
       initialized,
 

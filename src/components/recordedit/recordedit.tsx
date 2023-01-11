@@ -34,6 +34,7 @@ import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 export type RecordeditProps = {
   appMode: string;
@@ -78,7 +79,7 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, page, tuples, columnModels, initialized,
+    appMode, reference, page, tuples, foreignKeyData ,columnModels, initialized,
     forms, addForm, removeForm, getInitialFormValues, MAX_ROWS_TO_ADD
   } = useRecordedit()
 
@@ -292,10 +293,23 @@ const RecordeditInner = ({
         // should be able to handle falsy values
         tempFormValues[`${formValue}-${colName}`] = replaceNullOrUndefined(tempFormValues[`${lastFormValue}-${colName}`], '');
 
+        if (cm.column.isForeignKey) {
+          // copy the raw values of fk columns
+          cm.column.foreignKey.colset.columns.forEach((col: any) => {
+            tempFormValues[`${formValue}-${col.name}`] = replaceNullOrUndefined(tempFormValues[`${lastFormValue}-${col.name}`], '');
+          });
+        }
+
         if (cm.column.type.name.indexOf('timestamp') !== -1) {
           tempFormValues[`${formValue}-${colName}-date`] = tempFormValues[`${lastFormValue}-${colName}-date`] || '';
           tempFormValues[`${formValue}-${colName}-time`] = tempFormValues[`${lastFormValue}-${colName}-time`] || '';
         }
+      });
+
+      // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+      // we cannot go basd on visible columns since some of these data might be for invisible fks
+      reference.activeList.allOutBounds.forEach((col: any) => {
+        foreignKeyData.current[`${formValue}-${col.name}`] = simpleDeepCopy(foreignKeyData.current[`${lastFormValue}-${col.name}`]);
       });
     }
 

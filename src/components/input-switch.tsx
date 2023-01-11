@@ -880,7 +880,11 @@ type InputSwitchProps = {
    * Available only in edit mode.
    * (used for foreignkey input)
    */
-  parentTuple?: any
+  parentTuple?: any,
+  /**
+   * the ref used to capture the foreignkey data
+   */
+  foreignKeyData?: any
 };
 
 const InputSwitch = ({
@@ -902,7 +906,8 @@ const InputSwitch = ({
   appMode,
   formNumber,
   parentReference,
-  parentTuple
+  parentTuple,
+  foreignKeyData
 }: InputSwitchProps): JSX.Element | null => {
 
   return (() => {
@@ -992,6 +997,7 @@ const InputSwitch = ({
             formNumber={formNumber}
             parentReference={parentReference}
             parentTuple={parentTuple}
+            foreignKeyData={foreignKeyData}
           />
         }
       case 'disabled':
