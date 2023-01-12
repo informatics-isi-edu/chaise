@@ -15,16 +15,28 @@
 }
 
 // CSS fixes for lontext to override classes from common css file - for Josh to refer to
-.input-switch-longtext-container .chaise-input-control {
-  height: auto;
-  padding: 0 !important;
+.input-switch-longtext-container,
+.input-switch-json-container,
+.input-switch-array-container {
+  .chaise-input-control {
+    height: auto;
+    padding: 0 !important;
 
-  textarea {
-    padding: 10px !important;
-    min-height: 139px;
-    display: flex;
-    width: 100%;
-    border: none;
+    textarea {
+      padding: 10px !important;
+      min-height: 139px; // TODO: this might need to change based on markdown header height
+      display: flex;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+    }
+  }
+}
+
+.input-switch-json-container,
+.input-switch-array-container {
+  .chaise-input-control textarea {
+    min-height: 107px;
   }
 }
 

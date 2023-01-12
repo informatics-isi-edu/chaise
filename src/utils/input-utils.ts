@@ -135,7 +135,8 @@ export const DEFAULT_HEGHT_MAP: any = {
   'integer8': 47,
   'boolean': 47,
   'markdown': 182,
-  'json': 139,
+  'json': 126,
+  'array': 126,
   'color': 47, 
   'shorttext': 47, 
   'disabled': 47

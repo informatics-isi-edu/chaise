@@ -291,7 +291,7 @@ export function populateEditInitialValues(
       // stringify the returned array value
       if (column.type.isArray) {
         if (tupleValues[i] !== null) {
-          values[`${tupleIndex}-${column.name}`] = JSON.stringify(tupleValues[i], undefined, 2);
+          values[`${formValue}-${column.name}`] = JSON.stringify(tupleValues[i], undefined, 2);
         }
         return;
       }
@@ -382,7 +382,11 @@ export function populateEditInitialValues(
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
   const submissionRow: any = {};
   reference.columns.forEach((col: any) => {
-    const v = formData[formNumber + '-' + col.name];
+    let v = formData[formNumber + '-' + col.name];
+    if (v && !col.isDisabled) {
+      if (col.type.isArray) v = JSON.parse(v);
+    }
+
     submissionRow[col.name] = (v === undefined || v === '') ? null : v;
   });
   return submissionRow;

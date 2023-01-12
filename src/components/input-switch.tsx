@@ -2,8 +2,10 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
+import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
+import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
+import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -959,6 +961,28 @@ const InputSwitch = ({
         />
       case 'longtext':
         return <LongTextField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          value={value as string}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange}
+        />
+      case 'json':
+        return <JsonField
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          value={value as string}
+          disableInput={disableInput}
+          onFieldChange={onFieldChange}
+        />
+      case 'array':
+        return <ArrayField
           name={name}
           classes={classes}
           inputClasses={inputClasses}
