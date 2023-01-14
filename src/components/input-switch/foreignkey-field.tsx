@@ -70,7 +70,7 @@ type ForeignkeyFieldProps = {
   formNumber?: number,
   parentReference?: any,
   parentTuple?: any,
-  foreignKeyData?: any,
+  foreignKeyData?: React.MutableRefObject<any>,
   // TODO should be used by viewer app
   // (types should be modified based on viewer app changes)
   // popupSelectCallbacks?: {

@@ -1,6 +1,7 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect } from 'react';
@@ -24,7 +25,7 @@ type ChaiseFormProps = {
 
 const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormProps) => {
 
-  const { columnModels, formsHeightMap, removeForm, appMode, reference, tuples, foreignKeyData } = useRecordedit();
+  const { columnModels, formsHeightMap, removeForm, appMode, reference, tuples, foreignKeyData, waitingForForeignKeyData } = useRecordedit();
 
   const renderFormHeader = () => {
     return (
@@ -73,24 +74,29 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
       }
 
       return (
-        <InputSwitch
-          key={colName}
-          displayErrors={true}
-          name={`${formNumber}-${colName}`}
-          type={inputType}
-          // type='numeric'
-          containerClasses={'column-cell entity-value'}
-          // value={0}
-          classes='column-cell-input'
-          placeholder={placeholder}
-          styles={{ 'height': heightparam }}
-          columnModel={cm}
-          appMode={appMode}
-          formNumber={formNumber}
-          parentReference={reference}
-          parentTuple={parentTuple}
-          foreignKeyData={foreignKeyData}
-        />
+        <div key={colName} className='column-cell entity-value'>
+          {/* users cannot interact with fks using domain-filter before fetching foreignKeyData */}
+          {waitingForForeignKeyData && cm.column.isForeignKey && cm.hasDomainFilter &&
+            <div className='column-cell-spinner-container'>
+              <div className='column-cell-spinner-backdrop'></div>
+              <Spinner animation='border' size='sm' />
+            </div>
+          }
+          <InputSwitch
+            displayErrors={true}
+            name={`${formNumber}-${colName}`}
+            type={inputType}
+            classes='column-cell-input'
+            placeholder={placeholder}
+            styles={{ 'height': heightparam }}
+            columnModel={cm}
+            appMode={appMode}
+            formNumber={formNumber}
+            parentReference={reference}
+            parentTuple={parentTuple}
+            foreignKeyData={foreignKeyData}
+          />
+        </div>
       );
     })
   }

@@ -7,27 +7,33 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit'
+import { PrefillObject, RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit'
 
 // services
+import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
+import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
-import { formatDatetime, formatFloat, formatInt, getInputType,
-  replaceNullOrUndefined, isDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import {
+  formatDatetime, formatFloat, formatInt, getInputType,
+  replaceNullOrUndefined, isDisabled
+} from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import React from 'react';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
  * @param column the column object from ermrestJS
  */
-export function columnToColumnModel(column: any): RecordeditColumnModel {
+export function columnToColumnModel(column: any, queryParams?: any): RecordeditColumnModel {
   const isInputDisabled: boolean = isDisabled(column);
-  const stackNode = LogService.getStackNode(
+  const logStackNode = LogService.getStackNode(
     column.isForeignKey ? LogStackTypes.FOREIGN_KEY : LogStackTypes.COLUMN,
     column.table,
     { source: column.compressedDataSource, entity: column.isForeignKey }
   );
-  const stackPath = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
+  const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
   if (column.isAsset) {
@@ -40,17 +46,36 @@ export function columnToColumnModel(column: any): RecordeditColumnModel {
     type = getInputType(column.type);
   }
 
+  const prefillObj = getPrefillObject(queryParams);
+  let isPrefilled = false, hasDomainFilter = false;
+  if (prefillObj) {
+    if (column.isForeignKey) {
+      hasDomainFilter = column.hasDomainFilter;
+      if (
+        // whether the fk is already marked as prefilled
+        prefillObj.fkColumnNames.indexOf(column.name) !== -1 ||
+        // or all the columns have the prefilled value, and therefore it should be marked as prefilled.
+        column.foreignKey.colset.columns.every((col: any) => (prefillObj.keys[col.name] !== null))
+      ) {
+        isPrefilled = true;
+      }
+
+    } else if (column.name in prefillObj.keys) {
+      isPrefilled = true;
+    }
+  }
 
   return {
     // allInput: undefined,
     column: column,
-    isDisabled: isInputDisabled,
+    isDisabled: isInputDisabled || isPrefilled,
     isRequired: !column.nullok && !isInputDisabled,
-    inputType: type,
+    inputType: isPrefilled ? 'disabled' : type,
     // highlightRow: false,
     // showSelectAll: false,
-    logStackNode: stackNode, // should not be used directly, take a look at getColumnModelLogStack
-    logStackPathChild: stackPath // should not be used directly, use getColumnModelLogAction getting the action string
+    logStackNode, // should not be used directly, take a look at getColumnModelLogStack
+    logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
+    hasDomainFilter
   };
 }
 
@@ -88,40 +113,22 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 export function populateCreateInitialValues(
   columnModels: RecordeditColumnModel[],
   forms: number[],
-  prefillQueryParam?: string
+  queryParams?: any
 ) {
   const values: any = {};
+  let shouldWaitForForeignKeyData = false;
+
   // get the prefilled values
-  let prefilledColumns: any = {}, prefilledFks: string[] = [], oldRows: any[] = [];
-  // TODO: foreign key create
-  // if (prefillQueryParam) {
-  //     // get the cookie with the prefill value
-  //     // const cookie = $cookies.getObject(prefillQueryParam);
+  const prefillObj = getPrefillObject(queryParams);
+  if (prefillObj) {
+    shouldWaitForForeignKeyData = true;
+  }
 
-  //     // make sure cookie is correct
-  //     const hasAllKeys = cookie && ['keys', 'fkColumnNames', 'origUrl', 'rowname'].every((k: string) => {
-  //         return cookie.hasOwnProperty(k);
-  //     });
-  //     if (hasAllKeys) {
-  //         // TODO
-  //         // $rootScope.cookieObj = cookie;
-
-  //         // keep a record of freignkeys that are prefilled
-  //         prefilledFks = cookie.fkColumnNames;
-
-  //         // keep a record of columns that are prefilled
-  //         prefilledColumns = cookie.keys;
-
-  //         // process the list of prefilled foreignkeys to get additional data
-  //         // TODO
-  //         // _processPrefilledForeignKeys(model, reference, cookie.fkColumnNames, cookie.keys, cookie.origUrl, cookie.rowname);
-
-  //         // Keep a copy of the initial rows data so that we can see if user has made any changes later
-  //         oldRows = values;
-  //     }
-  // }
+  // the data associated with the foreignkeys
+  const foreignKeyData: any = {};
 
   // TODO: add initialValues to submissionRows (viewer feature)
+  // is this even needed?
   // if (DataUtils.isObjectAndNotNull(initialValues)) {
   //     model.submissionRows[0] = initialValues;
   // }
@@ -143,18 +150,14 @@ export function populateCreateInitialValues(
       //     defaultValue = initialValues[column.name];
       // }
 
-      // if it's a prefilled foreignkey, the value is already set
-      if (column.isForeignKey && prefilledFks.indexOf(column.name) !== -1) {
-        colModel.isDisabled = true;
-        colModel.inputType = 'disabled';
+      // if it's a prefilled foreignkey, the value is going to be set by processPrefilledForeignKeys
+      if (column.isForeignKey && prefillObj && prefillObj.fkColumnNames.indexOf(column.name) !== -1) {
         continue;
       }
 
       // if the column is prefilled, get the prefilled value instead of default
-      if (column.name in prefilledColumns) {
-        defaultValue = prefilledColumns[column.name];
-        colModel.isDisabled = true;
-        colModel.inputType = 'disabled';
+      if (prefillObj && column.name in prefillObj.keys) {
+        defaultValue = prefillObj.keys[column.name];
       }
 
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
@@ -187,60 +190,34 @@ export function populateCreateInitialValues(
               filesize: metadata.byteCount || ''
             }
           } else if (column.isForeignKey) {
-            // TODO: Implement foreign key initial values
             // if all the columns of the foreignkey are prefilled, use that instead of default
-            // const allPrefilled = column.foreignKey.colset.columns.every((col: any) => {
-            //     return prefilledColumns[col.name] !== null;
-            // });
+            const allPrefilled = prefillObj && column.foreignKey.colset.columns.every((col: any) => {
+              return prefillObj.keys[col.name] !== null;
+            });
 
-            // // if all the columns of the foreignkey are initialized, use that instead of default
+            // TODO viewer feature
+            // if all the columns of the foreignkey are initialized, use that instead of default
             // const allInitialized = column.foreignKey.colset.columns.every((col: any) => {
             //     return values[col.name] !== null;
             // });
 
-            // if (allPrefilled || allInitialized) {
-            //     const defaultDisplay = column.getDefaultDisplay(allPrefilled ? prefilledColumns : values);
-            //     // const logObj;
+            if (allPrefilled) {
+              const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
 
-            //     if (allPrefilled) {
-            //         colModel.isDisabled = true;
-            //         colModel.inputType = 'disabled';
-            //     }
-            //     // display the initial value
-            //     initialModelValue = defaultDisplay.rowname.value;
-            //     // initialize foreignKey data
-            //     // model.foreignKeyData[0][column.foreignKey.name] = defaultDisplay.values;
+              // display the initial value
+              initialModelValue = defaultDisplay.rowname.value;
+              // initialize foreignKey data
+              foreignKeyData[`${formValue}-${column.name}`] = defaultDisplay.values;
 
-            //     // populate the log object
-            //     // logObj = {
-            //     //     action: getColumnModelLogAction(
-            //     //         logService.logActions.FOREIGN_KEY_PRESELECT,
-            //     //         colModel,
-            //     //         model
-            //     //     ),
-            //     //     stack: getColumnModelLogStack(colModel, model)
-            //     // };
+              shouldWaitForForeignKeyData = true;
 
-            //     // get the actual foreign key data
-            //     // _getForeignKeyData(model, 0, [column.name], defaultDisplay.reference, logObj);
-            // } else if (defaultValue !== null) {
-            //     initialModelValue = defaultValue;
-            //     // initialize foreignKey data
-            //     // model.foreignKeyData[0][column.foreignKey.name] = column.defaultValues;
+            } else if (defaultValue !== null) {
+              initialModelValue = defaultValue;
+              // initialize foreignKey data
+              foreignKeyData[`${formValue}-${column.name}`] = column.defaultValues;
 
-            //     // populate the log object
-            //     // logObj = {
-            //     //     action: getColumnModelLogAction(
-            //     //         logService.logActions.FOREIGN_KEY_DEFAULT,
-            //     //         colModel,
-            //     //         model
-            //     //     ),
-            //     //     stack: getColumnModelLogStack(colModel, model)
-            //     // };
-
-            //     // get the actual foreign key data
-            //     // _getForeignKeyData(model, 0, [column.name], column.defaultReference, logObj);
-            // }
+              shouldWaitForForeignKeyData = true;
+            }
           } else {
             // all other column types
             if (defaultValue !== null) {
@@ -264,7 +241,7 @@ export function populateCreateInitialValues(
     }
   });
 
-  return { values, oldRows }
+  return { values, foreignKeyData, shouldWaitForForeignKeyData }
 }
 
 export function populateEditInitialValues(
@@ -432,4 +409,37 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
     }
   });
   return submissionRow;
+}
+
+/**
+ * This function will make sure the prefill object is valid before returning it.
+ * since this is needed while generating the columnModels as well as setting the initial
+ * values, it's been added here.
+ * TODO better type matching
+ * @param queryParams
+ * @returns
+ */
+export function getPrefillObject(queryParams: any): null | PrefillObject {
+  if (!queryParams.prefill) return null;
+  const cookie = CookieService.getCookie(queryParams.prefill);
+  if (cookie == null || typeof cookie !== 'object') {
+    return null;
+  }
+
+  // make sure all the keys are in the object
+  if (!(('keys' in cookie) && ('fkColumnNames' in cookie) && ('origUrl' in cookie) && ('rowname' in cookie))) {
+    return null;
+  }
+
+  // valide the values
+  if (!Array.isArray(cookie.fkColumnNames) || typeof cookie.origUrl !== 'string') {
+    return null;
+  }
+
+  return {
+    keys: cookie.keys,
+    fkColumnNames: cookie.fkColumnNames,
+    origUrl: cookie.origUrl,
+    rowname: cookie.rowname
+  }
 }

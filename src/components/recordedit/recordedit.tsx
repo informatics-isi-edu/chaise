@@ -79,8 +79,8 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, page, tuples, foreignKeyData ,columnModels, initialized,
-    forms, addForm, removeForm, getInitialFormValues, MAX_ROWS_TO_ADD
+    appMode, reference, page, tuples, foreignKeyData ,columnModels, initialized, waitingForForeignKeyData,
+    forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
@@ -122,6 +122,13 @@ const RecordeditInner = ({
   });
 
   const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord === true;
+
+  /**
+   * cannot add more forms if,
+   * - form is not initialized
+   * - we're waiting for foreignkey data of some columns.
+   */
+  const canAddMore = initialized && !waitingForForeignKeyData;
 
   /**
    * handler for bulk delete button. it will,
@@ -228,7 +235,15 @@ const RecordeditInner = ({
   // once data is fetched, initialize the form data with react hook form
   useEffect(() => {
     if (!initialized) return;
-    methods.reset(getInitialFormValues(forms, columnModels));
+
+    const initialValues = getInitialFormValues(forms, columnModels);
+    methods.reset(initialValues);
+
+    // in create mode, we need to fetch the foreignkey data
+    // for prefilled and foreignkeys that have default values
+    if (appMode === appModes.CREATE) {
+      getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
+    }
 
     setFormProviderInitialized(true)
   }, [initialized]);
@@ -381,12 +396,20 @@ const RecordeditInner = ({
                             data and therefore we should just disable the addMore button.
                             ng-disabled='!form.canAddMore'
                             */}
-                    <ChaiseTooltip tooltip='Duplicate rightmost form the specified number of times.' placement='bottom-end'>
+                    <ChaiseTooltip
+                      tooltip={
+                        canAddMore ?
+                          'Duplicate rightmost form the specified number of times.' :
+                          'Waiting for some columns to properly load.'
+                      }
+                      placement='bottom-end'
+                    >
                       <button
                         id='copy-rows-submit'
                         className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
                         onClick={callAddForm}
                         type='button'
+                        disabled={!canAddMore}
                       >
                         <span>Clone</span>
                       </button>

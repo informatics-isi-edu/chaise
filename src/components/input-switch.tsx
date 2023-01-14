@@ -884,7 +884,7 @@ type InputSwitchProps = {
   /**
    * the ref used to capture the foreignkey data
    */
-  foreignKeyData?: any
+  foreignKeyData?: React.MutableRefObject<any>
 };
 
 const InputSwitch = ({
