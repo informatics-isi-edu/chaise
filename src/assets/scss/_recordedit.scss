@@ -188,6 +188,27 @@
         .entity-value {
             position: relative;
 
+            // displayed while loading the fk data
+            .column-cell-spinner-container {
+              $column-cell-backdrop-z-index: 5;
+              .column-cell-spinner-backdrop {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                z-index: $column-cell-backdrop-z-index;
+                background: $disabled-background-color;
+                opacity: 0.55;
+              }
+              .spinner-border-sm {
+                left: 50%;
+                top: 15px;
+                position: absolute;
+                z-index: calc($column-cell-backdrop-z-index + 1);
+              }
+            }
+
             .column-permission-overlay {
                 position: absolute;
                 left: 0;

@@ -99,8 +99,8 @@ const RecordsetModal = ({
   const [showRecordset, setShowRecordset] = useState(false);
 
   /**
-   * the split-view logic will make sure the all the left panels have the same size,
-   * but it won't take care of the cases when the left panel is closed.
+   * the split-view logic will make sure that all the left panels have the same size,
+   * but it won't take care of the cases when the left panel is getting closed or opened.
    * We're handling the close UI by just adding a class and setting the display:none
    * So I had to make sure I'm doing the same thing for the modal-header's left panel as well.
    */
@@ -139,6 +139,9 @@ const RecordsetModal = ({
 
   useEffect(() => {
     if (selectMode === RecordsetSelectMode.SINGLE_SELECT) {
+      // on initial load this will be called, and the following is to guard
+      // against it.
+      if (submittedRows.length === 0) return;
       submit();
     }
     else {

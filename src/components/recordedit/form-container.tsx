@@ -8,7 +8,7 @@ import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { getDisabledInputValue, getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
@@ -24,7 +24,7 @@ type ChaiseFormProps = {
 
 const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormProps) => {
 
-  const { columnModels, formsHeightMap, removeForm } = useRecordedit();
+  const { columnModels, formsHeightMap, removeForm, appMode, reference, tuples, foreignKeyData, waitingForForeignKeyData } = useRecordedit();
 
   const renderFormHeader = () => {
     return (
@@ -62,6 +62,15 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
         // }
       }
 
+      // the tuple representing the row that this input is part of
+      let parentTuple;
+      if (tuples) {
+        if (appMode === appModes.COPY) {
+          parentTuple = tuples[0];
+        } else {
+          parentTuple = tuples[idx];
+        }
+      }
 
       return (
         <InputSwitch
@@ -69,13 +78,17 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
           displayErrors={true}
           name={`${formNumber}-${colName}`}
           type={inputType}
-          // type='numeric'
-          containerClasses={'column-cell entity-value'}
-          // value={0}
           classes='column-cell-input'
           placeholder={placeholder}
           styles={{ 'height': heightparam }}
+          containerClasses={'column-cell entity-value'}
           columnModel={cm}
+          appMode={appMode}
+          formNumber={formNumber}
+          parentReference={reference}
+          parentTuple={parentTuple}
+          foreignKeyData={foreignKeyData}
+          waitingForForeignKeyData={waitingForForeignKeyData}
         />
       );
     })
