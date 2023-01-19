@@ -24,6 +24,7 @@ import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/sr
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import {
+  allForeignKeyColumnsPrefilled,
   columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject, populateCreateInitialValues,
   populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
@@ -134,8 +135,10 @@ export default function RecordeditProvider({
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
    * foreignkey-field.tsx for domain-filter support.
-   * If other places need to use this, we need to change the
-   * logic for shouldFetchForeignKeyData.
+   *
+   * We're currently setting this to true, if:
+   *  - there's a prefill query and we need to fetch the prefilled data.
+   *  - some foreignkeys have default values and we need to see if the default is accurate.
    */
   const foreignKeyData = useRef<any>({});
   const shouldFetchForeignKeyData = useRef<boolean>(false);
@@ -149,21 +152,12 @@ export default function RecordeditProvider({
     if (!reference || setupStarted.current) return;
     setupStarted.current = true;
 
-    let domainFilterUsed = false;
     const tempColumnModels: RecordeditColumnModel[] = [];
     reference.columns.forEach((column: any) => {
       const cm = columnToColumnModel(column, queryParams);
-      if (!domainFilterUsed && cm.hasDomainFilter) {
-        domainFilterUsed = true;
-      }
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
-
-    // if there aren't any fks with domain-filter, we're not going to fetch fk data
-    if (appMode === appModes.CREATE && domainFilterUsed) {
-      setWaitingForForeignKeyData(true);
-    }
 
     // generate initial forms hmap
     const tempKeysHMap: any = {};
@@ -547,12 +541,12 @@ export default function RecordeditProvider({
       const defaultValue = initialValues[`1-${column.name}`];
 
       // if all the columns of the foreignkey are prefilled, use that instead of default
-      const allPrefilled = prefillObj && column.foreignKey.colset.columns.every((col: any) => {
-        return prefillObj.keys[col.name] !== null;
-      });
-
-      if (allPrefilled) {
+      if (prefillObj && allForeignKeyColumnsPrefilled(column, prefillObj)) {
         const defaultDisplay = column.getDefaultDisplay(prefillObj.keys);
+
+        // if the data is missing, ermrestjs will return null
+        // although the previous allPrefilled should already guard against this.
+        if (!defaultDisplay.reference) return;
 
         // get the actual foreign key data
         // TODO should be modified if recordedit is used in a modal (parent log related params)
@@ -595,6 +589,10 @@ export default function RecordeditProvider({
   /**
  * In case of prefill and default we only have a reference to the foreignkey,
  * we should do extra reads to get the actual data.
+ *
+ * NOTE for default we don't want to send the raw data to the ermrestjs request,
+ * that's why after fetching the data we're only changing the displayed rowname
+ * and the foreignKeyData, not the raw values sent to ermrestjs.
  * @param formValue which form it is
  * @param colNames the column names that will use this data
  * @param fkRef the foreignkey reference that should be used for fetching data
@@ -612,7 +610,7 @@ export default function RecordeditProvider({
         // default value is validated
         if (page.tuples.length > 0) {
           foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
-          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value)
+          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
         } else {
           foreignKeyData.current[`${formValue}-${colName}`] = {};
           setValue(`${formValue}-${colName}`, '');
@@ -641,10 +639,14 @@ export default function RecordeditProvider({
    * @param  {Object} rowname         the default rowname that should be displayed
    */
   function processPrefilledForeignKeys(formValue: number, prefillObj: PrefillObject, setValue: any) {
+    // update the displayed value
     prefillObj.fkColumnNames.forEach(function (cn: string) {
-      // update the displayed value
       setValue(`${formValue}-${cn}`, prefillObj.rowname.value);
+    });
 
+    // update the raw data that will be sent to ermrsetjs
+    Object.keys(prefillObj.keys).forEach((k: string) => {
+      setValue(`${formValue}-${k}`, prefillObj.keys[k]);
     });
 
     // get the actual foreignkey data

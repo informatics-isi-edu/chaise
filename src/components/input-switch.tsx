@@ -884,7 +884,11 @@ type InputSwitchProps = {
   /**
    * the ref used to capture the foreignkey data
    */
-  foreignKeyData?: React.MutableRefObject<any>
+  foreignKeyData?: React.MutableRefObject<any>,
+  /**
+   * whether we're still waiting for foreignkey data
+   */
+  waitingForForeignKeyData?: boolean,
 };
 
 const InputSwitch = ({
@@ -907,7 +911,8 @@ const InputSwitch = ({
   formNumber,
   parentReference,
   parentTuple,
-  foreignKeyData
+  foreignKeyData,
+  waitingForForeignKeyData
 }: InputSwitchProps): JSX.Element | null => {
 
   return (() => {
@@ -998,6 +1003,7 @@ const InputSwitch = ({
             parentReference={parentReference}
             parentTuple={parentTuple}
             foreignKeyData={foreignKeyData}
+            waitingForForeignKeyData={waitingForForeignKeyData}
           />
         }
       case 'disabled':

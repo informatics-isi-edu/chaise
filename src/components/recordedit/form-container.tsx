@@ -1,7 +1,6 @@
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect } from 'react';
@@ -74,29 +73,23 @@ const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormPr
       }
 
       return (
-        <div key={colName} className='column-cell entity-value'>
-          {/* users cannot interact with fks using domain-filter before fetching foreignKeyData */}
-          {waitingForForeignKeyData && cm.column.isForeignKey && cm.hasDomainFilter &&
-            <div className='column-cell-spinner-container'>
-              <div className='column-cell-spinner-backdrop'></div>
-              <Spinner animation='border' size='sm' />
-            </div>
-          }
-          <InputSwitch
-            displayErrors={true}
-            name={`${formNumber}-${colName}`}
-            type={inputType}
-            classes='column-cell-input'
-            placeholder={placeholder}
-            styles={{ 'height': heightparam }}
-            columnModel={cm}
-            appMode={appMode}
-            formNumber={formNumber}
-            parentReference={reference}
-            parentTuple={parentTuple}
-            foreignKeyData={foreignKeyData}
-          />
-        </div>
+        <InputSwitch
+          key={colName}
+          displayErrors={true}
+          name={`${formNumber}-${colName}`}
+          type={inputType}
+          classes='column-cell-input'
+          placeholder={placeholder}
+          styles={{ 'height': heightparam }}
+          containerClasses={'column-cell entity-value'}
+          columnModel={cm}
+          appMode={appMode}
+          formNumber={formNumber}
+          parentReference={reference}
+          parentTuple={parentTuple}
+          foreignKeyData={foreignKeyData}
+          waitingForForeignKeyData={waitingForForeignKeyData}
+        />
       );
     })
   }

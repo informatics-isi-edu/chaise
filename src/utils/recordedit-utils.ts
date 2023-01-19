@@ -20,7 +20,6 @@ import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import React from 'react';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
@@ -55,7 +54,7 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
         // whether the fk is already marked as prefilled
         prefillObj.fkColumnNames.indexOf(column.name) !== -1 ||
         // or all the columns have the prefilled value, and therefore it should be marked as prefilled.
-        column.foreignKey.colset.columns.every((col: any) => (prefillObj.keys[col.name] !== null))
+        allForeignKeyColumnsPrefilled(column, prefillObj)
       ) {
         isPrefilled = true;
       }
@@ -191,9 +190,7 @@ export function populateCreateInitialValues(
             }
           } else if (column.isForeignKey) {
             // if all the columns of the foreignkey are prefilled, use that instead of default
-            const allPrefilled = prefillObj && column.foreignKey.colset.columns.every((col: any) => {
-              return prefillObj.keys[col.name] !== null;
-            });
+            const allPrefilled = prefillObj && allForeignKeyColumnsPrefilled(column.foreignKey, prefillObj);
 
             // TODO viewer feature
             // if all the columns of the foreignkey are initialized, use that instead of default
@@ -392,22 +389,34 @@ export function populateEditInitialValues(
  * @returns
  */
 export function populateSubmissionRow(reference: any, formNumber: number, formData: any) {
-  const setSubmission = (col: any) => {
+  const submissionRow: any = {};
+  const setSubmission = (col: any, skipEmpty?: boolean) => {
     const v = formData[formNumber + '-' + col.name];
-    submissionRow[col.name] = (v === undefined || v === '') ? null : v;
+    const isEmpty = (v === undefined || v === '');
+    if (!(skipEmpty && isEmpty)) {
+      submissionRow[col.name] = isEmpty ? null : v;
+    }
   }
 
-  const submissionRow: any = {};
   reference.columns.forEach((col: any) => {
-    // we should get the raw column values (not the displayed rowname)
     if (col.isForeignKey) {
-      col.foreignKey.colset.columns.forEach((fkCol: any) => {
-        setSubmission(fkCol);
-      });
+      // the column value is just for display
+      // the actual raw values are going to be set after this loop
+      return;
     } else {
       setSubmission(col);
     }
   });
+
+  // some outbound-fks might not be visible and prefilled
+  // so instead of going based on the visible-columns, we're going based on all-outbounds
+  reference.activeList.allOutBounds.forEach((col: any) => {
+    col.foreignKey.colset.columns.forEach((fkCol: any) => {
+      // set the submission only if it has value
+      setSubmission(fkCol, true);
+    });
+  });
+
   return submissionRow;
 }
 
@@ -421,7 +430,7 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
  */
 export function getPrefillObject(queryParams: any): null | PrefillObject {
   if (!queryParams.prefill) return null;
-  const cookie = CookieService.getCookie(queryParams.prefill);
+  const cookie = CookieService.getCookie(queryParams.prefill, true);
   if (cookie == null || typeof cookie !== 'object') {
     return null;
   }
@@ -442,4 +451,25 @@ export function getPrefillObject(queryParams: any): null | PrefillObject {
     origUrl: cookie.origUrl,
     rowname: cookie.rowname
   }
+}
+
+/**
+ * Whether all the columns for a foreignkey are all prefilled or not
+ * @param column the visible column
+ * @param prefillObj the prefill object
+ */
+export function allForeignKeyColumnsPrefilled (column: any, prefillObj: PrefillObject | null) : boolean {
+  // must be foreignkey and object must be defined
+  if (!column.isForeignKey) return false;
+  if (!prefillObj) return false;
+
+  // just to double check, see if all the columns are prefilled.
+  // the prefillObj should already have handled this, but
+  // this has been part of the angularjs implementation and
+  // I decided to keep it.
+  return column.foreignKey.colset.columns.every((col: any) => (
+    // != to guard against both null and undefined
+    // eslint-disable-next-line eqeqeq
+    col.name in prefillObj.keys && prefillObj.keys[col.name] != null
+  ));
 }

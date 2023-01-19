@@ -2,6 +2,7 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import RecordsetModal from '@isrd-isi-edu/chaise/src/components/modals/recordset-modal';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect, useState } from 'react';
@@ -67,10 +68,27 @@ type ForeignkeyFieldProps = {
    * the mode of the app
    */
   appMode?: string,
+  /**
+   * the "formNumber" that this input belongs to
+   */
   formNumber?: number,
+  /**
+   * The reference that is used for the form
+   */
   parentReference?: any,
+  /**
+   * The tuple representing the row.
+   * Available only in edit mode.
+   */
   parentTuple?: any,
+  /**
+   * the ref used to capture the foreignkey data
+   */
   foreignKeyData?: React.MutableRefObject<any>,
+  /**
+   * whether we're still waiting for foreignkey data
+   */
+  waitingForForeignKeyData?: boolean,
   // TODO should be used by viewer app
   // (types should be modified based on viewer app changes)
   // popupSelectCallbacks?: {
@@ -96,7 +114,8 @@ const ForeignkeyField = ({
   formNumber,
   parentReference,
   parentTuple,
-  foreignKeyData
+  foreignKeyData,
+  waitingForForeignKeyData,
 }: ForeignkeyFieldProps): JSX.Element => {
 
   const usedFormNumber = typeof formNumber === 'number' ? formNumber : 1;
@@ -129,6 +148,13 @@ const ForeignkeyField = ({
   const [showClear, setShowClear] = useState<boolean>(typeof fieldValue !== 'boolean');
 
   const { error, isTouched } = fieldState;
+
+  /**
+   * - while loading the foreignkey data, users cannot interact with fks with defaulr or domain-filter.
+   * - we don't need to show spinner for prefilled fks since the inputs are already disabled
+   */
+  const showSpinner = waitingForForeignKeyData && (columnModel.hasDomainFilter ||
+    (appMode !== appModes.EDIT && columnModel.column.default !== null));
 
   const clearInput = (e: MouseEvent) => {
     e.stopPropagation();
@@ -242,10 +268,16 @@ const ForeignkeyField = ({
 
   return (
     <div className={`${containerClasses} input-switch-foreignkey input-switch-container-${name}`} style={styles}>
+      {showSpinner &&
+        <div className='column-cell-spinner-container'>
+          <div className='column-cell-spinner-backdrop'></div>
+          <Spinner animation='border' size='sm' />
+        </div>
+      }
       <div className='chaise-input-group' onClick={openRecordsetModal}>
         <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
           {isStringAndNotEmpty(fieldValue) ?
-            <DisplayValue value={{value: fieldValue, isHTML: true}} /> :
+            <DisplayValue value={{ value: fieldValue, isHTML: true }} /> :
             <span className='chaise-input-placeholder'>{placeholder ? placeholder : 'Select a value'}</span>
           }
           <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
