@@ -17,11 +17,12 @@ This is a guide for people who develop Chaise.
     + [Make targets](#make-targets)
     + [NPM](#npm)
 - [Structure of an App](#structure-of-an-app)
+- [Using Chaise through npm](#using-chaise-through-npm)
 - [Error handling](#error-handling)
   * [How it works](#how-it-works)
   * [Guidelines](#guidelines)
   * [Guidelines for promise chains](#guidelines-for-promise-chains)
-
+- [Context and provider pattern](#context-and-provider-pattern)
 
 ## Reading Material
 In this section, we've included all the guides and tools that we think are useful
@@ -330,6 +331,99 @@ To handle global errors, the app wrapper adds an `ErrorProvider` to handle the e
 ### Chaise Navbar
 The navbar for each Chaise app is the same style. It is loaded as part of the configuration phase in the app wrapper. All apps in Chaise can decide to show or hide the navbar as part of defining the `AppWrapper` component.
 
+
+## Using Chaise through npm
+
+Using npm, we can implement Chaise-like applications and use Chaise's existing code. This is how we're using Chaise to develop [`deriva-webapps`](https://github.com/informatics-isi-edu/deriva-webapps) React applications.
+
+### 1. Install Chaise and dev dependencies
+
+Just like any other npm packages, we first need to include the latest version of `@isrd-isi-edu/chaise` in `package.json`, or do
+
+```sh
+npm install --save @isrd-isi-edu/chaise
+```
+
+By doing so, npm will also install all the `dependencies` of Chaise, so you don't need to include `react`, react-boostrap`, and [other packages listed here](https://github.com/informatics-isi-edu/chaise/blob/master/package.json).
+
+
+We recommend installing similar `devDependencies` as Chaise (e.g., `eslint`) to facilitate the development process.
+
+### 2. Use AppWrapper for your app
+
+To make the process of developing applications easier, we've implemented [the `AppWrapper` component](https://github.com/informatics-isi-edu/chaise/blob/master/src/components/app-wrapper.tsx). This component,
+
+- Includes bootstrap and font-awesome styles, so you can use them freely in your components.
+- Fetches the catalog and configures Chaise/ERMrestJS.
+- Fetches the session and makes sure it's available throughout the app.
+- Displays navbar and/or alerts based on the given parameters.
+- Can override the behavior of download (to check before navigating) or external links (to open a modal before redirecting).
+
+The following is a simple example of using it:
+
+```tsx
+import { createRoot } from 'react-dom/client';
+import AppWrapper from '@isrd-isi-edu/chaise/src/components/app-wrapper';
+import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+
+const myappSettings = {
+  appName: 'app/sample',
+  appTitle: 'Sample App',
+  overrideHeadTitle: false,
+  overrideDownloadClickBehavior: false,
+  overrideExternalLinkBehavior: false
+};
+
+const MyApp = (): JSX.Element => {
+  return (
+    <div>Hello world!</div>
+  )
+};
+
+const root = createRoot(document.getElementById(ID_NAMES.APP_ROOT) as HTMLElement);
+root.render(
+  <AppWrapper appSettings={matrixSettings} includeNavbar displaySpinner ignoreHashChange>
+    <MyApp />
+  </AppWrapper>
+);
+```
+
+> :warning: CAUTION :warning: In the following step we will go over how to use the existing webpack config. This config will use Chaise's HTML template. So you MUST use the `ID_NAMES.APP_ROOT` like above to refer to the proper container in the template.
+
+### 3. Configure webpack and build
+
+Chaise includes webpack configuration helper functions that should be used for building bundles. The function can be found under the `@isrd-isi-edu/chaise/webpack/app.config` location. The following is an example of doing this:
+
+```tsx
+const { getWebPackConfig } = require('@isrd-isi-edu/chaise/webpack/app.config');
+const path = require('path');
+
+// if NODE_DEV is defined properly, use it. Otherwise set it to production.
+const nodeDevs = ['production', 'development'];
+let mode = process.env.NODE_ENV;
+if (nodeDevs.indexOf(mode) === -1) {
+  mode = nodeDevs[0];
+}
+
+const rootFolderLocation = path.resolve(__dirname, '..');
+const resolveAliases = { '@isrd-isi-edu/deriva-webapps': rootFolderLocation };
+
+module.exports = (env) => {
+  const WEBAPPS_BASE_PATH = env.BUILD_VARIABLES.WEBAPPS_BASE_PATH;
+  return getWebPackConfig(
+    [
+      {
+        appName: 'myapp',
+        appTitle: 'MyApp',
+        appConfigLocation: `${WEBAPPS_BASE_PATH}config/my-app-config.js`
+      }
+    ],
+    mode,
+    env,
+    { rootFolderLocation, resolveAliases, urlBasePath: WEBAPPS_BASE_PATH }
+  );
+};
+```
 
 ## Error handling
 
@@ -677,4 +771,132 @@ promise.then(
     dispatchError(...);
   }
 );
+```
+
+## Context and provider pattern
+
+Our apps heavily rely on [`Context`](https://reactjs.org/docs/context.html) to facilitate how components communicate. This helps us to avoid passing props on each level and instead use the [`useContext`](https://reactjs.org/docs/hooks-reference.html#usecontext) hook to access the context.
+
+### How to implement
+
+Before going through the providers that we've implemented for Chaise apps, let's go over the skeleton of how we're using `Context`. This example is just to demonstrate the concept. In a small example like the following, it's more efficient to just pass the props without using context/provider.
+
+#### 1. Create context and Provider component
+
+First we need to define the context and a provider to use it. The following is a simple example of this:
+
+```tsx
+// src/providers/counter.tsx
+
+const CounterContext = React.createContext<{
+  counter: number;
+} | null>(null);
+
+type CounterProviderProps = {
+  children: React.ReactNode,
+  initialCounter: number
+};
+
+export default function CounterProvider({
+  children,
+  initialCounter
+}: CounterProviderProps): JSX.Element {
+
+  const [counter, setCounter] = useState(initialCounter);
+
+  const [lastModified, setLastModified] = useState<Date | null>(null);
+
+  const addOneToCounter = () => {
+    setLastModified(new Date());
+    setCounter((counter) => counter + 1);
+  }
+
+  const providerValue = useMemo({
+    counter,
+    addOneToCounter,
+    lastModified,
+  }, [counter, lastModified])
+
+  return <CounterContext.Provider value={providerValue}>{children}</CounterContext.Provider>
+}
+```
+
+#### 2. Add custom hook
+
+Now that we have the context, we need a way to access it. To do so, we create a custom hook:
+
+```ts
+// src/hooks/counter.ts
+
+function useCounter() {
+  const context = useContext(CounterContext);
+  if (!context) {
+    throw new Error('No CounterProvider found when calling CounterContext');
+  }
+  return context;
+}
+
+export default useCounter;
+```
+
+#### 3. Use provider in the parent
+
+We cannot use the context and provider in the same component. The provider must be wrapping the parent component that will use the context. If there's a logical parent for your component, add the provider. In the example below, `Example` component will use the context, and `Container` is wrapping it.
+
+```tsx
+// src/components/container.tsx
+
+const Container = () => {
+  ...
+  return (
+    <CounterProvider>
+       <CounterDisplay />
+    </CounterProvider>
+  )
+};
+
+export default Counter;
+```
+
+#### 4. Use custom hook to acces the context
+
+To follow the previous example, the following is how `CounterDisplay` component would look like:
+
+```tsx
+// src/components/counter-display.tsx
+
+const CounterDisplay = () => {
+  const { counter } = useCounter();
+
+  return (
+    <span>{counter}</span>
+  )
+};
+
+export default CounterDisplay;
+```
+
+As we mentioned in the previous step, the provider and `useContext` must be on two different levels. In some cases, there isn't a logical parent-child relationship. So instead, we define both in the same file and use the "Inner" suffix. For instance, assume that we didn't want the `Container`, then the following is how `counter-display.tsx` would look like:
+
+```tsx
+// src/components/counter-display.tsx
+
+const CounterDisplay = () => {
+
+  return (
+    <CounterProvider>
+       <CounterDisplayInner />
+    </CounterProvider>
+  )
+};
+
+const CounterDisplayInner = () => {
+  const { counter } = useCounter();
+
+  return (
+    <span>{counter}</span>
+  )
+};
+
+export default CounterDisplay;
 ```
