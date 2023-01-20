@@ -189,6 +189,15 @@
   }
 }
 
+.chaise-table-footer {
+  text-align: center;
+  .show-all-rows-btn {
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+}
+
 .chaise-table-pagination {
   padding: 20px 0 50px 0;
   text-align: center;

@@ -9,6 +9,7 @@ import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column
 import ChaiseFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
+import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
 import Accordion from 'react-bootstrap/Accordion';
 
 // hooks
@@ -396,9 +397,9 @@ const RecordeditInner = ({
                     {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname}></Title>}
                   </>}
                   {resultsetProps && <>
-                    <span>{resultsetProps.success.length}/{tuples.length} </span>
+                    <span>{resultsetProps.success.page.length}/{tuples.length} </span>
                     <Title addLink={true} reference={reference}></Title>
-                    <span> records {appMode === appModes.EDIT ? 'updated': 'created'} successfully</span>
+                    <span> records {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
                   </>}
                 </h1>
               </div>
@@ -447,50 +448,43 @@ const RecordeditInner = ({
           <div className='side-panel-resizable close-panel'></div>
           {/* <!-- Form section --> */}
           <div className='main-container' ref={mainContainer}>
-          {columnModels.length > 0 && !resultsetProps &&
-            <div id='form-section'>
-              <KeyColumn />
-              <ChaiseFormContainer />
-            </div>
-          }
-          {resultsetProps &&
-            <div className='resultset-tables'>
-              <Accordion alwaysOpen defaultActiveKey={['0']} className='panel-group'>
-                <Accordion.Item eventKey='0' className='table-accordion'>
-                  <Accordion.Button as='div'>
-                    {resultsetProps.success.length} successful {appMode === appModes.EDIT ? 'updates': 'creations'}
-                  </Accordion.Button>
-                  <Accordion.Body>
-                    {resultsetProps.appLink &&
-                      <span>
-                        Click <a href={resultsetProps.appLink}>here</a> to navigate to the {appMode === appModes.EDIT ? 'updated': 'created'} results.
-                      </span>
-                    }
-                  </Accordion.Body>
-                </Accordion.Item>
-                {resultsetProps.failed &&
-                  <Accordion.Item eventKey='1' className='table-accordion'>
-                    <Accordion.Button as='div'>
-                      {resultsetProps.failed.length} failed {appMode === appModes.EDIT ? 'updates': 'creations'}
-                    </Accordion.Button>
+            {columnModels.length > 0 && !resultsetProps &&
+              <div id='form-section'>
+                <KeyColumn />
+                <ChaiseFormContainer />
+              </div>
+            }
+            {resultsetProps &&
+              <div className='resultset-tables'>
+                <Accordion alwaysOpen defaultActiveKey={['0', '1', '2']} className='panel-group'>
+                  <Accordion.Item eventKey='0' className='table-accordion'>
+                    <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.success.header} /></Accordion.Button>
                     <Accordion.Body>
-                    <ResultsetTable page={resultsetProps.failed} />
+                      {resultsetProps.success.appLink &&
+                        <div className='inline-tooltip'>
+                          Click <a href={resultsetProps.success.appLink}>here</a> to navigate to the
+                          {appMode === appModes.EDIT ? ' updated' : ' created'}
+                          {resultsetProps.success.page.length > 0 ? ' records' : 'record'}.
+                        </div>
+                      }
+                      <ResultsetTable page={resultsetProps.success.page} />
                     </Accordion.Body>
                   </Accordion.Item>
-                }
-                {resultsetProps.disabled &&
-                  <Accordion.Item eventKey='2' className='table-accordion'>
-                    <Accordion.Button as='div'>
-                      {resultsetProps.disabled.length} disabled records (due to lack of permission)
-                    </Accordion.Button>
-                    <Accordion.Body>
-                      <ResultsetTable page={resultsetProps.disabled} />
-                    </Accordion.Body>
-                  </Accordion.Item>
-                }
-              </Accordion>
-            </div>
-          }
+                  {resultsetProps.disabled &&
+                    <Accordion.Item eventKey='2' className='table-accordion'>
+                      <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.disabled.header} /></Accordion.Button>
+                      <Accordion.Body><ResultsetTable page={resultsetProps.disabled.page} /></Accordion.Body>
+                    </Accordion.Item>
+                  }
+                  {resultsetProps.failed &&
+                    <Accordion.Item eventKey='1' className='table-accordion'>
+                      <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.failed.header} /></Accordion.Button>
+                      <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
+                    </Accordion.Item>
+                  }
+                </Accordion>
+              </div>
+            }
           </div>
         </div>
         {showDeleteConfirmationModal &&

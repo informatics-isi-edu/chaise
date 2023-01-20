@@ -23,7 +23,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
+import { QUERY_PARAMS, RESULT_INFO_VALUES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
   allForeignKeyColumnsPrefilled,
   columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject,
@@ -31,9 +31,14 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { addQueryParamsToURL, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
+type ResultsetProps = {
+  success: { page: any, header: string, appLink?: string }
+  disabled?: { page: any, header: string },
+  failed?: { page: any, header: string, appLink?: string }
+}
 
 export const RecordeditContext = createContext<{
   /* which mode of recordedit we are in */
@@ -80,7 +85,7 @@ export const RecordeditContext = createContext<{
    * whether we should show the spinner indicating submitting data or not
    */
   showSubmitSpinner: boolean,
-  resultsetProps: { success: any, disabled: any, failed: any, appLink: null | string } | null,
+  resultsetProps?: ResultsetProps,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number
 } | null>(null);
@@ -120,7 +125,7 @@ export default function RecordeditProvider({
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
 
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
-  const [resultsetProps, setResultsetProps] = useState<{ success: any, disabled: any, failed: any, appLink: null | string } | null>(null);
+  const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
 
   const [tuples, setTuples] = useState<any[]>([]);
 
@@ -331,26 +336,50 @@ export default function RecordeditProvider({
         const page = response.successful;
         const failedPage = response.failed;
         const disabledPage = response.disabled;
+        const qParam: any = {};
+        qParam[QUERY_PARAMS.RESULT_INFO] = appMode === appModes.EDIT ? RESULT_INFO_VALUES.EDIT : RESULT_INFO_VALUES.CREATE;
 
+        // redirect to record app
         if (forms.length === 1) {
           // Created a single entity or Updated one
-          addAlert('Your data has been submitted. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+          addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-          // redirect to record app
-          windowRef.location = page.reference.detailed.appLink;
-        } else {
+          windowRef.location = addQueryParamsToURL(page.reference.contextualize.detailed.appLink, qParam);
+        }
+        // see if we can just redirect, or if we need the resultset view.
+        else {
           const compactRef = page.reference.contextualize.compact;
           const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
+
+          // redirect to recordset app
           if (!failedPage && !disabledPage && canLinkToRecordset) {
             const verb = appMode === appModes.EDIT ? 'updated' : 'created';
-            addAlert(`Your data has been submitted. Redirecting yo now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
+            addAlert(`Your data has been saved. Redirecting you now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
 
-            windowRef.location = compactRef.appLink;
+            windowRef.location = addQueryParamsToURL(compactRef.appLink, qParam);
           } else {
+            const noun = appMode === appModes.EDIT ? 'update' : 'creation';
+            const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
+
             // resultset view
             setResultsetProps({
-              success: page, failed: failedPage, disabled: disabledPage,
-              appLink: canLinkToRecordset ? compactRef.appLink : null
+              success: {
+                page,
+                header: `${page.length} successful ${noun}${handlePlural(page)}`,
+                ... (canLinkToRecordset && { appLink: compactRef.appLink })
+              },
+              ... (failedPage && {
+                failed: {
+                  page: failedPage,
+                  header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
+                },
+              }),
+              ... (disabledPage && {
+                failed: {
+                  page: disabledPage,
+                  header: `${disabledPage.length} disabled record${handlePlural(disabledPage)} (due to lack of permission)`
+                },
+              }),
             });
           }
         }

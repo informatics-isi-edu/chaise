@@ -42,6 +42,8 @@ const RecordsetTable = ({
     Array.isArray(initialSortObject) ? initialSortObject[0] : null
   );
 
+  const [ showAllRows, setShowAllRows ] = useState(!(config.maxDisplayedRows && config.maxDisplayedRows > 0));
+
   /**
    * capture the state of selected and disabled of rows in here so
    * we don't have to populate this multiple times
@@ -174,6 +176,7 @@ const RecordsetTable = ({
 
   // whether we should show the action buttons or not (used in multiple places)
   const showActionButtons = config.viewable || config.editable || config.deletable || config.selectMode !== RecordsetSelectMode.NO_SELECT;
+  const numHiddenRecords = config.maxDisplayedRows && page && page.length > 0 ? page.length - config.maxDisplayedRows : 0;
 
   /**
    * render the header for the action(s) column
@@ -338,6 +341,11 @@ const RecordsetTable = ({
     if (colValues.length === 0) return;
 
     return page.tuples.map((tuple: any, index: number) => {
+      // only show the number of rows that we allowed
+      if (!showAllRows && config.maxDisplayedRows && index >= config.maxDisplayedRows) {
+        return;
+      }
+
       const rowValues: any[] = [];
       colValues.forEach((valueArr: any[]) => {
         rowValues.push(valueArr[index]);
@@ -406,6 +414,16 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
+      {!hasTimeoutError && numHiddenRecords > 0 &&
+        <div className='chaise-table-footer'>
+          <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-secondary'>
+            {showAllRows ?
+              'Show less records' :
+              `Show all records (${numHiddenRecords} more available)`
+            }
+          </button>
+        </div>
+      }
       {config.displayMode !== RecordsetDisplayMode.TABLE && renderNextPreviousBtn()}
     </div>
   )
