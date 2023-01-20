@@ -26,7 +26,7 @@ import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { RECORDSET_DEAFULT_PAGE_SIZE, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { RECORDSET_DEAFULT_PAGE_SIZE, ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -40,7 +40,7 @@ const recordsetSettings = {
 };
 
 const RecordsetApp = (): JSX.Element => {
-  const { addAlert } = useAlert()
+  const { addAlert, addResultInfoAlert } = useAlert()
   const { session, showPreviousSessionAlert } = useAuthn();
   const { dispatchError, errors } = useError();
   const [recordsetProps, setRecordsetProps] = useState<RecordsetProps | null>(null);
@@ -73,6 +73,10 @@ const RecordsetApp = (): JSX.Element => {
 
       if (!session && showPreviousSessionAlert()) {
         addAlert(MESSAGE_MAP.previousSession.message, ChaiseAlertType.WARNING, AuthnStorageService.createPromptExpirationToken, true);
+      }
+
+      if (res.queryParams && QUERY_PARAMS.RESULT_INFO in res.queryParams) {
+        addResultInfoAlert(res.queryParams[QUERY_PARAMS.RESULT_INFO], recordsetSettings.appName);
       }
 
       const logStack = [

@@ -24,7 +24,7 @@ const RelatedTableHeader = ({
   relatedModel
 }: RelatedTableHeaderProps): JSX.Element => {
   /**
-   * variable to store ref of facet header text
+   * variable to store ref of header text
    */
   const contentRef = useRef(null);
   /**

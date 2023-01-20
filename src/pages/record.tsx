@@ -27,10 +27,10 @@ import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_NAMES, ID_NAMES, QUERY_PARAMS } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 const recordSettings = {
-  appName: 'record',
+  appName: APP_NAMES.RECORD,
   appTitle: 'Record',
   overrideHeadTitle: true,
   overrideDownloadClickBehavior: true,
@@ -39,7 +39,7 @@ const recordSettings = {
 
 const RecordApp = (): JSX.Element => {
 
-  const { addAlert } = useAlert();
+  const { addAlert, addResultInfoAlert } = useAlert();
   const { session, showPreviousSessionAlert, popupLogin } = useAuthn();
   const { dispatchError, errors } = useError();
 
@@ -62,6 +62,10 @@ const RecordApp = (): JSX.Element => {
     // 'promptlogin' query parameter comes from static generated chaise record pages
     if (res.queryParams && !session && QUERY_PARAMS.PROMPT_LOGIN in res.queryParams) {
       popupLogin(LogActions.LOGIN_WARNING);
+    }
+
+    if (res.queryParams && QUERY_PARAMS.RESULT_INFO in res.queryParams) {
+      addResultInfoAlert(res.queryParams[QUERY_PARAMS.RESULT_INFO], recordSettings.appName);
     }
 
     // 'scrollTo' query parameter used to automatically scroll to a related section on load

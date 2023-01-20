@@ -79,6 +79,11 @@ export type RecordsetConfig = {
     isInline: boolean,
     index: number
   },
+  /**
+   * limit the number of displayed records in the table (and trigger show more/less logic)
+   * used in recordedit resultset-table
+   */
+  maxDisplayedRows?: number
   // TODO enable favorites
   // enableFavorites: boolean
 }

@@ -1,5 +1,6 @@
 import { createContext, useMemo, useRef, useState } from 'react';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { APP_NAMES, RESULT_INFO_VALUES } from '@isrd-isi-edu/chaise/src//utils/constants';
 
 // TODO should we move the types to somewhere else?
 
@@ -47,6 +48,7 @@ export const AlertsContext = createContext<{
   removeAlert: RemoveAlertFunction,
   addURLLimitAlert: () => void,
   removeURLLimitAlert: () => void,
+  addResultInfoAlert: (type: string, appName: string) => void
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -118,6 +120,19 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
     // setURLLimitAlert(null);
   }
 
+  const addResultInfoAlert = (message: string, appName: string) => {
+    switch (message) {
+      case RESULT_INFO_VALUES.CREATE:
+        addAlert(`You are looking at the newly created record${appName === APP_NAMES.RECORDSET ? 's' : ''}.`, ChaiseAlertType.INFO);
+        return;
+      case RESULT_INFO_VALUES.EDIT:
+        addAlert(`You are looking at the updated record${appName === APP_NAMES.RECORDSET ? 's' : ''}.`, ChaiseAlertType.INFO);
+        return;
+      default:
+        return;
+    }
+  };
+
 
   const providerValue = useMemo(() => {
     return {
@@ -125,7 +140,8 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
       addAlert,
       removeAlert,
       addURLLimitAlert,
-      removeURLLimitAlert
+      removeURLLimitAlert,
+      addResultInfoAlert
     }
   }, [alerts]);
 
