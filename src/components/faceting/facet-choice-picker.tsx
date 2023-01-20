@@ -592,6 +592,11 @@ const FacetChoicePicker = ({
 
   //-------------------  render logic:   --------------------//
 
+  // number of rows that are selected and not visible to users (as we're only showing 10 facets)
+  const hiddenSelectedCount = checkboxRows.filter((r: FacetCheckBoxRow, i: number) => (
+    i >= FACET_PANEL_DEFAULT_PAGE_SIZE && r.selected
+  )).length;
+
   const renderPickerContainer = () => {
     return (
       <div className='picker-container'>
@@ -609,9 +614,12 @@ const FacetChoicePicker = ({
           <FacetCheckList
             setHeight={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
             rows={checkboxRows} hasNotNullFilter={facetColumn.hasNotNullFilter}
-            onRowClick={onRowClick}
+            onRowClick={onRowClick} maxDisplayedRows={FACET_PANEL_DEFAULT_PAGE_SIZE}
           />
         </div>
+        {hiddenSelectedCount > 0 &&
+          <span className='more-filters'>...{hiddenSelectedCount} more filters selected</span>
+        }
         <div className='button-container'>
           {/* TODO id='show-more' removed */}
           <button
