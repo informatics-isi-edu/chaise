@@ -1,5 +1,3 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
-
 // Components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';

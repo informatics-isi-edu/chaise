@@ -1,4 +1,3 @@
-import '@isrd-isi-edu/chaise/src/assets/scss/_faceting.scss';
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-picker.scss';
 
 // components

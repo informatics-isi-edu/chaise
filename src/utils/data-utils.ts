@@ -89,7 +89,9 @@ export function getDisplaynameInnerText(displayname: any) {
  * ONLY USE THIS FUNCTION IF IT IS NOT ANY OF THE GIVEN LIMIATIONS.
  */
 export function simpleDeepCopy(source: object) {
-  return JSON.parse(JSON.stringify(source));
+  try {
+    return JSON.parse(JSON.stringify(source));
+  } catch (exp) {
+    return {};
+  }
 }
-
-

@@ -34,6 +34,7 @@ import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 export type RecordeditProps = {
   appMode: string;
@@ -78,8 +79,8 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, page, tuples, columnModels, initialized,
-    forms, addForm, removeForm, getInitialFormValues, MAX_ROWS_TO_ADD
+    appMode, reference, page, tuples, foreignKeyData ,columnModels, initialized, waitingForForeignKeyData,
+    forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
@@ -121,6 +122,14 @@ const RecordeditInner = ({
   });
 
   const canShowBulkDelete = appMode === appModes.EDIT && ConfigService.chaiseConfig.deleteRecord === true;
+
+  /**
+   * form is ready when,
+   * - form is not initialized
+   * - we're waiting for foreignkey data of some columns.
+   * after this, user can click on title buttons.
+   */
+  const allFormDataLoaded = initialized && !waitingForForeignKeyData;
 
   /**
    * handler for bulk delete button. it will,
@@ -227,7 +236,15 @@ const RecordeditInner = ({
   // once data is fetched, initialize the form data with react hook form
   useEffect(() => {
     if (!initialized) return;
-    methods.reset(getInitialFormValues(forms, columnModels));
+
+    const initialValues = getInitialFormValues(forms, columnModels);
+    methods.reset(initialValues);
+
+    // in create mode, we need to fetch the foreignkey data
+    // for prefilled and foreignkeys that have default values
+    if (appMode === appModes.CREATE) {
+      getPrefilledDefaultForeignKeyData(initialValues, methods.setValue);
+    }
 
     setFormProviderInitialized(true)
   }, [initialized]);
@@ -297,6 +314,21 @@ const RecordeditInner = ({
           tempFormValues[`${formValue}-${colName}-time`] = tempFormValues[`${lastFormValue}-${colName}-time`] || '';
         }
       });
+
+      // the code above is just copying the displayed rowname for foreignkeys,
+      // we still need to copy the raw values
+      // but we cannot go basd on visible columns since some of these data might be for invisible fks.
+      reference.activeList.allOutBounds.forEach((col: any) => {
+        // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+        foreignKeyData.current[`${formValue}-${col.name}`] = simpleDeepCopy(foreignKeyData.current[`${lastFormValue}-${col.name}`]);
+
+        // copy the raw data (submitted to ermrestjs)
+        col.foreignKey.colset.columns.forEach((col: any) => {
+          const val = tempFormValues[`${lastFormValue}-${col.name}`];
+          if (val === null || val === undefined) return;
+          tempFormValues[`${formValue}-${col.name}`] = val;
+        });
+      });
     }
 
     methods.reset(tempFormValues)
@@ -320,21 +352,24 @@ const RecordeditInner = ({
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
                 <div className='recordedit-title-buttons title-buttons'>
-                  {/* TODO: proper submission workflow, submission disabled, tooltip,
-                          ng-disabled='form.submissionButtonDisabled || !displayReady'
-                          ng-click='::form.submit()'
-                          ng-attr-tooltip-placement='bottom-right'
-                          ng-attr-uib-tooltip='Save this data on the server'>
-                          */}
-                  <button
-                    id='submit-record-button'
-                    className='chaise-btn chaise-btn-primary'
-                    type='submit'
-                    form='recordedit-form'
+                  <ChaiseTooltip placement='bottom'
+                    tooltip={
+                      allFormDataLoaded ?
+                        'Save this data on the server.' :
+                        'Waiting for some columns to properly load.'
+                    }
                   >
-                    <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
-                    <span>Save</span>
-                  </button>
+                    <button
+                      id='submit-record-button'
+                      className='chaise-btn chaise-btn-primary'
+                      type='submit'
+                      form='recordedit-form'
+                      disabled={!allFormDataLoaded}
+                    >
+                      <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
+                      <span>Save</span>
+                    </button>
+                  </ChaiseTooltip>
                   {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
                     <button className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
                       <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
@@ -363,16 +398,20 @@ const RecordeditInner = ({
                     min='1'
                   />
                   <span className='chaise-input-group-append'>
-                    {/* TODO: if any of the columns is showing spinner, that means it's waiting for some
-                            data and therefore we should just disable the addMore button.
-                            ng-disabled='!form.canAddMore'
-                            */}
-                    <ChaiseTooltip tooltip='Duplicate rightmost form the specified number of times.' placement='bottom-end'>
+                    <ChaiseTooltip
+                      tooltip={
+                        allFormDataLoaded ?
+                          'Duplicate rightmost form the specified number of times.' :
+                          'Waiting for some columns to properly load.'
+                      }
+                      placement='bottom-end'
+                    >
                       <button
                         id='copy-rows-submit'
                         className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
                         onClick={callAddForm}
                         type='button'
+                        disabled={!allFormDataLoaded}
                       >
                         <span>Clone</span>
                       </button>

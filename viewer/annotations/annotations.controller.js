@@ -756,6 +756,13 @@
             vm.showPanel = (item !== null) ? true : false;
 
             // only in edit mode
+            /**
+             * TODO is this even a valid case?
+             * AFAIK this is supporting a case when users attempt to edit an annotation
+             * that is not saved in database. which means the annotation is coming
+             * from file. but we don't even allow users to edit an annotation that
+             * is coming from file (and not db)
+             */
             if (typeof index == 'number') {
                 // TODO is this unnecessary?
                 annotationEditForm.rows = [{}];

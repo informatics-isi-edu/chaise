@@ -7,6 +7,7 @@ import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boole
 import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
 import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-field';
 import LongtextField from '@isrd-isi-edu/chaise/src/components/input-switch/longtext-field';
+import ForeignkeyField from '@isrd-isi-edu/chaise/src/components/input-switch/foreignkey-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -736,9 +737,38 @@ type InputSwitchProps = {
   styles?: object,
   /**
    * The column model that is used for this input
-   * boolean and foreignkey inputs need this. other types might need it as well.
+   * (usd in boolean and foreignkey inputs)
    */
-  columnModel?: RecordeditColumnModel
+  columnModel?: RecordeditColumnModel,
+  /**
+   * the app mode that this input is used in
+   * (used in foreignkey input)
+   */
+  appMode?: string,
+  /**
+   * the "formNumber" that this input belongs to
+   * (used in foreignkey input)
+   */
+  formNumber?: number,
+  /**
+   * The reference that is used for the form
+   * (used in foreignkey input)
+   */
+  parentReference?: any,
+  /**
+   * The tuple representing the row.
+   * Available only in edit mode.
+   * (used for foreignkey input)
+   */
+  parentTuple?: any,
+  /**
+   * the ref used to capture the foreignkey data
+   */
+  foreignKeyData?: React.MutableRefObject<any>,
+  /**
+   * whether we're still waiting for foreignkey data
+   */
+  waitingForForeignKeyData?: boolean,
 };
 
 const InputSwitch = ({
@@ -757,6 +787,12 @@ const InputSwitch = ({
   onFieldChange,
   styles = {},
   columnModel,
+  appMode,
+  formNumber,
+  parentReference,
+  parentTuple,
+  foreignKeyData,
+  waitingForForeignKeyData
 }: InputSwitchProps): JSX.Element | null => {
 
   return (() => {
@@ -829,6 +865,27 @@ const InputSwitch = ({
           onFieldChange={onFieldChange}
           columnModel={columnModel}
         />
+      case 'popup-select':
+        // TODO columnModel is required, this should be refactored better?
+        if (columnModel) {
+          return <ForeignkeyField
+            name={name}
+            classes={classes}
+            inputClasses={inputClasses}
+            containerClasses={containerClasses}
+            clearClasses={clearClasses}
+            value={value as string}
+            disableInput={disableInput}
+            onFieldChange={onFieldChange}
+            columnModel={columnModel}
+            appMode={appMode}
+            formNumber={formNumber}
+            parentReference={parentReference}
+            parentTuple={parentTuple}
+            foreignKeyData={foreignKeyData}
+            waitingForForeignKeyData={waitingForForeignKeyData}
+          />
+        }
       case 'disabled':
         return <DisabledField
           name={name}
