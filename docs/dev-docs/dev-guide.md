@@ -299,16 +299,17 @@ The following are all the Makefile targets related to installation:
 #### NPM
 This section will go over how we think the NPM modules should be managed.
 
-- Ensure the latest stable node and npm versions are used.
-- Only use `make install` when the `package-lock.json` has been changed (or when doing a clean install).
-- Use `make install-wo-deps` while developing.
-- Avoid using `npm install`.
-- `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
+- Ensure the latest stable Node.js and NPM versions are used.
+- Use `make npm-install-all-modules` to install all the NPM modules regardless of `NODE_ENV` value.
+  - Useful when you first clone the repository, or want to download dependencies from scratch.
+  - Use it yo update the installed dependencies based on the changes in `pacakge-lock.json` file.
+- Use `make dist-wo-deps` while developing so you don't have to install depenendencies for each build.
+- Avoid using `npm install` (it can have unwanted side effects like updating `package-lock.json`).
+  - `pacakge-lock.json` should not be changed. If you noticed a change in your branch, consult with the main contributors.
 - Only for main contributors: If we want to upgrade the dependencies or install a new package, we should,
   - Ensure the used node and npm versions are updated and the latest stable.
   - Run `npm install` to sync `package-lock.json` with `package.json`
   - Double-check the changes to `pacakge-lock.json`
-
 
 ## Structure of an App
 Since Chaise is a collection of multiple single-page apps (`recordset`, `record`, `recordedit`, etc.), the app setup will be very similar. This similar structure allowed us to factor out a lot of that common setup code into different bits described below.
