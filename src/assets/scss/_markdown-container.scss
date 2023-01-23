@@ -1,3 +1,6 @@
+@import 'helpers';
+@import 'variables';
+
 .markdown-container {
   // NOTE related PR: https://github.com/informatics-isi-edu/chaise/pull/882
   // might not be needed anymore
@@ -155,10 +158,6 @@
     > li {
       margin-left: 1em;
       padding-left: 0;
-
-      &:before {
-      }
-
       list-style: inherit;
     }
   }

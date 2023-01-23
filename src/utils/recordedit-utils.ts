@@ -39,7 +39,6 @@ export function columnToColumnModel(column: any): RecordeditColumnModel {
     type = getInputType(column.type);
   }
 
-
   return {
     // allInput: undefined,
     column: column,

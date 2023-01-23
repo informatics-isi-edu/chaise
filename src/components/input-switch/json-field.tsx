@@ -6,10 +6,21 @@ import { useEffect, useState, useRef } from 'react';
 import { useFormContext, useController } from 'react-hook-form';
 
 // utils
+import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { ResizeSensor } from 'css-element-queries';
 
+const jsonFieldValidation = (value: string) => {
+  if (!value) return;
+
+  try {
+    JSON.parse(value);
+    return true;
+  } catch (error) {
+    return ERROR_MESSAGES.INVALID_JSON;
+  }
+};
 
 type JsonFieldProps = {
   /**
@@ -59,28 +70,28 @@ const JsonField = ({
   styles,
   onFieldChange,
 }: JsonFieldProps): JSX.Element => {
-  const { setValue, control, clearErrors } = useFormContext();
 
   const textAreaRef = useRef(null);
 
+  // react-hook-form setup
+  const { setValue, control, clearErrors } = useFormContext();
+
   const registerOptions = {
     required: false,
+    validate: jsonFieldValidation
   };
 
   const formInput = useController({
     name,
     control,
-    rules: registerOptions,
+    rules: registerOptions
   });
 
   const field = formInput?.field;
-
   const fieldValue = field?.value;
-
-  const fieldState = formInput?.fieldState;
-
   const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
 
+  const fieldState = formInput?.fieldState;
   const { error, isTouched } = fieldState;
 
   useEffect(() => {
@@ -99,11 +110,6 @@ const JsonField = ({
     }
   }, []);
 
-  const clearInput = () => {
-    setValue(name, '');
-    clearErrors(name);
-  }
-
   useEffect(() => {
     if (onFieldChange) {
       onFieldChange(fieldValue);
@@ -119,11 +125,6 @@ const JsonField = ({
     setValue(name, value);
   }, [value]);
 
-  const handleChange = (v: any) => {
-    field.onChange(v);
-    field.onBlur();
-  };
-
   useEffect(() => {
     fireCustomEvent(
       'input-switch-error-update',
@@ -131,6 +132,16 @@ const JsonField = ({
       { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'json' }
     );
   }, [error?.message]);
+
+  const handleChange = (v: any) => {
+    field.onChange(v);
+    field.onBlur();
+  };
+
+  const clearInput = () => {
+    setValue(name, '');
+    clearErrors(name);
+  }
 
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)} input-switch-json-container`} style={styles}>

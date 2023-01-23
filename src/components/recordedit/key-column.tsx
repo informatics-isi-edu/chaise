@@ -35,7 +35,7 @@ const KeyColumn = (): JSX.Element => {
         const height = keysHeightMap[colName];
         const colType = getInputTypeOrDisabled(cm);
         const defaultHeight = DEFAULT_HEGHT_MAP[colType];
-        const heightparam = height == -1 ? defaultHeight : `${height}px`;
+        const heightparam = height === -1 ? defaultHeight : `${height}px`;
 
         // try changing to div if height adjustment does not work
         return (

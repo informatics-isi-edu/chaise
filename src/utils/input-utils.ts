@@ -68,6 +68,32 @@ export function getInputType(type: any): string {
 }
 
 /**
+ * given a typename string, will return a more human readable version of it.
+ */
+export function getSimpleColumnType(typename: string): string {
+  switch (typename) {
+    case 'timestamp':
+      return 'timestamp';
+    case 'timestamptz':
+      return 'timestamp with timezone';
+    case 'date':
+      return 'date';
+    case 'float4':
+    case 'float8':
+    case 'numeric':
+      return 'number';
+    case 'boolean':
+      return 'boolean';
+    case 'int2':
+    case 'int4':
+    case 'int8':
+      return 'integer';
+    default:
+      return 'text';
+  }
+}
+
+/**
  * return whether the input is disabled or not
  *   NOTE: this will always return a boolean even if column.inputDisabled is an object
  * @param column the column object from ermrestJS
@@ -121,25 +147,24 @@ export function formatDatetime(value: string, options: TimestampOptions) {
  * Map type to default heights for different inputs (currently for recordedit)
  */
 export const DEFAULT_HEGHT_MAP: any = {
-  'number': 47,
+  'array': 127, // should be same as json
+  'boolean': 47,
+  'color': 47,
   'date': 47,
-  'timestamp': 82,
-  'text': 47 ,
-  'longtext': 158,
-  'timestamptz': 82,
+  'disabled': 47,
   'float4': 47,
   'float8': 47,
-  'numeric': 47,
   'integer2': 47,
   'integer4': 47,
   'integer8': 47,
-  'boolean': 47,
-  'markdown': 182,
-  'json': 126,
-  'array': 126,
-  'color': 47, 
-  'shorttext': 47, 
-  'disabled': 47
+  'json': 127, // should be same as array
+  'longtext': 170, // also markdown
+  'number': 47,
+  'numeric': 47,
+  'shorttext': 47,
+  'text': 47,
+  'timestamp': 82,
+  'timestamptz': 82
 }
 
 export const ERROR_MESSAGES = {
@@ -147,7 +172,8 @@ export const ERROR_MESSAGES = {
   INVALID_INTEGER: 'Please enter a valid integer value.',
   INVALID_NUMERIC: 'Please enter a valid decimal value.',
   INVALID_DATE: 'Please enter a valid date value.',
-  INVALID_TIMESTAMP: 'Please enter a valid date and time value.'
+  INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
+  INVALID_JSON: 'Please enter a valid JSON value.'
 }
 
 export function formatInt(value: string) {
@@ -173,4 +199,36 @@ export function formatBoolean(column: any, value: any) {
  */
 export function replaceNullOrUndefined(val: any, alt: any) {
   return (val === null || val === undefined) ? alt : val;
+}
+
+export function arrayFieldPlaceholder(baseType: string) {
+  let placeholder;
+  switch (baseType) {
+    case 'timestamptz':
+      placeholder = 'example: [ \"2001-01-01T01:01:01-08:00\", \"2002-02-02T02:02:02-08:00\" ]'
+    case 'timestamp':
+      placeholder = 'example: [ \"2001-01-01T01:01:01\", \"2002-02-02T02:02:02\" ]'
+      break;
+    case 'date':
+      placeholder = 'example: [ \"2001-01-01\", \"2001-02-02\" ]'
+      break;
+    case 'numeric':
+    case 'float4':
+    case 'float8':
+      placeholder = 'example: [ 1, 2.2 ]'
+      break;
+    case 'int2':
+    case 'int4':
+    case 'int8':
+      placeholder = 'example: [ 1, 2 ]'
+      break;
+    case 'boolean':
+      placeholder = 'example: [ true, false ]'
+      break;
+    default:
+      placeholder = 'example: [ \"value1\", \"value2\" ]'
+      break;
+  }
+
+  return placeholder;
 }

@@ -6,6 +6,7 @@ import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-f
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
 import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
 import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-field';
+import LongtextField from '@isrd-isi-edu/chaise/src/components/input-switch/longtext-field';
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -16,53 +17,31 @@ import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-pi
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { ERROR_MESSAGES, getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { arrayFieldPlaceholder, ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { ResizeSensor } from 'css-element-queries';
-
-
-
-
-/**
- * Things to consider
- * 1. need to move the defaultvalue logic to the HOC component
- * 2. how to handle validate on change for each field
- * 3. how to handle merging validation logic for date n time inputs for type timestamp
- * 4. handle integrating these fields into a formik component
- * 5. how to create a HOC that handles/manages multiple forms
- */
-
-const INTEGER_REGEXP = /^\-?\d+$/;
-
-const FLOAT_REGEXP = /^\-?(\d+)?((\.)?\d+)?$/;
-
-const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
-
-const DATE_FORMAT = 'YYYY-MM-DD';
 
 const integerFieldValidation = {
-  value: INTEGER_REGEXP,
+  value: dataFormats.regexp.integer,
   message: ERROR_MESSAGES.INVALID_INTEGER
 };
 
 const numericFieldValidation = {
-  value: FLOAT_REGEXP,
+  value: dataFormats.regexp.float,
   message: ERROR_MESSAGES.INVALID_NUMERIC
 };
 
-
-// https://github.com/react-hook-form/react-hook-form/issues/589
 const dateFieldValidation = (value: string) => {
   if (!value) return;
-  const date = windowRef.moment(value, DATE_FORMAT, true);
+  const date = windowRef.moment(value, dataFormats.date, true);
   return date.isValid() || ERROR_MESSAGES.INVALID_DATE;
 };
 
 const timestampFieldValidation = (value: string) => {
   if (!value) return;
-  const timestamp = windowRef.moment(value, TIMESTAMP_FORMAT, true);
+  const timestamp = windowRef.moment(value, dataFormats.timestamp, true);
   return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
 };
 
@@ -78,107 +57,6 @@ const validationFunctionMap: {
   'date': dateFieldValidation,
   'timestamp': timestampFieldValidation,
 };
-
-const LongTextField = ({
-  name,
-  placeholder,
-  classes,
-  inputClasses,
-  clearClasses,
-  disableInput,
-  displayErrors,
-  value,
-  containerClasses,
-  styles,
-  onFieldChange,
-}: TextFieldProps): JSX.Element => {
-  const { setValue, control, clearErrors } = useFormContext();
-
-  const textAreaRef = useRef(null);
-
-  const registerOptions = {
-    required: false,
-  };
-
-  const formInput = useController({
-    name,
-    control,
-    rules: registerOptions,
-  });
-
-  const field = formInput?.field;
-
-  const fieldValue = field?.value;
-
-  const fieldState = formInput?.fieldState;
-
-  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
-
-  const { error, isTouched } = fieldState;
-
-  useEffect(() => {
-    const textAreaElement = textAreaRef.current;
-    if (!textAreaElement) return;
-    const sensor = new ResizeSensor(textAreaElement, () => {
-      fireCustomEvent(
-        'input-switch-error-update',
-        `.input-switch-container-${makeSafeIdAttr(name)}`,
-        { inputFieldName: name, msgCleared: false, type: 'longtext' }
-      );
-    });
-
-    return () => {
-      sensor.detach();
-    }
-  }, []);
-
-  const clearInput = () => {
-    setValue(name, '');
-    clearErrors(name);
-  }
-
-  useEffect(() => {
-    if (onFieldChange) {
-      onFieldChange(fieldValue);
-    }
-
-    if (showClear != Boolean(fieldValue)) {
-      setShowClear(Boolean(fieldValue));
-    }
-  }, [fieldValue]);
-
-  useEffect(() => {
-    if (value === undefined) return;
-    setValue(name, value);
-  }, [value]);
-
-  const handleChange = (v: any) => {
-    field.onChange(v);
-    field.onBlur();
-  };
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'longtext' }
-    );
-  }, [error?.message]);
-
-  return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)} input-switch-longtext-container`} style={styles}>
-      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaRef}>
-        <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
-        <ClearInputBtn
-          btnClassName={`${clearClasses} input-switch-clear`}
-          clickCallback={clearInput}
-          show={showClear}
-        />
-      </div>
-      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
-    </div>
-  );
-}
 
 type TextFieldProps = {
   /**
@@ -960,7 +838,7 @@ const InputSwitch = ({
           placeholder={placeholder as string}
         />
       case 'longtext':
-        return <LongTextField
+        return <LongtextField
           name={name}
           classes={classes}
           inputClasses={inputClasses}
@@ -980,9 +858,14 @@ const InputSwitch = ({
           value={value as string}
           disableInput={disableInput}
           onFieldChange={onFieldChange}
+          displayErrors={displayErrors}
         />
       case 'array':
+        const baseType = columnModel?.column.type.baseType.name,
+          arrayPlaceholder = placeholder ? placeholder : arrayFieldPlaceholder(baseType);
+
         return <ArrayField
+          baseArrayType={baseType}
           name={name}
           classes={classes}
           inputClasses={inputClasses}
@@ -991,6 +874,8 @@ const InputSwitch = ({
           value={value as string}
           disableInput={disableInput}
           onFieldChange={onFieldChange}
+          displayErrors={displayErrors}
+          placeholder={arrayPlaceholder as string}
         />
       case 'text':
       default:

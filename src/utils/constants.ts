@@ -75,11 +75,16 @@ export const dataFormats = {
   date: 'YYYY-MM-DD',
   time12: 'hh:mm:ss', // used for displaying values in recordedit properly
   time24: 'HH:mm:ss',
+  timestamp: 'YYYY-MM-DDTHH:mm:ss',
   datetime: {
     display: 'YYYY-MM-DD HH:mm:ss',
     displayZ: 'YYYY-MM-DD HH:mm:ssZ',
     return: 'YYYY-MM-DDTHH:mm:ssZ', // the format that the database returns when there are no fractional seconds to show
     submission: 'YYYY-MM-DDTHH:mm:ss.SSSZ',
+  },
+  regexp: {
+    integer: /^\-?\d+$/,
+    float: /^\-?(\d+)?((\.)?\d+)?$/
   }
 }
 

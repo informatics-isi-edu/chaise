@@ -22,21 +22,57 @@
     height: auto;
     padding: 0 !important;
 
-    textarea {
-      padding: 10px !important;
-      min-height: 139px; // TODO: this might need to change based on markdown header height
+    textarea,
+    .disabled-textarea {
+      padding: 4px 10px !important;
+      min-height: 107px;
       display: flex;
       width: 100%;
       border: none;
       border-radius: 4px;
+      outline: 0;
     }
   }
 }
 
-.input-switch-json-container,
-.input-switch-array-container {
-  .chaise-input-control textarea {
-    min-height: 107px;
+.input-switch-longtext-container {
+  .md-editor {
+    border: 1px solid $border-color;
+    border-radius: 4px;
+
+    .md-header {
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      padding: 6px 4px;
+      background: #f5f5f5;
+    }
+
+    .chaise-input-control {
+      border: none !important;
+
+      textarea,
+      .disabled-textarea {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-top: 1px dashed $border-color;
+      }
+    }
+
+    .md-preview {
+      background: #fff;
+      border-top: 1px dashed #ddd;
+      border-bottom: 1px dashed #ddd;
+      min-height: 10px;
+      overflow: auto;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+      font-size: 14px !important;
+      line-height: 1.42857143 !important;
+      color: #333 !important;
+
+      width: 100% !important;
+      background-color: #d8d8dc !important;
+      resize: vertical;
+    }
   }
 }
 
