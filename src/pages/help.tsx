@@ -20,14 +20,14 @@ import { InvalidHelpPage } from '@isrd-isi-edu/chaise/src/models/errors';
 import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 
 // utilities
-import { ID_NAMES, HELP_PAGES, HELP_PAGES_FOLDER_LOCATION } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_NAMES, ID_NAMES, HELP_PAGES, HELP_PAGES_FOLDER_LOCATION } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { chaiseDeploymentPath, getQueryParam } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { attachContainerHeightSensors } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const helpSettings = {
-  appName: 'help',
+  appName: APP_NAMES.HELP,
   appTitle: 'Help Page',
   overrideHeadTitle: true,
   overrideDownloadClickBehavior: true,    // links in navbar might need this
