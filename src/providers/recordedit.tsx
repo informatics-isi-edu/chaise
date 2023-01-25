@@ -289,7 +289,24 @@ export default function RecordeditProvider({
       }
     }
 
-  }, [reference])
+  }, [reference]);
+
+  /**
+   * Show an alert if user is attempting to leave without saving
+   */
+  const canLeaveRecordedit = useRef(false);
+  useEffect(() => {
+    const avoidLeave = (e: any) => {
+      if (canLeaveRecordedit.current || ConfigService.chaiseConfig.hideRecordeditLeaveAlert === true) {
+        return undefined;
+      }
+      e.returnValue = 'Do you want to leave this page? Changes you have made will not be saved.';
+    }
+    window.addEventListener('beforeunload', avoidLeave);
+    return () => {
+      window.removeEventListener('beforeunload', avoidLeave);
+    };
+  }, []);
 
   const onSubmitValid = (data: any) => {
     const submissionRows: any[] = []
@@ -302,9 +319,10 @@ export default function RecordeditProvider({
       setShowSubmitSpinner(true);
 
       const submitSuccessCB = (response: any) => {
-        // TODO should be removed
-        $log.info(response);
+        // make sure the leave alert is disabled
+        canLeaveRecordedit.current = true;
 
+        // communicate with the caller page that the request is done
         if (appMode === appModes.EDIT) {
           // TODO should most probably be added when we implement assets
           // const data = checkUpdate(submissionRowsCopy, rsTuples);

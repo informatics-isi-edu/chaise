@@ -26,11 +26,11 @@ import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils
 import { chaiseURItoErmrestURI, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { addAppContainerClasses, updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
-import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const recordeditSettings = {
-  appName: 'recordedit',
+  appName: APP_NAMES.RECORDEDIT,
   appTitle: 'Recordedit',
   overrideHeadTitle: true,
   overrideDownloadClickBehavior: true,

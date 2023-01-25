@@ -28,7 +28,7 @@ export const CHAISE_CONFIG_PROPERTY_NAMES = [
   'includeCanonicalTag', 'systemColumnsDisplayCompact', 'systemColumnsDisplayDetailed', 'systemColumnsDisplayEntry',
   'logClientActions', 'disableExternalLinkModal', 'internalHosts', 'hideGoToRID', 'showWriterEmptyRelatedOnLoad',
   'showSavedQueryUI', 'savedQueryConfig', 'termsAndConditionsConfig', 'loggedInMenu', 'facetPanelDisplay', 'configRules',
-  'debug', 'templating'
+  'debug', 'templating', 'hideRecordeditLeaveAlert'
 ];
 
 export const DEFAULT_CHAISE_CONFIG = {
@@ -64,7 +64,8 @@ export const DEFAULT_CHAISE_CONFIG = {
   },
   templating: {
     engine: 'mustache'
-  }
+  },
+  hideRecordeditLeaveAlert: false,
 };
 
 export const dataFormats = {
@@ -147,10 +148,13 @@ export const RESULT_INFO_VALUES = {
 
 // these are the captured as `cid` value in logs
 export const APP_NAMES = {
+  HELP: 'help',
+  LOGIN: 'login',
+  NAVBAR: 'navbar',
   RECORD: 'record',
-  RECORDSET: 'recordset',
-  RECORDEDIT: 'recordedit'
-}
+  RECORDEDIT: 'recordedit',
+  RECORDSET: 'recordset'
+};
 
 export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden'

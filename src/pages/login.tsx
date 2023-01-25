@@ -20,11 +20,11 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 // utilities
 import { validateTermsAndConditionsConfig } from '@isrd-isi-edu/chaise/src/utils/config-utils';
 import { queryStringToJSON } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
-import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { APP_NAMES, ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 
 const loginSettings = {
-  appName: 'login',
+  appName: APP_NAMES.LOGIN,
   appTitle: 'Login',
   overrideHeadTitle: true,
   overrideDownloadClickBehavior: false,
