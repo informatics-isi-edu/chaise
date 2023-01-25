@@ -113,7 +113,7 @@ export default function RecordeditProvider({
 
   const { addAlert } = useAlert();
   const { session, validateSessionBeforeMutation } = useAuthn();
-  const { dispatchError } = useError();
+  const { dispatchError, errors, loginModal } = useError();
 
   const maxRowsToAdd = 201;
 
@@ -297,16 +297,22 @@ export default function RecordeditProvider({
   const canLeaveRecordedit = useRef(false);
   useEffect(() => {
     const avoidLeave = (e: any) => {
+      // if we're showing errors or login-modal, allow users to navigate away
+      if (loginModal || errors.length > 0) {
+        return undefined;
+      }
       if (canLeaveRecordedit.current || ConfigService.chaiseConfig.hideRecordeditLeaveAlert === true) {
         return undefined;
       }
       e.returnValue = 'Do you want to leave this page? Changes you have made will not be saved.';
     }
+
+    window.removeEventListener('beforeunload', avoidLeave);
     window.addEventListener('beforeunload', avoidLeave);
     return () => {
       window.removeEventListener('beforeunload', avoidLeave);
     };
-  }, []);
+  }, [loginModal, errors]);
 
   const onSubmitValid = (data: any) => {
     const submissionRows: any[] = []

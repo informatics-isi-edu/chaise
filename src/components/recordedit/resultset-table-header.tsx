@@ -1,6 +1,5 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
-import { ConditionalWrapper } from '@isrd-isi-edu/chaise/src/components/cond-wrapper';
 
 // hooks
 import { useRef, useState } from 'react';
@@ -35,7 +34,7 @@ const ResultsetTableHeader = ({
   };
 
   return (
-    <div className='resultset-table-header'>
+    <div className='chaise-accordion-header'>
       <ChaiseTooltip
         placement='top-start'
         tooltip={header}
@@ -50,7 +49,7 @@ const ResultsetTableHeader = ({
         }}
         show={showTooltip}
       >
-        <div className='header-displayname' ref={contentRef}>{header}</div>
+        <div className='chaise-accordion-displayname' ref={contentRef}>{header}</div>
       </ChaiseTooltip>
     </div>
   )

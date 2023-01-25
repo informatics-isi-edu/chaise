@@ -895,6 +895,121 @@ html {
     }
   }
 
+  // section accordion (used both in record and recordedit)
+  .chaise-accordions {
+    $space-between-accordions: 5px;
+    $row-focus-border-width: 2px;
+    $chaise-accordion-content-padding-left: 40px;
+
+    .panel-group {
+      margin-bottom: 20px;
+    }
+
+    .chaise-accordion {
+      // override the default bootstrap styles
+      box-shadow: none;
+      border-radius: 0;
+      border: 0;
+      + .chaise-accordion {
+        margin-top: $space-between-accordions;
+      }
+
+      // row-focus will add a border of 2px,
+      // - adding -2px margin to left and right to avoid shrinkage
+      // - reducing the margin-top from 5px to 3px to avoid moving
+      &.row-focus {
+        margin-left: -$row-focus-border-width;
+        margin-right: -$row-focus-border-width;
+        margin-top: $space-between-accordions - $row-focus-border-width;
+
+        + .chaise-accordion:not(.row-focus) {
+          margin-top: $space-between-accordions - $row-focus-border-width;
+        }
+
+        // if there are two row-focus on top of each other, we should
+        // change the margin to account for both of their borders.
+        + .row-focus {
+          margin-top: $space-between-accordions - ($row-focus-border-width * 2);
+        }
+      }
+
+      // the first row doesn't have margin top
+      &:first-child.row-focus {
+        margin-top: -$row-focus-border-width;
+      }
+
+      .accordion-button {
+        cursor: pointer;
+        height: 44px;
+        text-transform: inherit;
+        padding: 8px 8px 8px 8px;
+        color: $white-color;
+        border: none;
+        border-radius: inherit;
+        background: $section-background-color;
+        // Overriding accordian-button css to align right angle bracket icon to left
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+
+        &:focus {
+          box-shadow: none;
+        }
+
+        // Overriding accordian-button css to align right angle bracket icon to left
+        &::after {
+          margin-right: 11px;
+          margin-left: 2px;
+          background-image: none;
+          content: "\f054"; // fa-solid fa-chevron-right
+          font-family: "Font Awesome 6 Free";
+          font-weight: 900;
+          transform: unset;
+          font-size: 1.75rem;
+          height: unset;
+        }
+
+        &:not(.collapsed)::after {
+          content: "\f078"; // fa-solid fa-chevron-down
+        }
+      }
+
+      .chaise-accordion-header {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        white-space: nowrap;
+        min-width: 0; // needed to avoid overflow
+
+        .chaise-accordion-displayname {
+          font-size: 1.75rem;
+          text-overflow: ellipsis;
+          overflow: hidden;
+        }
+
+        .chaise-accordion-header-buttons {
+          position: relative;
+          padding-left: 20px;
+          margin-top: 2px;
+
+          .chaise-accordion-header-icons {
+            position: absolute;
+            left: 0;
+            top: 5px;
+          }
+        }
+      }
+
+      .accordion-body {
+        padding-left: $chaise-accordion-content-padding-left;
+        padding-right: 0;
+      }
+
+      .inline-tooltip {
+        margin-bottom: 10px;
+      }
+    }
+  }
+
   // used both in record and help apps
   .back-to-top-btn {
     position: fixed;
