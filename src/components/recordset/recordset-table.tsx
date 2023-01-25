@@ -1,5 +1,5 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_recordset-table.scss';
-import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow } from '@isrd-isi-edu/chaise/src/models/recordset';
+import { SortColumn, RecordsetConfig, RecordsetSelectMode, SelectedRow, RecordsetDisplayMode } from '@isrd-isi-edu/chaise/src/models/recordset';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import Spinner from 'react-bootstrap/Spinner';
@@ -406,7 +406,7 @@ const RecordsetTable = ({
           </tbody>
         </table>
       </div>
-      {renderNextPreviousBtn()}
+      {config.displayMode !== RecordsetDisplayMode.TABLE && renderNextPreviousBtn()}
     </div>
   )
 }

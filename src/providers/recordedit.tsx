@@ -23,10 +23,11 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
+import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
   allForeignKeyColumnsPrefilled,
-  columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject, populateCreateInitialValues,
-  populateEditInitialValues, populateSubmissionRow
+  columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject,
+  populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -75,6 +76,11 @@ export const RecordeditContext = createContext<{
   onSubmitValid: (data: any) => void,
   /* callback for react-hook-form to call when forms are NOT valid */
   onSubmitInvalid: (data: any) => void,
+  /**
+   * whether we should show the spinner indicating submitting data or not
+   */
+  showSubmitSpinner: boolean,
+  resultsetProps: { success: any, disabled: any, failed: any, appLink: null | string } | null,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number
 } | null>(null);
@@ -112,6 +118,9 @@ export default function RecordeditProvider({
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
   const [initialized, setInitialized, initializedRef] = useStateRef(false);
+
+  const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
+  const [resultsetProps, setResultsetProps] = useState<{ success: any, disabled: any, failed: any, appLink: null | string } | null>(null);
 
   const [tuples, setTuples] = useState<any[]>([]);
 
@@ -285,6 +294,8 @@ export default function RecordeditProvider({
     });
 
     validateSessionBeforeMutation(() => {
+      setShowSubmitSpinner(true);
+
       const submitSuccessCB = (response: any) => {
         // TODO should be removed
         $log.info(response);
@@ -318,32 +329,41 @@ export default function RecordeditProvider({
         }
 
         const page = response.successful;
-        // const failedPage = response.failed;
-        // const disabledPage = response.disabled;
+        const failedPage = response.failed;
+        const disabledPage = response.disabled;
 
         if (forms.length === 1) {
-          let redirectUrl = '../';
-
           // Created a single entity or Updated one
           addAlert('Your data has been submitted. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
-          // TODO can be replaced with page.reference.appLink.detailed
-          redirectUrl += 'record/#' + page.reference.location.catalog + '/' + page.reference.location.compactPath;
 
-          // append pcid
-          const qCharacter = redirectUrl.indexOf('?') !== -1 ? '&' : '?';
-          const contextHeaderParams = ConfigService.contextHeaderParams;
-          // Redirect to record or recordset app..
-          windowRef.location = redirectUrl + qCharacter + 'pcid=' + contextHeaderParams.cid + '&ppid=' + contextHeaderParams.pid;
+          // redirect to record app
+          windowRef.location = page.reference.detailed.appLink;
         } else {
-          // TODO: multi create view post create
-          $log.info('successfully saved!');
+          const compactRef = page.reference.contextualize.compact;
+          const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
+          if (!failedPage && !disabledPage && canLinkToRecordset) {
+            const verb = appMode === appModes.EDIT ? 'updated' : 'created';
+            addAlert(`Your data has been submitted. Redirecting yo now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
+
+            windowRef.location = compactRef.appLink;
+          } else {
+            // resultset view
+            setResultsetProps({
+              success: page, failed: failedPage, disabled: disabledPage,
+              appLink: canLinkToRecordset ? compactRef.appLink : null
+            });
+          }
         }
-      }
+      };
 
       const submitErrorCB = (err: any) => {
         console.log(err);
         addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
-      }
+      };
+
+      const submitFinallyCB = () => {
+        setShowSubmitSpinner(false);
+      };
 
       if (appMode === appModes.EDIT) {
         const tempTuples = [...tuples];
@@ -366,9 +386,9 @@ export default function RecordeditProvider({
           }
         }
 
-        reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB);
+        reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
       } else {
-        reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB);
+        reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
       }
     });
   }
@@ -725,17 +745,21 @@ export default function RecordeditProvider({
       getInitialFormValues,
       getPrefilledDefaultForeignKeyData,
 
+
       //   // log related:
       //   logRecordClientAction,
       //   getRecordLogAction,
       //   getRecordLogStack,
       onSubmitValid,
       onSubmitInvalid,
+      showSubmitSpinner,
+      resultsetProps,
       MAX_ROWS_TO_ADD: maxRowsToAdd
     };
   }, [
     // main entity:
     reference, page, tuples, columnModels, initialized, waitingForForeignKeyData,
+    showSubmitSpinner, resultsetProps,
     forms, keysHeightMap, formsHeightMap,
   ]);
 

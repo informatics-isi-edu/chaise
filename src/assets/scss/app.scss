@@ -913,20 +913,20 @@ html {
   // an spinner with backdrop blocking the whole app content
   // used in record and recordedit apps
   .app-blocking-spinner-container {
-    $delete-spinner-backdrop-z-index: 5;
+    $app-blocking-backdrop-z-index: 5;
     .app-blocking-spinner-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       height: 100%;
       width: 100%;
-      z-index: $delete-spinner-backdrop-z-index;
+      z-index: $app-blocking-backdrop-z-index;
       background: black;
       opacity: 0.5;
     }
     .spinner-container {
       top: 50%;
-      z-index: calc($delete-spinner-backdrop-z-index + 1);
+      z-index: calc($app-blocking-backdrop-z-index + 1);
     }
   }
 
@@ -945,5 +945,7 @@ html {
       list-style-type: unset;
     }
   }
+
+  
 
 }

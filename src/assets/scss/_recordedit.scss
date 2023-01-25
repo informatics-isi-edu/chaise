@@ -36,14 +36,18 @@
         width: 100%;
     }
 
-    .main-container {
-        overflow-y: auto;
-        overflow-x: hidden;
-        // changes a style from app.scss
-        flex-direction: row;
-    }
+    // .main-container {
+    //     overflow-y: auto;
+    //     overflow-x: hidden;
+    //     // changes a style from app.scss
+    //     flex-direction: row;
+    // }
 
     #form-section {
+        display: flex;
+        flex-direction: row;
+        overflow-y: auto;
+        overflow-x: hidden;
         width: 100%;
         position: relative;
         padding-right: 15px; // so table is padded properly on load
@@ -269,8 +273,62 @@
         }
     }
 
-    #resultset-tables {
-        padding-bottom: 20px;
+    .resultset-tables {
+      padding-top: 10px;
+      padding-bottom: 20px;
+
+      .panel-group {
+        margin-bottom: 20px;
+      }
+
+      $space-between-related-sections: 5px;
+      .table-accordion {
+        // override the default bootstrap styles
+        box-shadow: none;
+        border-radius: 0;
+        border: 0;
+        + .table-accordion {
+          margin-top: $space-between-related-sections;
+        }
+
+        .accordion-button {
+          // different from related
+          font-size: 1.75rem;
+
+          cursor: pointer;
+          height: 44px;
+          text-transform: inherit;
+          padding: 8px 8px 8px 8px;
+          color: $white-color;
+          border: none;
+          border-radius: inherit;
+          background: $section-background-color;
+          // Overriding accordian-button css to align right angle bracket icon to left
+          flex-direction: row-reverse;
+          justify-content: flex-end;
+
+          &:focus {
+            box-shadow: none;
+          }
+
+          // Overriding accordian-button css to align right angle bracket icon to left
+          &::after {
+            margin-right: 11px;
+            margin-left: 2px;
+            background-image: none;
+            content: "\f054"; // fa-solid fa-chevron-right
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            transform: unset;
+            font-size: 1.75rem;
+            height: unset;
+          }
+
+          &:not(.collapsed)::after {
+            content: "\f078"; // fa-solid fa-chevron-down
+          }
+        }
+      }
     }
 
     /****************** Upload modal css *****************/
