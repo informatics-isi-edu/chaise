@@ -8,6 +8,8 @@ import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
 import ChaiseFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
+import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
+import Accordion from 'react-bootstrap/Accordion';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -80,7 +82,8 @@ const RecordeditInner = ({
   const { addAlert } = useAlert();
   const {
     appMode, reference, page, tuples, foreignKeyData ,columnModels, initialized, waitingForForeignKeyData,
-    forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD
+    forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
+    showSubmitSpinner, resultsetProps,
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
@@ -337,10 +340,13 @@ const RecordeditInner = ({
   return (
     <div className='recordedit-container app-content-container'>
       {formProviderInitialized && <FormProvider {...methods}>
-        {errors.length === 0 && showDeleteSpinner &&
+        {errors.length === 0 && (showDeleteSpinner || showSubmitSpinner) &&
           <div className='app-blocking-spinner-container'>
             <div className='app-blocking-spinner-backdrop'></div>
-            <ChaiseSpinner className='delete-spinner' message='Deleting...' />
+            <ChaiseSpinner
+              className={showSubmitSpinner ? 'submit-spinner' : 'delete-spinner'}
+              message={showSubmitSpinner ? 'Saving...' : 'Deleting...'}
+            />
           </div>
         }
         <div className='top-panel-container'>
@@ -351,7 +357,13 @@ const RecordeditInner = ({
             <div className='top-left-panel close-panel'></div>
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
-                <div className='recordedit-title-buttons title-buttons'>
+                {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
+                  {/* TODO: proper submission workflow, submission disabled, tooltip,
+                          ng-disabled='form.submissionButtonDisabled || !displayReady'
+                          ng-click='::form.submit()'
+                          ng-attr-tooltip-placement='bottom-right'
+                          ng-attr-uib-tooltip='Save this data on the server'>
+                          */}
                   <ChaiseTooltip placement='bottom'
                     tooltip={
                       allFormDataLoaded ?
@@ -376,14 +388,21 @@ const RecordeditInner = ({
                       <span>Delete</span>
                     </button>
                   </ChaiseTooltip>}
-                </div>
+                </div>}
                 <h1 id='page-title'>
-                  <span>{appMode === appModes.EDIT ? 'Edit ' : 'Create new '}</span>
-                  <Title addLink={true} reference={reference}></Title>{page?.tuples.length === 1 ? ': ' : ''}
-                  {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname}></Title>}
+                  {!resultsetProps && <>
+                    <span>{appMode === appModes.EDIT ? 'Edit ' : 'Create new '}</span>
+                    <Title addLink={true} reference={reference}></Title>{page?.tuples.length === 1 ? ': ' : ''}
+                    {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname}></Title>}
+                  </>}
+                  {resultsetProps && <>
+                    <span>{resultsetProps.success.length}/{tuples.length} </span>
+                    <Title addLink={true} reference={reference}></Title>
+                    <span> records {appMode === appModes.EDIT ? 'updated': 'created'} successfully</span>
+                  </>}
                 </h1>
               </div>
-              <div className='form-controls'>
+              {!resultsetProps && <div className='form-controls'>
                 <span><span className='text-danger'><b>*</b></span> indicates required field</span>
                 {appMode !== appModes.EDIT && <div className='add-forms chaise-input-group'>
                   <span className='chaise-input-group-prepend'>
@@ -418,7 +437,7 @@ const RecordeditInner = ({
                     </ChaiseTooltip>
                   </span>
                 </div>}
-              </div>
+              </div>}
             </div>
           </div>
         </div>
@@ -427,12 +446,52 @@ const RecordeditInner = ({
           {/* This is here so the spacing can be done in one place for all the apps */}
           <div className='side-panel-resizable close-panel'></div>
           {/* <!-- Form section --> */}
-          {columnModels.length > 0 &&
-            <div id='form-section' className='main-container' ref={mainContainer}>
+          <div className='main-container' ref={mainContainer}>
+          {columnModels.length > 0 && !resultsetProps &&
+            <div id='form-section'>
               <KeyColumn />
               <ChaiseFormContainer />
             </div>
           }
+          {resultsetProps &&
+            <div className='resultset-tables'>
+              <Accordion alwaysOpen defaultActiveKey={['0']} className='panel-group'>
+                <Accordion.Item eventKey='0' className='table-accordion'>
+                  <Accordion.Button as='div'>
+                    {resultsetProps.success.length} successful {appMode === appModes.EDIT ? 'updates': 'creations'}
+                  </Accordion.Button>
+                  <Accordion.Body>
+                    {resultsetProps.appLink &&
+                      <span>
+                        Click <a href={resultsetProps.appLink}>here</a> to navigate to the {appMode === appModes.EDIT ? 'updated': 'created'} results.
+                      </span>
+                    }
+                  </Accordion.Body>
+                </Accordion.Item>
+                {resultsetProps.failed &&
+                  <Accordion.Item eventKey='1' className='table-accordion'>
+                    <Accordion.Button as='div'>
+                      {resultsetProps.failed.length} failed {appMode === appModes.EDIT ? 'updates': 'creations'}
+                    </Accordion.Button>
+                    <Accordion.Body>
+                    <ResultsetTable page={resultsetProps.failed} />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                }
+                {resultsetProps.disabled &&
+                  <Accordion.Item eventKey='2' className='table-accordion'>
+                    <Accordion.Button as='div'>
+                      {resultsetProps.disabled.length} disabled records (due to lack of permission)
+                    </Accordion.Button>
+                    <Accordion.Body>
+                      <ResultsetTable page={resultsetProps.disabled} />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                }
+              </Accordion>
+            </div>
+          }
+          </div>
         </div>
         {showDeleteConfirmationModal &&
           <DeleteConfirmationModal
