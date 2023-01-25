@@ -32,7 +32,9 @@ const Title = ({
   }
   else if (reference){
     link = reference.unfilteredReference.contextualize.compact.appLink;
+  }
 
+  if (reference) {
     if (typeof displayname !== 'object') {
       displayname = reference.displayname;
     }

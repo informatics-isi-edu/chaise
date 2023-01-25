@@ -416,7 +416,7 @@ const RecordsetTable = ({
       </div>
       {!hasTimeoutError && numHiddenRecords > 0 &&
         <div className='chaise-table-footer'>
-          <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-secondary'>
+          <button onClick={() => setShowAllRows(!showAllRows)} className='show-all-rows-btn chaise-btn chaise-btn-primary'>
             {showAllRows ?
               'Show less records' :
               `Show all records (${numHiddenRecords} more available)`

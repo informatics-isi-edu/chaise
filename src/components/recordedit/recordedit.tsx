@@ -391,14 +391,18 @@ const RecordeditInner = ({
                   </ChaiseTooltip>}
                 </div>}
                 <h1 id='page-title'>
+                  {/* the title on load */}
                   {!resultsetProps && <>
                     <span>{appMode === appModes.EDIT ? 'Edit ' : 'Create new '}</span>
-                    <Title addLink={true} reference={reference}></Title>{page?.tuples.length === 1 ? ': ' : ''}
-                    {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname}></Title>}
+                    <Title addLink reference={reference} />{page?.tuples.length === 1 ? ': ' : ''}
+                    {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname} />}
                   </>}
+                  {/* the title when showing the result tables */}
                   {resultsetProps && <>
                     <span>{resultsetProps.success.page.length}/{tuples.length} </span>
-                    <Title addLink={true} reference={reference}></Title>
+                    {/* NOTE in Angularjs, in edit mode the link was based on the original link, both now it's always unfiltered */}
+                    <Title addLink reference={reference}
+                      link={appMode === appModes.EDIT ? reference.unfilteredReference.contextualize.compact.appLink : undefined} />
                     <span> records {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
                   </>}
                 </h1>
@@ -455,13 +459,14 @@ const RecordeditInner = ({
               </div>
             }
             {resultsetProps &&
-              <div className='resultset-tables'>
+              <div className='resultset-tables chaise-accordions'>
                 <Accordion alwaysOpen defaultActiveKey={['0', '1', '2']} className='panel-group'>
-                  <Accordion.Item eventKey='0' className='table-accordion'>
+                  <Accordion.Item eventKey='0' className='chaise-accordion'>
                     <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.success.header} /></Accordion.Button>
                     <Accordion.Body>
                       {resultsetProps.success.appLink &&
                         <div className='inline-tooltip'>
+                          Table below is populated based on newly saved data and might not have all the information.
                           Click <a href={resultsetProps.success.appLink}>here</a> to navigate to the
                           {appMode === appModes.EDIT ? ' updated' : ' created'}
                           {resultsetProps.success.page.length > 0 ? ' records' : 'record'}.
@@ -471,13 +476,13 @@ const RecordeditInner = ({
                     </Accordion.Body>
                   </Accordion.Item>
                   {resultsetProps.disabled &&
-                    <Accordion.Item eventKey='2' className='table-accordion'>
+                    <Accordion.Item eventKey='2' className='chaise-accordion'>
                       <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.disabled.header} /></Accordion.Button>
                       <Accordion.Body><ResultsetTable page={resultsetProps.disabled.page} /></Accordion.Body>
                     </Accordion.Item>
                   }
                   {resultsetProps.failed &&
-                    <Accordion.Item eventKey='1' className='table-accordion'>
+                    <Accordion.Item eventKey='1' className='chaise-accordion'>
                       <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.failed.header} /></Accordion.Button>
                       <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
                     </Accordion.Item>

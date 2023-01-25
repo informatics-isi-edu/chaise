@@ -22,26 +22,21 @@ The query parameters appear in the browser url after the filter path and after t
    </tr>
    ```
 
-   - Below is the HTML representation of a Related Table from the visible-foreignkeys section of record app. The `id` on the `uib-accordion-group` element is the one that chaise uses to scroll to that specific related table. `rt-heading-` is the static part of the identifier. The value after that is the `displayname.value` that was generated using a markdown_pattern. If no markdown_pattern was defined (no extra styling, just plain text), you can simply use the plaintext as it is displayed in the browser. In the following, that value is `Images`. If you aren't sure of what value to use, you can always look at the HTML structure and look for the element with the class `rt-section-header`. There should be a `<span>` as a child of the `rt-section-header` element. The contents of that element will be the `displayname.value`, which is what should be used in the query parameter.
+   - Below is the HTML representation of a Related Table from the visible-foreignkeys section of record app. The `id` on the `.chaise-accodrion` element is the one that chaise uses to scroll to that specific related table. `rt-heading-` is the static part of the identifier. The value after that is the `displayname.value` that was generated using a markdown_pattern. If no markdown_pattern was defined (no extra styling, just plain text), you can simply use the plaintext as it is displayed in the browser. In the following, that value is `Images`. If you aren't sure of what value to use, you can always look at the HTML structure and look for the element with the class `chaise-accordion-displayname`. There should be a `<span>` as a child of the `chaise-accordion-displayname` element. The contents of that element will be the `displayname.value`, which is what should be used in the query parameter.
    ```HTML
-   <div uib-accordion-group class="related-table-accordion" id="rt-heading-Images" ...>
-     <div role="tab" id="accordiongroup-560-1386-tab" class="panel-heading" ...>
-       <h4 class="panel-title">
-         <a role="button" ... class="accordion-toggle" ng-click="toggleOpen()" ...>
-           <span uib-accordion-header ...>
-             <div class="rt-section-header">
-               <i class="toggle-icon fas fa-chevron-down" ...></i>
-               <span ... class="ng-binding ng-scope">
-                 Images
-               </span>
-             </div>
-             <record-action-bar ...></record-action-bar>
-           </span>
-         </a>
-       </h4>
-     </div>
-     <div id="accordiongroup-560-1386-panel" aria-labelledby="accordiongroup-560-1386-tab" class="panel-collapse collapse in" ...>...</div>
-   </div>
+    <div id="rt-heading-Images" class="chaise-accordion panel accordion-item">
+      <div class="panel-heading accordion-button">
+        <div class="chaise-accordion-header">
+          <div class="chaise-accordion-displayname">
+            <span>Images</span>
+            ....
+          <div class="chaise-accordion-header-buttons">
+            ...
+          </div>
+        </div>
+      </div>
+      <div class="accordion-collapse collapse show">...</div>
+    </div>
    ```
  - `limit`: This parameter changes the number of rows that are returned by the `ermrest` request. This parameter is consumed by chaise and sent along with the requests to fetch data (`recordset` and `recordedit` only)
 

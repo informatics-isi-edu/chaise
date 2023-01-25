@@ -524,7 +524,7 @@ var recordPage = function() {
     };
 
     this.getRelatedTables = function () {
-        return element.all(by.css(".related-table-accordion:not(.forced-hidden)"));
+        return element.all(by.css(".chaise-accordion:not(.forced-hidden)"));
     };
 
     this.getRelatedTable = function(displayName) {
@@ -547,7 +547,7 @@ var recordPage = function() {
     }
 
     this.getRelatedTableHeadings = function() {
-        return element.all(by.css(".related-table-accordion"));
+        return element.all(by.css(".chaise-accordion"));
     };
 
     // TODO this function might not be needed and we should evaluate it during react migration
@@ -555,13 +555,13 @@ var recordPage = function() {
     // given that we're using ng-show, this function is returning the hidden related tables too
     this.getRelatedTableTitles = function() {
         return browser.executeScript(`
-          return Array.from(document.querySelectorAll('.related-table-accordion .rt-section-header .rt-displayname')).map((el) => el.textContent.trim());
+          return Array.from(document.querySelectorAll('.chaise-accordion .chaise-accordion-header .chaise-accordion-displayname')).map((el) => el.textContent.trim());
         `);
     }
     // the following function only returns the related tables that are displayed
     this.getDisplayedRelatedTableTitles = function() {
       return browser.executeScript(`
-          return Array.from(document.querySelectorAll('.related-table-accordion:not(.forced-hidden) .rt-section-header .rt-displayname')).map((el) => el.textContent.trim());
+          return Array.from(document.querySelectorAll('.chaise-accordion:not(.forced-hidden) .chaise-accordion-header .chaise-accordion-displayname')).map((el) => el.textContent.trim());
       `);
     }
 
@@ -575,11 +575,11 @@ var recordPage = function() {
     };
 
     this.getRelatedTableSectionHeader = function(displayName) {
-        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header'));
+        return this.getRelatedTableHeading(displayName).element(by.css('.chaise-accordion-header'));
     };
 
     this.getRelatedTableSectionHeaderDisplayname = function(displayName) {
-        return this.getRelatedTableHeading(displayName).element(by.css('.rt-section-header .rt-displayname'));
+        return this.getRelatedTableHeading(displayName).element(by.css('.chaise-accordion-header .chaise-accordion-displayname'));
     };
 
     this.getRelatedTableInlineComment = function(displayname) {

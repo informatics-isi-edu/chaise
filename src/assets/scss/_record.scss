@@ -128,115 +128,6 @@
     }
 
     /******Related Entities in record **************/
-    .related-section-container {
-      .panel-group {
-        margin-bottom: 20px;
-      }
-
-      .related-table-accordion {
-        // override the default bootstrap styles
-        box-shadow: none;
-        border-radius: 0;
-        border: 0;
-        + .related-table-accordion {
-          margin-top: $space-between-related-sections;
-        }
-
-        // row-focus will add a border of 2px,
-        // - adding -2px margin to left and right to avoid shrinkage
-        // - reducing the margin-top from 5px to 3px to avoid moving
-        &.row-focus {
-          margin-left: -$row-focus-border-width;
-          margin-right: -$row-focus-border-width;
-          margin-top: $space-between-related-sections - $row-focus-border-width;
-
-          + .related-table-accordion:not(.row-focus) {
-            margin-top: $space-between-related-sections - $row-focus-border-width;
-          }
-
-          // if there are two row-focus on top of each other, we should
-          // change the margin to account for both of their borders.
-          + .row-focus {
-            margin-top: $space-between-related-sections - ($row-focus-border-width * 2);
-          }
-        }
-
-        // the first row doesn't have margin top
-        &:first-child.row-focus {
-          margin-top: -$row-focus-border-width;
-        }
-
-        .accordion-button {
-          cursor: pointer;
-          height: 44px;
-          text-transform: inherit;
-          padding: 8px 8px 8px 8px;
-          color: $white-color;
-          border: none;
-          border-radius: inherit;
-          background: $section-background-color;
-          // Overriding accordian-button css to align right angle bracket icon to left
-          flex-direction: row-reverse;
-          justify-content: flex-end;
-
-          &:focus {
-            box-shadow: none;
-          }
-
-          // Overriding accordian-button css to align right angle bracket icon to left
-          &::after {
-            margin-right: 11px;
-            margin-left: 2px;
-            background-image: none;
-            content: "\f054"; // fa-solid fa-chevron-right
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
-            transform: unset;
-            font-size: 1.75rem;
-            height: unset;
-          }
-
-          &:not(.collapsed)::after {
-            content: "\f078"; // fa-solid fa-chevron-down
-          }
-        }
-
-        .rt-section-header {
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-          white-space: nowrap;
-          min-width: 0; // needed to avoid overflow
-
-          .rt-displayname {
-            font-size: 1.75rem;
-            text-overflow: ellipsis;
-            overflow: hidden;
-          }
-
-          .rt-section-header-buttons {
-            position: relative;
-            padding-left: 20px;
-            margin-top: 2px;
-
-            .rt-section-header-icons {
-              position: absolute;
-              left: 0;
-              top: 5px;
-            }
-          }
-        }
-
-        .accordion-body {
-          padding-left: $record-header-padding-left;
-          padding-right: 0;
-        }
-
-        .inline-tooltip {
-          margin-bottom: 10px;
-        }
-      }
-    }
 
     .row-focus {
       border: $row-focus-border-width solid $primary-color !important;
@@ -398,7 +289,7 @@
       }
     }
 
-    .rt-section-header {
+    .chaise-accordion-header {
       font-size: 1.5rem !important;
     }
 
@@ -413,7 +304,7 @@
       display: none;
     }
 
-    .related-table-accordion {
+    .chaise-accordion {
       break-inside: avoid !important;
     }
 
