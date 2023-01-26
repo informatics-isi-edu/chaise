@@ -71,7 +71,7 @@ export class CustomError extends ChaiseError {
    * @param  {string} clickActionMessage  Message to display for the OK button. Can include HTML tags.
    * @param  {string} clickOkToDismiss    Set true to dismiss the error modal on clicking the OK button
    */
-  constructor(header: string, message: string, redirectUrl: string, clickActionMessage?: string, clickOkToDismiss?: boolean, subMessage?: string) {
+  constructor(header: string, message: string, redirectUrl?: string, clickActionMessage?: string, clickOkToDismiss?: boolean, subMessage?: string) {
     super(
       header,
       message,
