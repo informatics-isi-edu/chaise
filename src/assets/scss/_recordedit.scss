@@ -64,9 +64,9 @@
             .entity-key,
             .match-entity-key {
                 width: $chaise-caption-column-width;
-                border-left: 1px solid $border-color;
-                border-right: 1px solid $border-color;
-                border-bottom: 1px solid $border-color;
+                border-left: $chaise-RE-border-width solid $chaise-RE-border-color;
+                border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+                border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
                 // margin-left: 10px;
                 background: white;
                 padding: 8px;
@@ -137,8 +137,8 @@
                     .column-cell {
                         border-left: none;
                         border-top: none;
-                        border-right: 1px solid $border-color;
-                        border-bottom: 1px solid $border-color;
+                        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+                        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
                         border-radius: 0;
                         // height: 47px;
                         min-height: 47px;
@@ -163,7 +163,7 @@
         // nested inside entity-key-column AND form-container
         .form-header {
             height: 47px;
-            border-top: 1px solid $border-color;
+            border-top: $chaise-RE-border-width solid $chaise-RE-border-color;
             color: $disabled-color;
             font-weight: normal;
             font-size: 1rem;
@@ -173,8 +173,8 @@
         .match-entity-value {
             word-wrap: break-word;
             min-width: 250px;
-            border-right: 1px solid $border-color;
-            border-bottom: 1px solid $border-color;
+            border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+            border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
 
             // border-left: none;
             // border-top: none;

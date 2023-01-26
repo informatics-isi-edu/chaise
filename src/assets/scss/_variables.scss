@@ -9,6 +9,8 @@ $disabled-background-color: #DDDDDD;
 
 $border-color: #CCCCCC;
 
+$chaise-RE-border-color: #888888;
+
 $table-border-color: #BBBBBB;
 $table-header-background-color: #D0E0F0;
 // TODO: see if this is actually being used currently or if this is the default color
@@ -50,6 +52,9 @@ $input-remove-width: 18px;
 $chaise-input-group-text-color: $black-color;
 $chaise-input-group-text-bg: $table-striped-background-color;
 $chaise-input-group-text-border-color: $border-color;
+
+// border width in between inputs and forms in recordedit
+$chaise-RE-border-width: 1px;
 
 // edit column name column
 $chaise-caption-column-width: 200px;
