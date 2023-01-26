@@ -522,13 +522,29 @@ export default function RecordeditProvider({
   }
 
   const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean, fieldType: string) => {
-
     const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
-    const height = ele?.offsetHeight || 0;
+    const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
+
+    let height = ele?.offsetHeight || 0;
+    let newHeight;
     // how to handle this ? get default heights
 
-    const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
-    const newHeight = height == defaultHeight || msgCleared ? -1 : height;
+    const textAreaEle: HTMLTextAreaElement | null = document.querySelector(`.input-switch-container-${fieldName} textarea`);
+    const textAreaHeight = textAreaEle?.offsetHeight;
+
+    // if the text area height is greater than the default textarea height, set the height to the default inputHeight plus the change in textarea size
+    if (textAreaHeight && textAreaHeight > DEFAULT_HEGHT_MAP['textarea']) {
+      height = DEFAULT_HEGHT_MAP[fieldType] + (textAreaHeight - DEFAULT_HEGHT_MAP['textarea']);
+
+      if (!msgCleared) {
+        // Make sure to add the height of the error message container
+        const errorEle: HTMLElement | null = document.querySelector('.input-switch-error');
+        height += errorEle?.offsetHeight || 0;
+      }
+      newHeight = height === defaultHeight ? -1 : height;
+    } else {
+      newHeight = height === defaultHeight || msgCleared ? -1 : height;
+    }
 
     // execute the regexp to get individual values from the inputFieldName
     const r = /(\d*)-(.*)/;

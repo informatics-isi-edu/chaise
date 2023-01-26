@@ -163,6 +163,7 @@ export const DEFAULT_HEGHT_MAP: any = {
   'numeric': 47,
   'shorttext': 47,
   'text': 47,
+  'textarea': 108, // for textarea html element
   'timestamp': 82,
   'timestamptz': 82
 }
