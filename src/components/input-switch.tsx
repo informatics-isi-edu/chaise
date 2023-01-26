@@ -904,6 +904,7 @@ const InputSwitch = ({
           value={value as string}
           disableInput={disableInput}
           onFieldChange={onFieldChange}
+          styles={styles}
         />
       case 'json':
         return <JsonField
@@ -916,6 +917,7 @@ const InputSwitch = ({
           disableInput={disableInput}
           onFieldChange={onFieldChange}
           displayErrors={displayErrors}
+          styles={styles}
         />
       case 'array':
         const baseType = columnModel?.column.type.baseType.name,
@@ -933,6 +935,7 @@ const InputSwitch = ({
           onFieldChange={onFieldChange}
           displayErrors={displayErrors}
           placeholder={arrayPlaceholder as string}
+          styles={styles}
         />
       case 'text':
       default:
@@ -945,6 +948,7 @@ const InputSwitch = ({
           value={value as string}
           disableInput={disableInput}
           onFieldChange={onFieldChange}
+          styles={styles}
         />
     }
   })();
