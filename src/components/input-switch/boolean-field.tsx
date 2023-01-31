@@ -13,6 +13,7 @@ import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedi
 // utils
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES, formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 
 type BooleanFieldProps = {
@@ -123,7 +124,11 @@ const BooleanField = ({
   };
 
   useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });
+    fireCustomEvent(
+      'input-switch-error-update',
+      `.input-switch-container-${makeSafeIdAttr(name)}`,
+      { inputFieldName: name, msgCleared: !Boolean(error?.message) }
+    );
   }, [error?.message]);
 
 
@@ -131,7 +136,7 @@ const BooleanField = ({
   const displayedOptions = rawOptions.map((op) => columnModel ? formatBoolean(columnModel.column, op) : op.toString());
 
   return (
-    <div className={`${containerClasses} input-switch-boolean input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-boolean input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       <Dropdown>
         <Dropdown.Toggle as='div' disabled={disableInput} className='chaise-input-group'>
           <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
@@ -151,7 +156,7 @@ const BooleanField = ({
           {displayedOptions.map((option: any, index: number) => (
             <Dropdown.Item
               as='li'
-              key={`boolean-val-${name}-${index}`}
+              key={`boolean-val-${makeSafeIdAttr(name)}-${index}`}
               // first option is true, and second is false.
               onClick={() => handleChange(rawOptions[index])}
             >
