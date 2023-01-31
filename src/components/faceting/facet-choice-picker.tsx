@@ -598,6 +598,13 @@ const FacetChoicePicker = ({
   )).length;
 
   const renderPickerContainer = () => {
+    const useShowMore = (hasMore || showFindMore);
+
+    let showMoreTooltip = 'Click here to see more information about available items.';
+    if (useShowMore) {
+      showMoreTooltip = 'Click here to show more available items with details.';
+    }
+
     return (
       <div className='picker-container'>
         {facetColumn.column.type.name !== 'boolean' &&
@@ -618,18 +625,23 @@ const FacetChoicePicker = ({
           />
         </div>
         {hiddenSelectedCount > 0 &&
-          <span className='more-filters'>...{hiddenSelectedCount} more filters selected</span>
+          <span className='more-filters'>
+            <span className='fa-solid fa-triangle-exclamation' />
+            <span className='more-filters-text'> {hiddenSelectedCount} selected items not shown.</span>
+          </span>
         }
         <div className='button-container'>
           {/* TODO id='show-more' removed */}
-          <button
-            className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
-            disabled={facetColumn.hasNotNullFilter}
-            onClick={() => openRecordsetModal()}
-          >
-            <span className='chaise-btn-icon far fa-window-restore'></span>
-            <span>{(hasMore || showFindMore) ? 'Show More' : 'Show Details'}</span>
-          </button>
+          <ChaiseTooltip placement='right' tooltip={showMoreTooltip}>
+            <button
+              className='chaise-btn chaise-btn-sm chaise-btn-tertiary show-more-btn'
+              disabled={facetColumn.hasNotNullFilter}
+              onClick={() => openRecordsetModal()}
+            >
+              <span className='chaise-btn-icon far fa-window-restore'></span>
+              <span>{useShowMore ? 'Show More' : 'Show Details'}</span>
+            </button>
+          </ChaiseTooltip>
           {facetModel.noConstraints &&
             <ChaiseTooltip
               tooltip='Retry updating the facet values with constraints.'

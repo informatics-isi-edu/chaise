@@ -192,7 +192,7 @@ const RecordsetTable = ({
           <>
             <ChaiseTooltip
               placement='right'
-              tooltip={'Select all rows on this page.'}
+              tooltip={'Select all items on this page.'}
             >
               <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={selectAllOnPage}
@@ -203,7 +203,7 @@ const RecordsetTable = ({
             </ChaiseTooltip>
             <ChaiseTooltip
               placement='right'
-              tooltip={'Deselect all rows on this page.'}
+              tooltip={'Deselect all items on this page.'}
             >
               <button className='chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={DeselectAllOnPage}

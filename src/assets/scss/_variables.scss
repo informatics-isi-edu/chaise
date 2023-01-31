@@ -32,11 +32,12 @@ $dropdown-menu-anchor-color: #9d9d9d;
 // Spacing
 $left-panel-width-lg: 21vw;
 $left-panel-width-sm: 15vw;
+$left-panel-min-width: 170px;
 $viewport-margin: 20px;
 $main-alley:30px;
 
 
-
+// button props
 $btn-border-radius: 4px;
 $btn-height: 30px;
 $btn-height-sm: 24px;
@@ -53,6 +54,10 @@ $chaise-input-group-text-border-color: $border-color;
 
 // edit column name column
 $chaise-caption-column-width: 200px;
+
+// checkbox
+$chaise-checkbox-width: 20px;
+$chaise-checkbox-height: 20px;
 
 
 // fonts
