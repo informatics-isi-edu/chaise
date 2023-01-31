@@ -23,7 +23,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { QUERY_PARAMS, RESULT_INFO_VALUES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
+import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
   allForeignKeyColumnsPrefilled,
   columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject,
@@ -31,13 +31,13 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { addQueryParamsToURL, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ResultsetProps = {
-  success: { page: any, header: string, appLink?: string }
-  disabled?: { page: any, header: string },
-  failed?: { page: any, header: string, appLink?: string }
+  pageTitle: string,
+  success: { page: any, header: string, exploreLink?: string, editLink?: string },
+  failed?: { page: any, header: string, exploreLink?: string }
 }
 
 export const RecordeditContext = createContext<{
@@ -360,52 +360,40 @@ export default function RecordeditProvider({
         const page = response.successful;
         const failedPage = response.failed;
         const disabledPage = response.disabled;
-        const qParam: any = {};
-        qParam[QUERY_PARAMS.RESULT_INFO] = appMode === appModes.EDIT ? RESULT_INFO_VALUES.EDIT : RESULT_INFO_VALUES.CREATE;
 
         // redirect to record app
         if (forms.length === 1) {
           // Created a single entity or Updated one
           addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-          windowRef.location = addQueryParamsToURL(page.reference.contextualize.detailed.appLink, qParam);
+          windowRef.location = page.reference.contextualize.detailed.appLink;
         }
         // see if we can just redirect, or if we need the resultset view.
         else {
           const compactRef = page.reference.contextualize.compact;
           const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
 
-          // redirect to recordset app
-          if (!failedPage && !disabledPage && canLinkToRecordset) {
-            const verb = appMode === appModes.EDIT ? 'updated' : 'created';
-            addAlert(`Your data has been saved. Redirecting you now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
+          const noun = appMode === appModes.EDIT ? 'update' : 'creation';
+          const adj = appMode === appModes.EDIT ? 'updated' : 'created';
+          const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
 
-            windowRef.location = addQueryParamsToURL(compactRef.appLink, qParam);
-          } else {
-            const noun = appMode === appModes.EDIT ? 'update' : 'creation';
-            const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
-
-            // resultset view
-            setResultsetProps({
-              success: {
-                page,
-                header: `${page.length} successful ${noun}${handlePlural(page)}`,
-                ... (canLinkToRecordset && { appLink: compactRef.appLink })
+          // resultset view
+          setResultsetProps({
+            success: {
+              page,
+              header: `${page.length} ${adj} record${handlePlural(page)}`,
+              ... (canLinkToRecordset && {
+                exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
+              })
+            },
+            ... (failedPage && {
+              failed: {
+                page: failedPage,
+                header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
               },
-              ... (failedPage && {
-                failed: {
-                  page: failedPage,
-                  header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
-                },
-              }),
-              ... (disabledPage && {
-                failed: {
-                  page: disabledPage,
-                  header: `${disabledPage.length} disabled record${handlePlural(disabledPage)} (due to lack of permission)`
-                },
-              }),
-            });
-          }
+              // TODO add exploreLink (most probably requires ermrestjs change)
+            }),
+          });
         }
       };
 
@@ -561,8 +549,8 @@ export default function RecordeditProvider({
       // NOTE: should only be 1 form for create...
       initialModel = populateCreateInitialValues(columnModels, forms, queryParams);
 
-        setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
-        shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
+      setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
+      shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
 
     } else if (appMode === appModes.EDIT || appMode === appModes.COPY) {
       const tempTuples: any[] = [];
@@ -614,8 +602,8 @@ export default function RecordeditProvider({
 
     // we need to know the number of requests (for spinner), so we have to capture them
     // first before sending the requests.
-    type FkRequest = {reference: any, logAction: string, index: number};
-    const fkRequests : FkRequest[] = [];
+    type FkRequest = { reference: any, logAction: string, index: number };
+    const fkRequests: FkRequest[] = [];
 
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;

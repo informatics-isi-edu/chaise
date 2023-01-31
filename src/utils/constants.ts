@@ -138,12 +138,6 @@ export const BODY_CLASS_NAMES = {
 export const QUERY_PARAMS = {
   PROMPT_LOGIN: 'promptlogin',
   SCROLL_TO: 'scrollTo',
-  RESULT_INFO: 'resultinfo',
-};
-
-export const RESULT_INFO_VALUES = {
-  EDIT: 'update',
-  CREATE: 'create'
 };
 
 // these are the captured as `cid` value in logs

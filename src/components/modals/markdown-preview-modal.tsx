@@ -42,11 +42,10 @@ const MarkdownPreviewModal = ({
       </Modal.Header>
       <Modal.Body>
       <div className='outer-table'>
-        <div 
+        <div
           className='markdown-container'
-          style={{'padding': '10px'}} 
+          style={{'padding': '10px'}}
           dangerouslySetInnerHTML={{ __html: markdownContent}}
-          ng-bind-html="ctrl.renderedMarkdown"
         />
       </div>
       </Modal.Body>

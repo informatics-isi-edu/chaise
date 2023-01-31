@@ -37,8 +37,7 @@ const ResultsetTable = ({
     selectMode: RecordsetSelectMode.NO_SELECT,
     showFaceting: false,
     disableFaceting: true,
-    displayMode: RecordsetDisplayMode.TABLE,
-    maxDisplayedRows: RECORDEDIT_RESULTSET_MAX_ROWS
+    displayMode: RecordsetDisplayMode.TABLE
   }
 
   return (

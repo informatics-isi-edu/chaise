@@ -82,7 +82,7 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, page, tuples, foreignKeyData ,columnModels, initialized, waitingForForeignKeyData,
+    appMode, reference, page, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
     forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
     showSubmitSpinner, resultsetProps,
   } = useRecordedit()
@@ -336,7 +336,51 @@ const RecordeditInner = ({
     }
 
     methods.reset(tempFormValues)
-  }
+  };
+
+  /**
+   * on load:
+   *   - Edit 25 <table> records
+   *   - Edit 18/25 <table> records
+   *   - Edit <table>:<rowname>
+   *   - Create <number> <table> record
+   * on resultset view:
+   *   - 18 <table> records {updated|created} successfully
+   *   - 18/25 <table> records {updated|created} successfully
+   */
+  const renderTitle = () => {
+    if (resultsetProps) {
+      let count = resultsetProps.success.page.length;
+      if (resultsetProps.failed) {
+        count = `${count}/${resultsetProps.failed.page.length + count}`;
+      }
+      const recordTxt = resultsetProps.success.page.length > 1 ? 'records' : 'record';
+
+      return (<>
+        <span>{count} </span>
+        {/* NOTE in Angularjs, in edit mode the link was based on the original link, both now it's always unfiltered */}
+        <Title addLink reference={reference}
+          link={appMode === appModes.EDIT ? reference.unfilteredReference.contextualize.compact.appLink : undefined} />
+        <span> {recordTxt} {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
+      </>);
+    }
+
+    const tableName = <Title addLink reference={reference} />;
+    const fnStr = appMode === appModes.EDIT ? 'Edit' : 'Create';
+    const recordStr = forms.length > 1 ? 'records' : 'record';
+
+    let countStr: string = forms.length.toString();
+    const numDisabled = tuples && tuples.length ? tuples.filter((t: any) => !t.canUpdate).length : 0;
+    if (numDisabled) {
+      countStr = `${forms.length - numDisabled}/${forms.length}`;
+    }
+
+    if (appMode === appModes.EDIT && tuples.length === 1) {
+      return (<>Edit {tableName}: <Title displayname={tuples[0].displayname} /></>);
+    }
+
+    return (<>{fnStr} {countStr} {tableName} {recordStr}</>);
+  };
 
   return (
     <div className='recordedit-container app-content-container'>
@@ -390,22 +434,7 @@ const RecordeditInner = ({
                     </button>
                   </ChaiseTooltip>}
                 </div>}
-                <h1 id='page-title'>
-                  {/* the title on load */}
-                  {!resultsetProps && <>
-                    <span>{appMode === appModes.EDIT ? 'Edit ' : 'Create new '}</span>
-                    <Title addLink reference={reference} />{page?.tuples.length === 1 ? ': ' : ''}
-                    {page?.tuples.length === 1 && <Title displayname={page.tuples[0].displayname} />}
-                  </>}
-                  {/* the title when showing the result tables */}
-                  {resultsetProps && <>
-                    <span>{resultsetProps.success.page.length}/{tuples.length} </span>
-                    {/* NOTE in Angularjs, in edit mode the link was based on the original link, both now it's always unfiltered */}
-                    <Title addLink reference={reference}
-                      link={appMode === appModes.EDIT ? reference.unfilteredReference.contextualize.compact.appLink : undefined} />
-                    <span> records {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
-                  </>}
-                </h1>
+                <h1 id='page-title'>{renderTitle()}</h1>
               </div>
               {!resultsetProps && <div className='form-controls'>
                 <span><span className='text-danger'><b>*</b></span> indicates required field</span>
@@ -460,14 +489,20 @@ const RecordeditInner = ({
             }
             {resultsetProps &&
               <div className='resultset-tables chaise-accordions'>
-                <Accordion alwaysOpen defaultActiveKey={['0', '1', '2']} className='panel-group'>
+                <Accordion alwaysOpen defaultActiveKey={['0', '1']} className='panel-group'>
                   <Accordion.Item eventKey='0' className='chaise-accordion'>
-                    <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.success.header} /></Accordion.Button>
+                    <Accordion.Button as='div'>
+                      <ResultsetTableHeader
+                        appMode={appMode} header={resultsetProps.success.header}
+                        exploreLink={resultsetProps.success.exploreLink}
+                        editLink={resultsetProps.success.editLink}
+                      />
+                    </Accordion.Button>
                     <Accordion.Body>
-                      {resultsetProps.success.appLink &&
+                      {resultsetProps.success.exploreLink &&
                         <div className='inline-tooltip'>
-                          Table below is populated based on newly saved data and might not have all the information.
-                          Click <a href={resultsetProps.success.appLink}>here</a> to navigate to the
+                          Table below is populated based on newly saved data and might not represent all the information.
+                          Use the Edit or Explore button to navigate to the
                           {appMode === appModes.EDIT ? ' updated' : ' created'}
                           {resultsetProps.success.page.length > 0 ? ' records' : 'record'}.
                         </div>
@@ -475,15 +510,14 @@ const RecordeditInner = ({
                       <ResultsetTable page={resultsetProps.success.page} />
                     </Accordion.Body>
                   </Accordion.Item>
-                  {resultsetProps.disabled &&
-                    <Accordion.Item eventKey='2' className='chaise-accordion'>
-                      <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.disabled.header} /></Accordion.Button>
-                      <Accordion.Body><ResultsetTable page={resultsetProps.disabled.page} /></Accordion.Body>
-                    </Accordion.Item>
-                  }
                   {resultsetProps.failed &&
                     <Accordion.Item eventKey='1' className='chaise-accordion'>
-                      <Accordion.Button as='div'><ResultsetTableHeader header={resultsetProps.failed.header} /></Accordion.Button>
+                      <Accordion.Button as='div'>
+                        <ResultsetTableHeader
+                          appMode={appMode} header={resultsetProps.failed.header}
+                          exploreLink={resultsetProps.failed.exploreLink}
+                        />
+                      </Accordion.Button>
                       <Accordion.Body><ResultsetTable page={resultsetProps.failed.page} /></Accordion.Body>
                     </Accordion.Item>
                   }

@@ -991,6 +991,14 @@ html {
           padding-left: 20px;
           margin-top: 2px;
 
+          .chaise-btn:not(:first-child) {
+            margin-left: 5px;
+          }
+
+          a.chaise-btn {
+            text-decoration: none;
+          }
+
           .chaise-accordion-header-icons {
             position: absolute;
             left: 0;
