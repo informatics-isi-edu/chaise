@@ -333,7 +333,7 @@ describe("Viewing Recordset with Faceting,", function () {
         });
 
         describe("default presentation based on facets annotation ", function () {
-            it("should have " + testParams.totalNumFacets + " facets", function () {
+            it("should have " + testParams.totalNumFacets + " facets", function (done) {
                 browser.wait(function () {
                     return chaisePage.recordsetPage.getAllFacets().count().then(function (ct) {
                         return (ct == testParams.totalNumFacets);
@@ -344,11 +344,12 @@ describe("Viewing Recordset with Faceting,", function () {
                     titles.forEach(function (title, idx) {
                         expect(title.getText()).toEqual(testParams.facetNames[idx], "All facets' names is incorrect");
                     });
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
 
             });
 
-            it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function () {
+            it("verify the text is truncated properly based on the 'maxRecordsetRowHeight=100', then not truncated after clicking 'more'", function (done) {
                 // default config: maxRecordsetRowHeight = 100
                 // 100 for max height, 10 for padding, 1 for border
                 var testCell, cellHeight = 110;
@@ -369,9 +370,8 @@ describe("Viewing Recordset with Faceting,", function () {
                     return testCell.getSize();
                 }).then(function (tallerDimensions) {
                     expect(tallerDimensions.height).toBeGreaterThan(cellHeight);
-                }).catch(function (err) {
-                    console.log(err);
-                });
+                    done();
+                }).catch(chaisePage.catchTestError(done));
             });
 
             it("should have 3 facets open", function (done) {

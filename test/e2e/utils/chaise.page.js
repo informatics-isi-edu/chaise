@@ -1102,6 +1102,10 @@ var recordsetPage = function() {
         return element(by.css(".fc-" + idx)).all(by.css(".chaise-checkbox input.checked"));
     }
 
+    this.getFacetMoreFiltersText = function (idx) {
+      return element(by.css(".fc-" + idx)).element(by.css('.more-filters'));
+    }
+
     this.getFacetOptionsText = function (idx) {
       return browser.executeScript(`
         return Array.from(document.querySelectorAll('.fc-${idx} .chaise-checkbox label')).map((el) => el.textContent.trim())

@@ -147,6 +147,14 @@ const FacetChoicePicker = ({
   const facetColumnRef = useVarRef(facetColumn);
   const facetReferenceRef = useVarRef(facetReference);
 
+  // maxCheckboxLen: Maximum number of checkboxes that we could show
+  // NOTE given that these values won't change, it's safe to use this variable
+  // in both render logic and flow-control related functions
+  // (PAGE_SIZE + if not-null is allowed + if null is allowed)
+  let maxCheckboxLen = FACET_PANEL_DEFAULT_PAGE_SIZE;
+  if (!facetColumn.hideNotNullChoice) maxCheckboxLen++;
+  if (!facetColumn.hideNullChoice) maxCheckboxLen++;
+
   /**
    * register the flow-control related functions for the facet
    * this will ensure the functions are registerd based on the latest facet changes
@@ -271,12 +279,6 @@ const FacetChoicePicker = ({
     // add the already selected facets (except null and not-null since they are already added)
     updatedRows.push(...getAppliedFilters().filter((f) => !f.isNotNull && f.uniqueId !== null));
 
-    // maxCheckboxLen: Maximum number of checkboxes that we could show
-    // (PAGE_SIZE + if not-null is allowed + if null is allowed)
-    let maxCheckboxLen = FACET_PANEL_DEFAULT_PAGE_SIZE;
-    if (!facetColumn.hideNotNullChoice) maxCheckboxLen++;
-    if (!facetColumn.hideNullChoice) maxCheckboxLen++;
-
     // appliedLen: number of applied filters (apart from null and not-null)
     //if this is more than PAGE_SIZE, we don't need to read the data.
     let appliedLen = updatedRows.length;
@@ -333,7 +335,9 @@ const FacetChoicePicker = ({
           const value = getFilterUniqueId(tuple, columnName);
 
           const i = updatedRows.findIndex(function (row) {
-            return row.uniqueId === value && !row.isNotNull;
+            // ermrestjs always returns a string for uniqueId, but internally we don't
+            // eslint-disable-next-line eqeqeq
+            return row.uniqueId == value && !row.isNotNull;
           });
 
           // it's already selected
@@ -473,7 +477,7 @@ const FacetChoicePicker = ({
       }
       initialSelectedRows.push({
         uniqueId: rowUniqueId,
-        displayname: (rowUniqueId.uniqueId === null) ? { value: null, isHTML: false } : row.displayname,
+        displayname: (rowUniqueId === null) ? { value: null, isHTML: false } : row.displayname,
         data: rowData,
       });
     });
@@ -591,17 +595,21 @@ const FacetChoicePicker = ({
   }
 
   //-------------------  render logic:   --------------------//
-
-  // number of rows that are selected and not visible to users (as we're only showing 10 facets)
+  // number of rows that are selected and not visible to users
+  // NOTE given that this is using checkboxRows, it's only safe to use for render
+  // logic and should not be used by flow-control related functions.
   const hiddenSelectedCount = checkboxRows.filter((r: FacetCheckBoxRow, i: number) => (
-    i >= FACET_PANEL_DEFAULT_PAGE_SIZE && r.selected
+    i >= maxCheckboxLen && r.selected
   )).length;
 
   const renderPickerContainer = () => {
     const useShowMore = (hasMore || showFindMore);
 
     let showMoreTooltip = 'Click here to see more information about available items.';
-    if (useShowMore) {
+    if (hiddenSelectedCount > 0) {
+      // TODO maybe saying 'all' is misleading as the selected items might not be displayed on the first page.
+      showMoreTooltip = 'Click here to show all selected items and available items with details.';
+    } else if (useShowMore) {
       showMoreTooltip = 'Click here to show more available items with details.';
     }
 
@@ -621,13 +629,13 @@ const FacetChoicePicker = ({
           <FacetCheckList
             setHeight={facetModel.isOpen && facetModel.initialized && facetPanelOpen}
             rows={checkboxRows} hasNotNullFilter={facetColumn.hasNotNullFilter}
-            onRowClick={onRowClick} maxDisplayedRows={FACET_PANEL_DEFAULT_PAGE_SIZE}
+            onRowClick={onRowClick} maxDisplayedRows={maxCheckboxLen}
           />
         </div>
         {hiddenSelectedCount > 0 &&
           <span className='more-filters'>
             <span className='fa-solid fa-triangle-exclamation' />
-            <span className='more-filters-text'> {hiddenSelectedCount} selected items not shown.</span>
+            <span className='more-filters-text'> {hiddenSelectedCount} selected items not displayed.</span>
           </span>
         }
         <div className='button-container'>
