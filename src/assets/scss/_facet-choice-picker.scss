@@ -9,6 +9,20 @@
       margin-bottom: 10px;
     }
 
+    .more-filters {
+      margin-left: 5px;
+      font-style: italic;
+
+      .fa-triangle-exclamation {
+        margin-left: 1px;
+        font-size: 1.2em;
+      }
+      .more-filters-text {
+        margin-left: 3px;
+      }
+
+    }
+
     .button-container {
       margin-top: auto;
       height: 20px;

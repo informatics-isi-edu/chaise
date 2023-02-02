@@ -598,7 +598,7 @@ const RecordsetInner = ({
             <FilterChiclet
               key={`selected-filter-chiclet-${facetIndex}`}
               identifier={facetIndex}
-              iconTooltip={'Clear filter applied'}
+              iconTooltip={'Clear applied filter.'}
               title={facetDisplayname}
               titleTooltip={<span>Go to <DisplayValue value={facetDisplayname} /> filter</span>}
               value={chicletValue}
@@ -618,7 +618,7 @@ const RecordsetInner = ({
         {showClearAll &&
           <ChaiseTooltip
             placement='bottom-start'
-            tooltip={'Clear all filters applied'}
+            tooltip={'Clear all applied filters.'}
           >
             <button
               className='clear-all-filters chaise-btn chaise-btn-tertiary clear-all-btn'

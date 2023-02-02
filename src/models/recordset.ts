@@ -143,8 +143,8 @@ export type FacetRequestModel = {
 export type SelectedRow = {
   displayname: Displayname;
   uniqueId: string | null;
-  data?: any; // TODO
-  tupleReference: any; // TODO
+  data?: any;
+  tupleReference?: any;
   // the following can be added for plot app and might require change:
   // cannotBeRemoved?: boolean;
 }

@@ -31,7 +31,11 @@ type FacetCheckListProps = {
   /**
    * If true, we should disable other options
    */
-  hasNotNullFilter?: boolean
+  hasNotNullFilter?: boolean,
+  /**
+   * limit the number of displayed rows (regardless of available height)
+   */
+  maxDisplayedRows?: number,
   // TODO favorites support
   // enableFavorites?: boolean,
   // onFavoritesChanged: Function
@@ -108,7 +112,8 @@ const FacetCheckList = ({
   setHeight,
   rows,
   onRowClick,
-  hasNotNullFilter
+  hasNotNullFilter,
+  maxDisplayedRows
 }: FacetCheckListProps): JSX.Element => {
   // TODO favorites support:
   // const [favoritesLoading, setFavoritesLoading] = useState<{[key: number]: boolean}>({});
@@ -148,6 +153,8 @@ const FacetCheckList = ({
     }
 
     return rows.map((row: FacetCheckBoxRow, index: number) => {
+      if (maxDisplayedRows && index >= maxDisplayedRows) return;
+
       let rowClass = 'chaise-checkbox ellipsis-text';
       // if there's a not-null, all the other options should be disabled
       const disabled = hasNotNullFilter && !row.isNotNull;

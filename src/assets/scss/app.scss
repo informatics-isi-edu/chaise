@@ -513,7 +513,7 @@ html {
         &.open-panel {
           flex: 0;
           flex-basis: $left-panel-width-lg;
-          min-width: 170px;
+          min-width: $left-panel-min-width;
 
           &.small-panel {
             flex-basis: $left-panel-width-sm;
@@ -583,7 +583,7 @@ html {
       &.open-panel {
         flex: 0;
         flex-basis: $left-panel-width-lg;
-        min-width: 170px;
+        min-width: $left-panel-min-width;
 
         &.small-panel {
           flex-basis: $left-panel-width-sm;
@@ -703,7 +703,7 @@ html {
       font-weight: 400;
       position: relative;
       vertical-align: middle;
-      min-height: 20px;
+      min-height: $chaise-checkbox-height;
       margin-bottom: 0;
     }
     &.no-left-padding label {
@@ -714,8 +714,8 @@ html {
       position: absolute;
       z-index: 1;
       cursor: pointer;
-      width: 20px;
-      height: 20px;
+      width: $chaise-checkbox-width;
+      height: $chaise-checkbox-height;
       top: 0;
       margin-top: 2px;
 
@@ -740,8 +740,8 @@ html {
         content: "";
         display: inline-block;
         position: absolute;
-        width: 20px;
-        height: 20px;
+        width: $chaise-checkbox-width;
+        height: $chaise-checkbox-height;
         left: 0;
         top: 0;
         border: 1px solid $primary-color;
