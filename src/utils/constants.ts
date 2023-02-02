@@ -198,7 +198,6 @@ export const RECORDEDIT_MAX_ROWS = 200;
 export const FACET_PANEL_DEFAULT_PAGE_SIZE = 10;
 export const RECORDSET_DEAFULT_PAGE_SIZE = 25;
 export const RELATED_TABLE_DEFAULT_PAGE_SIZE = 25;
-export const RECORDEDIT_RESULTSET_MAX_ROWS = 5;
 
 // TODO if chaise is not built how we expect, this value will be undefiend.
 //      we might be able to enforce this during the npm install command of chaise

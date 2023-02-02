@@ -46,7 +46,8 @@ export const AlertsContext = createContext<{
   addAlert: AddAlertFunction,
   removeAlert: RemoveAlertFunction,
   addURLLimitAlert: () => void,
-  removeURLLimitAlert: () => void
+  removeURLLimitAlert: () => void,
+  removeAllAlerts: () => void,
 } |
   // NOTE: since it can be null, to make sure the context is used properly with
   //       a provider, the useRecordset hook will throw an error if it's null.
@@ -96,6 +97,10 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
     )
   };
 
+  const removeAllAlerts = () => {
+    setAlerts([]);
+  };
+
   /**
    * Display the URL limit alert
    * (we want to ensure only one alert is displayed at the time)
@@ -124,6 +129,7 @@ export default function AlertsProvider({ children }: AlertsProviderProps): JSX.E
       alerts,
       addAlert,
       removeAlert,
+      removeAllAlerts,
       addURLLimitAlert,
       removeURLLimitAlert
     }

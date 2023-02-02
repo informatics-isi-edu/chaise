@@ -134,6 +134,15 @@ const RecordeditInner = ({
    * after this, user can click on title buttons.
    */
   const allFormDataLoaded = initialized && !waitingForForeignKeyData;
+  const canUpdateAtLeastOne = initialized && appMode === appModes.EDIT && tuples && tuples.some((t: any) => t.canUpdate);
+
+  let saveButtonTooltip = 'Save this data on the server.';
+  if (!canUpdateAtLeastOne) {
+    saveButtonTooltip = 'You cannot update any of the displayed records.';
+  }
+  else if (!allFormDataLoaded) {
+    saveButtonTooltip = 'Waiting for some columns to properly load.';
+  }
 
   /**
    * handler for bulk delete button. it will,
@@ -235,7 +244,15 @@ const RecordeditInner = ({
       // hide the spinner
       setShowDeleteSpinner(false);
     });
-  }
+  };
+
+  /**
+   * the callback for reset button displayed in edit mode
+   */
+  const onResetClick = () => {
+    // TODO log the client action
+    windowRef.location.reload();
+  };
 
   // once data is fetched, initialize the form data with react hook form
   useEffect(() => {
@@ -341,7 +358,7 @@ const RecordeditInner = ({
   /**
    * on load:
    *   - Edit 25 <table> records
-   *   - Edit 18/25 <table> records
+   *   - Edit 18/25 <table> records (7 disabled due to permission)
    *   - Edit <table>:<rowname>
    *   - Create <number> <table> record
    * on resultset view:
@@ -370,16 +387,19 @@ const RecordeditInner = ({
     const recordStr = forms.length > 1 ? 'records' : 'record';
 
     let countStr: string = forms.length.toString();
+    let dueToPerm = <></>;
+
     const numDisabled = tuples && tuples.length ? tuples.filter((t: any) => !t.canUpdate).length : 0;
-    if (numDisabled) {
+    if (numDisabled !== 0) {
       countStr = `${forms.length - numDisabled}/${forms.length}`;
+      dueToPerm = <small>({numDisabled} disabled due to permission)</small>;
     }
 
-    if (appMode === appModes.EDIT && tuples.length === 1) {
+    if (appMode === appModes.EDIT && tuples.length === 1 && numDisabled === 0) {
       return (<>Edit {tableName}: <Title displayname={tuples[0].displayname} /></>);
     }
 
-    return (<>{fnStr} {countStr} {tableName} {recordStr}</>);
+    return (<>{fnStr} {countStr} {tableName} {recordStr}{dueToPerm}</>);
   };
 
   return (
@@ -403,25 +423,13 @@ const RecordeditInner = ({
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
                 {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
-                  {/* TODO: proper submission workflow, submission disabled, tooltip,
-                          ng-disabled='form.submissionButtonDisabled || !displayReady'
-                          ng-click='::form.submit()'
-                          ng-attr-tooltip-placement='bottom-right'
-                          ng-attr-uib-tooltip='Save this data on the server'>
-                          */}
-                  <ChaiseTooltip placement='bottom'
-                    tooltip={
-                      allFormDataLoaded ?
-                        'Save this data on the server.' :
-                        'Waiting for some columns to properly load.'
-                    }
-                  >
+                  <ChaiseTooltip placement='bottom'  tooltip={saveButtonTooltip}>
                     <button
                       id='submit-record-button'
                       className='chaise-btn chaise-btn-primary'
                       type='submit'
                       form='recordedit-form'
-                      disabled={!allFormDataLoaded}
+                      disabled={!allFormDataLoaded || (appMode === appModes.EDIT && !canUpdateAtLeastOne)}
                     >
                       <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                       <span>Save</span>
@@ -438,39 +446,50 @@ const RecordeditInner = ({
               </div>
               {!resultsetProps && <div className='form-controls'>
                 <span><span className='text-danger'><b>*</b></span> indicates required field</span>
-                {appMode !== appModes.EDIT && <div className='add-forms chaise-input-group'>
-                  <span className='chaise-input-group-prepend'>
-                    <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
-                  </span>
-                  <input
-                    id='copy-rows-input'
-                    ref={copyFormRef}
-                    type='number'
-                    className='chaise-input-control chaise-input-control-sm add-rows-input'
-                    placeholder='1'
-                    min='1'
-                  />
-                  <span className='chaise-input-group-append'>
-                    <ChaiseTooltip
-                      tooltip={
-                        allFormDataLoaded ?
-                          'Duplicate rightmost form the specified number of times.' :
-                          'Waiting for some columns to properly load.'
-                      }
-                      placement='bottom-end'
-                    >
-                      <button
-                        id='copy-rows-submit'
-                        className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
-                        onClick={callAddForm}
-                        type='button'
-                        disabled={!allFormDataLoaded}
-                      >
-                        <span>Clone</span>
+                <div className='add-forms chaise-input-group'>
+                  {appMode === appModes.EDIT ?
+                    <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
+                      <button className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
+                        <span className='chaise-btn-icon fa-solid fa-undo'></span>
+                        <span>Reset</span>
                       </button>
                     </ChaiseTooltip>
-                  </span>
-                </div>}
+                    :
+                    <div className='chaise-input-group'>
+                      <span className='chaise-input-group-prepend'>
+                        <div className='chaise-input-group-text chaise-input-group-text-sm'>Qty</div>
+                      </span>
+                      <input
+                        id='copy-rows-input'
+                        ref={copyFormRef}
+                        type='number'
+                        className='chaise-input-control chaise-input-control-sm add-rows-input'
+                        placeholder='1'
+                        min='1'
+                      />
+                      <span className='chaise-input-group-append'>
+                        <ChaiseTooltip
+                          tooltip={
+                            allFormDataLoaded ?
+                              'Duplicate rightmost form the specified number of times.' :
+                              'Waiting for some columns to properly load.'
+                          }
+                          placement='bottom-end'
+                        >
+                          <button
+                            id='copy-rows-submit'
+                            className='chaise-btn chaise-btn-sm chaise-btn-secondary center-block'
+                            onClick={callAddForm}
+                            type='button'
+                            disabled={!allFormDataLoaded}
+                          >
+                            <span>Clone</span>
+                          </button>
+                        </ChaiseTooltip>
+                      </span>
+                    </div>
+                  }
+                </div>
               </div>}
             </div>
           </div>

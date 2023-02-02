@@ -76,7 +76,7 @@ const ResultsetTableHeader = ({
           >
             <a className='chaise-btn chaise-btn-secondary more-results-link' href={editLink} onClick={avoidClick}>
               <span className='chaise-btn-icon fa-solid fa-pen'></span>
-              <span>Edit</span>
+              <span>Bulk Edit</span>
             </a>
           </ChaiseTooltip>
         }

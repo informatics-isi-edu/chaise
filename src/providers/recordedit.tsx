@@ -111,7 +111,7 @@ export default function RecordeditProvider({
   reference
 }: RecordeditProviderProps): JSX.Element {
 
-  const { addAlert } = useAlert();
+  const { addAlert, removeAllAlerts } = useAlert();
   const { session, validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors, loginModal } = useError();
 
@@ -315,13 +315,17 @@ export default function RecordeditProvider({
   }, [loginModal, errors]);
 
   const onSubmitValid = (data: any) => {
-    const submissionRows: any[] = []
+    // remove all existing alerts
+    removeAllAlerts();
+
+    const submissionRows: any[] = [];
     // f is the number in forms array that is
     forms.forEach((f: number) => {
       submissionRows.push(populateSubmissionRow(reference, f, data));
     });
 
     validateSessionBeforeMutation(() => {
+      // show spinner
       setShowSubmitSpinner(true);
 
       const submitSuccessCB = (response: any) => {
@@ -373,15 +377,20 @@ export default function RecordeditProvider({
           const compactRef = page.reference.contextualize.compact;
           const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
 
-          const noun = appMode === appModes.EDIT ? 'update' : 'creation';
-          const adj = appMode === appModes.EDIT ? 'updated' : 'created';
           const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
+
+          // if we have failures: <num> {updated|created} records
+          // otherwise: {Updated|Created} records
+          let headerPrefix = appMode === appModes.EDIT ? 'Updated' : 'Created';
+          if (failedPage) {
+            headerPrefix = page.length + (appMode === appModes.EDIT ? ' updated' : 'created');
+          }
 
           // resultset view
           setResultsetProps({
             success: {
               page,
-              header: `${page.length} ${adj} record${handlePlural(page)}`,
+              header: `${headerPrefix} record${handlePlural(page)}`,
               ... (canLinkToRecordset && {
                 exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
               })
@@ -389,7 +398,7 @@ export default function RecordeditProvider({
             ... (failedPage && {
               failed: {
                 page: failedPage,
-                header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
+                header: `${failedPage.length} failed ${appMode === appModes.EDIT ? 'update' : 'creation'}${handlePlural(failedPage)}`
               },
               // TODO add exploreLink (most probably requires ermrestjs change)
             }),
