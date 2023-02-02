@@ -50,7 +50,6 @@
         overflow-x: hidden;
         width: 100%;
         position: relative;
-        padding-right: 15px; // so table is padded properly on load
         padding-top: 15px;
         // padding at bottom of page so edit form isn't touching the bottom of viewport
         // padding instead of margin so it doesn't mess with scrollable area
@@ -103,7 +102,7 @@
                     // form header and form inputs
                     .entity-value {
                         position: relative;
-            
+
                         .column-permission-overlay {
                             position: absolute;
                             left: 0;
@@ -112,7 +111,7 @@
                             width: 100%;
                             z-index: 6; // higher than the chaise-clear
                         }
-            
+
                         .column-permission-warning {
                             margin: 0;
                             padding: 5px;
@@ -126,7 +125,7 @@
                             float: right;
                             padding: 1px 7px 0px 7px;
                         }
-            
+
                         .disabled-row-icon {
                             margin: 6px 10px 0 0;
                             font-size: 1.3em;
@@ -150,7 +149,7 @@
                             padding: 0 10px;
                             display: flex;
                             align-items: center;
-        
+
                             .input-switch {
                                 height: auto;
                             }

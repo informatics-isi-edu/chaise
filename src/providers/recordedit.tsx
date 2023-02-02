@@ -18,6 +18,7 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import RecordeditFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-flow-control';
 
 // utilities
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
@@ -156,7 +157,7 @@ export default function RecordeditProvider({
    */
   const foreignKeyData = useRef<any>({});
   const shouldFetchForeignKeyData = useRef<boolean>(false);
-  const pendingForeignKeyRequests = useRef<number>(0);
+  const flowControl = useRef(new RecordeditFlowControl(queryParams));
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -600,20 +601,6 @@ export default function RecordeditProvider({
 
     const prefillObj = getPrefillObject(queryParams);
 
-    // NOTE since this is create mode and we're disabling the addForm,
-    // we can assume this is the first form
-    const formValue = 1;
-
-    if (prefillObj) {
-      pendingForeignKeyRequests.current += 1;
-      processPrefilledForeignKeys(formValue, prefillObj, setValue);
-    }
-
-    // we need to know the number of requests (for spinner), so we have to capture them
-    // first before sending the requests.
-    type FkRequest = { reference: any, logAction: string, index: number };
-    const fkRequests: FkRequest[] = [];
-
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;
       if (!column.isForeignKey) return;
@@ -636,84 +623,61 @@ export default function RecordeditProvider({
 
         // get the actual foreign key data
         // TODO should be modified if recordedit is used in a modal (parent log related params)
-        fkRequests.push({
-          index,
-          reference: defaultDisplay.reference,
-          logAction: LogActions.FOREIGN_KEY_PRESELECT
-        });
+        flowControl.current.addForeignKeyRequest(index, defaultDisplay.reference, LogActions.FOREIGN_KEY_PRESELECT);
 
       } else if (defaultValue !== null && defaultValue !== '') {
 
         // get the actual foreign key data
         // TODO should be modified if recordedit is used in a modal (parent log related params)
-        fkRequests.push({
-          index,
-          reference: column.defaultReference,
-          logAction: LogActions.FOREIGN_KEY_DEFAULT
-        });
+        flowControl.current.addForeignKeyRequest(index, column.defaultReference, LogActions.FOREIGN_KEY_DEFAULT);
       }
 
     });
 
-    // capture the number of generated requests
-    pendingForeignKeyRequests.current += fkRequests.length;
-
-    // send the requests after finding how many there are
-    fkRequests.forEach((req: FkRequest) => {
-      fetchForeignKeyData(formValue, [columnModels[req.index].column.name], req.reference, {
-        action: getColumnModelLogAction(
-          LogActions.FOREIGN_KEY_DEFAULT,
-          columnModels[req.index],
-          null
-        ),
-        stack: getColumnModelLogStack(columnModels[req.index], null)
-      }, setValue);
-    })
-
+    flowControl.current.setValue = setValue;
+    processForeignKeyRequests();
   }
+
+  // ---------------- fk flow-control related function --------------------------- //
 
   /**
- * In case of prefill and default we only have a reference to the foreignkey,
- * we should do extra reads to get the actual data.
- *
- * NOTE for default we don't want to send the raw data to the ermrestjs request,
- * that's why after fetching the data we're only changing the displayed rowname
- * and the foreignKeyData, not the raw values sent to ermrestjs.
- * @param formValue which form it is
- * @param colNames the column names that will use this data
- * @param fkRef the foreignkey reference that should be used for fetching data
- * @param logObject
- */
-  function fetchForeignKeyData(formValue: number, colNames: string[], fkRef: any, logObject: any, setValue: any) {
+   * flow-control logic for foreign key requests
+   */
+  function processForeignKeyRequests() {
+    if (!flowControl.current.haveFreeSlot()) {
+      return;
+    }
 
-    // we should get the fk data since it might be used for rowname
-    fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
-      colNames.forEach(function (colName) {
-        // we should not set the raw default values since we want ermrest to handle those for us.
-        // so we're just setting the displayed rowname to users
-        // and also the foreignkeyData used for the domain-filter logic.
+    if (!flowControl.current.prefillProcessed && flowControl.current.prefillObj) {
+      flowControl.current.queue.occupiedSlots++;
+      flowControl.current.prefillProcessed = true;
+      processPrefilledForeignKeys(flowControl.current.prefillObj, flowControl.current.setValue);
+    }
 
-        // default value is validated
-        if (page.tuples.length > 0) {
-          foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
-          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
-        } else {
-          foreignKeyData.current[`${formValue}-${colName}`] = {};
-          setValue(`${formValue}-${colName}`, '');
-        }
-      });
-    }).catch(function (err: any) {
-      $log.warn(err);
-    }).finally(() => {
-      pendingForeignKeyRequests.current--;
-
-      if (pendingForeignKeyRequests.current === 0) {
-        setWaitingForForeignKeyData(false);
+    flowControl.current.foreignKeyRequests.forEach((fkReq) => {
+      if (fkReq.processed || !flowControl.current.haveFreeSlot()) {
+        return;
       }
 
-    })
+      flowControl.current.queue.occupiedSlots++;
+      fkReq.processed = true;
 
+      fetchForeignKeyData(
+        [columnModels[fkReq.colIndex].column.name],
+        fkReq.reference,
+        {
+          action: getColumnModelLogAction(
+            fkReq.logAction,
+            columnModels[fkReq.colIndex],
+            null
+          ),
+          stack: getColumnModelLogStack(columnModels[fkReq.colIndex], null)
+        },
+        flowControl.current.setValue
+      );
+    });
   }
+
 
   /**
    * - Attach the values for foreignkeys and columns that are prefilled.
@@ -724,7 +688,12 @@ export default function RecordeditProvider({
    * @param  {string} origUrl         the parent url that should be resolved to get the complete row of data
    * @param  {Object} rowname         the default rowname that should be displayed
    */
-  function processPrefilledForeignKeys(formValue: number, prefillObj: PrefillObject, setValue: any) {
+  function processPrefilledForeignKeys(prefillObj: PrefillObject, setValue: any) {
+
+    // NOTE since this is create mode and we're disabling the addForm,
+    // we can assume this is the first form
+    const formValue = 1;
+
     // update the displayed value
     prefillObj.fkColumnNames.forEach(function (cn: string) {
       setValue(`${formValue}-${cn}`, prefillObj.rowname.value);
@@ -762,13 +731,58 @@ export default function RecordeditProvider({
         stack: LogService.getStackObject(stackNode, null)
       }
 
-      fetchForeignKeyData(formValue, prefillObj.fkColumnNames, ref, logObj, setValue);
+      fetchForeignKeyData(prefillObj.fkColumnNames, ref, logObj, setValue);
     }).catch(function (err: any) {
       $log.warn(err);
     });
   }
 
+  /**
+ * In case of prefill and default we only have a reference to the foreignkey,
+ * we should do extra reads to get the actual data.
+ *
+ * NOTE for default we don't want to send the raw data to the ermrestjs request,
+ * that's why after fetching the data we're only changing the displayed rowname
+ * and the foreignKeyData, not the raw values sent to ermrestjs.
+ * @param formValue which form it is
+ * @param colNames the column names that will use this data
+ * @param fkRef the foreignkey reference that should be used for fetching data
+ * @param logObject
+ */
+  function fetchForeignKeyData(colNames: string[], fkRef: any, logObject: any, setValue: any) {
+    // NOTE since this is create mode and we're disabling the addForm,
+    // we can assume this is the first form
+    const formValue = 1;
 
+    // we should get the fk data since it might be used for rowname
+    fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
+      colNames.forEach(function (colName) {
+        // we should not set the raw default values since we want ermrest to handle those for us.
+        // so we're just setting the displayed rowname to users
+        // and also the foreignkeyData used for the domain-filter logic.
+
+        // default value is validated
+        if (page.tuples.length > 0) {
+          foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
+          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
+        } else {
+          foreignKeyData.current[`${formValue}-${colName}`] = {};
+          setValue(`${formValue}-${colName}`, '');
+        }
+      });
+    }).catch(function (err: any) {
+      $log.warn(err);
+    }).finally(() => {
+      flowControl.current.queue.occupiedSlots--;
+
+      if (flowControl.current.allRequestsProcessed()) {
+        setWaitingForForeignKeyData(false);
+      } else {
+        processForeignKeyRequests();
+      }
+    })
+
+  }
 
   // ---------------- log related function --------------------------- //
 
