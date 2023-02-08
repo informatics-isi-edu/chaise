@@ -1,8 +1,8 @@
 # Use the navbar app on external HTML pages
 
-This documentation focuses on the navbar and how it can be used in external HTML pages. 
+This documentation focuses on the navbar and how it can be used in external HTML pages.
 
-This document will focus on the new implementation of the navbar using React. You can find the document for deprecated AngularJS implementation [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/navbar-app-deprecated.md). You can also jump to [Migrate from AngularJS](#migrate-from-angularjs) section for information about moving from AngularJS to React implementation.
+> This document will focus on the new implementation of the navbar using React. You can find the document for deprecated AngularJS implementation [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/navbar-app-deprecated.md). You can also jump to [Migrate from AngularJS](#migrate-from-angularjs) section for information about moving from AngularJS to React implementation.
 
 ## Table of Contents
 
@@ -40,9 +40,9 @@ To summarize, after Chaise installation in your build scripts, you need to copy 
 ```html
 <head>
     <!-- other assets on the page -->
-    
+
     <!-- TODO add the contents of lib/navbar/navbar-dependencies.html here -->
-    
+
     <!-- other assets on the page -->
 </head>
 ```
@@ -93,8 +93,8 @@ If you define the `customCSS` property in your [chaise-config](chaise-config.md)
 ```html
 <head>
     <!-- TODO include your customCSS file here -->
-    <!-- TODO 
-      AUTOMATICALLY add the contents of lib/navbar/navbar-dependencies.html here 
+    <!-- TODO
+      AUTOMATICALLY add the contents of lib/navbar/navbar-dependencies.html here
       OR
       <script src="/chaise/lib/navbar/navbar.dependencies.js"></script>
     -->
@@ -127,59 +127,88 @@ The `navbarMenu` property is the most complex of the above properties. This para
 
 ## How to customize navbar UI
 
-With the current HTML structure, it is possible to apply different styles to customize the appearance. Overriding these selectors can help -
+With the current HTML structure, it is possible to apply different styles to customize the appearance. The following are common rules that can be used to customize the UI and behavior of navbar:
 
-```css
-/* change the navbar background color */
-.navbar-inverse {
-  background-color: YOUR_VALUE;
-}
-```
+1. Preserve space for navbar while its loading (to reduce the page shift):
+    ```css
+    navbar {
+      height: YOUR_VALUE;
+      background-color: YOUR_VALUE;
+      display: block;
+    }
+    ```
 
-```css
-/* change the brand text color */
-.navbar-inverse .navbar-brand{
-  color: YOUR_VALUE;
-}
-```
+2. Change the navbar background color:
 
-```css 
-/* change color of text on right side of navbar (login/signup links) */
-.navbar-inverse .navbar-nav.navbar-right > div > a.nav-link {
-  color: YOUR_VALUE;
-}
-```
+    ```css
+    /* change the navbar background color */
+    .navbar-inverse {
+      background-color: YOUR_VALUE;
+    }
+    ```
 
-```css
-/* change the color of first level navbar menu options */
-.navbar .navbar-menu-options a.nav-link {color: YOUR_VALUE; font-size: YOUR_VALUE;}
-.navbar .navbar-menu-options a.nav-link:hover {color: YOUR_VALUE;}
-.navbar .navbar-menu-options a.nav-link:visited {color: YOUR_VALUE;}
-```
+3. Change the brand text color:
 
-```css
-/* change the minimum height of navbar */
-.navbar {
-  min-height: YOUR_VALUE;
-}
-```
+    ```css
+    /* change the brand text color */
+    .navbar-inverse .navbar-brand{
+      color: YOUR_VALUE;
+    }
+    ```
+4. Change color of text on right side of navbar (login/signup links)
 
-```css
-/* we get a vertical navbar when the width is lesser than the content, you can change the max-height of that navbar after which we will see a scrollbar to ensure it doesn’t take over the entire page (default if not customized is 340px) */
-.navbar-collapse {
-  max-height: YOUR_VALUE;
-}
-```
+    ```css
+    /* change color of text on right side of navbar (login/signup links) */
+    .navbar-inverse .navbar-nav.navbar-right > div > a.nav-link {
+      color: YOUR_VALUE;
+    }
+    ```
+
+5. Change the color of first level navbar menu options
+
+    ```css
+    /* change the color of first level navbar menu options */
+    .navbar .navbar-menu-options a.nav-link {color: YOUR_VALUE; font-size: YOUR_VALUE;}
+    .navbar .navbar-menu-options a.nav-link:hover {color: YOUR_VALUE;}
+    .navbar .navbar-menu-options a.nav-link:visited {color: YOUR_VALUE;}
+    ```
+
+6. Change the minimum height of navbar
+    ```css
+    /* change the minimum height of navbar */
+    .navbar {
+      min-height: YOUR_VALUE;
+    }
+    ```
+
+7. We get a vertical navbar when the width is lesser than the content, you can change the max-height of that navbar after which we will see a scrollbar to ensure it doesn’t take over the entire page (default if not customized is 340px)
+
+    ```css
+    .navbar-collapse {
+      max-height: YOUR_VALUE;
+    }
+    ```
 
 ## Migrate from AngularJS
 
 The following are the major things that have changed from AngularJS to React:
 
 1. If you're prefetching the dependencies:
-   1. The include statements for prefetching dependencies are now under `lib/navbar/navbar-dependencies.html`.
-   2. While in AngularJS, you need to include a `navbar.app.js` regardless of prefetching dependencies, in React implementation, you don't need to include anything else if you're prefetching the dependencies.
+   1. The include statements for prefetching dependencies are now under `lib/navbar/navbar-dependencies.html`. So in build recipes change the location like the following:
+    ```diff
+    - /dist/chaise-dependencies.html
+    + /lib/navbar/navbar-dependencies.html
+    ```
+   2. While in AngularJS, you need to include a `navbar.app.js` regardless of prefetching dependencies, in React implementation, you don't need to include anything else if you're prefetching the dependencies. So in your HTML file:
+   ```diff
+   - <script src="/chaise/lib/navbar/navbar.app.js"></script>
+   ```
 2. If you don't want to change the build process to prefetch the dependencies:
-   1. You need to include the `navbar.dependencies.js` file (notice that its name has been changed from `navbar.app.js`).
+   1. You need to include the `navbar.dependencies.js` file (notice that its name has been changed from `navbar.app.js`). In your HTML file:
+   ```diff
+   - <script src="/chaise/lib/navbar/navbar.app.js"></script>
+   + <script src="/chaise/lib/navbar/navbar.dependencies.js"></script>
+   ```
 3. AngularJS implementation uses the Boostrap 3 version, while in React implementation, we use Bootstrap 5. As a result, you will notice changes on the page. The following are some of the most noticeable changes:
    - The navbar implementation has been changed, and we're no longer using `ul` or `li` for the menu options. Please refer to the previous section for more information.
    - The default color of links and buttons has been changed (Bootstrap 5 uses a less saturated blue color. Links also show the underline in the new version).

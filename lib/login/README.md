@@ -1,1 +1,5 @@
-For more information about this app please refer to [the login app documentation](../../docs/user-docs/login-app.md).
+For more information about using login apps in static sites outside of Chaise, please refer to the following documents:
+
+- [React login app](../../docs/user-docs/login-app.md)
+- [Deprecated AngularJS login app](../../docs/user-docs/login-app-deprecated.md)
+
