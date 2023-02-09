@@ -102,11 +102,21 @@ export function isDisabled(column: any): boolean {
   return column.inputDisabled ? true : false;
 }
 
-export function getInputTypeOrDisabled(columnModel: RecordeditColumnModel): string {
-  if (columnModel.isDisabled) {
+/**
+ * Return `disabled` if,
+ *  - columnModel is marked as disabled
+ *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
+ *  - TODO show all
+ * @param formNumber
+ * @param columnModel
+ * @param canUpdateValues
+ * @returns
+ */
+export function getInputTypeOrDisabled(formNumber: number, columnModel: RecordeditColumnModel, canUpdateValues: any): string {
+  const valName = `${formNumber}-${columnModel.column.name}`;
+
+  if (columnModel.isDisabled || (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false)) {
     // TODO: if columnModel.showSelectAll, disable input
-    // TODO: create column models, no column model, enable!
-    // TODO: is editMode and user cannot update this row, disable
     return 'disabled';
   }
   return columnModel.inputType;
@@ -143,30 +153,6 @@ export function formatDatetime(value: string, options: TimestampOptions) {
   return null;
 }
 
-/**
- * Map type to default heights for different inputs (currently for recordedit)
- */
-export const DEFAULT_HEGHT_MAP: any = {
-  'array': 127, // should be same as json
-  'boolean': 47,
-  'color': 47,
-  'date': 47,
-  'disabled': 47,
-  'float4': 47,
-  'float8': 47,
-  'integer2': 47,
-  'integer4': 47,
-  'integer8': 47,
-  'json': 127, // should be same as array
-  'longtext': 170, // also markdown
-  'number': 47,
-  'numeric': 47,
-  'shorttext': 47,
-  'text': 47,
-  'textarea': 108, // for textarea html element
-  'timestamp': 82,
-  'timestamptz': 82
-}
 
 export const ERROR_MESSAGES = {
   REQUIRED: 'Please enter a value for this field.',

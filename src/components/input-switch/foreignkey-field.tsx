@@ -21,11 +21,11 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnModelLogStack, populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 type ForeignkeyFieldProps = {
   /**
@@ -186,10 +186,6 @@ const ForeignkeyField = ({
     field.onBlur();
   };
 
-  useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });
-  }, [error?.message]);
-
   const openRecordsetModal = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
@@ -267,7 +263,7 @@ const ForeignkeyField = ({
   }
 
   return (
-    <div className={`${containerClasses} input-switch-foreignkey input-switch-container-${name}`} style={styles}>
+    <div className={`${containerClasses} input-switch-foreignkey input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       {showSpinner &&
         <div className='column-cell-spinner-container'>
           <div className='column-cell-spinner-backdrop'></div>

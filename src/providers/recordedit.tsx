@@ -18,26 +18,26 @@ import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
+import RecordeditFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-flow-control';
 
 // utilities
 import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
-import { QUERY_PARAMS, RESULT_INFO_VALUES, URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
+import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
   allForeignKeyColumnsPrefilled,
   columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { addQueryParamsToURL, createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
+import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ResultsetProps = {
-  success: { page: any, header: string, appLink?: string }
-  disabled?: { page: any, header: string },
-  failed?: { page: any, header: string, appLink?: string }
+  pageTitle: string,
+  success: { page: any, header: string, exploreLink?: string, editLink?: string },
+  failed?: { page: any, header: string, exploreLink?: string }
 }
 
 export const RecordeditContext = createContext<{
@@ -58,6 +58,10 @@ export const RecordeditContext = createContext<{
   waitingForForeignKeyData: boolean,
   /* the created column models from reference.columns */
   columnModels: RecordeditColumnModel[],
+  /* whether a value can be updated or not (key-value pair where key is the same structure as form values ) */
+  canUpdateValues: { [key: string]: boolean };
+  /** precomputed column permission error that should be displayed to the users */
+  columnPermissionErrors: { [columnName: string]: string };
   /* Whether the data for the main entity is fetched and the model is initialized  */
   initialized: boolean,
   /* Array of numbers for initalizing form data */
@@ -66,14 +70,6 @@ export const RecordeditContext = createContext<{
   addForm: (count: number) => number[],
   /* callback to remove from(s) from the forms array */
   removeForm: (indexes: number[]) => void,
-  /* Object to keep track of height changes for each column name display cell */
-  keysHeightMap: any,
-  /* callback to manipulate the keys height map */
-  updateKeysHeightMap: (colName: string, height: number) => void,
-  /* Object to keep track of height changes for each input cell */
-  formsHeightMap: any,
-  /* callback to manipulate the forms height map */
-  handleInputHeightAdjustment: (fieldName: string, msgCleared: boolean, fieldType: string) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
@@ -111,7 +107,7 @@ export default function RecordeditProvider({
   reference
 }: RecordeditProviderProps): JSX.Element {
 
-  const { addAlert } = useAlert();
+  const { addAlert, removeAllAlerts } = useAlert();
   const { session, validateSessionBeforeMutation } = useAuthn();
   const { dispatchError, errors, loginModal } = useError();
 
@@ -119,6 +115,8 @@ export default function RecordeditProvider({
 
   const [page, setPage, pageRef] = useStateRef<any>(null);
   const [columnModels, setColumnModels] = useState<RecordeditColumnModel[]>([]);
+  const [canUpdateValues, setCanUpdateValues] = useState<any>({});
+  const [columnPermissionErrors, setColumnPermissionErrors] = useState<any>({});
 
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
@@ -131,20 +129,6 @@ export default function RecordeditProvider({
 
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
-  /*
-   * Object to keep track of height changes for each column name display cell
-   *  - each key is the column name
-   *  - each value is -1 if not changed or the corresponding height value to apply
-   */
-  const [keysHeightMap, setKeysHeightMap] = useState<any>({})
-  /*
-   * Object to keep track of height changes for each input cell
-   *  - each key is the column name
-   *  - each value is an array
-   *    - the length of the arrays is equal to the total number of forms
-   *    - each value in the  array is 1 if not changed or the corresponding height value to apply
-   */
-  const [formsHeightMap, setFormsHeightMap] = useState<any>({})
 
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
@@ -156,7 +140,7 @@ export default function RecordeditProvider({
    */
   const foreignKeyData = useRef<any>({});
   const shouldFetchForeignKeyData = useRef<boolean>(false);
-  const pendingForeignKeyRequests = useRef<number>(0);
+  const flowControl = useRef(new RecordeditFlowControl(queryParams));
 
   // since we're using strict mode, the useEffect is getting called twice in dev mode
   // this is to guard against it
@@ -172,18 +156,6 @@ export default function RecordeditProvider({
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
-
-    // generate initial forms hmap
-    const tempKeysHMap: any = {};
-    const tempFormsHMap: any = {};
-    tempColumnModels.forEach((cm: any) => {
-      const colname = cm.column.name;
-      tempKeysHMap[colname] = -1;
-      tempFormsHMap[colname] = [-1];
-    });
-
-    setKeysHeightMap(tempKeysHMap);
-    setFormsHeightMap(tempFormsHMap);
 
     const ERMrest = windowRef.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
@@ -291,6 +263,34 @@ export default function RecordeditProvider({
 
   }, [reference]);
 
+
+  /**
+   * if because of column-level acls, columns of one of the rows cannot be
+   * updated, we cannot update any other rows. so we should precompute this
+   * and attach the error so we can show it later to the users.
+   * This will take care of populating on load as well as when forms are removed.
+   */
+  useEffect(() => {
+    if (appMode !== appModes.EDIT || tuples.length === 0 || !canUpdateValues) return;
+
+    // update the column permission errors when forms are changed removed
+    const res: { [columnName: string]: string } = {};
+    forms.forEach(({ }, formIndex) => {
+      columnModels.forEach((cm, i) => {
+        // assumption is that isDisabled is not based on per column ACLs
+        if (cm.isDisabled) return;
+
+        const tuple = tuples[formIndex];
+        if (tuple.canUpdate && !tuple.canUpdateValues[i] && !res[cm.column.name]) {
+          let errMessage = 'This field cannot be modified. ';
+          errMessage += `To modify it, remove all records that have this field disabled (e.g. Record Number ${formIndex + 1})`;
+          res[cm.column.name] = errMessage;
+        }
+      });
+    });
+    setColumnPermissionErrors(res);
+  }, [forms, tuples]);
+
   /**
    * Show an alert if user is attempting to leave without saving
    */
@@ -315,13 +315,17 @@ export default function RecordeditProvider({
   }, [loginModal, errors]);
 
   const onSubmitValid = (data: any) => {
-    const submissionRows: any[] = []
+    // remove all existing alerts
+    removeAllAlerts();
+
+    const submissionRows: any[] = [];
     // f is the number in forms array that is
     forms.forEach((f: number) => {
       submissionRows.push(populateSubmissionRow(reference, f, data));
     });
 
     validateSessionBeforeMutation(() => {
+      // show spinner
       setShowSubmitSpinner(true);
       uploadFiles(submissionRows, () => {
         // success callback after create/update is called on a reference object
@@ -345,6 +349,7 @@ export default function RecordeditProvider({
               // And if it's from another origin, we don't need to call updated since it's not
               // the same row that we wanted to update in recordset (table directive)
             }
+<<<<<<< HEAD
           } else {
             // cleanup the prefill query parameter
             if (queryParams.prefill) {
@@ -357,6 +362,70 @@ export default function RecordeditProvider({
               CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
             }
           }
+=======
+          } catch (exp) {
+            // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+            // And if it's from another origin, we don't need to call updated since it's not
+            // the same row that we wanted to update in recordset (table directive)
+          }
+        } else {
+          // cleanup the prefill query parameter
+          if (queryParams.prefill) {
+            CookieService.deleteCookie(queryParams.prefill);
+          }
+
+          // add cookie indicating record successfully added
+          if (queryParams.invalidate) {
+            // the value of the cookie is not important as other apps are just looking for the cookie name
+            CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
+          }
+        }
+
+        const page = response.successful;
+        const failedPage = response.failed;
+        const disabledPage = response.disabled;
+
+        // redirect to record app
+        if (forms.length === 1) {
+          // Created a single entity or Updated one
+          addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+
+          windowRef.location = page.reference.contextualize.detailed.appLink;
+        }
+        // see if we can just redirect, or if we need the resultset view.
+        else {
+          const compactRef = page.reference.contextualize.compact;
+          const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
+
+          const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
+
+          // if we have failures: <num> {updated|created} records
+          // otherwise: {Updated|Created} records
+          let headerPrefix = appMode === appModes.EDIT ? 'Updated' : 'Created';
+          if (failedPage) {
+            headerPrefix = page.length + (appMode === appModes.EDIT ? ' updated' : 'created');
+          }
+
+          // resultset view
+          setResultsetProps({
+            success: {
+              page,
+              header: `${headerPrefix} record${handlePlural(page)}`,
+              ... (canLinkToRecordset && {
+                exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
+              })
+            },
+            ... (failedPage && {
+              failed: {
+                page: failedPage,
+                header: `${failedPage.length} failed ${appMode === appModes.EDIT ? 'update' : 'creation'}${handlePlural(failedPage)}`
+              },
+              // TODO add exploreLink (most probably requires ermrestjs change)
+            }),
+          });
+        }
+      };
+>>>>>>> react-recordedit-app
 
           const page = response.successful;
           const failedPage = response.failed;
@@ -551,17 +620,6 @@ export default function RecordeditProvider({
       return [...res];
     })
 
-    // for each form added, push another '-1' into the array for each column
-    setFormsHeightMap((previous: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(previous);
-      for (let i = 0; i < count; i++) {
-        Object.keys(formsHeightMapCpy).forEach(k => {
-          formsHeightMapCpy[k].push(-1);
-        });
-      }
-      return formsHeightMapCpy;
-    });
-
     return newFormValues;
   };
 
@@ -569,72 +627,10 @@ export default function RecordeditProvider({
     // remove the forms based on the given indexes
     setForms((previous: number[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
-    // remove the entry at 'idx' in the array for each column
-    setFormsHeightMap((previous: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(previous);
-      Object.keys(formsHeightMapCpy).forEach(k => {
-        formsHeightMapCpy[k] = formsHeightMapCpy[k].filter(({ }, i: number) => !indexes.includes(i));
-      });
-      return formsHeightMapCpy;
-    });
-
     setTuples((previous: any[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
     // TODO: should this cleanup the form data?
     //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
-  }
-
-  const updateKeysHeightMap = (colName: string, height: number) => {
-    setKeysHeightMap((previous: any) => {
-      const hMapCopy = simpleDeepCopy(previous);
-      hMapCopy[colName] = height;
-      return hMapCopy;
-    })
-  }
-
-  const updateFormsHeightMap = (colName: string, idx: string, height: string | number) => {
-    setFormsHeightMap((previous: any) => {
-      const hMapCpy = simpleDeepCopy(previous);
-      hMapCpy[colName][idx] = height;
-
-      updateKeysHeightMap(colName, Math.max(...hMapCpy[colName]));
-
-      return hMapCpy;
-    });
-  }
-
-  const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean, fieldType: string) => {
-    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
-    const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
-
-    let height = ele?.offsetHeight || 0;
-    let newHeight;
-    // how to handle this ? get default heights
-
-    const textAreaEle: HTMLTextAreaElement | null = document.querySelector(`.input-switch-container-${fieldName} textarea`);
-    const textAreaHeight = textAreaEle?.offsetHeight;
-
-    // if the text area height is greater than the default textarea height, set the height to the default inputHeight plus the change in textarea size
-    if (textAreaHeight && textAreaHeight > DEFAULT_HEGHT_MAP['textarea']) {
-      height = DEFAULT_HEGHT_MAP[fieldType] + (textAreaHeight - DEFAULT_HEGHT_MAP['textarea']);
-
-      if (!msgCleared) {
-        // Make sure to add the height of the error message container
-        const errorEle: HTMLElement | null = document.querySelector('.input-switch-error');
-        height += errorEle?.offsetHeight || 0;
-      }
-      newHeight = height === defaultHeight ? -1 : height;
-    } else {
-      newHeight = height === defaultHeight || msgCleared ? -1 : height;
-    }
-
-    // execute the regexp to get individual values from the inputFieldName
-    const r = /(\d*)-(.*)/;
-    const result = r.exec(fieldName) || [];
-    const idx = result[1];
-    const colName = result[2];
-
-    updateFormsHeightMap(colName, idx, newHeight);
   }
 
   const getInitialFormValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
@@ -659,6 +655,8 @@ export default function RecordeditProvider({
       initialModel = populateEditInitialValues(columnModels, forms, reference.columns, page.tuples, appMode === appModes.COPY);
 
       setTuples([...tempTuples]);
+
+      setCanUpdateValues(initialModel.canUpdateValues);
     }
 
     foreignKeyData.current = initialModel.foreignKeyData;
@@ -685,6 +683,7 @@ export default function RecordeditProvider({
 
     const prefillObj = getPrefillObject(queryParams);
 
+<<<<<<< HEAD
     // NOTE since this is create mode and we're disabling the addForm,
     // we can assume this is the first form
     const formValue = 1;
@@ -699,6 +698,8 @@ export default function RecordeditProvider({
     type FkRequest = { reference: any, logAction: string, index: number };
     const fkRequests: FkRequest[] = [];
 
+=======
+>>>>>>> react-recordedit-app
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;
       if (!column.isForeignKey) return;
@@ -721,84 +722,61 @@ export default function RecordeditProvider({
 
         // get the actual foreign key data
         // TODO should be modified if recordedit is used in a modal (parent log related params)
-        fkRequests.push({
-          index,
-          reference: defaultDisplay.reference,
-          logAction: LogActions.FOREIGN_KEY_PRESELECT
-        });
+        flowControl.current.addForeignKeyRequest(index, defaultDisplay.reference, LogActions.FOREIGN_KEY_PRESELECT);
 
       } else if (defaultValue !== null && defaultValue !== '') {
 
         // get the actual foreign key data
         // TODO should be modified if recordedit is used in a modal (parent log related params)
-        fkRequests.push({
-          index,
-          reference: column.defaultReference,
-          logAction: LogActions.FOREIGN_KEY_DEFAULT
-        });
+        flowControl.current.addForeignKeyRequest(index, column.defaultReference, LogActions.FOREIGN_KEY_DEFAULT);
       }
 
     });
 
-    // capture the number of generated requests
-    pendingForeignKeyRequests.current += fkRequests.length;
-
-    // send the requests after finding how many there are
-    fkRequests.forEach((req: FkRequest) => {
-      fetchForeignKeyData(formValue, [columnModels[req.index].column.name], req.reference, {
-        action: getColumnModelLogAction(
-          LogActions.FOREIGN_KEY_DEFAULT,
-          columnModels[req.index],
-          null
-        ),
-        stack: getColumnModelLogStack(columnModels[req.index], null)
-      }, setValue);
-    })
-
+    flowControl.current.setValue = setValue;
+    processForeignKeyRequests();
   }
+
+  // ---------------- fk flow-control related function --------------------------- //
 
   /**
- * In case of prefill and default we only have a reference to the foreignkey,
- * we should do extra reads to get the actual data.
- *
- * NOTE for default we don't want to send the raw data to the ermrestjs request,
- * that's why after fetching the data we're only changing the displayed rowname
- * and the foreignKeyData, not the raw values sent to ermrestjs.
- * @param formValue which form it is
- * @param colNames the column names that will use this data
- * @param fkRef the foreignkey reference that should be used for fetching data
- * @param logObject
- */
-  function fetchForeignKeyData(formValue: number, colNames: string[], fkRef: any, logObject: any, setValue: any) {
+   * flow-control logic for foreign key requests
+   */
+  function processForeignKeyRequests() {
+    if (!flowControl.current.haveFreeSlot()) {
+      return;
+    }
 
-    // we should get the fk data since it might be used for rowname
-    fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
-      colNames.forEach(function (colName) {
-        // we should not set the raw default values since we want ermrest to handle those for us.
-        // so we're just setting the displayed rowname to users
-        // and also the foreignkeyData used for the domain-filter logic.
+    if (!flowControl.current.prefillProcessed && flowControl.current.prefillObj) {
+      flowControl.current.queue.occupiedSlots++;
+      flowControl.current.prefillProcessed = true;
+      processPrefilledForeignKeys(flowControl.current.prefillObj, flowControl.current.setValue);
+    }
 
-        // default value is validated
-        if (page.tuples.length > 0) {
-          foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
-          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
-        } else {
-          foreignKeyData.current[`${formValue}-${colName}`] = {};
-          setValue(`${formValue}-${colName}`, '');
-        }
-      });
-    }).catch(function (err: any) {
-      $log.warn(err);
-    }).finally(() => {
-      pendingForeignKeyRequests.current--;
-
-      if (pendingForeignKeyRequests.current === 0) {
-        setWaitingForForeignKeyData(false);
+    flowControl.current.foreignKeyRequests.forEach((fkReq) => {
+      if (fkReq.processed || !flowControl.current.haveFreeSlot()) {
+        return;
       }
 
-    })
+      flowControl.current.queue.occupiedSlots++;
+      fkReq.processed = true;
 
+      fetchForeignKeyData(
+        [columnModels[fkReq.colIndex].column.name],
+        fkReq.reference,
+        {
+          action: getColumnModelLogAction(
+            fkReq.logAction,
+            columnModels[fkReq.colIndex],
+            null
+          ),
+          stack: getColumnModelLogStack(columnModels[fkReq.colIndex], null)
+        },
+        flowControl.current.setValue
+      );
+    });
   }
+
 
   /**
    * - Attach the values for foreignkeys and columns that are prefilled.
@@ -809,7 +787,12 @@ export default function RecordeditProvider({
    * @param  {string} origUrl         the parent url that should be resolved to get the complete row of data
    * @param  {Object} rowname         the default rowname that should be displayed
    */
-  function processPrefilledForeignKeys(formValue: number, prefillObj: PrefillObject, setValue: any) {
+  function processPrefilledForeignKeys(prefillObj: PrefillObject, setValue: any) {
+
+    // NOTE since this is create mode and we're disabling the addForm,
+    // we can assume this is the first form
+    const formValue = 1;
+
     // update the displayed value
     prefillObj.fkColumnNames.forEach(function (cn: string) {
       setValue(`${formValue}-${cn}`, prefillObj.rowname.value);
@@ -847,13 +830,58 @@ export default function RecordeditProvider({
         stack: LogService.getStackObject(stackNode, null)
       }
 
-      fetchForeignKeyData(formValue, prefillObj.fkColumnNames, ref, logObj, setValue);
+      fetchForeignKeyData(prefillObj.fkColumnNames, ref, logObj, setValue);
     }).catch(function (err: any) {
       $log.warn(err);
     });
   }
 
+  /**
+ * In case of prefill and default we only have a reference to the foreignkey,
+ * we should do extra reads to get the actual data.
+ *
+ * NOTE for default we don't want to send the raw data to the ermrestjs request,
+ * that's why after fetching the data we're only changing the displayed rowname
+ * and the foreignKeyData, not the raw values sent to ermrestjs.
+ * @param formValue which form it is
+ * @param colNames the column names that will use this data
+ * @param fkRef the foreignkey reference that should be used for fetching data
+ * @param logObject
+ */
+  function fetchForeignKeyData(colNames: string[], fkRef: any, logObject: any, setValue: any) {
+    // NOTE since this is create mode and we're disabling the addForm,
+    // we can assume this is the first form
+    const formValue = 1;
 
+    // we should get the fk data since it might be used for rowname
+    fkRef.contextualize.compactSelectForeignKey.read(1, logObject, false, true).then((page: any) => {
+      colNames.forEach(function (colName) {
+        // we should not set the raw default values since we want ermrest to handle those for us.
+        // so we're just setting the displayed rowname to users
+        // and also the foreignkeyData used for the domain-filter logic.
+
+        // default value is validated
+        if (page.tuples.length > 0) {
+          foreignKeyData.current[`${formValue}-${colName}`] = page.tuples[0].data;
+          setValue(`${formValue}-${colName}`, page.tuples[0].displayname.value);
+        } else {
+          foreignKeyData.current[`${formValue}-${colName}`] = {};
+          setValue(`${formValue}-${colName}`, '');
+        }
+      });
+    }).catch(function (err: any) {
+      $log.warn(err);
+    }).finally(() => {
+      flowControl.current.queue.occupiedSlots--;
+
+      if (flowControl.current.allRequestsProcessed()) {
+        setWaitingForForeignKeyData(false);
+      } else {
+        processForeignKeyRequests();
+      }
+    })
+
+  }
 
   // ---------------- log related function --------------------------- //
 
@@ -884,18 +912,15 @@ export default function RecordeditProvider({
       columnModels,
       initialized,
       waitingForForeignKeyData,
+      canUpdateValues,
+      columnPermissionErrors,
 
       // form
       forms,
       addForm,
       removeForm,
-      keysHeightMap,
-      updateKeysHeightMap,
-      formsHeightMap,
-      handleInputHeightAdjustment,
       getInitialFormValues,
       getPrefilledDefaultForeignKeyData,
-
 
       //   // log related:
       //   logRecordClientAction,
@@ -910,8 +935,7 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     reference, page, tuples, columnModels, initialized, waitingForForeignKeyData,
-    showSubmitSpinner, resultsetProps,
-    forms, keysHeightMap, formsHeightMap,
+    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors
   ]);
 
   return (

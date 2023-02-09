@@ -12,9 +12,6 @@ import RecordsetProvider from '@isrd-isi-edu/chaise/src/providers/recordset';
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
-// utils
-import { RECORDEDIT_RESULTSET_MAX_ROWS } from '@isrd-isi-edu/chaise/src/utils/constants';
-
 type ResultsetTableProps = {
   page: any
 }
@@ -37,8 +34,7 @@ const ResultsetTable = ({
     selectMode: RecordsetSelectMode.NO_SELECT,
     showFaceting: false,
     disableFaceting: true,
-    displayMode: RecordsetDisplayMode.TABLE,
-    maxDisplayedRows: RECORDEDIT_RESULTSET_MAX_ROWS
+    displayMode: RecordsetDisplayMode.TABLE
   }
 
   return (

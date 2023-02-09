@@ -9,10 +9,8 @@ import { useEffect, useState, useRef } from 'react';
 import { useFormContext, useController } from 'react-hook-form';
 
 // utils
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import MarkdownCallbacks from '@isrd-isi-edu/chaise/src/utils/markdown-utils';
-import { ResizeSensor } from 'css-element-queries';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type LongtextFieldProps = {
@@ -64,13 +62,11 @@ const LongtextField = ({
   onFieldChange,
 }: LongtextFieldProps): JSX.Element => {
 
-  // reference hook to access contents of input
-  const textAreaContainerRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [showPreview, setShowPreview] = useState<boolean>(false);
   const [showModalPreview, setShowModalPreview] = useState<boolean>(false);
-  const [previewContent, setPreviewContent] = useState<string>(''); 
+  const [previewContent, setPreviewContent] = useState<string>('');
 
   // react-hook-form setup
   const { setValue, control, clearErrors } = useFormContext();
@@ -89,22 +85,6 @@ const LongtextField = ({
 
   // hooks
   useEffect(() => {
-    const textAreaElement = textAreaContainerRef.current;
-    if (!textAreaElement) return;
-    const sensor = new ResizeSensor(textAreaElement, () => {
-      fireCustomEvent(
-        'input-switch-error-update',
-        `.input-switch-container-${makeSafeIdAttr(name)}`,
-        { inputFieldName: name, msgCleared: false, type: 'longtext' }
-      );
-    });
-
-    return () => {
-      sensor.detach();
-    }
-  }, []);
-
-  useEffect(() => {
     if (onFieldChange) {
       onFieldChange(fieldValue);
     }
@@ -118,15 +98,6 @@ const LongtextField = ({
     if (value === undefined) return;
     setValue(name, value);
   }, [value]);
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'longtext' }
-    );
-  }, [error?.message]);
-
 
   // callback functions
   const handleChange = (v: any) => {
@@ -163,7 +134,7 @@ const LongtextField = ({
       <div className='md-editor'>
         <div className='md-header chaise-btn-toolbar'>
           <div className='chaise-btn-group'>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Heading' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setHeading(textAreaRef.current);
@@ -173,7 +144,7 @@ const LongtextField = ({
             >
               <span className='fa fa-header'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Bold' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setBold(textAreaRef.current);
@@ -183,7 +154,7 @@ const LongtextField = ({
             >
               <span className='fa fa-bold'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Italic' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setItalic(textAreaRef.current);
@@ -195,7 +166,7 @@ const LongtextField = ({
             </button>
           </div>
           <div className='chaise-btn-group'>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='URL/Link' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setLink(textAreaRef.current);
@@ -205,7 +176,7 @@ const LongtextField = ({
             >
               <span className='fa fa-link'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Image' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setImage(textAreaRef.current);
@@ -215,7 +186,7 @@ const LongtextField = ({
             >
               <span className='fa-regular fa-image'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn chaise-btn-no-padding' 
+            <button className='chaise-btn-secondary chaise-btn chaise-btn-no-padding'
               type='button' title='RID link' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setRidLink(textAreaRef.current);
@@ -227,7 +198,7 @@ const LongtextField = ({
             </button>
           </div>
           <div className='chaise-btn-group'>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Unordered List' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setList(textAreaRef.current);
@@ -237,7 +208,7 @@ const LongtextField = ({
             >
               <span className='fa fa-list'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Ordered List' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setListOrdered(textAreaRef.current);
@@ -247,7 +218,7 @@ const LongtextField = ({
             >
               <span className='fa fa-list-ol'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Quote' disabled={showPreview}
               onClick={() => {
                   MarkdownCallbacks.setQuote(textAreaRef.current);
@@ -259,19 +230,19 @@ const LongtextField = ({
             </button>
           </div>
           <div className='chaise-btn-group'>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Help' disabled={showPreview}
               onClick={MarkdownCallbacks.openHelp}
             >
               <span className='fa-solid fa-circle-question'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
-              type='button' title='Preview' 
+            <button className='chaise-btn-secondary chaise-btn'
+              type='button' title='Preview'
               onClick={togglePreview}
             >
               <span className='fa-solid fa-eye'></span>
             </button>
-            <button className='chaise-btn-secondary chaise-btn' 
+            <button className='chaise-btn-secondary chaise-btn'
               type='button' title='Fullscreen Preview' disabled={showPreview}
               onClick={modalPreview}
             >
@@ -279,9 +250,12 @@ const LongtextField = ({
             </button>
           </div>
         </div>
-        {!showPreview ? 
-          <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaContainerRef}>
-            <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} ref={textAreaRef} data-provide='markdown' />
+        {!showPreview ?
+          <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`}>
+            <textarea
+              placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field}
+              onChange={handleChange} ref={textAreaRef} data-provide='markdown'
+            />
             <ClearInputBtn
               btnClassName={`${clearClasses} input-switch-clear`}
               clickCallback={clearInput}
@@ -294,13 +268,13 @@ const LongtextField = ({
         }
       </div>
       {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
-      {showModalPreview && 
-        <MarkdownPreviewModal 
+      {showModalPreview &&
+        <MarkdownPreviewModal
           markdownContent={previewContent}
           onClose={() => {
               setShowModalPreview(false)
               setPreviewContent('')
-            } 
+            }
           }
         />
       }
