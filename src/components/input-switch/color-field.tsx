@@ -10,7 +10,6 @@ import { useFormContext, useController } from 'react-hook-form';
 import useClickOutside from '@isrd-isi-edu/chaise/src/hooks/click-outside';
 
 // utils
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type ColorFieldProps = {
@@ -125,10 +124,6 @@ const ColorField = ({
     field.onChange(v);
     field.onBlur();
   };
-
-  useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });
-  }, [error?.message]);
 
   /**
    * The color preview rectangle. used in two places

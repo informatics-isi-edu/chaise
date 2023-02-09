@@ -30,7 +30,6 @@ import {
   columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { DEFAULT_HEGHT_MAP } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { createRedirectLinkFromPath } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
@@ -59,6 +58,10 @@ export const RecordeditContext = createContext<{
   waitingForForeignKeyData: boolean,
   /* the created column models from reference.columns */
   columnModels: RecordeditColumnModel[],
+  /* whether a value can be updated or not (key-value pair where key is the same structure as form values ) */
+  canUpdateValues: { [key: string]: boolean };
+  /** precomputed column permission error that should be displayed to the users */
+  columnPermissionErrors: { [columnName: string]: string };
   /* Whether the data for the main entity is fetched and the model is initialized  */
   initialized: boolean,
   /* Array of numbers for initalizing form data */
@@ -67,14 +70,6 @@ export const RecordeditContext = createContext<{
   addForm: (count: number) => number[],
   /* callback to remove from(s) from the forms array */
   removeForm: (indexes: number[]) => void,
-  /* Object to keep track of height changes for each column name display cell */
-  keysHeightMap: any,
-  /* callback to manipulate the keys height map */
-  updateKeysHeightMap: (colName: string, height: number) => void,
-  /* Object to keep track of height changes for each input cell */
-  formsHeightMap: any,
-  /* callback to manipulate the forms height map */
-  handleInputHeightAdjustment: (fieldName: string, msgCleared: boolean, fieldType: string) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
@@ -120,6 +115,8 @@ export default function RecordeditProvider({
 
   const [page, setPage, pageRef] = useStateRef<any>(null);
   const [columnModels, setColumnModels] = useState<RecordeditColumnModel[]>([]);
+  const [canUpdateValues, setCanUpdateValues] = useState<any>({});
+  const [columnPermissionErrors, setColumnPermissionErrors] = useState<any>({});
 
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
@@ -132,20 +129,6 @@ export default function RecordeditProvider({
 
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
-  /*
-   * Object to keep track of height changes for each column name display cell
-   *  - each key is the column name
-   *  - each value is -1 if not changed or the corresponding height value to apply
-   */
-  const [keysHeightMap, setKeysHeightMap] = useState<any>({})
-  /*
-   * Object to keep track of height changes for each input cell
-   *  - each key is the column name
-   *  - each value is an array
-   *    - the length of the arrays is equal to the total number of forms
-   *    - each value in the  array is 1 if not changed or the corresponding height value to apply
-   */
-  const [formsHeightMap, setFormsHeightMap] = useState<any>({})
 
   /**
    * NOTE the current assumption is that foreignKeyData is used only in
@@ -173,18 +156,6 @@ export default function RecordeditProvider({
       tempColumnModels.push(cm);
     })
     setColumnModels([...tempColumnModels]);
-
-    // generate initial forms hmap
-    const tempKeysHMap: any = {};
-    const tempFormsHMap: any = {};
-    tempColumnModels.forEach((cm: any) => {
-      const colname = cm.column.name;
-      tempKeysHMap[colname] = -1;
-      tempFormsHMap[colname] = [-1];
-    });
-
-    setKeysHeightMap(tempKeysHMap);
-    setFormsHeightMap(tempFormsHMap);
 
     const ERMrest = windowRef.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
@@ -291,6 +262,34 @@ export default function RecordeditProvider({
     }
 
   }, [reference]);
+
+
+  /**
+   * if because of column-level acls, columns of one of the rows cannot be
+   * updated, we cannot update any other rows. so we should precompute this
+   * and attach the error so we can show it later to the users.
+   * This will take care of populating on load as well as when forms are removed.
+   */
+  useEffect(() => {
+    if (appMode !== appModes.EDIT || tuples.length === 0 || !canUpdateValues) return;
+
+    // update the column permission errors when forms are changed removed
+    const res: { [columnName: string]: string } = {};
+    forms.forEach(({ }, formIndex) => {
+      columnModels.forEach((cm, i) => {
+        // assumption is that isDisabled is not based on per column ACLs
+        if (cm.isDisabled) return;
+
+        const tuple = tuples[formIndex];
+        if (tuple.canUpdate && !tuple.canUpdateValues[i] && !res[cm.column.name]) {
+          let errMessage = 'This field cannot be modified. ';
+          errMessage += `To modify it, remove all records that have this field disabled (e.g. Record Number ${formIndex + 1})`;
+          res[cm.column.name] = errMessage;
+        }
+      });
+    });
+    setColumnPermissionErrors(res);
+  }, [forms, tuples]);
 
   /**
    * Show an alert if user is attempting to leave without saving
@@ -467,17 +466,6 @@ export default function RecordeditProvider({
       return [...res];
     })
 
-    // for each form added, push another '-1' into the array for each column
-    setFormsHeightMap((previous: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(previous);
-      for (let i = 0; i < count; i++) {
-        Object.keys(formsHeightMapCpy).forEach(k => {
-          formsHeightMapCpy[k].push(-1);
-        });
-      }
-      return formsHeightMapCpy;
-    });
-
     return newFormValues;
   };
 
@@ -485,72 +473,10 @@ export default function RecordeditProvider({
     // remove the forms based on the given indexes
     setForms((previous: number[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
-    // remove the entry at 'idx' in the array for each column
-    setFormsHeightMap((previous: any) => {
-      const formsHeightMapCpy = simpleDeepCopy(previous);
-      Object.keys(formsHeightMapCpy).forEach(k => {
-        formsHeightMapCpy[k] = formsHeightMapCpy[k].filter(({ }, i: number) => !indexes.includes(i));
-      });
-      return formsHeightMapCpy;
-    });
-
     setTuples((previous: any[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
     // TODO: should this cleanup the form data?
     //   if reading the data for submission is done based on formValue (instead of index) this shouldn't matter
-  }
-
-  const updateKeysHeightMap = (colName: string, height: number) => {
-    setKeysHeightMap((previous: any) => {
-      const hMapCopy = simpleDeepCopy(previous);
-      hMapCopy[colName] = height;
-      return hMapCopy;
-    })
-  }
-
-  const updateFormsHeightMap = (colName: string, idx: string, height: string | number) => {
-    setFormsHeightMap((previous: any) => {
-      const hMapCpy = simpleDeepCopy(previous);
-      hMapCpy[colName][idx] = height;
-
-      updateKeysHeightMap(colName, Math.max(...hMapCpy[colName]));
-
-      return hMapCpy;
-    });
-  }
-
-  const handleInputHeightAdjustment = (fieldName: string, msgCleared: boolean, fieldType: string) => {
-    const ele: HTMLElement | null = document.querySelector(`.input-switch-container-${fieldName}`);
-    const defaultHeight = DEFAULT_HEGHT_MAP[fieldType];
-
-    let height = ele?.offsetHeight || 0;
-    let newHeight;
-    // how to handle this ? get default heights
-
-    const textAreaEle: HTMLTextAreaElement | null = document.querySelector(`.input-switch-container-${fieldName} textarea`);
-    const textAreaHeight = textAreaEle?.offsetHeight;
-
-    // if the text area height is greater than the default textarea height, set the height to the default inputHeight plus the change in textarea size
-    if (textAreaHeight && textAreaHeight > DEFAULT_HEGHT_MAP['textarea']) {
-      height = DEFAULT_HEGHT_MAP[fieldType] + (textAreaHeight - DEFAULT_HEGHT_MAP['textarea']);
-
-      if (!msgCleared) {
-        // Make sure to add the height of the error message container
-        const errorEle: HTMLElement | null = document.querySelector('.input-switch-error');
-        height += errorEle?.offsetHeight || 0;
-      }
-      newHeight = height === defaultHeight ? -1 : height;
-    } else {
-      newHeight = height === defaultHeight || msgCleared ? -1 : height;
-    }
-
-    // execute the regexp to get individual values from the inputFieldName
-    const r = /(\d*)-(.*)/;
-    const result = r.exec(fieldName) || [];
-    const idx = result[1];
-    const colName = result[2];
-
-    updateFormsHeightMap(colName, idx, newHeight);
   }
 
   const getInitialFormValues = (forms: number[], columnModels: RecordeditColumnModel[]) => {
@@ -575,6 +501,8 @@ export default function RecordeditProvider({
       initialModel = populateEditInitialValues(columnModels, forms, reference.columns, page.tuples, appMode === appModes.COPY);
 
       setTuples([...tempTuples]);
+
+      setCanUpdateValues(initialModel.canUpdateValues);
     }
 
     foreignKeyData.current = initialModel.foreignKeyData;
@@ -813,18 +741,15 @@ export default function RecordeditProvider({
       columnModels,
       initialized,
       waitingForForeignKeyData,
+      canUpdateValues,
+      columnPermissionErrors,
 
       // form
       forms,
       addForm,
       removeForm,
-      keysHeightMap,
-      updateKeysHeightMap,
-      formsHeightMap,
-      handleInputHeightAdjustment,
       getInitialFormValues,
       getPrefilledDefaultForeignKeyData,
-
 
       //   // log related:
       //   logRecordClientAction,
@@ -839,8 +764,7 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     reference, page, tuples, columnModels, initialized, waitingForForeignKeyData,
-    showSubmitSpinner, resultsetProps,
-    forms, keysHeightMap, formsHeightMap,
+    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors
   ]);
 
   return (

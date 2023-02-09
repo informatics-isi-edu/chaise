@@ -3,7 +3,7 @@ import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
@@ -12,136 +12,175 @@ import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models
 
 // utils
 import { getDisabledInputValue, getInputTypeOrDisabled } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
+import { Prev } from 'react-bootstrap/esm/PageItem';
 
-
-type ChaiseFormProps = {
-  classes?: string,
-  formNumber: number,
-  idx: number,
-  allowRemove: boolean
-}
-
-const ChaiseForm = ({ classes = '', formNumber, idx, allowRemove }: ChaiseFormProps) => {
-
-  const { columnModels, formsHeightMap, removeForm, appMode, reference, tuples, foreignKeyData, waitingForForeignKeyData } = useRecordedit();
-
-  const renderFormHeader = () => {
-    return (
-      <div className='form-header entity-value'>
-        <span>{idx + 1}</span>
-        {allowRemove &&
-          <ChaiseTooltip
-            placement='bottom'
-            tooltip='Click to remove this record from the form.'
-          >
-            <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm([idx])}>
-              <i className='fa-solid fa-xmark' />
-            </button>
-          </ChaiseTooltip>
-        }
-      </div>
-    )
-  }
-
-  const renderInputs = () => {
-    return columnModels.map((cm: RecordeditColumnModel) => {
-      const colName = cm.column.name;
-      const height = Math.max(...formsHeightMap[colName]);
-      const heightparam = height === -1 ? 'auto' : `${height}px`;
-
-      const inputType = getInputTypeOrDisabled(cm);
-      let placeholder;
-      if (inputType === 'disabled') {
-        placeholder = getDisabledInputValue(cm.column);
-
-        // TODO: extend this for edit mode
-        // if value is empty string and we are in edit mode, use the previous value
-        // if (placeholder == '' && context.mode == context.modes.EDIT) {
-        //   placeholder = value;
-        // }
-      }
-
-      // the tuple representing the row that this input is part of
-      let parentTuple;
-      if (tuples) {
-        if (appMode === appModes.COPY) {
-          parentTuple = tuples[0];
-        } else {
-          parentTuple = tuples[idx];
-        }
-      }
-
-      return (
-        <InputSwitch
-          key={colName}
-          displayErrors={true}
-          name={`${formNumber}-${colName}`}
-          type={inputType}
-          classes='column-cell-input'
-          placeholder={placeholder}
-          styles={{ 'height': heightparam }}
-          containerClasses={'column-cell entity-value'}
-          columnModel={cm}
-          appMode={appMode}
-          formNumber={formNumber}
-          parentReference={reference}
-          parentTuple={parentTuple}
-          foreignKeyData={foreignKeyData}
-          waitingForForeignKeyData={waitingForForeignKeyData}
-        />
-      );
-    })
-  }
-
-
-  return (
-    <div className={`column-form ${classes}`}>
-      {renderFormHeader()}
-      {renderInputs()}
-    </div>
-  );
-
-};
-
-const ChaiseFormContainer = (): JSX.Element => {
+const FormContainer = (): JSX.Element => {
 
   const {
-    forms, handleInputHeightAdjustment,
-    onSubmitValid, onSubmitInvalid
+    onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels, appMode, tuples
   } = useRecordedit();
 
-  const { handleSubmit } = useFormContext()
-
-  // TODO: how to refactor this when the event being fired in input switch might be in the case of apps that are not recordedit
-  useEffect(() => {
-    const formContainer = document.querySelector('.form-container') as HTMLElement;
-    formContainer.addEventListener('input-switch-error-update', handleHeightAdjustment);
-
-    return () => {
-      formContainer.removeEventListener('input-switch-error-update', handleHeightAdjustment);
-    }
-  }, []);
-
-  const handleHeightAdjustment = (event: any) => {
-    const fieldName = event.detail.inputFieldName;
-    const msgCleared = event.detail.msgCleared;
-
-    const fieldType = event.detail.type;
-
-    // call provider function
-    handleInputHeightAdjustment(fieldName, msgCleared, fieldType);
-  }
-
+  const { handleSubmit } = useFormContext();
   return (
     <div className='form-container'>
       <form id='recordedit-form' className='recordedit-form' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}>
-        {forms.map((f: number, idx: number) =>
-          <ChaiseForm key={f} formNumber={f} idx={idx} allowRemove={forms.length > 1} />
-        )}
+        {/* form header */}
+        <div className='form-header-row'>
+          {forms.map((formNumber: number, formIndex: number) => (
+            <div key={`form-header-${formNumber}`} className='form-header entity-value'>
+              <span>{formIndex + 1}</span>
+              <div className='form-header-buttons-container'>
+                {appMode === appModes.EDIT && tuples && !tuples[formIndex].canUpdate &&
+                  <ChaiseTooltip placement='bottom' tooltip='This record cannot be modified.'>
+                    <i className='disabled-row-icon fas fa-ban'></i>
+                  </ChaiseTooltip>
+                }
+                {forms.length > 1 &&
+                  <ChaiseTooltip
+                    placement='bottom'
+                    tooltip='Click to remove this record from the form.'
+                  >
+                    <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm([formIndex])}>
+                      <i className='fa-solid fa-xmark' />
+                    </button>
+                  </ChaiseTooltip>
+                }
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* inputs for each column */}
+        {columnModels.map(({ }, idx) => (
+          <FormRow key={`form-row-${idx}`} columnModelIndex={idx} />
+        ))}
       </form>
     </div>
-  );
-}
+  )
+};
 
-export default ChaiseFormContainer;
+type FormRowProps = {
+  columnModelIndex: number
+};
+
+/**
+ * each row in the form
+ * to make the height logic simpler, I decided to extract the rows as separate
+ * components instead of having it in the FormContainer.
+ *
+ */
+const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
+
+  const {
+    forms, appMode, reference, columnModels, tuples,
+    canUpdateValues, columnPermissionErrors, foreignKeyData, waitingForForeignKeyData,
+  } = useRecordedit();
+
+  /**
+   * which columns should show the permission error.
+   * if a user cannot edit a column in one of the rows, we cannot allow them
+   * to edit that column in other rows.
+   */
+  const [showPermissionError, setShowPermissionError] = useState<{[key: string]: boolean}>({});
+
+  /**
+   * reset the state of showing permission errors whenever the errors changed
+   */
+  useEffect(() => {
+    setShowPermissionError({});
+  }, [columnPermissionErrors]);
+
+  const container = useRef<HTMLDivElement>(null);
+
+  /**
+   * make sure the column names (key-column.tsx) have the same height as FormRow
+   */
+  useLayoutEffect(() => {
+    if (!container || !container.current) return;
+
+    let cachedHeight = -1;
+    const sensor = new ResizeSensor(container.current as Element, (dimension) => {
+      if (container.current?.offsetHeight === cachedHeight || !container.current) return;
+      cachedHeight = container.current?.offsetHeight;
+      const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
+      if (header) {
+        header.style.height = `${cachedHeight}px`;
+      }
+    });
+
+    return () => {
+      sensor.detach();
+    }
+  }, []);
+
+  /**
+   * show the error to users after they clicked on the cell.
+   */
+  const onPermissionClick = (formIndex: number) => {
+    setShowPermissionError((prev) => {
+      const res = {...prev};
+      res[formIndex] = true;
+      return res;
+    });
+  };
+
+  const renderInput = (formNumber: number, formIndex: number) => {
+    const cm = columnModels[columnModelIndex];
+
+    const colName = cm.column.name;
+
+    const inputType = getInputTypeOrDisabled(formNumber, cm, canUpdateValues);
+    let placeholder = '';
+    let permissionError = '';
+    if (inputType === 'disabled') {
+      placeholder = getDisabledInputValue(cm.column);
+
+      // TODO: extend this for edit mode
+      // if value is empty string and we are in edit mode, use the previous value
+      // if (placeholder == '' && context.mode == context.modes.EDIT) {
+      //   placeholder = value;
+      // }
+    }
+    // set the error if we're supposed to show it
+    else if (appMode === appModes.EDIT && isObjectAndKeyDefined(columnPermissionErrors, colName)) {
+      permissionError = columnPermissionErrors[colName];
+    }
+
+    return (<>
+      {permissionError && <div className='column-permission-overlay' onClick={() => onPermissionClick(formIndex)} />}
+      <InputSwitch
+        key={colName}
+        displayErrors={true}
+        name={`${formNumber}-${colName}`}
+        type={inputType}
+        classes='column-cell-input'
+        placeholder={placeholder}
+        // styles={{ 'height': heightparam }}
+        columnModel={cm}
+        appMode={appMode}
+        formNumber={formNumber}
+        parentReference={reference}
+        parentTuple={appMode === appModes.EDIT ? tuples[formIndex] : undefined}
+        foreignKeyData={foreignKeyData}
+        waitingForForeignKeyData={waitingForForeignKeyData}
+      />
+      {formIndex in showPermissionError &&
+        <div className='column-permission-warning'>{permissionError}</div>
+      }
+    </>)
+  }
+
+  return (
+    <div className='form-inputs-row' ref={container}>
+      {forms.map((formNumber: number, formIndex: number) => (
+        <div key={`form-${formNumber}-input-${columnModelIndex}`} className='entity-value'>
+          {renderInput(formNumber, formIndex)}
+        </div>
+      ))}
+    </div>
+  )
+
+};
+
+export default FormContainer;

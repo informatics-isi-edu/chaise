@@ -20,7 +20,6 @@ import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedi
 // utils
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { arrayFieldPlaceholder, ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
@@ -154,14 +153,6 @@ const TextField = ({
     field.onChange(v);
     field.onBlur();
   };
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'text' }
-    );
-  }, [error?.message]);
 
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
@@ -322,14 +313,6 @@ const NumericField = ({
     field.onBlur();
   };
 
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'number' }
-    );
-  }, [error?.message])
-
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
       <div className={`chaise-input-control has-feedback input-switch-numeric ${classes} ${disableInput ? ' input-disabled' : ''}`}>
@@ -440,14 +423,6 @@ const DateField = ({
     field.onChange(v);
     field.onBlur();
   };
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'date' }
-    );
-  }, [error?.message])
 
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
@@ -630,14 +605,6 @@ const TimestampField = ({
     timeField.onChange(v);
     timeField.onBlur();
   };
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'timestamp' }
-    );
-  }, [error?.message])
 
   const clearDate = () => {
     setValue(`${name}-date`, '');

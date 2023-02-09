@@ -2,14 +2,12 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 
 // hooks
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext, useController } from 'react-hook-form';
 
 // utils
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { ResizeSensor } from 'css-element-queries';
 
 const jsonFieldValidation = (value: string) => {
   if (!value) return;
@@ -71,8 +69,6 @@ const JsonField = ({
   onFieldChange,
 }: JsonFieldProps): JSX.Element => {
 
-  const textAreaRef = useRef(null);
-
   // react-hook-form setup
   const { setValue, control, clearErrors } = useFormContext();
 
@@ -95,22 +91,6 @@ const JsonField = ({
   const { error, isTouched } = fieldState;
 
   useEffect(() => {
-    const textAreaElement = textAreaRef.current;
-    if (!textAreaElement) return;
-    const sensor = new ResizeSensor(textAreaElement, () => {
-      fireCustomEvent(
-        'input-switch-error-update',
-        `.input-switch-container-${makeSafeIdAttr(name)}`,
-        { inputFieldName: name, msgCleared: false, type: 'json' }
-      );
-    });
-
-    return () => {
-      sensor.detach();
-    }
-  }, []);
-
-  useEffect(() => {
     if (onFieldChange) {
       onFieldChange(fieldValue);
     }
@@ -125,14 +105,6 @@ const JsonField = ({
     setValue(name, value);
   }, [value]);
 
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'json' }
-    );
-  }, [error?.message]);
-
   const handleChange = (v: any) => {
     field.onChange(v);
     field.onBlur();
@@ -145,7 +117,7 @@ const JsonField = ({
 
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)} input-switch-json-container`} style={styles}>
-      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaRef}>
+      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`}>
         <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}

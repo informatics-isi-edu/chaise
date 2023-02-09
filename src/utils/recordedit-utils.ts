@@ -254,13 +254,12 @@ export function populateEditInitialValues(
   // the data associated with the foreignkeys
   const foreignKeyData: any = {};
 
-  const canUpdateRows: any[] = [];
+  // whether the value can be updated or not
+  const canUpdateValues: {[key: string]: boolean} = {};
 
   forms.forEach((formValue: any, formIndex: number) => {
     const tupleIndex = formIndex;
     const tuple = tuples[tupleIndex];
-
-    if (!isCopy) canUpdateRows[tupleIndex] = {};
 
     const tupleValues = tuple.values;
 
@@ -269,12 +268,9 @@ export function populateEditInitialValues(
       foreignKeyData[`${formValue}-${k}`] = tuple.linkedData[k];
     });
 
-    columnModels.forEach((colModel: RecordeditColumnModel) => {
+    columnModels.forEach((colModel: RecordeditColumnModel, i: number) => {
       const column = colModel.column;
       let value;
-
-      // columnModels array might not be the same size as column list
-      const i = columns.findIndex((col: any) => { return col.name === column.name });
 
       // If input is disabled, and it's copy, we don't want to copy the value
       let isDisabled = colModel.inputType === 'disabled';
@@ -282,7 +278,10 @@ export function populateEditInitialValues(
 
       if (!isCopy) {
         // whether certain columns are disabled or not
-        canUpdateRows[tupleIndex][column.name] = tuple.canUpdate && tuple.canUpdateValues[i];
+        canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[i];
+
+        // while we cannot change the isDisabled state, this will be
+        // taken care of by calling getInputTypeOrDisabled in other places
         isDisabled = isDisabled || !(tuple.canUpdate && tuple.canUpdateValues[i]);
       }
 
@@ -378,7 +377,7 @@ export function populateEditInitialValues(
     });
   });
 
-  return { values, foreignKeyData };
+  return { values, foreignKeyData, canUpdateValues };
 }
 
 /**

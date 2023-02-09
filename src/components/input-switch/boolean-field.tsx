@@ -1,6 +1,5 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 // hooks
@@ -11,7 +10,6 @@ import { useFormContext, useController } from 'react-hook-form';
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES, formatBoolean } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
@@ -122,15 +120,6 @@ const BooleanField = ({
     field.onChange(v);
     field.onBlur();
   };
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message) }
-    );
-  }, [error?.message]);
-
 
   const rawOptions = [true, false];
   const displayedOptions = rawOptions.map((op) => columnModel ? formatBoolean(columnModel.column, op) : op.toString());

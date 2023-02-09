@@ -6,7 +6,7 @@ import ChaiseSpinner from '@isrd-isi-edu/chaise/src/components/spinner';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
-import ChaiseFormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
+import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
@@ -503,7 +503,7 @@ const RecordeditInner = ({
             {columnModels.length > 0 && !resultsetProps &&
               <div id='form-section'>
                 <KeyColumn />
-                <ChaiseFormContainer />
+                <FormContainer />
               </div>
             }
             {resultsetProps &&

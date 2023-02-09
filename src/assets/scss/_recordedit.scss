@@ -1,340 +1,304 @@
-@import 'helpers';
-@import 'variables';
+@import "helpers";
+@import "variables";
 
 // From _recordedit-app.scss
 #recordedit .app-container {
-    .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
-        padding: 5px 3px;
+  .btn-sm[data-handler="bootstrap-markdown-cmdRidLink"] {
+    padding: 5px 3px;
+  }
+
+  .form-controls {
+    display: flex;
+    align-items: flex-end;
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    .add-forms {
+      width: auto;
+      margin-left: auto;
+
+      .add-rows-input {
+        width: 50px;
+        padding-left: 5px;
+      }
+    }
+  }
+
+  @mixin shift-above-edit-forms() {
+    height: 15px;
+    position: fixed;
+    z-index: 5;
+    margin-top: -15px;
+  }
+
+  #form-section {
+    display: flex;
+    flex-direction: row;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    padding-top: 15px;
+    // padding at bottom of page so edit form isn't touching the bottom of viewport
+    // padding instead of margin so it doesn't mess with scrollable area
+    padding-bottom: 40px;
+
+    .entity-key-column {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+
+      .entity-key,
+      .match-entity-key {
+        width: $chaise-caption-column-width;
+        border-left: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+        // margin-left: 10px;
+        background: white;
+        padding: 8px;
+
+        min-height: 47px;
+        height: 47px;
+
+        flex: none;
+      }
+
+      .match-entity-key.select-all-opened {
+        border-top: none;
+      }
     }
 
-    .form-controls {
+    .form-container {
+      width: 100%;
+      overflow-x: auto;
+      height: fit-content;
+
+      .recordedit-form {
         display: flex;
-        align-items: flex-end;
-        padding-top: 10px;
-        padding-bottom: 10px;
-
-        .add-forms {
-            width: auto;
-            margin-left: auto;
-
-            .add-rows-input {
-                width: 50px;
-                padding-left: 5px;
-            }
-        }
-    }
-
-    @mixin shift-above-edit-forms() {
-        height: 15px;
-        position: fixed;
-        z-index: 5;
-        margin-top: -15px;
-    }
-
-    .bottom-panel-container {
-        display: flex;
-        width: 100%;
-    }
-
-    // .main-container {
-    //     overflow-y: auto;
-    //     overflow-x: hidden;
-    //     // changes a style from app.scss
-    //     flex-direction: row;
-    // }
-
-    #form-section {
-        display: flex;
-        flex-direction: row;
-        overflow-y: auto;
-        overflow-x: hidden;
-        width: 100%;
+        flex-direction: column;
+        background-color: white;
+        height: 100%;
+        min-width: 250px;
+        color: black;
         position: relative;
-        padding-top: 15px;
-        // padding at bottom of page so edit form isn't touching the bottom of viewport
-        // padding instead of margin so it doesn't mess with scrollable area
-        padding-bottom: 40px;
 
-        .entity-key-column {
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-
-            .entity-key,
-            .match-entity-key {
-                width: $chaise-caption-column-width;
-                border-left: $chaise-RE-border-width solid $chaise-RE-border-color;
-                border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-                border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
-                // margin-left: 10px;
-                background: white;
-                padding: 8px;
-
-                min-height: 47px;
-                height: 47px;
-
-                flex: none;
-            }
-
-            .match-entity-key.select-all-opened {
-                border-top: none;
-            }
+        .form-inputs-row,
+        .form-header-row {
+          display: flex;
         }
 
-        .form-container {
+        // form header and form inputs
+        .entity-value {
+          // make sure the inputs take up as much space as they can
+          // and are the same size
+          flex: 1 1 0;
+          position: relative;
+
+          .column-permission-overlay {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
             width: 100%;
-            overflow-x: auto;
-            height: fit-content;
+            z-index: 6; // higher than the chaise-clear
+          }
 
-            .recordedit-form {
-                display: flex;
-                background-color: white;
-                height: 100%;
-                min-width: 250px;
-                color: black;
-                position: relative;
+          .column-permission-warning {
+            margin: 0;
+            padding: 5px;
+            color: rgb(180, 95, 6);
+          }
 
-                .column-form {
-                    flex-grow: 1;
-                    flex-shrink: 0;
-                    flex-direction: column;
-
-                    // form header and form inputs
-                    .entity-value {
-                        position: relative;
-
-                        .column-permission-overlay {
-                            position: absolute;
-                            left: 0;
-                            top: 0;
-                            height: 100%;
-                            width: 100%;
-                            z-index: 6; // higher than the chaise-clear
-                        }
-
-                        .column-permission-warning {
-                            margin: 0;
-                            padding: 5px;
-                            color: rgb(180, 95, 6);
-                        }
-                    }
-
-                    // only form header
-                    .entity-value.form-header {
-                        .remove-form-btn {
-                            float: right;
-                            padding: 1px 7px 0px 7px;
-                        }
-
-                        .disabled-row-icon {
-                            margin: 6px 10px 0 0;
-                            font-size: 1.3em;
-                        }
-                    }
-
-                    // only form inputs
-                    .column-cell {
-                        border-left: none;
-                        border-top: none;
-                        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-                        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
-                        border-radius: 0;
-                        // height: 47px;
-                        min-height: 47px;
-                        padding: 8px 10px;
-
-                        .chaise-input-control.column-cell-input {
-                            border: 1px solid $border-color;
-                            border-radius: 4px;
-                            padding: 0 10px;
-                            display: flex;
-                            align-items: center;
-
-                            .input-switch {
-                                height: auto;
-                            }
-                        }
-                    }
-                }
+          // displayed while loading the fk data
+          .column-cell-spinner-container {
+            $column-cell-backdrop-z-index: 5;
+            .column-cell-spinner-backdrop {
+              position: absolute;
+              top: 0;
+              left: 0;
+              height: 100%;
+              width: 100%;
+              z-index: $column-cell-backdrop-z-index;
+              background: $disabled-background-color;
+              opacity: 0.55;
             }
-        }
-
-        // nested inside entity-key-column AND form-container
-        .form-header {
-            height: 47px;
-            border-top: $chaise-RE-border-width solid $chaise-RE-border-color;
-            color: $disabled-color;
-            font-weight: normal;
-            font-size: 1rem;
+            .spinner-border-sm {
+              left: 50%;
+              top: 15px;
+              position: absolute;
+              z-index: calc($column-cell-backdrop-z-index + 1);
+            }
+          }
         }
 
         .entity-value,
         .match-entity-value {
-            word-wrap: break-word;
-            min-width: 250px;
-            border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-            border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+          word-wrap: break-word;
+          min-width: 250px;
+          border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+          border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
 
-            // border-left: none;
-            // border-top: none;
+          // border-left: none;
+          // border-top: none;
 
-            border-radius: 0;
-            min-height: 47px;
-            padding: 8px 10px;
+          border-radius: 0;
+          min-height: 47px;
+          padding: 8px 10px;
         }
 
-        .entity-value {
-            position: relative;
+        // only form inputs
+        .column-cell {
+          border-left: none;
+          border-top: none;
+          border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+          border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+          border-radius: 0;
+          // height: 47px;
+          min-height: 47px;
+          padding: 8px 10px;
 
-            // displayed while loading the fk data
-            .column-cell-spinner-container {
-              $column-cell-backdrop-z-index: 5;
-              .column-cell-spinner-backdrop {
-                position: absolute;
-                top: 0;
-                left: 0;
-                height: 100%;
-                width: 100%;
-                z-index: $column-cell-backdrop-z-index;
-                background: $disabled-background-color;
-                opacity: 0.55;
-              }
-              .spinner-border-sm {
-                left: 50%;
-                top: 15px;
-                position: absolute;
-                z-index: calc($column-cell-backdrop-z-index + 1);
-              }
+          .chaise-input-control.column-cell-input {
+            border: 1px solid $border-color;
+            border-radius: 4px;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+
+            .input-switch {
+              height: auto;
             }
-
-            .column-permission-overlay {
-                position: absolute;
-                left: 0;
-                top: 0;
-                height: 100%;
-                width: 100%;
-                z-index: 6; // higher than the chaise-clear
-            }
-
-            .column-permission-warning {
-                margin: 0;
-                padding: 5px;
-                color: rgb(180, 95, 6);
-            }
-
+          }
         }
+      }
     }
 
-    // // end #form-section
+    // in both entity-key-column and form-container
+    .form-header {
+      height: 47px;
+      border-top: $chaise-RE-border-width solid $chaise-RE-border-color;
+      color: $disabled-color;
 
-    .modal-popup {
-        width: 100%;
-        margin-bottom: 0px;
-    }
-
-    .record-number {
-        font-size: 14px;
-        margin-left: 10px;
-        color: $disabled-color;
-    }
-
-    tbody.highlight {
-        background-color: #f7f0cf !important;
-    }
-
-    .chaise-input-control[readonly] {
-        background-color: $white-color;
-        opacity: 1;
-    }
-
-    textarea,
-    .disabled-textarea {
-        resize: vertical;
-        height: auto;
-    }
-
-    .input-timestamptz {
-        min-width: 112px;
-    }
-
-    .adjust-boolean-dropdown {
-        border-top: 0;
-    }
-
-    .select-all-text {
-        padding: 4px;
-        border: 1px solid transparent;
-    }
-
-    @-moz-document url-prefix() {
-        #form-edit>table>tbody>tr>td:first-child {
-            margin-top: -1px;
+      .form-header-buttons-container {
+        float: right;
+        .remove-form-btn {
+          padding: 1px 7px 0px 7px;
         }
+
+        .disabled-row-icon {
+          margin-right: 10px;
+          font-size: 1.3em;
+          vertical-align: middle;
+        }
+      }
     }
+  }
 
-    .resultset-tables {
-      padding-top: 10px;
-      padding-bottom: 20px;
+  // // end #form-section
+
+  .modal-popup {
+    width: 100%;
+    margin-bottom: 0px;
+  }
+
+  .record-number {
+    font-size: 14px;
+    margin-left: 10px;
+    color: $disabled-color;
+  }
+
+  tbody.highlight {
+    background-color: #f7f0cf !important;
+  }
+
+  .chaise-input-control[readonly] {
+    background-color: $white-color;
+    opacity: 1;
+  }
+
+  textarea,
+  .disabled-textarea {
+    resize: vertical;
+    height: auto;
+  }
+
+  .input-timestamptz {
+    min-width: 112px;
+  }
+
+  .adjust-boolean-dropdown {
+    border-top: 0;
+  }
+
+  .select-all-text {
+    padding: 4px;
+    border: 1px solid transparent;
+  }
+
+  @-moz-document url-prefix() {
+    #form-edit > table > tbody > tr > td:first-child {
+      margin-top: -1px;
     }
+  }
 
-    /****************** Upload modal css *****************/
+  .resultset-tables {
+    padding-top: 10px;
+    padding-bottom: 20px;
+  }
 
+  /****************** Upload modal css *****************/
 
-    // .progress-percent {
-    //   font-weight: bold;
-    //   margin-top: -25px;
-    //   margin-left: 50%;
-    // }
+  // .progress-percent {
+  //   font-weight: bold;
+  //   margin-top: -25px;
+  //   margin-left: 50%;
+  // }
 
-    // .inner-progress-percent {
-    //   margin-top: -18px;
-    //   font-size: 12px;
-    // }
+  // .inner-progress-percent {
+  //   margin-top: -18px;
+  //   font-size: 12px;
+  // }
 
-    // table.upload-table {
+  // table.upload-table {
 
-    // }
+  // }
 
-    // table.upload-table > tbody {
-    //   border: none;
-    // }
+  // table.upload-table > tbody {
+  //   border: none;
+  // }
 
-    // table.upload-table > tbody > tr > td:first-child {
-    //   padding-left: 20px;
+  // table.upload-table > tbody > tr > td:first-child {
+  //   padding-left: 20px;
 
-    // }
+  // }
 
-    // table.upload-table > tbody > tr > td:last-child {
-    //   width: 40%;
-    // }
+  // table.upload-table > tbody > tr > td:last-child {
+  //   width: 40%;
+  // }
 
-    // table.upload-table > tbody > tr > td:nth-child(2) {
-    //   padding-left: 0px;
-    //   padding-right: 0px;
-    // }
+  // table.upload-table > tbody > tr > td:nth-child(2) {
+  //   padding-left: 0px;
+  //   padding-right: 0px;
+  // }
 
+  // table.upload-table > tbody > tr:last-child > td {
+  //   border-bottom: 1px solid $disabled-background-color;
+  //   background-color: white;
+  // }
 
-    // table.upload-table > tbody > tr:last-child > td {
-    //   border-bottom: 1px solid $disabled-background-color;
-    //   background-color: white;
-    // }
+  // table.upload-table > tbody > tr:first-child > td {
+  //   padding-left:0px;
+  //   padding-top: 15px;
+  //   border-bottom: 2px solid gainsboro;
+  //   font-weight: 600;
+  // }
 
+  // table.upload-table .progress {
+  //   height: 20px;
+  // }
 
-    // table.upload-table > tbody > tr:first-child > td {
-    //   padding-left:0px;
-    //   padding-top: 15px;
-    //   border-bottom: 2px solid gainsboro;
-    //   font-weight: 600;
-    // }
-
-
-    // table.upload-table .progress {
-    //   height: 20px;
-    // }
-
-
-    // .upload-progress-bar {
-    //   width: 0%;
-    //   background-color: #8cacc7 !important;
-    // }
+  // .upload-progress-bar {
+  //   width: 0%;
+  //   background-color: #8cacc7 !important;
+  // }
 }
