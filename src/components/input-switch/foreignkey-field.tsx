@@ -21,7 +21,6 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utils
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { getColumnModelLogStack, populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
@@ -186,14 +185,6 @@ const ForeignkeyField = ({
     field.onChange(v);
     field.onBlur();
   };
-
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message) }
-    );
-  }, [error?.message]);
 
   const openRecordsetModal = (e: any) => {
     e.preventDefault();

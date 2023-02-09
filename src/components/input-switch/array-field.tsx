@@ -2,15 +2,13 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 
 // hooks
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useFormContext, useController } from 'react-hook-form';
 
 // utils
 import { getSimpleColumnType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
-import { ResizeSensor } from 'css-element-queries';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type ArrayFieldProps = {
@@ -121,8 +119,6 @@ const ArrayField = ({
     return true;
   };
 
-  const textAreaRef = useRef(null);
-
   // react-hook-form setup
   const { setValue, control, clearErrors } = useFormContext();
   const registerOptions = {
@@ -143,23 +139,6 @@ const ArrayField = ({
   const fieldState = formInput?.fieldState;
   const { error, isTouched } = fieldState;
 
-  // hooks
-  useEffect(() => {
-    const textAreaElement = textAreaRef.current;
-    if (!textAreaElement) return;
-    const sensor = new ResizeSensor(textAreaElement, () => {
-      fireCustomEvent(
-        'input-switch-error-update',
-        `.input-switch-container-${makeSafeIdAttr(name)}`,
-        { inputFieldName: name, msgCleared: false, type: 'array' }
-      );
-    });
-
-    return () => {
-      sensor.detach();
-    }
-  }, []);
-
   useEffect(() => {
     if (onFieldChange) {
       onFieldChange(fieldValue);
@@ -175,14 +154,6 @@ const ArrayField = ({
     setValue(name, value);
   }, [value]);
 
-  useEffect(() => {
-    fireCustomEvent(
-      'input-switch-error-update',
-      `.input-switch-container-${makeSafeIdAttr(name)}`,
-      { inputFieldName: name, msgCleared: !Boolean(error?.message), type: 'array' }
-    );
-  }, [error?.message]);
-
   // acllback functions
   const handleChange = (v: any) => {
     field.onChange(v);
@@ -196,7 +167,7 @@ const ArrayField = ({
 
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)} input-switch-array-container`} style={styles}>
-      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`} ref={textAreaRef}>
+      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`}>
         <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
         <ClearInputBtn
           btnClassName={`${clearClasses} input-switch-clear`}

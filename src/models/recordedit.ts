@@ -6,6 +6,12 @@ export const appModes = {
 
 export interface RecordeditColumnModel {
   column: any;
+  /**
+   * NOTE
+   * whether the column should be disabled based on model, or is prefilled.
+   * this will not properly handle per-column dynamic ACLs and we should use
+   * getInputTypeOrDisabled for it instead.
+   */
   isDisabled: boolean;
   isRequired: boolean;
   inputType: string;
