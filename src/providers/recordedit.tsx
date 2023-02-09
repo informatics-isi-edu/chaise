@@ -323,126 +323,129 @@ export default function RecordeditProvider({
 
     validateSessionBeforeMutation(() => {
       setShowSubmitSpinner(true);
+      uploadFiles(submissionRows, () => {
+        // success callback after create/update is called on a reference object
+        const submitSuccessCB = (response: any) => {
+          // make sure the leave alert is disabled
+          canLeaveRecordedit.current = true;
 
-      const submitSuccessCB = (response: any) => {
-        // make sure the leave alert is disabled
-        canLeaveRecordedit.current = true;
-
-        // communicate with the caller page that the request is done
-        if (appMode === appModes.EDIT) {
-          // TODO should most probably be added when we implement assets
-          // const data = checkUpdate(submissionRowsCopy, rsTuples);
-          try {
-            // check if there is a window that opened the current one
-            // make sure the update function is defined for that window
-            // verify whether we still have a valid vaue to call that function with
-            if (window.opener && window.opener.updated && queryParams.invalidate) {
-              window.opener.updated(queryParams.invalidate);
+          // communicate with the caller page that the request is done
+          if (appMode === appModes.EDIT) {
+            // TODO should most probably be added when we implement assets
+            // const data = checkUpdate(submissionRowsCopy, rsTuples);
+            try {
+              // check if there is a window that opened the current one
+              // make sure the update function is defined for that window
+              // verify whether we still have a valid vaue to call that function with
+              if (window.opener && window.opener.updated && queryParams.invalidate) {
+                window.opener.updated(queryParams.invalidate);
+              }
+            } catch (exp) {
+              // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+              // And if it's from another origin, we don't need to call updated since it's not
+              // the same row that we wanted to update in recordset (table directive)
             }
-          } catch (exp) {
-            // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
-            // And if it's from another origin, we don't need to call updated since it's not
-            // the same row that we wanted to update in recordset (table directive)
-          }
-        } else {
-          // cleanup the prefill query parameter
-          if (queryParams.prefill) {
-            CookieService.deleteCookie(queryParams.prefill);
-          }
-
-          // add cookie indicating record successfully added
-          if (queryParams.invalidate) {
-            // the value of the cookie is not important as other apps are just looking for the cookie name
-            CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
-          }
-        }
-
-        const page = response.successful;
-        const failedPage = response.failed;
-        const disabledPage = response.disabled;
-        const qParam: any = {};
-        qParam[QUERY_PARAMS.RESULT_INFO] = appMode === appModes.EDIT ? RESULT_INFO_VALUES.EDIT : RESULT_INFO_VALUES.CREATE;
-
-        // redirect to record app
-        if (forms.length === 1) {
-          // Created a single entity or Updated one
-          addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
-
-          windowRef.location = addQueryParamsToURL(page.reference.contextualize.detailed.appLink, qParam);
-        }
-        // see if we can just redirect, or if we need the resultset view.
-        else {
-          const compactRef = page.reference.contextualize.compact;
-          const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
-
-          // redirect to recordset app
-          if (!failedPage && !disabledPage && canLinkToRecordset) {
-            const verb = appMode === appModes.EDIT ? 'updated' : 'created';
-            addAlert(`Your data has been saved. Redirecting you now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
-
-            windowRef.location = addQueryParamsToURL(compactRef.appLink, qParam);
           } else {
-            const noun = appMode === appModes.EDIT ? 'update' : 'creation';
-            const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
+            // cleanup the prefill query parameter
+            if (queryParams.prefill) {
+              CookieService.deleteCookie(queryParams.prefill);
+            }
 
-            // resultset view
-            setResultsetProps({
-              success: {
-                page,
-                header: `${page.length} successful ${noun}${handlePlural(page)}`,
-                ... (canLinkToRecordset && { appLink: compactRef.appLink })
-              },
-              ... (failedPage && {
-                failed: {
-                  page: failedPage,
-                  header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
-                },
-              }),
-              ... (disabledPage && {
-                failed: {
-                  page: disabledPage,
-                  header: `${disabledPage.length} disabled record${handlePlural(disabledPage)} (due to lack of permission)`
-                },
-              }),
-            });
+            // add cookie indicating record successfully added
+            if (queryParams.invalidate) {
+              // the value of the cookie is not important as other apps are just looking for the cookie name
+              CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
+            }
           }
-        }
-      };
 
-      const submitErrorCB = (err: any) => {
-        console.log(err);
-        addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
-      };
+          const page = response.successful;
+          const failedPage = response.failed;
+          const disabledPage = response.disabled;
+          const qParam: any = {};
+          qParam[QUERY_PARAMS.RESULT_INFO] = appMode === appModes.EDIT ? RESULT_INFO_VALUES.EDIT : RESULT_INFO_VALUES.CREATE;
 
-      const submitFinallyCB = () => {
-        setShowSubmitSpinner(false);
-      };
+          // redirect to record app
+          if (forms.length === 1) {
+            // Created a single entity or Updated one
+            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-      if (appMode === appModes.EDIT) {
-        const tempTuples = [...tuples];
-
-        // TODO submissionRowsCopy for upload
-        /**
-         * After uploading files, the returned submissionRows contains
-         * new file data. This includes filename, filebyte, and md5.
-         * The following makes sure that all the data are updated.
-         * That's why this for loop must be after uploading files and not before.
-         * And we cannot just pass submissionRows to update function, because
-         * update function only accepts array of tuples (and not just key-value pair).
-         */
-        for (let i = 0; i < submissionRows.length; i++) {
-          const row = submissionRows[i];
-          const data = tempTuples[i].data;
-          // assign each value from the form to the data object on tuple
-          for (const key in row) {
-            data[key] = (row[key] === '' ? null : row[key]);
+            windowRef.location = addQueryParamsToURL(page.reference.contextualize.detailed.appLink, qParam);
           }
-        }
+          // see if we can just redirect, or if we need the resultset view.
+          else {
+            const compactRef = page.reference.contextualize.compact;
+            const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
 
-        reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
-      } else {
-        reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
-      }
+            // redirect to recordset app
+            if (!failedPage && !disabledPage && canLinkToRecordset) {
+              const verb = appMode === appModes.EDIT ? 'updated' : 'created';
+              addAlert(`Your data has been saved. Redirecting you now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
+
+              windowRef.location = addQueryParamsToURL(compactRef.appLink, qParam);
+            } else {
+              const noun = appMode === appModes.EDIT ? 'update' : 'creation';
+              const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
+
+              // resultset view
+              setResultsetProps({
+                success: {
+                  page,
+                  header: `${page.length} successful ${noun}${handlePlural(page)}`,
+                  ... (canLinkToRecordset && { appLink: compactRef.appLink })
+                },
+                ... (failedPage && {
+                  failed: {
+                    page: failedPage,
+                    header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
+                  },
+                }),
+                ... (disabledPage && {
+                  failed: {
+                    page: disabledPage,
+                    header: `${disabledPage.length} disabled record${handlePlural(disabledPage)} (due to lack of permission)`
+                  },
+                }),
+              });
+            }
+          }
+        };
+
+        // error handling for create/update calls to ermrest
+        const submitErrorCB = (err: any) => {
+          console.log(err);
+          addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
+        };
+
+        const submitFinallyCB = () => {
+          setShowSubmitSpinner(false);
+        };
+
+        if (appMode === appModes.EDIT) {
+          const tempTuples = [...tuples];
+
+          // TODO submissionRowsCopy for upload
+          /**
+           * After uploading files, the returned submissionRows contains
+           * new file data. This includes filename, filebyte, and md5.
+           * The following makes sure that all the data are updated.
+           * That's why this for loop must be after uploading files and not before.
+           * And we cannot just pass submissionRows to update function, because
+           * update function only accepts array of tuples (and not just key-value pair).
+           */
+          for (let i = 0; i < submissionRows.length; i++) {
+            const row = submissionRows[i];
+            const data = tempTuples[i].data;
+            // assign each value from the form to the data object on tuple
+            for (const key in row) {
+              data[key] = (row[key] === '' ? null : row[key]);
+            }
+          }
+
+          reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+        } else {
+          reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+        }
+      })
     });
   }
 
@@ -452,6 +455,85 @@ export default function RecordeditProvider({
 
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
     addAlert(invalidMessage, ChaiseAlertType.ERROR);
+  }
+
+  const uploadFiles = (submissionRowsCopy: any[], onSuccess: () => void) => {
+
+    // If url is valid
+    if (areFilesValid(submissionRowsCopy)) {
+      // modalUtils.showModal({
+      //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/uploadProgress.modal.html",
+      //   windowClass: "modal-upload-progress",
+      //   controller: "UploadModalDialogController",
+      //   controllerAs: "ctrl",
+      //   size: "md",
+      //   backdrop: 'static',
+      //   keyboard: false,
+      //   resolve: {
+      //     params: {
+      //       reference: rsReference,
+      //       rows: submissionRowsCopy
+      //     }
+      //   }
+      // }, onSuccess, function (exception) {
+      //   viewModel.readyToSubmit = false;
+      //   viewModel.submissionButtonDisabled = false;
+
+      //   if (typeof exception !== "string") {
+      //     // happens with an error with code 0 (Timeout Error)
+      //     $log.warn(exception);
+      //     var message = exception.message || messageMap.errorMessageMissing;
+
+      //     // if online, we don't know how to handle the error
+      //     if ($window.navigator.onLine) AlertsService.addAlert(message, 'error');
+      //   }
+      // }, false, false);
+    } else {
+      // viewModel.readyToSubmit = false;
+      // viewModel.submissionButtonDisabled = false;
+    }
+  }
+
+  const areFilesValid = (rows: any[]) => {
+    let isValid = true, index = 0;
+    // Iterate over all rows that are passed as parameters to the modal controller
+    rows.forEach(function (row) {
+
+      index++;
+
+      // Iterate over each property/column of a row
+      for (const k in row) {
+
+        // If the column type is object and has a file property inside it
+        // Then increment the count for no of files and create an uploadFile Object for it
+        // Push this to the tuple array for the row
+        // NOTE: each file object has an hatracObj property which is an hatrac object
+        try {
+          const column = reference.columns.find((c: any) => { return c.name === k; });
+          if (column.isAsset) {
+
+            if (row[k].url === '' && !column.nullok) {
+              isValid = false;
+              addAlert('Please select file for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+            } else if (row[k] !== null && typeof row[k] === 'object' && row[k].file) {
+              try {
+                if (!row[k].hatracObj.validateURL(row)) {
+                  isValid = false;
+                  addAlert('Invalid url template for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+                }
+              } catch (e) {
+                isValid = false;
+                addAlert('Invalid url template for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+              }
+            }
+          }
+        } catch (e) {
+          //NOthing to do
+        }
+      }
+    });
+
+    return isValid;
   }
 
   const addForm = (count: number) => {
@@ -561,8 +643,8 @@ export default function RecordeditProvider({
       // NOTE: should only be 1 form for create...
       initialModel = populateCreateInitialValues(columnModels, forms, queryParams);
 
-        setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
-        shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
+      setWaitingForForeignKeyData(initialModel.shouldWaitForForeignKeyData);
+      shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
 
     } else if (appMode === appModes.EDIT || appMode === appModes.COPY) {
       const tempTuples: any[] = [];
@@ -614,8 +696,8 @@ export default function RecordeditProvider({
 
     // we need to know the number of requests (for spinner), so we have to capture them
     // first before sending the requests.
-    type FkRequest = {reference: any, logAction: string, index: number};
-    const fkRequests : FkRequest[] = [];
+    type FkRequest = { reference: any, logAction: string, index: number };
+    const fkRequests: FkRequest[] = [];
 
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;

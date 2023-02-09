@@ -10,7 +10,7 @@ import { useFormContext, useController } from 'react-hook-form';
 
 // models
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
@@ -95,7 +95,7 @@ const FileField = ({
   const field = formInput?.field;
   const fieldValue = field?.value;
   const [showClear, setShowClear] = useState<boolean>(fieldValue.url && fieldValue.url !== '');
-  const [fileObject, setFileObject] = useState<any>({});
+  const [fileObject, setFileObject] = useState<FileObject | null>(null);
 
   const fieldState = formInput?.fieldState;
   const { error, isTouched } = fieldState;
@@ -167,10 +167,10 @@ const FileField = ({
     e.stopPropagation();
     e.preventDefault();
 
-    const tempFileObject = {
+    const tempFileObject: FileObject = {
       url: '',
       filename: '',
-      filesize: ''
+      filesize: 0
     }
 
     setFileObject(tempFileObject);
@@ -188,22 +188,36 @@ const FileField = ({
     (fileInputElement as HTMLInputElement).click();
   }
 
-  const fileTooltip = () => {
-    return (fileObject.filesize ? '- ' + fileObject.filename + '\n- ' + humanFileSize(fileObject.filesize) : fileObject.filename);
+  const fileTooltip = (fileObj: FileObject) => {
+    return (fileObj.filesize ? '- ' + fileObj.filename + '\n- ' + humanFileSize(fileObj.filesize) : fileObj.filename);
+  }
+
+  const renderInput = () => {
+    return (
+      <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`} onClick={openFilePicker}>
+        {isStringAndNotEmpty(fieldValue.filename) ?
+          <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
+          <span className='chaise-input-placeholder'>{placeholder}</span>
+        }
+        <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
+      </div>
+    )
+  }
+
+  const renderInputWithTooltip = () => {
+    if (!fileObject) return renderInput();
+
+    return (
+      <ChaiseTooltip placement='bottom-start' tooltip={fileTooltip(fileObject)}>
+        {renderInput()}
+      </ChaiseTooltip>
+    )
   }
 
   return (
     <div className={`${containerClasses} input-switch-file input-switch-container-${name}`} style={styles}>
       <div className='chaise-input-group'>
-        <ChaiseTooltip placement='bottom-start' tooltip={fileTooltip()}>
-          <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`} onClick={openFilePicker}>
-            {isStringAndNotEmpty(fieldValue.filename) ?
-              <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
-              <span className='chaise-input-placeholder'>{placeholder}</span>
-            }
-            <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
-          </div>
-        </ChaiseTooltip>
+        {renderInputWithTooltip()}
         <ChaiseTooltip placement='bottom' tooltip='Select File'>
           <div className='chaise-input-group-append' tabIndex={0}>
             <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>

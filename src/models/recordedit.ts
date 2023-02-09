@@ -23,6 +23,14 @@ export interface TimestampOptions {
   outputMomentFormat: string;
 }
 
+export interface FileObject {
+  file?: any;
+  hatracObj?: any;
+  url: string;
+  filename: string;
+  filesize: number;
+}
+
 export interface PrefillObject {
   /**
    * the raw value of keys that should be prefilled
