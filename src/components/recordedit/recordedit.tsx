@@ -501,7 +501,7 @@ const RecordeditInner = ({
           {/* <!-- Form section --> */}
           <div className='main-container' ref={mainContainer}>
             {columnModels.length > 0 && !resultsetProps &&
-              <div id='form-section'>
+              <div className='main-body'>
                 <KeyColumn />
                 <FormContainer />
               </div>

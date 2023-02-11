@@ -21,7 +21,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import RecordeditFlowControl from '@isrd-isi-edu/chaise/src/services/recordedit-flow-control';
 
 // utilities
-import { getDisplaynameInnerText, simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { getDisplaynameInnerText } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 import { updateHeadTitle } from '@isrd-isi-edu/chaise/src/utils/head-injector';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
@@ -72,11 +72,16 @@ export const RecordeditContext = createContext<{
   removeForm: (indexes: number[]) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
+  /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
   getPrefilledDefaultForeignKeyData: (initialValues: any, setValue: any) => void,
+  /* the index of column that is showing the select all input */
+  activeSelectAll: number,
+  /* change the active select all */
+  toggleActiveSelectAll: (colIndex: number) => void,
   /* callback for react-hook-form to call when forms are valid */
   onSubmitValid: (data: any) => void,
   /* callback for react-hook-form to call when forms are NOT valid */
-  onSubmitInvalid: (data: any) => void,
+  onSubmitInvalid: (errors: any, e?: any) => void,
   /**
    * whether we should show the spinner indicating submitting data or not
    */
@@ -117,6 +122,8 @@ export default function RecordeditProvider({
   const [columnModels, setColumnModels] = useState<RecordeditColumnModel[]>([]);
   const [canUpdateValues, setCanUpdateValues] = useState<any>({});
   const [columnPermissionErrors, setColumnPermissionErrors] = useState<any>({});
+
+  const [activeSelectAll, setActiveSelectAll] = useState<number>(-1);
 
   const [waitingForForeignKeyData, setWaitingForForeignKeyData] = useState<boolean>(false);
 
@@ -314,6 +321,12 @@ export default function RecordeditProvider({
     };
   }, [loginModal, errors]);
 
+  const toggleActiveSelectAll = (colIndex: number) => {
+    setActiveSelectAll((prev) => {
+      return colIndex === prev ? -1 : colIndex;
+    });
+  };
+
   const onSubmitValid = (data: any) => {
     // remove all existing alerts
     removeAllAlerts();
@@ -444,8 +457,8 @@ export default function RecordeditProvider({
   }
 
   // NOTE: most likely not needed
-  const onSubmitInvalid = (data: any) => {
-    console.log(data);
+  const onSubmitInvalid = (errors: Object, e?: any) => {
+    console.log(errors, e);
 
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
     addAlert(invalidMessage, ChaiseAlertType.ERROR);
@@ -498,7 +511,7 @@ export default function RecordeditProvider({
       }
 
       // using page.tuples here instead of forms
-      initialModel = populateEditInitialValues(columnModels, forms, reference.columns, page.tuples, appMode === appModes.COPY);
+      initialModel = populateEditInitialValues(reference, columnModels, forms, page.tuples, appMode);
 
       setTuples([...tempTuples]);
 
@@ -750,6 +763,8 @@ export default function RecordeditProvider({
       removeForm,
       getInitialFormValues,
       getPrefilledDefaultForeignKeyData,
+      activeSelectAll,
+      toggleActiveSelectAll,
 
       //   // log related:
       //   logRecordClientAction,
@@ -764,7 +779,7 @@ export default function RecordeditProvider({
   }, [
     // main entity:
     reference, page, tuples, columnModels, initialized, waitingForForeignKeyData,
-    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors
+    showSubmitSpinner, resultsetProps, forms, columnPermissionErrors, activeSelectAll
   ]);
 
   return (
