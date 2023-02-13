@@ -37,6 +37,29 @@ export interface FileObject {
   filesize: number;
 }
 
+export interface UploadFileObject {
+  name: string;
+  size: number;
+  humanFileSize: string;
+  checksumProgress: number;
+  checksumPercent: number;
+  checksumCompleted: boolean;
+  skipUploadJob?: boolean;
+  jobCreateDone: boolean;
+  fileExistsDone: boolean;
+  uploadCompleted: boolean;
+  uploadStarted: boolean;
+  completeUploadJob: boolean;
+  progress: number;
+  progressPercent: number;
+  hatracObj: any;
+  url: string;
+  versionedUrl?: string;
+  column: any,
+  reference: any,
+  row: any
+}
+
 export interface PrefillObject {
   /**
    * the raw value of keys that should be prefilled
@@ -54,4 +77,16 @@ export interface PrefillObject {
    * the rowname of the fk
    */
   rowname: any
+}
+
+export interface UploadProgressProps {
+  rows: any[];
+  /**
+   * prop to trigger on delete confirmation
+   */
+  onSuccess: () => void;
+  /**
+   * prop to trigger on cancel
+   */
+  onCancel: () => void;
 }

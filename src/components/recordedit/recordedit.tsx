@@ -10,6 +10,7 @@ import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-c
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
+import UploadProgressModal from '@isrd-isi-edu/chaise/src/components/modals/upload-progress-modal';
 import Accordion from 'react-bootstrap/Accordion';
 
 // hooks
@@ -84,7 +85,7 @@ const RecordeditInner = ({
   const {
     appMode, reference, page, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
     forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
-    showSubmitSpinner, resultsetProps,
+    showSubmitSpinner, resultsetProps, uploadProgressModalProps
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
@@ -100,6 +101,7 @@ const RecordeditInner = ({
     buttonLabel: string,
     message?: JSX.Element
   } | null>(null);
+
   const [showDeleteSpinner, setShowDeleteSpinner] = useState(false);
 
   const mainContainer = useRef<HTMLDivElement>(null);
@@ -423,7 +425,7 @@ const RecordeditInner = ({
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
                 {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
-                  <ChaiseTooltip placement='bottom'  tooltip={saveButtonTooltip}>
+                  <ChaiseTooltip placement='bottom' tooltip={saveButtonTooltip}>
                     <button
                       id='submit-record-button'
                       className='chaise-btn chaise-btn-primary'
@@ -552,6 +554,14 @@ const RecordeditInner = ({
             buttonLabel={showDeleteConfirmationModal.buttonLabel}
             onConfirm={showDeleteConfirmationModal.onConfirm}
             onCancel={showDeleteConfirmationModal.onCancel}
+          />
+        }
+        {uploadProgressModalProps &&
+          <UploadProgressModal
+            show={!!uploadProgressModalProps}
+            rows={uploadProgressModalProps.rows}
+            onSuccess={uploadProgressModalProps.onSuccess}
+            onCancel={uploadProgressModalProps.onCancel}
           />
         }
       </FormProvider>}

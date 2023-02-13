@@ -9,6 +9,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import { appModes, PrefillObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -82,6 +83,7 @@ export const RecordeditContext = createContext<{
    */
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
+  uploadProgressModalProps?: UploadProgressProps,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number
 } | null>(null);
@@ -124,6 +126,7 @@ export default function RecordeditProvider({
 
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
+  const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
 
   const [tuples, setTuples] = useState<any[]>([]);
 
@@ -327,8 +330,11 @@ export default function RecordeditProvider({
     validateSessionBeforeMutation(() => {
       // show spinner
       setShowSubmitSpinner(true);
+
       uploadFiles(submissionRows, () => {
-        // success callback after create/update is called on a reference object
+        // close the modal
+        setUploadProgressModalProps(undefined);
+
         const submitSuccessCB = (response: any) => {
           // make sure the leave alert is disabled
           canLeaveRecordedit.current = true;
@@ -349,7 +355,6 @@ export default function RecordeditProvider({
               // And if it's from another origin, we don't need to call updated since it's not
               // the same row that we wanted to update in recordset (table directive)
             }
-<<<<<<< HEAD
           } else {
             // cleanup the prefill query parameter
             if (queryParams.prefill) {
@@ -362,124 +367,52 @@ export default function RecordeditProvider({
               CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
             }
           }
-=======
-          } catch (exp) {
-            // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
-            // And if it's from another origin, we don't need to call updated since it's not
-            // the same row that we wanted to update in recordset (table directive)
-          }
-        } else {
-          // cleanup the prefill query parameter
-          if (queryParams.prefill) {
-            CookieService.deleteCookie(queryParams.prefill);
-          }
-
-          // add cookie indicating record successfully added
-          if (queryParams.invalidate) {
-            // the value of the cookie is not important as other apps are just looking for the cookie name
-            CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
-          }
-        }
-
-        const page = response.successful;
-        const failedPage = response.failed;
-        const disabledPage = response.disabled;
-
-        // redirect to record app
-        if (forms.length === 1) {
-          // Created a single entity or Updated one
-          addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
-
-          windowRef.location = page.reference.contextualize.detailed.appLink;
-        }
-        // see if we can just redirect, or if we need the resultset view.
-        else {
-          const compactRef = page.reference.contextualize.compact;
-          const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
-
-          const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
-
-          // if we have failures: <num> {updated|created} records
-          // otherwise: {Updated|Created} records
-          let headerPrefix = appMode === appModes.EDIT ? 'Updated' : 'Created';
-          if (failedPage) {
-            headerPrefix = page.length + (appMode === appModes.EDIT ? ' updated' : 'created');
-          }
-
-          // resultset view
-          setResultsetProps({
-            success: {
-              page,
-              header: `${headerPrefix} record${handlePlural(page)}`,
-              ... (canLinkToRecordset && {
-                exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
-              })
-            },
-            ... (failedPage && {
-              failed: {
-                page: failedPage,
-                header: `${failedPage.length} failed ${appMode === appModes.EDIT ? 'update' : 'creation'}${handlePlural(failedPage)}`
-              },
-              // TODO add exploreLink (most probably requires ermrestjs change)
-            }),
-          });
-        }
-      };
->>>>>>> react-recordedit-app
 
           const page = response.successful;
           const failedPage = response.failed;
           const disabledPage = response.disabled;
-          const qParam: any = {};
-          qParam[QUERY_PARAMS.RESULT_INFO] = appMode === appModes.EDIT ? RESULT_INFO_VALUES.EDIT : RESULT_INFO_VALUES.CREATE;
 
           // redirect to record app
           if (forms.length === 1) {
             // Created a single entity or Updated one
             addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
 
-            windowRef.location = addQueryParamsToURL(page.reference.contextualize.detailed.appLink, qParam);
+            windowRef.location = page.reference.contextualize.detailed.appLink;
           }
           // see if we can just redirect, or if we need the resultset view.
           else {
             const compactRef = page.reference.contextualize.compact;
             const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
 
-            // redirect to recordset app
-            if (!failedPage && !disabledPage && canLinkToRecordset) {
-              const verb = appMode === appModes.EDIT ? 'updated' : 'created';
-              addAlert(`Your data has been saved. Redirecting you now to the ${verb} records...`, ChaiseAlertType.SUCCESS);
+            const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
 
-              windowRef.location = addQueryParamsToURL(compactRef.appLink, qParam);
-            } else {
-              const noun = appMode === appModes.EDIT ? 'update' : 'creation';
-              const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
-
-              // resultset view
-              setResultsetProps({
-                success: {
-                  page,
-                  header: `${page.length} successful ${noun}${handlePlural(page)}`,
-                  ... (canLinkToRecordset && { appLink: compactRef.appLink })
-                },
-                ... (failedPage && {
-                  failed: {
-                    page: failedPage,
-                    header: `${failedPage.length} failed ${noun}${handlePlural(failedPage)}`
-                  },
-                }),
-                ... (disabledPage && {
-                  failed: {
-                    page: disabledPage,
-                    header: `${disabledPage.length} disabled record${handlePlural(disabledPage)} (due to lack of permission)`
-                  },
-                }),
-              });
+            // if we have failures: <num> {updated|created} records
+            // otherwise: {Updated|Created} records
+            let headerPrefix = appMode === appModes.EDIT ? 'Updated' : 'Created';
+            if (failedPage) {
+              headerPrefix = page.length + (appMode === appModes.EDIT ? ' updated' : 'created');
             }
+
+            // resultset view
+            setResultsetProps({
+              success: {
+                page,
+                header: `${headerPrefix} record${handlePlural(page)}`,
+                ... (canLinkToRecordset && {
+                  exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
+                })
+              },
+              ... (failedPage && {
+                failed: {
+                  page: failedPage,
+                  header: `${failedPage.length} failed ${appMode === appModes.EDIT ? 'update' : 'creation'}${handlePlural(failedPage)}`
+                },
+                // TODO add exploreLink (most probably requires ermrestjs change)
+              }),
+            });
           }
         };
 
-        // error handling for create/update calls to ermrest
         const submitErrorCB = (err: any) => {
           console.log(err);
           addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
@@ -512,9 +445,12 @@ export default function RecordeditProvider({
 
           reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         } else {
-          reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+          // TODO: isModalUpdate?
+          // const createRef = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
+          const createRef = reference.unfilteredReference.contextualize.entryCreate;
+          createRef.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         }
-      })
+      });
     });
   }
 
@@ -527,39 +463,29 @@ export default function RecordeditProvider({
   }
 
   const uploadFiles = (submissionRowsCopy: any[], onSuccess: () => void) => {
-
     // If url is valid
     if (areFilesValid(submissionRowsCopy)) {
-      // modalUtils.showModal({
-      //   templateUrl: UriUtils.chaiseDeploymentPath() + "common/templates/uploadProgress.modal.html",
-      //   windowClass: "modal-upload-progress",
-      //   controller: "UploadModalDialogController",
-      //   controllerAs: "ctrl",
-      //   size: "md",
-      //   backdrop: 'static',
-      //   keyboard: false,
-      //   resolve: {
-      //     params: {
-      //       reference: rsReference,
-      //       rows: submissionRowsCopy
-      //     }
-      //   }
-      // }, onSuccess, function (exception) {
-      //   viewModel.readyToSubmit = false;
-      //   viewModel.submissionButtonDisabled = false;
+      setUploadProgressModalProps({
+        rows: submissionRowsCopy,
+        onSuccess: onSuccess,
+        // onCancel: (exception: any) => {
+        onCancel: () => {
+          setShowSubmitSpinner(false);
 
-      //   if (typeof exception !== "string") {
-      //     // happens with an error with code 0 (Timeout Error)
-      //     $log.warn(exception);
-      //     var message = exception.message || messageMap.errorMessageMissing;
+          // if (typeof exception !== "string") {
+          //   // happens with an error with code 0 (Timeout Error)
+          //   const message = exception.message || MESSAGE_MAP.errorMessageMissing;
 
-      //     // if online, we don't know how to handle the error
-      //     if ($window.navigator.onLine) AlertsService.addAlert(message, 'error');
-      //   }
-      // }, false, false);
+          //   // if online, we don't know how to handle the error
+          //   if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
+          // }
+
+          // close the modal
+          setUploadProgressModalProps(undefined);
+        }
+      })
     } else {
-      // viewModel.readyToSubmit = false;
-      // viewModel.submissionButtonDisabled = false;
+      setShowSubmitSpinner(false);
     }
   }
 
@@ -597,7 +523,7 @@ export default function RecordeditProvider({
             }
           }
         } catch (e) {
-          //NOthing to do
+          //Nothing to do
         }
       }
     });
@@ -683,23 +609,6 @@ export default function RecordeditProvider({
 
     const prefillObj = getPrefillObject(queryParams);
 
-<<<<<<< HEAD
-    // NOTE since this is create mode and we're disabling the addForm,
-    // we can assume this is the first form
-    const formValue = 1;
-
-    if (prefillObj) {
-      pendingForeignKeyRequests.current += 1;
-      processPrefilledForeignKeys(formValue, prefillObj, setValue);
-    }
-
-    // we need to know the number of requests (for spinner), so we have to capture them
-    // first before sending the requests.
-    type FkRequest = { reference: any, logAction: string, index: number };
-    const fkRequests: FkRequest[] = [];
-
-=======
->>>>>>> react-recordedit-app
     columnModels.forEach((colModel: RecordeditColumnModel, index: number) => {
       const column = colModel.column;
       if (!column.isForeignKey) return;
@@ -930,6 +839,7 @@ export default function RecordeditProvider({
       onSubmitInvalid,
       showSubmitSpinner,
       resultsetProps,
+      uploadProgressModalProps,
       MAX_ROWS_TO_ADD: maxRowsToAdd
     };
   }, [

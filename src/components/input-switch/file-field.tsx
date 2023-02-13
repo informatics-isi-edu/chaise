@@ -15,7 +15,6 @@ import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/mode
 // utils
 import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 type FileFieldProps = {
@@ -148,10 +147,6 @@ const FileField = ({
       // and also create an Upload object and save it as hatracObj in the value object
       const tempFileObject: any = {};
       tempFileObject.file = fileInput.files[0];
-      tempFileObject.hatracObj = new windowRef.ERMrest.Upload(tempFileObject.file, {
-        column: columnModel.column,
-        reference: parentReference
-      });
       tempFileObject.url = tempFileObject.filename = tempFileObject.file.name;
       tempFileObject.filesize = tempFileObject.file.size;
 
@@ -234,10 +229,10 @@ const FileField = ({
         type='file'
         accept={fileExtensions}
         tabIndex={-1}
-        // {...field}
         onChange={handleChange}
         ref={fileInputRef}
       />
+      <input className={inputClasses} {...field} type='hidden' />
       {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div >
   );

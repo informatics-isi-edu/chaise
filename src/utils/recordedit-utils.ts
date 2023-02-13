@@ -20,6 +20,7 @@ import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
@@ -395,6 +396,14 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
     if (v && !col.isDisabled) {
       if (col.type.isArray) {
         v = JSON.parse(v);
+      } else if (col.isAsset) {
+        const tempVal = { ...v };
+        tempVal.hatracObj = new windowRef.ERMrest.Upload(v.file, {
+          column: col,
+          reference: reference
+        });
+
+        v = tempVal;
       } else {
         // Special cases for formatting data
         // NOTE: handled timestamp[tz] before but that is done by the input now
