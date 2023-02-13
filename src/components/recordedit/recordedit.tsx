@@ -36,8 +36,8 @@ import { attachContainerHeightSensors, attachMainContainerPaddingSensor } from '
 import { appModes, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-import { replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 export type RecordeditProps = {
   appMode: string;
@@ -326,14 +326,7 @@ const RecordeditInner = ({
     for (let i = 0; i < newFormValues.length; i++) {
       const formValue = newFormValues[i];
       columnModels.forEach((cm: RecordeditColumnModel) => {
-        const colName = cm.column.name;
-        // should be able to handle falsy values
-        tempFormValues[`${formValue}-${colName}`] = replaceNullOrUndefined(tempFormValues[`${lastFormValue}-${colName}`], '');
-
-        if (cm.column.type.name.indexOf('timestamp') !== -1) {
-          tempFormValues[`${formValue}-${colName}-date`] = tempFormValues[`${lastFormValue}-${colName}-date`] || '';
-          tempFormValues[`${formValue}-${colName}-time`] = tempFormValues[`${lastFormValue}-${colName}-time`] || '';
-        }
+        copyOrClearValue(cm, tempFormValues, foreignKeyData.current, formValue, lastFormValue, false, true);
       });
 
       // the code above is just copying the displayed rowname for foreignkeys,

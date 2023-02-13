@@ -8,18 +8,17 @@ import { useFormContext } from 'react-hook-form';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { appModes, RecordeditColumnModel, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
-import { getDisabledInputValue, replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { copyOrClearValue, getColumnModelLogAction, getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 const FormContainer = (): JSX.Element => {
 
@@ -160,21 +159,19 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   };
 
   const closeSelectAll = () => {
-    // TODO client log
-    // var defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : $rootScope.reference.defaultLogInfo);
-    // logService.logClientAction({
-    //     action: recordCreate.getColumnModelLogAction(logService.logActions.SET_ALL_CANCEL, model),
-    //     stack: recordCreate.getColumnModelLogStack(model)
-    // }, defaultLogInfo);
+    const cm = columnModels[columnModelIndex];
+
+    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
+    // TODO parent log obj
+    LogService.logClientAction({
+      action: getColumnModelLogAction(LogActions.SET_ALL_CANCEL, cm, null),
+      stack: getColumnModelLogStack(cm, null)
+    }, defaultLogInfo);
 
     toggleActiveSelectAll(columnModelIndex);
   };
 
   // ------------------------ helper functions ----------------------------//
-  /**
-   * this code is similar to recordedit.tsx:291 (callAddForm)
-   * TODO can be refactored into one function
-   */
   const setValueForAllInputs = (clearValue?: boolean) => {
     const cm = columnModels[columnModelIndex];
 
@@ -193,42 +190,46 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   const columnModel = columnModels[columnModelIndex];
 
   /**
- * Return `disabled` if,
+ * Returntrue if,
  *  - columnModel is marked as disabled
  *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
- *  - TODO show all
+ *  - show all
  * @param formNumber
  * @param columnModel
  * @param canUpdateValues
- * @returns
  */
-  const getInputTypeOrDisabled = (formNumber?: number, isSelectAllInput?: boolean): string => {
+  const getIsDisabled = (formNumber?: number, isSelectAllInput?: boolean): boolean => {
     if (isSelectAllInput) {
-      return columnModel.inputType;
+      return false;
     }
 
     if (columnModel.isDisabled || showSelectAll) {
-      return 'disabled';
+      return true;
     }
 
     if (typeof formNumber === 'number') {
       const valName = `${formNumber}-${columnModel.column.name}`;
       if (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false) {
-        return 'disabled';
+        return true;
       }
     }
 
-    return columnModel.inputType;
+    return false;
   }
 
   const renderInput = (formNumber: number, formIndex?: number) => {
 
     const colName = columnModel.column.name;
+    const column = columnModel.column;
 
-    const inputType = getInputTypeOrDisabled(formNumber, formNumber === SELECT_ALL_INPUT_FORM_VALUE);
+    const isDisabled = getIsDisabled(formNumber, formNumber === SELECT_ALL_INPUT_FORM_VALUE);
+
+    // boolean and asset will handle their own disabled inputs
+    const inputType = (isDisabled && !(column.isAsset || column.type.name === 'boolean' )) ? 'disabled' : columnModel.inputType;
+
     let placeholder = '';
     let permissionError = '';
-    if (inputType === 'disabled') {
+    if (isDisabled) {
       placeholder = getDisabledInputValue(columnModel.column);
 
       // TODO: extend this for edit mode
@@ -249,11 +250,11 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
       <InputSwitch
         key={colName}
         displayErrors={true}
+        disableInput={isDisabled}
         name={`${formNumber}-${colName}`}
         type={inputType}
         classes='column-cell-input'
         placeholder={placeholder}
-        // styles={{ 'height': heightparam }}
         columnModel={columnModel}
         appMode={appMode}
         formNumber={formNumber}

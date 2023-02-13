@@ -34,8 +34,11 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
+  // asset and boolean will handle their own disabeld inputs.
   if (column.isAsset) {
     type = 'file'
+  } else if (column.type.name === 'boolean') {
+    type = 'boolean';
   } else if (isInputDisabled) {
     type = 'disabled';
   } else if (column.isForeignKey) {
@@ -98,11 +101,23 @@ export function getColumnModelLogAction(action: string, colModel: RecordeditColu
 }
 
 /**
+ * sets value for a form by either clearing, or using the existing values
+ * of another form.
+ *
  * NOTE this function is immutating the given value
+ * @param columnModel the column that we want to copy its value
+ * @param values the FormContext.getValues()
+ * @param foreignKeyData the foreign key data
+ * @param destFormValue the from where the new data should go
+ * @param srcFormValue if we're copying, the form that the data will be copied from.
+ * @param clearValue signal that we want to clear the inputs.
+ * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
+ * flag to skip doing so.
+ * @returns
  */
-export function copyOrClearValue(columnModel: RecordeditColumnModel,
-  values: any, foreignKeyData: any,
-  destFormValue: number, srcFormValue?: number, clearValue?: boolean
+export function copyOrClearValue(
+  columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
 ) {
 
   const column = columnModel.column;
@@ -126,10 +141,9 @@ export function copyOrClearValue(columnModel: RecordeditColumnModel,
       values[`${dstKey}-date`] = values[`${srcKey}-date`] || '';
       values[`${dstKey}-time`] = values[`${srcKey}-time`] || '';
     }
-
   }
 
-  if (columnModel.column.isForeignKey) {
+  if (!skipFkColumns && columnModel.column.isForeignKey) {
     // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
     if (clearValue) {
       foreignKeyData[dstKey] = {};
@@ -464,17 +478,11 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
         v = JSON.parse(v);
       } else {
         // Special cases for formatting data
-        // NOTE: handled timestamp[tz] before but that is done by the input now
-        // TODO: does boolean need to be handled here still?
         switch (col.type.name) {
           case 'json':
           case 'jsonb':
             v = JSON.parse(v);
             break;
-          // case 'boolean':
-          //   // call columnToColumnModel to set booleanArray and booleanMap for proper un-formatting
-          //   rowVal = InputUtils.unformatBoolean(columnToColumnModel(column), rowVal);
-          //   break;
           default:
             break;
         }

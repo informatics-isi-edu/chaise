@@ -20,7 +20,7 @@ const KeyColumn = (): JSX.Element => {
 
   const {
     appMode, columnModels, activeSelectAll, toggleActiveSelectAll,
-    columnPermissionErrors, forms, reference, canUpdateValues
+    columnPermissionErrors, forms, reference,
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
@@ -65,7 +65,7 @@ const KeyColumn = (): JSX.Element => {
       return true;
     }
 
-    // in this case we want toshow the button and instead disable it
+    // in this case we want to show the button and instead disable it
     if (disableSelectAllbtn(columnIndex)) {
       return true;
     }
