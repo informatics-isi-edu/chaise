@@ -36,11 +36,6 @@ const FormContainer = (): JSX.Element => {
           <div key={`form-header-${formNumber}`} className='form-header entity-value'>
             <span>{formIndex + 1}</span>
             <div className='form-header-buttons-container'>
-              {appMode === appModes.EDIT && tuples && !tuples[formIndex].canUpdate &&
-                <ChaiseTooltip placement='bottom' tooltip='This record cannot be modified.'>
-                  <i className='disabled-row-icon fas fa-ban'></i>
-                </ChaiseTooltip>
-              }
               {forms.length > 1 &&
                 <ChaiseTooltip
                   placement='bottom'

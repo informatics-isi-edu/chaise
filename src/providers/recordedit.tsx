@@ -46,8 +46,6 @@ export const RecordeditContext = createContext<{
   appMode: string,
   /* the main entity reference */
   reference: any,
-  /* the main page from reading the reference */
-  page: any,
   /* the tuples correspondeing to the displayed form */
   tuples: any,
   /**
@@ -120,7 +118,6 @@ export default function RecordeditProvider({
 
   const maxRowsToAdd = 201;
 
-  const [page, setPage, pageRef] = useStateRef<any>(null);
   const [columnModels, setColumnModels] = useState<RecordeditColumnModel[]>([]);
   const [canUpdateValues, setCanUpdateValues] = useState<any>({});
   const [columnPermissionErrors, setColumnPermissionErrors] = useState<any>({});
@@ -135,7 +132,7 @@ export default function RecordeditProvider({
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
   const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
 
-  const [tuples, setTuples] = useState<any[]>([]);
+  const [tuples, setTuples, tuplesRef] = useStateRef<any[]>([]);
 
   // an array of unique keys to for referencing each form
   const [forms, setForms] = useState<number[]>([1]);
@@ -183,50 +180,63 @@ export default function RecordeditProvider({
         // in edit mode, we have to check the TCRS (row-level acls)
         const getTCRS = appMode === appModes.EDIT;
         reference.read(numberRowsToRead, logInfo.logObject, false, false, false, getTCRS).then((readPage: any) => {
-          setPage(readPage);
-          $log.info('Page: ', readPage);
-
           if (readPage.tuples.length < 1) {
             // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
             const recordSetLink = readPage.reference.unfilteredReference.contextualize.compact.appLink;
             dispatchError({ error: new NoRecordError({}, readPage.reference.displayname.value, recordSetLink) });
           }
 
-          let headTitle;
-          // make sure at least one row is editable and setup headTitle
-          if (appMode === appModes.EDIT) {
-            const forbiddenTuples = readPage.tuples.filter((t: any) => {
-              return !t.canUpdate;
-            });
-            // all the rows are disabled
-            if (forbiddenTuples.length === readPage.tuples.length) {
-              const errMessage = MESSAGE_MAP.unauthorizedMessage + MESSAGE_MAP.reportErrorToAdmin;
-              const forbiddenError = new ERMrest.ForbiddenError(MESSAGE_MAP.unauthorizedErrorCode, errMessage);
-              // NOTE there might be different reasons for this (column vs row)
-              // should we list all of them?
-              forbiddenError.subMessage = forbiddenTuples[0].canUpdateReason;
-              dispatchError({ error: forbiddenError });
+          // capture the tuples
+          const usedTuples: any[] = [];
+          const forbiddenTuples: any[] = [];
+          readPage.tuples.forEach((t: any) => {
+            if (appMode === appModes.EDIT && !t.canUpdate) {
+              forbiddenTuples.push(t);
+              return;
             }
+            // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
+            // The submission data is copied back to the tuples object before submitted in the PUT request
+            usedTuples.push(t.copy());
+          });
+          setTuples([...usedTuples]);
 
-            headTitle = 'Edit ' + getDisplaynameInnerText(reference.displayname);
-            if (readPage.tuples.length === 1) headTitle += ': ' + getDisplaynameInnerText(readPage.tuples[0].displayname);
-          } else {
-            headTitle = 'Create new ' + getDisplaynameInnerText(reference.displayname);
-          }
-
+          // update head title
           // TODO this should not be done when we want to have recordedit in modal
           // send string to prepend to "headTitle"
           // For editing ==1 record - "Edit <table>: <rowname>"
           // For editing >1 record  - "Edit <table>"
           // For copy >=1 record    - "Create new <table>"
+          let headTitle;
+          if (appMode === appModes.EDIT) {
+            headTitle = 'Edit ' + getDisplaynameInnerText(reference.displayname);
+            if (usedTuples.length === 1) headTitle += ': ' + getDisplaynameInnerText(usedTuples[0].displayname);
+          } else {
+            headTitle = 'Create new ' + getDisplaynameInnerText(reference.displayname);
+          }
           updateHeadTitle(headTitle);
 
-          if (readPage.tuples.length > 1) {
-            const newForms = addForm(readPage.tuples.length - 1)
-            console.log(newForms);
+          // if all the rows are disabled, throw an error without marking the recordedit as initialized
+          if (usedTuples.length === 0) {
+            const errMessage = MESSAGE_MAP.unauthorizedMessage + MESSAGE_MAP.reportErrorToAdmin;
+            const forbiddenError = new ERMrest.ForbiddenError(MESSAGE_MAP.unauthorizedErrorCode, errMessage);
+            // NOTE there might be different reasons for this (column vs row)
+            // should we list all of them?
+            forbiddenError.subMessage = forbiddenTuples[0].canUpdateReason;
+            dispatchError({ error: forbiddenError });
+            return;
           }
 
-          console.log('recordedit initialized');
+          if (forbiddenTuples.length > 0) {
+            const msg = `${forbiddenTuples.length}/${readPage.tuples.length} entries were removed from editing due to the lack of permission.`;
+            addAlert(msg, ChaiseAlertType.WARNING);
+          }
+
+          // add more forms if we need to
+          if (usedTuples.length > 1) {
+            addForm(usedTuples.length - 1);
+          }
+
+          // mark recordedit as initialized
           setInitialized(true);
         }, (response: any) => {
           const errorData: any = {};
@@ -257,7 +267,6 @@ export default function RecordeditProvider({
         // TODO this should not be done when we want to have recordedit in modal
         updateHeadTitle('Create new ' + reference.displayname.value);
 
-        console.log('recordedit initialized');
         setInitialized(true);
       } else if (session) {
         const errMessage = MESSAGE_MAP.unauthorizedMessage + MESSAGE_MAP.reportErrorToAdmin;
@@ -427,7 +436,6 @@ export default function RecordeditProvider({
         };
 
         const submitErrorCB = (err: any) => {
-          console.log(err);
           addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
         };
 
@@ -467,7 +475,6 @@ export default function RecordeditProvider({
 
   // NOTE: most likely not needed
   const onSubmitInvalid = (errors: Object, e?: any) => {
-    console.log(errors, e);
 
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
     addAlert(invalidMessage, ChaiseAlertType.ERROR);
@@ -580,18 +587,10 @@ export default function RecordeditProvider({
       shouldFetchForeignKeyData.current = initialModel.shouldWaitForForeignKeyData;
 
     } else if (appMode === appModes.EDIT || appMode === appModes.COPY) {
-      const tempTuples: any[] = [];
-      for (let i = 0; i < page.tuples.length; i++) {
-        // We don't want to mutate the actual tuples associated with the page returned from `reference.read`
-        // The submission data is copied back to the tuples object before submitted in the PUT request
-        const shallowTuple = page.tuples[i].copy();
-        tempTuples.push(shallowTuple);
-      }
+
 
       // using page.tuples here instead of forms
-      initialModel = populateEditInitialValues(reference, columnModels, forms, page.tuples, appMode);
-
-      setTuples([...tempTuples]);
+      initialModel = populateEditInitialValues(reference, columnModels, forms, tuplesRef.current, appMode);
 
       setCanUpdateValues(initialModel.canUpdateValues);
     }
@@ -826,7 +825,6 @@ export default function RecordeditProvider({
       // main entity:
       appMode,
       reference,
-      page,
       tuples,
       foreignKeyData,
       columnModels,
@@ -857,7 +855,7 @@ export default function RecordeditProvider({
     };
   }, [
     // main entity:
-    reference, page, tuples, columnModels, initialized, waitingForForeignKeyData,
+    reference, tuples, columnModels, initialized, waitingForForeignKeyData,
     showSubmitSpinner, resultsetProps, forms, columnPermissionErrors, activeSelectAll
   ]);
 

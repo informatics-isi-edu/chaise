@@ -83,7 +83,7 @@ const RecordeditInner = ({
   const { errors, dispatchError } = useError();
   const { addAlert } = useAlert();
   const {
-    appMode, reference, page, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
+    appMode, reference, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
     forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
     showSubmitSpinner, resultsetProps, uploadProgressModalProps
   } = useRecordedit()
@@ -136,15 +136,6 @@ const RecordeditInner = ({
    * after this, user can click on title buttons.
    */
   const allFormDataLoaded = initialized && !waitingForForeignKeyData;
-  const canUpdateAtLeastOne = initialized && appMode === appModes.EDIT && tuples && tuples.some((t: any) => t.canUpdate);
-
-  let saveButtonTooltip = 'Save this data on the server.';
-  if (!canUpdateAtLeastOne) {
-    saveButtonTooltip = 'You cannot update any of the displayed records.';
-  }
-  else if (!allFormDataLoaded) {
-    saveButtonTooltip = 'Waiting for some columns to properly load.';
-  }
 
   /**
    * handler for bulk delete button. it will,
@@ -353,7 +344,6 @@ const RecordeditInner = ({
   /**
    * on load:
    *   - Edit 25 <table> records
-   *   - Edit 18/25 <table> records (7 disabled due to permission)
    *   - Edit <table>:<rowname>
    *   - Create <number> <table> record
    * on resultset view:
@@ -376,26 +366,23 @@ const RecordeditInner = ({
         <span> {recordTxt} {appMode === appModes.EDIT ? 'updated' : 'created'} successfully</span>
       </>);
     }
-
     const tableName = <Title addLink reference={reference} />;
     const fnStr = appMode === appModes.EDIT ? 'Edit' : 'Create';
-    const recordStr = forms.length > 1 ? 'records' : 'record';
 
-    let countStr: string = forms.length.toString();
-    let dueToPerm = <></>;
-
-    const numDisabled = tuples && tuples.length ? tuples.filter((t: any) => !t.canUpdate).length : 0;
-    if (numDisabled !== 0) {
-      countStr = `${forms.length - numDisabled}/${forms.length}`;
-      dueToPerm = <small>({numDisabled} disabled due to permission)</small>;
-    }
-
-    if (appMode === appModes.EDIT && tuples.length === 1 && numDisabled === 0) {
+    if (appMode === appModes.EDIT && tuples.length === 1) {
       return (<>Edit {tableName}: <Title displayname={tuples[0].displayname} /></>);
     }
 
-    return (<>{fnStr} {countStr} {tableName} {recordStr}{dueToPerm}</>);
+    return (<>{fnStr} {forms.length.toString()} {tableName} {forms.length > 1 ? 'records' : 'record'}</>);
   };
+
+  // if the main data is not initialized, just show spinner
+  if (!initialized) {
+    if (errors.length > 0) {
+      return <></>;
+    }
+    return <ChaiseSpinner />;
+  }
 
   return (
     <div className='recordedit-container app-content-container'>
@@ -418,13 +405,20 @@ const RecordeditInner = ({
             <div className='top-right-panel'>
               <div className='recordedit-title-container title-container meta-icons'>
                 {!resultsetProps && <div className='recordedit-title-buttons title-buttons'>
-                  <ChaiseTooltip placement='bottom' tooltip={saveButtonTooltip}>
+                  <ChaiseTooltip
+                    placement='bottom'
+                    tooltip={
+                      allFormDataLoaded ?
+                        'Save this data on the server.' :
+                        'Waiting for some columns to properly load.'
+                    }
+                  >
                     <button
                       id='submit-record-button'
                       className='chaise-btn chaise-btn-primary'
                       type='submit'
                       form='recordedit-form'
-                      disabled={!allFormDataLoaded || (appMode === appModes.EDIT && !canUpdateAtLeastOne)}
+                      disabled={!allFormDataLoaded}
                     >
                       <span className='chaise-btn-icon fa-solid fa-check-to-slot'></span>
                       <span>Save</span>
