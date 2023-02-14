@@ -10,7 +10,10 @@ import { Displayname as DisplaynameType } from '@isrd-isi-edu/chaise/src/models/
 type TitleProps = {
   reference?: any,
   displayname?: DisplaynameType,
-  comment?: string,
+  /**
+   * use `false` to suppress adding the comment
+   */
+  comment?: string | false,
   addLink?: boolean,
   link?: string,
   className?: string
@@ -39,7 +42,7 @@ const Title = ({
       displayname = reference.displayname;
     }
 
-    if (!comment && reference.comment) {
+    if (comment !== false && !comment && reference.comment) {
       comment = reference.comment;
     }
 

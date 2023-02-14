@@ -515,10 +515,13 @@ const RecordeditInner = ({
                     <Accordion.Body>
                       {resultsetProps.success.exploreLink &&
                         <div className='inline-tooltip'>
-                          Table below is populated based on newly saved data and might not represent all the information.
-                          Use the Edit or Explore button to navigate to the
-                          {appMode === appModes.EDIT ? ' updated' : ' created'}
-                          {resultsetProps.success.page.length > 0 ? ' records' : 'record'}.
+                          <p>
+                            This table content displays user submitted values.
+                            Use the <a href={resultsetProps.success.editLink}>Bulk Edit</a> button
+                             to continue making changes to these entries,
+                             or <a href={resultsetProps.success.exploreLink}>Explore</a> button
+                             to navigate to the <code><Title reference={reference} comment={false}/></code> search page with these entries selected.
+                          </p>
                         </div>
                       }
                       <ResultsetTable page={resultsetProps.success.page} />
