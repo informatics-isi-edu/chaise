@@ -19,7 +19,7 @@ import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-util
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { copyOrClearValue, getColumnModelLogAction, getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
-import { makeSafeIdAttr } from '../../utils/string-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 const FormContainer = (): JSX.Element => {
 
