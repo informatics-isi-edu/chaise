@@ -7,19 +7,18 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { PrefillObject, RecordeditColumnModel, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit'
+import { appModes, PrefillObject, RecordeditColumnModel, SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions } from '@isrd-isi-edu/chaise/src/models/recordedit'
 
 // services
-import { ConfigService } from '@isrd-isi-edu/chaise/src/services/config';
 import { CookieService } from '@isrd-isi-edu/chaise/src/services/cookie';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-import $log from '@isrd-isi-edu/chaise/src/services/logger';
 
 // utilities
 import {
   formatDatetime, formatFloat, formatInt, getInputType,
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
@@ -35,8 +34,11 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
+  // asset and boolean will handle their own disabeld inputs.
   if (column.isAsset) {
     type = 'file'
+  } else if (column.type.name === 'boolean') {
+    type = 'boolean';
   } else if (isInputDisabled) {
     type = 'disabled';
   } else if (column.isForeignKey) {
@@ -65,13 +67,10 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   }
 
   return {
-    // allInput: undefined,
     column: column,
     isDisabled: isInputDisabled || isPrefilled,
     isRequired: !column.nullok && !isInputDisabled,
     inputType: isPrefilled ? 'disabled' : type,
-    // highlightRow: false,
-    // showSelectAll: false,
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
     hasDomainFilter
@@ -99,6 +98,74 @@ export function getColumnModelLogStack(colModel: RecordeditColumnModel, parentSt
 export function getColumnModelLogAction(action: string, colModel: RecordeditColumnModel, parentLogStackPath: string | null) {
   const logStackPath = LogService.getStackPath(parentLogStackPath, colModel.logStackPathChild);
   return LogService.getActionString(action, logStackPath);
+}
+
+/**
+ * sets value for a form by either clearing, or using the existing values
+ * of another form.
+ *
+ * NOTE this function is immutating the given value
+ * @param columnModel the column that we want to copy its value
+ * @param values the FormContext.getValues()
+ * @param foreignKeyData the foreign key data
+ * @param destFormValue the from where the new data should go
+ * @param srcFormValue if we're copying, the form that the data will be copied from.
+ * @param clearValue signal that we want to clear the inputs.
+ * @param skipFkColumns if the column is fk, we will copy/clear the raw values too. set this
+ * flag to skip doing so.
+ * @returns
+ */
+export function copyOrClearValue(
+  columnModel: RecordeditColumnModel, values: any, foreignKeyData: any,
+  destFormValue: number, srcFormValue?: number, clearValue?: boolean, skipFkColumns?: boolean
+) {
+
+  const column = columnModel.column;
+
+  const srcKey = typeof srcFormValue === 'number' ? `${srcFormValue}-${column.name}` : null;
+
+  const dstKey = `${destFormValue}-${column.name}`;
+
+
+  if (clearValue) {
+    values[dstKey] = '';
+  } else if (srcKey) {
+    values[dstKey] = replaceNullOrUndefined(values[srcKey], '');
+  }
+
+  if (columnModel.column.type.name.indexOf('timestamp') !== -1) {
+    if (clearValue) {
+      values[`${dstKey}-date`] = '';
+      values[`${dstKey}-time`] = '';
+    } else if (srcKey) {
+      values[`${dstKey}-date`] = values[`${srcKey}-date`] || '';
+      values[`${dstKey}-time`] = values[`${srcKey}-time`] || '';
+    }
+  }
+
+  if (!skipFkColumns && columnModel.column.isForeignKey) {
+    // copy the foreignKeyData (used for domain-filter support in foreignkey-field.tsx)
+    if (clearValue) {
+      foreignKeyData[dstKey] = {};
+    } else if (srcKey) {
+      foreignKeyData[dstKey] = simpleDeepCopy(foreignKeyData[srcKey]);
+    }
+
+    // the code above is just copying the displayed rowname for foreignkey
+    // we still need to copy the raw values
+    columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
+      let val;
+      if (clearValue) {
+        val = '';
+      } else if (typeof srcFormValue === 'number') {
+        val = values[`${srcFormValue}-${col.name}`];
+      }
+      if (val === null || val === undefined) return;
+      values[`${destFormValue}-${col.name}`] = val;
+    });
+  }
+
+  return values;
 }
 
 /**
@@ -134,7 +201,7 @@ export function populateCreateInitialValues(
 
   // populate defaults
   // NOTE: should only be 1 form
-  forms.forEach((formValue: number) => {
+  forms.forEach((formValue: number, formIndex: number) => {
     for (let i = 0; i < columnModels.length; i++) {
       // default model initialiation is null
       let initialModelValue = null;
@@ -165,13 +232,15 @@ export function populateCreateInitialValues(
       switch (column.type.name) {
         // timestamp[tz] and asset columns have default model objects if their inputs are NOT disabled
         case 'timestamp':
-          tsOptions.outputMomentFormat = dataFormats.datetime.display;
+          // this is only going to change the underlying raw value
+          tsOptions.outputMomentFormat = dataFormats.timestamp;
           // formatDatetime takes care of column.default if null || undefined
           initialModelValue = formatDatetime(defaultValue, tsOptions);
           isTimestamp = true;
           break;
         case 'timestamptz':
-          tsOptions.outputMomentFormat = dataFormats.datetime.displayZ;
+          // this is only going to change the underlying raw value
+          tsOptions.outputMomentFormat = dataFormats.datetime.return;
           // formatDatetime takes care of column.default if null || undefined
           initialModelValue = formatDatetime(defaultValue, tsOptions);
           isTimestamp = true;
@@ -224,16 +293,23 @@ export function populateCreateInitialValues(
       }
 
       if (isTimestamp) {
-        // string implies the input is disabled
-        if (colModel.inputType === 'disabled') {
-          values[`${formValue}-${column.name}`] = initialModelValue?.datetime || '';
-        } else {
-          values[`${formValue}-${column.name}`] = '';
-          values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
-          values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
+        values[`${formValue}-${column.name}`] = initialModelValue.datetime || '';
+        values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
+        values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
+
+        // add the select-all input value
+        if (formIndex === 0) {
+          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}`] = '';
+          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}-date`] = '';
+          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}-time`] = '';
         }
       } else {
         values[`${formValue}-${column.name}`] = replaceNullOrUndefined(initialModelValue, '');
+
+        // add the select-all input value
+        if (formIndex === 0) {
+          values[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}`] = '';
+        }
       }
     }
   });
@@ -242,11 +318,11 @@ export function populateCreateInitialValues(
 }
 
 export function populateEditInitialValues(
+  reference: any,
   columnModels: RecordeditColumnModel[],
   forms: number[],
-  columns: any[],
   tuples: any[],
-  isCopy: boolean
+  appMode: string
 ) {
   // initialize row objects {column-name: value,...}
   const values: any = {};
@@ -255,7 +331,7 @@ export function populateEditInitialValues(
   const foreignKeyData: any = {};
 
   // whether the value can be updated or not
-  const canUpdateValues: {[key: string]: boolean} = {};
+  const canUpdateValues: { [key: string]: boolean } = {};
 
   forms.forEach((formValue: any, formIndex: number) => {
     const tupleIndex = formIndex;
@@ -272,11 +348,18 @@ export function populateEditInitialValues(
       const column = colModel.column;
       let value;
 
+      // add the select-all input values
+      if (formIndex === 0) {
+        // just use empty value (this is to make sure react-hook-forms has this key from the beginning)
+        // NOTE if we actually want to show the default values, we should send extra requests.
+        copyOrClearValue(colModel, values, foreignKeyData, SELECT_ALL_INPUT_FORM_VALUE, undefined, true);
+      }
+
       // If input is disabled, and it's copy, we don't want to copy the value
       let isDisabled = colModel.inputType === 'disabled';
-      if (isDisabled && isCopy) return;
+      if (isDisabled && appMode === appModes.COPY) return;
 
-      if (!isCopy) {
+      if (appMode !== appModes.COPY) {
         // whether certain columns are disabled or not
         canUpdateValues[`${formValue}-${column.name}`] = tuple.canUpdate && tuple.canUpdateValues[i];
 
@@ -298,11 +381,14 @@ export function populateEditInitialValues(
       let isTimestamp = false
       switch (column.type.name) {
         case 'timestamp':
+          // this is only going to change the underlying raw value
+          options.outputMomentFormat = dataFormats.timestamp;
           value = formatDatetime(tupleValues[i], options);
           isTimestamp = true;
           break;
         case 'timestamptz':
-          if (isDisabled) options.outputMomentFormat = dataFormats.datetime.return;
+          // this is only going to change the underlying raw value
+          options.outputMomentFormat = dataFormats.datetime.return;
           value = formatDatetime(tupleValues[i], options);
           isTimestamp = true;
           break;
@@ -351,14 +437,9 @@ export function populateEditInitialValues(
       // no need to check for copy here because the case above guards against the negative case for copy
 
       if (isTimestamp) {
-        // string implies the input is disabled
-        if (colModel.inputType === 'disabled') {
-          values[`${formValue}-${column.name}`] = value?.datetime || '';
-        } else {
-          values[`${formValue}-${column.name}`] = '';
-          values[`${formValue}-${column.name}-date`] = value?.date || '';
-          values[`${formValue}-${column.name}-time`] = value?.time || '';
-        }
+        values[`${formValue}-${column.name}`] = value?.datetime || '';
+        values[`${formValue}-${column.name}-date`] = value?.date || '';
+        values[`${formValue}-${column.name}-time`] = value?.time || '';
       } else {
         values[`${formValue}-${column.name}`] = replaceNullOrUndefined(value, '');
       }
@@ -397,17 +478,11 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
         v = JSON.parse(v);
       } else {
         // Special cases for formatting data
-        // NOTE: handled timestamp[tz] before but that is done by the input now
-        // TODO: does boolean need to be handled here still?
         switch (col.type.name) {
           case 'json':
           case 'jsonb':
             v = JSON.parse(v);
             break;
-          // case 'boolean':
-          //   // call columnToColumnModel to set booleanArray and booleanMap for proper un-formatting
-          //   rowVal = InputUtils.unformatBoolean(columnToColumnModel(column), rowVal);
-          //   break;
           default:
             break;
         }

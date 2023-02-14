@@ -145,7 +145,7 @@ const ForeignkeyField = ({
 
   const fieldState = formInput?.fieldState;
 
-  const [showClear, setShowClear] = useState<boolean>(typeof fieldValue !== 'boolean');
+  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
 
   const { error, isTouched } = fieldState;
 

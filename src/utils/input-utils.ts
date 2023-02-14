@@ -103,26 +103,6 @@ export function isDisabled(column: any): boolean {
 }
 
 /**
- * Return `disabled` if,
- *  - columnModel is marked as disabled
- *  - based on dynamic ACLs the column cannot be updated (based on canUpdateValues)
- *  - TODO show all
- * @param formNumber
- * @param columnModel
- * @param canUpdateValues
- * @returns
- */
-export function getInputTypeOrDisabled(formNumber: number, columnModel: RecordeditColumnModel, canUpdateValues: any): string {
-  const valName = `${formNumber}-${columnModel.column.name}`;
-
-  if (columnModel.isDisabled || (canUpdateValues && valName in canUpdateValues && canUpdateValues[valName] === false)) {
-    // TODO: if columnModel.showSelectAll, disable input
-    return 'disabled';
-  }
-  return columnModel.inputType;
-}
-
-/**
  * return the disabled input value based on input type
  * @param column the column object from ermrestJS
  */

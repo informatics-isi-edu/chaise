@@ -121,38 +121,38 @@ const BooleanField = ({
     field.onBlur();
   };
 
+  // first option is true, and second is false.
   const rawOptions = [true, false];
   const displayedOptions = rawOptions.map((op) => columnModel ? formatBoolean(columnModel.column, op) : op.toString());
 
   return (
     <div className={`${containerClasses} input-switch-boolean input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
-      <Dropdown>
-        <Dropdown.Toggle as='div' disabled={disableInput} className='chaise-input-group'>
+      <Dropdown aria-disabled={disableInput}>
+        <Dropdown.Toggle as='div' className='chaise-input-group' disabled={disableInput} aria-disabled={disableInput}>
           <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`}>
             {typeof fieldValue === 'boolean' ?
               displayedOptions[rawOptions.indexOf(fieldValue)] :
               <span className='chaise-input-placeholder'>{placeholder ? placeholder : 'Select a value'}</span>
             }
-            <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
+            <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={!disableInput && showClear} />
           </div>
-          <div className='chaise-input-group-append'>
+          {!disableInput && <div className='chaise-input-group-append'>
             <button className='chaise-btn chaise-btn-primary' role='button' type='button'>
               <span className='chaise-btn-icon fa-solid fa-chevron-down' />
             </button>
-          </div>
+          </div>}
         </Dropdown.Toggle>
-        <Dropdown.Menu>
+        {!disableInput && <Dropdown.Menu>
           {displayedOptions.map((option: any, index: number) => (
             <Dropdown.Item
               as='li'
               key={`boolean-val-${makeSafeIdAttr(name)}-${index}`}
-              // first option is true, and second is false.
               onClick={() => handleChange(rawOptions[index])}
             >
               {option}
             </Dropdown.Item>
           ))}
-        </Dropdown.Menu>
+        </Dropdown.Menu>}
       </Dropdown>
       <input className={inputClasses} {...field} type='hidden' />
       {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
