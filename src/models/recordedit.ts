@@ -93,3 +93,9 @@ export interface UploadProgressProps {
    */
   onCancel: () => void;
 }
+
+/**
+ * so we can get the select-all input value for a column by doing:
+ * getValues()[`${SELECT_ALL_INPUT_FORM_VALUE}-${column.name}]
+ */
+export const SELECT_ALL_INPUT_FORM_VALUE = -1;

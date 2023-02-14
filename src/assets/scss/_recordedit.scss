@@ -31,11 +31,9 @@
     margin-top: -15px;
   }
 
-  #form-section {
+  .main-body {
     display: flex;
     flex-direction: row;
-    overflow-y: auto;
-    overflow-x: hidden;
     width: 100%;
     position: relative;
     padding-top: 15px;
@@ -48,8 +46,7 @@
       flex-direction: column;
       flex-shrink: 0;
 
-      .entity-key,
-      .match-entity-key {
+      .entity-key {
         width: $chaise-caption-column-width;
         border-left: $chaise-RE-border-width solid $chaise-RE-border-color;
         border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
@@ -64,116 +61,149 @@
         flex: none;
       }
 
-      .match-entity-key.select-all-opened {
-        border-top: none;
+      .toggle-select-all-btn {
+        float: right;
       }
     }
 
-    .form-container {
+    .recordedit-form {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      color: black;
+      background-color: white;
+      height: 100%;
       width: 100%;
+      min-width: 250px;
       overflow-x: auto;
-      height: fit-content;
 
-      .recordedit-form {
+      .form-header-row {
+        display: flex;
+      }
+
+      .form-inputs-row {
         display: flex;
         flex-direction: column;
-        background-color: white;
-        height: 100%;
-        min-width: 250px;
-        color: black;
+        // make sure the form is stretched in one-input case
+        min-width: 100%;
+        // make sure the width is the same as the scrollable width in multi-input case
+        width: fit-content;
+        width: -moz-fit-content;
+        width: -webkit-fit-content;
+
+        &.highlighted-row {
+          background-color: #f7f0cf;
+        }
+
+        .inputs-row {
+          display: flex;
+          flex-direction: row;
+        }
+
+        .select-all-row {
+          width: 100%;
+
+          .select-all-text, .select-all-input, .select-all-buttons {
+            float: left;
+          }
+
+          .select-all-text {
+            padding: 4px;
+            border: 1px solid transparent;
+          }
+
+          .select-all-input {
+            width: 250px;
+            margin: 0px 5px;
+          }
+        }
+      }
+
+      // form header and form inputs
+      .entity-value {
+        // make sure the inputs take up as much space as they can
+        // and are the same size
+        flex: 1 1 0;
         position: relative;
 
-        .form-inputs-row,
-        .form-header-row {
-          display: flex;
+        .column-permission-overlay {
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          width: 100%;
+          z-index: 6; // higher than the chaise-clear
         }
 
-        // form header and form inputs
-        .entity-value {
-          // make sure the inputs take up as much space as they can
-          // and are the same size
-          flex: 1 1 0;
-          position: relative;
+        .column-permission-warning {
+          margin: 0;
+          padding: 5px;
+          color: rgb(180, 95, 6);
+        }
 
-          .column-permission-overlay {
+        // displayed while loading the fk data
+        .column-cell-spinner-container {
+          $column-cell-backdrop-z-index: 5;
+          .column-cell-spinner-backdrop {
             position: absolute;
-            left: 0;
             top: 0;
+            left: 0;
             height: 100%;
             width: 100%;
-            z-index: 6; // higher than the chaise-clear
+            z-index: $column-cell-backdrop-z-index;
+            background: $disabled-background-color;
+            opacity: 0.55;
           }
-
-          .column-permission-warning {
-            margin: 0;
-            padding: 5px;
-            color: rgb(180, 95, 6);
-          }
-
-          // displayed while loading the fk data
-          .column-cell-spinner-container {
-            $column-cell-backdrop-z-index: 5;
-            .column-cell-spinner-backdrop {
-              position: absolute;
-              top: 0;
-              left: 0;
-              height: 100%;
-              width: 100%;
-              z-index: $column-cell-backdrop-z-index;
-              background: $disabled-background-color;
-              opacity: 0.55;
-            }
-            .spinner-border-sm {
-              left: 50%;
-              top: 15px;
-              position: absolute;
-              z-index: calc($column-cell-backdrop-z-index + 1);
-            }
+          .spinner-border-sm {
+            left: 50%;
+            top: 15px;
+            position: absolute;
+            z-index: calc($column-cell-backdrop-z-index + 1);
           }
         }
+      }
 
-        .entity-value,
-        .match-entity-value {
-          word-wrap: break-word;
-          min-width: 250px;
-          border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-          border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+      .entity-value,
+      .match-entity-value {
+        word-wrap: break-word;
+        min-width: 250px;
+        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
 
-          // border-left: none;
-          // border-top: none;
+        // border-left: none;
+        // border-top: none;
 
-          border-radius: 0;
-          min-height: 47px;
-          padding: 8px 10px;
-        }
+        border-radius: 0;
+        min-height: 47px;
+        padding: 8px 10px;
+      }
 
-        // only form inputs
-        .column-cell {
-          border-left: none;
-          border-top: none;
-          border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-          border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
-          border-radius: 0;
-          // height: 47px;
-          min-height: 47px;
-          padding: 8px 10px;
+      // only form inputs
+      .column-cell {
+        border-left: none;
+        border-top: none;
+        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-radius: 0;
+        // height: 47px;
+        min-height: 47px;
+        padding: 8px 10px;
 
-          .chaise-input-control.column-cell-input {
-            border: 1px solid $border-color;
-            border-radius: 4px;
-            padding: 0 10px;
-            display: flex;
-            align-items: center;
+        .chaise-input-control.column-cell-input {
+          border: 1px solid $border-color;
+          border-radius: 4px;
+          padding: 0 10px;
+          display: flex;
+          align-items: center;
 
-            .input-switch {
-              height: auto;
-            }
+          .input-switch {
+            height: auto;
           }
         }
       }
     }
 
-    // in both entity-key-column and form-container
+    // in both entity-key-column and form
     .form-header {
       height: 47px;
       border-top: $chaise-RE-border-width solid $chaise-RE-border-color;
@@ -193,8 +223,6 @@
       }
     }
   }
-
-  // // end #form-section
 
   .modal-popup {
     width: 100%;
@@ -228,11 +256,6 @@
 
   .adjust-boolean-dropdown {
     border-top: 0;
-  }
-
-  .select-all-text {
-    padding: 4px;
-    border: 1px solid transparent;
   }
 
   @-moz-document url-prefix() {
