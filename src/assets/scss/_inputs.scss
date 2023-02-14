@@ -341,6 +341,10 @@
 
     @include border-radius($btn-border-radius);
 }
+
+.chaise-input-hidden {
+  display: none !important;
+}
 //
 // .chaise-input-control-color {
 //   max-width: 3rem;

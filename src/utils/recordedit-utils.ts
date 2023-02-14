@@ -19,6 +19,7 @@ import {
   replaceNullOrUndefined, isDisabled
 } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { simpleDeepCopy } from '@isrd-isi-edu/chaise/src/utils/data-utils';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 /**
  * Create a columnModel based on the given column that can be used in a recordedit form
@@ -476,6 +477,16 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
     if (v && !col.isDisabled) {
       if (col.type.isArray) {
         v = JSON.parse(v);
+      } else if (col.isAsset) {
+        // dereference formData so we aren't modifying content in react-hook-form
+        // v is an object with `file`, `filename`, `filesize`, and `url` defined
+        const tempVal = { ...v };
+        tempVal.hatracObj = new windowRef.ERMrest.Upload(v.file, {
+          column: col,
+          reference: reference
+        });
+
+        v = tempVal;
       } else {
         // Special cases for formatting data
         switch (col.type.name) {

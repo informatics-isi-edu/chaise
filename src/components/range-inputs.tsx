@@ -266,8 +266,6 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     [`${name}-max`] : absMax
   };
 
-  console.log({defVals, type, absMin, absMax});
-
   const methods = useForm<FormDefaultValues>({
     mode: 'onChange',
     reValidateMode: 'onChange',
@@ -345,8 +343,6 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   const fromVal = useWatch({ control: methods.control, name: `${name}-min` });
 
   const toVal = useWatch({ control: methods.control, name: `${name}-max` });
-
-  console.log('watched values change::::: ', fromVal, toVal, type);
 
   /**
    * get form errors and set error message

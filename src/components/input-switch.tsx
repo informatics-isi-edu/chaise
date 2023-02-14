@@ -5,9 +5,11 @@ import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import ArrayField from '@isrd-isi-edu/chaise/src/components/input-switch/array-field';
 import BooleanField from '@isrd-isi-edu/chaise/src/components/input-switch/boolean-field';
 import ColorField from '@isrd-isi-edu/chaise/src/components/input-switch/color-field';
+import FileField from '@isrd-isi-edu/chaise/src/components/input-switch/file-field';
+import ForeignkeyField from '@isrd-isi-edu/chaise/src/components/input-switch/foreignkey-field';
 import JsonField from '@isrd-isi-edu/chaise/src/components/input-switch/json-field';
 import LongtextField from '@isrd-isi-edu/chaise/src/components/input-switch/longtext-field';
-import ForeignkeyField from '@isrd-isi-edu/chaise/src/components/input-switch/foreignkey-field';
+
 
 // hooks
 import { useEffect, useState, useRef } from 'react';
@@ -904,6 +906,24 @@ const InputSwitch = ({
           placeholder={arrayPlaceholder as string}
           styles={styles}
         />
+      case 'file':
+        // TODO columnModel is required, this should be refactored better?
+        // maybe columnModel should be a required attribute since there will always be a columnModel
+        if (columnModel) {
+          return <FileField
+            name={name}
+            classes={classes}
+            inputClasses={inputClasses}
+            containerClasses={containerClasses}
+            clearClasses={clearClasses}
+            value={value as string}
+            disableInput={disableInput}
+            onFieldChange={onFieldChange}
+            displayErrors={displayErrors}
+            styles={styles}
+            columnModel={columnModel}
+          />
+        }
       case 'text':
       default:
         return <TextField

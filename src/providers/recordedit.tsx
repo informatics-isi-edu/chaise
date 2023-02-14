@@ -9,6 +9,7 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import { appModes, PrefillObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions, LogReloadCauses, LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
 import { NoRecordError } from '@isrd-isi-edu/chaise/src/models/errors';
+import { UploadProgressProps } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // providers
 import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
@@ -87,6 +88,7 @@ export const RecordeditContext = createContext<{
    */
   showSubmitSpinner: boolean,
   resultsetProps?: ResultsetProps,
+  uploadProgressModalProps?: UploadProgressProps,
   /* max rows allowed to add constant */
   MAX_ROWS_TO_ADD: number
 } | null>(null);
@@ -131,6 +133,7 @@ export default function RecordeditProvider({
 
   const [showSubmitSpinner, setShowSubmitSpinner] = useState(false);
   const [resultsetProps, setResultsetProps] = useState<ResultsetProps | undefined>();
+  const [uploadProgressModalProps, setUploadProgressModalProps] = useState<UploadProgressProps | undefined>();
 
   const [tuples, setTuples] = useState<any[]>([]);
 
@@ -341,118 +344,124 @@ export default function RecordeditProvider({
       // show spinner
       setShowSubmitSpinner(true);
 
-      const submitSuccessCB = (response: any) => {
-        // make sure the leave alert is disabled
-        canLeaveRecordedit.current = true;
+      uploadFiles(submissionRows, () => {
+        // close the modal
+        setUploadProgressModalProps(undefined);
 
-        // communicate with the caller page that the request is done
-        if (appMode === appModes.EDIT) {
-          // TODO should most probably be added when we implement assets
-          // const data = checkUpdate(submissionRowsCopy, rsTuples);
-          try {
-            // check if there is a window that opened the current one
-            // make sure the update function is defined for that window
-            // verify whether we still have a valid vaue to call that function with
-            if (window.opener && window.opener.updated && queryParams.invalidate) {
-              window.opener.updated(queryParams.invalidate);
+        const submitSuccessCB = (response: any) => {
+          // make sure the leave alert is disabled
+          canLeaveRecordedit.current = true;
+
+          // communicate with the caller page that the request is done
+          if (appMode === appModes.EDIT) {
+            // TODO should most probably be added when we implement assets
+            // const data = checkUpdate(submissionRowsCopy, rsTuples);
+            try {
+              // check if there is a window that opened the current one
+              // make sure the update function is defined for that window
+              // verify whether we still have a valid vaue to call that function with
+              if (window.opener && window.opener.updated && queryParams.invalidate) {
+                window.opener.updated(queryParams.invalidate);
+              }
+            } catch (exp) {
+              // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
+              // And if it's from another origin, we don't need to call updated since it's not
+              // the same row that we wanted to update in recordset (table directive)
             }
-          } catch (exp) {
-            // if window.opener is from another origin, this will result in error on accessing any attribute in window.opener
-            // And if it's from another origin, we don't need to call updated since it's not
-            // the same row that we wanted to update in recordset (table directive)
-          }
-        } else {
-          // cleanup the prefill query parameter
-          if (queryParams.prefill) {
-            CookieService.deleteCookie(queryParams.prefill);
-          }
+          } else {
+            // cleanup the prefill query parameter
+            if (queryParams.prefill) {
+              CookieService.deleteCookie(queryParams.prefill);
+            }
 
-          // add cookie indicating record successfully added
-          if (queryParams.invalidate) {
-            // the value of the cookie is not important as other apps are just looking for the cookie name
-            CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
-          }
-        }
-
-        const page = response.successful;
-        const failedPage = response.failed;
-        const disabledPage = response.disabled;
-
-        // redirect to record app
-        if (forms.length === 1) {
-          // Created a single entity or Updated one
-          addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
-
-          windowRef.location = page.reference.contextualize.detailed.appLink;
-        }
-        // see if we can just redirect, or if we need the resultset view.
-        else {
-          const compactRef = page.reference.contextualize.compact;
-          const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
-
-          const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
-
-          // if we have failures: <num> {updated|created} records
-          // otherwise: {Updated|Created} records
-          let headerPrefix = appMode === appModes.EDIT ? 'Updated' : 'Created';
-          if (failedPage) {
-            headerPrefix = page.length + (appMode === appModes.EDIT ? ' updated' : 'created');
+            // add cookie indicating record successfully added
+            if (queryParams.invalidate) {
+              // the value of the cookie is not important as other apps are just looking for the cookie name
+              CookieService.setCookie(queryParams.invalidate, '1', new Date(Date.now() + (60 * 60 * 24 * 1000)));
+            }
           }
 
-          // resultset view
-          setResultsetProps({
-            success: {
-              page,
-              header: `${headerPrefix} record${handlePlural(page)}`,
-              ... (canLinkToRecordset && {
-                exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
-              })
-            },
-            ... (failedPage && {
-              failed: {
-                page: failedPage,
-                header: `${failedPage.length} failed ${appMode === appModes.EDIT ? 'update' : 'creation'}${handlePlural(failedPage)}`
+          const page = response.successful;
+          const failedPage = response.failed;
+          const disabledPage = response.disabled;
+
+          // redirect to record app
+          if (forms.length === 1) {
+            // Created a single entity or Updated one
+            addAlert('Your data has been saved. Redirecting you now to the record...', ChaiseAlertType.SUCCESS);
+
+            windowRef.location = page.reference.contextualize.detailed.appLink;
+          }
+          // see if we can just redirect, or if we need the resultset view.
+          else {
+            const compactRef = page.reference.contextualize.compact;
+            const canLinkToRecordset = compactRef.readPath.length <= URL_PATH_LENGTH_LIMIT;
+
+            const handlePlural = (p: any) => (p.length > 1 ? 's' : '');
+
+            // if we have failures: <num> {updated|created} records
+            // otherwise: {Updated|Created} records
+            let headerPrefix = appMode === appModes.EDIT ? 'Updated' : 'Created';
+            if (failedPage) {
+              headerPrefix = page.length + (appMode === appModes.EDIT ? ' updated' : 'created');
+            }
+
+            // resultset view
+            setResultsetProps({
+              success: {
+                page,
+                header: `${headerPrefix} record${handlePlural(page)}`,
+                ... (canLinkToRecordset && {
+                  exploreLink: compactRef.appLink, editLink: compactRef.contextualize.entryEdit.appLink
+                })
               },
-              // TODO add exploreLink (most probably requires ermrestjs change)
-            }),
-          });
-        }
-      };
-
-      const submitErrorCB = (err: any) => {
-        console.log(err);
-        addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
-      };
-
-      const submitFinallyCB = () => {
-        setShowSubmitSpinner(false);
-      };
-
-      if (appMode === appModes.EDIT) {
-        const tempTuples = [...tuples];
-
-        // TODO submissionRowsCopy for upload
-        /**
-         * After uploading files, the returned submissionRows contains
-         * new file data. This includes filename, filebyte, and md5.
-         * The following makes sure that all the data are updated.
-         * That's why this for loop must be after uploading files and not before.
-         * And we cannot just pass submissionRows to update function, because
-         * update function only accepts array of tuples (and not just key-value pair).
-         */
-        for (let i = 0; i < submissionRows.length; i++) {
-          const row = submissionRows[i];
-          const data = tempTuples[i].data;
-          // assign each value from the form to the data object on tuple
-          for (const key in row) {
-            data[key] = (row[key] === '' ? null : row[key]);
+              ... (failedPage && {
+                failed: {
+                  page: failedPage,
+                  header: `${failedPage.length} failed ${appMode === appModes.EDIT ? 'update' : 'creation'}${handlePlural(failedPage)}`
+                },
+                // TODO add exploreLink (most probably requires ermrestjs change)
+              }),
+            });
           }
-        }
+        };
 
-        reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
-      } else {
-        reference.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
-      }
+        const submitErrorCB = (err: any) => {
+          console.log(err);
+          addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
+        };
+
+        const submitFinallyCB = () => {
+          setShowSubmitSpinner(false);
+        };
+
+        if (appMode === appModes.EDIT) {
+          const tempTuples = [...tuples];
+
+          // TODO submissionRowsCopy for upload
+          /**
+           * After uploading files, the returned submissionRows contains
+           * new file data. This includes filename, filebyte, and md5.
+           * The following makes sure that all the data are updated.
+           * That's why this for loop must be after uploading files and not before.
+           * And we cannot just pass submissionRows to update function, because
+           * update function only accepts array of tuples (and not just key-value pair).
+           */
+          for (let i = 0; i < submissionRows.length; i++) {
+            const row = submissionRows[i];
+            const data = tempTuples[i].data;
+            // assign each value from the form to the data object on tuple
+            for (const key in row) {
+              data[key] = (row[key] === '' ? null : row[key]);
+            }
+          }
+
+          reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+        } else {
+          const createRef = reference.unfilteredReference.contextualize.entryCreate;
+          createRef.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+        }
+      });
     });
   }
 
@@ -462,6 +471,75 @@ export default function RecordeditProvider({
 
     const invalidMessage = 'Sorry, the data could not be submitted because there are errors on the form. Please check all fields and try again.';
     addAlert(invalidMessage, ChaiseAlertType.ERROR);
+  }
+
+  const uploadFiles = (submissionRowsCopy: any[], onSuccess: () => void) => {
+    // If url is valid
+    if (areFilesValid(submissionRowsCopy)) {
+      setUploadProgressModalProps({
+        rows: submissionRowsCopy,
+        onSuccess: onSuccess,
+        onCancel: () => {
+        // onCancel: (exception: any) => {
+          setShowSubmitSpinner(false);
+
+          // if (typeof exception !== "string") {
+          //   // happens with an error with code 0 (Timeout Error)
+          //   const message = exception.message || MESSAGE_MAP.errorMessageMissing;
+
+          //   // if online, we don't know how to handle the error
+          //   if (windowRef.navigator.onLine) addAlert(message, ChaiseAlertType.ERROR);
+          // }
+
+          // close the modal
+          setUploadProgressModalProps(undefined);
+        }
+      })
+    } else {
+      setShowSubmitSpinner(false);
+    }
+  }
+
+  const areFilesValid = (rows: any[]) => {
+    let isValid = true, index = 0;
+    // Iterate over all rows that are passed as parameters to the modal controller
+    rows.forEach(function (row) {
+
+      index++;
+
+      // Iterate over each property/column of a row
+      for (const k in row) {
+
+        // If the column type is object and has a file property inside it
+        // Then increment the count for no of files and create an uploadFile Object for it
+        // Push this to the tuple array for the row
+        // NOTE: each file object has an hatracObj property which is an hatrac object
+        try {
+          const column = reference.columns.find((c: any) => { return c.name === k; });
+          if (column.isAsset) {
+
+            if (row[k].url === '' && !column.nullok) {
+              isValid = false;
+              addAlert('Please select file for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+            } else if (row[k] !== null && typeof row[k] === 'object' && row[k].file) {
+              try {
+                if (!row[k].hatracObj.validateURL(row)) {
+                  isValid = false;
+                  addAlert('Invalid url template for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+                }
+              } catch (e) {
+                isValid = false;
+                addAlert('Invalid url template for column ' + k + ' for record ' + index, ChaiseAlertType.ERROR);
+              }
+            }
+          }
+        } catch (e) {
+          //Nothing to do
+        }
+      }
+    });
+
+    return isValid;
   }
 
   const addForm = (count: number) => {
@@ -774,6 +852,7 @@ export default function RecordeditProvider({
       onSubmitInvalid,
       showSubmitSpinner,
       resultsetProps,
+      uploadProgressModalProps,
       MAX_ROWS_TO_ADD: maxRowsToAdd
     };
   }, [

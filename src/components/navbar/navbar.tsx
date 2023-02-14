@@ -11,6 +11,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import ChaiseLogin from '@isrd-isi-edu/chaise/src/components/navbar/login';
 import NavbarDropdown from '@isrd-isi-edu/chaise/src/components/navbar/navbar-dropdown';
 import ChaiseBanner from '@isrd-isi-edu/chaise/src/components/navbar/banner';
+import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
 import useAuthn from '@isrd-isi-edu/chaise/src/hooks/authn';
@@ -35,6 +36,7 @@ import {
 } from '@isrd-isi-edu/chaise/src/utils/menu-utils';
 import { isObjectAndNotNull, isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { debounce } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
+import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 
 const ChaiseNavbar = (): JSX.Element => {
   const catalogId: string = getCatalogId();
@@ -274,12 +276,13 @@ const ChaiseNavbar = (): JSX.Element => {
   const renderLiveButton = () => {
     if (!isVersioned()) return;
 
-    return (<a
-      id='live-btn'
-      className='nav navbar-nav navbar-right'
-      onClick={handleToLiveClick}
-    // uib-tooltip="You are viewing snapshotted data. Click here to return to the live data catalog." tooltip-placement="bottom"
-    >View Live Data</a>)
+    return (<ChaiseTooltip placement='bottom' tooltip={MESSAGE_MAP.tooltip.liveData}>
+      <a
+        id='live-btn'
+        className='nav navbar-nav navbar-right'
+        onClick={handleToLiveClick}
+      >View Live Data</a>
+    </ChaiseTooltip>)
   }
 
   const renderRidSearchIcon = () => {
