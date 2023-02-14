@@ -19,6 +19,7 @@ import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-util
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { copyOrClearValue, getColumnModelLogAction, getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '../../utils/string-utils';
 
 const FormContainer = (): JSX.Element => {
 
@@ -75,11 +76,9 @@ type FormRowProps = {
 const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
 
   const {
-    forms, appMode, reference, columnModels, tuples, activeSelectAll, toggleActiveSelectAll,
+    forms, appMode, reference, columnModels, tuples, activeSelectAll,
     canUpdateValues, columnPermissionErrors, foreignKeyData, waitingForForeignKeyData,
   } = useRecordedit();
-
-  const methods = useFormContext();
 
   /**
    * which columns should show the permission error.
@@ -132,58 +131,6 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
     });
   };
 
-  const applyValueToAll = () => {
-    const cm = columnModels[columnModelIndex];
-
-    const defaultLogInfo = cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo;
-    // TODO parent log obj
-    LogService.logClientAction({
-      action: getColumnModelLogAction(LogActions.SET_ALL_APPLY, cm, null),
-      stack: getColumnModelLogStack(cm, null)
-    }, defaultLogInfo);
-
-    setValueForAllInputs();
-  };
-
-  const clearAllValues = () => {
-    const cm = columnModels[columnModelIndex];
-
-    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
-    // TODO parent log obj
-    LogService.logClientAction({
-      action: getColumnModelLogAction(LogActions.SET_ALL_CLEAR, cm, null),
-      stack: getColumnModelLogStack(cm, null)
-    }, defaultLogInfo);
-
-    setValueForAllInputs(true);
-  };
-
-  const closeSelectAll = () => {
-    const cm = columnModels[columnModelIndex];
-
-    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
-    // TODO parent log obj
-    LogService.logClientAction({
-      action: getColumnModelLogAction(LogActions.SET_ALL_CANCEL, cm, null),
-      stack: getColumnModelLogStack(cm, null)
-    }, defaultLogInfo);
-
-    toggleActiveSelectAll(columnModelIndex);
-  };
-
-  // ------------------------ helper functions ----------------------------//
-  const setValueForAllInputs = (clearValue?: boolean) => {
-    const cm = columnModels[columnModelIndex];
-
-    forms.forEach((formValue: number) => {
-      // ignore the ones that cannot be updated
-      if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
-        return;
-      }
-      methods.reset(copyOrClearValue(cm, methods.getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue));
-    });
-  };
-
   // -------------------------- render logic ---------------------- //
 
   const showSelectAll = activeSelectAll === columnModelIndex;
@@ -225,7 +172,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
     const isDisabled = getIsDisabled(formNumber, formNumber === SELECT_ALL_INPUT_FORM_VALUE);
 
     // boolean and asset will handle their own disabled inputs
-    const inputType = (isDisabled && !(column.isAsset || column.type.name === 'boolean' )) ? 'disabled' : columnModel.inputType;
+    const inputType = (isDisabled && !(column.isAsset || column.type.name === 'boolean')) ? 'disabled' : columnModel.inputType;
 
     let placeholder = '';
     let permissionError = '';
@@ -278,34 +225,159 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
           </div>
         ))}
       </div>
-      {showSelectAll &&
-        <div className='select-all-row match-entity-value'>
-          <div className='select-all-text'>Set value for all records: </div>
-          <div className='select-all-input'>
-            {renderInput(SELECT_ALL_INPUT_FORM_VALUE)}
-          </div>
-          <div className='chaise-btn-group select-all-buttons'>
-            <ChaiseTooltip tooltip='Click to apply the value to all records.' placement='bottom'>
-              <button type='button' className='chaise-btn chaise-btn-secondary' onClick={applyValueToAll}>
-                Apply All
-              </button>
-            </ChaiseTooltip>
-            <ChaiseTooltip tooltip='Click to clear all values for all records.' placement='bottom'>
-              <button type='button' className='chaise-btn chaise-btn-secondary' onClick={clearAllValues}>
-                Clear All
-              </button>
-            </ChaiseTooltip>
-            <ChaiseTooltip tooltip='Click to close the set all input.' placement='bottom'>
-              <button type='button' className='chaise-btn chaise-btn-secondary' onClick={closeSelectAll}>
-                Close
-              </button>
-            </ChaiseTooltip>
-          </div>
-        </div>
-      }
+      {showSelectAll && <SelectAllRow columnModelIndex={columnModelIndex} />}
     </div>
   )
 
 };
+
+/**
+ * shows the select all row
+ * NOTE this is its own component to avoid rerendering the whole row on each change.
+ */
+const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
+  const {
+    columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
+    canUpdateValues, toggleActiveSelectAll
+  } = useRecordedit();
+
+  const { watch, reset, getValues, formState: { errors } } = useFormContext();
+
+  const [isEmpty, setIsEmpty] = useState(true);
+
+  /**
+   * if the selected value is empty, we should disable the apply-all
+   * useEffect allows us to look for the value and only rerender when we have to.
+   */
+  useEffect(() => {
+    const subscribe = watch((data, options) => {
+      const n = `${SELECT_ALL_INPUT_FORM_VALUE}-${columnModels[columnModelIndex].column.name}`;
+      const columnModel = columnModels[columnModelIndex];
+      if (!options.name || options.name !== n) return;
+
+      // see if the input is empty
+      let temp = !Boolean(data[n]);
+      if (columnModel.column.type.name === 'boolean') {
+        temp = typeof data[n] !== 'boolean';
+      }
+
+      if (isEmpty !== temp) {
+        setIsEmpty(temp);
+      }
+
+    });
+    return () => subscribe.unsubscribe();
+  }, [watch, isEmpty]);
+
+  // ------------------------ callbacks -----------------------------------//
+
+  const applyValueToAll = () => {
+    const cm = columnModels[columnModelIndex];
+
+    const defaultLogInfo = cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo;
+    // TODO parent log obj
+    LogService.logClientAction({
+      action: getColumnModelLogAction(LogActions.SET_ALL_APPLY, cm, null),
+      stack: getColumnModelLogStack(cm, null)
+    }, defaultLogInfo);
+
+    setValueForAllInputs();
+  };
+
+  const clearAllValues = () => {
+    const cm = columnModels[columnModelIndex];
+
+    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
+    // TODO parent log obj
+    LogService.logClientAction({
+      action: getColumnModelLogAction(LogActions.SET_ALL_CLEAR, cm, null),
+      stack: getColumnModelLogStack(cm, null)
+    }, defaultLogInfo);
+
+    setValueForAllInputs(true);
+  };
+
+  const closeSelectAll = () => {
+    const cm = columnModels[columnModelIndex];
+
+    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
+    // TODO parent log obj
+    LogService.logClientAction({
+      action: getColumnModelLogAction(LogActions.SET_ALL_CANCEL, cm, null),
+      stack: getColumnModelLogStack(cm, null)
+    }, defaultLogInfo);
+
+    toggleActiveSelectAll(columnModelIndex);
+  };
+
+  /**
+   * The callback used by functions above to set the values of the row.
+   * if clearValue is true, it will use emtpy value, otherwise it will copy the select-all input value
+   */
+  const setValueForAllInputs = (clearValue?: boolean) => {
+    const cm = columnModels[columnModelIndex];
+
+    forms.forEach((formValue: number) => {
+      // ignore the ones that cannot be updated
+      if (appMode === appModes.EDIT && canUpdateValues && !canUpdateValues[`${formValue}-${cm.column.name}`]) {
+        return;
+      }
+      reset(copyOrClearValue(cm, getValues(), foreignKeyData.current, formValue, SELECT_ALL_INPUT_FORM_VALUE, clearValue));
+    });
+  };
+
+  // -------------------------- render logic ---------------------- //
+
+  const columnModel = columnModels[columnModelIndex];
+  const colName = columnModel.column.name;
+  const inputName = `${SELECT_ALL_INPUT_FORM_VALUE}-${colName}`;
+
+  const btnClass = `${makeSafeIdAttr(columnModel.column.displayname.value)} chaise-btn chaise-btn-secondary`;
+
+  return (
+    <div className='select-all-row match-entity-value'>
+      <div className='select-all-text'>Set value for all records: </div>
+      <div className='select-all-input'>
+        {/* TODO we should also pass isRequired so we can override the columnModel in here */}
+        <InputSwitch
+          key={colName}
+          displayErrors={true}
+          disableInput={false}
+          name={inputName}
+          type={columnModel.inputType}
+          classes='column-cell-input'
+          columnModel={columnModel}
+          appMode={appMode}
+          formNumber={SELECT_ALL_INPUT_FORM_VALUE}
+          parentReference={reference}
+          foreignKeyData={foreignKeyData}
+          waitingForForeignKeyData={waitingForForeignKeyData}
+        />
+      </div>
+      <div className='chaise-btn-group select-all-buttons'>
+        <ChaiseTooltip tooltip='Click to apply the value to all records.' placement='bottom'>
+          <button
+            type='button' className={`select-all-apply-${btnClass}`} onClick={applyValueToAll}
+            // we should disable it when its empty or has error
+            // NOTE I couldn't use `errors` in the watch above since it was always one cycle behind.
+            disabled={isEmpty || (errors && inputName in errors)}
+          >
+            Apply All
+          </button>
+        </ChaiseTooltip>
+        <ChaiseTooltip tooltip='Click to clear all values for all records.' placement='bottom'>
+          <button type='button' className={`select-all-clear-${btnClass}`} onClick={clearAllValues}>
+            Clear All
+          </button>
+        </ChaiseTooltip>
+        <ChaiseTooltip tooltip='Click to close the set all input.' placement='bottom'>
+          <button type='button' className={`select-all-close-${btnClass}`} onClick={closeSelectAll}>
+            Close
+          </button>
+        </ChaiseTooltip>
+      </div>
+    </div>
+  )
+}
 
 export default FormContainer;
