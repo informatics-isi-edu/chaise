@@ -8,12 +8,15 @@ import useStateRef from '@isrd-isi-edu/chaise/src/hooks/state-ref';
 import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 
 // models
-import { UploadFileObject } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { FileObject, UploadFileObject } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 export interface UploadProgressModalProps {
+  /**
+   * rows of data from recordedit form to get file values from
+   */
   rows: any[];
   /**
    * prop to show modal
@@ -35,24 +38,37 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
   const [title, setTitle] = useState<string>('');
 
+  // Contains arrays of UploadFileObjects. Each array is for each record number, each record might contain multiple files
+  const [uploadRows, setUploadRows, uploadRowsRef] = useStateRef<UploadFileObject[][]>([]);
+
+  // 5 Booleans control the state of the upload modal
   const [isUpload, setIsUpload] = useState<boolean>(false);
   const [isCreateUploadJob, setIsCreateUploadJob] = useState<boolean>(false);
   const [isFileExists, setIsFileExists] = useState<boolean>(false);
 
-  // This will contains all the tuples who have files to be uploaded.
-  const [uploadRows, setUploadRows, uploadRowsRef] = useStateRef<any[]>([]);
-
-  // The controller uses a bunch of variables that're being used to keep track of current state of upload.
   const [erred, setErred] = useState<boolean>(false);
+  const [aborted, setAborted] = useState<boolean>(false);
 
+  // total number of files being uploaded
   const [filesCt, setFilesCt] = useState<number>(0);
+  // total number of files to upload after checking if any exist on the server already
+  // NOTE: This number will be less than filesCt if files already exist in hatrac
   const [filesToUploadCt, setFilesToUploadCt, filesToUploadCtRef] = useStateRef<number>(0);
 
+  // counter of files that already exist in hatrac. Might not be needed
   const [fileExistsCount, setFileExistsCount] = useState<number>(0);
+  // the total size of all files to be uploaded
   const [totalSize, setTotalSize, totalSizeRef] = useStateRef<number>(0);
+  // the total size transferred to the server already, updated by onNotify callback
   const [sizeTransferred, setSizeTransferred, sizeTransferredRef] = useStateRef<number>(0);
+  // the total more readable size of all files to be uploaded 
   const [humanTotalSize, setHumanTotalSize] = useState<string>('');
+  // the total more readable size transferred to the server already, updated by onNotify callback
   const [humanSizeTransferred, setHumanSizeTransferred] = useState<string>('');
+
+  // following state variables for each step have 2 values:
+  //   - progress: value from 0 - 100 
+  //   - completed: number of files completed in this step so far
 
   // checksum step state variables
   const [checksumProgress, setChecksumProgress] = useState<number>(0);
@@ -70,22 +86,20 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [numUploadsCompleted, setNumUploadsCompleted] = useState<number>(0);
 
-  // uplaods completed step state variables
+  // uploads completed step state variables
   const [uploadJobCompleteProgress, setUploadJobCompleteProgress] = useState<number>(0);
   const [uploadJobCompletedCount, setUploadJobCompletedCount] = useState<number>(0)
 
-  const [speed, setSpeed] = useState<string>('');
-
   // used for uploading files one by one
-  const [queue, setQueue, queueRef] = useStateRef<any[]>([]);
-
+  const [queue, setQueue, queueRef] = useStateRef<UploadFileObject[]>([]);
   // used for finializing the upload jobs one by one
-  const [jobCompletionQueue, setJobCompletionQueue, jobCompletionQueueRef] = useStateRef<any[]>([])
+  const [jobCompletionQueue, setJobCompletionQueue, jobCompletionQueueRef] = useStateRef<UploadFileObject[]>([])
 
-  const [aborted, setAborted] = useState<boolean>(false);
-
+  // current upload speed
+  const [speed, setSpeed] = useState<string>('');
+  // used in the speed calculation
   const [lastByteTransferred, setLastByteTransferred, lastByteTransferredRef] = useStateRef<number>(0);
-  let speedIntervalTimer: any;
+  let speedIntervalTimer: NodeJS.Timer;
 
   /*=== Hooks ===*/
 
@@ -103,7 +117,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     rows.forEach((row: any) => {
 
       // Create a tuple for the row
-      const tuple: any[] = [];
+      const tuple: UploadFileObject[] = [];
 
       // Iterate over each property/column of a row
       for (const k in row) {
@@ -167,8 +181,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsCreateUploadJob(false);
     setIsFileExists(false);
     setIsUpload(false);
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         item.hatracObj.calculateChecksum(item.row).then(
           (url: string) => onChecksumCompleted(item, url),
           onError,
@@ -185,8 +199,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
     setTitle('Checking for existing files');
     setIsFileExists(true);
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         item.hatracObj.fileExists().then(
           () => onFileExistSuccess(item),
           onError);
@@ -203,8 +217,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setTitle('Creating Upload Jobs for the files');
     setIsCreateUploadJob(true);
     setIsUpload(false);
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         item.hatracObj.createUploadJob().then(
           () => onJobCreated(item),
           onError);
@@ -212,7 +226,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     });
   };
 
-  // This function starts upload in hatrac.js for all files
+  // This function starts the upload in hatrac.js for all files
   const startUpload = () => {
 
     if (erred || aborted) return;
@@ -221,19 +235,18 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsUpload(true);
     setHumanTotalSize(humanFileSize(totalSizeRef.current));
 
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         onProgressChanged(item, 0);
         queueRef.current.push(item);
       });
     });
-    
-    // NOTE: maybe watch for `queue` to be set with useEffect and call startQueuedUpload in the hook
-    //    - but this would trigger on each `setQueue` call after shifting the queue
+
+    // start uploading files
     startQueuedUpload();
 
     setSpeed('Calculating Speed');
-
+    // create an interval that periodically checks the uploaded content and updates the user on the speed
     speedIntervalTimer = setInterval(() => {
       const diff = sizeTransferredRef.current - lastByteTransferredRef.current;
       setLastByteTransferred(sizeTransferredRef.current);
@@ -242,6 +255,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     }, 1000);
   };
 
+  // This function starts to upload the next file in queue
   const startQueuedUpload = () => {
 
     if (erred || aborted) return;
@@ -291,27 +305,25 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     });
   };
 
-  // This function is called by all rejected promises form above functions
+  // This function is called by all rejected promises from above functions
   const onError = (err: any) => {
     if (erred || aborted) return;
 
     setErred(true);
-
     abortUploads(err);
-
     onCancel();
   };
 
   /*=== uploadFile class ===*/
   /**
    * @function
-   * @param {Object} data - data object for the file column
+   * @param {FileObject} data - FileObject for the file column
    * @param {Ermrest.Column} column - Column Object
-   * @param {Object} row - Json key value Object of row values
+   * @param {Object} row - Json key value Object of row values from the recordedit form
    * @desc
    * Creates an uploadFile obj to keep track of file and its upload.
    */
-  const createUploadFileObject = (data: any, column: any, row: any): UploadFileObject => {
+  const createUploadFileObject = (data: FileObject, column: any, row: any): UploadFileObject => {
     const file = data.file;
 
     const uploadFileObject: UploadFileObject = {
@@ -358,8 +370,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsCreateUploadJob(false);
     setIsFileExists(false);
 
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         progress += item.checksumProgress;
       });
     });
@@ -368,7 +380,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   };
 
   // This function is called as a success promise callback by calculateChecksum function above for each file
-  // Once all files are done it calls createUploadJob
+  // Once all files are done, call checkFileExists
   const onChecksumCompleted = (ufo: UploadFileObject, url: string) => {
 
     if (erred || aborted) return;
@@ -381,14 +393,15 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       ufo.url = url;
       setChecksumCompleted((prev: number) => prev++);
 
-      // Once all checksums have been calculated call createUploadJobs
-      // To create a job for each file
+      // Once all checksums have been calculated call checkFileExists
       if (checksumCompleted === filesCt) {
         checkFileExists();
       }
     }
   };
 
+  // This function is called as a success promise callback by checkFileExists function above for each file
+  // Once all files have been checked if they exist or not, call createUploadJobs
   const onFileExistSuccess = (ufo: UploadFileObject) => {
 
     if (erred || aborted) return;
@@ -398,7 +411,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     ufo.jobCreateDone = false;
 
     let tempfilesToUploadCt = filesToUploadCtRef.current;
-    // if the job is already done, that means the file has an idntical file already in the server (md5 and size match)
+    // if the job is already done, that means the file has an identical file already in the server (md5 and size match)
     // we don't want to even create a job for that file because it shouldn't be uploaded
     if (ufo.hatracObj.jobDone) {
       tempfilesToUploadCt--;
@@ -412,8 +425,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     setIsFileExists(true);
     setIsUpload(false);
     let pendingFileExists = false;
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         if (!item.fileExistsDone) {
           pendingFileExists = true;
         }
@@ -430,8 +443,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     }
   }
 
-  // This function is called as a success promise callback by createUpload function above for each file
-  // Once upload jobs for all files are done it calls checkFileExists
+  // This function is called as a success promise callback by createUploadJobs function above for each file
+  // Once upload jobs for all files are done it calls startUpload
   const onJobCreated = (ufo: UploadFileObject) => {
 
     if (erred || aborted) return;
@@ -444,8 +457,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     // This code updates the main progress bar for job creation progress for all files
     let progress = 0;
     let pendingJobCreation = false;
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         if (!item.jobCreateDone) {
           pendingJobCreation = true;
         }
@@ -462,9 +475,6 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     }
   };
 
-  // This function is called as a success promise callback by checkFileExists function above for each file
-  // Once all files have been checked for their existence it calls startUpload
-
   // This function is called as a notify promise callback by startUpload function above for each file
   // It updates the progress for upload on the UI
   const onProgressChanged = (ufo: UploadFileObject, uploadedSize: number) => {
@@ -480,8 +490,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
     // This code updates the main progress bar for uploading file
     let progress = 0
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         progress += item.progress;
       });
     });
@@ -493,6 +503,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   };
 
   // This function is called as a success promise callback by startUpload function above for each file
+  // If there are still uploads pending, this function starts the next queued upload
   // Once all files are uploaded it calls doQueuedJobCompletion
   const onUploadCompleted = (ufo: UploadFileObject) => {
 
@@ -503,8 +514,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     if (!ufo.uploadCompleted) {
       ufo.uploadCompleted = true;
       // find if there are any job pending
-      const uploadPending = uploadRowsRef.current.some((row: any) => {
-        return row.some((item: any) => {
+      const uploadPending = uploadRowsRef.current.some((row: UploadFileObject[]) => {
+        return row.some((item: UploadFileObject) => {
           return !item.uploadCompleted;
         });
       });
@@ -516,8 +527,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
       if (!uploadPending) {
         clearInterval(speedIntervalTimer);
 
-        uploadRowsRef.current.forEach((row: any) => {
-          row.forEach((item: any) => {
+        uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+          row.forEach((item: UploadFileObject) => {
             jobCompletionQueueRef.current.push(item);
           });
         });
@@ -531,7 +542,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
   // This function is called as a success promise callback by doQueuedJobCompletion function above for each file
   // Once upload jobs are marked as completed it sets the url in the columns for rows
-  // And closes the modal
+  // When there are no more pending jobs to complete, close the modal
   const onCompleteUploadJob = (ufo: UploadFileObject, url: string) => {
 
     if (erred || aborted) return;
@@ -542,8 +553,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     // This code updates the main progress bar for job completion progress for all files
     let progress = 0;
     let pendingJobCompletion = false;
-    uploadRowsRef.current.forEach((row: any) => {
-      row.forEach((item: any) => {
+    uploadRowsRef.current.forEach((row: UploadFileObject[]) => {
+      row.forEach((item: UploadFileObject) => {
         if (!item.completeUploadJob) {
           pendingJobCompletion = true;
         }
@@ -585,6 +596,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
 
   /*=== Functions for rendering modal content ===*/
+  // render the main progress bar for ALL upload jobs
   const renderBodyContent = () => {
     if (!isCreateUploadJob && !isFileExists && !isUpload) {
       return (<>
@@ -642,8 +654,9 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     }
   }
 
-  const renderRowSummary = (row: any) => {
-    return row.map((item: any, itemIdx: number) => {
+  // render individual progress bars for each file to be uploaded
+  const renderRowSummary = (row: UploadFileObject[]) => {
+    return row.map((item: UploadFileObject, itemIdx: number) => {
       return (<tr key={itemIdx}>
         <td>
           <div className='ellipsis'>{item.name} ( {item.humanFileSize} )</div>
@@ -677,7 +690,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   }
 
   const renderTableSummary = () => {
-    return uploadRows.map((row: any, rowIndex: number) => {
+    return uploadRows.map((row: UploadFileObject[], rowIndex: number) => {
       if (row.length === 0) return;
 
       return (<tbody key={rowIndex}>

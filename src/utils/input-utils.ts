@@ -221,6 +221,7 @@ export function arrayFieldPlaceholder(baseType: string) {
 }
 
 export function humanFileSize(size: number) {
+  // Math.log(0) is -Infinity
   const i = size === 0 ? 0 : Math.floor( Math.log(size) / Math.log(1024) );
   return Number(( size / Math.pow(1024, i) ).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }

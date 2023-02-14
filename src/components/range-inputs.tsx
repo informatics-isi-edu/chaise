@@ -344,8 +344,6 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
 
   const toVal = useWatch({ control: methods.control, name: `${name}-max` });
 
-  // console.log('watched values change::::: ', fromVal, toVal, type);
-
   /**
    * get form errors and set error message
    */

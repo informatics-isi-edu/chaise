@@ -445,8 +445,6 @@ export default function RecordeditProvider({
 
           reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         } else {
-          // TODO: isModalUpdate?
-          // const createRef = isModalUpdate ? derivedref.unfilteredReference.contextualize.entryCreate : rsReference.unfilteredReference.contextualize.entryCreate;
           const createRef = reference.unfilteredReference.contextualize.entryCreate;
           createRef.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         }
@@ -468,8 +466,8 @@ export default function RecordeditProvider({
       setUploadProgressModalProps({
         rows: submissionRowsCopy,
         onSuccess: onSuccess,
-        // onCancel: (exception: any) => {
         onCancel: () => {
+        // onCancel: (exception: any) => {
           setShowSubmitSpinner(false);
 
           // if (typeof exception !== "string") {

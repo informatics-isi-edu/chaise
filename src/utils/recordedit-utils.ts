@@ -397,6 +397,8 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       if (col.type.isArray) {
         v = JSON.parse(v);
       } else if (col.isAsset) {
+        // dereference formData so we aren't modifying content in react-hook-form
+        // v is an object with `file`, `filename`, `filesize`, and `url` defined
         const tempVal = { ...v };
         tempVal.hatracObj = new windowRef.ERMrest.Upload(v.file, {
           column: col,

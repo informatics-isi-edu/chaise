@@ -80,6 +80,9 @@ export interface PrefillObject {
 }
 
 export interface UploadProgressProps {
+  /**
+   * rows of data from recordedit form to get file values from
+   */
   rows: any[];
   /**
    * prop to trigger on delete confirmation

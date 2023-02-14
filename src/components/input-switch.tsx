@@ -922,7 +922,6 @@ const InputSwitch = ({
             displayErrors={displayErrors}
             styles={styles}
             columnModel={columnModel}
-            parentReference={parentReference}
           />
         }
       case 'text':

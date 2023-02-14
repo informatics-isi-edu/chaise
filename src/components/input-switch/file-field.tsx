@@ -5,7 +5,7 @@ import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, ChangeEventHandler, useEffect, useRef, useState } from 'react';
 import { useFormContext, useController } from 'react-hook-form';
 
 // models
@@ -45,7 +45,7 @@ type FileFieldProps = {
   */
   displayErrors?: boolean,
   value: string,
-  styles?: any,
+  styles?: React.CSSProperties,
   /**
   * the handler function called on input change
   */
@@ -54,10 +54,6 @@ type FileFieldProps = {
    * The column model representing this field in the form.
    */
   columnModel: RecordeditColumnModel,
-  /**
-   * The reference that is used for the form
-   */
-  parentReference?: any,
 };
 
 const FileField = ({
@@ -72,8 +68,7 @@ const FileField = ({
   containerClasses,
   styles,
   onFieldChange,
-  columnModel,
-  parentReference,
+  columnModel
 }: FileFieldProps): JSX.Element => {
 
   const { addAlert } = useAlert();
@@ -102,13 +97,13 @@ const FileField = ({
   const fileElementId = 'fileInput' + Math.round(Math.random() * 100000);
   const fileExtensionFilter = columnModel.column.filenameExtFilter;
   // needs to be a comma separated list, i.e. ".jpg", ".png", ...
-  const fileExtensions = fileExtensionFilter.join(",");
+  const fileExtensions = fileExtensionFilter.join(',');
 
   useEffect(() => {
     if (onFieldChange) {
       onFieldChange(fieldValue);
     }
-    if (showClear != Boolean(fieldValue)) {
+    if (showClear !== Boolean(fieldValue)) {
       setShowClear(Boolean(fieldValue.url && fieldValue.url !== ''));
     }
   }, [fieldValue]);
@@ -122,17 +117,17 @@ const FileField = ({
     fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });
   }, [error?.message]);
 
-  const handleChange = (e: any) => {
-    const fileInput = e.target as HTMLInputElement;
+  const handleChange: ChangeEventHandler<HTMLInputElement> = (e: ChangeEvent<HTMLInputElement>) => {
+    const fileInput = e.target;
     if (fileInput.files?.length && fileInput.files?.length > 0) {
       let filename = '';
 
       if (fileExtensionFilter.length > 0) {
         let validFileExtension = false;
         // loop through the array, if any of the extensions in the array match the extension in the current filename, validates as true
-        for (var j = 0; j < fileExtensionFilter.length; j++) {
+        for (let j = 0; j < fileExtensionFilter.length; j++) {
           filename = fileInput.files[0].name;
-          if (filename.slice(filename.length - fileExtensionFilter[j].length, filename.length) == fileExtensionFilter[j]) {
+          if (filename.slice(filename.length - fileExtensionFilter[j].length, filename.length) === fileExtensionFilter[j]) {
             validFileExtension = true;
           }
         }
@@ -145,7 +140,11 @@ const FileField = ({
 
       // set the reference value object with selected file, url/filename
       // and also create an Upload object and save it as hatracObj in the value object
-      const tempFileObject: any = {};
+      const tempFileObject: FileObject = {
+        url: '',
+        filename: '',
+        filesize: 0
+      };
       tempFileObject.file = fileInput.files[0];
       tempFileObject.url = tempFileObject.filename = tempFileObject.file.name;
       tempFileObject.filesize = tempFileObject.file.size;
@@ -224,7 +223,7 @@ const FileField = ({
       </div>
       <input
         id={fileElementId}
-        className='chaise-input-hidden'
+        className={`${inputClasses} chaise-input-hidden`}
         name={name}
         type='file'
         accept={fileExtensions}
@@ -232,7 +231,6 @@ const FileField = ({
         onChange={handleChange}
         ref={fileInputRef}
       />
-      <input className={inputClasses} {...field} type='hidden' />
       {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div >
   );
