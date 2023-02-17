@@ -82,6 +82,14 @@ type ForeignkeyFieldProps = {
    */
   parentTuple?: any,
   /**
+   * the log stack of the form
+   */
+  parentLogStack?: any,
+  /**
+   * the log stack path of the form
+   */
+  parentLogStackPath?: string,
+  /**
    * the ref used to capture the foreignkey data
    */
   foreignKeyData?: React.MutableRefObject<any>,
@@ -114,6 +122,8 @@ const ForeignkeyField = ({
   formNumber,
   parentReference,
   parentTuple,
+  parentLogStack,
+  parentLogStackPath,
   foreignKeyData,
   waitingForForeignKeyData,
 }: ForeignkeyFieldProps): JSX.Element => {
@@ -220,11 +230,8 @@ const ForeignkeyField = ({
       initialPageLimit: RECORDSET_DEAFULT_PAGE_SIZE,
       config: recordsetConfig,
       logInfo: {
-        logObject: null,
-        // TODO parent log stack
-        logStack: getColumnModelLogStack(columnModel, null),
-        // TODO parent log stack path
-        logStackPath: LogService.getStackPath(null, LogStackPaths.FOREIGN_KEY_POPUP)
+        logStack: LogService.addExtraInfoToStack(LogService.getStackObject(columnModel.logStackNode, parentLogStack), { picker: 1 }),
+        logStackPath: LogService.getStackPath(parentLogStackPath ? parentLogStackPath : null, LogStackPaths.FOREIGN_KEY_POPUP)
       }
     });
   };

@@ -47,7 +47,7 @@ export type RecordeditProps = {
   reference: any;
   /* The log related APIs */
   logInfo: {
-    logAppMode?: string;
+    logAppMode: string;
     /* the object that will be logged with the first request */
     logObject?: any;
     logStack: any;
@@ -85,7 +85,7 @@ const RecordeditInner = ({
   const {
     appMode, reference, tuples, foreignKeyData, columnModels, initialized, waitingForForeignKeyData,
     forms, addForm, removeForm, getInitialFormValues, getPrefilledDefaultForeignKeyData, MAX_ROWS_TO_ADD,
-    showSubmitSpinner, resultsetProps, uploadProgressModalProps
+    showSubmitSpinner, resultsetProps, uploadProgressModalProps, logRecordeditClientAction,
   } = useRecordedit()
 
   const [formProviderInitialized, setFormProviderInitialized] = useState<boolean>(false)
@@ -216,7 +216,7 @@ const RecordeditInner = ({
             removedForms.push(idx);
           }
         });
-        removeForm(removedForms);
+        removeForm(removedForms, true);
       };
       /**
        * will be called when all records were deleted
@@ -286,18 +286,11 @@ const RecordeditInner = ({
     const numberFormsToAdd: number = Number(copyFormRef.current?.value) || 1;
 
     // log the button was clicked
-    // let action = LogActions.FORM_CLONE,
-    //   stack = LogService.getStackObject();
-
-    // if (numberFormsToAdd > 1) {
-    //   action = LogActions.FORM_CLONE_X;
-    //   stack = LogService.addExtraInfoToStack(null, { clone: numberFormsToAdd });
-    // }
-
-    // LogService.logClientAction({
-    //   action: LogService.getActionString(action),
-    //   stack: stack
-    // }, reference.defaultLogInfo);
+    logRecordeditClientAction(
+      numberFormsToAdd > 1 ? LogActions.FORM_CLONE_X : LogActions.FORM_CLONE,
+      undefined, undefined,
+      numberFormsToAdd > 1 ? { clone: numberFormsToAdd } : undefined
+    );
 
     // TODO: need access to # of forms
     // refactor so provider manages the forms

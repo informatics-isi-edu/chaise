@@ -731,6 +731,14 @@ type InputSwitchProps = {
    */
   parentTuple?: any,
   /**
+   * the log stack of the form
+   */
+  parentLogStack?: any,
+  /**
+   * the log stack path of the form
+   */
+  parentLogStackPath?: string,
+  /**
    * the ref used to capture the foreignkey data
    */
   foreignKeyData?: React.MutableRefObject<any>,
@@ -760,6 +768,8 @@ const InputSwitch = ({
   formNumber,
   parentReference,
   parentTuple,
+  parentLogStack,
+  parentLogStackPath,
   foreignKeyData,
   waitingForForeignKeyData
 }: InputSwitchProps): JSX.Element | null => {
@@ -851,6 +861,8 @@ const InputSwitch = ({
             formNumber={formNumber}
             parentReference={parentReference}
             parentTuple={parentTuple}
+            parentLogStack={parentLogStack}
+            parentLogStackPath={parentLogStackPath}
             foreignKeyData={foreignKeyData}
             waitingForForeignKeyData={waitingForForeignKeyData}
           />
