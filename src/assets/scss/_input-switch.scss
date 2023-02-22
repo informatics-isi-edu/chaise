@@ -15,9 +15,9 @@
 }
 
 // CSS fixes for lontext to override classes from common css file - for Josh to refer to
-.input-switch-longtext-container,
-.input-switch-json-container,
-.input-switch-array-container {
+.input-switch-longtext,
+.input-switch-json,
+.input-switch-array {
   .chaise-input-control {
     height: auto;
     padding: 0 !important;
@@ -35,7 +35,7 @@
   }
 }
 
-.input-switch-longtext-container {
+.input-switch-longtext {
   .md-editor {
     border: 1px solid $border-color;
     border-radius: 4px;
@@ -82,9 +82,10 @@
   .chaise-input-control {
     min-height: auto;
 
-    .input-switch-clear {
-      top: -2px;
-    }
+    // TODO this rule is not needed for recordedit, is it needed for range-inputs?
+    // .input-switch-clear {
+      // top: -2px;
+    // }
   }
 
   .chaise-input-control:first-child {
@@ -110,6 +111,10 @@
 .input-switch-color {
   position: relative;
 
+  .chaise-input-control {
+    display: inline-flex;
+  }
+
   .hex-sign {
     color: $placeholder-color;
   }
@@ -118,6 +123,7 @@
     width: 40px;
     height: 28px;
     margin-left: -10px;
+    margin-top: -4px;
     margin-right: 5px;
 
     &.no-color {

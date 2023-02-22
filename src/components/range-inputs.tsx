@@ -1,7 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 
 // components
-import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -134,11 +134,11 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
 
   //   if (type === 'timestamp') {
   //     if (!fromTimeRef.current || !toTimeRef.current) return;
-      
+
   //     const min = absMin as TimeStamp;
   //     fromRef.current.value = min.date;
   //     fromTimeRef.current.value = min.time;
-      
+
   //     const max = absMax as TimeStamp;
   //     toRef.current.value = max.date;
   //     toTimeRef.current.value = max.time;
@@ -159,7 +159,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   //       to: Boolean(absMax),
   //       toTime: true
   //     });
-  //   } 
+  //   }
   // }, [absMin, absMax]);
 
   // const formatTimeValues = () => {
@@ -307,7 +307,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   //   return rangeCheck(fromVal, toVal) ? 'valid' : 'range';
   // }
 
-  const validateValues = (fromVal, toVal) => { 
+  const validateValues = (fromVal, toVal) => {
     /**if only one field is non null then don't perform range check */
     if (!fromVal || !toVal) return 'valid';
 
@@ -350,8 +350,8 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
 
   const formErrors = methods.formState.errors;
 
-  const errMsg = formErrors[`${name}-min`]?.message || formErrors[`${name}-max`]?.message || '';    
-  
+  const errMsg = formErrors[`${name}-min`]?.message || formErrors[`${name}-max`]?.message || '';
+
   if(error!=errMsg) setError(errMsg);
 
   // let fromVal = methods.getValues(`${name}-min`);
@@ -367,7 +367,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   return (
     <div className={classes}>
       <div className='range-input-container range-inputs-width'>
-      <FormProvider {...methods} > 
+      <FormProvider {...methods} >
         <form className='range-input-form' onSubmit={methods.handleSubmit(onSubmit)}>
           <div className={`range-input ${classTypeName}`}>
             <label>From:
@@ -375,12 +375,11 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
                 displayErrors={false}
                 name={`${name}-min`}
                 type={type}
-                value={absMin}
                 placeholder={absMin}
                 // disableInput={disableSubmit}
                 inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
                 timeClasses='ts-time-range-min'
-                clearClasses={type === 'date' || type === 'timestamp' ? 'min-date-clear' : 'min-clear'} 
+                clearClasses={type === 'date' || type === 'timestamp' ? 'min-date-clear' : 'min-clear'}
                 clearTimeClasses='min-time-clear'
               />
             </label>
