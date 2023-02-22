@@ -91,7 +91,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
                 <div className='popover-controls'>
                   {renderInput(field.value, onChange)}
                   <div className='popover-buttons'>
-                    {renderPreview('chaise-btn')}
+                    {renderPreview(field.value, 'chaise-btn')}
                     <ChaiseTooltip placement='bottom' tooltip='Clear the value.'>
                       <button className='chaise-btn chaise-btn-secondary' type='button' onClick={clearInput}>Clear</button>
                     </ChaiseTooltip>

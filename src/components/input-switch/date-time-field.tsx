@@ -6,7 +6,6 @@ import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components
 import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { useEffect, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
-import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 type DateTimeFieldProps = InputFieldProps & {
   /**
@@ -72,12 +71,6 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
   });
 
   useEffect(() => {
-    if (props.value === undefined) return;
-    // TODO we should get the value as string and then change it to date and time.
-    setValue(`${props.name}-date`, props.value);
-  }, [props.value]);
-
-  useEffect(() => {
     if (showClear.date != Boolean(dateFieldValue)) {
       setShowClear({ ...showClear, date: Boolean(dateFieldValue) });
     }
@@ -111,6 +104,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   return (
     <InputField {...props}
+      checkIsTouched={() => isDateTouched || isDateTouched}
       controllerRules={{
         validate: VALIDATE_VALUE_BY_TYPE['timestamp']
       }}

@@ -54,7 +54,9 @@ export type InputFieldProps = {
   * flag to show error below the input switch component
   */
   displayErrors?: boolean,
-  value: string,
+  /**
+   * The styles attached to the container
+   */
   styles?: any,
 }
 
@@ -89,6 +91,11 @@ export type InputFieldCompProps = InputFieldProps & {
    * if it's defined and returns false, we will not change the value.
    */
   handleChange?: (event: any) => boolean,
+  /**
+   * a callback that is called to see if the input has been touched or not.
+   * this is useful in date-time when we're not touching the actual input.
+   */
+  checkIsTouched?: () => boolean,
 };
 
 const InputField = ({
@@ -101,7 +108,8 @@ const InputField = ({
   onClear,
   controllerRules,
   checkHasValue,
-  handleChange
+  handleChange,
+  checkIsTouched
 }: InputFieldCompProps): JSX.Element => {
 
   const { setValue, control, clearErrors } = useFormContext();
@@ -162,7 +170,7 @@ const InputField = ({
     if (error?.type === 'required') {
       showError = formInput.formState.isSubmitted;
     } else {
-      showError = isTouched;
+      showError = checkIsTouched ? checkIsTouched() : isTouched;
     }
   }
 

@@ -53,10 +53,6 @@ export type InputSwitchProps = {
    */
   clearTimeClasses?: string
   /**
-   * the default date value being used in case of date and timestamp types
-   */
-  value?: string,
-  /**
    * whether this input is required or not
    */
   requiredInput?: boolean,
@@ -130,7 +126,6 @@ const InputSwitch = ({
   timeClasses = '',
   clearClasses,
   clearTimeClasses,
-  value,
   disableInput,
   requiredInput,
   displayErrors = true,
@@ -146,6 +141,7 @@ const InputSwitch = ({
   waitingForForeignKeyData
 }: InputSwitchProps): JSX.Element | null => {
 
+
   return (() => {
     switch (type) {
       case 'array':
@@ -157,7 +153,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -165,31 +160,49 @@ const InputSwitch = ({
           placeholder={placeholder as string}
         />;
       case 'popup-select':
-        if (columnModel) {
-          return <ForeignkeyField
-            type={type}
-            name={name}
-            classes={classes}
-            inputClasses={inputClasses}
-            containerClasses={containerClasses}
-            clearClasses={clearClasses}
-            value={value as string}
-            disableInput={disableInput}
-            requiredInput={requiredInput}
-            styles={styles}
-            displayErrors={displayErrors}
-            placeholder={placeholder as string}
-            columnModel={columnModel}
-            appMode={appMode}
-            formNumber={formNumber}
-            parentReference={parentReference}
-            parentTuple={parentTuple}
-            parentLogStack={parentLogStack}
-            parentLogStackPath={parentLogStackPath}
-            foreignKeyData={foreignKeyData}
-            waitingForForeignKeyData={waitingForForeignKeyData}
-          />
+        if (!columnModel) {
+          throw new Error('columnModel is needed for popup-select inputs.');
         }
+        return <ForeignkeyField
+          type={type}
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          requiredInput={requiredInput}
+          styles={styles}
+          displayErrors={displayErrors}
+          placeholder={placeholder as string}
+          columnModel={columnModel}
+          appMode={appMode}
+          formNumber={formNumber}
+          parentReference={parentReference}
+          parentTuple={parentTuple}
+          parentLogStack={parentLogStack}
+          parentLogStackPath={parentLogStackPath}
+          foreignKeyData={foreignKeyData}
+          waitingForForeignKeyData={waitingForForeignKeyData}
+        />
+      case 'file':
+        if (!columnModel) {
+          throw new Error('columnModel is needed for file inputs.');
+        }
+        return <FileField
+          type={type}
+          name={name}
+          classes={classes}
+          inputClasses={inputClasses}
+          containerClasses={containerClasses}
+          clearClasses={clearClasses}
+          disableInput={disableInput}
+          requiredInput={requiredInput}
+          styles={styles}
+          displayErrors={displayErrors}
+          placeholder={placeholder as string}
+          columnModel={columnModel}
+        />
       case 'timestamp':
         return <DateTimeField
           timeClasses={timeClasses}
@@ -200,7 +213,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -215,7 +227,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -233,7 +244,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -248,7 +258,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -265,7 +274,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -281,7 +289,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -296,7 +303,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}
@@ -312,7 +318,6 @@ const InputSwitch = ({
           inputClasses={inputClasses}
           containerClasses={containerClasses}
           clearClasses={clearClasses}
-          value={value as string}
           disableInput={disableInput}
           requiredInput={requiredInput}
           styles={styles}

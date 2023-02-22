@@ -2,6 +2,7 @@
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import DisplayValue from '@isrd-isi-edu/chaise/src/components/display-value';
+import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
 // hooks
 import useAlert from '@isrd-isi-edu/chaise/src/hooks/alerts';
@@ -13,111 +14,29 @@ import { ChaiseAlertType } from '@isrd-isi-edu/chaise/src/providers/alerts';
 import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
 // utils
-import { fireCustomEvent } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
-type FileFieldProps = {
-  /**
-   *  the name of the field
-   */
-  name: string,
-  /**
-  * placeholder text
-  */
-  placeholder?: string,
-  /**
-  * classes for styling the input element
-  */
-  classes?: string,
-  inputClasses?: string,
-  containerClasses?: string,
-  /**
-  * classes for styling the clear button
-  */
-  clearClasses?: string
-  /**
-  * flag for disabling the input
-  */
-  disableInput?: boolean,
-  /**
-  * flag to show error below the input switch component
-  */
-  displayErrors?: boolean,
-  value: string,
-  styles?: React.CSSProperties,
-  /**
-  * the handler function called on input change
-  */
-  onFieldChange?: ((value: string) => void),
+type FileFieldProps = InputFieldProps & {
   /**
    * The column model representing this field in the form.
    */
   columnModel: RecordeditColumnModel,
 };
 
-const FileField = ({
-  name,
-  placeholder = 'No file selected',
-  classes,
-  inputClasses,
-  clearClasses,
-  disableInput,
-  displayErrors,
-  value,
-  containerClasses,
-  styles,
-  onFieldChange,
-  columnModel
-}: FileFieldProps): JSX.Element => {
+const FileField = (props: FileFieldProps): JSX.Element => {
 
   const { addAlert } = useAlert();
   const fileInputRef = useRef(null);
 
-  const { setValue, control, clearErrors } = useFormContext();
-
-  const registerOptions = {
-    required: false
-  };
-
-  const formInput = useController({
-    name,
-    control,
-    rules: registerOptions,
-  });
-
-  const field = formInput?.field;
-  const fieldValue = field?.value;
-  const [showClear, setShowClear] = useState<boolean>(fieldValue.url && fieldValue.url !== '');
   const [fileObject, setFileObject] = useState<FileObject | null>(null);
 
-  const fieldState = formInput?.fieldState;
-  const { error, isTouched } = fieldState;
-
   const fileElementId = 'fileInput' + Math.round(Math.random() * 100000);
-  const fileExtensionFilter = columnModel.column.filenameExtFilter;
+  const fileExtensionFilter = props.columnModel.column.filenameExtFilter;
   // needs to be a comma separated list, i.e. ".jpg", ".png", ...
   const fileExtensions = fileExtensionFilter.join(',');
 
-  useEffect(() => {
-    if (onFieldChange) {
-      onFieldChange(fieldValue);
-    }
-    if (showClear !== Boolean(fieldValue)) {
-      setShowClear(Boolean(fieldValue.url && fieldValue.url !== ''));
-    }
-  }, [fieldValue]);
-
-  useEffect(() => {
-    if (value === undefined) return;
-    setValue(name, value);
-  }, [value]);
-
-  useEffect(() => {
-    fireCustomEvent('input-switch-error-update', `.input-switch-container-${name}`, { inputFieldName: name, msgCleared: !Boolean(error?.message) });
-  }, [error?.message]);
-
-  const handleChange: ChangeEventHandler<HTMLInputElement> = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (field: any, e: ChangeEvent<HTMLInputElement>) => {
     const fileInput = e.target;
     if (fileInput.files?.length && fileInput.files?.length > 0) {
       let filename = '';
@@ -156,11 +75,14 @@ const FileField = ({
     }
   };
 
-  const clearInput = (e: MouseEvent) => {
-    // don't click the input
-    e.stopPropagation();
-    e.preventDefault();
+  /**
+ * input-field checks for falsy values, but the check here is different
+ */
+  const hasValue = (v: any) => {
+    return v.url && v.url !== '';
+  };
 
+  const onClear = (e: MouseEvent) => {
     const tempFileObject: FileObject = {
       url: '',
       filename: '',
@@ -168,9 +90,6 @@ const FileField = ({
     }
 
     setFileObject(tempFileObject);
-
-    setValue(name, '');
-    clearErrors(name);
   }
 
   const openFilePicker = () => {
@@ -186,53 +105,63 @@ const FileField = ({
     return (fileObj.filesize ? '- ' + fileObj.filename + '\n- ' + humanFileSize(fileObj.filesize) : fileObj.filename);
   }
 
-  const renderInput = () => {
+  const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
     return (
-      <div className={`chaise-input-control has-feedback ${classes} ${disableInput ? ' input-disabled' : ''}`} onClick={openFilePicker}>
+      <div
+        className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+        {... (!props.disableInput && { onClick: openFilePicker })}
+      >
         {isStringAndNotEmpty(fieldValue.filename) ?
           <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
-          <span className='chaise-input-placeholder'>{placeholder}</span>
+          <span className='chaise-input-placeholder'>{props.placeholder}</span>
         }
-        <ClearInputBtn btnClassName={`${clearClasses} input-switch-clear`} clickCallback={clearInput} show={showClear} />
+        <ClearInputBtn
+          btnClassName={`${props.clearClasses} input-switch-clear`}
+          clickCallback={clearInput} show={showClear && !props.disableInput}
+        />
       </div>
     )
   }
 
-  const renderInputWithTooltip = () => {
-    if (!fileObject) return renderInput();
+  const renderInputWithTooltip = (fieldValue: any, showClear: any, clearInput: any) => {
+    if (!fileObject) return renderInput(fieldValue, showClear, clearInput);
 
     return (
       <ChaiseTooltip placement='bottom-start' tooltip={fileTooltip(fileObject)}>
-        {renderInput()}
+        {renderInput(fieldValue, showClear , clearInput)}
       </ChaiseTooltip>
     )
   }
 
   return (
-    <div className={`${containerClasses} input-switch-file input-switch-container-${name}`} style={styles}>
-      <div className='chaise-input-group'>
-        {renderInputWithTooltip()}
-        <ChaiseTooltip placement='bottom' tooltip='Select File'>
-          <div className='chaise-input-group-append' tabIndex={0}>
-            <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
-              <span className='fa-solid fa-folder-open'></span>
-              <span className='button-text'>Select file</span>
-            </label>
+    <InputField {...props} onClear={onClear} checkHasValue={hasValue}>
+      {/* onChange is not used as we're implementing our own onChange method */}
+      {(field, onChange, showClear, clearInput) => (
+        <div className={`${props.containerClasses} input-switch-file input-switch-container-${props.name}`} style={props.styles}>
+          <div className='chaise-input-group'>
+            {renderInputWithTooltip(field.value, showClear, clearInput)}
+            {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>
+              <div className='chaise-input-group-append' tabIndex={0}>
+                <label className='chaise-btn chaise-btn-secondary' role='button' htmlFor={fileElementId}>
+                  <span className='fa-solid fa-folder-open'></span>
+                  <span className='button-text'>Select file</span>
+                </label>
+              </div>
+            </ChaiseTooltip>}
           </div>
-        </ChaiseTooltip>
-      </div>
-      <input
-        id={fileElementId}
-        className={`${inputClasses} chaise-input-hidden`}
-        name={name}
-        type='file'
-        accept={fileExtensions}
-        tabIndex={-1}
-        onChange={handleChange}
-        ref={fileInputRef}
-      />
-      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
-    </div >
+          <input
+            id={fileElementId}
+            className={`${props.inputClasses} chaise-input-hidden`}
+            name={props.name}
+            type='file'
+            accept={fileExtensions}
+            tabIndex={-1}
+            onChange={(e) => handleChange(field, e)}
+            ref={fileInputRef}
+          />
+        </div >
+      )}
+    </InputField>
   );
 };
 
