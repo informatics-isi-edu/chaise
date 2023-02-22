@@ -92,10 +92,10 @@ describe("Viewing Recordset with Faceting,", function() {
 
         // NOTE: Migrated these tests to react by commenting this out and testing locally.
         //       I think this should run locally too unless we determine otherwise again
-        if (!process.env.CI) {
-            console.log("histogram test cases only work on CI environments.");
-            return;
-        }
+        // if (!process.env.CI) {
+        //     console.log("histogram test cases only work on CI environments.");
+        //     return;
+        // }
 
         describe("testing histogram functions for each facet type", function () {
 

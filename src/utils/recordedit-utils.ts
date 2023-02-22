@@ -294,7 +294,7 @@ export function populateCreateInitialValues(
       }
 
       if (isTimestamp) {
-        values[`${formValue}-${column.name}`] = initialModelValue.datetime || '';
+        values[`${formValue}-${column.name}`] = initialModelValue?.datetime || '';
         values[`${formValue}-${column.name}-date`] = initialModelValue?.date || '';
         values[`${formValue}-${column.name}-time`] = initialModelValue?.time || '';
 
