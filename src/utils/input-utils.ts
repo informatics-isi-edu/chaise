@@ -48,6 +48,8 @@ export function getInputType(type: any): string {
       inputType = 'boolean';
       break;
     case 'markdown':
+      inputType = 'markdown';
+      break;
     case 'longtext':
       inputType = 'longtext';
       break;
@@ -205,3 +207,39 @@ export function humanFileSize(size: number) {
   const i = size === 0 ? 0 : Math.floor( Math.log(size) / Math.log(1024) );
   return Number(( size / Math.pow(1024, i) ).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
+
+
+const integerFieldValidation = {
+  value: dataFormats.regexp.integer,
+  message: ERROR_MESSAGES.INVALID_INTEGER
+};
+
+const numericFieldValidation = {
+  value: dataFormats.regexp.float,
+  message: ERROR_MESSAGES.INVALID_NUMERIC
+};
+
+const dateFieldValidation = (value: string) => {
+  if (!value) return;
+  const date = windowRef.moment(value, dataFormats.date, true);
+  return date.isValid() || ERROR_MESSAGES.INVALID_DATE;
+};
+
+const timestampFieldValidation = (value: string) => {
+  if (!value) return;
+  const timestamp = windowRef.moment(value, dataFormats.timestamp, true);
+  return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
+};
+
+export const VALIDATE_VALUE_BY_TYPE: {
+  [key: string]: any;
+} = {
+  'int': integerFieldValidation,
+  'integer2': integerFieldValidation,
+  'integer4': integerFieldValidation,
+  'integer8': integerFieldValidation,
+  'float': numericFieldValidation,
+  'number': numericFieldValidation,
+  'date': dateFieldValidation,
+  'timestamp': timestampFieldValidation,
+};
