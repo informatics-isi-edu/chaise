@@ -1,6 +1,7 @@
 // models
 import { FlowControlQueueInfo } from '@isrd-isi-edu/chaise/src/models/flow-control';
 import { PrefillObject } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
 // services
 import $log from '@isrd-isi-edu/chaise/src/services/logger';
@@ -25,7 +26,7 @@ export default class RecordeditFlowControl {
    * the requests that should be sent
    */
   foreignKeyRequests: {
-    processed: boolean, reference: any, logAction: string, colIndex: number
+    processed: boolean, reference: any, logAction: LogActions, colIndex: number
   }[];
 
   /**
@@ -67,7 +68,7 @@ export default class RecordeditFlowControl {
    * @param reference the reference that we're going to read the data from
    * @param logAction the log action string
    */
-  addForeignKeyRequest(colIndex: number, reference: any, logAction: string) {
+  addForeignKeyRequest(colIndex: number, reference: any, logAction: LogActions) {
     this.foreignKeyRequests.push({ processed: false, reference, logAction, colIndex });
   }
 

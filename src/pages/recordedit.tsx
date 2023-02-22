@@ -104,8 +104,8 @@ const RecordeditApp = (): JSX.Element => {
       ];
       const logStackPath = LogStackTypes.SET;
 
-      // // set the global log stack and log stack path
-      LogService.config(logStack, logStackPath);
+      // set the global log stack, log stack path, and logAppMode
+      LogService.config(logStack, logStackPath, logAppMode);
 
       const queryParams = res.queryParams || {};
       setRecordeditProps({

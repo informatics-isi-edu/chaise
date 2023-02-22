@@ -28,7 +28,7 @@ import { MESSAGE_MAP } from '@isrd-isi-edu/chaise/src/utils/message-map';
 import { URL_PATH_LENGTH_LIMIT } from '@isrd-isi-edu/chaise/src/utils/constants'
 import {
   allForeignKeyColumnsPrefilled,
-  columnToColumnModel, getColumnModelLogAction, getColumnModelLogStack, getPrefillObject,
+  columnToColumnModel, getPrefillObject,
   populateCreateInitialValues, populateEditInitialValues, populateSubmissionRow
 } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
@@ -68,7 +68,7 @@ export const RecordeditContext = createContext<{
   /* callback to add form(s) to the forms array */
   addForm: (count: number) => number[],
   /* callback to remove from(s) from the forms array */
-  removeForm: (indexes: number[]) => void,
+  removeForm: (indexes: number[], skipLogging?: boolean) => void,
   /* returns the initial values for all forms to display */
   getInitialFormValues: (forms: number[], columnModels: RecordeditColumnModel[]) => any,
   /* initiate the process of handling prefilled and default foreignkeys (in create mode) */
@@ -88,7 +88,22 @@ export const RecordeditContext = createContext<{
   resultsetProps?: ResultsetProps,
   uploadProgressModalProps?: UploadProgressProps,
   /* max rows allowed to add constant */
-  MAX_ROWS_TO_ADD: number
+  MAX_ROWS_TO_ADD: number,
+  /**
+   * log client actions
+   * Notes:
+   *   - the optional `ref` parameter can be used to log based on a different reference object
+   */
+  logRecordeditClientAction: (actionPath: LogActions, childStackPath?: any, childStackElement?: any, extraInfo?: any, ref?: any) => void,
+  /**
+   * get the appropriate log action.
+   * if called with `true` argument, it will return the stack path.
+   */
+  getRecordeditLogAction: (actionPath: LogActions | true, childStackPath?: any) => string,
+  /**
+   * get the appropriate log stack
+   */
+  getRecordeditLogStack: (childStackElement?: any, extraInfo?: any) => any,
 } | null>(null);
 
 type RecordeditProviderProps = {
@@ -97,7 +112,7 @@ type RecordeditProviderProps = {
   queryParams: any;
   reference: any;
   logInfo: {
-    logAppMode?: string;
+    logAppMode: string;
     logObject?: any;
     logStack: any;
     logStackPath: string;
@@ -177,9 +192,14 @@ export default function RecordeditProvider({
           }
         }
 
+        const logParams = {
+          action: getRecordeditLogAction(LogActions.LOAD),
+          stack: getRecordeditLogStack()
+        };
+
         // in edit mode, we have to check the TCRS (row-level acls)
         const getTCRS = appMode === appModes.EDIT;
-        reference.read(numberRowsToRead, logInfo.logObject, false, false, false, getTCRS).then((readPage: any) => {
+        reference.read(numberRowsToRead, logParams, false, false, false, getTCRS).then((readPage: any) => {
           if (readPage.tuples.length < 1) {
             // TODO: understand the filter that was used and relate that information to the user (it oucld be a facet filter now)
             const recordSetLink = readPage.reference.unfilteredReference.contextualize.compact.appLink;
@@ -443,6 +463,12 @@ export default function RecordeditProvider({
           setShowSubmitSpinner(false);
         };
 
+        const logParams = {
+          ... (logInfo.logObject ? logInfo.logObject : {}),
+          action: getRecordeditLogAction(appMode === appModes.EDIT ? LogActions.UPDATE : LogActions.CREATE),
+          stack: getRecordeditLogStack()
+        };
+
         if (appMode === appModes.EDIT) {
           const tempTuples = [...tuples];
 
@@ -464,10 +490,10 @@ export default function RecordeditProvider({
             }
           }
 
-          reference.update(tempTuples).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+          reference.update(tempTuples, logParams).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         } else {
           const createRef = reference.unfilteredReference.contextualize.entryCreate;
-          createRef.create(submissionRows).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
+          createRef.create(submissionRows, logParams).then(submitSuccessCB).catch(submitErrorCB).finally(submitFinallyCB);
         }
       });
     });
@@ -567,7 +593,11 @@ export default function RecordeditProvider({
     return newFormValues;
   };
 
-  const removeForm = (indexes: number[]) => {
+  const removeForm = (indexes: number[], skipLogging?: boolean) => {
+    if (!skipLogging) {
+      logRecordeditClientAction(LogActions.FORM_REMOVE);
+    }
+
     // remove the forms based on the given indexes
     setForms((previous: number[]) => previous.filter(({ }, i: number) => !indexes.includes(i)));
 
@@ -680,19 +710,12 @@ export default function RecordeditProvider({
       flowControl.current.queue.occupiedSlots++;
       fkReq.processed = true;
 
-      fetchForeignKeyData(
-        [columnModels[fkReq.colIndex].column.name],
-        fkReq.reference,
-        {
-          action: getColumnModelLogAction(
-            fkReq.logAction,
-            columnModels[fkReq.colIndex],
-            null
-          ),
-          stack: getColumnModelLogStack(columnModels[fkReq.colIndex], null)
-        },
-        flowControl.current.setValue
-      );
+      const cm = columnModels[fkReq.colIndex];
+      const logObj = {
+        action: getRecordeditLogAction(fkReq.logAction, cm.logStackPathChild),
+        stack: getRecordeditLogStack(cm.logStackNode)
+      };
+      fetchForeignKeyData([cm.column.name], fkReq.reference, logObj, flowControl.current.setValue);
     });
   }
 
@@ -736,17 +759,17 @@ export default function RecordeditProvider({
         }
       }
 
-      // create proper logObject
+      // since this is not necessarily related to a columnModel, we have
+      // to create the stack node ourself
       const stackNode = LogService.getStackNode(
         LogStackTypes.FOREIGN_KEY,
         ref.table,
         { source: source, entity: true }
       );
-      // TODO current path and stack should be passed if recordedit will be used in modal
-      const logStackPath = LogService.getStackPath(null, LogStackPaths.FOREIGN_KEY);
+
       const logObj = {
-        action: LogService.getActionString(LogActions.FOREIGN_KEY_PRESELECT, logStackPath),
-        stack: LogService.getStackObject(stackNode, null)
+        action: getRecordeditLogAction(LogActions.FOREIGN_KEY_PRESELECT, LogStackPaths.FOREIGN_KEY),
+        stack: getRecordeditLogStack(stackNode)
       }
 
       fetchForeignKeyData(prefillObj.fkColumnNames, ref, logObj, setValue);
@@ -804,21 +827,54 @@ export default function RecordeditProvider({
 
   // ---------------- log related function --------------------------- //
 
-  // const logRecordClientAction = (action: LogActions, childStackElement?: any, extraInfo?: any, ref?: any) => {
-  //   const usedRef = ref ? ref : reference;
-  //   LogService.logClientAction({
-  //     action: flowControl.current.getLogAction(action),
-  //     stack: flowControl.current.getLogStack(childStackElement, extraInfo)
-  //   }, usedRef.defaultLogInfo)
-  // };
+  /**
+   * log client action
+   * @param actionPath the action string (without the stack path)
+   * @param childStackPath (the stack path of the current child)
+   * @param childStackElement the created child stack element
+   * @param extraInfo extra information that we want to add to stack
+   * @param ref the reference to use for default log info.
+   */
+  const logRecordeditClientAction = (actionPath: LogActions, childStackPath?: any, childStackElement?: any, extraInfo?: any, ref?: any) => {
+    const usedRef = ref ? ref : reference;
+    LogService.logClientAction({
+      action: getRecordeditLogAction(actionPath, childStackPath),
+      stack: getRecordeditLogStack(childStackElement, extraInfo)
+    }, usedRef.defaultLogInfo);
+  };
 
-  // const getRecordLogAction = (actionPath: LogActions, childStackPath?: any) => {
-  //   return flowControl.current.getLogAction(actionPath, childStackPath);
-  // }
+  /**
+   * return the action string that should be used for logging.
+   * NOTE if `true` passed as the first parameter, it will return the stack path.
+   * @param actionPath the action string (without the stack path) or `true`.
+   * @param childStackPath (the stack path of the current child)
+   */
+  const getRecordeditLogAction = (actionPath: LogActions | true, childStackPath?: any) => {
+    let stackPath = logInfo.logStackPath;
+    if (actionPath === true) {
+      return stackPath;
+    }
+    if (childStackPath) {
+      stackPath = LogService.getStackPath(stackPath, childStackPath);
+    }
+    return LogService.getActionString(actionPath, stackPath, logInfo.logAppMode);
+  }
 
-  // const getRecordLogStack = (childStackElement?: any, extraInfo?: any) => {
-  //   return flowControl.current.getLogStack(childStackElement, extraInfo);
-  // }
+  /**
+   * return the stack object that should be used for logging.
+   * @param childStackElement the created child stack element
+   * @param extraInfo extra information that we want to add to stack
+   */
+  const getRecordeditLogStack = (childStackElement?: any, extraInfo?: any) => {
+    let stack = logInfo.logStack;
+    if (childStackElement) {
+      stack = logInfo.logStack.concat(childStackElement);
+    }
+    if (extraInfo) {
+      return LogService.addExtraInfoToStack(stack, extraInfo);
+    }
+    return stack;
+  }
 
   const providerValue = useMemo(() => {
     return {
@@ -842,16 +898,17 @@ export default function RecordeditProvider({
       activeSelectAll,
       toggleActiveSelectAll,
 
-      //   // log related:
-      //   logRecordClientAction,
-      //   getRecordLogAction,
-      //   getRecordLogStack,
       onSubmitValid,
       onSubmitInvalid,
       showSubmitSpinner,
       resultsetProps,
       uploadProgressModalProps,
-      MAX_ROWS_TO_ADD: maxRowsToAdd
+      MAX_ROWS_TO_ADD: maxRowsToAdd,
+
+      // log related:
+      logRecordeditClientAction,
+      getRecordeditLogAction,
+      getRecordeditLogStack,
     };
   }, [
     // main entity:

@@ -14,27 +14,24 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { getColumnModelLogAction, getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 
 const KeyColumn = (): JSX.Element => {
 
   const {
     appMode, columnModels, activeSelectAll, toggleActiveSelectAll,
-    columnPermissionErrors, forms, reference,
+    columnPermissionErrors, forms, logRecordeditClientAction,
   } = useRecordedit();
 
   const onToggleClick = (cmIndex: number) => {
-    const model = columnModels[cmIndex];
+    const cm = columnModels[cmIndex];
 
-    const defaultLogInfo = (model.column.reference ? model.column.reference.defaultLogInfo : reference.defaultLogInfo);
-
-    const action = cmIndex === activeSelectAll ? LogActions.SET_ALL_CLOSE : LogActions.SET_ALL_OPEN;
-
-    // TODO parent stack model
-    LogService.logClientAction({
-        action: getColumnModelLogAction(action, model, null),
-        stack: getColumnModelLogStack(model, null)
-    }, defaultLogInfo);
+    logRecordeditClientAction(
+      cmIndex === activeSelectAll ? LogActions.SET_ALL_CLOSE : LogActions.SET_ALL_OPEN,
+      cm.logStackPathChild,
+      cm.logStackNode,
+      undefined,
+      cm.column.reference ? cm.column.reference : undefined
+    );
 
     toggleActiveSelectAll(cmIndex);
   }

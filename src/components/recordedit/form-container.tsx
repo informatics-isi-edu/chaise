@@ -18,7 +18,7 @@ import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-import { copyOrClearValue, getColumnModelLogAction, getColumnModelLogStack } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 
 const FormContainer = (): JSX.Element => {
@@ -73,6 +73,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   const {
     forms, appMode, reference, columnModels, tuples, activeSelectAll,
     canUpdateValues, columnPermissionErrors, foreignKeyData, waitingForForeignKeyData,
+    getRecordeditLogStack, getRecordeditLogAction,
   } = useRecordedit();
 
   /**
@@ -202,6 +203,8 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
         formNumber={formNumber}
         parentReference={reference}
         parentTuple={appMode === appModes.EDIT && typeof formIndex === 'number' ? tuples[formIndex] : undefined}
+        parentLogStack={getRecordeditLogStack()}
+        parentLogStackPath={getRecordeditLogAction(true)}
         foreignKeyData={foreignKeyData}
         waitingForForeignKeyData={waitingForForeignKeyData}
       />
@@ -233,7 +236,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
 const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   const {
     columnModels, forms, reference, waitingForForeignKeyData, foreignKeyData, appMode,
-    canUpdateValues, toggleActiveSelectAll
+    canUpdateValues, toggleActiveSelectAll, logRecordeditClientAction
   } = useRecordedit();
 
   const { watch, reset, getValues, formState: { errors } } = useFormContext();
@@ -269,12 +272,13 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   const applyValueToAll = () => {
     const cm = columnModels[columnModelIndex];
 
-    const defaultLogInfo = cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo;
-    // TODO parent log obj
-    LogService.logClientAction({
-      action: getColumnModelLogAction(LogActions.SET_ALL_APPLY, cm, null),
-      stack: getColumnModelLogStack(cm, null)
-    }, defaultLogInfo);
+    logRecordeditClientAction(
+      LogActions.SET_ALL_APPLY,
+      cm.logStackPathChild,
+      cm.logStackNode,
+      undefined,
+      cm.column.reference ? cm.column.reference : undefined
+    );
 
     setValueForAllInputs();
   };
@@ -282,12 +286,13 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   const clearAllValues = () => {
     const cm = columnModels[columnModelIndex];
 
-    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
-    // TODO parent log obj
-    LogService.logClientAction({
-      action: getColumnModelLogAction(LogActions.SET_ALL_CLEAR, cm, null),
-      stack: getColumnModelLogStack(cm, null)
-    }, defaultLogInfo);
+    logRecordeditClientAction(
+      LogActions.SET_ALL_CLEAR,
+      cm.logStackPathChild,
+      cm.logStackNode,
+      undefined,
+      cm.column.reference ? cm.column.reference : undefined
+    );
 
     setValueForAllInputs(true);
   };
@@ -295,12 +300,13 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
   const closeSelectAll = () => {
     const cm = columnModels[columnModelIndex];
 
-    const defaultLogInfo = (cm.column.reference ? cm.column.reference.defaultLogInfo : reference.defaultLogInfo);
-    // TODO parent log obj
-    LogService.logClientAction({
-      action: getColumnModelLogAction(LogActions.SET_ALL_CANCEL, cm, null),
-      stack: getColumnModelLogStack(cm, null)
-    }, defaultLogInfo);
+    logRecordeditClientAction(
+      LogActions.SET_ALL_CANCEL,
+      cm.logStackPathChild,
+      cm.logStackNode,
+      undefined,
+      cm.column.reference ? cm.column.reference : undefined
+    );
 
     toggleActiveSelectAll(columnModelIndex);
   };

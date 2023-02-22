@@ -73,7 +73,7 @@ const RecordsetTable = ({
   // when sort column has changed, call the callback
   useEffect(() => {
     // TODO why isInitialized is needed? (removing it triggers two updates on load)
-    if (!currSortColumn || !isInitialized) return;
+    if (!currSortColumn || !isInitialized || !config.sortable) return;
 
     const ref = reference.sort([currSortColumn]);
 
