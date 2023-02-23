@@ -1,5 +1,5 @@
 // components
-import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 
 // hooks
@@ -163,12 +163,8 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
   const renderInput = (formNumber: number, formIndex?: number) => {
 
     const colName = columnModel.column.name;
-    const column = columnModel.column;
 
     const isDisabled = getIsDisabled(formNumber, formNumber === SELECT_ALL_INPUT_FORM_VALUE);
-
-    // boolean and asset will handle their own disabled inputs
-    const inputType = (isDisabled && !(column.isAsset || column.type.name === 'boolean')) ? 'disabled' : columnModel.inputType;
 
     let placeholder = '';
     let permissionError = '';
@@ -194,8 +190,9 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
         key={colName}
         displayErrors={true}
         disableInput={isDisabled}
+        requiredInput={columnModel.isRequired}
         name={`${formNumber}-${colName}`}
-        type={inputType}
+        type={columnModel.inputType}
         classes='column-cell-input'
         placeholder={placeholder}
         columnModel={columnModel}
@@ -339,11 +336,11 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
     <div className='select-all-row match-entity-value'>
       <div className='select-all-text'>Set value for all records: </div>
       <div className='select-all-input'>
-        {/* TODO we should also pass isRequired so we can override the columnModel in here */}
         <InputSwitch
           key={colName}
           displayErrors={true}
           disableInput={false}
+          requiredInput={false}
           name={inputName}
           type={columnModel.inputType}
           classes='column-cell-input'

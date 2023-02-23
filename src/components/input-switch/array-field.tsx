@@ -1,67 +1,19 @@
 // components
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-
-// hooks
-import { useEffect, useState } from 'react';
-import { useFormContext, useController } from 'react-hook-form';
+import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
 // utils
 import { getSimpleColumnType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { arrayFieldPlaceholder } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
-type ArrayFieldProps = {
+type ArrayFieldProps = InputFieldProps & {
   /* the type of each element in the array */
   baseArrayType: string,
-  /**
-   *  the name of the field
-   */
-  name: string,
-  /**
-  * placeholder text
-  */
-  placeholder?: string,
-  /**
-  * classes for styling the input element
-  */
-  classes?: string,
-  inputClasses?: string,
-  containerClasses?: string,
-  /**
-  * classes for styling the clear button
-  */
-  clearClasses?: string
-  /**
-  * flag for disabling the input
-  */
-  disableInput?: boolean,
-  /**
-  * flag to show error below the input switch component
-  */
-  displayErrors?: boolean,
-  value: string,
-  styles?: any,
-  /**
-  * the handler function called on input change
-  */
-  onFieldChange?: ((value: string) => void)
 };
 
-const ArrayField = ({
-  baseArrayType,
-  name,
-  placeholder,
-  classes,
-  inputClasses,
-  clearClasses,
-  disableInput,
-  displayErrors,
-  value,
-  containerClasses,
-  styles,
-  onFieldChange,
-}: ArrayFieldProps): JSX.Element => {
+const ArrayField = (props : ArrayFieldProps): JSX.Element => {
   const arrayFieldValidation = (value: string) => {
     if (!value) return;
 
@@ -73,7 +25,7 @@ const ArrayField = ({
     } catch (e) {}
 
     if (!validArray) {
-      return 'Please enter a valid array structure' + ((baseArrayType === 'text') ? ' e.g. [\"value1\", \"value2\"]' : '.');
+      return 'Please enter a valid array structure' + ((props.baseArrayType === 'text') ? ' e.g. [\"value1\", \"value2\"]' : '.');
     }
 
     const moment = windowRef.moment;
@@ -85,7 +37,7 @@ const ArrayField = ({
       // null is a valid value for any type
       if (val === null) continue;
 
-      switch (baseArrayType) {
+      switch (props.baseArrayType) {
         case 'timestamptz':
         case 'timestamp':
           isValid = moment(val, moment.ISO_8601, true).isValid();
@@ -112,72 +64,38 @@ const ArrayField = ({
       }
 
       if (!isValid) {
-        return '`' + val + '` is not a valid ' + getSimpleColumnType(baseArrayType) + ' value.';
+        return '`' + val + '` is not a valid ' + getSimpleColumnType(props.baseArrayType) + ' value.';
       }
     }
 
     return true;
   };
 
-  // react-hook-form setup
-  const { setValue, control, clearErrors } = useFormContext();
-  const registerOptions = {
-    required: false,
-    validate: arrayFieldValidation
-  };
-
-  const formInput = useController({
-    name,
-    control,
-    rules: registerOptions,
-  });
-
-  const field = formInput?.field;
-  const fieldValue = field?.value;
-  const [showClear, setShowClear] = useState<boolean>(Boolean(fieldValue));
-
-  const fieldState = formInput?.fieldState;
-  const { error, isTouched } = fieldState;
-
-  useEffect(() => {
-    if (onFieldChange) {
-      onFieldChange(fieldValue);
-    }
-
-    if (showClear != Boolean(fieldValue)) {
-      setShowClear(Boolean(fieldValue));
-    }
-  }, [fieldValue]);
-
-  useEffect(() => {
-    if (value === undefined) return;
-    setValue(name, value);
-  }, [value]);
-
-  // acllback functions
-  const handleChange = (v: any) => {
-    field.onChange(v);
-    field.onBlur();
-  };
-
-  const clearInput = () => {
-    setValue(name, '');
-    clearErrors(name);
-  }
+  const placeholder = props.placeholder ? props.placeholder : arrayFieldPlaceholder(props.baseArrayType);
 
   return (
-    <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)} input-switch-array-container`} style={styles}>
-      <div className={`chaise-input-control has-feedback content-box ${classes} ${disableInput ? ' input-disabled' : ''}`}>
-        <textarea placeholder={placeholder} rows={5} className={`${inputClasses} input-switch`} {...field} onChange={handleChange} />
-        <ClearInputBtn
-          btnClassName={`${clearClasses} input-switch-clear`}
-          clickCallback={clearInput}
-          show={showClear}
-        />
-      </div>
-      {displayErrors && isTouched && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
-    </div>
-  );
+    <InputField {...props}
+      controllerRules={{
+        validate: arrayFieldValidation
+      }}
+    >
+      {(field, onChange, showClear, clearInput) => (
+        <div className='input-switch-array'>
+          <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
+            <textarea
+              placeholder={placeholder} rows={5} className={`${props.inputClasses} input-switch`}
+              {...field} onChange={onChange} disabled={props.disableInput}
+            />
+            <ClearInputBtn
+              btnClassName={`${props.clearClasses} input-switch-clear`}
+              clickCallback={clearInput}
+              show={showClear && !props.disableInput}
+            />
+          </div>
+        </div>
+      )}
+    </InputField>
+  )
 }
 
 export default ArrayField;

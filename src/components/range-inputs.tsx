@@ -1,7 +1,7 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 
 // components
-import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch';
+import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
 // hooks
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -200,7 +200,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
                   displayErrors={false}
                   name={`${name}-min`}
                   type={inputType}
-                  placeholder={absMin}
+                  placeholder={absMin as string}
                   // disableInput={disableSubmit}
                   inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
                   timeClasses='ts-time-range-min'
@@ -216,7 +216,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
                   displayErrors={false}
                   name={`${name}-max`}
                   type={inputType}
-                  placeholder={absMax}
+                  placeholder={absMax as string}
                   // disableInput={disableSubmit}
                   inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-max' : 'range-max'}
                   timeClasses='ts-time-range-max'

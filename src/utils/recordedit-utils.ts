@@ -35,13 +35,8 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
   const logStackPathChild = column.isForeignKey ? LogStackPaths.FOREIGN_KEY : LogStackPaths.COLUMN;
 
   let type;
-  // asset and boolean will handle their own disabeld inputs.
   if (column.isAsset) {
     type = 'file'
-  } else if (column.type.name === 'boolean') {
-    type = 'boolean';
-  } else if (isInputDisabled) {
-    type = 'disabled';
   } else if (column.isForeignKey) {
     type = 'popup-select';
   } else {
@@ -71,7 +66,7 @@ export function columnToColumnModel(column: any, queryParams?: any): RecordeditC
     column: column,
     isDisabled: isInputDisabled || isPrefilled,
     isRequired: !column.nullok && !isInputDisabled,
-    inputType: isPrefilled ? 'disabled' : type,
+    inputType: type,
     logStackNode, // should not be used directly, take a look at getColumnModelLogStack
     logStackPathChild, // should not be used directly, use getColumnModelLogAction getting the action string
     hasDomainFilter
@@ -357,7 +352,7 @@ export function populateEditInitialValues(
       }
 
       // If input is disabled, and it's copy, we don't want to copy the value
-      let isDisabled = colModel.inputType === 'disabled';
+      let isDisabled = colModel.isDisabled;
       if (isDisabled && appMode === appModes.COPY) return;
 
       if (appMode !== appModes.COPY) {
