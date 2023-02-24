@@ -11,7 +11,7 @@
     .range-input-form{
         display: flex;
         flex-direction: row;
-        align-items: end;
+        align-items: flex-start;
         width: 100%;
         flex-wrap: wrap;
     }
@@ -46,7 +46,7 @@
     }
 
     .range-input-submit-btn {
-        margin-top: 5px;
+        margin-top: 25px;
     }
 }
 

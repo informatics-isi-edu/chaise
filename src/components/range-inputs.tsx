@@ -4,8 +4,8 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
 // hooks
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { FieldError, FormProvider, useForm, useWatch } from 'react-hook-form';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 // models
 import { RangeOptions } from '@isrd-isi-edu/chaise/src/models/range-picker';
@@ -81,9 +81,12 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   const type = getType(inputType);
   const classTypeName = (type === 'int' || type === 'number') ? 'numeric-width' : type === 'date' ? 'date-width' : 'time-width';
 
+  const minName = `${name}-min`;
+  const maxName = `${name}-max`;
+
   const defVals = {
-    [`${name}-min`]: absMin,
-    [`${name}-max`]: absMax
+    [minName]: absMin,
+    [maxName]: absMax
   };
 
   const methods = useForm<any>({
@@ -98,57 +101,30 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     delayError: undefined
   });
 
-  const [error, setError] = useState<any>(null);
-  const [disableSubmit, setDisableSubmit] = useState<boolean>(disabled || (type === 'int' || type === 'number'));
+  const [rangeError, setRangeError] = useState<any>(null);
 
-  const fromVal = useWatch({ control: methods.control, name: `${name}-min` });
-  const toVal = useWatch({ control: methods.control, name: `${name}-max` });
+  const fromVal = useWatch({ control: methods.control, name: minName });
+  const toVal = useWatch({ control: methods.control, name: maxName });
 
+  // if the absMin/absMax are updated, update the value in the form
+  // can occur when this facet is open and another facet is used
   useLayoutEffect(() => {
-    // set value for form 
-    methods.resetField(`${name}-min`, { defaultValue: absMin });
-    methods.resetField(`${name}-max`, { defaultValue: absMax });
-
-    // enable the submit button if we have a min/max
-    setDisableSubmit(!!disabled);
+    methods.resetField(minName, { defaultValue: absMin });
+    methods.resetField(maxName, { defaultValue: absMax });
   }, [absMax, absMin])
 
-  const handleChange = () => {
-    const formErrors = methods.formState.errors;
-    const errMessage = formErrors[`${name}-min`]?.message || formErrors[`${name}-max`]?.message || '';
-    console.log('error message: ', errMessage);
+  useEffect(() => {
+    const subscribe = methods.watch((data, options) => {
+      if (options.name !== minName && options.name !== maxName) return;
 
-    // update if the message is not the same
-    if (errMessage !== error) setError(errMessage);
+      if (rangeError) setRangeError(null);
+    });
+    return () => subscribe.unsubscribe();
+  });
 
-    // TODO: this doesn't check if timestamp is empty properly
-    const areBothFieldsEmpty = !fromVal && !toVal;
-    setDisableSubmit(!!disabled || Boolean(errMessage) || areBothFieldsEmpty)
-  }
-
-  // const formatTimeValues = () => {
-  //   const fromDateVal = fromRef?.current?.value;
-  //   let fromTimeVal = fromTimeRef?.current?.value;
-
-  //   if (fromDateVal && !fromTimeVal) fromTimeVal = '00:00:00';
-
-  //   const toDateVal = toRef?.current?.value;
-  //   let toTimeVal = toTimeRef?.current?.value;
-
-  //   if (toDateVal && !toTimeVal) toTimeVal = '00:00:00';
-
-  //   return {
-  //     fromVal: fromDateVal || fromTimeVal ? `${fromDateVal}T${fromTimeVal}` : '',
-  //     toVal: toDateVal || toTimeVal ? `${toDateVal}T${toTimeVal}` : '',
-  //   };
-  // }
-
-  /**
-   * performs basic range validation : from_value > to_value
-  */
+  // performs basic range validation : from_value > to_value  
   const rangeCheck = (fromVal: string, toVal: string): boolean => {
     if (type === 'int') return parseInt(fromVal) < parseInt(toVal);
-
     if (type === 'number') return parseFloat(fromVal) < parseFloat(toVal);
 
     /**type is either date or timestamp */
@@ -166,28 +142,32 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     return rangeCheck(fromVal, toVal) ? 'valid' : 'range';
   };
 
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const disableSubmit = () => {
+    const hasError = Boolean(minName in methods.formState.errors || maxName in methods.formState.errors || rangeError);
+    const areBothFieldsEmpty = !fromVal && !toVal;
+    return (!!disabled || hasError || areBothFieldsEmpty);
+  }
 
-    const submitFromVal = data[`${name}-min`];
-    const submitToVal = data[`${name}-max`];
+  const onSubmit = (data: any) => {
+    const submitFromVal = data[minName];
+    const submitToVal = data[maxName];
 
     const validatedResult = validateValues(submitFromVal, submitToVal);
 
     if (validatedResult === 'valid') {
       addRange(fromVal, toVal);
     } else {
-      setError('From value cannot be greater than the To value');
+      setRangeError('From value cannot be greater than the To value');
     }
   }
 
-  // useEffect(() => {
-  //   const values: any = methods.getValues();
-  //   const disabledFromVal = values[`${name}-min`];
-  //   const disabledtoVal = values[`${name}-max`];
+  const renderErrors = () => {
+    const minError = methods.formState.errors[minName]?.message;
+    const maxError = methods.formState.errors[maxName]?.message;
+    if (!minError && !maxError && !rangeError) return;
 
-  //   setDisableSubmit(!!disabled || (!disabledFromVal && !disabledtoVal));
-  // }, [disabled]);
+    return <span className='range-input-error'>{minError || maxError || rangeError}</span>
+  }
 
   return (
     <div className={classes}>
@@ -198,15 +178,13 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
               <label>From:
                 <InputSwitch
                   displayErrors={false}
-                  name={`${name}-min`}
+                  name={minName}
                   type={inputType}
                   placeholder={absMin as string}
-                  // disableInput={disableSubmit}
-                  inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
+                  inputClasses={type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
                   timeClasses='ts-time-range-min'
-                  clearClasses={type === 'date' || type === 'timestamp' ? 'min-date-clear' : 'min-clear'}
+                  clearClasses={type === 'timestamp' ? 'min-date-clear' : 'min-clear'}
                   clearTimeClasses='min-time-clear'
-                  onFieldChange={handleChange}
                 />
               </label>
             </div>
@@ -214,27 +192,23 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
               <label>To:
                 <InputSwitch
                   displayErrors={false}
-                  name={`${name}-max`}
+                  name={maxName}
                   type={inputType}
                   placeholder={absMax as string}
-                  // disableInput={disableSubmit}
-                  inputClasses={type === 'date' || type === 'timestamp' ? 'ts-date-range-max' : 'range-max'}
+                  inputClasses={type === 'timestamp' ? 'ts-date-range-max' : 'range-max'}
                   timeClasses='ts-time-range-max'
-                  clearClasses={type === 'date' || type === 'timestamp' ? 'max-date-clear' : 'max-clear'}
+                  clearClasses={type === 'timestamp' ? 'max-date-clear' : 'max-clear'}
                   clearTimeClasses='max-time-clear'
-                  onFieldChange={handleChange}
                 />
               </label>
             </div>
-            <button type='submit' className='chaise-btn chaise-btn-primary range-input-submit-btn' disabled={disableSubmit}>
+            <button type='submit' className='chaise-btn chaise-btn-primary range-input-submit-btn' disabled={disableSubmit()}>
               <span className='chaise-btn-icon fa-solid fa-check' />
             </button>
           </form>
         </FormProvider>
       </div>
-      {
-        error && <span className='range-input-error'>{error}</span>
-      }
+      {renderErrors()}
     </div>
   );
 };
