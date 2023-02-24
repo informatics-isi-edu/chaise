@@ -590,27 +590,8 @@ const FacetRangePicker = ({
     const tempRangeOptions: RangeOptions = { ...compState.rangeOptions }
     if (isColumnOfType('timestamp')) {
       // convert and set the values if they are defined.
-      if (!min) {
-        tempRangeOptions.absMin = null;
-      } else {
-        // incase of fractional seconds, truncate for min
-        const m = windowRef.moment(min).startOf('second');
-        tempRangeOptions.absMin = {
-          date: m.format(dataFormats.date),
-          time: m.format(dataFormats.time24)
-        }
-      }
-
-      if (!max) {
-        tempRangeOptions.absMax = null;
-      } else {
-        // incase of fractional seconds, add 1 and truncate for max
-        const m = windowRef.moment(max).add(1, 'second').startOf('second');
-        tempRangeOptions.absMax = {
-          date: m.format(dataFormats.date),
-          time: m.format(dataFormats.time24)
-        }
-      }
+      tempRangeOptions.absMin = timestampToDateTime(min as string);
+      tempRangeOptions.absMax = timestampToDateTime(max as string);
     } else if (isColumnOfType('float')) {
       tempRangeOptions.absMin = formatFloatMin(min as number);
       tempRangeOptions.absMax = formatFloatMax(max as number);
