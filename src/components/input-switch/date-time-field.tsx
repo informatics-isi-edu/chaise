@@ -2,10 +2,14 @@
 import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
 import InputField, { InputFieldProps } from '@isrd-isi-edu/chaise/src/components/input-switch/input-field';
 
+// hooks
+import { useEffect } from 'react';
+import { useController, useFormContext } from 'react-hook-form';
+
 // utils
 import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { useEffect, useState } from 'react';
-import { useController, useFormContext } from 'react-hook-form';
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 type DateTimeFieldProps = InputFieldProps & {
   /**
@@ -15,7 +19,8 @@ type DateTimeFieldProps = InputFieldProps & {
   /**
    * classes for styling the clear button for time field
    */
-  clearTimeClasses?: string
+  clearTimeClasses?: string,
+  hasTimezone?: boolean
 }
 
 const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
@@ -25,15 +30,19 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
   useEffect(() => {
 
     const sub = watch((data, options) => {
-      const name = props.name;
+      const name = props.name
 
       // not sure what this is doing??
-      if (options.name && (options.name == `${name}-date` || options.name == `${name}-time`)) {
+      if (options.name && (options.name === `${name}-date` || options.name === `${name}-time`)) {
         const dateVal = data[`${name}-date`];
         if (!dateVal) return;
         let timeVal = data[`${name}-time`];
         if (dateVal && !timeVal) timeVal = '00:00';
-        setValue(name, `${dateVal}T${timeVal}`);
+
+        let valueToSet = `${dateVal}T${timeVal}`;
+        // adds the timezone info if needed
+        if (props.hasTimezone) valueToSet = windowRef.moment(valueToSet).format(dataFormats.datetime.return);
+        setValue(name, valueToSet);
       }
     });
 
@@ -65,23 +74,6 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
   const timeFieldState = formInputTime?.fieldState;
   const { isTouched: isTimeTouched } = timeFieldState;
 
-  const [showClear, setShowClear] = useState<{ time: boolean, date: boolean }>({
-    time: Boolean(timeFieldValue),
-    date: Boolean(dateFieldValue)
-  });
-
-  useEffect(() => {
-    if (showClear.date != Boolean(dateFieldValue)) {
-      setShowClear({ ...showClear, date: Boolean(dateFieldValue) });
-    }
-  }, [dateFieldValue]);
-
-  useEffect(() => {
-    if (showClear.time != Boolean(timeFieldValue)) {
-      setShowClear({ ...showClear, time: Boolean(timeFieldValue) });
-    }
-  }, [timeFieldValue]);
-
   const handleDateChange = (v: any) => {
     dateField.onChange(v);
     dateField.onBlur();
@@ -102,31 +94,33 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     clearErrors(`${props.name}-time`);
   }
 
+  const showDateClear = () => Boolean(dateFieldValue);
+  const showTimeClear = () => Boolean(timeFieldValue);
+
   return (
     <InputField {...props}
       checkIsTouched={() => isDateTouched || isDateTouched}
       controllerRules={{
-        validate: VALIDATE_VALUE_BY_TYPE['timestamp']
+        validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')]
       }}
     >
       {(field) => (
         <div className='input-switch-datetime'>
           <div className={`chaise-input-control has-feedback input-switch-date ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <input
-              className={`${props.inputClasses} input-switch ${showClear.date ? 'date-input-show-clear' : ''}`}
-              type='date' min='1970-01-01' max='2999-12-31' step='1'
-              disabled={props.disableInput}
+              className={`${props.inputClasses} input-switch ${showDateClear() ? 'date-input-show-clear' : ''}`}
+              type='date' step='1' disabled={props.disableInput}
               {...dateField} onChange={handleDateChange}
             />
             <ClearInputBtn
               btnClassName={`${props.clearClasses} input-switch-clear`}
               clickCallback={clearDate}
-              show={showClear.date && !props.disableInput}
+              show={showDateClear() && !props.disableInput}
             />
           </div>
           <div className={`chaise-input-control has-feedback input-switch-time ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
             <input
-              className={`${props.timeClasses} input-switch ${showClear.time ? 'time-input-show-clear' : ''}`}
+              className={`${props.timeClasses} input-switch ${showTimeClear() ? 'time-input-show-clear' : ''}`}
               type='time' min='00:00:00' max='23:59:59' step='1'
               disabled={props.disableInput}
               {...timeField} onChange={handleTimeChange}
@@ -134,7 +128,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
             <ClearInputBtn
               btnClassName={`${props.clearTimeClasses} input-switch-clear`}
               clickCallback={clearTime}
-              show={showClear.time && !props.disableInput}
+              show={showTimeClear() && !props.disableInput}
             />
           </div>
           <input {...field} type='hidden' />

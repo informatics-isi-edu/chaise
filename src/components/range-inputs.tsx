@@ -3,6 +3,9 @@ import '@isrd-isi-edu/chaise/src/assets/scss/_range-input.scss';
 // components
 import InputSwitch from '@isrd-isi-edu/chaise/src/components/input-switch/input-switch';
 
+// constants
+import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
+
 // hooks
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
@@ -12,6 +15,9 @@ import { RangeOptions } from '@isrd-isi-edu/chaise/src/models/range-picker';
 
 // services
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+
+// utils
+import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 const DATE_FORMAT = 'YYYY-MM-DD';
@@ -84,10 +90,30 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   const minName = `${name}-min`;
   const maxName = `${name}-max`;
 
-  const defVals = {
-    [minName]: absMin,
-    [maxName]: absMax
-  };
+  const timestampOptions = { outputMomentFormat: dataFormats.datetime.return }
+  if (type === 'timestamptz') timestampOptions.outputMomentFormat = dataFormats.timestamp;
+  
+  let defVals = {};
+  if (type.indexOf('timestamp') !== -1) {
+    const timestampMinValue = formatDatetime(absMin as string, timestampOptions);
+    const timestampMaxValue = formatDatetime(absMax as string, timestampOptions);
+
+    defVals = {
+      // initial min defaults
+      [`${minName}-datetime`]: timestampMinValue?.datetime || '',
+      [`${minName}-date`]: timestampMinValue?.date || '',
+      [`${minName}-time`]: timestampMinValue?.time || '',
+      // initial max defaults
+      [`${maxName}-datetime`]: timestampMaxValue?.datetime || '',
+      [`${maxName}-date`]: timestampMaxValue?.date || '',
+      [`${maxName}-time`]: timestampMaxValue?.time || ''
+    };
+  } else {
+    defVals = {
+      [minName]: absMin,
+      [maxName]: absMax
+    };
+  }
 
   const methods = useForm<any>({
     mode: 'onChange',
@@ -109,8 +135,21 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   // if the absMin/absMax are updated, update the value in the form
   // can occur when this facet is open and another facet is used
   useLayoutEffect(() => {
-    methods.resetField(minName, { defaultValue: absMin });
-    methods.resetField(maxName, { defaultValue: absMax });
+    // match timestamp and timestamptz
+    if (type.indexOf('timestamp') !== -1) {
+      const timestampMinValue = formatDatetime(absMin as string, timestampOptions);
+      methods.resetField(`${minName}-datetime`, { defaultValue: timestampMinValue?.datetime || '' });
+      methods.resetField(`${minName}-date`, { defaultValue: timestampMinValue?.date || '' });
+      methods.resetField(`${minName}-time`, { defaultValue: timestampMinValue?.time || '' });
+
+      const timestampMaxValue = formatDatetime(absMax as string, timestampOptions);
+      methods.resetField(`${maxName}-datetime`, { defaultValue: timestampMaxValue?.datetime || '' });
+      methods.resetField(`${maxName}-date`, { defaultValue: timestampMaxValue?.date || '' });
+      methods.resetField(`${maxName}-time`, { defaultValue: timestampMaxValue?.time || '' });
+    } else {
+      methods.resetField(minName, { defaultValue: absMin });
+      methods.resetField(maxName, { defaultValue: absMax });
+    }
   }, [absMax, absMin])
 
   useEffect(() => {
