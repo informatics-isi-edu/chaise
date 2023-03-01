@@ -231,6 +231,12 @@ const timestampFieldValidation = (value: string) => {
   return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
 };
 
+const timestamptzFieldValidation = (value: string) => {
+  if (!value) return;
+  const timestamp = windowRef.moment(value, dataFormats.datetime.return, true);
+  return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
+};
+
 export const VALIDATE_VALUE_BY_TYPE: {
   [key: string]: any;
 } = {
@@ -242,4 +248,5 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'number': numericFieldValidation,
   'date': dateFieldValidation,
   'timestamp': timestampFieldValidation,
+  'timestamptz': timestamptzFieldValidation,
 };

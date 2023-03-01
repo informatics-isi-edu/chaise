@@ -16,6 +16,9 @@ import TextField from '@isrd-isi-edu/chaise/src/components/input-switch/text-fie
 // models
 import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
 
+// utils
+import { getInputType } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+
 export type InputSwitchProps = {
   /**
    * the type of input :
@@ -208,6 +211,7 @@ const InputSwitch = ({
           timeClasses={timeClasses}
           clearTimeClasses={clearTimeClasses}
           type={type}
+          hasTimezone={columnModel?.column.type.name === 'timestamptz'}
           name={name}
           classes={classes}
           inputClasses={inputClasses}

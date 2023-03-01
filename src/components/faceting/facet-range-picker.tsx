@@ -424,9 +424,7 @@ const FacetRangePicker = ({
     const defer = Q.defer();
 
     (function (uri) {
-      const requestMin = isColumnOfType('timestamp') ? dateTimeToTimestamp(min as TimeStamp) : min,
-        requestMax = isColumnOfType('timestamp') ? dateTimeToTimestamp(max as TimeStamp) : max;
-
+      const requestMin = min, requestMax = max;
       const facetLog = getDefaultLogInfo();
       let action = LogActions.FACET_HISTOGRAM_LOAD;
       if (reloadCauses.length > 0) {
@@ -528,26 +526,23 @@ const FacetRangePicker = ({
   const initializeRangeMinMax = (min: string | number, max: string | number) => {
     const tempRangeOptions: RangeOptions = { ...compState.rangeOptions }
     if (isColumnOfType('timestamp')) {
+      let format = dataFormats.timestamp;
+      if (facetColumnRef.current.column.type.rootName === 'timestamptz') format = dataFormats.datetime.return;
+
       if (!min) {
-        tempRangeOptions.absMin = null;
+        tempRangeOptions.absMin = '';
       } else {
         // incase of fractional seconds, truncate for min
         const m = windowRef.moment(min).startOf('second');
-        tempRangeOptions.absMin = {
-          date: m.format(dataFormats.date),
-          time: m.format(dataFormats.time24)
-        }
+        tempRangeOptions.absMin = m.format(format);
       }
 
       if (!max) {
-        tempRangeOptions.absMax = null;
+        tempRangeOptions.absMax = '';
       } else {
         // incase of fractional seconds, add 1 and truncate for max
         const m = windowRef.moment(max).add(1, 'second').startOf('second');
-        tempRangeOptions.absMax = {
-          date: m.format(dataFormats.date),
-          time: m.format(dataFormats.time24)
-        }
+        tempRangeOptions.absMax = m.format(format)
       }
     } else if (isColumnOfType('float')) {
       // epsilon can be calculated using Math.pow(2, exponent_base + log2(x))
@@ -642,12 +637,11 @@ const FacetRangePicker = ({
    * NOTE might return `null`
    */
   const timestampToDateTime = (ts: string) => {
-    if (!ts) return null;
-    const m = windowRef.moment(ts);
-    return {
-      date: m.format(dataFormats.date),
-      time: m.format(dataFormats.time24)
-    };
+    if (!ts) return '';
+    let format = dataFormats.timestamp;
+    if (facetColumnRef.current.column.type.rootName === 'timestamptz') format = dataFormats.datetime.return;
+
+    return windowRef.moment(ts).format(format);
   }
 
   const updateHistogramRange = (min: RangeOptions['absMin'], max: RangeOptions['absMax']) => {
@@ -800,20 +794,18 @@ const FacetRangePicker = ({
           return;
         }
 
+        let format = dataFormats.date;
+        if (facetColumnRef.current.column.type.rootName === 'timestamp') format = dataFormats.timestamp;
+        if (facetColumnRef.current.column.type.rootName === 'timestamptz') format = dataFormats.datetime.return;
+
         const minMaxRangeOptions = { absMin: compState.rangeOptions.absMin, absMax: compState.rangeOptions.absMax };
         // if min is undefined, absMin remains unchanged (happens when xaxis max is stretched)
         // and if not null, update the value
         if (min !== null && typeof min !== 'undefined') {
           if (isColumnOfType('int')) {
             minMaxRangeOptions.absMin = Math.round(min);
-          } else if (isColumnOfType('date')) {
-            minMaxRangeOptions.absMin = windowRef.moment(min).format(dataFormats.date);
-          } else if (isColumnOfType('timestamp')) {
-            const minMoment = windowRef.moment(min);
-            minMaxRangeOptions.absMin = {
-              date: minMoment.format(dataFormats.date),
-              time: minMoment.format(dataFormats.time24)
-            };
+          } else if (isColumnOfType('date') || isColumnOfType('timestamp')) {
+            minMaxRangeOptions.absMin = windowRef.moment(min).format(format);
           } else {
             minMaxRangeOptions.absMin = min;
           }
@@ -824,14 +816,8 @@ const FacetRangePicker = ({
         if (max !== null && typeof max !== 'undefined') {
           if (isColumnOfType('int')) {
             minMaxRangeOptions.absMax = Math.round(max);
-          } else if (isColumnOfType('date')) {
-            minMaxRangeOptions.absMax = windowRef.moment(max).format(dataFormats.date);
-          } else if (isColumnOfType('timestamp')) {
-            const maxMoment = windowRef.moment(max);
-            minMaxRangeOptions.absMax = {
-              date: maxMoment.format(dataFormats.date),
-              time: maxMoment.format(dataFormats.time24)
-            }
+          } else if (isColumnOfType('date') || isColumnOfType('timestamp')) {
+            minMaxRangeOptions.absMax = windowRef.moment(max).format(format);
           } else {
             minMaxRangeOptions.absMax = max;
           }
