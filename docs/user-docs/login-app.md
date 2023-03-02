@@ -1,6 +1,6 @@
 # Use the login app on external HTML pages
 
-This documentation focuses on the login app and how it can be used in external HTML pages. 
+This documentation focuses on the login app and how it can be used in external HTML pages.
 
 This document will focus on the new implementation of the login app using React. You can find the document for deprecated AngularJS implementation [here](https://github.com/informatics-isi-edu/chaise/blob/master/docs/user-docs/login-app-deprecated.md).
 
@@ -33,14 +33,14 @@ While the second method seems more straightforward, it will drastically affect t
 
 #### 2.1. Change the build process to prefetch dependencies (Preferred method)
 
-To summarize, after Chaise installation in your build scripts, you need to copy the contents of `lib/login/login-dependencies.html` into the HTML page that displays the login.
+To summarize, after Chaise installation in your build scripts, you need to copy the contents of `lib/login/login-dependencies.html` into the HTML page that displays the login. This file won't be present in the Chaise repository folder, and you can only find this folder where you've deployed chaise (By default it should be under `/var/www/chaise/`).
 
 ```html
 <head>
     <!-- other assets on the page -->
-    
-    <!-- TODO add the contents of lib/login/login-dependencies.html here -->
-    
+
+    <!-- TODO add the contents of /var/wwww/html/lib/login/login-dependencies.html here -->
+
     <!-- other assets on the page -->
 </head>
 ```
@@ -91,8 +91,8 @@ If you define the `customCSS` property in your [chaise-config](chaise-config.md)
 ```html
 <head>
     <!-- TODO include your customCSS file here -->
-    <!-- TODO 
-      AUTOMATICALLY add the contents of lib/login/login-dependencies.html here 
+    <!-- TODO
+      AUTOMATICALLY add the contents of lib/login/login-dependencies.html here
       OR
       <script src="/chaise/lib/login/login.dependencies.js"></script>
     -->

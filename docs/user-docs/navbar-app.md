@@ -35,13 +35,13 @@ While the second method seems more straightforward, it will drastically affect t
 
 #### 2.1. Change the build process to prefetch dependencies (Preferred method)
 
-To summarize, after Chaise installation in your build scripts, you need to copy the contents of `lib/navbar/navbar-dependencies.html` into the HTML page that displays the navbar.
+To summarize, after Chaise installation in your build scripts, you need to copy the contents of `lib/navbar/navbar-dependencies.html` into the HTML page that displays the navbar. This file won't be present in the Chaise repository folder, and you can only find this folder where you've deployed chaise (By default it should be under `/var/www/chaise/`).
 
 ```html
 <head>
     <!-- other assets on the page -->
 
-    <!-- TODO add the contents of lib/navbar/navbar-dependencies.html here -->
+    <!-- TODO add the contents of /var/www/html/lib/navbar/navbar-dependencies.html here -->
 
     <!-- other assets on the page -->
 </head>
@@ -199,6 +199,7 @@ The following are the major things that have changed from AngularJS to React:
     - /dist/chaise-dependencies.html
     + /lib/navbar/navbar-dependencies.html
     ```
+    - The `navbar-dependencies.html` will only be present in the deployed Chaise folder (by default `/var/www/html`), while the `chaise-dependencies.html` is present in both deployed Chaise folder as well as the Chaise repository folder.
    2. While in AngularJS, you need to include a `navbar.app.js` regardless of prefetching dependencies, in React implementation, you don't need to include anything else if you're prefetching the dependencies. So in your HTML file:
    ```diff
    - <script src="/chaise/lib/navbar/navbar.app.js"></script>
