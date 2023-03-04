@@ -1,0 +1,71 @@
+// z-index
+$z-index-map: (
+  // make sure it's above the displayed checkbox, so we can click on it
+  'checkbox-input': 1,
+  'button-active': 1,
+  'markdown-container-radio-label': 1,
+  // more than input
+  'input-group-append-btn': 2,
+  // more than the unfocused version
+  'input-group-append-btn-focus': 3,
+  // more than previous one
+  'input-control-feedback': 4,
+
+  // more than clear btn (TODO but why 6?)
+  'recordedit-column-permission-overlay': 6,
+
+  // TOOD feature missing from recordedit (used in recordset),and why do we need z-index?
+  'top-horzontal-scroll-wrapper': 5,
+
+  // more than all the inputs stuff
+  'recordedit-column-cell-spinner-backdrop': 5,
+  'recordedit-column-cell-spinner': 7,
+
+  // more than most of the stuff on the page
+  'spinner': 10,
+
+  // should be lower
+  'split-view-divider': 100,
+  'back-to-top-btn': 100,
+
+
+  'modal-submit-spinner-backdrop': 100,
+  'modal-submit-spinner': 101,
+
+  // should be higher
+  'app-blocking-spinner-backdrop': 5,
+  'app-blocking-spinner': 6,
+
+
+  // less than modal itself
+  'export-progress-backdrop': 1030,
+  // less than login instruction modal
+  'export-progress': 1031,
+
+
+  // less than modal-error
+  'modal-error-backdrop': 1031,
+
+  // less than modal-login-instruction
+  'modal-login-instruction-backdrop': 1035,
+  // less than navbar
+  'modal-login-instruction': 1036,
+  // less than navbar
+  'modal-error': 1036,
+
+
+
+  'navbar': 1037,
+
+  'modal-backdrop': 1050,
+  'modal': 1055,
+
+  // more than the previous modal
+  'modal-backdrop-on-modal': 1056,
+  'modal-on-modal': 1057,
+
+  'modal-error-backdrop-on-search-popup': 1061,
+  'modal-error-on-search-popup': 1066,
+
+
+)

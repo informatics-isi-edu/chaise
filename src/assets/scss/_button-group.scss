@@ -1,81 +1,83 @@
+@use 'sass:map';
+@use 'variables';
+@use 'helpers';
 
 // stylelint-disable selector-no-qualifying-type
 // Make the div behave like a button
 .chaise-btn-group,
 .chaise-btn-group-vertical {
-    position: relative;
-    display: inline-flex;
-    vertical-align: middle; // match .chaise-btn alignment given font-size hack above
+  position: relative;
+  display: inline-flex;
+  vertical-align: middle; // match .chaise-btn alignment given font-size hack above
 
-    > .chaise-btn {
-        position: relative;
-        flex: 1 1 auto;
-        // Bring the hover, focused, and "active" buttons to the front to overlay
-        // the borders properly
-        &.active,
-        &:active,
-        &:focus,
-        &:hover {
-            z-index: 1;
-        }
+  > .chaise-btn {
+    position: relative;
+    flex: 1 1 auto;
+    // Bring the hover, focused, and "active" buttons to the front to overlay
+    // the borders properly
+    &.active,
+    &:active,
+    &:focus,
+    &:hover {
+      z-index: map-get(variables.$z-index-map, 'button-active');
     }
+  }
 }
 // Optional: Group multiple button groups together for a toolbar
 .chaise-btn-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 5px;
 
-    .input-group {
-        width: auto;
-    }
+  .input-group {
+    width: auto;
+  }
 }
 
 .chaise-btn-group {
-    // Prevent double borders when buttons are next to each other
-    > .chaise-btn-group:not(:first-child):not([disabled]),
-    > .chaise-btn:not(:first-child):not([disabled]) {
-        margin-left: -$btn-border-width;
-    }
-    // Reset rounded corners
-    > .chaise-btn-group:not(:last-child) > .chaise-btn,
-    > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
-        @include border-right-radius(0);
-    }
+  // Prevent double borders when buttons are next to each other
+  > .chaise-btn-group:not(:first-child):not([disabled]),
+  > .chaise-btn:not(:first-child):not([disabled]) {
+    margin-left: variables.$btn-border-width * -1;
+  }
+  // Reset rounded corners
+  > .chaise-btn-group:not(:last-child) > .chaise-btn,
+  > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
+    @include helpers.border-right-radius(0);
+  }
 
-    > .chaise-btn-group:not(:first-child) > .chaise-btn,
-    > .chaise-btn:not(:first-child) {
-        @include border-left-radius(0);
-    }
+  > .chaise-btn-group:not(:first-child) > .chaise-btn,
+  > .chaise-btn:not(:first-child) {
+    @include helpers.border-left-radius(0);
+  }
 }
 
 //
 // Vertical button groups
 //
 .chaise-btn-group-vertical {
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
 
-    > .chaise-btn-group,
-    > .chaise-btn {
-        width: 100%;
-    }
+  > .chaise-btn-group,
+  > .chaise-btn {
+    width: 100%;
+  }
 
-    > .chaise-btn-group:not(:first-child),
-    > .chaise-btn:not(:first-child) {
-        margin-top: -$btn-border-width;
-    }
-    // Reset rounded corners
-    > .chaise-btn-group:not(:last-child) > .chaise-btn,
-    > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
-        @include border-bottom-radius(0);
-    }
+  > .chaise-btn-group:not(:first-child),
+  > .chaise-btn:not(:first-child) {
+    margin-top: variables.$btn-border-width * -1;
+  }
+  // Reset rounded corners
+  > .chaise-btn-group:not(:last-child) > .chaise-btn,
+  > .chaise-btn:not(:last-child):not(.dropdown-toggle) {
+    @include helpers.border-bottom-radius(0);
+  }
 
-    > .chaise-btn-group:not(:first-child) > .chaise-btn,
-    > .chaise-btn:not(:first-child) {
-        @include border-top-radius(0);
-    }
+  > .chaise-btn-group:not(:first-child) > .chaise-btn,
+  > .chaise-btn:not(:first-child) {
+    @include helpers.border-top-radius(0);
+  }
 }
-

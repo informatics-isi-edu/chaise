@@ -1,0 +1,12 @@
+$record-spacing-map: (
+  'main-spinner-height': 97px,
+  'record-table-cell-padding': 5px,
+  'record-table-cell-border-width': 1px,
+  'space-between-related-sections': 5px,
+  'row-focus-border-width': 2px,
+  /*
+  * In case of related entities, the accordion icon is adding this much space,
+  * so we're making sure the rest of titles and content are aligned with it.
+  */
+  'record-header-padding-left': 40px
+)

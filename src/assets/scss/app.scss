@@ -1,10 +1,10 @@
-@import "variables";
-@import "helpers";
+@use 'sass:map';
+@use 'variables';
+@use 'helpers';
 
 // globally used
 @import "chaise-icon";
 @import "markdown-container";
-// used in navbar
 @import "buttons";
 @import "button-group";
 @import "inputs";
@@ -19,7 +19,7 @@
 }
 
 html {
-  font-size: $font-size;
+  font-size: variables.$font-size;
 }
 
 .chaise-body {
@@ -29,14 +29,14 @@ html {
   height: 100%;
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande",
     sans-serif;
-  background-color: $white-color;
-  font-size: $font-size;
+  background-color: map-get(variables.$color-map, 'white');
+  font-size: variables.$font-size;
   font-weight: 400;
   line-height: 1.428;
 
   h1,
   .h1-class {
-    font-size: $h1-font-size;
+    font-size: variables.$h1-font-size;
   }
 
   // in iframe we're making the headers smaller
@@ -44,7 +44,7 @@ html {
   .h2-class,
   &.chaise-iframe h1,
   &.chaise-iframe .h1-class {
-    font-size: $h2-font-size;
+    font-size: variables.$h2-font-size;
   }
 
   // in iframe we're making the headers smaller
@@ -52,7 +52,7 @@ html {
   .h3-class,
   &.chaise-iframe h2,
   &.chaise-iframe .h2-class {
-    font-size: $h3-font-size;
+    font-size: variables.$h3-font-size;
   }
 
   // in iframe we're making the headers smaller
@@ -60,7 +60,7 @@ html {
   .h4-class,
   &.chaise-iframe h3,
   &.chaise-iframe .h3-class {
-    font-size: $h4-font-size;
+    font-size: variables.$h4-font-size;
   }
 
   h1,
@@ -116,7 +116,7 @@ html {
   a,
   a:not([href]):not([class]) {
     cursor: pointer;
-    color: $link-color;
+    color: map-get(variables.$color-map, 'link');
     text-decoration: none;
   }
   // the last selector is added to override bootstrap default behavior
@@ -235,7 +235,7 @@ html {
   // disabled row and form
   .disabled-form,
   .disabled-row {
-    color: $disabled-color !important;
+    color: map-get(variables.$color-map, 'disabled') !important;
   }
 
   .disabled-form *,
@@ -245,7 +245,7 @@ html {
 
   .disabled-form a,
   .disabled-row a {
-    color: $disabled-color !important;
+    color: map-get(variables.$color-map, 'disabled') !important;
   }
 
   .disabled-form .remove-input-btn {
@@ -261,7 +261,7 @@ html {
 
   .disabled-form .btn.btn-inverted[disabled]:hover {
     background-color: white !important;
-    border-color: $border-color !important;
+    border-color: map-get(variables.$color-map, 'border') !important;
   }
 
   .disabled-element {
@@ -274,31 +274,31 @@ html {
 
   // spinner
   .spinner-container:not(.bottom-left-spinner) {
-    background: $white-color;
+    background: map-get(variables.$color-map, 'white');
+    color: map-get(variables.$color-map, 'spinner');
     width: 130px;
     margin: 0 auto;
     text-align: center;
     padding: 14px 0;
-    border: 1px solid $border-color;
+    border: 1px solid map-get(variables.$color-map, 'border');
     border-radius: 7px;
-    color: $spinner-color;
     &:not(.manual-position-spinner) {
       top: 50vh;
       position: absolute;
       left: 50%;
       margin-top: -75px;
       margin-left: -75px;
-      z-index: 10;
+      z-index: map-get(variables.$z-index-map, 'spinner');
     }
     .spinner-message {
-      color: $black-color;
+      color: map-get(variables.$color-map, 'black');
       margin-top: 15px;
     }
   }
   .spinner-container.bottom-left-spinner {
     float: left;
     position: fixed;
-    z-index: 2;
+    z-index: map-get(variables.$z-index-map, 'spinner');
     bottom: 0;
     background: #d9edf7;
     margin: 5px;
@@ -330,7 +330,7 @@ html {
     margin: 0;
 
     .link-decoration {
-      color: $link-color;
+      color: map-get(variables.$color-map, 'link');
     }
   }
 
@@ -413,7 +413,7 @@ html {
       left: 0;
     }
 
-    margin-right: -$viewport-margin;
+    margin-right: variables.$viewport-margin * -1;
 
     .footer-content {
       height: 30px;
@@ -439,7 +439,7 @@ html {
       code {
         padding-left: 0;
         padding-right: 0;
-        color: $black-color;
+        color: map-get(variables.$color-map, 'black');
         background-color: #f5f5f5;
       }
     }
@@ -474,7 +474,7 @@ html {
 
   // fix the padding issues related to the main alerts container that is outside of apps
   .app-header-container > .alerts-container {
-    padding: $viewport-margin;
+    padding: variables.$viewport-margin;
 
     /**
      * having margin causes issues with the height logic, that's why we're trying
@@ -492,8 +492,8 @@ html {
   // top panel container for record and recordset
   .top-panel-container {
     // NOTE the padding top has been moved to the rule above (.app-header-container > .alerts-container)
-    // padding-top: $viewport-margin;
-    padding-right: $viewport-margin;
+    // padding-top: variables.$viewport-margin;
+    padding-right: variables.$viewport-margin;
 
     .alerts-container {
       padding-left: 20px;
@@ -508,19 +508,19 @@ html {
       .top-left-panel {
         position: relative;
         max-width: 40vw;
-        margin-left: $viewport-margin;
+        margin-left: variables.$viewport-margin;
 
         &.open-panel {
           flex: 0;
-          flex-basis: $left-panel-width-lg;
+          flex-basis: variables.$left-panel-width-lg;
           min-width: 170px;
 
           &.small-panel {
-            flex-basis: $left-panel-width-sm;
+            flex-basis: variables.$left-panel-width-sm;
           }
 
           & + .top-right-panel {
-            padding-left: $main-alley;
+            padding-left: variables.$main-alley;
           }
         }
 
@@ -534,7 +534,7 @@ html {
             // spacing the same way in top and bottom panels.
             // This is becuase we have js code that will look at the
             // clientWidth and the width of these two panels should be the same.
-            padding-left: $viewport-margin;
+            padding-left: variables.$viewport-margin;
           }
         }
 
@@ -578,22 +578,22 @@ html {
     .side-panel-resizable {
       position: relative;
       max-width: 40vw;
-      margin-left: $viewport-margin;
+      margin-left: variables.$viewport-margin;
 
       &.open-panel {
         flex: 0;
-        flex-basis: $left-panel-width-lg;
+        flex-basis: variables.$left-panel-width-lg;
         min-width: 170px;
 
         &.small-panel {
-          flex-basis: $left-panel-width-sm;
+          flex-basis: variables.$left-panel-width-sm;
         }
 
         & ~ .main-container {
-          padding-left: $main-alley;
+          padding-left: variables.$main-alley;
 
           .footer-container:not(.position-absolute) {
-            margin-left: -$main-alley;
+            margin-left: variables.$main-alley * -1;
           }
         }
       }
@@ -612,10 +612,10 @@ html {
           // of the footer behaviour that we want.
           // If we move it up, then the footer won't be displayed properly
           // when the side-panel is closed
-          padding-left: $viewport-margin;
+          padding-left: variables.$viewport-margin;
 
           .footer-container:not(.position-absolute) {
-            margin-left: -$viewport-margin;
+            margin-left: variables.$viewport-margin * -1;
           }
         }
       }
@@ -633,7 +633,7 @@ html {
 
       // we're going to adjust this dynamically for dynamic-padding
       &:not(.dynamic-padding) {
-        padding-right: $viewport-margin;
+        padding-right: variables.$viewport-margin;
       }
     }
   }
@@ -644,51 +644,9 @@ html {
     display: none;
   }
 
-  // TODO used in boolean search, record and recordset are not using it anymore
-  /**** side panel buttons ****/
-  .facet-btn {
-    position: absolute;
-    top: 40px;
-    z-index: 2;
-  }
-
-  .sidePanFiddler {
-    height: 40px;
-    width: 21px;
-    font-size: 20px;
-    padding: 4px 4px 0 0;
-    cursor: pointer;
-    overflow: hidden;
-  }
-
-  .record-container .facet-btn {
-    left: -20px;
-  }
-
-  .record-container .facet-btn.close-panel {
-    left: -20px;
-  }
-
-  .record-container .sidePanFiddler {
-    border-right: none;
-    border-radius: 15px 0 0 15px;
-  }
-
-  /** recordset side panel collapse button **/
-  .recordset-container .facet-btn {
-    right: -20px;
-  }
-
-  .recordset-container .sidePanFiddler {
-    border-left: none;
-    border-radius: 0 15px 15px 0;
-  }
-
-  // END remove
-
   // copy to clipboard btn (used in share dialog)
   .chaise-copy-to-clipboard-btn {
-    color: $primary-color;
+    color: map-get(variables.$color-map, 'primary');
     font-size: 65%;
     cursor: pointer;
   }
@@ -712,7 +670,7 @@ html {
 
     input {
       position: absolute;
-      z-index: 1;
+      z-index: map-get(variables.$z-index-map, 'checkbox-input');
       cursor: pointer;
       width: 20px;
       height: 20px;
@@ -723,14 +681,14 @@ html {
         cursor: not-allowed;
         &:before,
         &:checked:after {
-          color: $disabled-color;
-          border-color: $disabled-color;
+          color: map-get(variables.$color-map, 'disabled');
+          border-color: map-get(variables.$color-map, 'disabled');
         }
       }
 
       &:before,
       &:checked:after {
-        color: $primary-color;
+        color: map-get(variables.$color-map, 'primary');
         -webkit-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
         -o-transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
         transition: border 0.15s ease-in-out, color 0.15s ease-in-out;
@@ -744,9 +702,9 @@ html {
         height: 20px;
         left: 0;
         top: 0;
-        border: 1px solid $primary-color;
+        border: 1px solid map-get(variables.$color-map, 'primary');
         border-radius: 3px;
-        background-color: $white-color;
+        background-color: map-get(variables.$color-map, 'white');
       }
 
       &:checked:after {
@@ -798,13 +756,13 @@ html {
 
   // changes the color of alert fa-triangle-exclamation (used for timeout error)
   .fa-triangle-exclamation {
-    color: $warning-color !important;
+    color: map-get(variables.$color-map, 'warning') !important;
     border: none;
   }
 
   // spinner
   .fa-circle-notch {
-    color: $spinner-color;
+    color: map-get(variables.$color-map, 'spinner');
   }
 
   /* Rule for Chrome */
@@ -834,7 +792,7 @@ html {
     position: sticky;
     width: -moz-available;
     width: -webkit-fill-available;
-    z-index: 2;
+    z-index: map-get(variables.$z-index-map, 'top-horzontal-scroll-wrapper');
     top: 0;
     display: none;
   }
@@ -943,10 +901,10 @@ html {
         height: 44px;
         text-transform: inherit;
         padding: 8px 8px 8px 8px;
-        color: $white-color;
+        color: map-get(variables.$color-map, 'white');;
         border: none;
         border-radius: inherit;
-        background: $section-background-color;
+        background: map-get(variables.$color-map, 'section-background');
         // Overriding accordian-button css to align right angle bracket icon to left
         flex-direction: row-reverse;
         justify-content: flex-end;
@@ -1030,26 +988,25 @@ html {
     width: 35px;
     cursor: pointer;
     overflow: hidden;
-    z-index: 100;
+    z-index: map-get(variables.$z-index-map, 'back-to-top-btn');
   }
 
   // an spinner with backdrop blocking the whole app content
   // used in record and recordedit apps
   .app-blocking-spinner-container {
-    $app-blocking-backdrop-z-index: 5;
     .app-blocking-spinner-backdrop {
       position: fixed;
       top: 0;
       left: 0;
       height: 100%;
       width: 100%;
-      z-index: $app-blocking-backdrop-z-index;
+      z-index: map-get(variables.$z-index-map, 'app-blocking-spinner-backdrop');
       background: black;
       opacity: 0.5;
     }
     .spinner-container {
       top: 50%;
-      z-index: calc($app-blocking-backdrop-z-index + 1);
+      z-index: map-get(variables.$z-index-map, 'app-blocking-spinner');
     }
   }
 

@@ -1,14 +1,17 @@
+@use 'sass:map';
+@use 'variables';
+
 .divider-hitbox {
   cursor: col-resize;
   align-self: stretch;
   display: flex;
   align-items: center;
   top: 50%;
-  color: #bbb;
+  color: map-get(variables.$color-map, 'split-view-divider');
   left: 2px;
   margin-right: -20px;
   width: 20px;
-  z-index: 100;
+  z-index: map-get(variables.$z-index-map, 'split-view-divider');
 
   span {
     padding-left: 3px;

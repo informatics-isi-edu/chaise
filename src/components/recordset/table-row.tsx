@@ -515,7 +515,7 @@ const TableRow = ({
         style={{ 'position': 'relative' }}
       >
         {showActionButtons &&
-          <td className='block action-btns'>
+          <td className={`block action-btns${rowDisabled ? ' disabled-cell' : ''}`}>
             {renderActionButtons()}
           </td>
         }
