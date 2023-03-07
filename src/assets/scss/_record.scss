@@ -1,25 +1,14 @@
-@import "helpers";
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 .record-container {
-  $record-table-cell-padding: 5px;
-  $record-table-cell-border-width: 1px;
-  $space-between-related-sections: 5px;
-  $row-focus-border-width: 2px;
-
-  /*
-     * In case of related entities, the accordion icon is adding this much space,
-     * so we're making sure the rest of titles and content are aligned with it.
-     */
-  $record-header-padding-left: 40px;
-
   .top-panel-container {
     padding-bottom: 10px;
 
     .top-flex-panel {
       .top-right-panel {
         .page-action-btns {
-          height: $btn-height;
+          height: variables.$btn-height;
           margin: 0;
 
           > div {
@@ -93,7 +82,7 @@
         .toc-heading {
           padding: 4px 10px 4px 0px;
           cursor: pointer;
-          font-size: $h4-font-size;
+          font-size: variables.$h4-font-size;
 
           & > a.empty-toc-heading {
             opacity: 0.55;
@@ -130,7 +119,7 @@
     /******Related Entities in record **************/
 
     .row-focus {
-      border: $row-focus-border-width solid $primary-color !important;
+      border: map-get(variables.$record-spacing-map, 'row-focus-border-width') solid map-get(variables.$color-map, 'primary') !important;
     }
 
     .chaise-table-header {
@@ -147,16 +136,6 @@
       font-weight: 600;
     }
 
-    .loading-sticky {
-      float: left;
-      position: fixed;
-      z-index: 1;
-      bottom: 0;
-      background: #d9edf7;
-      margin: 5px;
-      padding: 5px 20px;
-      border: solid #446c73 1.5px;
-    }
   }
 
   .related-section-spinner {

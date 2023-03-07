@@ -1,5 +1,6 @@
-@import "helpers";
-@import "variables";
+@use 'sass:map';
+@use 'variables';
+@use 'helpers';
 
 // From _recordedit-app.scss
 #recordedit .app-container {
@@ -24,13 +25,6 @@
     }
   }
 
-  @mixin shift-above-edit-forms() {
-    height: 15px;
-    position: fixed;
-    z-index: 5;
-    margin-top: -15px;
-  }
-
   .main-body {
     display: flex;
     flex-direction: row;
@@ -47,10 +41,10 @@
       flex-shrink: 0;
 
       .entity-key {
-        width: $chaise-caption-column-width;
-        border-left: $chaise-RE-border-width solid $chaise-RE-border-color;
-        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+        width: variables.$chaise-caption-column-width;
+        border-left: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
         // margin-left: 10px;
         background: white;
         padding: 8px;
@@ -66,14 +60,22 @@
       }
     }
 
+    .form-container {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+
+      .chaise-table-top-scroll-wrapper {
+        position: fixed;
+      }
+    }
+
     .recordedit-form {
       position: relative;
       display: flex;
       flex-direction: column;
-      color: black;
-      background-color: white;
-      height: 100%;
-      width: 100%;
+      color: map-get(variables.$color-map, 'black');
+      background-color: map-get(variables.$color-map, 'white');
       min-width: 250px;
       overflow-x: auto;
 
@@ -92,7 +94,7 @@
         width: -webkit-fit-content;
 
         &.highlighted-row {
-          background-color: #f7f0cf;
+          background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');
         }
 
         .inputs-row {
@@ -132,33 +134,32 @@
           top: 0;
           height: 100%;
           width: 100%;
-          z-index: 6; // higher than the chaise-clear
+          z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner-backdrop')
         }
 
         .column-permission-warning {
           margin: 0;
           padding: 5px;
-          color: rgb(180, 95, 6);
+          color: map-get(variables.$color-map, 'recordedit-column-permission-warning');
         }
 
         // displayed while loading the fk data
         .column-cell-spinner-container {
-          $column-cell-backdrop-z-index: 5;
           .column-cell-spinner-backdrop {
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
             width: 100%;
-            z-index: $column-cell-backdrop-z-index;
-            background: $disabled-background-color;
+            z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner-backdrop');
+            background: map-get(variables.$color-map, 'disabled-background');
             opacity: 0.55;
           }
           .spinner-border-sm {
             left: 50%;
             top: 15px;
             position: absolute;
-            z-index: calc($column-cell-backdrop-z-index + 1);
+            z-index: map-get(variables.$z-index-map, 'recordedit-column-cell-spinner');
           }
         }
       }
@@ -167,8 +168,8 @@
       .match-entity-value {
         word-wrap: break-word;
         min-width: 250px;
-        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
 
         // border-left: none;
         // border-top: none;
@@ -182,15 +183,15 @@
       .column-cell {
         border-left: none;
         border-top: none;
-        border-right: $chaise-RE-border-width solid $chaise-RE-border-color;
-        border-bottom: $chaise-RE-border-width solid $chaise-RE-border-color;
+        border-right: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+        border-bottom: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
         border-radius: 0;
         // height: 47px;
         min-height: 47px;
         padding: 8px 10px;
 
         .chaise-input-control.column-cell-input {
-          border: 1px solid $border-color;
+          border: 1px solid map-get(variables.$color-map, 'border');
           border-radius: 4px;
           padding: 0 10px;
           display: flex;
@@ -206,8 +207,8 @@
     // in both entity-key-column and form
     .form-header {
       height: 47px;
-      border-top: $chaise-RE-border-width solid $chaise-RE-border-color;
-      color: $disabled-color;
+      border-top: variables.$chaise-RE-border-width solid map-get(variables.$color-map, 'recordedit-border');
+      color: map-get(variables.$color-map, 'disabled');
 
       .form-header-buttons-container {
         float: right;
@@ -232,15 +233,11 @@
   .record-number {
     font-size: 14px;
     margin-left: 10px;
-    color: $disabled-color;
-  }
-
-  tbody.highlight {
-    background-color: #f7f0cf !important;
+    color: map-get(variables.$color-map, 'disabled');
   }
 
   .chaise-input-control[readonly] {
-    background-color: $white-color;
+    background-color: map-get(variables.$color-map, 'white');
     opacity: 1;
   }
 

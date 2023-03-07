@@ -1,8 +1,12 @@
+@use 'sass:map';
+@use 'variables';
+@use 'helpers';
+
 .chaise-btn {
-  @include chaise-btn();
+  @include helpers.chaise-btn();
 
   &.chaise-btn-sm {
-    @include chaise-btn-sm();
+    @include helpers.chaise-btn-sm();
   }
 
   > .chaise-btn-icon + * {
@@ -32,52 +36,52 @@
   }
 
   &.chaise-btn-primary {
-    @include chaise-btn-primary();
+    @include helpers.chaise-btn-primary();
   }
 
   &.chaise-btn-secondary {
-    @include chaise-btn-secondary();
+    @include helpers.chaise-btn-secondary();
   }
 
   &.chaise-btn.chaise-btn-primary[disabled],
   &.chaise-btn.chaise-btn-secondary[disabled],
   &.chaise-btn.chaise-btn-primary.disabled,
   &.chaise-btn.chaise-btn-secondary.disabled {
-    color: $disabled-color;
-    background-color: $disabled-background-color;
-    border-color: $disabled-background-color;
+    color: map-get(variables.$color-map, 'disabled');
+    background-color: map-get(variables.$color-map, 'disabled-background');
+    border-color: map-get(variables.$color-map, 'disabled-background');
   }
 
   &.chaise-btn-tertiary {
-    color: $primary-color;
+    color: map-get(variables.$color-map, 'primary');
     border: none;
     background: transparent;
 
     &[disabled],
     &.disabled {
-      color: $disabled-color;
+      color: map-get(variables.$color-map, 'disabled');
     }
 
     // the link color is more prominent than our button/control color,
     // we should use this class if we want to make the button to be as prominent as links
     &.chaise-btn-link:not([disabled]):not(.disabled) {
-      color: $link-color;
+      color: map-get(variables.$color-map, 'link');
     }
   }
 
   &.chaise-btn-default {
-    color: $black-color;
-    border-color: $border-color;
+    color: map-get(variables.$color-map, 'black');
+    border-color: map-get(variables.$color-map, 'border');
   }
 
   &.chaise-btn-danger {
-    color: $white-color;
-    background-color: $danger-color;
-    border-color: darken($danger-color, 10%);
+    color: map-get(variables.$color-map, 'white');
+    background-color: map-get(variables.$color-map, 'danger');
+    border-color: darken(map-get(variables.$color-map, 'danger'), 10%);
   }
 
   &.chaise-download-btn {
-    @include download-btn();
+    @include helpers.download-btn();
     border: 0;
     padding: 0;
   }
@@ -110,7 +114,7 @@
 
 // export dropdown item
 .dropdown-item.export-menu-item {
-  color: $black-color !important;
+  color: map-get(variables.$color-map, 'black') !important;
 
   &:hover,
   &:focus {
