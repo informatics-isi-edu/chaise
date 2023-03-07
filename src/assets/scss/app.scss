@@ -992,7 +992,6 @@ html {
   }
 
   // an spinner with backdrop blocking the whole app content
-  // used in record and recordedit apps
   .app-blocking-spinner-container {
     .app-blocking-spinner-backdrop {
       position: fixed;
@@ -1005,8 +1004,8 @@ html {
       opacity: 0.5;
     }
     .spinner-container {
-      top: 50%;
-      z-index: map-get(variables.$z-index-map, 'app-blocking-spinner');
+      top: 50% !important;
+      z-index: map-get(variables.$z-index-map, 'app-blocking-spinner') !important;
     }
   }
 

@@ -321,8 +321,8 @@ const RecordsetModal = ({
       ref={modalContainer}
     >
       {showSubmitSpinner &&
-        <div className='modal-submit-spinner-container'>
-          <div className='modal-submit-spinner-backdrop'></div>
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
           <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
         </div>
       }

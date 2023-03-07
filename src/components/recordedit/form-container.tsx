@@ -20,6 +20,7 @@ import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { copyOrClearValue } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
+import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 
 const FormContainer = (): JSX.Element => {
 
@@ -28,33 +29,67 @@ const FormContainer = (): JSX.Element => {
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
+
+  const formContainer = useRef<any>(null);
+
+  /**
+   * add the top horizontal scroll if needed
+   */
+  useLayoutEffect(() => {
+    if (!formContainer.current) return;
+
+    const sensors = addTopHorizontalScroll(
+      formContainer.current,
+      /**
+       * we want to show the scrollbar outside of the container
+       */
+      true,
+      /**
+       * this will make sure we're also changing the state of
+       * scrollbar when the users add or remove forms.
+       * NOTE: it's a bit hacky as we're looking at the children
+       *       of the component. But given that it's useLayoutEffect it should be fine.
+       */
+      document.querySelector('.form-inputs-row') as HTMLElement
+    );
+
+    return () => {
+      sensors?.forEach((sensor) => sensor.detach());
+    }
+  }, []);
+
   return (
-    <form id='recordedit-form' className='recordedit-form' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}>
-      {/* form header */}
-      <div className='form-header-row'>
-        {forms.map((formNumber: number, formIndex: number) => (
-          <div key={`form-header-${formNumber}`} className='form-header entity-value'>
-            <span>{formIndex + 1}</span>
-            <div className='form-header-buttons-container'>
-              {forms.length > 1 &&
-                <ChaiseTooltip
-                  placement='bottom'
-                  tooltip='Click to remove this record from the form.'
-                >
-                  <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm([formIndex])}>
-                    <i className='fa-solid fa-xmark' />
-                  </button>
-                </ChaiseTooltip>
-              }
-            </div>
-          </div>
-        ))}
+    <div className='form-container' ref={formContainer}>
+      <div className='chaise-table-top-scroll-wrapper'>
+        <div className='chaise-table-top-scroll'></div>
       </div>
-      {/* inputs for each column */}
-      {columnModels.map(({ }, idx) => (
-        <FormRow key={`form-row-${idx}`} columnModelIndex={idx} />
-      ))}
-    </form>
+      <form id='recordedit-form' className='recordedit-form chaise-hr-scrollable' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)} ref={formContainer}>
+        {/* form header */}
+        <div className='form-header-row'>
+          {forms.map((formNumber: number, formIndex: number) => (
+            <div key={`form-header-${formNumber}`} className='form-header entity-value'>
+              <span>{formIndex + 1}</span>
+              <div className='form-header-buttons-container'>
+                {forms.length > 1 &&
+                  <ChaiseTooltip
+                    placement='bottom'
+                    tooltip='Click to remove this record from the form.'
+                  >
+                    <button className='chaise-btn chaise-btn-secondary pull-right remove-form-btn' onClick={() => removeForm([formIndex])}>
+                      <i className='fa-solid fa-xmark' />
+                    </button>
+                  </ChaiseTooltip>
+                }
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* inputs for each column */}
+        {columnModels.map(({ }, idx) => (
+          <FormRow key={`form-row-${idx}`} columnModelIndex={idx} />
+        ))}
+      </form>
+    </div>
   )
 };
 

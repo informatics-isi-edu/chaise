@@ -25,14 +25,6 @@
     }
   }
 
-  // TODO not used and should be added (horizontal scroll in recordedit
-  @mixin shift-above-edit-forms() {
-    height: 15px;
-    position: fixed;
-    z-index: map-get(variables.$z-index-map, 'top-horzontal-scroll-wrapper');
-    margin-top: -15px;
-  }
-
   .main-body {
     display: flex;
     flex-direction: row;
@@ -68,14 +60,22 @@
       }
     }
 
+    .form-container {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+
+      .chaise-table-top-scroll-wrapper {
+        position: fixed;
+      }
+    }
+
     .recordedit-form {
       position: relative;
       display: flex;
       flex-direction: column;
       color: map-get(variables.$color-map, 'black');
       background-color: map-get(variables.$color-map, 'white');
-      height: 100%;
-      width: 100%;
       min-width: 250px;
       overflow-x: auto;
 

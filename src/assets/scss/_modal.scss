@@ -304,28 +304,3 @@
     background-color: #4674a7;
   }
 }
-
-.modal-submit-spinner-container {
-  .modal-submit-spinner-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    z-index: map-get(variables.$z-index-map, 'modal-submit-spinner-backdrop');
-    background: black;
-    opacity: 0.5;
-  }
-  .modal-submit-spinner.spinner-container {
-    top: 50% !important;
-    z-index: map-get(variables.$z-index-map, 'modal-submit-spinner') !important;
-  }
-}
-
-@media (min-width: 768px) {
-  .chaise-body .modal:not(.modal-login-instruction) .modal-dialog:not(.modal-sm):not(.modal-lg):not(.modal-xl) {
-    max-width: unset !important;
-    width: 600px !important;
-    margin: 30px auto !important;
-  }
-}
