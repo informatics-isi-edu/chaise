@@ -793,7 +793,6 @@ html {
     width: -moz-available;
     width: -webkit-fill-available;
     z-index: map-get(variables.$z-index-map, 'top-horzontal-scroll-wrapper');
-    top: 0;
     display: none;
   }
 
