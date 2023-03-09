@@ -142,8 +142,8 @@ const InputField = ({
     }
     e.stopPropagation();
     e.preventDefault();
-    setValue(name, '');
     clearErrors(name);
+    setValue(name, '');
   }
 
   useEffect(() => {

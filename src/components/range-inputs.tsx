@@ -17,7 +17,7 @@ import { RangeOptions } from '@isrd-isi-edu/chaise/src/models/range-picker';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 // utils
-import { formatDatetime } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { formatDatetime, replaceNullOrUndefined } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 
 const TIMESTAMP_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
 const DATE_FORMAT = 'YYYY-MM-DD';
@@ -92,7 +92,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
 
   const timestampOptions = { outputMomentFormat: dataFormats.datetime.return }
   if (type === 'timestamptz') timestampOptions.outputMomentFormat = dataFormats.timestamp;
-  
+
   let defVals = {};
   if (type.indexOf('timestamp') !== -1) {
     const timestampMinValue = formatDatetime(absMin as string, timestampOptions);
@@ -100,11 +100,11 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
 
     defVals = {
       // initial min defaults
-      [`${minName}-datetime`]: timestampMinValue?.datetime || '',
+      [`${minName}`]: timestampMinValue?.datetime || '',
       [`${minName}-date`]: timestampMinValue?.date || '',
       [`${minName}-time`]: timestampMinValue?.time || '',
       // initial max defaults
-      [`${maxName}-datetime`]: timestampMaxValue?.datetime || '',
+      [`${maxName}`]: timestampMaxValue?.datetime || '',
       [`${maxName}-date`]: timestampMaxValue?.date || '',
       [`${maxName}-time`]: timestampMaxValue?.time || ''
     };
@@ -138,17 +138,17 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     // match timestamp and timestamptz
     if (type.indexOf('timestamp') !== -1) {
       const timestampMinValue = formatDatetime(absMin as string, timestampOptions);
-      methods.resetField(`${minName}-datetime`, { defaultValue: timestampMinValue?.datetime || '' });
+      methods.resetField(`${minName}`, { defaultValue: timestampMinValue?.datetime || '' });
       methods.resetField(`${minName}-date`, { defaultValue: timestampMinValue?.date || '' });
       methods.resetField(`${minName}-time`, { defaultValue: timestampMinValue?.time || '' });
 
       const timestampMaxValue = formatDatetime(absMax as string, timestampOptions);
-      methods.resetField(`${maxName}-datetime`, { defaultValue: timestampMaxValue?.datetime || '' });
+      methods.resetField(`${maxName}`, { defaultValue: timestampMaxValue?.datetime || '' });
       methods.resetField(`${maxName}-date`, { defaultValue: timestampMaxValue?.date || '' });
       methods.resetField(`${maxName}-time`, { defaultValue: timestampMaxValue?.time || '' });
     } else {
-      methods.resetField(minName, { defaultValue: absMin });
-      methods.resetField(maxName, { defaultValue: absMax });
+      methods.resetField(minName, { defaultValue: replaceNullOrUndefined(absMin, '') });
+      methods.resetField(maxName, { defaultValue: replaceNullOrUndefined(absMax, '') });
     }
   }, [absMax, absMin])
 
@@ -161,7 +161,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     return () => subscribe.unsubscribe();
   });
 
-  // performs basic range validation : from_value > to_value  
+  // performs basic range validation : from_value > to_value
   const rangeCheck = (fromVal: string, toVal: string): boolean => {
     if (type === 'int') return parseInt(fromVal) < parseInt(toVal);
     if (type === 'number') return parseFloat(fromVal) < parseFloat(toVal);
@@ -212,7 +212,12 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
     <div className={classes}>
       <div className='range-input-container range-inputs-width'>
         <FormProvider {...methods} >
-          <form className='range-input-form' onSubmit={methods.handleSubmit(onSubmit)}>
+          <form className='range-input-form' onSubmit={(event) => {
+            // this will make sure only the current form is submitted and not outter forms.
+            // (submitting this in the fk popup, was submitting the recordedit form)
+            event.stopPropagation();
+            methods.handleSubmit(onSubmit)(event);
+          }}>
             <div className={`range-input ${classTypeName}`}>
               <label>From:
                 <InputSwitch

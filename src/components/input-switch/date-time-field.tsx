@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 
 // utils
-import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { ERROR_MESSAGES, VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
@@ -25,23 +25,42 @@ type DateTimeFieldProps = InputFieldProps & {
 
 const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
-  const { setValue, control, clearErrors, watch } = useFormContext();
+  const { setValue, control, clearErrors, watch, setError } = useFormContext();
 
   useEffect(() => {
 
+    /**
+     * this will make sure we're updating the underlying value after
+     * each update to the date and time fields.
+     */
     const sub = watch((data, options) => {
       const name = props.name
 
-      // not sure what this is doing??
       if (options.name && (options.name === `${name}-date` || options.name === `${name}-time`)) {
         const dateVal = data[`${name}-date`];
-        if (!dateVal) return;
         let timeVal = data[`${name}-time`];
-        if (dateVal && !timeVal) timeVal = '00:00';
+
+        // if both are missing, the input is empty
+        if (!dateVal && !timeVal) {
+          clearErrors(name);
+          setValue(name, '');
+          return;
+        }
+        // if only the date is missing, this is invalid
+        if (!dateVal) {
+          setError(name, {type: 'custom', message: ERROR_MESSAGES.INVALID_DATE});
+          return;
+        }
+        // if only time is missing, just use 00:00:00 for it
+        if (!timeVal) {
+          timeVal = '00:00:00';
+        }
 
         let valueToSet = `${dateVal}T${timeVal}`;
         // adds the timezone info if needed
         if (props.hasTimezone) valueToSet = windowRef.moment(valueToSet).format(dataFormats.datetime.return);
+
+        clearErrors(name);
         setValue(name, valueToSet);
       }
     });
@@ -85,13 +104,13 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
   };
 
   const clearDate = () => {
-    setValue(`${props.name}-date`, '');
     clearErrors(`${props.name}-date`);
+    setValue(`${props.name}-date`, '');
   }
 
   const clearTime = () => {
-    setValue(`${props.name}-time`, '');
     clearErrors(`${props.name}-time`);
+    setValue(`${props.name}-time`, '');
   }
 
   const showDateClear = () => Boolean(dateFieldValue);
@@ -99,7 +118,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   return (
     <InputField {...props}
-      checkIsTouched={() => isDateTouched || isDateTouched}
+      checkIsTouched={() => isDateTouched || isTimeTouched}
       controllerRules={{
         validate: VALIDATE_VALUE_BY_TYPE[(props.hasTimezone ? 'timestamptz' : 'timestamp')]
       }}
