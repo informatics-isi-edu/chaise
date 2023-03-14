@@ -3597,6 +3597,21 @@
                     });
                 }
             });
+
+            /**
+             * add the listener for the asset-image-preview to zoom in/out
+             * TODO should go somewhere else most probably
+             */
+            addClickListener('.asset-image-preview', function (e, element) {
+              e.preventDefault();
+
+              var zoomClass = 'zoomed-in';
+              if (element.classList.contains(zoomClass)) {
+                element.classList.remove(zoomClass);
+              } else {
+                element.classList.add(zoomClass)
+              }
+            });
         }
 
         function overrideExternalLinkBehavior() {

@@ -926,4 +926,66 @@ html {
     }
   }
 
+  .asset-image-preview {
+    $asset-image-preview-max-height: 50vh;
+
+    position: relative;
+    display: block;
+    border: 1px solid $border-color;
+    text-align: center;
+
+    /**
+     * the container should take the whole width, and let
+     * the content handle the height
+     */
+    width: 100%;
+    height: auto;
+
+    // image markdown might add an empty embed-caption
+    .embed-caption:empty {
+      display: none;
+    }
+
+    // markdown-container might add a margin, and we should get rid of it
+    img {
+      margin: 0;
+    }
+
+    &.zoomed-in {
+      cursor: zoom-out;
+      // make sure proper scrollbars are displayed
+      overflow: auto;
+
+      /**
+       * when the image is zoomed in, we have to add the
+       * max-height to the container instead of the img
+       */
+      max-height: $asset-image-preview-max-height;
+      img {
+        max-height: unset;
+        max-width: unset;
+      }
+    }
+
+    &:not(.zoomed-in) {
+      cursor: zoom-in;
+      overflow: hidden;
+
+      img {
+        /**
+         * set the height based on the width and aspect ratio
+         * but at maximum it should be less than half the page
+         */
+        height: auto;
+        max-height: $asset-image-preview-max-height;
+        /**
+         * occupy the whole width if available,,
+         * but no more than the container availabel space
+         */
+        max-width: 100%;
+        // make sure the aspect ratio of image is preserved
+        object-fit: contain;
+      }
+    }
+  }
 }

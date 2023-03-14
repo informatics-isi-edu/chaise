@@ -132,10 +132,14 @@
 
                     > tr > td {
                         border-top: 1px solid $border-color;
+                    }
 
-                        &:last-child {
-                            border-bottom: 1px solid $border-color;
-                        }
+                    /**
+                     * make sure the table cells have the same width
+                     */
+                    .shift-form, .select-all-row {
+                        display: flex;
+                        width: 100%;
                     }
 
                     > tr {
@@ -174,6 +178,15 @@
                                 word-wrap: break-word;
                                 min-width: 250px;
                                 border-right: 1px solid $border-color;
+                                height: auto;
+
+                                // TODO is this needed?
+                                // width: 1px;
+
+                                /**
+                                 * make sure the table cells have the same width
+                                 */
+                                flex: 1 1 0;
                             }
 
                             &.entity-value {

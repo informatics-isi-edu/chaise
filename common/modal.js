@@ -695,6 +695,20 @@
         }
     }])
 
+    .controller('ImagePreviewController', ['$scope', '$uibModalInstance', 'params', 'ERMrest', function MarkdownPreviewController($scope, $uibModalInstance, params) {
+      var vm = this;
+
+      vm.column = params.column;
+      vm.imagePreviewSource = params.imagePreviewSource;
+
+      function ok() {
+          $uibModalInstance.close();
+      }
+      vm.cancel = function () {
+          $uibModalInstance.dismiss("cancel");
+      }
+  }])
+
     .controller('SavedQueryModalDialogController', ['AlertsService', 'DataUtils', 'logService', 'messageMap', 'params', '$scope', '$uibModalInstance', function SavedQueryModalDialogController(AlertsService, DataUtils, logService, messageMap, params, $scope, $uibModalInstance) {
         var vm = this;
         vm.alerts = [];

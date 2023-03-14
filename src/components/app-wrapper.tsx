@@ -128,6 +128,7 @@ const AppWrapperInner = ({
     if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
     if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
 
+
   }, [configDone]);
 
   const errorFallback = ({ error }: FallbackProps) => {
@@ -186,7 +187,24 @@ const AppWrapperInner = ({
         });
       }
     });
+
+    /**
+     * add the listener for the asset-image-preview to zoom in/out
+     * TODO should go somewhere else most probably
+     */
+    addClickListener('.asset-image-preview', function (e: Event, element: HTMLAnchorElement) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const zoomClass = 'zoomed-in';
+      if (element.classList.contains(zoomClass)) {
+        element.classList.remove(zoomClass);
+      } else {
+        element.classList.add(zoomClass)
+      }
+    });
   }
+
 
   return (
     <StrictMode>
