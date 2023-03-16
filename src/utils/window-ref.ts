@@ -25,6 +25,7 @@ export interface ICustomWindow extends Window {
       hideNavbar: boolean,
       appTitle: string,
       overrideHeadTitle: boolean,
+      overrideImagePreviewBehavior: boolean,
       overrideDownloadClickBehavior: boolean,
       overrideExternalLinkBehavior: boolean,
       openLinksInTab: boolean

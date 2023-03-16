@@ -328,7 +328,7 @@ To handle global errors, the app wrapper adds an `ErrorProvider` to handle the e
 
 ### Alerts Provider
 `Alerts` also has its own provider created to have a consistent state at the app level when trying to show alerts from sub-components of the app. The provider here acts like a service that handles the functionality surrounding alerts. This provider also allows for showing alerts in multiple places without having duplicate alerts show in the wrong contexts.
-  
+
 ### Authn Provider
 `Authn` has its own provider that acts as a service to manage the logged in user and keep that user state consistent throughout the duration of using the app. Each app has to interact with the session to best inform the user of what actions they can take related to create, update and delete.
 
@@ -373,6 +373,7 @@ const myappSettings = {
   appName: 'app/sample',
   appTitle: 'Sample App',
   overrideHeadTitle: false,
+  overrideImagePreviewBehavior: false,
   overrideDownloadClickBehavior: false,
   overrideExternalLinkBehavior: false
 };

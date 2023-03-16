@@ -35,6 +35,7 @@ const recordsetSettings = {
   appName: 'recordset',
   appTitle: 'Recordset',
   overrideHeadTitle: true,
+  overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
   overrideExternalLinkBehavior: true
 };

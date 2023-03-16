@@ -7,6 +7,7 @@
         appName: "viewer",
         appTitle: "Image Viewer",
         overrideHeadTitle: true,
+        overrideImagePreviewBehavior: true,
         overrideDownloadClickBehavior: true,
         overrideExternalLinkBehavior: true,
         openIframeLinksInTab: true

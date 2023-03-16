@@ -926,8 +926,8 @@ html {
     }
   }
 
-  .asset-image-preview {
-    $asset-image-preview-max-height: 50vh;
+  .chaise-image-preview {
+    $chaise-image-preview-max-height: 50vh;
 
     position: relative;
     display: block;
@@ -960,7 +960,7 @@ html {
        * when the image is zoomed in, we have to add the
        * max-height to the container instead of the img
        */
-      max-height: $asset-image-preview-max-height;
+      max-height: $chaise-image-preview-max-height;
       img {
         max-height: unset;
         max-width: unset;
@@ -977,7 +977,7 @@ html {
          * but at maximum it should be less than half the page
          */
         height: auto;
-        max-height: $asset-image-preview-max-height;
+        max-height: $chaise-image-preview-max-height;
         /**
          * occupy the whole width if available,,
          * but no more than the container availabel space

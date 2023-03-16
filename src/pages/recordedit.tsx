@@ -12,6 +12,7 @@ const recordeditSettings = {
   appName: 'recordedit',
   appTitle: 'Recordedit',
   overrideHeadTitle: true,
+  overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
   overrideExternalLinkBehavior: true
 };

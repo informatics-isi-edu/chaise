@@ -33,6 +33,7 @@ const recordSettings = {
   appName: 'record',
   appTitle: 'Record',
   overrideHeadTitle: true,
+  overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,
   overrideExternalLinkBehavior: true
 };
