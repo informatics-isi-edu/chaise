@@ -70,7 +70,6 @@
                     // needs to be a comma separated list, i.e. ".jpg", ".png", ...
                     scope.fileExtensions = fileExtensionFilter.join(",");
 
-                    scope.showZoomedOutImage = true;
                     scope.displayImagePreview = scope.column.displayImagePreview;
 
                     scope.select = function() {
@@ -101,10 +100,6 @@
                         // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
                         return (value.filesize ? "- " + value.filename + "<br>- " + UiUtils.humanFileSize(value.filesize) : value.filename);
                     }
-
-                    scope.openImagePreview = function () {
-                      scope.showZoomedOutImage = !scope.showZoomedOutImage;
-                    };
 
                     scope.setImagePreview = function () {
                         var value = scope.value;
