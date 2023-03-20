@@ -12,4 +12,9 @@
             </label>
         </span>
     </div>
+    <div ng-if='displayImagePreview && imagePreviewSource' style="margin-top: 5px;">
+      <div class="chaise-image-preview">
+        <img ng-src="{{imagePreviewSource}}" ng-show="imagePreviewSource" />
+      </div>
+    </div>
 </div>

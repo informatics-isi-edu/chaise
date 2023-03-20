@@ -30,6 +30,7 @@ const helpSettings = {
   appName: 'help',
   appTitle: 'Help Page',
   overrideHeadTitle: true,
+  overrideImagePreviewBehavior: true,
   overrideDownloadClickBehavior: true,    // links in navbar might need this
   overrideExternalLinkBehavior: true      // links in navbar might need this
 };

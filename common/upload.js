@@ -4,7 +4,7 @@
     angular.module('chaise.upload', ['ermrestjs', 'chaise.utils'])
 
 
-        .directive('upload', [ '$timeout', 'AlertsService', 'ConfigUtils', 'ERMrest', 'InputUtils', 'UiUtils', 'UriUtils', function($timeout, AlertsService, ConfigUtils, ERMrest, InputUtils, UiUtils, UriUtils) {
+        .directive('upload', [ '$timeout', 'AlertsService', 'ConfigUtils', 'ERMrest', 'InputUtils', 'modalUtils', 'UiUtils', 'UriUtils', function($timeout, AlertsService, ConfigUtils, ERMrest, InputUtils, modalUtils, UiUtils, UriUtils) {
 
             return {
                 restrict: 'AE',
@@ -21,8 +21,6 @@
                 link: function (scope, element,attrs, ngModel) {
                     scope.fileEl;
                     scope.fileElId = "fileInput" +  Math.round(Math.random() * 100000);
-
-
 
                     $timeout(function() {
                         scope.fileEl = angular.element(element[0].querySelector('input[type="file"]'));
@@ -61,6 +59,7 @@
                                     });
                                     scope.value.url = scope.value.filename = scope.value.file.name;
                                     scope.value.filesize = scope.value.file.size;
+
                                     scope.$apply();
                                 }
                             });
@@ -71,6 +70,8 @@
                     // needs to be a comma separated list, i.e. ".jpg", ".png", ...
                     scope.fileExtensions = fileExtensionFilter.join(",");
 
+                    scope.displayImagePreview = scope.column.displayImagePreview;
+
                     scope.select = function() {
                         scope.fileEl.click();
                     };
@@ -80,6 +81,7 @@
                         scope.value.url = "";
                         scope.value.filename = "";
                         scope.value.filesize = "";
+                        scope.imagePreviewSource = "";
                         delete scope.value.file;
                         delete scope.value.hatracObj;
                         scope.fileEl.val("");
@@ -98,6 +100,33 @@
                         // value.filename will always be either the stored filename or the "caption" (text stripped of the hatrac path)
                         return (value.filesize ? "- " + value.filename + "<br>- " + UiUtils.humanFileSize(value.filesize) : value.filename);
                     }
+
+                    scope.setImagePreview = function () {
+                        var value = scope.value;
+                        if (!scope.displayImagePreview) {
+                          return scope.imagePreviewSource = '';
+                        }
+
+                        if (value && value.file) {
+                          return scope.imagePreviewSource = URL.createObjectURL(scope.value.file);
+                        }
+
+                        if (value && value.url) {
+                          return scope.imagePreviewSource = value.url;
+                        }
+
+                        return scope.imagePreviewSource = '';
+                    }
+
+                    /**
+                     * make sure the displayed image preview is based on the latest value
+                     */
+                    scope.$watch('value', function () {
+                      scope.setImagePreview();
+                    });
+                    scope.$watch('value.file', function () {
+                      scope.setImagePreview();
+                    });
                 }
             };
         }])

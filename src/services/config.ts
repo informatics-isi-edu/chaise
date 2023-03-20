@@ -23,9 +23,14 @@ export interface AppSettings {
   appTitle?: string,
   hideNavbar?: boolean,
   openLinksInTab?: boolean,
+  /**
+   * adds the image preview functionality of chaise
+   */
+  overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
-  overrideHeadTitle?: boolean
+  overrideHeadTitle?: boolean,
+
 }
 
 /**
@@ -36,6 +41,7 @@ export interface ConfigServiceSettings {
   appTitle?: string,
   hideNavbar?: boolean,
   overrideHeadTitle?: boolean,
+  overrideImagePreviewBehavior?: boolean,
   overrideDownloadClickBehavior?: boolean,
   overrideExternalLinkBehavior?: boolean,
   openIframeLinksInTab?: boolean
@@ -107,6 +113,7 @@ export class ConfigService {
       appName: settings.appName,
       appTitle: settings.appTitle,
       overrideHeadTitle: settings.overrideHeadTitle,
+      overrideImagePreviewBehavior: settings.overrideImagePreviewBehavior,
       overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
       overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
       openLinksInTab
