@@ -137,7 +137,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     <InputField {...props} onClear={onClear} checkHasValue={hasValue}>
       {/* onChange is not used as we're implementing our own onChange method */}
       {(field, onChange, showClear, clearInput) => (
-        <div className={`${props.containerClasses} input-switch-file input-switch-container-${props.name}`} style={props.styles}>
+        <div className={`${props.containerClasses} input-switch-file`} style={props.styles}>
           <div className='chaise-input-group'>
             {renderInputWithTooltip(field.value, showClear, clearInput)}
             {!props.disableInput && <ChaiseTooltip placement='bottom' tooltip='Select File'>

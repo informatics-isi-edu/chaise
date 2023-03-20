@@ -1,5 +1,6 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
+var moment = require('moment');
 var testParams = {
     table_name: "multi-add-table",
     records: 3,
@@ -23,17 +24,17 @@ var testParams = {
     }],
     values: {
         date: {
-            initial: "2018-10-09",
-            modified: "2017-06-05"
+            initial: "10-09-2018",
+            modified: "06-05-2017"
         },
         timestamp: {
             initial: {
-                date: "2018-10-10",
-                time: "10:48:02"
+                date: "10-10-2018",
+                time: "10:48:02AM"
             },
             modified: {
-                date: "2017-06-05",
-                time: "01:22:39"
+                date: "06-05-2017",
+                time: "01:22:39AM"
             }
         },
         fk: {
@@ -58,25 +59,25 @@ describe('Record Add', function() {
             intDisplayName = "int",
             textDisplayName = "text";
 
-        var dateInput1 = chaisePage.recordEditPage.getDateInputsForAColumn(testParams.date_col_name, 0),
-            dateInput2 = chaisePage.recordEditPage.getDateInputsForAColumn(testParams.date_col_name, 1),
-            dateInput3 = chaisePage.recordEditPage.getDateInputsForAColumn(testParams.date_col_name, 2);
+        var dateInput1 = chaisePage.recordEditPage.getDateInputsForAColumn(testParams.date_col_name, 1),
+            dateInput2 = chaisePage.recordEditPage.getDateInputsForAColumn(testParams.date_col_name, 2),
+            dateInput3 = chaisePage.recordEditPage.getDateInputsForAColumn(testParams.date_col_name, 3);
 
-        var tsInput1 = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 0),
-            tsInput2 = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 1),
-            tsInput3 = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 2);
+        var tsInput1 = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 1),
+            tsInput2 = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 2),
+            tsInput3 = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 3);
 
-        var fkInput1 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 0),
-            fkInput2 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 1),
-            fkInput3 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 2);
+        var fkInput1 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 1),
+            fkInput2 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 2),
+            fkInput3 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 3);
 
-        var uploadInput1 = chaisePage.recordEditPage.getUploadInput(testParams.uri_col_name, 0),
-            uploadInput2 = chaisePage.recordEditPage.getUploadInput(testParams.uri_col_name, 1),
-            uploadInput3 = chaisePage.recordEditPage.getUploadInput(testParams.uri_col_name, 2);
+        var uploadInput1 = chaisePage.recordEditPage.getInputForAColumn(testParams.uri_col_name, 1),
+            uploadInput2 = chaisePage.recordEditPage.getInputForAColumn(testParams.uri_col_name, 2),
+            uploadInput3 = chaisePage.recordEditPage.getInputForAColumn(testParams.uri_col_name, 3);
 
-        var intArrInput1 = chaisePage.recordEditPage.getInputById(0, testParams.int_array_col_name),
-            intArrInput2 = chaisePage.recordEditPage.getInputById(1, testParams.int_array_col_name),
-            intArrInput3 = chaisePage.recordEditPage.getInputById(2, testParams.int_array_col_name);
+        var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 1),
+            intArrInput2 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 2),
+            intArrInput3 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 3);
 
         var index;
 
@@ -108,10 +109,10 @@ describe('Record Add', function() {
             });
         });
 
-        it("should fill in the first form add " + (testParams.records-1) + " more forms.", function() {
-            index = 0;
-            intInput = chaisePage.recordEditPage.getInputById(index, intDisplayName);
-            textInput = chaisePage.recordEditPage.getInputById(index, textDisplayName);
+        it("should fill in the first form then add " + (testParams.records-1) + " more forms.", function() {
+            index = 1;
+            intInput = chaisePage.recordEditPage.getInputForAColumn(intDisplayName, index);
+            textInput = chaisePage.recordEditPage.getInputForAColumn(textDisplayName, index);
 
             intInput.sendKeys(intVal);
             textInput.sendKeys(textVal);
@@ -121,7 +122,7 @@ describe('Record Add', function() {
             multiFormInput.sendKeys(testParams.records-1);
 
             chaisePage.clickButton(multiFormSubmitButton).then(function() {
-                return chaisePage.recordEditPage.getViewModelRows();
+                return chaisePage.recordEditPage.getRecordeditForms();
             }).then(function(rows) {
                 expect(rows.length).toBe(testParams.records);
             });
@@ -153,10 +154,11 @@ describe('Record Add', function() {
                 }).then(function () {
                     return cancelBtn.click();
                 }).then(function () {
+                    const momentValue = moment(value, 'MM-DD-YYYY').format('YYYY-MM-DD');
                     // verify the values
-                    expect(dateInput1.date.getAttribute("value")).toBe(value);
-                    expect(dateInput2.date.getAttribute("value")).toBe(value);
-                    expect(dateInput3.date.getAttribute("value")).toBe(value);
+                    expect(dateInput1.date.getAttribute("value")).toBe(momentValue);
+                    expect(dateInput2.date.getAttribute("value")).toBe(momentValue);
+                    expect(dateInput3.date.getAttribute("value")).toBe(momentValue);
 
                     done();
                 }).catch(function (err) {
@@ -176,21 +178,23 @@ describe('Record Add', function() {
                 chaisePage.clickButton(chaisePage.recordEditPage.getColumnSelectAllButton(colName)).then(function () {
                     browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
-                    chaisePage.recordEditPage.getSelectAllDate(colName).sendKeys(dateValue);
-                    chaisePage.recordEditPage.getSelectAllTime(colName).sendKeys(timeValue);
+                    chaisePage.recordEditPage.getSelectAllTimestampDate(colName).sendKeys(dateValue);
+                    chaisePage.recordEditPage.getSelectAllTimestampTime(colName).sendKeys(timeValue);
 
                     return applyBtn.click();
                 }).then(function () {
                     return cancelBtn.click();
                 }).then(function () {
+                    const dateMomentValue = moment(dateValue, 'MM-DD-YYYY').format('YYYY-MM-DD');
                     // verify the values
-                    expect(tsInput1.date.getAttribute("value")).toBe(dateValue);
-                    expect(tsInput2.date.getAttribute("value")).toBe(dateValue);
-                    expect(tsInput3.date.getAttribute("value")).toBe(dateValue);
+                    expect(tsInput1.date.getAttribute("value")).toBe(dateMomentValue);
+                    expect(tsInput2.date.getAttribute("value")).toBe(dateMomentValue);
+                    expect(tsInput3.date.getAttribute("value")).toBe(dateMomentValue);
 
-                    expect(tsInput1.time.getAttribute("value")).toBe(timeValue);
-                    expect(tsInput2.time.getAttribute("value")).toBe(timeValue);
-                    expect(tsInput3.time.getAttribute("value")).toBe(timeValue);
+                    const timeMomentValue = moment(timeValue, 'hh:mm:ssA').format('hh:mm:ss');
+                    expect(tsInput1.time.getAttribute("value")).toBe(timeMomentValue);
+                    expect(tsInput2.time.getAttribute("value")).toBe(timeMomentValue);
+                    expect(tsInput3.time.getAttribute("value")).toBe(timeMomentValue);
 
                     done();
                 }).catch(function (err) {
@@ -220,10 +224,10 @@ describe('Record Add', function() {
                         });
                     }, browser.params.defaultTimeout);
                     
-                    var displayingText = "Displayingall 5of 5 records";
+                    var displayingText = "Displaying all\n5\nof 5 records";
                         displayingTextError = "The total count display in the foreign key popup is incorrect";
 
-                    chaisePage.waitForTextInElement(chaisePage.recordsetPage.getTotalCount(), displayingText, null, displayingTextError);
+                    expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe(displayingText, displayingTextError);
 
                     // select value (the third row)
                     return chaisePage.recordsetPage.getRows().get(2).all(by.css(".select-action-button")).click();
@@ -286,8 +290,8 @@ describe('Record Add', function() {
                         browser.wait(EC.elementToBeClickable(cancelBtn), browser.params.defaultTimeout);
 
                         // select (set) file
-                        var fileInput = chaisePage.recordEditPage.getSelectAllFileInput(colName, colName),
-                            txtInput = chaisePage.recordEditPage.getSelectAllFileInput(colName, "txt"+colName);
+                        var fileInput = chaisePage.recordEditPage.getSelectAllFileInput(colName),
+                            txtInput = chaisePage.recordEditPage.getSelectAllTextFileInput(colName);
 
                         recordEditHelpers.selectFile(file, fileInput, txtInput);
 
@@ -311,17 +315,17 @@ describe('Record Add', function() {
 
         describe("change values in the forms without affecting the other forms, ", function() {
             //added 2 more forms, should be 3 total
-            var textInput1 = chaisePage.recordEditPage.getInputById(0, textDisplayName),
-                textInput2 = chaisePage.recordEditPage.getInputById(1, textDisplayName),
-                textInput3 = chaisePage.recordEditPage.getInputById(2, textDisplayName);
+            var textInput1 = chaisePage.recordEditPage.getInputForAColumn(textDisplayName, 1),
+                textInput2 = chaisePage.recordEditPage.getInputForAColumn(textDisplayName, 2),
+                textInput3 = chaisePage.recordEditPage.getInputForAColumn(textDisplayName, 3);
 
-            var intInput1 = chaisePage.recordEditPage.getInputById(0, intDisplayName),
-                intInput2 = chaisePage.recordEditPage.getInputById(1, intDisplayName),
-                intInput3 = chaisePage.recordEditPage.getInputById(2, intDisplayName);
+            var intInput1 = chaisePage.recordEditPage.getInputForAColumn(intDisplayName, 1),
+                intInput2 = chaisePage.recordEditPage.getInputForAColumn(intDisplayName, 2),
+                intInput3 = chaisePage.recordEditPage.getInputForAColumn(intDisplayName, 3);
 
-            var intArrInput1 = chaisePage.recordEditPage.getInputById(0, testParams.int_array_col_name),
-                intArrInput2 = chaisePage.recordEditPage.getInputById(1, testParams.int_array_col_name),
-                intArrInput3 = chaisePage.recordEditPage.getInputById(2, testParams.int_array_col_name);
+            var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 1),
+                intArrInput2 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 2),
+                intArrInput3 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 3);
 
             //change value in form 1, test others unchanged
             it("should change text input in form 1.", function() {

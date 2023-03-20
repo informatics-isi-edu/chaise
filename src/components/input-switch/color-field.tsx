@@ -56,7 +56,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
    */
   const renderInput = (fieldValue: any, onChange: any) => {
     return <HexColorInput
-      className={props.inputClasses} placeholder={props.placeholder}
+      className={`sp-input${ props.inputClasses}`} placeholder={props.placeholder}
       disabled={props.disableInput} color={fieldValue} onChange={onChange} prefixed
     />;
   };
@@ -93,10 +93,10 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
                   <div className='popover-buttons'>
                     {renderPreview(field.value, 'chaise-btn')}
                     <ChaiseTooltip placement='bottom' tooltip='Clear the value.'>
-                      <button className='chaise-btn chaise-btn-secondary' type='button' onClick={clearInput}>Clear</button>
+                      <button className='chaise-btn chaise-btn-secondary sp-clear' type='button' onClick={clearInput}>Clear</button>
                     </ChaiseTooltip>
                     <ChaiseTooltip placement='bottom' tooltip='Close the color picker.'>
-                      <button className='chaise-btn chaise-btn-secondary' type='button' onClick={toggleColorPopup}>Close</button>
+                      <button className='chaise-btn chaise-btn-secondary sp-choose' type='button' onClick={toggleColorPopup}>Close</button>
                     </ChaiseTooltip>
                   </div>
                 </div>

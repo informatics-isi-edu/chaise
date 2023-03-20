@@ -6,7 +6,7 @@ var recordEditPage = function() {
 
     // recordedit form view
     this.getEntityTitleElement = function() {
-        return element(by.css('.form-container #page-title'));
+        return element(by.css('.app-container #page-title'));
     };
 
     this.getEntityTitleLinkElement = function() {
@@ -22,12 +22,12 @@ var recordEditPage = function() {
         return this.getResultsetTitleElement().element(by.tagName('a'));
     };
 
-    this.getAllColumnCaptions = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname > span')");
-    };
+    this.getRequiredInfoEl = () => {
+        return element(by.className('required-info'));
+    }
 
     this.getAllColumnNames = function() {
-        return element.all(by.css("td.entity-key > span.column-displayname > span"));
+        return element.all(by.css(".entity-key-column > .entity-key > span.column-displayname > span"));
     };
 
     this.getAllColumnPermissionOverlays = function () {
@@ -53,11 +53,11 @@ var recordEditPage = function() {
     };
 
     this.getColumnsWithUnderline = function() {
-        return browser.executeScript("return $('td.entity-key > span.column-displayname[uib-tooltip]')");
+        return element.all(by.css('.entity-key-column > .entity-key > span.column-displayname.chaise-icon-for-tooltip'));
     };
 
     this.getColumnWithAsterisk = function(el) {
-        return browser.executeScript("return $(arguments[0]).parent().siblings('span[ng-if=\"::form.isRequired(columnIndex);\"].text-danger')[0];", el);
+        return el.element(by.xpath('./../..')).element(by.className('text-danger'));
     };
 
     this.getColumnComment = function(el) {
@@ -70,26 +70,30 @@ var recordEditPage = function() {
     };
 
     this.getInputForAColumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value input[name="' + inputName + '"]'));
     };
 
     this.getTextAreaForAcolumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value textarea[name=\"" + name + "\"]')[" + index + "];");
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value textarea[name="' + inputName + '"]'));
     };
 
-    this.getColorInputBackground = function (index, name) {
-        index = index || 0;
-        var script = "var color = $('td.entity-value input[name=\"" + name + "\"]:eq(" + index + ")').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+    this.getColorInputBackground = function (name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        var script = "var color = 'document.querySelector('.input-switch-container-" + inputName + "').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
         return browser.executeScript(script);
     };
 
-    this.getColorInputBtn = function (index, columnDisplayName) {
-        columnDisplayName = makeSafeIdAttr(columnDisplayName);
-        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
+    this.getColorInputBtn = function (name, index) {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.input-switch-container-' + inputName + ' button'));
     }
 
     this.getColorInputPopup = function () {
@@ -114,61 +118,74 @@ var recordEditPage = function() {
 
     this.getColumnSelectAllButton = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-"+columnDisplayName));
+        return element(by.css('.select-all-' + columnDisplayName));
     };
 
-    this.getSelectAllInput = function (name) {
-        var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-"+columnDisplayName+"-input"));
+    this.getSelectAllInput = () => {
+        return element(by.css('.select-all-input'));
     }
 
     this.getSelectAllDate = function (name) {
-        return this.getSelectAllInput(name).element(by.css('input[name="' + name + '"][date]'));
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '"]'));
     }
 
-    this.getSelectAllTime = function (name) {
-        return this.getSelectAllInput(name).element(by.css('input[name="' + name + '"][time]'));
+    this.getSelectAllTimestampDate = function (name) {
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '-date"]'));
+    }
+
+    this.getSelectAllTimestampTime = function (name) {
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '-time"]'));
     }
 
     this.getSelectAllPopupBtn = function (name) {
-        return this.getSelectAllInput(name).element(by.className("modal-popup-btn"));
+        return this.getSelectAllInput().element(by.className("modal-popup-btn"));
     }
 
-    this.getSelectAllFileInput = function (name, name2) {
-        return this.getSelectAllInput(name).element(by.css('input[name="' + name2 + '"]'));
+    this.getSelectAllFileInput = function (name) {
+        return this.getSelectAllInput().element(by.css('input[name="-1-' + name + '"]'));
+    }
+
+    this.getSelectAllTextFileInput = function (name) {
+        return this.getSelectAllInput().element(by.className('input-switch-container--1-' + name)).element(by.css('.chaise-input-control > span'));
     }
 
     this.getSelectAllTextArea = function (name) {
-        return this.getSelectAllInput(name).element(by.css('textarea[name="' + name + '"]'));
+        return this.getSelectAllInput().element(by.css('textarea[name="-1-' + name + '"]'));
     };
 
     this.getSelectAllApply = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-apply-"+columnDisplayName));
+        return element(by.css('.select-all-apply-' + columnDisplayName));
     }
 
     this.getSelectAllClear = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-clear-"+columnDisplayName));
+        return element(by.css('.select-all-clear-' + columnDisplayName));
     }
 
     this.getSelectAllCancel = function (name) {
         var columnDisplayName = makeSafeIdAttr(name);
-        return element(by.id("select-all-cancel-"+columnDisplayName));
+        return element(by.css('.select-all-close-' + columnDisplayName));
     }
 
     // gets dropdowns relative to el
     this.getDropdownElements = function(el) {
         return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
     };
+    
+    this.getDropdownElementByName = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value .input-switch-container-' + inputName + ' .dropdown-toggle'));
+    }
 
     // gets all dropdowns
     this.getDropdowns = function() {
         return element.all(by.css(".chaise-input-control.dropdown-toggle"));
     };
 
-    this.getDropdownText = function(el) {
-        return el.element(by.css(".ng-binding"));
+    this.getDropdownText = (el) => {
+        return el.element(by.css('.chaise-input-control'));
     };
 
     this.getBooleanInputDisplay = function(columnDisplayName, index) {
@@ -181,10 +198,13 @@ var recordEditPage = function() {
         return element(by.id("form-" + index + '-' + columnDisplayName + "-input"));
     };
 
+    this.getOpenDropdownOptionsContainer = () => {
+        return element(by.css(".dropdown-menu.show"));
+    }
+
     // Gets the boolean dropdown options after the input is opened and attached to input container
-    // NOTE: could be more general because of how `.uib-dropdown-open` works
     this.getDropdownOptions = function() {
-        return element(by.css(".uib-dropdown-open > .adjust-boolean-dropdown.dropdown-menu")).all(by.tagName('li'));
+        return element(by.css(".dropdown-menu.show")).all(by.tagName('li'));
     }
 
     // Gets the boolean dropdown options when the dropdown is closed/hidden
@@ -212,12 +232,15 @@ var recordEditPage = function() {
             if (txt.trim() !== value) {
                 // Click open the dropdown
                 dropdownEl.click().then(function () {
+                    const optionsContainer = self.getOpenDropdownOptionsContainer();
+                    return browser.wait(protractor.ExpectedConditions.visibilityOf(optionsContainer), browser.params.defaultTimeout);
+                }).then(() => {
                     // Get all the possible choices in the dropdown
-                    return self.getDropdownOptions(dropdownEl)
+                    return self.getDropdownOptions();
                 }).then(function (options) {
                     // loop through options and check for one that matches our value we want to click
                     options.forEach(function (option, index) {
-                        option.element(by.tagName('a')).getAttribute("innerHTML").then(function (optionTxt) {
+                        option.getAttribute("innerHTML").then(function (optionTxt) {
                             if (optionTxt.trim() == value + "") {
                                 try {
                                     option.click()
@@ -263,7 +286,7 @@ var recordEditPage = function() {
     };
 
     this.getModalCloseBtn = function() {
-        return element(by.css(".modal-close"));
+        return element(by.css(".modal-close"));x
     };
 
     this.getForms = function() {
@@ -308,58 +331,84 @@ var recordEditPage = function() {
     };
 
     this.getDateInputsForAColumn = function(name, index) {
-        index = index || 0;
-        var inputs = {};
-        var inputControl = element(by.id("form-" + index + '-' + name + "-input"));
-        inputs.date = inputControl.element(by.tagName("input"));
-        inputs.todayBtn = inputControl.element(by.xpath('..')).element(by.css(".chaise-input-group-append > button"));
-        return inputs;
+        index = index || 1;
+        const inputName = index + '-' + name;
+        const inputObj = {};
+        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '"]'));
+        return inputObj;
     };
 
     // NOTE: currently only works for Date
     this.getRemoveButton = function (name, index, removeClass) {
-        return element(by.id("form-" + index + '-' + name + "-input")).element(by.css("." + removeClass));
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css("." + removeClass));
+    }
+
+    this.getTimestampRemoveButtons = (name, index, removeClass) => {
+        const inputName = index + '-' + name;
+        const buttonsObj = {}
+        buttonsObj.date = element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-date .' + removeClass));
+        buttonsObj.time = element(by.className('input-switch-container-' + inputName)).element(by.css('.input-switch-time .' + removeClass));
+        return buttonsObj;
     }
 
     this.getTimestampInputsForAColumn = function(name, index) {
-        index = index || 0;
-        var inputs = {};
-        inputs.date = element.all(by.css('input[name="' + name + '"][date]')).get(index);
-        inputs.time = element.all(by.css('input[name="' + name + '"][time]')).get(index);
-        inputs.meridiem = element.all(by.css('button[name="' + name + '"]')).get(index);
-        inputs.nowBtn = element.all(by.css('button[name="' + name + '-now"]')).get(index);
-        inputs.clearBtn = element.all(by.css('button[name="' + name + '-clear"]')).get(index);
-        return inputs;
+        index = index || 1;
+        const inputName = index + '-' + name;
+        var inputObj = {};
+        inputObj.date = element(by.css('.entity-value input[name="' + inputName + '-date"]'));
+        inputObj.time = element(by.css('.entity-value input[name="' + inputName + '-time"]'));
+        return inputObj;
     };
 
-    this.getIntegerInputForAColumn = function(name, index) {
-        index = index || 0
-        return browser.executeScript("return $('td.entity-value input[type=\"text\"][integer][name=\"" + name + "\"]')[" + index + "];");
-    };
+    this.getColorInputForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
+    }
 
-    this.getFloatInputForAColumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[type=\"text\"][float][name=\"" + name + "\"]')[" + index + "];");
-    };
+    this.getTextFileInputForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control > span'));
+    }
 
     this.submitForm = function() {
-        return browser.executeScript("$('.alert-danger button').click(), $('button[type=\"submit\"]').click();");
+        const defer = Q.defer();
+
+        element(by.css(('button[type="submit"]'))).click().then(() => {
+            defer.resolve();
+        });
+
+        return defer.promise;
     };
 
     this.getInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('.chaise-input-control').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+        return el.element(by.xpath('./../..')).element(by.css('.input-switch-error.text-danger'));
     };
 
     this.getTimestampInputErrorMessage = function(el, type) {
         return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"timestamp\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
     };
 
-    this.getJSONInputErrorMessage = function(el, type) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"json\"]').siblings('.text-danger.ng-active').find('div[ng-message=\"" + type + "\"]')[0];", el);
+    this.getJSONInputErrorMessage = function(el) {
+        // similar input structure as array detailed below
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
     };
 
     this.getArrayInputErrorMessage = function(el) {
-        return browser.executeScript("return $(arguments[0]).parents('div[ng-switch-when=\"array\"]').siblings('.text-danger.ng-active').find('div').text();", el);
+        /**
+         * The error message is a sibling of the grandparent to the textarea. Get the great grandparent and select the error from there
+         *  <div class='input-switch-container-{index}-{name}'>
+         *    <div class='input-switch-array'>
+         *      <div class='chaise-input-control'>
+         *        <textarea name='{index}-{name}' />
+         *      </div>
+         *    </div>
+         *    <span class='input-switch-error'>...</span>]
+         *  </div>
+         */
+        return el.element(by.xpath('./../../..')).element(by.css('.input-switch-error.text-danger'));
     };
 
     this.getDateInputErrorMessage = function(el, type) {
@@ -385,11 +434,11 @@ var recordEditPage = function() {
 
     this.getDeleteRowButton = function(index) {
         index = index || 0;
-        return browser.executeScript("return $('button.remove-form-btn')[" + index  + "];");
+        return this.getAllDeleteRowButtons().get(index);
     };
 
     this.getAllDeleteRowButtons = function() {
-        return browser.executeScript("return $('button.remove-form-btn');");
+        return element.all(by.css('button.remove-form-btn'));
     };
 
     this.getDeleteModalButton = function() {
@@ -430,6 +479,10 @@ var recordEditPage = function() {
         return browser.executeScript('return document.querySelector(\'.alert-danger\');');
     };
 
+    this.getAlertErrorClose = () => {
+        return element(by.css('.alert-danger button'));
+    }
+
     this.getAlertErrorLinkHref = function() {
         return browser.executeScript("return $('.alert-danger:visible a')[0].getAttribute('href');");
     };
@@ -437,6 +490,10 @@ var recordEditPage = function() {
     this.getAlertWarning = function() {
         return element(by.css('.alert-warning'));
     };
+
+    this.getRecordeditForms = () => {
+        return element.all(by.css('.recordedit-form .form-header'))
+    }
 
     this.getViewModelRows = function() {
         return browser.executeScript("return $('div[ng-controller=\"FormController as form\"]').data().$ngControllerController.recordEditModel.rows;");
@@ -503,7 +560,7 @@ var recordPage = function() {
     };
 
     this.getAllColumnNames = function() {
-        return element.all(by.css('tr:not(.forced-hidden) td.entity-key > span.column-displayname > span'));
+        return element.all(by.css('span.entity-key > span.column-displayname > span'));
     };
 
     this.getColumnNameElement = function (columnDisplayName) {
@@ -1398,8 +1455,7 @@ function chaisePage() {
         return this.waitForElementInverse(self.recordPage.getRelatedSectionSpinner());
     }
     this.recordeditPageReady = function() {
-        this.waitForClickableElement(element(by.id("submit-record-button")));
-        return this.waitForElementInverse(element(by.id("recordedit-main-spinner")));
+        return this.waitForClickableElement(element(by.id("submit-record-button")));
     }
     this.setAuthCookie = function(url, authCookie) {
         if (url && authCookie) {
@@ -1622,6 +1678,8 @@ function chaisePage() {
                 browser.actions().mouseMove(self.recordPage.getEntityTitleElement()).perform();
             } else if (appName === 'recordset') {
                 browser.actions().mouseMove(self.recordsetPage.getTotalCount()).perform();
+            } else if (appName === 'recordedit') {
+                browser.actions().mouseMove(self.recordeditPage.getRequiredInfoEl()).perform();
             }
 
             // TODO what about other apps

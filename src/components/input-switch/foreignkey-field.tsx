@@ -24,6 +24,7 @@ import $log from '@isrd-isi-edu/chaise/src/services/logger';
 // utils
 import { RECORDSET_DEAFULT_PAGE_SIZE } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { populateSubmissionRow } from '@isrd-isi-edu/chaise/src/utils/recordedit-utils';
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 type ForeignkeyFieldProps = InputFieldProps & {
@@ -182,10 +183,18 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
             </div>
           }
           <div className='chaise-input-group' {... (!props.disableInput && { onClick: openRecordsetModal })}>
-            <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
+            <div 
+              id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-display`}
+              className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+            >
               {isStringAndNotEmpty(field?.value) ?
-                <DisplayValue value={{ value: field?.value, isHTML: true }} /> :
-                <span className='chaise-input-placeholder'>{props.placeholder ? props.placeholder : 'Select a value'}</span>
+                <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
+                <span 
+                  className='chaise-input-placeholder popup-select-value' 
+                  contentEditable='false'
+                >
+                  {props.placeholder ? props.placeholder : 'Select a value'}
+                </span>
               }
               <ClearInputBtn
                 btnClassName={`${props.clearClasses} input-switch-clear`}
@@ -193,7 +202,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               />
             </div>
             {!props.disableInput && <div className='chaise-input-group-append'>
-              <button className='chaise-btn chaise-btn-primary' role='button' type='button'>
+              <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
                 <span className='chaise-btn-icon fa-solid fa-chevron-down' />
               </button>
             </div>}
