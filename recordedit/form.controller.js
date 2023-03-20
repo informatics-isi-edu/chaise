@@ -890,7 +890,7 @@
 
                             model.submissionRows[rowIndex][referenceCol.name] = value ? value.data[foreignTableCol.name] : null;
                             // Similar to above in `clearForeignKey()`
-                            // Comment from above: 
+                            // Comment from above:
                             //     // this conditional is for clearing `tuple.data` for update
                             //     // we rely on the data property to compare against the old data to verify what has changed
                             // NOTE: when migrating this functionality, write one function that handles clearing the data and call it in both places
@@ -1123,9 +1123,9 @@
 
             if (vm.recordEditModel.rows.length > 1) {
                 // make sure the width of form-edit-scroll and the table are the same
-                vm.topScroll.width =  (tableEl.offsetWidth) + "px";
+                vm.topScroll.width =  (tableEl.scrollWidth) + "px";
 
-                if (tableEl.offsetWidth > reducedWidth) {
+                if (tableEl.scrollWidth > tableEl.offsetWidth) {
                     // if the table width is greater than the scrollable container width
                     // NOTE: this is for an edge case in safari but has no harm on other browsers
                     vm.showTopScroll = true;
