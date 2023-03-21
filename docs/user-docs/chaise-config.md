@@ -379,7 +379,7 @@ If a property appears in the same configuration twice, the property defined late
      ```
 
  #### maxRecordsetRowHeight
- Set this property to false if you don't want content to be clipped in tables else set it to a number which represents the maximum row height when not expanded.
+ Set this property to `false` if you don't want content to be clipped in tables else set it to a number which represents the maximum row height when not expanded.
    - Type: Boolean || Number
    - Default behavior: 160 will be used if no value is supplied
    - Sample syntax:

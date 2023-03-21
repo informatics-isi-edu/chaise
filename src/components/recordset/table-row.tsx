@@ -71,10 +71,18 @@ const TableRow = ({
   } = useRecordset();
   const { validateSessionBeforeMutation } = useAuthn();
 
-  const tdPadding = 10, // +10 to account for padding on <td>
-    moreButtonHeight = 20,
-    maxHeight = ConfigService.chaiseConfig.maxRecordsetRowHeight || 160,
-    defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
+  const CONFIG_MAX_ROW_HEIGH = ConfigService.chaiseConfig.maxRecordsetRowHeight;
+
+  /**
+   * if the chaise-config property is set to `false` we should skip the ellipsis logic
+   */
+  const disableMaxRowHeightFeature = CONFIG_MAX_ROW_HEIGH === false;
+
+  // +10 to account for padding on <td>
+  const tdPadding = 10;
+  const moreButtonHeight = 20;
+  const maxHeight = typeof CONFIG_MAX_ROW_HEIGH === 'number' ? CONFIG_MAX_ROW_HEIGH : 160;
+  const defaultMaxHeightStyle = { 'maxHeight': (maxHeight - moreButtonHeight) + 'px' };
 
   const [sensor, setSensor] = useState<ResizeSensor | null>(null);
   const [overflow, setOverflow] = useState<boolean[]>([]);
@@ -142,11 +150,12 @@ const TableRow = ({
   // TODO: This assumes that tuple is set before rowValues. And that useEffect triggers before useLayoutEffect
   // NOTE: if the tuple changes, the table-row component isn't destroyed so the overflows need to be reset
   useEffect(() => {
+    if (disableMaxRowHeightFeature) return;
     setOverflow([]);
   }, [tuple]);
 
   useLayoutEffect(() => {
-    if (!rowContainer.current) return;
+    if (!rowContainer.current || disableMaxRowHeightFeature) return;
     const tempSensor = new ResizeSensor(
       rowContainer.current,
       () => {
@@ -489,10 +498,13 @@ const TableRow = ({
     return rowValues.map((value: any, colIndex: number) => {
       return (
         <td key={rowIndex + '-' + colIndex} className={rowDisabled ? 'disabled-cell' : ''}>
-          <div className={'display-value ' + (readMoreObj.hideContent === true ? 'hideContent' : 'showContent')} style={readMoreObj.maxHeightStyle}>
+          <div
+            className={'display-value ' + (!disableMaxRowHeightFeature && readMoreObj.hideContent === true ? 'hideContent' : 'showContent')}
+            style={!disableMaxRowHeightFeature ? readMoreObj.maxHeightStyle : {}}
+          >
             <DisplayValue addClass={true} value={value} />
           </div>
-          {overflow[colIndex + 1] && <div style={{ 'display': 'inline' }}>
+          {(!disableMaxRowHeightFeature && overflow[colIndex + 1]) && <div style={{ 'display': 'inline' }}>
             {' ... '}
             <span
               className='text-primary readmore'
