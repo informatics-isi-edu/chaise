@@ -71,9 +71,9 @@ describe('Record Add', function() {
             fkInput2 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 2),
             fkInput3 = chaisePage.recordEditPage.getForeignKeyInputDisplay(testParams.fk_col_name, 3);
 
-        var uploadInput1 = chaisePage.recordEditPage.getInputForAColumn(testParams.uri_col_name, 1),
-            uploadInput2 = chaisePage.recordEditPage.getInputForAColumn(testParams.uri_col_name, 2),
-            uploadInput3 = chaisePage.recordEditPage.getInputForAColumn(testParams.uri_col_name, 3);
+        var uploadInput1 = chaisePage.recordEditPage.getTextFileInputForAColumn(testParams.uri_col_name, 1),
+            uploadInput2 = chaisePage.recordEditPage.getTextFileInputForAColumn(testParams.uri_col_name, 2),
+            uploadInput3 = chaisePage.recordEditPage.getTextFileInputForAColumn(testParams.uri_col_name, 3);
 
         var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 1),
             intArrInput2 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 2),
@@ -190,7 +190,7 @@ describe('Record Add', function() {
                     expect(tsInput1.date.getAttribute("value")).toBe(dateMomentValue);
                     expect(tsInput2.date.getAttribute("value")).toBe(dateMomentValue);
                     expect(tsInput3.date.getAttribute("value")).toBe(dateMomentValue);
-
+                    
                     const timeMomentValue = moment(timeValue, 'hh:mm:ssA').format('hh:mm:ss');
                     expect(tsInput1.time.getAttribute("value")).toBe(timeMomentValue);
                     expect(tsInput2.time.getAttribute("value")).toBe(timeMomentValue);
@@ -300,9 +300,9 @@ describe('Record Add', function() {
                         return cancelBtn.click();
                     }).then(function () {
                         // verify the values
-                        expect(uploadInput1.getAttribute('value')).toBe(file.name);
-                        expect(uploadInput2.getAttribute('value')).toBe(file.name);
-                        expect(uploadInput3.getAttribute('value')).toBe(file.name);
+                        expect(uploadInput1.getText()).toBe(file.name);
+                        expect(uploadInput2.getText()).toBe(file.name);
+                        expect(uploadInput3.getText()).toBe(file.name);
 
                         done();
                     }).catch(function (err) {
@@ -362,10 +362,12 @@ describe('Record Add', function() {
                 dateInput3.date.sendKeys(testParams.values.date.modified);
 
                 // get clear btn for dateinput1
-                chaisePage.recordEditPage.getRemoveButton(testParams.date_col_name, 0, "date-remove").click().then(function () {
+                chaisePage.recordEditPage.getRemoveButton(testParams.date_col_name, 1, 'remove-input-btn').click().then(function () {
                     expect(dateInput1.date.getAttribute("value")).toBe("");
-                    expect(dateInput2.date.getAttribute("value")).toBe(testParams.values.date.initial);
-                    expect(dateInput3.date.getAttribute("value")).toBe(testParams.values.date.modified);
+                    const input2DateMomentValue = moment(testParams.values.date.initial, 'MM-DD-YYYY').format('YYYY-MM-DD');
+                    expect(dateInput2.date.getAttribute("value")).toBe(input2DateMomentValue);
+                    const input3DateMomentValue = moment(testParams.values.date.modified, 'MM-DD-YYYY').format('YYYY-MM-DD');
+                    expect(dateInput3.date.getAttribute("value")).toBe(input3DateMomentValue);
                 });
             });
 
@@ -376,19 +378,30 @@ describe('Record Add', function() {
                 chaisePage.recordEditPage.clearInput(tsInput3.time);
                 tsInput3.time.sendKeys(testParams.values.timestamp.modified.time);
 
-                tsInput2.clearBtn.click().then(function () {
-                    expect(tsInput1.date.getAttribute("value")).toBe(testParams.values.timestamp.initial.date);
-                    expect(tsInput2.date.getAttribute("value")).toBe("");
-                    expect(tsInput3.date.getAttribute("value")).toBe(testParams.values.timestamp.modified.date);
+                tsInput2RemoveBtns = chaisePage.recordEditPage.getTimestampRemoveButtons(testParams.timestamp_col_name, 2);
 
-                    expect(tsInput1.time.getAttribute("value")).toBe(testParams.values.timestamp.initial.time);
+                tsInput2RemoveBtns.date.click().then(() => {
+                    return tsInput2RemoveBtns.time.click();
+                }).then(() => {
+                    const input1DateMomentValue = moment(testParams.values.timestamp.initial.date, 'MM-DD-YYYY').format('YYYY-MM-DD');
+                    expect(tsInput1.date.getAttribute("value")).toBe(input1DateMomentValue);
+                    expect(tsInput2.date.getAttribute("value")).toBe("");
+                    const input3DateMomentValue = moment(testParams.values.timestamp.modified.date, 'MM-DD-YYYY').format('YYYY-MM-DD');
+                    expect(tsInput3.date.getAttribute("value")).toBe(input3DateMomentValue);
+
+                    const input1TimeMomentValue = moment(testParams.values.timestamp.initial.time, 'hh:mm:ssA').format('hh:mm:ss');
+                    expect(tsInput1.time.getAttribute("value")).toBe(input1TimeMomentValue);
                     expect(tsInput2.time.getAttribute("value")).toBe("");
-                    expect(tsInput3.time.getAttribute("value")).toBe(testParams.values.timestamp.modified.time);
+                    const input3TimeMomentValue = moment(testParams.values.timestamp.modified.time, 'hh:mm:ssA').format('hh:mm:ss');
+                    expect(tsInput3.time.getAttribute("value")).toBe(input3TimeMomentValue);
                 });
             });
 
             it("should change fk value in form 1.", function () {
-                chaisePage.recordEditPage.getForeignKeyInputButton(testParams.fk_col_name, 0).click().then(function () {
+                // chaisePage.recordEditPage.getForeignKeyInputButton(testParams.fk_col_name, 0).click().then(function () {
+                chaisePage.recordEditPage.getModalPopupBtns().then((btns) => {
+                    return btns[0].click()
+                }).then(() => {
                     // wait for modal rows to load
                     browser.wait(function() {
                         return chaisePage.recordsetPage.getModalRows().count().then(function(ct) {
@@ -417,12 +430,10 @@ describe('Record Add', function() {
             if (!process.env.CI && testParams.files.length > 0) {
                 it("should clear the uri value in form 3.", function () {
                     var file = testParams.files[0];
-                    chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(removeBtns) {
-                        return chaisePage.clickButton(removeBtns[6]);
-                    }).then(function () {
-                        expect(uploadInput1.getAttribute('value')).toBe(file.name);
-                        expect(uploadInput2.getAttribute('value')).toBe(file.name);
-                        expect(uploadInput3.getAttribute('value')).toBe("");
+                    chaisePage.recordEditPage.getRemoveButton(testParams.uri_col_name, 3, 'remove-input-btn').click().then(() => {
+                        expect(uploadInput1.getText()).toBe(file.name);
+                        expect(uploadInput2.getText()).toBe(file.name);
+                        expect(uploadInput3.getText()).toBe("");
                     });
                 });
             }
@@ -473,7 +484,7 @@ describe('Record Add', function() {
 
             it("should show a resultset table with " + (testParams.max_input_rows+1) + " entities.", function() {
 
-                var intInput = chaisePage.recordEditPage.getInputById(0, "int");
+                var intInput = chaisePage.recordEditPage.getInputForAColumn('int', 1);
                 intInput.sendKeys("1").then(function () {
                     return chaisePage.recordEditPage.clearInput(multiFormInput);
                 }).then(function () {
@@ -485,7 +496,7 @@ describe('Record Add', function() {
                 }).then(function() {
                     // wait for dom to finish rendering the forms
                     return browser.wait(function() {
-                        return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                             return (ct == testParams.max_input_rows+1);
                         });
                     }, browser.params.defaultTimeout);

@@ -26,16 +26,24 @@ var testParams = {
         boolean_disabled_value: "false",
         date_value: "2010-06-08",
         date_disabled_value: "2014-05-12",
+        timestamp_value: "2016-05-14T17:30:00",
         timestamp_date_value: "2016-05-14",
-        timestamp_time_value: "05:30:00",
-        timestamp_meridiem_value: "PM",
-        timestamp_disabled_value: "2012-06-22 18:36:00",
-        timestamp_disabled_no_default_value: "Automatically generated",
+        timestamp_time_value: "17:30:00", // no separate meridiem input, change time value to 24 hour
+        timestamp_disabled_value: "2012-06-22T18:36:00",
+        timestamp_disabled_date_value: "2012-06-22",
+        timestamp_disabled_time_value: "18:36:00",
+        timestamp_disabled_no_default_value: "",
+        timestamp_disabled_no_default_date_value: "",
+        timestamp_disabled_no_default_time_value: "",
+        timestamptz_value: "2014-05-07T14:40:00-07:00",
         timestamptz_date_value: "2014-05-07",
-        timestamptz_time_value: "02:40:00",
-        timestamptz_meridiem_value: "PM",
-        timestamptz_disabled_value: "2010-06-13 17:22:00-07:00",
-        timestamptz_disabled_no_default_value: "Automatically generated",
+        timestamptz_time_value: "14:40:00", // no separate meridiem input, change time value to 24 hour
+        timestamptz_disabled_value: "2010-06-13T17:22:00-07:00",
+        timestamptz_disabled_date_value: "2010-06-13",
+        timestamptz_disabled_time_value: "17:22:00",
+        timestamptz_disabled_no_default_value: "",
+        timestamptz_disabled_no_default_date_value: "",
+        timestamptz_disabled_no_default_time_value: "",
         json_value:JSON.stringify({"name":"testing_json"}),
         json_disabled_value:JSON.stringify(98.786),
         json_disabled_no_default_value: "Automatically generated",
@@ -47,8 +55,10 @@ var testParams = {
         rid_disabled_value: "Automatically generated",
         rcb_disabled_value: "Automatically generated",
         rmb_disabled_value: "Automatically generated",
-        rct_disabled_value: "Automatically generated",
-        rmt_disabled_value: "Automatically generated"
+        rct_disabled_date_value: "",
+        rct_disabled_time_value: "",
+        rmt_disabled_date_value: "",
+        rmt_disabled_time_value: "",
     },
     record_column_values: {
     // data values
@@ -81,8 +91,18 @@ var testParams = {
     },
     edit_key: { name: "id", value: "2", operator: "="},
     re_column_names: [
-        "text_disabled", "markdown_disabled", "foreign_key_disabled", "int_disabled", "float_disabled", "boolean_disabled",
-        "date_disabled", "timestamp_disabled", "timestamptz_disabled", "json_disabled", "asset_disabled", "color_rgb_hex_disabled"
+        { name: "text_disabled" }, 
+        { name: "markdown_disabled", type: "textarea" }, 
+        { name: "foreign_key_disabled", type: "foreign_key" }, 
+        { name: "int_disabled" }, 
+        { name: "float_disabled" }, 
+        { name: "boolean_disabled", type: "dropdown" },
+        { name: "date_disabled" }, 
+        { name: "timestamp_disabled", type: "timestamp" }, 
+        { name: "timestamptz_disabled", type: "timestamp" }, 
+        { name: "json_disabled", type: "textarea" }, 
+        { name: "asset_disabled", type: "asset" }, 
+        { name: "color_rgb_hex_disabled", type: "color" }
     ],
     re_column_values: {
         text_disabled: "Disabled input",
@@ -94,7 +114,11 @@ var testParams = {
         boolean_disabled: "false",
         date_disabled: "2014-05-12",
         timestamp_disabled: "2012-06-22T18:36:00",
+        timestamp_disabled_date: "2012-06-22",
+        timestamp_disabled_time: "18:36:00",
         timestamptz_disabled: "2010-06-13T17:22:00-07:00",
+        timestamptz_disabled_date: "2010-06-13",
+        timestamptz_disabled_time: "17:22:00",
         json_disabled: JSON.stringify(98.786),
         // Value of "filename" column for the current record
         // asset_disabled: "Four Points Sherathon 3"
@@ -127,42 +151,42 @@ describe('Record Add with defaults', function() {
         });
 
         it("should prefill simple input fields that are not disabled with their default value.", function() {
-            textInput = chaisePage.recordEditPage.getInputById(0, "text");
-            markdownInput = chaisePage.recordEditPage.getInputById(0, "markdown");
-            intInput = chaisePage.recordEditPage.getInputById(0, "int");
-            floatInput = chaisePage.recordEditPage.getInputById(0, "float");
-            booleanTrueInput = chaisePage.recordEditPage.getBooleanInputDisplay("boolean_true", 0);
-            booleanFalseInput = chaisePage.recordEditPage.getBooleanInputDisplay("boolean_false", 0);
-            dateInput = chaisePage.recordEditPage.getInputById(0, "date");
-            jsonInput = chaisePage.recordEditPage.getInputById(0, "json");
-            colorRGBHexInput = chaisePage.recordEditPage.getInputById(0, "color_rgb_hex");
+            textInput = chaisePage.recordEditPage.getInputForAColumn('text', 1);
+            markdownInput = chaisePage.recordEditPage.getTextAreaForAcolumn('markdown', 1);
+            intInput = chaisePage.recordEditPage.getInputForAColumn('int', 1);
+            floatInput = chaisePage.recordEditPage.getInputForAColumn('float', 1);
+            booleanTrueInput = chaisePage.recordEditPage.getDropdownElementByName('boolean_true', 1);
+            booleanFalseInput = chaisePage.recordEditPage.getDropdownElementByName('boolean_false', 1);
+            dateInput = chaisePage.recordEditPage.getInputForAColumn('date', 1);
+            jsonInput = chaisePage.recordEditPage.getTextAreaForAcolumn('json', 1);
+            colorRGBHexInput = chaisePage.recordEditPage.getColorInputForAColumn('color_rgb_hex', 1);
 
             expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
             expect(markdownInput.getAttribute("value")).toBe(values.markdown_value, "Markdown input default is incorrect");
             expect(intInput.getAttribute("value")).toBe(values.int_value, "Int input default is incorrect");
             expect(floatInput.getAttribute("value")).toBe(values.float_value, "Float input default is incorrect");
-            expect(booleanTrueInput.getText()).toBe(values.boolean_true_value, "Boolean input is not set to true");
-            expect(booleanFalseInput.getText()).toBe(values.boolean_false_value, "Boolean input is not set to false");
-            expect(dateInput.element(by.tagName("input")).getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
+            expect(chaisePage.recordEditPage.getDropdownText(booleanTrueInput).getText()).toBe(values.boolean_true_value, "Boolean input is not set to true");
+            expect(chaisePage.recordEditPage.getDropdownText(booleanFalseInput).getText()).toBe(values.boolean_false_value, "Boolean input is not set to false");
+            expect(dateInput.getAttribute("value")).toBe(values.date_value, "Date input default is incorrect");
             expect(jsonInput.getAttribute("value")).toBe(values.json_value, "JSON input default is incorrect");
             expect(colorRGBHexInput.getAttribute("value")).toBe(values.color_rgb_hex_value, "Text input default is incorrect");
         });
 
         it("should prefill simple input fields that are disabled with their default value.", function() {
-            textDisabledInput = chaisePage.recordEditPage.getInputById(0, "text_disabled");
-            markdownDisabledInput = chaisePage.recordEditPage.getInputById(0, "markdown_disabled");
-            intDisabledInput = chaisePage.recordEditPage.getInputById(0, "int_disabled");
-            floatDisabledInput = chaisePage.recordEditPage.getInputById(0, "float_disabled");
-            booleanDisabledInput = chaisePage.recordEditPage.getInputById(0, "boolean_disabled");
-            dateDisabledInput = chaisePage.recordEditPage.getInputById(0, "date_disabled");
-            jsonInputDisabled= chaisePage.recordEditPage.getInputById(0, "json_disabled");
-            colorRGBHexDisabledInput = chaisePage.recordEditPage.getInputById(0, "color_rgb_hex_disabled");
+            textDisabledInput = chaisePage.recordEditPage.getInputForAColumn('text_disabled', 1);
+            markdownDisabledInput = chaisePage.recordEditPage.getTextAreaForAcolumn('markdown_disabled', 1);
+            intDisabledInput = chaisePage.recordEditPage.getInputForAColumn('int_disabled', 1);
+            floatDisabledInput = chaisePage.recordEditPage.getInputForAColumn('float_disabled', 1);
+            booleanDisabledInput = chaisePage.recordEditPage.getDropdownElementByName('boolean_disabled', 1);
+            dateDisabledInput = chaisePage.recordEditPage.getInputForAColumn('date_disabled', 1);
+            jsonInputDisabled= chaisePage.recordEditPage.getTextAreaForAcolumn('json_disabled', 1);
+            colorRGBHexDisabledInput = chaisePage.recordEditPage.getColorInputForAColumn('color_rgb_hex_disabled', 1);
 
             expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
             expect(markdownDisabledInput.getAttribute("value")).toBe(values.markdown_disabled_value, "Markdown disabled input default is incorrect");
             expect(intDisabledInput.getAttribute("value")).toBe(values.int_disabled_value, "Int disabled input default is incorrect");
             expect(floatDisabledInput.getAttribute("value")).toBe(values.float_disabled_value, "Float disabled input default is incorrect");
-            expect(booleanDisabledInput.getAttribute("value")).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
+            expect(chaisePage.recordEditPage.getDropdownText(booleanDisabledInput).getText()).toBe(values.boolean_disabled_value, "Boolean disabled input default is incorrect");
             expect(dateDisabledInput.getAttribute("value")).toBe(values.date_disabled_value, "Date disabled input default is incorrect");
             expect(jsonInputDisabled.getAttribute("value")).toBe(values.json_disabled_value, "JSON disabled input default is incorrect");
             expect(colorRGBHexDisabledInput.getAttribute("value")).toBe(values.color_rgb_hex_disabled_value, "Text input default is incorrect");
@@ -171,7 +195,7 @@ describe('Record Add with defaults', function() {
 
         //JOSN columns
         it("should initialize json columns properly if they are disabled without a default.", function() {
-            jsonDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "json_disabled_no_default");
+            jsonDisabledNoDefaultInput = chaisePage.recordEditPage.getTextAreaForAcolumn('json_disabled_no_default', 1);
 
             expect(jsonDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled json value is incorrect");
             expect(jsonDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.json_disabled_no_default_value, "The disabled json placeholder is incorrect");
@@ -179,38 +203,55 @@ describe('Record Add with defaults', function() {
 
         // Timestamp columns
         it("should intialize timestamp columns properly with a default value.", function() {
-            timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamp", 0);
-            timestampDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled");
+            timestampInput = chaisePage.recordEditPage.getInputForAColumn('timestamp', 1);
+            timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn('timestamp', 1);
 
+            expect(timestampInput.getAttribute('value')).toBe(values.timestamp_value, "Timestamp default is incorrect");
             expect(timestampInputs.date.getAttribute('value')).toBe(values.timestamp_date_value, "Timestamp date default is incorrect");
             expect(timestampInputs.time.getAttribute('value')).toBe(values.timestamp_time_value, "Timestamp time default is incorrect");
-            expect(timestampInputs.meridiem.getText()).toBe(values.timestamp_meridiem_value, "Timestamp meridiem default is incorrect");
+
+            timestampDisabledInput = chaisePage.recordEditPage.getInputForAColumn('timestamp_disabled', 1);
+            timestampDisabledInputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn('timestamp_disabled', 1);
+
             expect(timestampDisabledInput.getAttribute('value')).toBe(values.timestamp_disabled_value, "Timestamp disabled value is incorrect");
+            expect(timestampDisabledInputObj.date.getAttribute('value')).toBe(values.timestamp_disabled_date_value, "Timestamp disabled date value is incorrect");
+            expect(timestampDisabledInputObj.time.getAttribute('value')).toBe(values.timestamp_disabled_time_value, "Timestamp disabled time value is incorrect");
         });
 
         it("should initialize timestamp columns properly if they are disabled without a default.", function() {
-            timestampDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "timestamp_disabled_no_default");
+            timestampDisabledNoDefaultInput = chaisePage.recordEditPage.getInputForAColumn('timestamp_disabled_no_default', 1);
+            timestampDisabledNoDefaultInputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn('timestamp_disabled_no_default', 1);
 
-            expect(timestampDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled timestamp value is incorrect");
-            expect(timestampDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.timestamp_disabled_no_default_value, "The disabled timestamp placeholder is incorrect");
+            // should both be empty string ("")
+            expect(timestampDisabledNoDefaultInput.getAttribute("value")).toBe(values.timestamp_disabled_no_default_value, "The disabled timestamp value is incorrect");
+            expect(timestampDisabledNoDefaultInputObj.date.getAttribute("value")).toBe(values.timestamp_disabled_no_default_date_value, "The disabled timestamp date value is incorrect");
+            expect(timestampDisabledNoDefaultInputObj.time.getAttribute("value")).toBe(values.timestamp_disabled_no_default_time_value, "The disabled timestamp time value is incorrect");
         });
 
         // Timestamptz columns
         it("should intialize timestamptz columns properly with a default value.", function() {
-            timestamptzInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn("timestamptz", 0);
-            timestamptzDisabledInput = chaisePage.recordEditPage.getInputById(0, "timestamptz_disabled");
+            timestamptzInput = chaisePage.recordEditPage.getInputForAColumn('timestamptz', 1);
+            timestamptzInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn('timestamptz', 1);
 
+            expect(timestamptzInput.getAttribute('value')).toBe(values.timestamptz_value, "Timestamptz default is incorrect");
             expect(timestamptzInputs.date.getAttribute('value')).toBe(values.timestamptz_date_value, "Timestamptz date default is incorrect");
             expect(timestamptzInputs.time.getAttribute('value')).toBe(values.timestamptz_time_value, "Timestamptz time default is incorrect");
-            expect(timestamptzInputs.meridiem.getText()).toBe(values.timestamptz_meridiem_value, "Timestamptz meridiem default is incorrect");
-            expect(timestamptzDisabledInput.getAttribute('value')).toBe(values.timestamptz_disabled_value, "Timestamptz disabled value is incorrect");
+
+            timestamptzDisabledInput = chaisePage.recordEditPage.getInputForAColumn('timestamptz_disabled', 1);
+            timestamptzDisabledInputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn('timestamptz_disabled', 1);
+
+            expect(timestamptzDisabledInput.getAttribute('value')).toBe(values.timestamptz_disabled_value, "Hidden timestamptz disabled value is incorrect");
+            expect(timestamptzDisabledInputObj.date.getAttribute('value')).toBe(values.timestamptz_disabled_date_value, "Timestamptz disabled date value is incorrect");
+            expect(timestamptzDisabledInputObj.time.getAttribute('value')).toBe(values.timestamptz_disabled_time_value, "Timestamptz disabled time value is incorrect");
         });
 
         it("should initialize timestamptz columns properly if they are disabled without a default.", function() {
-            timestamptzDisabledNoDefaultInput = chaisePage.recordEditPage.getInputById(0, "timestamptz_disabled_no_default");
+            timestamptzDisabledNoDefaultInput = chaisePage.recordEditPage.getInputForAColumn('timestamptz_disabled_no_default', 1);
+            timestamptzDisabledNoDefaultInputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn('timestamptz_disabled_no_default', 1);
 
-            expect(timestamptzDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled timestamptz value is incorrect");
-            expect(timestamptzDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.timestamptz_disabled_no_default_value, "The disabled timestamptz placeholder is incorrect");
+            expect(timestamptzDisabledNoDefaultInput.getAttribute('value')).toBe(values.timestamptz_disabled_no_default_value, "Hidden timestamptz disabled value is incorrect");
+            expect(timestamptzDisabledNoDefaultInputObj.date.getAttribute("value")).toBe(values.timestamptz_disabled_no_default_date_value, "The disabled timestamptz date value is incorrect");
+            expect(timestamptzDisabledNoDefaultInputObj.time.getAttribute("value")).toBe(values.timestamptz_disabled_no_default_time_value, "The disabled timestamptz time value is incorrect");
         });
 
         // Foreign key columns
@@ -218,11 +259,11 @@ describe('Record Add with defaults', function() {
             // the clone will be disabled while data is loading.
             browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getMultiFormInputSubmitButton()));
 
-            foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 0);
-            foreignKeyDisabledInput = chaisePage.recordEditPage.getInputById(0, "foreign_key_disabled");
+            foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key", 1);
+            foreignKeyDisabledInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("foreign_key_disabled", 1);
 
             expect(foreignKeyInput.getText()).toBe(values.foreign_key_value, "Foreign key input default is incorrect");
-            expect(foreignKeyDisabledInput.getAttribute('value')).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
+            expect(foreignKeyDisabledInput.getText()).toBe(values.foreign_key_disabled_value, "Foreign key disabled default is incorrect");
         });
 
         // Asset columns
@@ -230,35 +271,35 @@ describe('Record Add with defaults', function() {
             // the clone btn will be disabled while data is loading.
             browser.wait(EC.elementToBeClickable(chaisePage.recordEditPage.getMultiFormInputSubmitButton()));
 
-            chaisePage.recordEditPage.getInputForAColumn("txtasset", 0).then(function (assetInput) {
-                expect(assetInput.getAttribute('value')).toBe(values.asset_value, "Asset input default is incorrect");
+            const assetTextInput = chaisePage.recordEditPage.getTextFileInputForAColumn("asset", 1)
+            expect(assetTextInput.getText()).toBe(values.asset_value, "Asset input default is incorrect");
 
-                return chaisePage.recordEditPage.getInputForAColumn("txtasset_disabled", 0);
-            }).then(function (assetDisabledInput) {
-                expect(assetDisabledInput.getAttribute('value')).toBe(values.asset_disabled_value, "Asset disabled default is incorrect");
-            });
+            const assetDisabledTextInput = chaisePage.recordEditPage.getTextFileInputForAColumn("asset_disabled", 1);
+            expect(assetDisabledTextInput.getText()).toBe(values.asset_disabled_value, "Asset disabled default is incorrect");
         });
 
         it("should initialize asset columns properly if they are disabled without a default.", function() {
-            chaisePage.recordEditPage.getInputForAColumn("txtasset_disabled_no_default", 0).then(function (assetInput) {
-                expect(assetInput.getAttribute("value")).toBe("", "The disabled asset value is incorrect");
-                expect(assetInput.getAttribute("placeholder")).toBe(values.asset_disabled_no_default_value, "The disabled asset placeholder is incorrect");
-            });
+            const assetTextInput = chaisePage.recordEditPage.getTextFileInputForAColumn("asset_disabled_no_default", 1);
+            expect(assetTextInput.getText()).toBe(values.asset_disabled_no_default_value, "The disabled asset placeholder is incorrect");
         });
 
         // System columns
         it("should initialize system column inputs with 'Automatically Generated'.", function() {
-            var ridDisabledInput = chaisePage.recordEditPage.getInputById(0, "RID"),
-                rcbDisabledInput = chaisePage.recordEditPage.getInputById(0, "RCB"),
-                rmbDisabledInput = chaisePage.recordEditPage.getInputById(0, "RMB"),
-                rctDisabledInput = chaisePage.recordEditPage.getInputById(0, "RCT"),
-                rmtDisabledInput = chaisePage.recordEditPage.getInputById(0, "RMT");
+            var ridDisabledInput = chaisePage.recordEditPage.getInputForAColumn("RID", 1),
+                rcbDisabledInput = chaisePage.recordEditPage.getInputForAColumn("RCB", 1),
+                rmbDisabledInput = chaisePage.recordEditPage.getInputForAColumn("RMB", 1),
+                rctDisabledInput = chaisePage.recordEditPage.getTimestampInputsForAColumn("RCT", 1),
+                rmtDisabledInput = chaisePage.recordEditPage.getTimestampInputsForAColumn("RMT", 1);
 
             expect(ridDisabledInput.getAttribute("placeholder")).toBe(values.rid_disabled_value, "RID disabled input default is incorrect");
             expect(rcbDisabledInput.getAttribute("placeholder")).toBe(values.rcb_disabled_value, "RCB disabled input default is incorrect");
             expect(rmbDisabledInput.getAttribute("placeholder")).toBe(values.rmb_disabled_value, "RMB disabled input default is incorrect");
-            expect(rctDisabledInput.getAttribute("placeholder")).toBe(values.rct_disabled_value, "RCT disabled input default is incorrect");
-            expect(rmtDisabledInput.getAttribute("placeholder")).toBe(values.rmt_disabled_value, "RMT disabled input default is incorrect");
+            
+            expect(rctDisabledInput.date.getText()).toBe(values.rct_disabled_date_value, "RCT disabled date input default is incorrect");
+            expect(rctDisabledInput.time.getText()).toBe(values.rct_disabled_time_value, "RCT disabled time input default is incorrect");
+
+            expect(rmtDisabledInput.date.getText()).toBe(values.rmt_disabled_date_value, "RMT disabled date input default is incorrect");
+            expect(rmtDisabledInput.time.getText()).toBe(values.rmt_disabled_time_value, "RMT disabled time input default is incorrect");
         });
 
         // TODO write tests for default values for composite foreign keys when implemented
@@ -305,24 +346,42 @@ describe("Record Edit with immutable columns", function() {
 
         for (var i=0; i < testParams.re_column_names.length; i++) {
             (function(index) {
-                var columnName = testParams.re_column_names[index];
+                const columnObj = testParams.re_column_names[index];
+                const columnName = columnObj.name;
                 // normal inputs with values in input under value attribute
                 it("should initialize text input column: " + columnName + " with the proper value", function () {
-                    if (columnName == "asset_disabled") {
-                        chaisePage.recordEditPage.getInputForAColumn("txt"+columnName, 0).then(function (input) {
-                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-
-                            // test the tooltip on hover
-                            // NOTE: for the mouse move function to move properly, the column should be visible otherwise we have to scroll to it.
-                            // that's why the asset column must be added to the begining of visible columns list
-                            browser.actions().mouseMove(input).perform();
-                            var tooltip = chaisePage.getTooltipDiv();
-                            chaisePage.waitForElement(tooltip).then(function () {
-                                expect(tooltip.getText()).toBe(testParams.re_column_values[columnName], "Incorrect tooltip on the Asset input");
-                            });
+                    let input;
+                    if (columnObj.type === 'asset') {
+                        input = chaisePage.recordEditPage.getTextFileInputForAColumn(columnName, 1);
+                        expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                        
+                        // that's why the asset column must be added to the begining of visible columns list
+                        const tooltip = chaisePage.getTooltipDiv();
+                        chaisePage.waitForElementInverse(tooltip).then(function () {
+                            chaisePage.testTooltipReturnPromise(input, testParams.re_column_values[columnName], 'recordedit');
                         });
+                    } else if (columnObj.type === 'color') {
+                        input = chaisePage.recordEditPage.getColorInputForAColumn(columnName, 1);
+                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    } else if (columnObj.type === 'dropdown') {
+                        input = chaisePage.recordEditPage.getDropdownElementByName(columnName, 1);
+                        expect(chaisePage.recordEditPage.getDropdownText(input).getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    } else if (columnObj.type === 'foreign_key') {
+                        input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 1);
+                        expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    } else if (columnObj.type === 'textarea') {
+                        input = chaisePage.recordEditPage.getTextAreaForAcolumn(columnName, 1);
+                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    } else if (columnObj.type === 'timestamp') {
+                        input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
+                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+
+                        const inputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn(columnName, 1);
+                        expect(inputObj.date.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_date'], "Recordedit value for: " + columnName + " date is incorrect");
+                        expect(inputObj.time.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_time'], "Recordedit value for: " + columnName + " time is incorrect");
                     } else {
-                        var input = chaisePage.recordEditPage.getInputById(0, columnName);
+                        // colummObj.type = input but not set
+                        input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
                         expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
                     }
                 });
