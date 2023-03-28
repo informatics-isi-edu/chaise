@@ -61,7 +61,6 @@
         margin-top: 0px;
     }
 
-
     @mixin shift-above-edit-forms() {
         height: 15px;
         position: fixed;
@@ -104,9 +103,9 @@
             margin-bottom: 40px; // margin at bottom of page so edit form isn't touching the bottom of viewport
 
             > table {
-                overflow: hidden;
                 margin-bottom: 0;
-                max-width: none;
+                display: flex;
+                flex-direction: column;
 
                 > tbody {
                     &:first-child > tr.shift-form:first-child > td {
@@ -132,10 +131,14 @@
 
                     > tr > td {
                         border-top: 1px solid $border-color;
+                    }
 
-                        &:last-child {
-                            border-bottom: 1px solid $border-color;
-                        }
+                    /**
+                     * make sure the table cells have the same width
+                     */
+                    .shift-form, .select-all-row {
+                        display: flex;
+                        width: 100%;
                     }
 
                     > tr {
@@ -174,6 +177,15 @@
                                 word-wrap: break-word;
                                 min-width: 250px;
                                 border-right: 1px solid $border-color;
+                                height: auto;
+
+                                // TODO is this needed?
+                                // width: 1px;
+
+                                /**
+                                 * make sure the table cells have the same width
+                                 */
+                                flex: 1 1 0;
                             }
 
                             &.entity-value {
@@ -246,12 +258,6 @@
     .select-all-text {
         padding: 4px;
         border: 1px solid transparent;
-    }
-
-    @-moz-document url-prefix() {
-        #form-edit > table > tbody > tr > td:first-child {
-            margin-top: -1px;
-        }
     }
 
     #resultset-tables {

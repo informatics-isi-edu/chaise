@@ -1,10 +1,12 @@
 // Spacing
 $left-panel-width-lg: 21vw;
 $left-panel-width-sm: 15vw;
+$left-panel-min-width: 170px;
 $viewport-margin: 20px;
 $main-alley:30px;
 
-// button
+
+// button props
 $btn-border-radius: 4px;
 $btn-height: 30px;
 $btn-height-sm: 24px;
@@ -20,6 +22,10 @@ $chaise-RE-border-width: 1px;
 
 // edit column name column
 $chaise-caption-column-width: 200px;
+
+// checkbox
+$chaise-checkbox-width: 20px;
+$chaise-checkbox-height: 20px;
 
 
 // fonts

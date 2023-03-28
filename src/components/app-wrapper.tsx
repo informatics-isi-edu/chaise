@@ -30,11 +30,10 @@ import { ConfigService, ConfigServiceSettings } from '@isrd-isi-edu/chaise/src/s
 
 // utils
 import { addClickListener } from '@isrd-isi-edu/chaise/src/utils/head-injector';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 import { clickHref } from '@isrd-isi-edu/chaise/src/utils/ui-utils';
 import { isSameOrigin } from '@isrd-isi-edu/chaise/src/utils/uri-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
-
-
 
 type AppWrapperProps = {
   /**
@@ -127,6 +126,8 @@ const AppWrapperInner = ({
 
     if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
     if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
+    if (settings.overrideImagePreviewBehavior) overrideImagePreviewBehavior();
+
 
   }, [configDone]);
 
@@ -187,6 +188,38 @@ const AppWrapperInner = ({
       }
     });
   }
+
+  /**
+   * add the listener for the chaise-image-preview to zoom in/out
+   */
+  const overrideImagePreviewBehavior = () => {
+    addClickListener('.chaise-image-preview', function (e: Event, element: HTMLAnchorElement) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const img = element.querySelector('img');
+
+      /**
+       * TODO this feels hacky
+       */
+      const maxHeight = img ? img.getAttribute('image-preview-max-height') : null;
+
+      if (element.classList.contains(CLASS_NAMES.ZOOMED_IN)) {
+        element.classList.remove(CLASS_NAMES.ZOOMED_IN);
+        if (maxHeight && img) {
+          element.style.maxHeight = 'unset';
+          img.style.maxHeight = maxHeight;
+        }
+      } else {
+        element.classList.add(CLASS_NAMES.ZOOMED_IN);
+        if (maxHeight && img) {
+          element.style.maxHeight = maxHeight;
+          img.style.maxHeight = 'unset';
+        }
+      }
+    });
+  }
+
 
   return (
     <StrictMode>

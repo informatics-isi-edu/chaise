@@ -1,6 +1,8 @@
-# Use navbar app in external HTML pages
+# Use the AngularJS navbar app on external HTML pages
 
 This documentation focuses on navbar and how it can be used in external HTML pages.
+
+> This document focuses on deprecated AngularJS implementation. For the new implementation please refer to [this document](navbar-app.md).
 
 ## Table of Contents
 - [How to add navbar app](#how-to-add-navbar-app)

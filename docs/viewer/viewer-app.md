@@ -31,7 +31,7 @@ while DZI relies on precomputed tile images in the file system.
 
 ## Dependencies
 
-Apart from [other chaise dependencies](installation.md#dependencies), viewer app
+Apart from [other chaise dependencies](../user-docs/installation.md#dependencies), viewer app
 depends on the [openseadragon-viewer](https://github.com/informatics-isi-edu/openseadragon-viewer) as well.
 
 

@@ -27,6 +27,7 @@ const loginSettings = {
   appName: APP_NAMES.LOGIN,
   appTitle: 'Login',
   overrideHeadTitle: true,
+  overrideImagePreviewBehavior: false,
   overrideDownloadClickBehavior: false,
   overrideExternalLinkBehavior: false
 };

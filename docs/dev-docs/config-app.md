@@ -20,6 +20,7 @@ angular.module('<NAMESPACE>.configure-<APP_NAME>', ['chaise.config'])
     appName: '<APP_NAME>',                      // used for `cid` (e.g. recordset)
     appTitle: '<APP_TITLE>',                    // used for tab title in browser. appended with `chaiseConfig.headTitle` || `Chaise`
     overrideHeadTitle: true|false,              // enables chaise's heuristics for the headTitle
+    overrideImagePreviewBehavior: true|false,   // adds the image preview functionality of chaise
     overrideDownloadClickBehavior: true|false,  // enables onclick behavior for asset with the asset-permission class
     overrideExternalLinkBehavior: true|false,   // enables onclick behavior for external links
     openIframeLinksInTab: true|false            // if the app is used in an iframe window, makes sure all the links are added in new tab
@@ -48,7 +49,7 @@ This will delay your app until the configuration is completely done. To make sur
             <!-- Main content -->
         </div>
     </body>
-</html>    
+</html>
 ```
 
 With these css rules

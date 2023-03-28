@@ -206,6 +206,28 @@ var testParams = {
         ].join(""),
         numRows: 22
     },
+    hide_selected_items: {
+      // not used and only added here so we know what the blob represents
+      facetObject: {
+        "and": [
+          {"source": "id", "choices": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]},
+          {"source": "text_col", "choices": ["one", "two"]}
+        ]
+      },
+      facetBlob: 'N4IghgdgJiBcDaoDOB7ArgJwMYFM4gEsYAaELACxQNyTngEZiAmYgZmIBZiBWYgNmIB2YgA5iATmL0ADFMb0mAXQC+xZOmx5YIAC44AHjoD6WFABsQpClRp0QKCHlI6A7ihAqVQA',
+      numRows: 10,
+      firstFacet: {
+        index: 0,
+        options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+        optionsAfterFirstChange: ["2", "3", "4", "5", "6", "7", "8", "9", "10", "11"],
+        optionsAfterFinalChange: ["4", "5", "6", "7", "8", "9", "10", "11", "12", "1"],
+      },
+      secondFacet: {
+        index: 5,
+        selectedOption: 3,
+        options: ["All records with value", "No value", "one", "two", "four", "three"]
+      }
+    },
     hideFilterPanelClass: "chaise-sidebar-close",
     showFilterPanelClass: "chaise-sidebar-open",
     foreignKeyPopupFacetFilter: "term\neight",
@@ -678,6 +700,92 @@ describe("Other facet features, ", function() {
     /***********************************************************  local test cases ***********************************************************/
     if (process.env.CI) return;
     // NOTE the following test cases will only run locally.
+
+    describe('regarding the logic to show only certian number of selected items,', function () {
+        var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;
+        var currParams = testParams.hide_selected_items;
+        const facetIdx = currParams.firstFacet.index;
+        const secondFacetIdx = currParams.secondFacet.index;
+
+        beforeAll(function(done) {
+            var uri = uriPrefix + "/*::facets::" + currParams.facetBlob;
+            chaisePage.navigate(uri);
+            chaisePage.waitForElementInverse(element(by.id("spinner")));
+            done();
+        });
+
+        it ('facet panel should only show limited number of selected facet options.', function (done) {
+            // wait for facet to open
+            browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getFacetCollapse(facetIdx)), browser.params.defaultTimeout);
+
+            // wait for list to be fully visible
+            browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(facetIdx)), browser.params.defaultTimeout);
+
+            // wait for facet checkboxes to load
+            browser.wait(function () {
+                return chaisePage.recordsetPage.getFacetOptions(facetIdx).getText().then(function (opts) {
+                    return JSON.stringify(opts) === JSON.stringify(currParams.firstFacet.options);
+                }).catch(chaisePage.catchTestError(done));
+            }, browser.params.defaultTimeout);
+
+            // make sure all are selected
+            expect(chaisePage.recordsetPage.getCheckedFacetOptions(0).count()).toBe(currParams.firstFacet.options.length, 'not all options are selected');
+
+            // make sure the text is visible
+            expect(chaisePage.recordsetPage.getFacetMoreFiltersText(facetIdx).getText()).toEqual('2 selected items not displayed.');
+
+            done();
+        });
+
+        it ('interacting with other facet should rearrange the options and update the message.', function (done) {
+            // deselect the first option in the first facet
+            chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(facetIdx, 0)).then(() => {
+                // wait for list to be fully visible
+                browser.wait(EC.visibilityOf(chaisePage.recordsetPage.getList(secondFacetIdx)), browser.params.defaultTimeout);
+
+                // in the second facet, deselect third option (first two are not-null and null)
+                return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(secondFacetIdx, currParams.secondFacet.selectedOption));
+            }).then(() => {
+                  // wait for facet checkboxes to load for the first facet
+                  browser.wait(function () {
+                      return chaisePage.recordsetPage.getFacetOptions(facetIdx).getText().then(function (opts) {
+                          return JSON.stringify(opts) === JSON.stringify(currParams.firstFacet.optionsAfterFirstChange);
+                      }).catch(chaisePage.catchTestError(done));
+                  }, browser.params.defaultTimeout);
+
+                  // make sure all are selected
+                  expect(chaisePage.recordsetPage.getCheckedFacetOptions(0).count()).toBe(currParams.firstFacet.optionsAfterFirstChange.length, 'not all options are selected');
+
+                  // make sure the text is updated
+                  expect(chaisePage.recordsetPage.getFacetMoreFiltersText(facetIdx).getText()).toEqual('1 selected items not displayed.');
+
+                  done();
+            }).catch(chaisePage.catchTestError(done));
+
+        });
+
+        it ('going below the limit should remove the message.', function (done) {
+          // deselect first and second options in the first facet so we go below the limit
+          chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(facetIdx, 0)).then(() => {
+              return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(facetIdx, 1));
+          }).then(() => {
+              // in the second facet, deselect third option (first two are not-null and null)
+              return chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(secondFacetIdx, currParams.secondFacet.selectedOption));
+          }).then (() => {
+              // wait for facet checkboxes to load
+              browser.wait(function () {
+                  return chaisePage.recordsetPage.getFacetOptions(facetIdx).getText().then(function (opts) {
+                      return JSON.stringify(opts) === JSON.stringify(currParams.firstFacet.optionsAfterFinalChange);
+                  }).catch(chaisePage.catchTestError(done));
+              }, browser.params.defaultTimeout);
+
+              // make sure the text has disapeared
+              expect(chaisePage.recordsetPage.getFacetMoreFiltersText(facetIdx).isDisplayed()).toBeFalsy();
+
+              done();
+          }).catch(chaisePage.catchTestError(done));
+        });
+    });
 
     describe("regarding facets with shared path,", function () {
         var uriPrefix = browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schema_name + ":" + testParams.table_name;

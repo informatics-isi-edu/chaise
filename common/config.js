@@ -68,6 +68,7 @@
                 overrideHeadTitle: settings.overrideHeadTitle,
                 overrideDownloadClickBehavior: settings.overrideDownloadClickBehavior,
                 overrideExternalLinkBehavior: settings.overrideExternalLinkBehavior,
+                overrideImagePreviewBehavior: settings.overrideImagePreviewBehavior,
                 openLinksInTab: openLinksInTab
             }
         };

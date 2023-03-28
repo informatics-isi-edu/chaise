@@ -3558,6 +3558,33 @@
             document.body.removeChild(downloadLink[0]);
         }
 
+        /**
+         * add the listener for the chaise-image-preview to zoom in/out
+         */
+        function overrideImagePreviewBehavior() {
+            addClickListener('.chaise-image-preview', function (e, element) {
+                e.preventDefault();
+
+                var zoomClass = 'zoomed-in';
+                var img = element.querySelector('img');
+                var maxHeight = img ? img.getAttribute('image-preview-max-height') : null;
+
+                if (element.classList.contains(zoomClass)) {
+                    element.classList.remove(zoomClass);
+                    if (maxHeight && img) {
+                        element.style.maxHeight = 'unset';
+                        img.style.maxHeight = maxHeight;
+                    }
+                } else {
+                    element.classList.add(zoomClass);
+                    if (maxHeight && img) {
+                        element.style.maxHeight = maxHeight;
+                        img.style.maxHeight = 'unset';
+                    }
+                }
+            });
+        }
+
         function overrideDownloadClickBehavior() {
             addClickListener("a.asset-permission", function (e, element) {
 
@@ -3684,6 +3711,7 @@
 
             var settings = ConfigUtils.getSettings();
             if (settings.openLinksInTab) openLinksInTab();
+            if (settings.overrideImagePreviewBehavior) overrideImagePreviewBehavior();
             if (settings.overrideDownloadClickBehavior) overrideDownloadClickBehavior();
             if (settings.overrideExternalLinkBehavior) overrideExternalLinkBehavior();
             if (settings.overrideHeadTitle) addTitle(settings.appTitle);

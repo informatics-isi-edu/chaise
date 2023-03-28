@@ -8,6 +8,7 @@
         appName: "recordedit",
         appTitle: "Record Edit",
         overrideHeadTitle: true,
+        overrideImagePreviewBehavior: true,
         overrideDownloadClickBehavior: true,
         overrideExternalLinkBehavior: true
     })

@@ -51,13 +51,17 @@ const RecordsetTable = ({
   let isRowSelected = Array(page ? page.length : 0).fill(false);
   if (page && page.length && Array.isArray(selectedRows) && selectedRows.length > 0) {
     isRowSelected = page.tuples.map((tuple: any) => (
-      selectedRows.some((obj) => obj.uniqueId === tuple.uniqueId)
+      // ermrestjs always returns a string for uniqueId, but internally we don't
+      // eslint-disable-next-line eqeqeq
+      selectedRows.some((obj) => obj.uniqueId == tuple.uniqueId)
     ));
   }
   let isRowDisabled = Array(page ? page.length : 0).fill(false);
   if (page && page.length && Array.isArray(disabledRows) && disabledRows.length > 0) {
     isRowDisabled = page.tuples.map((tuple: any) => (
-      disabledRows.some((obj) => obj.uniqueId === tuple.uniqueId)
+      // ermrestjs always returns a string for uniqueId, but internally we don't
+      // eslint-disable-next-line eqeqeq
+      disabledRows.some((obj) => obj.uniqueId == tuple.uniqueId)
     ));
   }
 
@@ -195,7 +199,7 @@ const RecordsetTable = ({
           <>
             <ChaiseTooltip
               placement='right'
-              tooltip={'Select all rows on this page.'}
+              tooltip={'Select all items on this page.'}
             >
               <button className='table-select-all-rows chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={selectAllOnPage}
@@ -206,7 +210,7 @@ const RecordsetTable = ({
             </ChaiseTooltip>
             <ChaiseTooltip
               placement='right'
-              tooltip={'Deselect all rows on this page.'}
+              tooltip={'Deselect all items on this page.'}
             >
               <button className='chaise-btn chaise-btn-secondary chaise-btn-sm'
                 type='button' onClick={DeselectAllOnPage}

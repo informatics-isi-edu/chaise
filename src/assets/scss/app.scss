@@ -661,7 +661,7 @@ html {
       font-weight: 400;
       position: relative;
       vertical-align: middle;
-      min-height: 20px;
+      min-height: $chaise-checkbox-height;
       margin-bottom: 0;
     }
     &.no-left-padding label {
@@ -672,8 +672,8 @@ html {
       position: absolute;
       z-index: map-get(variables.$z-index-map, 'checkbox-input');
       cursor: pointer;
-      width: 20px;
-      height: 20px;
+      width: $chaise-checkbox-width;
+      height: $chaise-checkbox-height;
       top: 0;
       margin-top: 2px;
 
@@ -698,8 +698,8 @@ html {
         content: "";
         display: inline-block;
         position: absolute;
-        width: 20px;
-        height: 20px;
+        width: $chaise-checkbox-width;
+        height: $chaise-checkbox-height;
         left: 0;
         top: 0;
         border: 1px solid map-get(variables.$color-map, 'primary');
@@ -1024,4 +1024,66 @@ html {
     }
   }
 
+  .chaise-image-preview {
+    $chaise-image-preview-max-height: 50vh;
+
+    position: relative;
+    display: block;
+    border: 1px solid $border-color;
+    text-align: center;
+
+    /**
+     * the container should take the whole width, and let
+     * the content handle the height
+     */
+    width: 100%;
+    height: auto;
+
+    // image markdown might add an empty embed-caption
+    .embed-caption:empty {
+      display: none;
+    }
+
+    // markdown-container might add a margin, and we should get rid of it
+    img {
+      margin: 0;
+    }
+
+    &.zoomed-in {
+      cursor: zoom-out;
+      // make sure proper scrollbars are displayed
+      overflow: auto;
+
+      /**
+       * when the image is zoomed in, we have to add the
+       * max-height to the container instead of the img
+       */
+      max-height: $chaise-image-preview-max-height;
+      img {
+        max-height: unset;
+        max-width: unset;
+      }
+    }
+
+    &:not(.zoomed-in) {
+      cursor: zoom-in;
+      overflow: hidden;
+
+      img {
+        /**
+         * set the height based on the width and aspect ratio
+         * but at maximum it should be less than half the page
+         */
+        height: auto;
+        max-height: $chaise-image-preview-max-height;
+        /**
+         * occupy the whole width if available,,
+         * but no more than the container availabel space
+         */
+        max-width: 100%;
+        // make sure the aspect ratio of image is preserved
+        object-fit: contain;
+      }
+    }
+  }
 }

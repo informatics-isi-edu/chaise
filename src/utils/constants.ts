@@ -151,7 +151,8 @@ export const APP_NAMES = {
 };
 
 export const CLASS_NAMES = {
-  HIDDEN: 'forced-hidden'
+  HIDDEN: 'forced-hidden',
+  ZOOMED_IN: 'zoomed-in'
 };
 
 export const ID_NAMES = {

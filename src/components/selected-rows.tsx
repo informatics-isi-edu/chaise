@@ -63,7 +63,7 @@ const SelectedRows = ({
       <>
         <ChaiseTooltip
           placement='bottom-start'
-          tooltip='Clear selected row'
+          tooltip='Clear selected item.'
         >
           <div className='selected-chiclet-remove' onClick={(event) => removeCallback(row, event)}>
             <i className='fa-solid fa-xmark selected-chiclet-remove-icon' />
@@ -82,7 +82,7 @@ const SelectedRows = ({
   const renderShowMoreLessBtn = (isMoreBtn: boolean) => (
     <ChaiseTooltip
       placement='bottom-start'
-      tooltip={isMoreBtn ? 'Click to show all selected values.' : 'Click to hide some selected values.'}
+      tooltip={isMoreBtn ? 'Click to show all selected items.' : 'Click to hide some of the selected items.'}
     >
       <button
         className={`chaise-btn chaise-btn-tertiary selected-chiclets-btn ${isMoreBtn ? 'show-more-btn' : 'show-less-btn'}`}
@@ -96,7 +96,7 @@ const SelectedRows = ({
   const renderClearAllBtn = () => (
     <ChaiseTooltip
       placement='bottom-start'
-      tooltip='Clear all selected rows'
+      tooltip='Clear all the selected items.'
     >
       <button
         className='chaise-btn chaise-btn-tertiary clear-all-btn selected-chiclets-btn'

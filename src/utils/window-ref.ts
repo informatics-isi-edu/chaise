@@ -1,4 +1,5 @@
-interface ICustomWindow extends Window {
+// exporting so third-party apps can customize this
+export interface ICustomWindow extends Window {
   // WID
   name: string;
   // ERMrset object that is attached to window in ermrestjs:
@@ -24,6 +25,7 @@ interface ICustomWindow extends Window {
       hideNavbar: boolean,
       appTitle: string,
       overrideHeadTitle: boolean,
+      overrideImagePreviewBehavior: boolean,
       overrideDownloadClickBehavior: boolean,
       overrideExternalLinkBehavior: boolean,
       openLinksInTab: boolean

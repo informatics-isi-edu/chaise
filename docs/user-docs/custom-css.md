@@ -11,67 +11,26 @@ The default styling for specific elements can be altered by adding a custom css 
 
 Custom style classes with modified styling attributes can be added in `chaise.css`. Make sure to use same class names and hierarchy as described below to avoid any discrepancy.
 
+## Table of Contents
+
+- [Changing chaise styles](#changing-chaise-styles)
+  - [Body](#body)
+  - [Navbar](#navbar)
+  - [App-sepecific](#app-sepecific)
+- [Character replacement](#character-replacement)
+- [Examples](#examples)
+- [Custom Markdown Styles](#custom-markdown-styles)
+- [Bootstrap styles](#bootstrap-styles)
+
 ## Changing chaise styles
-With the current HTML structure, it is possible to apply different styles to different parts of chaise and to further style the chaise tables based on model information :
 
- - `.chaise-mac`
-   - Added a class to deal with table column spacing on Mac OS. This class can be used to apply any custom styling specific to the Mac OS
-     irrespective of the browser type.
- - `.chaise-firefox`
-   - Added a class to deal with table column spacing in Firefox browser. This class can be used to apply any custom styling specific to
-     the Firefox browser irrespective of the operating system.
- - `navbar`
-   - identifies the navbar that is displayed on top of every app.
- - `recordset` identifier (`#recordset`)
-   - identifies (scopes) the HTML used only for the `recordset` application
-   - should be specified when CSS rules are to be applied ONLY to `recordset` app
-   - also have `#recordedit` and `#record` to scope rules to those apps as well
- - `recordset-container` class (`.recordset-container`)
-   - identifies the recordset directive container
-   - should be specified when CSS rules are to be applied anywhere the recordset directive is used
-   - this would be applied to all popups in `record` and `recordedit` as well
-   - leaves out the related tables in `record` app
- - `.record-main-section-table`
-   - identifies the main section of the `record` app.
-   - should be specified when CSS rules are to be applied to only the main section of `record` app (and not related section).
-   - can be used to scope CSS rules to the inline related tables
- - `related tables container` identifier (`.related-section-container`)
-   - identifies the related tables container
-   - should be specified when CSS rules are to be applied to only the related tables portion of `record` app
-   - can be used to scope CSS rules to the related tables not in the main body
- - `r_s_<schema.name>` and `r_t_<table.name>` classes
-   - identifies the record page for the particular table or schema.
- - `rs_s_<schema.name>` and `rs_t_<table.name>` classes
-   - identifies the recordset page for the particular table or schema.
- - `re_s_<schema.name>` and `re_t_<table.name>` classes
-   - identifies the recordedit page for the particular table or schema.
- - `s_<schema.name>` class (`.s_<schema.name>`) and `t_<table.name>` class (`.t_<table.name>`)
-   - identifies the record table directive, for applying styling to the whole table (`<table>`) DOM element
-   - schema class should be specified when scoping CSS rules to all tables in that schema
-     - use in conjunction with table class to identify a unique table to apply styling to
-   - table class should be specified when scoping CSS rules to all tables with that name
-     - NOTE: currently will apply cross schemas if multiple tables with the same name exist in different schemas
- - `c_<column.name>` class (`.c_<column.name>`)
-   - identifies the table heading, for applying styling to an individual table heading (`<th>`) DOM element
-   - column class should be specified when scoping CSS rules to all columns with that name
-   - use in conjunction with schema class and table class to be more specific as to what table headings to apply styling to
+The following is how the HTML of main Chaise apps look like:
 
-More often than not, you will want to apply styling for each of the columns rather than at the table level, so the `c_<column.name>` identifier should almost always be included in the selector.
-
-### Character replacement
-For both class names and id attributes:
-   - Must begin with a letter A-Z or a-z
-   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("\_")
-
-This means that if the schema, table, or column name contains any other characters, they will be replaced with a "-".
-If the name contains multiple unsafe characters in a row, all will be replaced by 1 single "-".
-For example, if your column name is `text (name)`, chaise will rewrite this as `text-name-` and then will use `c_text-name-` as the class name.
-
-### General HTML structure:
 ```html
-<html id="<appname>"
-  <head>...</head>
-  <body>
+<html id="<appname>">
+  ...
+  <body class="chaise-body">
+    ...
     <div class="app-container <app-abbr>_s_<schema.name> <app-abbr>_t_<table.name>">
       <navbar></navbar>
       ...
@@ -80,6 +39,7 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
             <thead>
               <tr>
                 <th class="c_<column.name>">...</th>
+                ...
               </tr>
             <thead>
             <tbody>...</tbody>
@@ -91,9 +51,71 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
 </html>
 ```
 
-### Examples:
+In the following we will go over the identifiers that can be used to target different parts of the page in order to customize their styles.
 
-- Hide everything except the result table in recordset:
+### Body
+
+The following are classes added to the `body` element:
+
+- `.chaise-body`: added to all Chaise apps.
+- `.chaise-mac`: This class can be used to apply any custom styling specific to the Mac OS irrespective of the browser type e.g., change table column spacing on Mac OS.
+- `.chaise-firefox`: This class can be used to apply any custom styling specific to the Firefox browser irrespective of the operating system. e.g., change table column spacing in Firefox browser.
+
+### Navbar
+
+Navbar related classes:
+
+ - `navbar`:  identifies the navbar that is displayed on top of every app.
+ - `.chaise-navbar-banner-container`: identifies the navbar banners.
+ - Please refer to [navbar app documentation](navbar-app.md#how-to-customize-navbar-ui) for more information.
+
+### Page-sepecific
+
+ - `#recordset`: identifies (scopes) the HTML used ONLY for the Recordset page.
+ - `#record`: identifies (scopes) the HTML used ONLY for the Record page.
+ - `#recordedit`: identifies (scopes) the HTML used ONLY for the Recordedit page.
+ - `.recordset-container`: identifies the Recordset component container
+   - This would be applied to all popups in Record and Recordedit pages as well.
+   - Doesn't apply to the tables displayed for related entities in Record page.
+ - `.record-main-section-table`: identifies the main section of the Record page.
+   - Should be specified when CSS rules are to be applied to only the main section of the Record page (and not related section).
+   - Can be used to scope CSS rules to the inline related tables
+ - `.related-section-container`: identifies the related tables container
+   - Should be specified when CSS rules are to be applied to only the related tables portion of  the Record page.
+   - Can be used to scope CSS rules to the related tables not in the main body.
+ - `.r_s_<schema.name>` and `.r_t_<table.name>`:
+   - Identifies the Record page for the particular table or schema.
+ - `.rs_s_<schema.name>` and `.rs_t_<table.name>`:
+   - Identifies the Recordset page for the particular table or schema.
+ - `.re_s_<schema.name>` and `.re_t_<table.name>`:
+   - Identifies the Recordedit page for the particular table or schema.
+ - `.s_<schema.name>` and `.t_<table.name>`:
+   - Identifies the Record table component, for applying styling to the whole table (`<table>`) DOM element.
+   - Schema class should be specified when scoping CSS rules to all tables in that schema.
+   - Use schema in conjunction with table class to identify a unique table to apply styling to.
+   - Table class should be specified when scoping CSS rules to all tables with that name
+     - NOTE: currently will apply cross schemas if multiple tables with the same name exist in different schemas
+ - `.c_<column.name>`:
+   - identifies the table heading, for applying styling to an individual table heading (`<th>`) DOM element
+   - column class should be specified when scoping CSS rules to all columns with that name
+   - use in conjunction with schema class and table class to be more specific as to what table headings to apply styling to
+   - More often than not, you will want to apply styling for each of the columns rather than at the table level, so the `.c_<column.name>` identifier should almost always be included in the selector.
+
+## Character replacement
+
+In the previous section, we showed that in some cases we're using schema, table, or column names in the identifiers. In HTML, both class names and id attributes:
+   - Must begin with a letter A-Z or a-z
+   - Can be followed by: letters (A-Za-z), digits (0-9), hyphens ("-"), and underscores ("\_")
+
+That's why we're going to transform the schema, table, or column names before using them in the identifiers. THe following is how the transformation works:
+- Any unsafe characters will be replaced with a "-".
+- If the name contains multiple unsafe characters in a row, all will be replaced by 1 single "-".
+
+For example, if your column name is `text (name)`, chaise will rewrite this as `text-name-` and then will use `c_text-name-` as the class name.
+
+## Examples
+
+1. Hide everything except the result table in recordset:
 ```css
 .rs_s_schema.rs_t_table .top-left-panel,
 .rs_s_schema.rs_t_table .side-panel-resizable,
@@ -107,7 +129,7 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
 }
 ```
 
-- Hide navbar in recordedit:
+2. Hide navbar in recordedit:
 
 ```css
 .re_s_schema.re_t_table navbar {
@@ -115,7 +137,7 @@ For example, if your column name is `text (name)`, chaise will rewrite this as `
 }
 ```
 
-- Increase the width of a column in tabular displays:
+3. Increase the width of a column in tabular displays:
 
 ```css
 .s_schema.t_table .c_column {
@@ -127,7 +149,7 @@ NOTE: The `min-width` property will almost always be honored. If content is shor
 NOTE: The `max-width` property will also almost always be honored. If the content is shorter than the `max-width` value, then it will shrink down to fit the content. If the content itself has to show on one line and is longer than the `max-width` value, the `max-width` will be ignored.
 
 
-### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen)):
+### More specific examples (using RBK [.../#2/Gene_Expression:Specimen](https://dev.rebuildingakidney.org/chaise/recordset/#2/Gene_Expression:Specimen))
 ```css
 #recordset .s_Gene_Expression.t_Specimen .c_Images {
   min-width: 210px;

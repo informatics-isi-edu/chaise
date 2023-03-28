@@ -204,7 +204,7 @@ var testParams = {
         data: [
             [
                 "main one", // self_link_rowname
-                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525\n... more", // self_link_id
+                "current: main one(1234501, 1,234,501), id: 01, array: 1,234,521, 1,234,522, 1,234,523, 1,234,524, 1,234,525", // self_link_id
                 "1,234,501", //normal_col_int_col
                 "current cnt: 5 - 1,234,511, 1234511, cnt_i1: 5", //normal_col_int_col_2
                 "outbound1 one", //outbound_entity_o1
