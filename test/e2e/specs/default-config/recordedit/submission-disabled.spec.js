@@ -20,8 +20,7 @@ describe("For error handling strategies on submission,", function() {
             var keys = [];
             keys.push(testParams.key.name + testParams.key.operator + testParams.key.value);
 
-            browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/submission-disabled:" + testParams.table_name + "/" + keys.join("&"));
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/submission-disabled:" + testParams.table_name + "/" + keys.join("&"));
 
             chaisePage.recordeditPageReady();
         });
@@ -45,9 +44,8 @@ describe("For error handling strategies on submission,", function() {
         var uri;
 
         beforeAll(function () {
-            browser.ignoreSynchronization = true;
             uri = browser.params.url + "/recordedit/#" + browser.params.catalogId + "/submission-disabled:" + testParams.conflict_table_name;
-            browser.get(uri);
+            chaisePage.navigate(uri);
 
             chaisePage.recordeditPageReady();
         });

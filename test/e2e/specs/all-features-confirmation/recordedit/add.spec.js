@@ -318,9 +318,8 @@ describe('Record Add', function() {
     describe('When url has a prefill query string param set, ', function() {
         var testCookie = {};
         beforeAll(function() {
-            browser.ignoreSynchronization=true;
             // Refresh the page
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then (function () {
                 // Write a dummy cookie for creating a record in Accommodation table
                 testCookie = {
@@ -342,7 +341,7 @@ describe('Record Add', function() {
 
         it('should pre-fill fields from the prefill cookie', function() {
             // Reload the page with prefill query param in url
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation?prefill=test");
 
             chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
                 return browser.manage().getCookie('test');
@@ -364,8 +363,7 @@ describe('Record Add', function() {
 
     describe('Markdown Editor Help button is clicked, ', function() {
         beforeAll(function() {
-            browser.ignoreSynchronization = true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-add:accommodation");
             helpBtn = element.all(by.css('button[title=Help]')).get(0);
             chaisePage.waitForElement(helpBtn);
         });

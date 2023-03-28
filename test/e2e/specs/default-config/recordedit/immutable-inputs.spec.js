@@ -145,8 +145,7 @@ describe('Record Add with defaults', function() {
             colorRGBHexInput, colorRGBHexDisabledInput;
 
         beforeAll(function () {
-            browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name);
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name);
             chaisePage.waitForElement(element(by.id("submit-record-button")));
         });
 
@@ -333,8 +332,7 @@ describe("Record Edit with immutable columns", function() {
         beforeAll(function () {
             var keys = [];
             keys.push(testParams.edit_key.name + testParams.edit_key.operator + testParams.edit_key.value);
-            browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + "/"  + keys.join("&"));
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/defaults:" + testParams.table_name + "/"  + keys.join("&"));
 
             chaisePage.recordeditPageReady();
             browser.wait(function() {
@@ -351,38 +349,46 @@ describe("Record Edit with immutable columns", function() {
                 // normal inputs with values in input under value attribute
                 it("should initialize text input column: " + columnName + " with the proper value", function () {
                     let input;
-                    if (columnObj.type === 'asset') {
-                        input = chaisePage.recordEditPage.getTextFileInputForAColumn(columnName, 1);
-                        expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                    switch (columnObj.type) {
+                        case 'asset':
+                            input = chaisePage.recordEditPage.getTextFileInputForAColumn(columnName, 1);
+                            expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
                         
-                        // that's why the asset column must be added to the begining of visible columns list
-                        const tooltip = chaisePage.getTooltipDiv();
-                        chaisePage.waitForElementInverse(tooltip).then(function () {
-                            chaisePage.testTooltipReturnPromise(input, testParams.re_column_values[columnName], 'recordedit');
-                        });
-                    } else if (columnObj.type === 'color') {
-                        input = chaisePage.recordEditPage.getColorInputForAColumn(columnName, 1);
-                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    } else if (columnObj.type === 'dropdown') {
-                        input = chaisePage.recordEditPage.getDropdownElementByName(columnName, 1);
-                        expect(chaisePage.recordEditPage.getDropdownText(input).getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    } else if (columnObj.type === 'foreign_key') {
-                        input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 1);
-                        expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    } else if (columnObj.type === 'textarea') {
-                        input = chaisePage.recordEditPage.getTextAreaForAColumn(columnName, 1);
-                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                    } else if (columnObj.type === 'timestamp') {
-                        input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
-                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-
-                        const inputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn(columnName, 1);
-                        expect(inputObj.date.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_date'], "Recordedit value for: " + columnName + " date is incorrect");
-                        expect(inputObj.time.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_time'], "Recordedit value for: " + columnName + " time is incorrect");
-                    } else {
-                        // colummObj.type = input but not set
-                        input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
-                        expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            // that's why the asset column must be added to the begining of visible columns list
+                            const tooltip = chaisePage.getTooltipDiv();
+                            chaisePage.waitForElementInverse(tooltip).then(function () {
+                                chaisePage.testTooltipReturnPromise(input, testParams.re_column_values[columnName], 'recordedit');
+                            });
+                            break;
+                        case 'color':
+                            input = chaisePage.recordEditPage.getColorInputForAColumn(columnName, 1);
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            break;
+                        case 'dropdown':
+                            input = chaisePage.recordEditPage.getDropdownElementByName(columnName, 1);
+                            expect(chaisePage.recordEditPage.getDropdownText(input).getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            break;
+                        case 'foreign_key':
+                            input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 1);
+                            expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            break;
+                        case 'textarea':
+                            input = chaisePage.recordEditPage.getTextAreaForAColumn(columnName, 1);
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            break;
+                        case 'timestamp':
+                            input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+    
+                            const inputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn(columnName, 1);
+                            expect(inputObj.date.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_date'], "Recordedit value for: " + columnName + " date is incorrect");
+                            expect(inputObj.time.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_time'], "Recordedit value for: " + columnName + " time is incorrect");
+                            break;
+                        default:
+                            // colummObj.type = input but not set
+                            input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
+                            expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
+                            break;
                     }
                 });
             })(i);

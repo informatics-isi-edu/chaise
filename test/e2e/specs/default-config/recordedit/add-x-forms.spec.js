@@ -82,8 +82,7 @@ describe('Record Add', function() {
         var index;
 
         beforeAll(function () {
-            browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-add:" + testParams.table_name);
             chaisePage.recordeditPageReady();
         });
 
@@ -476,7 +475,6 @@ describe('Record Add', function() {
                 multiFormSubmitButton = chaisePage.recordEditPage.getMultiFormInputSubmitButton();
 
             beforeAll(function () {
-                browser.ignoreSynchronization=true;
                 browser.refresh();
                 chaisePage.recordeditPageReady();
             });

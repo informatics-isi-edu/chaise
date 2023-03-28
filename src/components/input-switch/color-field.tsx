@@ -56,7 +56,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
    */
   const renderInput = (fieldValue: any, onChange: any) => {
     return <HexColorInput
-      className={`sp-input${ props.inputClasses}`} placeholder={props.placeholder}
+      className={`sp-input${' ' + props.inputClasses}`} placeholder={props.placeholder}
       disabled={props.disableInput} color={fieldValue} onChange={onChange} prefixed
     />;
   };

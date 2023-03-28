@@ -130,8 +130,7 @@ var testParams = {
 describe('When editing a record', function() {
 
     beforeAll(function() {
-        browser.ignoreSynchronization = true;
-        browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
+        chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_w_generated_columns.tableName + '/' + testParams.table_w_generated_columns.key.columnName + testParams.table_w_generated_columns.key.operator + testParams.table_w_generated_columns.key.value);
         chaisePage.recordeditPageReady();
 
         if (!process.env.CI && files.length > 0) {
@@ -190,7 +189,7 @@ describe('When editing a record', function() {
 
     describe('if the user made no edits', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.recordeditPageReady().then(function() {
                 return recordEditPage.submitForm();
             });
@@ -218,7 +217,7 @@ describe('When editing a record', function() {
     // Except boolean type gets 3 cases (null to true, true to false, false to null).
     describe('if the user did make edits', function() {
         beforeAll(function() {
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.recordeditPageReady();
         });
 

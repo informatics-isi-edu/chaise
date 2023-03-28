@@ -21,8 +21,7 @@ describe('Edit a record,', function() {
         var record;
 
         beforeAll(function () {
-            browser.ignoreSynchronization=true;
-            browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-person:" + testParams.table_name);
+            chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/product-person:" + testParams.table_name);
         });
 
         describe("Presentation and validation for an entity with a composite key and formatted boolean,", function() {

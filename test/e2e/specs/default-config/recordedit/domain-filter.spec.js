@@ -62,8 +62,7 @@ describe("Domain filter pattern support,", function () {
         describe("In create mode, ", function () {
 
             beforeAll(function () {
-                browser.ignoreSynchronization = true;
-                browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
+                chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/fk-filter-pattern:" + testParams.table_name);
 
                 chaisePage.waitForElement(element(by.id("submit-record-button")));
             });

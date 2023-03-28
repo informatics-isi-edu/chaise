@@ -140,8 +140,7 @@ describe('Edit existing record,', function() {
 
                     var keys = [];
                     keys.push(tableParams.key.name + tableParams.key.operator + tableParams.key.value);
-                    browser.ignoreSynchronization=true;
-                    browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ tableParams.schema_name +":" + tableParams.table_name + "/" + keys.join("&"));
+                    chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ tableParams.schema_name +":" + tableParams.table_name + "/" + keys.join("&"));
 
                     chaisePage.waitForElement(element(by.id("submit-record-button")));
                 });
