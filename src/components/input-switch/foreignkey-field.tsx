@@ -202,7 +202,12 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
               />
             </div>
             {!props.disableInput && <div className='chaise-input-group-append'>
-              <button className='chaise-btn chaise-btn-primary modal-popup-btn' role='button' type='button'>
+              <button 
+                id={`form-${usedFormNumber}-${makeSafeIdAttr(props.columnModel.column.displayname.value)}-button`}
+                className='chaise-btn chaise-btn-primary modal-popup-btn' 
+                role='button' 
+                type='button'
+              >
                 <span className='chaise-btn-icon fa-solid fa-chevron-down' />
               </button>
             </div>}

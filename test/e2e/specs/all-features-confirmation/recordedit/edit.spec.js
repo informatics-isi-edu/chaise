@@ -56,7 +56,7 @@ var testParams = {
             {
                 "title": "new title 1", "website": "https://example1.com", "category": {index: 1, value: "Ranch"},
                 "rating": "1", "summary": "This is the summary of this column 1.", "description": "## Description 1", "json_col": JSON.stringify({"items": {"qty": 6,"product": "apple"},"customer": "Nitish Sahu"},undefined,2),
-                "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "2017-01-01", "luxurious": false,
+                "no_of_rooms": "1", "opened_on": moment("2017-01-01 01:01:01", "YYYY-MM-DD hh:mm:ss"), "date_col": "01-01-2017", "luxurious": false,
                 "text_array": "[\"v1\", \"v2\"]", "boolean_array": "[true]", "int4_array": "[1, 2]", "float4_array": "[1, 2.2]",
                 "date_array": "[\"2001-01-01\", \"2002-02-02\"]", "timestamp_array": "[null, \"2001-01-01T01:01:01\"]",
                 "timestamptz_array": "[null, \"2001-01-01T01:01:01-08:00\"]",
@@ -124,7 +124,7 @@ describe('Edit existing record,', function() {
 
     for (var i=0; i< testParams.tables.length; i++) {
 
-        (function(tableParams, index) {
+        (function(tableParams) {
 
             if (!process.env.CI && tableParams.files.length > 0) {
                 beforeAll(function() {
@@ -136,8 +136,6 @@ describe('Edit existing record,', function() {
 
             describe("For table " + tableParams.table_name + ",", function() {
 
-                var record;
-
                 beforeAll(function () {
 
                     var keys = [];
@@ -145,23 +143,12 @@ describe('Edit existing record,', function() {
                     browser.ignoreSynchronization=true;
                     browser.get(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/"+ tableParams.schema_name +":" + tableParams.table_name + "/" + keys.join("&"));
 
-                    chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
-                        return chaisePage.recordEditPage.getViewModelRows();
-                    }).then(function(records) {
-                        browser.params.record = record = records[0];
-                        tableParams.columns.forEach(function(c) {
-                            if (record[c.name]) {
-                                if (c.type !== "date" && c.type !== "timestamptz") {
-                                    c._value =  record[c.name] + "";
-                                }
-                            }
-                        });
-                    });
+                    chaisePage.waitForElement(element(by.id("submit-record-button")));
                 });
 
 
                 describe("Presentation and validation,", function() {
-                    var params = recordEditHelpers.testPresentationAndBasicValidation(tableParams, true);
+                    recordEditHelpers.testPresentationAndBasicValidation(tableParams, true);
                 });
 
                 describe("Submitting an existing record,", function() {
@@ -178,6 +165,6 @@ describe('Edit existing record,', function() {
 
             });
 
-        })(testParams.tables[i], i);
+        })(testParams.tables[i]);
     }
 });

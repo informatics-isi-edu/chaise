@@ -65,8 +65,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
 
-        it("should not allow to add new rows/columns", function() {
-            expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeFalsy("Add x rows is visible in edit mode");
+        it("should show reset button", function() {
+            expect(chaisePage.recordEditPage.getRecordeditResetButton().isDisplayed()).toBeTruthy("Rest recordedit forms is not visible in edit mode");
         });
 
     } else {
@@ -261,8 +261,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 it("should click add record button", function(done) {
                     chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function(button) {
                         browser.wait(function() {
-                            return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-                                return (ct == recordIndex + 1);
+                            return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
+                                return (ct == recordIndex);
                             });
                         }, browser.params.defaultTimeout);
                         done();
@@ -296,7 +296,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it ("should show textarea input with correct value.", function () {
                         arrayCols.forEach(function(c) {
-                            const arrayTxtArea = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            const arrayTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             expect(arrayTxtArea.isDisplayed()).toBeTruthy(colError(c.name, "element not visible."));
                             arrayTxtArea.column = c;
 
@@ -465,7 +465,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("longText fields, ", function () {
                     it("should show textarea input for longtext datatype and then set the value.", function() {
                         longTextCols.forEach(function(c) {
-                            const txtArea = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            const txtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             expect(txtArea.isDisplayed()).toBeTruthy();
                             longTextDataTypeFields.push(txtArea);
 
@@ -536,7 +536,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should show textarea input for JSON datatype and then set the value", function() {
                         jsonCols.forEach(function(c) {
-                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             expect(jsonTxtArea.isDisplayed()).toBeTruthy();
                             jsonTxtArea.column = c;
 
@@ -551,7 +551,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should only allow valid JSON values", function(){
                         jsonCols.forEach(function(c) {
-                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             for (i = 0; i < JSONTestParams.length; i++) {
                                 chaisePage.recordEditPage.clearInput(jsonTxtArea);
                                 (function(input){
@@ -571,7 +571,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it('should NOT allow invalid JSON values', () => {
                         jsonCols.forEach((c) => {
-                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             for (i = 0; i < invalidJSONTextParams.length; i++) {
                                 chaisePage.recordEditPage.clearInput(jsonTxtArea);
                                 ((input) => {
@@ -587,7 +587,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("set the correct value.", function () {
                         jsonCols.forEach(function(c) {
-                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             jsonTxtArea.clear();
                             var input = getRecordInput(c.name, "");
                             c._value = input;
@@ -644,7 +644,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it('should have the correct value.', function () {
                         markdownCols.forEach(function(c) {
-                            var inp = chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex+1);
+                            var inp = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             if (inp.isPresent()) {
                                 inp.column = c;
 
@@ -664,7 +664,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it('should render correct markdown with inline preview and full preview button.', function() {
                         //Both preview is being tested.
                         markdownCols.forEach(function(descCol) {
-                            var markdownField = chaisePage.recordEditPage.getTextAreaForAcolumn(descCol.name, recordIndex+1);
+                            var markdownField = chaisePage.recordEditPage.getTextAreaForAColumn(descCol.name, recordIndex+1);
                             // lgt and markdown have these input controls, select all draws an extra for each
                             // we want the 3rd one (aka index 2 of 0-3 within that record/form column)
 
@@ -826,30 +826,28 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     if (isEditMode) {
                         it("clicking the 'x' should remove the value in the foreign key field.", function () {
-                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(foreignKeyCols[0].title, recordIndex+1);
-                                //the first foreignkey input for editing should be pre-filled
-                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-                                chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
-                                    return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
-                                }).then(function() {
-                                    // value is empty string after removing it
-                                    expect(foreignKeyInput.getAttribute("value")).toBe('');
-                                });
+                            var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(foreignKeyCols[0].title, recordIndex+1);
+                            // the first foreignkey input for editing should be pre-filled
+                            expect(foreignKeyInput.getText()).toBeDefined();
+                            foreignKeyInput.element(by.className('remove-input-btn')).click().then(() => {
+                                // value is empty string after removing it
+                                expect(foreignKeyInput.getText()).toBe('Select a value');
+                            });
                         });
 
-                        it("clicking 'x' in the model should close it without returning a value.", function () {
+                        it("clicking 'x' in the modal should close it without returning a value.", function () {
                             var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
                             EC = protractor.ExpectedConditions;
 
-                            chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                            chaisePage.recordEditPage.getModalPopupBtns().then(function(popupBtns) {
                                 return chaisePage.clickButton(popupBtns[0]);
                             }).then(function() {
                                 // wait for the modal to open
                                 browser.wait(EC.visibilityOf(modalClose), browser.params.defaultTimeout);
                                 return modalClose.click();
                             }).then(function() {
-                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(foreignKeyCols[0].title, recordIndex+1);
-                                expect(foreignKeyInput.getAttribute("value")).toBe('');
+                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(foreignKeyCols[0].title, recordIndex+1);
+                                expect(foreignKeyInput.getText()).toBe('Select a value');
                             });
                         });
                     }
@@ -1061,7 +1059,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     return timeInput.getAttribute('value');
                                 }).then(function(timeVal) {
                                     // Check time input value is within an interval
-                                    expect(timeVal).toEqual(value.format("hh:mm:ssA"), colError(column.name, "column time is not as expected."));
+                                    let momentTime = moment(timeVal, "hh:mm:ss").format("hh:mm:ssA")
+                                    expect(momentTime).toEqual(value.format("hh:mm:ssA"), colError(column.name, "column time is not as expected."));
                                 }).catch(function(error) {
                                     console.log(error);
                                 });
@@ -1651,7 +1650,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
             return chaisePage.recordEditPage.getAlertError();
         }).then(function(err) {
             if (err) {
-                expect("Page has errors").toBe("No errors", "expected pge to have no errors");
+                expect("Page has errors").toBe("No errors", "expected page to have no errors");
                 hasErrors = true;
             } else {
                 expect(true).toBe(true);

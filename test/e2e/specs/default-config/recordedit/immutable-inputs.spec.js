@@ -152,13 +152,13 @@ describe('Record Add with defaults', function() {
 
         it("should prefill simple input fields that are not disabled with their default value.", function() {
             textInput = chaisePage.recordEditPage.getInputForAColumn('text', 1);
-            markdownInput = chaisePage.recordEditPage.getTextAreaForAcolumn('markdown', 1);
+            markdownInput = chaisePage.recordEditPage.getTextAreaForAColumn('markdown', 1);
             intInput = chaisePage.recordEditPage.getInputForAColumn('int', 1);
             floatInput = chaisePage.recordEditPage.getInputForAColumn('float', 1);
             booleanTrueInput = chaisePage.recordEditPage.getDropdownElementByName('boolean_true', 1);
             booleanFalseInput = chaisePage.recordEditPage.getDropdownElementByName('boolean_false', 1);
             dateInput = chaisePage.recordEditPage.getInputForAColumn('date', 1);
-            jsonInput = chaisePage.recordEditPage.getTextAreaForAcolumn('json', 1);
+            jsonInput = chaisePage.recordEditPage.getTextAreaForAColumn('json', 1);
             colorRGBHexInput = chaisePage.recordEditPage.getColorInputForAColumn('color_rgb_hex', 1);
 
             expect(textInput.getAttribute("value")).toBe(values.text_value, "Text input default is incorrect");
@@ -174,12 +174,12 @@ describe('Record Add with defaults', function() {
 
         it("should prefill simple input fields that are disabled with their default value.", function() {
             textDisabledInput = chaisePage.recordEditPage.getInputForAColumn('text_disabled', 1);
-            markdownDisabledInput = chaisePage.recordEditPage.getTextAreaForAcolumn('markdown_disabled', 1);
+            markdownDisabledInput = chaisePage.recordEditPage.getTextAreaForAColumn('markdown_disabled', 1);
             intDisabledInput = chaisePage.recordEditPage.getInputForAColumn('int_disabled', 1);
             floatDisabledInput = chaisePage.recordEditPage.getInputForAColumn('float_disabled', 1);
             booleanDisabledInput = chaisePage.recordEditPage.getDropdownElementByName('boolean_disabled', 1);
             dateDisabledInput = chaisePage.recordEditPage.getInputForAColumn('date_disabled', 1);
-            jsonInputDisabled= chaisePage.recordEditPage.getTextAreaForAcolumn('json_disabled', 1);
+            jsonInputDisabled= chaisePage.recordEditPage.getTextAreaForAColumn('json_disabled', 1);
             colorRGBHexDisabledInput = chaisePage.recordEditPage.getColorInputForAColumn('color_rgb_hex_disabled', 1);
 
             expect(textDisabledInput.getAttribute("value")).toBe(values.text_disabled_value, "Text disabled input default is incorrect");
@@ -195,7 +195,7 @@ describe('Record Add with defaults', function() {
 
         //JOSN columns
         it("should initialize json columns properly if they are disabled without a default.", function() {
-            jsonDisabledNoDefaultInput = chaisePage.recordEditPage.getTextAreaForAcolumn('json_disabled_no_default', 1);
+            jsonDisabledNoDefaultInput = chaisePage.recordEditPage.getTextAreaForAColumn('json_disabled_no_default', 1);
 
             expect(jsonDisabledNoDefaultInput.getAttribute("value")).toBe("", "The disabled json value is incorrect");
             expect(jsonDisabledNoDefaultInput.getAttribute("placeholder")).toBe(values.json_disabled_no_default_value, "The disabled json placeholder is incorrect");
@@ -370,7 +370,7 @@ describe("Record Edit with immutable columns", function() {
                         input = chaisePage.recordEditPage.getForeignKeyInputDisplay(columnName, 1);
                         expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
                     } else if (columnObj.type === 'textarea') {
-                        input = chaisePage.recordEditPage.getTextAreaForAcolumn(columnName, 1);
+                        input = chaisePage.recordEditPage.getTextAreaForAColumn(columnName, 1);
                         expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
                     } else if (columnObj.type === 'timestamp') {
                         input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);

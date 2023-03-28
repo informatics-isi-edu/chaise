@@ -75,9 +75,9 @@ describe('Record Add', function() {
             uploadInput2 = chaisePage.recordEditPage.getTextFileInputForAColumn(testParams.uri_col_name, 2),
             uploadInput3 = chaisePage.recordEditPage.getTextFileInputForAColumn(testParams.uri_col_name, 3);
 
-        var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 1),
-            intArrInput2 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 2),
-            intArrInput3 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 3);
+        var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAColumn(testParams.int_array_col_name, 1),
+            intArrInput2 = chaisePage.recordEditPage.getTextAreaForAColumn(testParams.int_array_col_name, 2),
+            intArrInput3 = chaisePage.recordEditPage.getTextAreaForAColumn(testParams.int_array_col_name, 3);
 
         var index;
 
@@ -323,9 +323,9 @@ describe('Record Add', function() {
                 intInput2 = chaisePage.recordEditPage.getInputForAColumn(intDisplayName, 2),
                 intInput3 = chaisePage.recordEditPage.getInputForAColumn(intDisplayName, 3);
 
-            var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 1),
-                intArrInput2 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 2),
-                intArrInput3 = chaisePage.recordEditPage.getTextAreaForAcolumn(testParams.int_array_col_name, 3);
+            var intArrInput1 = chaisePage.recordEditPage.getTextAreaForAColumn(testParams.int_array_col_name, 1),
+                intArrInput2 = chaisePage.recordEditPage.getTextAreaForAColumn(testParams.int_array_col_name, 2),
+                intArrInput3 = chaisePage.recordEditPage.getTextAreaForAColumn(testParams.int_array_col_name, 3);
 
             //change value in form 1, test others unchanged
             it("should change text input in form 1.", function() {
@@ -398,7 +398,6 @@ describe('Record Add', function() {
             });
 
             it("should change fk value in form 1.", function () {
-                // chaisePage.recordEditPage.getForeignKeyInputButton(testParams.fk_col_name, 0).click().then(function () {
                 chaisePage.recordEditPage.getModalPopupBtns().then((btns) => {
                     return btns[0].click()
                 }).then(() => {

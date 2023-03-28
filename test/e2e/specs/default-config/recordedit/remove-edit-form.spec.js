@@ -32,7 +32,7 @@ describe('Edit a record,', function() {
 
         it("remove 2 forms and edit some of the data", function(done) {
             // verify number of rows is what we expect
-            chaisePage.recordEditPage.getForms().count().then(function(ct) {
+            chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                 expect(ct).toBe(testParams.original_rows, "incorrect number of rows to edit");
 
                 return chaisePage.recordEditPage.getAllDeleteRowButtons();
@@ -44,7 +44,7 @@ describe('Edit a record,', function() {
             }).then(function (button) {
                 return chaisePage.clickButton(button);
             }).then(function () {
-                return chaisePage.recordEditPage.getForms().count();
+                return chaisePage.recordEditPage.getRecordeditForms().count();
             }).then(function (ct) {
                 expect(ct).toBe(testParams.original_rows - 1, "number of rows is incorrect after removing 1");
 
@@ -54,12 +54,12 @@ describe('Edit a record,', function() {
                 return chaisePage.clickButton(button);
             }).then(function () {
                 // verify number of forms is expected
-                return chaisePage.recordEditPage.getForms().count();
+                return chaisePage.recordEditPage.getRecordeditForms().count();
             }).then(function(ct) {
                 expect(ct).toBe(testParams.rows_after, "incorrect number of rows to edit after removing 2");
 
                 //change a value in 1 form
-                var textInput = chaisePage.recordEditPage.getInputById(0, "text");
+                var textInput = chaisePage.recordEditPage.getInputForAColumn('text', 1);
                 chaisePage.recordEditPage.clearInput(textInput);
                 textInput.sendKeys("changed text");
 

@@ -79,7 +79,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
  * input-field checks for falsy values, but the check here is different
  */
   const hasValue = (v: any) => {
-    return v.url && v.url !== '';
+    return v?.url && v.url !== '';
   };
 
   const onClear = (e: MouseEvent) => {
@@ -111,7 +111,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
         className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
         {... (!props.disableInput && { onClick: openFilePicker })}
       >
-        {isStringAndNotEmpty(fieldValue.filename) ?
+        {isStringAndNotEmpty(fieldValue?.filename) ?
           <DisplayValue value={{ value: fieldValue.filename, isHTML: true }} /> :
           <span className='chaise-input-placeholder'>{props.placeholder}</span>
         }

@@ -113,14 +113,14 @@ var testParams = {
             {name: "float4_col_gen", value: "4.6123", displayType: "disabled"},
             {name: "float8_col_gen", value: "234523523.023045", displayType: "disabled"},
             {name: "text_col_gen", value: "sample", displayType: "disabled"},
-            {name: "longtext_col_gen", value: "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja", displayType: "disabled"},
-            {name: "markdown_col_gen", value: "<strong>Sample</strong>", displayType: "disabled"},
-            {name: "bool_true_col_gen", value: "true", displayType: "disabled"},
-            {name: "bool_false_col_gen", value: "false", displayType: "disabled"},
-            {name: "timestamp_col_gen", value: "2016-01-18T13:00:00", displayType: "disabled"},
-            {name: "timestamptz_col_gen", value: "2016-01-18T00:00:00-08:00", displayType: "disabled"},
+            {name: "longtext_col_gen", value: "asjdf;laksjdf;laj ;lkajsd;f lkajsdf;lakjs f;lakjs df;lasjd f;ladsjf;alskdjfa ;lskdjf a;lsdkjf a;lskdfjal;sdkfj as;ldfkj as;dlf kjasl;fkaj;lfkjasl;fjas;ldfkjals;dfkjas;dlkfja;sldkfjasl;dkfjas;dlfkjasl;dfkja; lsdjfk a;lskdjf a;lsdfj as;ldfja;sldkfja;lskjdfa;lskdjfa;lsdkfja;sldkfjas;ldfkjas;dlfkjas;lfkja;sldkjf a;lsjf ;laskj fa;slk jfa;sld fjas;l js;lfkajs;lfkasjf;alsja;lk ;l kja", displayType: "textarea"},
+            {name: "markdown_col_gen", value: "<strong>Sample</strong>", displayType: "textarea"},
+            {name: "bool_true_col_gen", value: "true", displayType: "boolean"},
+            {name: "bool_false_col_gen", value: "false", displayType: "boolean"},
+            {name: "timestamp_col_gen", value: { date: "2016-01-18", time: "13:00:00" }, displayType: "timestamp"},
+            {name: "timestamptz_col_gen", value: { date: "2016-01-18", time: "00:00:00" }, displayType: "timestamp"},
             {name: "date_col_gen", value: "2016-08-15", displayType: "disabled"},
-            {name: "fk_col_gen", value: "Abraham Lincoln", displayType: "disabled"},
+            {name: "fk_col_gen", value: "Abraham Lincoln", displayType: "fk"},
             {name: "asset_col_gen", value: "test", displayType: "upload"}
         ]
     }
@@ -144,17 +144,46 @@ describe('When editing a record', function() {
     // Tests that check the values for regular, non-disabled input fields are in 01-recordedit.edit.spec.js
     it('should display the correct values in disabled input fields', function(done) {
         testParams.table_w_generated_columns.row.forEach(function checkInput(col) {
+            let input, inputControl;
             // Upload input is disabled, but not the same displayType (input field) as other disabled inputs
-            if (col.displayType == "upload") {
-                chaisePage.recordEditPage.getInputForAColumn("txt"+col.name, 0).then(function (input) {
+            switch (col.displayType) {
+                case 'upload':
+                    inputControl = recordEditPage.getInputControlForAColumn(col.name, 1);
+                    input = recordEditPage.getTextFileInputForAColumn(col.name, 1);
+                    expect(inputControl.getAttribute('class')).toContain('input-disabled', "col " + col.name + " was not disabled.");
+                    expect(input.getText()).toBe(col.value, "col " + col.name + " value missmatch.");
+                    break;
+                case 'textarea':
+                    input = recordEditPage.getTextAreaForAColumn(col.name, 1);
                     expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
                     expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
-                });
-            } else {
-                var input = recordEditPage.getInputById(0, col.name);
-                expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
-                expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
+                    break;
+                case 'boolean':
+                    inputControl = recordEditPage.getInputControlForAColumn(col.name, 1);
+                    input = recordEditPage.getDropdownElementByName(col.name, 1);
+                    expect(inputControl.getAttribute('class')).toContain('input-disabled', "col " + col.name + " was not disabled.");
+                    expect(input.getText()).toBe(col.value, "col " + col.name + " value missmatch.");
+                    break;
+                case 'timestamp':
+                    input = recordEditPage.getTimestampInputsForAColumn(col.name, 1);
+                    expect(input.date.isEnabled()).toBeFalsy("col " + col.name + " date was not disabled.");
+                    expect(input.time.isEnabled()).toBeFalsy("col " + col.name + " time was not disabled.");
+
+                    expect(input.date.getAttribute('value')).toBe(col.value.date, "col " + col.name + " date value missmatch.");
+                    expect(input.time.getAttribute('value')).toBe(col.value.time, "col " + col.name + " time value missmatch.");
+                    break;
+                case 'fk':
+                    input = recordEditPage.getForeignKeyInputDisplay(col.name, 1);
+                    expect(input.getAttribute('class')).toContain('input-disabled', "col " + col.name + " was not disabled.");
+                    expect(input.getText()).toBe(col.value, "col " + col.name + " value missmatch.");
+                    break;
+                default:
+                    input = recordEditPage.getInputForAColumn(col.name, 1);
+                    expect(input.isEnabled()).toBeFalsy("col " + col.name + " was not disabled.");
+                    expect(input.getAttribute('value')).toBe(col.value, "col " + col.name + " value missmatch.");
+                    break;
             }
+
             done();
         });
     });
@@ -280,6 +309,7 @@ describe('When editing a record', function() {
 
 
             // Submit the form
+            // TODO: disabled timestamp inputs (RCT/RMT) are not showing the values properly on load
             recordEditPage.submitForm().then(function() {
 
                 var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/';

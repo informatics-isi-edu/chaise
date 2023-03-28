@@ -35,7 +35,7 @@ describe('Edit a record,', function() {
                 // make sure recordedit is loaded
                 chaisePage.waitForElement(element(by.id("submit-record-button"))).then(function() {
 
-                    return chaisePage.clickButton(chaisePage.recordEditPage.getForeignKeyInputButton("Person", 0));
+                    return chaisePage.clickButton(chaisePage.recordEditPage.getForeignKeyInputButton('Person', 1));
                 }).then(function() {
                     // wait for the modal to open
                     browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
@@ -62,7 +62,7 @@ describe('Edit a record,', function() {
                 }).then(function() {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
 
-                    var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 0);
+                    var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay("Person", 1);
                     expect(foreignKeyInput.getText()).toBe(testParams.column_values["0YGNuO_bvxoczJ6ms2k0tQ"], "Foreign Key input display value is incorrect");
                     done();
                 }).catch(function (err) {
@@ -73,24 +73,26 @@ describe('Edit a record,', function() {
 
             it("should show 'Luxurious' and 'Not Luxurious' as the options in the boolean dropdown menu", function (done) {
                 var trueOption = testParams.booleanOptions[0],
-                    dropdown;
+                    dropdown = chaisePage.recordEditPage.getDropdownElementByName('luxurious', 1);
 
-                chaisePage.recordEditPage.getDropdowns().then(function(el) {
-                    dropdown = el[0];
-
-                    return chaisePage.recordEditPage.getRelativeDropdownOptionsATag(dropdown);
-                }).then(function (options) {
+                dropdown.click().then(() => {
+                    const optionsContainer = chaisePage.recordEditPage.getOpenDropdownOptionsContainer();
+                    return chaisePage.waitForElement(optionsContainer);
+                }).then(() => {
+                    return chaisePage.recordEditPage.getDropdownOptions();
+                }).then((options) => {
                     options.forEach(function (opt, idx) {
                         expect(opt.getAttribute("innerHTML")).toBe(testParams.booleanOptions[idx], "Boolean option text with idx: " + idx + " is incorrect");
                     });
 
-                    browser.wait(EC.elementToBeClickable(dropdown), browser.params.defaultTimeout);
+                    return dropdown.click()
+                }).then(() => {
                     return chaisePage.recordEditPage.selectDropdownValue(dropdown, trueOption);
-                }).then(function(option) {
+                }).then(() => {
                     expect(chaisePage.recordEditPage.getDropdownText(dropdown).getText()).toBe(trueOption, "The truthy option was not selected");
 
                     done();
-                }).catch(function (error) {
+                }).catch((error) => {
                     console.dir(error);
                     done.fail();
                 });

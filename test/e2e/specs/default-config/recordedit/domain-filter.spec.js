@@ -11,12 +11,10 @@ describe("Domain filter pattern support,", function () {
         var fk, modal, rows, filters;
         var fkModal = chaisePage.searchPopup.getForeignKeyPopup();
 
-        fk = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, 0);
+        fk = chaisePage.recordEditPage.getForeignKeyInputDisplay(colName, 1);
         browser.wait(EC.elementToBeClickable(fk));
         fk.click().then(function () {
             chaisePage.waitForElement(fkModal)
-            // TODO allowAnimations only works for angularjs and should be removed after migration
-            fkModal.allowAnimations(false);
 
             modal = chaisePage.recordEditPage.getModalTitle();
             return browser.wait(EC.visibilityOf(modal), browser.params.defaultTimeout);
@@ -33,8 +31,7 @@ describe("Domain filter pattern support,", function () {
             });
         }).then(function () {
             //make sure the filter chiclet is displayed or not
-            // TODO: change when recordedit migradted to react
-            filters = chaisePage.recordsetPage.getAngularFacetFilters();
+            filters = chaisePage.recordsetPage.getFacetFilters();
             if (filterValue) {
                 expect(filters.isPresent()).toBe(true, "filter was not present");
                 expect(filters.count()).toBe(1, "more than one filter was present.");
@@ -94,7 +91,7 @@ describe("Domain filter pattern support,", function () {
                     var textColName = "position_text_col",
                         textInputVal = "relative";
 
-                    var textInput = chaisePage.recordEditPage.getInputById(0, textColName);
+                    var textInput = chaisePage.recordEditPage.getInputForAColumn(textColName, 1);
                     textInput.sendKeys(textInputVal);
 
                     testModalCount(fkColName, 1, done, true);
@@ -116,7 +113,7 @@ describe("Domain filter pattern support,", function () {
                 it("should limit the set.", function (done) {
                     var constraintColName = "fk1";
                     var currFk;
-                    currFk = chaisePage.recordEditPage.getForeignKeyInputDisplay(constraintColName, 0);
+                    currFk = chaisePage.recordEditPage.getForeignKeyInputDisplay(constraintColName, 1);
                     browser.wait(EC.elementToBeClickable(currFk));
                     currFk.click().then(function () {
                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
@@ -129,7 +126,7 @@ describe("Domain filter pattern support,", function () {
 
                         return selectButtons[0].click();
                     }).then(function () {
-                        currFk = chaisePage.recordEditPage.getForeignKeyInputButton(fkColName, 0);
+                        currFk = chaisePage.recordEditPage.getForeignKeyInputButton(fkColName, 1);
                         browser.wait(EC.elementToBeClickable(currFk));
 
                         return currFk.click();
@@ -177,6 +174,7 @@ describe("Domain filter pattern support,", function () {
 
                 // open col_w_fkeys_default, select something.
                 it("should limit the set before setting the value if other foreignkey has default value.", function (done) {
+                    // TODO: expected count is not correct. Data is not being filtered
                     testModalCount(colWFkeysDefault, 2, done, true, "other fk values: 1, fixed");
                 });
 
@@ -193,7 +191,7 @@ describe("Domain filter pattern support,", function () {
                         // clears the col_w_fkeys_default input (should be the last visible "x")
                         return chaisePage.clickButton(btns[btns.length - 1]);
                     }).then(function () {
-                        return chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 0).click();
+                        return chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 1).click();
                     }).then(function () {
                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
                         return modalTitle.getText();

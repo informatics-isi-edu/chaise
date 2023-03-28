@@ -69,13 +69,19 @@ var recordEditPage = function() {
         return browser.executeScript("return $(arguments[0]).parents('tr').find('input.form-control')[0];", el);
     };
 
+    this.getInputSwitchContainerForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.input-switch-container-' + inputName));
+    }
+
     this.getInputForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value input[name="' + inputName + '"]'));
     };
 
-    this.getTextAreaForAcolumn = function(name, index) {
+    this.getTextAreaForAColumn = function(name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.css('.entity-value textarea[name="' + inputName + '"]'));
@@ -84,7 +90,8 @@ var recordEditPage = function() {
     this.getColorInputBackground = function (name, index) {
         index = index || 1;
         const inputName = index + '-' + name;
-        var script = "var color = 'document.querySelector('.input-switch-container-" + inputName + "').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+        // var script = "var color = document.querySelector('.input-switch-container-" + inputName + "').siblings('.sp-colorize-container').find('.sp-colorize').css('background-color');";
+        var script = "var color = document.querySelector('.input-switch-container-" + inputName + " .chaise-color-picker-preview').style.backgroundColor;";
         script += "var ctx = document.createElement('canvas').getContext('2d');ctx.fillStyle = color;";
         script += "return ctx.fillStyle;";
         return browser.executeScript(script);
@@ -338,7 +345,6 @@ var recordEditPage = function() {
         return inputObj;
     };
 
-    // NOTE: currently only works for Date
     this.getRemoveButton = function (name, index, removeClass) {
         const inputName = index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.css("." + removeClass));
@@ -365,6 +371,12 @@ var recordEditPage = function() {
         index = index || 1;
         const inputName = index + '-' + name;
         return element(by.className('input-switch-container-' + inputName)).element(by.tagName('input'));
+    }
+
+    this.getInputControlForAColumn = (name, index) => {
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.className('input-switch-container-' + inputName)).element(by.css('.chaise-input-control'));
     }
 
     this.getTextFileInputForAColumn = (name, index) => {
@@ -513,6 +525,10 @@ var recordEditPage = function() {
 
     this.getMultiFormInputSubmitButton = function () {
         return element(by.id("copy-rows-submit"));
+    };
+
+    this.getRecordeditResetButton = function () {
+        return element(by.id('recordedit-reset'));
     };
 
     this.getInputById = function (index, displayName) {
@@ -987,13 +1003,14 @@ var recordsetPage = function() {
     };
 
     this.getInputForAColumn = function(name, index) {
-        index = index || 0;
-        return browser.executeScript("return $('td.entity-value input[name=\"" + name + "\"]')[" + index + "];");
+        index = index || 1;
+        const inputName = index + '-' + name;
+        return element(by.css('.entity-value input[name="' + inputName + '"]'));
     };
 
-    this.getModalPopupBtn = function(index) {
-        index = index || 0;
-        return browser.executeScript("return $('.modal-popup-btn')[" + index + "];");
+    this.getModalPopupBtn = function(columnDisplayName, index) {
+        columnDisplayName = makeSafeIdAttr(columnDisplayName);
+        return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
     };
 
     this.getActionHeaderSpan = function () {

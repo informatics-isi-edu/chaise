@@ -53,14 +53,16 @@ describe("For error handling strategies on submission,", function() {
         });
 
         it("a conflict error should show an alert with a link to the conflicting record.", function(done) {
-            chaisePage.recordEditPage.getInputForAColumn(testParams.conflict_column, 0).then(function(idInput) {
-                idInput.sendKeys(testParams.conflict_key);
-                expect(idInput.getAttribute('value')).toBe(testParams.conflict_key, "input does not show the correct value");
+            const idInput = chaisePage.recordEditPage.getInputForAColumn(testParams.conflict_column, 1);
 
-                return chaisePage.recordEditPage.submitForm();
-            }).then(function () {
+            idInput.sendKeys(testParams.conflict_key);
+            expect(idInput.getAttribute('value')).toBe(testParams.conflict_key, "input does not show the correct value");
+
+            chaisePage.recordEditPage.submitForm().then(function () {
                 return browser.wait(function() { return chaisePage.recordEditPage.getAlertError(); }, browser.params.defaultTimeout);
             }).then(function(alert) {
+                // TODO: conflict message is missing duplicate id text:
+                //    - 'Click here to see the conflicting record that already exists.'
                 expect(alert.getText()).toContain(testParams.conflict_message, "alert message is incorrect");
 
                 var duplicate_uri = uri.replace('recordedit', 'record') + '/' + testParams.conflict_column + '=' + testParams.conflict_key;

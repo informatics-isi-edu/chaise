@@ -51,7 +51,7 @@ describe('Bulk delete in recordedit,', function () {
   it('clicking on "ok" button should redirect users to recordset page', (done) => {
     const summaryCloseBtn = chaisePage.errorModal.getOKButton();
     browser.wait(EC.elementToBeClickable(summaryCloseBtn), browser.params.defaultTimeout).then(() => {
-      return chaisePage.clickButton(summaryCloseBtn);
+      return summaryCloseBtn.click();
     }).then(() => {
       // wait for url change
       browser.wait(function () {
