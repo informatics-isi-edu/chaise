@@ -152,7 +152,8 @@ export const APP_NAMES = {
 
 export const CLASS_NAMES = {
   HIDDEN: 'forced-hidden',
-  ZOOMED_IN: 'zoomed-in'
+  IMAGE_PREVIEW: 'chaise-image-preview',
+  IMAGE_PREVIEW_ZOOMED_IN: 'zoomed-in'
 };
 
 export const ID_NAMES = {

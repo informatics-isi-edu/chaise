@@ -92,6 +92,8 @@
         width: fit-content;
         width: -moz-fit-content;
         width: -webkit-fit-content;
+        // the rule below added for chaise-image-preview functionality
+        max-width: 100%;
 
         &.highlighted-row {
           background-color: map-get(variables.$color-map, 'recordedit-highlighted-row');

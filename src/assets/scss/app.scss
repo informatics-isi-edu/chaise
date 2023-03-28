@@ -661,7 +661,7 @@ html {
       font-weight: 400;
       position: relative;
       vertical-align: middle;
-      min-height: $chaise-checkbox-height;
+      min-height: variables.$chaise-checkbox-height;
       margin-bottom: 0;
     }
     &.no-left-padding label {
@@ -672,8 +672,8 @@ html {
       position: absolute;
       z-index: map-get(variables.$z-index-map, 'checkbox-input');
       cursor: pointer;
-      width: $chaise-checkbox-width;
-      height: $chaise-checkbox-height;
+      width: variables.$chaise-checkbox-width;
+      height: variables.$chaise-checkbox-height;
       top: 0;
       margin-top: 2px;
 
@@ -698,8 +698,8 @@ html {
         content: "";
         display: inline-block;
         position: absolute;
-        width: $chaise-checkbox-width;
-        height: $chaise-checkbox-height;
+        width: variables.$chaise-checkbox-width;
+        height: variables.$chaise-checkbox-height;
         left: 0;
         top: 0;
         border: 1px solid map-get(variables.$color-map, 'primary');
@@ -900,7 +900,7 @@ html {
         height: 44px;
         text-transform: inherit;
         padding: 8px 8px 8px 8px;
-        color: map-get(variables.$color-map, 'white');;
+        color: map-get(variables.$color-map, 'white');
         border: none;
         border-radius: inherit;
         background: map-get(variables.$color-map, 'section-background');
@@ -1029,7 +1029,7 @@ html {
 
     position: relative;
     display: block;
-    border: 1px solid $border-color;
+    border: 1px solid map-get(variables.$color-map, 'border');
     text-align: center;
 
     /**

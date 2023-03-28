@@ -16,6 +16,7 @@ import { FileObject, RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/mode
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { humanFileSize } from '@isrd-isi-edu/chaise/src/utils/input-utils';
+import { CLASS_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 type FileFieldProps = InputFieldProps & {
   /**
@@ -108,7 +109,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   const renderInput = (fieldValue: any, showClear: any, clearInput: any) => {
     return (
       <div
-        className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
+        className={`chaise-input-control has-feedback ellipsis ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
         {... (!props.disableInput && { onClick: openFilePicker })}
       >
         {isStringAndNotEmpty(fieldValue?.filename) ?
@@ -133,6 +134,33 @@ const FileField = (props: FileFieldProps): JSX.Element => {
     )
   }
 
+  const renderImagePreview = (fieldValue: any) => {
+    if (!props.columnModel.column.displayImagePreview) return null;
+
+    let imageURL = '';
+    if (fieldValue) {
+      // when users pick a file, we should show it based on the file not the url
+      // as the url will not have the proper value (the file has not been uploaded yet)
+      if (fieldValue.file) {
+        imageURL = URL.createObjectURL(fieldValue.file);
+      }
+      // use the url of the uploaded file if the file is not picked (getting the url from the database)
+      else if (fieldValue.url) {
+        imageURL = fieldValue.url;
+      }
+    }
+
+    if (!imageURL) {
+      return null;
+    }
+
+    return (
+      <div className={CLASS_NAMES.IMAGE_PREVIEW}>
+        <img src={imageURL} />
+      </div>
+    )
+  }
+
   return (
     <InputField {...props} onClear={onClear} checkHasValue={hasValue}>
       {/* onChange is not used as we're implementing our own onChange method */}
@@ -149,6 +177,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
               </div>
             </ChaiseTooltip>}
           </div>
+          {renderImagePreview(field.value)}
           <input
             id={fileElementId}
             className={`${props.inputClasses} chaise-input-hidden`}
