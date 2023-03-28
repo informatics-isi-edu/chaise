@@ -374,11 +374,14 @@ const FacetRangePicker = ({
           // initiailize the min/max values. Float and timestamp values need epsilon values applied to get a more accurate range
           const minMaxRangeOptions = initializeRangeMinMax(response[0], response[1]);
 
-          // if - the max/min are null
+          // if - the max/min are null or empty string (empty string is used for the timestamp)
           //    - bar_plot in annotation is 'false'
           //    - histogram not supported for column type
           // since compState might not have been updated, do the showHistogram() check but with the supplied min/max
-          if (!(facetColumnRef.current.barPlot && minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null)) {
+          const hasValue = minMaxRangeOptions.absMin !== null && minMaxRangeOptions.absMax !== null &&
+            minMaxRangeOptions.absMin !== '' && minMaxRangeOptions.absMax !== '';
+
+          if (!(facetColumnRef.current.barPlot && hasValue)) {
             setCompState({
               ...compState,
               rangeOptions: minMaxRangeOptions

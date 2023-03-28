@@ -1,5 +1,5 @@
-@import "helpers";
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 .chaise-body {
   .recordset-container {
@@ -22,7 +22,7 @@
             max-width: 400px;
           }
 
-          // @include for-predefined-size(sm) {
+          // @include helpers.for-predefined-size(sm) {
           //   .main-search-container {
           //     min-width: 400px;
           //   }
@@ -42,11 +42,11 @@
             margin-bottom: 5px;
 
             .chaise-btn:focus {
-              background-color: $white-color;
+              background-color: map-get(variables.$color-map, 'white');
             }
 
             .chaise-btn.chaise-btn-secondary {
-              border-color: $border-color;
+              border-color: map-get(variables.$color-map, 'border');
               height: 25px;
               min-width: 25px;
               padding: 2px 5px;
@@ -89,12 +89,12 @@
             }
 
             span {
-              color: $black-color;
+              color: map-get(variables.$color-map, 'black');
               cursor: default;
             }
 
             button span {
-              color: $primary-color;
+              color: map-get(variables.$color-map, 'primary');
               cursor: pointer;
             }
           }

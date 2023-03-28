@@ -1,4 +1,5 @@
-@import "variables";
+@use 'variables';
+
 
 .chaise-input-control {
   .input-switch {
@@ -37,7 +38,7 @@
 
 .input-switch-longtext {
   .md-editor {
-    border: 1px solid $border-color;
+    border: 1px solid map-get(variables.$color-map, 'border');
     border-radius: 4px;
 
     .md-header {
@@ -104,7 +105,7 @@
 
 .chaise-firefox .input-switch-date.chaise-input-control.has-feedback,
 .chaise-firefox .input-switch-time.chaise-input-control.has-feedback {
-  padding-right: $input-remove-width;
+  padding-right: variables.$input-remove-width;
 }
 
 .input-switch-color {
@@ -115,7 +116,7 @@
   }
 
   .hex-sign {
-    color: $placeholder-color;
+    color: map-get(variables.$color-map, 'placeholder');
   }
 
   .chaise-color-picker-preview {

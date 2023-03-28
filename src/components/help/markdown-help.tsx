@@ -5,7 +5,7 @@ const MarkdownHelp = (): JSX.Element => {
   return (
     <div className='markdown-help-page'>
       <table className='markdown-reference' id='mainTable'>
-        <thead className='hdrStyle'>
+        <thead className='markdown-reference-header'>
           <tr>
             <th>Raw</th>
             <th>Raw (Alternative)</th>

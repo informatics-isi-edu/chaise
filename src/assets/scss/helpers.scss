@@ -1,3 +1,6 @@
+@use 'sass:map';
+@use 'variables';
+
 @mixin border-radius($radius: $border-radius, $fallback-border-radius: false) {
   @if $fallback-border-radius != false {
     border-radius: $fallback-border-radius;
@@ -35,7 +38,7 @@
 }
 
 @mixin download-btn() {
-  color: $primary-color;
+  color: map-get(variables.$color-map, 'primary');
   white-space: nowrap;
   // touch action
   -ms-touch-action: manipulation;
@@ -72,13 +75,13 @@
 }
 
 @mixin chaise-btn() {
-  @include border-radius($btn-border-radius);
+  @include border-radius(variables.$btn-border-radius);
   cursor: pointer;
   display: inline-block;
-  height: $btn-height;
-  min-width: $btn-height;
-  border: $btn-border-width solid;
-  padding: $btn-padding-y $btn-padding-x;
+  height: variables.$btn-height;
+  min-width: variables.$btn-height;
+  border: variables.$btn-border-width solid;
+  padding: variables.$btn-padding-y variables.$btn-padding-x;
   text-align: center;
   vertical-align: middle;
   user-select: none;
@@ -89,30 +92,30 @@
 }
 
 @mixin chaise-btn-primary() {
-  color: $white-color;
-  background-color: $primary-color;
-  border-color: $black-color;
+  color: map-get(variables.$color-map, 'white');
+  background-color: map-get(variables.$color-map, 'primary');
+  border-color: map-get(variables.$color-map, 'black');
 
   &:focus {
-    background-color: darken($primary-color, 10%);
+    background-color: darken(map-get(variables.$color-map, 'primary'), 10%);
     box-shadow: none;
   }
 }
 
 @mixin chaise-btn-secondary {
-  color: $primary-color;
-  background-color: $white-color;
-  border: 1px solid $primary-color;
+  color: map-get(variables.$color-map, 'primary');
+  background-color: map-get(variables.$color-map, 'white');
+  border: 1px solid map-get(variables.$color-map, 'primary');
 
   &:focus {
-    background-color: darken($white-color, 10%);
+    background-color: darken(map-get(variables.$color-map, 'white'), 10%);
     box-shadow: none;
   }
 }
 
 @mixin chaise-btn-sm {
-  height: $btn-height-sm;
-  min-width: $btn-height-sm;
+  height: variables.$btn-height-sm;
+  min-width: variables.$btn-height-sm;
   font-size: 1rem;
   padding: 2px 5px;
 }

@@ -32,6 +32,10 @@ export type RecordestModalProps = {
    */
   modalClassName?: string,
   /**
+   * The modal's backdrop class name
+   */
+  modalBackdropClassName?: string,
+  /**
    * The displayname used for the title
    */
   displayname?: Displayname,
@@ -76,6 +80,7 @@ export type RecordestModalProps = {
 const RecordsetModal = ({
   recordsetProps,
   modalClassName,
+  modalBackdropClassName,
   displayname,
   comment,
   onSelectedRowsChanged,
@@ -308,6 +313,7 @@ const RecordsetModal = ({
 
   return (
     <Modal
+      backdropClassName={`search-popup-backdrop ${modalBackdropClassName}`}
       className={`search-popup ${modalClassName}`}
       size={modalSize}
       show={true}
@@ -315,8 +321,8 @@ const RecordsetModal = ({
       ref={modalContainer}
     >
       {showSubmitSpinner &&
-        <div className='modal-submit-spinner-container'>
-          <div className='modal-submit-spinner-backdrop'></div>
+        <div className='app-blocking-spinner-container'>
+          <div className='app-blocking-spinner-backdrop'></div>
           <ChaiseSpinner className='modal-submit-spinner' message='Saving the changes...' />
         </div>
       }

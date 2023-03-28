@@ -1,13 +1,13 @@
-@import "helpers";
-@import "variables";
+@use 'sass:map';
+@use 'variables';
 
 .recordset-table {
   overflow-y: hidden;
 }
 
 .chaise-table.table {
-  border-top: 1px solid $table-border-color;
-  border-bottom: 1px solid $table-border-color;
+  border-top: 1px solid map-get(variables.$color-map, 'table-border');
+  border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
   margin: 0;
 
   tbody {
@@ -15,17 +15,17 @@
     vertical-align: middle;
 
     > tr > td.disabled-cell {
-      background-color: #f4f4f4;
+      background-color: map-get(variables.$color-map, 'table-disabled-background');
     }
 
     /* table hover */
     > tr:hover {
       // background-color: #f7f0cf !important;
-      --bs-table-hover-bg: #f7f0cf !important;
+      --bs-table-hover-bg: map-get(variables.$color-map, 'table-highlight-background') !important;
 
       /* match color from row highlight for disabled cells */
       > td.disabled-cell {
-        background-color: #f7f0cf !important;
+        background-color: map-get(variables.$color-map, 'table-highlight-background') !important;
         // --bs-table-hover-bg: #f7f0cf !important;;
       }
 
@@ -36,28 +36,28 @@
 
     /* odd disabled cells need to be darker */
     > tr:nth-child(odd) > td.disabled-cell {
-      background-color: #ebebeb;
+      background-color: map-get(variables.$color-map, 'table-striped-disabled-background');
     }
 
     /* odd row hover for striped table */
     > tr:nth-child(odd):hover {
-      background-color: #efebda !important;
+      background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
 
       /* odd disabled cells need to match odd row hover for striped table above */
       > td.disabled-cell {
-        background-color: #efebda !important;
+        background-color: map-get(variables.$color-map, 'table-striped-highlight-background') !important;
       }
     }
   }
 
   tr {
-    border-left: 1px solid $table-border-color;
+    border-left: 1px solid map-get(variables.$color-map, 'table-border');
     border-bottom: none;
   }
 
   .table-heading {
-    background-color: $table-header-background-color;
-    color: $black-color;
+    background-color: map-get(variables.$color-map, 'table-header-background');
+    color: map-get(variables.$color-map, 'black');
 
     .actions-header {
       width: 100px;
@@ -92,11 +92,11 @@
   }
 
   & > tbody > tr:nth-child(odd) {
-    background: $table-striped-background-color;
+    background: map-get(variables.$color-map, 'table-striped-background');
   }
 
   > thead > tr > th {
-    border-bottom: 1px solid $table-border-color;
+    border-bottom: 1px solid map-get(variables.$color-map, 'table-border');
     white-space: nowrap;
   }
 
@@ -108,7 +108,7 @@
   > tfoot > tr > td {
     border-top: none;
     border-bottom: none;
-    border-right: 1px solid $table-border-color;
+    border-right: 1px solid map-get(variables.$color-map, 'table-border');
     word-wrap: break-word;
   }
 
@@ -119,18 +119,18 @@
 
   th {
     font-weight: 400;
-    border-top: 1px solid $table-border-color;
+    border-top: 1px solid map-get(variables.$color-map, 'table-border');
     position: relative;
 
     &.actions-header {
       white-space: nowrap;
       text-align: center;
-      font-size: $h4-font-size;
+      font-size: variables.$h4-font-size;
       padding: 8px;
     }
 
     .table-column-displayname {
-      font-size: $h4-font-size;
+      font-size: variables.$h4-font-size;
     }
 
     // preserve space for the icon on the right
@@ -141,7 +141,7 @@
       position: absolute;
       bottom: 7px;
       right: 10px;
-      font-size: $h4-font-size;
+      font-size: variables.$h4-font-size;
 
       .table-column-spinner {
         position: absolute;
@@ -150,7 +150,7 @@
 
         .spinner-border {
           // NOTE: we should not customize the width/height since it causes wobbling effect
-          color: #828282;
+          color: map-get(variables.$color-map, 'table-header-spinner');
           border-width: .16em;
         }
       }
@@ -176,11 +176,11 @@
 
     .disabled {
       cursor: not-allowed;
-      color: $disabled-color;
+      color: map-get(variables.$color-map, 'disabled');
     }
 
     .delete-loader {
-      color: $disabled-color;
+      color: map-get(variables.$color-map, 'disabled');
     }
   }
 

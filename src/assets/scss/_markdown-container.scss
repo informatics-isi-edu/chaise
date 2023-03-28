@@ -1,5 +1,6 @@
-@import 'helpers';
-@import 'variables';
+@use 'sass:map';
+@use 'helpers';
+@use 'variables';
 
 .markdown-container {
   // NOTE related PR: https://github.com/informatics-isi-edu/chaise/pull/882
@@ -82,12 +83,12 @@
     height: 11px;
     width: 11px;
     border-radius: 3px;
-    border: 1px solid $black-color;
+    border: 1px solid map-get(variables.$color-map, 'black');
   }
 
   .vocab {
-    color: darkblue;
-    background-color: rgba(220, 220, 220, 0.68);
+    color: map-get(variables.$color-map, 'vocab');
+    background-color: map-get(variables.$color-map, 'vocab-background');
     padding: 7px;
     border-radius: 10px;
     display: inline-block;
@@ -115,8 +116,8 @@
   }
 
   a.download {
-    @include chaise-btn();
-    @include chaise-btn-primary();
+    @include helpers.chaise-btn();
+    @include helpers.chaise-btn-primary();
 
     // override the button style and allow user text selection
     user-select: auto;
@@ -126,7 +127,7 @@
   }
 
   a.download-alt:not(.download), a[download]:not(.download) {
-    @include download-btn();
+    @include helpers.download-btn();
   }
 
   .asset-source-description {
@@ -708,7 +709,7 @@
 
 .markdown-container:checked + .radio-label {
   position: relative;
-  z-index: 1;
+  z-index: map-get(variables.$z-index-map, 'markdown-container-radio-label');
   border-color: #0366d6;
 }
 
