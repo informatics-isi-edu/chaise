@@ -13,6 +13,7 @@ import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
 
 // utils
+import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndKeyDefined } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
 const KeyColumn = (): JSX.Element => {
@@ -90,6 +91,7 @@ const KeyColumn = (): JSX.Element => {
       {columnModels.map((cm: any, cmIndex: number) => {
         const column = cm.column;
         const colName = column.name;
+        const colDisplay = makeSafeIdAttr(column.displayname.value)
 
         const isDisabled = disableSelectAllbtn(cmIndex);
         let tooltip = cmIndex === activeSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.';
@@ -115,7 +117,7 @@ const KeyColumn = (): JSX.Element => {
             {canShowSelectAllBtn(cmIndex) &&
               <ChaiseTooltip placement='bottom' tooltip={tooltip}>
                 <button
-                  className={`chaise-btn chaise-btn-secondary toggle-select-all-btn toggle-select-all-btn-${cmIndex}`}
+                  className={`chaise-btn chaise-btn-secondary toggle-select-all-btn toggle-select-all-btn-${cmIndex} select-all-${colDisplay}`}
                   disabled={isDisabled}
                   onClick={() => onToggleClick(cmIndex)}
                 >

@@ -29,12 +29,12 @@ describe('Recordset edit records,', function() {
                 return chaisePage.recordsetPage.getEditRecordLink().click();
             }).then(function() {
                 browser.wait(function() {
-                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                    return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                         return (ct == testParams.default_page_limit);
                     });
                 }, browser.params.defaultTimeout);
 
-                return chaisePage.recordEditPage.getForms().count();
+                return chaisePage.recordEditPage.getRecordeditForms().count();
             }).then(function(count) {
                 expect(count).toBe(testParams.default_page_limit);
             });
@@ -61,12 +61,12 @@ describe('Recordset edit records,', function() {
                 return chaisePage.recordsetPage.getEditRecordLink().click();
             }).then(function() {
                 browser.wait(function() {
-                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                    return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                         return (ct == testParams.limit);
                     });
                 }, browser.params.defaultTimeout);
 
-                return chaisePage.recordEditPage.getForms().count();
+                return chaisePage.recordEditPage.getRecordeditForms().count();
             }).then(function(count) {
                 expect(count).toBe(testParams.limit);
             });
@@ -93,12 +93,12 @@ describe('Recordset edit records,', function() {
                 return chaisePage.recordsetPage.getEditRecordLink().click();
             }).then(function() {
                 browser.wait(function() {
-                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                    return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                         return (ct == testParams.int_23_count);
                     });
                 }, browser.params.defaultTimeout);
 
-                return chaisePage.recordEditPage.getForms().count();
+                return chaisePage.recordEditPage.getRecordeditForms().count();
             }).then(function(count) {
                 expect(count).toBe(testParams.int_23_count);
             });
@@ -121,12 +121,12 @@ describe('Recordset edit records,', function() {
                 return chaisePage.recordsetPage.getEditRecordLink().click();
             }).then(function() {
                 browser.wait(function() {
-                    return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                    return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                         return (ct == testParams.limit);
                     });
                 }, browser.params.defaultTimeout);
 
-                return chaisePage.recordEditPage.getForms().count();
+                return chaisePage.recordEditPage.getRecordeditForms().count();
             }).then(function(count) {
                 expect(count).toBe(testParams.limit);
             });

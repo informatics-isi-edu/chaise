@@ -65,20 +65,20 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             });
         });
 
-        it("should not allow to add new rows/columns", function() {
-            expect(chaisePage.recordEditPage.getMultiFormInputSubmitButton().isDisplayed()).toBeFalsy("Add x rows is visible in edit mode");
+        it("should show reset button", function() {
+            expect(chaisePage.recordEditPage.getRecordeditResetButton().isDisplayed()).toBeTruthy("Rest recordedit forms is not visible in edit mode");
         });
 
     } else {
-        var titleText = "Create new " + tableParams.table_displayname;
         it("should have create record title", function() {
-            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe(titleText, "Create mode title is incorrect.");
+            var pageTitleText = 'Create ' + tableParams.formsOnLoad + ' ' + tableParams.table_displayname + ' record';
+            expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe(pageTitleText, "Create mode title is incorrect.");
         });
 
         it ("should have the correct head title using the heuristics for recordedit app in entry/create mode", function (done) {
+            var headTitleText = 'Create new ' + tableParams.table_displayname;
             browser.executeScript("return chaiseConfig;").then(function(chaiseConfig) {
-                // <table-name> | chaiseConfig.headTitle
-                expect(browser.getTitle()).toBe(titleText + " | " + chaiseConfig.headTitle);
+                expect(browser.getTitle()).toBe(headTitleText + " | " + chaiseConfig.headTitle);
 
                 done();
             }).catch(function (err) {
@@ -99,7 +99,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
         // because of pcid and ppid we cannot test the whole url
         expect(linkEl.getAttribute("href")).toContain(expectedLink, "Title of result page doesn't have the expected link.");
-        expect(linkEl.getAttribute('uib-tooltip')).toBe(tableParams.table_comment, "Entity subtitle tooltip is incorrect.");
+        chaisePage.testTooltipReturnPromise(linkEl, tableParams.table_comment, 'recordedit');
     });
 
     it("should have 'Save' text for the submit button", function () {
@@ -109,7 +109,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
     it("should render columns which are inside the visible columns annotation if defined; Default all are visible", function() {
         var columns = tableParams.columns;
-        chaisePage.recordEditPage.getAllColumnCaptions().then(function(pageColumns) {
+        chaisePage.recordEditPage.getAllColumnNames().then(function(pageColumns) {
             expect(pageColumns.length).toBe(columns.length, "number of visible columns is not what is expected.");
             pageColumns.forEach(function(c) {
                 c.getAttribute('innerHTML').then(function(txt) {
@@ -135,7 +135,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     var col = columns.find(function(cl) { return txt == cl.title });
                     expect(txt).toBe(col ? col.title : " should not have underline");
                     if (col) {
-                        expect(c.getAttribute("uib-tooltip")).toBe(col.comment);
+                        chaisePage.testTooltipReturnPromise(c, col.comment, 'recordedit');
                     }
                 });
             });
@@ -146,9 +146,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
         var columns = tableParams.columns.filter(function(c) { if (c.nullok === false && !c.generated && !c.immutable) return true; });
         columns.forEach(function(c) {
             var el = visibleFields.find(function(v) { return v.column.name == c.name });
-            chaisePage.recordEditPage.getColumnWithAsterisk(el).then(function(el) {
-                if (el) expect(true).toBeDefined();
-                else expect(undefined).toBe("Asterisk");
+            chaisePage.recordEditPage.getColumnWithAsterisk(el).getText().then((text) => {
+                expect(text).toBe('*');
             });
         });
     });
@@ -216,9 +215,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 }
 
                 chaisePage.recordEditPage.submitForm().then(function () {
-                    return chaisePage.recordEditPage.getInputErrorMessage(input, 'required');
-                }).then(function(err) {
-                    expect(err.isDisplayed()).toBeTruthy(colError(col, "Expected to show error."));
+                    const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(input);
+
+                    expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(col, "Expected to show error."));
+                    
+                    return chaisePage.recordEditPage.getAlertErrorClose().click();
+                }).then(() => {
                     return defer.fulfill(), defer.promise;
                 }).catch(function (err) {
                     defer.reject(err);
@@ -259,8 +261,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 it("should click add record button", function(done) {
                     chaisePage.clickButton(chaisePage.recordEditPage.getMultiFormInputSubmitButton()).then(function(button) {
                         browser.wait(function() {
-                            return chaisePage.recordEditPage.getForms().count().then(function(ct) {
-                                return (ct == recordIndex + 1);
+                            return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
+                                return (ct == recordIndex);
                             });
                         }, browser.params.defaultTimeout);
                         done();
@@ -272,20 +274,18 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 it("should show columns with generated or immutable annotations as disabled", function() {
                     disabledCols.forEach(function(column) {
                         if (column.type == 'timestamp' || column.type == 'timestamptz') {
-                            var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
+                            var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex+1);
                             var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemBtn = timeInputs.meridiem;
                             expect(dateInput.isEnabled()).toBe(false, colError(column.name, "date input of generated timestamp column is enabled."));
                             expect(timeInput.isEnabled()).toBe(false, colError(column.name, "time input of generated timestamp column is enabled."));
                             expect(meridiemBtn.isEnabled()).toBe(false, colError(column.name, "meridiem input of generated timestamp column is enabled."));
                         } else {
-                            chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function(input) {
-                                expect(input.isEnabled()).toBe(false, colError(column.name, "input of generated column is enabled."));
-                                if (!tableParams.key) {
-                                    expect(input.getAttribute('placeholder')).toBe('Automatically generated', colError(column.name, "placeholder of generated column is not correct."));
-                                }
-                            }).catch(function(e) {
-                                console.log(e);
-                            });
+                            const inputSelector = chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex+1);
+                            
+                            expect(inputSelector.isEnabled()).toBe(false, colError(column.name, "input of generated column is enabled."));
+                            if (!tableParams.key) {
+                                expect(inputSelector.getAttribute('placeholder')).toBe('Automatically generated', colError(column.name, "placeholder of generated column is not correct."));
+                            }
                         }
                     });
                 });
@@ -296,25 +296,24 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it ("should show textarea input with correct value.", function () {
                         arrayCols.forEach(function(c) {
-                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(arrayTxtArea) {
-                                expect(arrayTxtArea.isDisplayed()).toBeTruthy(colError(c.name, "element not visible."));
-                                arrayTxtArea.column = c;
+                            const arrayTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
+                            expect(arrayTxtArea.isDisplayed()).toBeTruthy(colError(c.name, "element not visible."));
+                            arrayTxtArea.column = c;
 
-                                arrayDataTypeFields.push(arrayTxtArea);
-                                var value = getRecordValue(c.name);
+                            arrayDataTypeFields.push(arrayTxtArea);
+                            var value = getRecordValue(c.name);
 
-                                if (value != undefined) {
-                                    if (c.name === "timestamptz_array") {
-                                        arrayTxtArea.getAttribute('value').then(function (inputValue) {
-                                            var parts = inputValue.split('"');
-                                            inputValue = parts[0] + '"' + moment(parts[1], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ") + '"' + parts[2];
-                                            expect(inputValue).toBe(value, colError(c.name , "Doesn't have the expected value."));
-                                        })
-                                    } else {
-                                        expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
-                                    }
+                            if (value != undefined) {
+                                if (c.name === "timestamptz_array") {
+                                    arrayTxtArea.getAttribute('value').then(function (inputValue) {
+                                        var parts = inputValue.split('"');
+                                        inputValue = parts[0] + '"' + moment(parts[1], "YYYY-MM-DDTHH:mm:ssZ").format("YYYY-MM-DDTHH:mm:ssZ") + '"' + parts[2];
+                                        expect(inputValue).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                                    })
+                                } else {
+                                    expect(arrayTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
                                 }
-                            });
+                            }
                         });
                     });
 
@@ -411,9 +410,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // test the required input
                                 if (c.nullok == false) {
                                     chaisePage.recordEditPage.submitForm();
-                                    chaisePage.recordEditPage.getInputErrorMessage(arrayInput, 'required').then(function(err) {
-                                        expect(err.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
-                                    });
+                                    const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(arrayInput, 'required');
+                                    expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
+                                    chaisePage.recordEditPage.getAlertErrorClose().click();
                                 }
 
                                 // test invalid values
@@ -423,10 +422,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     chaisePage.recordEditPage.clearInput(arrayInput).then(function () {
                                         return arrayInput.sendKeys(tv.value);
                                     }).then(function () {
-                                        return chaisePage.recordEditPage.getArrayInputErrorMessage(arrayInput);
-                                    }).then(function (err) {
-                                        expect(err).toBe(tv.error, colError(c.name, "error missmatch for following value: " + tv.value));
-                                    }).catch(function (err) {
+                                        return chaisePage.recordEditPage.getArrayInputErrorMessage(arrayInput).getText();
+                                    }).then(function (text) {
+                                        expect(text).toBe(tv.error, colError(c.name, "error missmatch for following value: " + tv.value));
+                                    }).catch(function () {
                                         expect(true).toBe(false, colError(c.name, "failed while trying to test values."));
                                     })
                                 });
@@ -466,27 +465,25 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("longText fields, ", function () {
                     it("should show textarea input for longtext datatype and then set the value.", function() {
                         longTextCols.forEach(function(c) {
-                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(txtArea) {
-                                    expect(txtArea.isDisplayed()).toBeTruthy();
-                                    longTextDataTypeFields.push(txtArea);
+                            const txtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
+                            expect(txtArea.isDisplayed()).toBeTruthy();
+                            longTextDataTypeFields.push(txtArea);
 
-                                    var value = getRecordValue(c.name);
-                                    if (value != undefined) {
-                                        expect(txtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
-                                    }
+                            var value = getRecordValue(c.name);
+                            if (value != undefined) {
+                                expect(txtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                            }
 
-                                    if (c.generated || c.immutable) return;
+                            if (c.generated || c.immutable) return;
 
-                                    chaisePage.recordEditPage.clearInput(txtArea);
-                                    browser.sleep(10);
+                            chaisePage.recordEditPage.clearInput(txtArea);
+                            browser.sleep(10);
 
-                                    txtArea.column = c;
-                                    var text = getRecordInput(c.name, chance.paragraph());
-                                    txtArea.sendKeys(text);
+                            txtArea.column = c;
+                            var text = getRecordInput(c.name, chance.paragraph());
+                            txtArea.sendKeys(text);
 
-                                    expect(txtArea.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
-
-                            });
+                            expect(txtArea.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
                         });
                     });
                 });
@@ -496,27 +493,26 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Text fields, ", function () {
                     it("should show text input for text and set the value.", function() {
                         textCols.forEach(function(c) {
-                            chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex).then(function(txtInput) {
-                                    expect(txtInput.isDisplayed()).toBeTruthy();
-                                    txtInput.column = c;
+                            const txtInput = chaisePage.recordEditPage.getInputForAColumn(c.name, recordIndex+1)
+                            expect(txtInput.isDisplayed()).toBeTruthy();
+                            txtInput.column = c;
 
-                                    textDataTypeFields.push(txtInput);
+                            textDataTypeFields.push(txtInput);
 
-                                    var value = getRecordValue(c.name);
-                                    if (value !== undefined) {
-                                        expect(txtInput.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
-                                    }
+                            var value = getRecordValue(c.name);
+                            if (value !== undefined) {
+                                expect(txtInput.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                            }
 
-                                    if (c.generated || c.immutable) return;
+                            if (c.generated || c.immutable) return;
 
-                                    chaisePage.recordEditPage.clearInput(txtInput);
-                                    browser.sleep(10);
+                            chaisePage.recordEditPage.clearInput(txtInput);
+                            browser.sleep(10);
 
-                                    var text = getRecordInput(c.name, c.isUrl ? chance.url() : chance.sentence({ words: 5 }));
-                                    txtInput.sendKeys(text);
+                            var text = getRecordInput(c.name, c.isUrl ? chance.url() : chance.sentence({ words: 5 }));
+                            txtInput.sendKeys(text);
 
-                                    expect(txtInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
-                            });
+                            expect(txtInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
                         });
                     });
                 });
@@ -529,51 +525,74 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         { stringVal:"{\"name\":\"tester\"}" },
                         { stringVal:"6534.9987" },
                         { stringVal:"null" },
+                        { stringVal:"\"          \""}
+                    ];
+
+                    const invalidJSONTextParams = [
+                        { stringVal:"{" },
+                        { stringVal:"{name\":\"tester\"}" },
                         { stringVal:"          "}
                     ];
 
                     it("should show textarea input for JSON datatype and then set the value", function() {
                         jsonCols.forEach(function(c) {
-                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
-                                expect(jsonTxtArea.isDisplayed()).toBeTruthy();
-                                jsonTxtArea.column = c;
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
+                            expect(jsonTxtArea.isDisplayed()).toBeTruthy();
+                            jsonTxtArea.column = c;
 
-                                JSONDataTypeFields.push(jsonTxtArea);
-                                var value = getRecordValue(c.name);
+                            JSONDataTypeFields.push(jsonTxtArea);
+                            var value = getRecordValue(c.name);
 
-                                if (value != undefined) {
-                                    expect(jsonTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
-                                }
-                            });
+                            if (value != undefined) {
+                                expect(jsonTxtArea.getAttribute('value')).toBe(value, colError(c.name , "Doesn't have the expected value."));
+                            }
                         });
                     });
 
                     it("should only allow valid JSON values", function(){
                         jsonCols.forEach(function(c) {
-                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
-                                for (i = 0; i < JSONTestParams.length; i++) {
-                                    jsonTxtArea.clear();
-                                    (function(input){
-                                        c._value = input;
-                                        jsonTxtArea.sendKeys(input);
-                                        chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json').then(function(error){
-                                            expect(error).toBe(null, colError(c.name , "Some Valid JSON Values were not accepted"));
-                                        });
-                                    })(JSONTestParams[i].stringVal);
-                                }//for
-                            });
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
+                            for (i = 0; i < JSONTestParams.length; i++) {
+                                chaisePage.recordEditPage.clearInput(jsonTxtArea);
+                                (function(input){
+                                    c._value = input;
+                                    jsonTxtArea.sendKeys(input);
+                                    
+                                    const errMessageSelector = chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json');
+                                    // sleep for an error to "possibly show", it shouldn't
+                                    browser.sleep(20);
+                                    chaisePage.waitForElementInverse(errMessageSelector);
+
+                                    expect(true).toBeTruthy(colError(c.name , "Some Valid JSON Values were not accepted"));
+                                })(JSONTestParams[i].stringVal);
+                            }//for
+                        });
+                    });
+
+                    it('should NOT allow invalid JSON values', () => {
+                        jsonCols.forEach((c) => {
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
+                            for (i = 0; i < invalidJSONTextParams.length; i++) {
+                                chaisePage.recordEditPage.clearInput(jsonTxtArea);
+                                ((input) => {
+                                    c._value = input;
+                                    jsonTxtArea.sendKeys(input);
+                                    
+                                    const errMessageSelector = chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json');
+                                    expect(errMessageSelector.getText()).toBe('Please enter a valid JSON value.', colError(c.name , 'Some Invalid JSON Values didn\'t show error'));
+                                })(invalidJSONTextParams[i].stringVal);
+                            }//for
                         });
                     });
 
                     it("set the correct value.", function () {
                         jsonCols.forEach(function(c) {
-                            chaisePage.recordEditPage.getTextAreaForAcolumn(c.name, recordIndex).then(function(jsonTxtArea) {
-                                jsonTxtArea.clear();
-                                var input = getRecordInput(c.name, "");
-                                c._value = input;
-                                jsonTxtArea.sendKeys(input);
-                                expect(jsonTxtArea.getAttribute('value')).toEqual(input, colError(c.name, "Couldn't change the value."));
-                            });
+                            const jsonTxtArea = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
+                            jsonTxtArea.clear();
+                            var input = getRecordInput(c.name, "");
+                            c._value = input;
+                            jsonTxtArea.sendKeys(input);
+                            expect(jsonTxtArea.getAttribute('value')).toEqual(input, colError(c.name, "Couldn't change the value."));
                         });
                     });
                 });
@@ -585,7 +604,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     var markdownTestParams = [{
                             "raw": "RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh",
                             "markdown": "<h3>RBK Project ghriwvfw nwoeifwiw qb2372b wuefiquhf pahele kabhi na phelke kabhiy gqeequhwqh</h3>\n",
-                            "comm":"Ctrl+H"
+                            "title":"Heading"
                         }, {
                             "raw":"E15.5 embryonic kidneys for sections\n" +
                                 "- E18.5 embryonic kidneys for cDNA synthesis\n"+
@@ -599,33 +618,33 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 "<li>QIAShredder columns (Qiagen, cat no. 79654)</li>\n" +
                                 "<li>DEPC-Treated Water</li>\n" +
                                 "</ul>\n",
-                            "comm":"Ctrl+U"
+                            "title":"Unordered List"
                         }, {
                             "raw": "This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru",
                             "markdown": "<p><strong>This is bold text. nuf2uh3498hcuh23uhcu29hh  nfwnfi2nfn k2mr2ijri. Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</strong></p>\n",
-                            "comm":"Ctrl+B"
+                            "title":"Bold"
                         }, {
                             "raw":"This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.",
                             "markdown":"<p><em>This is italic text fcj2ij3ijjcn 2i3j2ijc3roi2joicj. Hum ja rahal chi gaam ta pher kail aaib. Khana kha ka aib rehal chi parson tak.</em></p>\n",
-                            "comm":"Ctrl+I"
+                            "title":"Italic"
                         }, {
                             "raw":"~~Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru~~",
                             "markdown":"<p><s>Strikethrough wnnfw nwn wnf wu2h2h3hr2hrf13hu u 2u3h u1ru31r 1n3r uo13ru1ru</s></p>\n",
-                            "comm":" "
+                            "title":" "
                         }, {
                             "raw": "X^2^+Y^2^+Z^2^=0",
                             "markdown": "<p>X<sup>2</sup>+Y<sup>2</sup>+Z<sup>2</sup>=0</p>\n",
-                            "comm":" "
+                            "title":" "
                         }, {
                             "raw": "[[RID]]",
                             "markdown": '<p><a href="/id/RID">RID</a></p>\n',
-                            "comm":" "
+                            "title":" "
                         }
                     ];
 
                     it('should have the correct value.', function () {
                         markdownCols.forEach(function(c) {
-                            var inp = chaisePage.recordEditPage.getInputById(recordIndex, c.title);
+                            var inp = chaisePage.recordEditPage.getTextAreaForAColumn(c.name, recordIndex+1);
                             if (inp.isPresent()) {
                                 inp.column = c;
 
@@ -645,35 +664,35 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it('should render correct markdown with inline preview and full preview button.', function() {
                         //Both preview is being tested.
                         markdownCols.forEach(function(descCol) {
-                            var markdownField = chaisePage.recordEditPage.getInputById(recordIndex, descCol.title);
+                            var markdownField = chaisePage.recordEditPage.getTextAreaForAColumn(descCol.name, recordIndex+1);
                             // lgt and markdown have these input controls, select all draws an extra for each
                             // we want the 3rd one (aka index 2 of 0-3 within that record/form column)
-                            btnIndex = (recordIndex * 2) + 2;
+
+                            const btnIndex = recordIndex;
                             var PrevBtn = element.all(by.css('button[title="Preview"]')).get(btnIndex);       //test inline preview
                             var modalPrevBtn = element.all(by.css('button[title="Fullscreen Preview"]')).get(btnIndex);       //test modal preview
                             for (i = 0; i < markdownTestParams.length; i++) {
-                                markdownField.clear();
-                                (function(input, markdownOut, comm, btnIdx) {
-                                    //If keyboard shortcut found for markdown elements then send click command.
-                                    if(comm !=' ') {
-                                        let v = "button[data-hotkey='"+comm+"']";
+                                chaisePage.recordEditPage.clearInput(markdownField);
+                                (function(input, markdownOut, title, btnIdx) {
+                                    //If title defined found for markdown elements then send click command.
+                                    if(title !=' ') {
+                                        let v = "button[title='"+title+"']";
                                         element.all(by.css(v)).get(btnIdx).click();
                                     }
                                     markdownField.sendKeys(input);
                                     modalPrevBtn.click();
-                                    let mdDiv = element(by.css('[ng-bind-html="ctrl.renderedMarkdown"]'));
+                                    let mdDiv = element(by.css('.chaise-preview-markdown .markdown-container'));
                                     browser.wait(EC.presenceOf(mdDiv), browser.params.defaultTimeout);
                                     expect(mdDiv.getAttribute('innerHTML')).toBe(markdownOut, colError(descCol.name, "Error during markdown preview generation"));
                                     browser.wait(EC.elementToBeClickable(element(by.className('modal-close'))), browser.params.defaultTimeout);
                                     element(by.className('modal-close')).click();
                                     browser.wait(EC.elementToBeClickable(PrevBtn), browser.params.defaultTimeout);
                                     PrevBtn.click();        //generate preview
-                                    let mdPrevDiv = element(by.className("md-preview"));
+                                    let mdPrevDiv = element(by.css('.md-preview .markdown-container'));
                                     browser.wait(EC.presenceOf(mdPrevDiv), browser.params.defaultTimeout);
                                     expect(mdPrevDiv.getAttribute('innerHTML')).toBe(markdownOut,colError(descCol.name, "Error during markdown preview generation"));
                                     PrevBtn.click();        //editing mode
-
-                                })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].comm, btnIndex);
+                                })(markdownTestParams[i].raw, markdownTestParams[i].markdown, markdownTestParams[i].title, btnIndex);
                             } //for
                         })
                     });
@@ -728,25 +747,37 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should show a dropdown", function() {
                         dropdowns.forEach(function(dropdown) {
-                            chaisePage.recordEditPage.getDropdownElements(dropdown.columnTitle).then(function(elements) {
-                                return elements[recordIndex];
-                            }).then(function (el) {
-                                expect(el.isDisplayed()).toBeTruthy();
+                            const el = chaisePage.recordEditPage.getDropdownElementByName(dropdown.column.name, recordIndex+1);
+                            
+                            expect(el.isDisplayed()).toBeTruthy();
 
-                                var value = getRecordValue(dropdown.column.name);
-                                if (value != undefined) {
-                                    expect(chaisePage.recordEditPage.getDropdownText(el).getText()).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
-                                }
+                            var value = getRecordValue(dropdown.column.name);
+                            if (value != undefined) {
+                                expect(chaisePage.recordEditPage.getDropdownText(el).getText()).toBe(value.length == 0 ? 'Select a value' : (value + ""), colError(dropdown.column.name, "Doesn't have the expected value."));
+                            }
 
-                                dropdown.dropdownInput = el;
-                            });
+                            dropdown.dropdownInput = el;
                         });
                     });
 
-                    it("should render options for a boolean field", function() {
-                        dropdowns.forEach(function(dropdown) {
-                            chaisePage.recordEditPage.getRelativeDropdownOptions(dropdown.dropdownInput).then(function(items) {
+                    it("should render options for a boolean field", () => {
+                        dropdowns.forEach((dropdown) => {
+                            // open the dropdown
+                            dropdown.dropdownInput.click().then(() => {
+                                const optionsContainer = chaisePage.recordEditPage.getOpenDropdownOptionsContainer();
+                                return chaisePage.waitForElement(optionsContainer);
+                            }).then(() => {
+                                return chaisePage.recordEditPage.getDropdownOptions();
+                            }).then((items) => {
                                 expect(items.length).toBe(2, colError(dropdown.column.name, "Number of available options is not as expected."));
+
+                                // close the dropdown before next test
+                                return dropdown.dropdownInput.click();
+                            }).then(() => {
+                                // do nothing, done() here if we use it 
+                            }).catch((error) => {
+                                console.dir(error);
+                                expect('Something went wrong in this promise chain').toBe('Please see error message.', colError(dropdown.column.name, "While counting the values in the dropdown."));
                             });
                         });
                     });
@@ -773,13 +804,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Foreign key fields,", function() {
 
                     it('should show an uneditable field for each foreign key column', function() {
-                        // plus an extra foreignKeyCols.length because there is 1 select all input per foreign key column
-                        var expectedNumOfPopupFields = foreignKeyCols.length * (recordIndex + 1) + (foreignKeyCols.length);
+                        var expectedNumOfPopupFields = foreignKeyCols.length * recordIndex+1;
                         var popupFields = element.all(by.css('.popup-select-value'));
                         expect(popupFields.count()).toBe(expectedNumOfPopupFields, "number of foreignkeys is not as expected.");
                         // Ensure each field is an uneditable div element (not an input)
                         popupFields.map(function(field) {
-                            expect(field.getTagName()).toBe('div', "field is not a div.");
+                            expect(field.getTagName()).toBe('span', "field is not a span.");
                             expect(field.getAttribute('contenteditable')).toBe('false', "field is not uneditable.");
                         });
                     });
@@ -788,7 +818,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         foreignKeyCols.forEach(function (fkCol) {
                             if (fkCol.value === undefined) return;
 
-                            var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(fkCol.title, recordIndex);
+                            var input = chaisePage.recordEditPage.getForeignKeyInputDisplay(fkCol.title, (recordIndex+1));
 
                             expect(input.getText()).toEqual(getRecordValue(fkCol.name));
                         });
@@ -796,44 +826,42 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     if (isEditMode) {
                         it("clicking the 'x' should remove the value in the foreign key field.", function () {
-                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(foreignKeyCols[0].title, recordIndex);
-                                //the first foreignkey input for editing should be pre-filled
-                                expect(foreignKeyInput.getAttribute("value")).toBeDefined();
-                                chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function(foreignKeyInputRemoveBtn) {
-                                    return chaisePage.clickButton(foreignKeyInputRemoveBtn[0]);
-                                }).then(function() {
-                                    // value is empty string after removing it
-                                    expect(foreignKeyInput.getAttribute("value")).toBe('');
-                                });
+                            var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(foreignKeyCols[0].title, recordIndex+1);
+                            // the first foreignkey input for editing should be pre-filled
+                            expect(foreignKeyInput.getText()).toBeDefined();
+                            foreignKeyInput.element(by.className('remove-input-btn')).click().then(() => {
+                                // value is empty string after removing it
+                                expect(foreignKeyInput.getText()).toBe('Select a value');
+                            });
                         });
 
-                        it("clicking 'x' in the model should close it without returning a value.", function () {
+                        it("clicking 'x' in the modal should close it without returning a value.", function () {
                             var modalClose = chaisePage.recordEditPage.getModalCloseBtn(),
                             EC = protractor.ExpectedConditions;
 
-                            chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                            chaisePage.recordEditPage.getModalPopupBtns().then(function(popupBtns) {
                                 return chaisePage.clickButton(popupBtns[0]);
                             }).then(function() {
                                 // wait for the modal to open
                                 browser.wait(EC.visibilityOf(modalClose), browser.params.defaultTimeout);
                                 return modalClose.click();
                             }).then(function() {
-                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputValue(foreignKeyCols[0].title, recordIndex);
-                                expect(foreignKeyInput.getAttribute("value")).toBe('');
+                                var foreignKeyInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(foreignKeyCols[0].title, recordIndex+1);
+                                expect(foreignKeyInput.getText()).toBe('Select a value');
                             });
                         });
                     }
 
                     it("should open a modal search and select a foreign key value.", function () {
-                        chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
+                        chaisePage.recordEditPage.getModalPopupBtns().then(function(popupBtns) {
                             var EC = protractor.ExpectedConditions;
 
                             // plus an extra foreignKeyCols.length because there is 1 select all input per foreign key column
-                            expect(popupBtns.length).toBe(foreignKeyCols.length * (recordIndex + 1) + (foreignKeyCols.length), "number of foreign keys is not as expected.");
+                            expect(popupBtns.length).toBe(foreignKeyCols.length * (recordIndex+1), "number of foreign keys is not as expected.");
 
                             for (var i=0; i<foreignKeyCols.length; i++) {
-                                (function(i) {
-                                    var col = foreignKeyCols[i];
+                                (function(idx) {
+                                    var col = foreignKeyCols[idx];
                                     var modalTitle;
 
                                     // this will have the index and the presentational value
@@ -841,7 +869,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                     var rows, searchBox;
                                     browser.sleep(100);
-                                    chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]).then(function() {
+                                    chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + idx]).then(function() {
                                         modalTitle = chaisePage.recordEditPage.getModalTitle();
                                         // wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
@@ -860,7 +888,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                             });
                                         }, browser.params.defaultTimeout);
                                     }).then(function() {
-                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(foreignKeyCols[i].name, "when opened the modal selector, focus was not on search input."));
+                                        expect(searchBox.getAttribute('id')).toEqual(browser.driver.switchTo().activeElement().getAttribute('id'), colError(col.name, "when opened the modal selector, focus was not on search input."));
 
                                         return modalTitle.getText();
                                     }).then(function(text) {
@@ -885,22 +913,26 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     }).then(function(ct) {
                                         expect(ct).toBe(col.count, colError(col.name, "number of foreign key rows are not as expected."));
 
-                                        var displayingText = "Displayingall " + col.count + "of " + col.totalCount + " records";
+                                        var displayingText = "Displaying all\n" + col.count + "\nof " + col.totalCount + " records";
                                             displayingTextError = "The total count display in the foreign key popup is incorrect";
 
-                                        chaisePage.waitForTextInElement(chaisePage.recordsetPage.getTotalCount(), displayingText, null, displayingTextError);
+                                        
+                                        expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe(displayingText, displayingTextError);
 
-                                        return rows.get(fkSelectedValue.index).all(by.css(".select-action-button"));
+                                        return rows.all(by.css(".select-action-button"));
                                     }).then(function(selectButtons) {
-                                        return selectButtons[0].click();
+                                        expect(selectButtons.length).toBe(col.count, 'number of select action buttons not as expected.');
+
+                                        return selectButtons[fkSelectedValue.index].click();
                                     }).then(function() {
                                         browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getEntityTitleElement()), browser.params.defaultTimeout);
 
-                                        var foreignKeyInputDisplay = chaisePage.recordEditPage.getForeignKeyInputDisplay(col.title, recordIndex);
+                                        var foreignKeyInputDisplay = chaisePage.recordEditPage.getForeignKeyInputDisplay(col.title, recordIndex+1);
+                                        // might still show the old value, wait for input display to have expected value
                                         expect(foreignKeyInputDisplay.getText()).toEqual(fkSelectedValue.value, colError(col.name, "Didn't select the expected foreign key."));
 
                                         // Open the same modal again to make sure search box is autofocused again
-                                        return chaisePage.clickButton(popupBtns[(foreignKeyCols.length * recordIndex) + i ]);
+                                        return chaisePage.clickButton(popupBtns[idx]);
                                     }).then(function() {
                                         // Wait for the modal to open
                                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
@@ -936,13 +968,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Date fields,", function() {
                     it('should show input fields and validate for date columns', function() {
                         dateCols.forEach(function(column) {
-                            var dateInputs = chaisePage.recordEditPage.getDateInputsForAColumn(column.name, recordIndex);
+                            const dateInputObj = chaisePage.recordEditPage.getDateInputsForAColumn(column.name, recordIndex+1);
 
-                            dateInputs.column = column;
+                            dateInputObj.column = column;
 
-                            datePickerFields.push(dateInputs);
+                            datePickerFields.push(dateInputObj);
 
-                            var dateInput = dateInputs.date;
+                            var dateInput = dateInputObj.date;
 
                             var value = getRecordValue(column.name);
                             if (value != undefined) {
@@ -954,39 +986,33 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(dateInput);
                             browser.sleep(10);
 
-                            dateInput.sendKeys('1234-13-31');
-                            chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
-                                expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Expected to show a error on invalid input."));
-                            });
+                            // TODO: do we want to validate dates and show errors?
+                            //    - input doesn't allow date values that don't exist, but we could test partial dates?
+                            // dateInput.sendKeys('1234-13-31');
+                            // chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
+                            //     expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Expected to show a error on invalid input."));
+                            // });
 
-                            chaisePage.recordEditPage.clearInput(dateInput);
-                            browser.sleep(10);
+                            // chaisePage.recordEditPage.clearInput(dateInput);
+                            // browser.sleep(10);
 
-                            dateInput.sendKeys('2016-01-01');
+                            // input is displayed as MM/dd/YYYY
+                            dateInput.sendKeys('01-01-2016');
                             expect(dateInput.getAttribute('value')).toEqual('2016-01-01', colError(column.name, "value didn't change."));
-                            chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
-                                expect(error).toBeNull(colError(column.name , "Expected to not show any error on valid input."));
-                            });
+                            // chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
+                            //     expect(error).toBeNull(colError(column.name , "Expected to not show any error on valid input."));
+                            // });
                         });
                     });
 
-                    it('\"Today\" button should enter the current date into the input', function() {
-                        var today = moment().format('YYYY-MM-DD');
-                        datePickerFields.forEach(function(dp) {
-
-                            if (dp.column.generated || dp.column.immutable) return;
-
-                            dp.todayBtn.click();
-                            expect(dp.date.getAttribute('value')).toEqual(today, colError(dp.column.name, "selected date is not correct."));
-                        });
-                    });
+                    // NOTE: removed Today button test since the browser is now overlaying the calendar icon
 
                     it('\"Clear\" button clear the date input respectively', function() {
                         datePickerFields.forEach(function(dp) {
 
                             if (dp.column.generated || dp.column.immutable) return;
 
-                            chaisePage.recordEditPage.getRemoveButton(dp.column.name, recordIndex, "date-remove").click().then(function () {
+                            chaisePage.recordEditPage.getRemoveButton(dp.column.name, recordIndex+1, 'remove-input-btn').click().then(function () {
                                 expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
                             });
                         });
@@ -1001,9 +1027,13 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(inp);
                             browser.sleep(10);
 
-                            var value = getRecordInput(column.name, '2016-01-01');
+                            const value = getRecordInput(column.name, '01-01-2016');
+                            const momentValue = moment(value, 'MM-DD-YYYY');
+
+                            // send value in MM-DD-YYYY format
                             inp.sendKeys(value);
-                            expect(inp.getAttribute('value')).toEqual(value, colError(column.name, "value didn't change."));
+                            // compare value in YYYY-MM-DD format
+                            expect(inp.getAttribute('value')).toEqual(momentValue.format('YYYY-MM-DD'), colError(column.name, "value didn't change."));
                         });
                     });
                 });
@@ -1013,13 +1043,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Timestamp fields,", function() {
                     it('should have 3 inputs with validation for each timestamp column', function() {
                         timestampCols.forEach(function(column) {
-                            var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex);
-                            var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemBtn = timeInputs.meridiem;
-                            var nowBtn = timeInputs.nowBtn, clearBtn = timeInputs.clearBtn;
+                            var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex+1);
+                            var dateInput = timeInputs.date, 
+                                timeInput = timeInputs.time;
 
                             expect(dateInput).toBeDefined(colError(column.name, "Date input is not defined."));
                             expect(timeInput).toBeDefined(colError(column.name, "Time input is not defined."));
-                            expect(meridiemBtn).toBeDefined(colError(column.name, "Meridiem button is not defined."));
 
                             // NOTE: value is a moment object
                             var value = getRecordValue(column.name);
@@ -1030,11 +1059,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                     return timeInput.getAttribute('value');
                                 }).then(function(timeVal) {
                                     // Check time input value is within an interval
-                                    expect(timeVal).toEqual(value.format("hh:mm:ss"), colError(column.name, "column time is not as expected."));
-                                    return meridiemBtn.getText();
-                                }).then(function(meridiemVal) {
-                                    // Check meridiem btn
-                                    expect(meridiemVal).toEqual(value.format("A"), colError(column.name, "column meridiem is not as expected."));
+                                    let momentTime = moment(timeVal, "hh:mm:ss").format("hh:mm:ssA")
+                                    expect(momentTime).toEqual(value.format("hh:mm:ssA"), colError(column.name, "column time is not as expected."));
                                 }).catch(function(error) {
                                     console.log(error);
                                 });
@@ -1042,104 +1068,79 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             if (column.generated || column.immutable) return;
 
-                            // Test toggling of meridiem button
-                            // Testing meridiem before the time input test because toggling btn should work
-                            // with or without input in the other fields (i.e. date and time input fields).
-                            var initialMeridiem = '';
-                            meridiemBtn.getText().then(function(text) {
-                                initialMeridiem = text;
-                                return meridiemBtn.click();
-                            }).then(function() {
-                                return meridiemBtn.getText();
-                            }).then(function(newText) {
-                                if (initialMeridiem == 'AM') {
-                                    expect(newText).toEqual('PM', colError(column.name, "initial column meridiem is not as expected."));
-                                } else {
-                                    expect(newText).toEqual('AM', colError(column.name, "initial column meridiem is not as expected."));
-                                }
-                                return meridiemBtn.click();
-                            }).then(function() {
-                                return meridiemBtn.getText();
-                            }).then(function(newText) {
-                                expect(newText).toEqual(initialMeridiem, colError(column.name, "column meridiem did not change after clicking it."));
-                            }).catch(function(error) {
-                                console.log(error);
-                                expect('There was an error in this promise chain.').toBe('Please see the error message.', colError(column.name, ""));
-                            });
+                            // NOTE: removed meridiem tests cases since it's not a button anymore
 
+                            // TODO: decide how to validate time
                             // If user enters an invalid time an error msg should appear
-                            timeInput.clear();
-                            timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Accepted an invalid time."));
-                            });
+                            // timeInput.clear();
+                            // timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Accepted an invalid time."));
+                            // });
 
                             // If user enters a valid time, then error msg should disappear
-                            timeInput.clear();
-                            timeInput.sendKeys('12:00:00');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error).toBeNull("An error message was not supposed to appear. But one was found", colError(column.name, ""));
-                            });
-                            timeInput.clear();
-                            // users can enter 1 digit in any place
-                            timeInput.sendKeys('2:00:00');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            });
-                            timeInput.clear();
-                            // users can enter just the hours
-                            timeInput.sendKeys('08');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            });
-                            timeInput.clear();
-                            // users can enter less than the full string
-                            timeInput.sendKeys('2:10');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            });
-                            timeInput.clear();
-                            // users can enter time in 24 hr format
-                            timeInput.sendKeys('20:00:00');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            });
-                            timeInput.clear();
-                            // users can enter 0 for the time
-                            timeInput.sendKeys('00:00:00');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            });
+                            // timeInput.clear();
+                            // timeInput.sendKeys('12:00:00');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error).toBeNull("An error message was not supposed to appear. But one was found", colError(column.name, ""));
+                            // });
+                            // timeInput.clear();
+                            // // users can enter 1 digit in any place
+                            // timeInput.sendKeys('2:00:00');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            // });
+                            // timeInput.clear();
+                            // // users can enter just the hours
+                            // timeInput.sendKeys('08');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            // });
+                            // timeInput.clear();
+                            // // users can enter less than the full string
+                            // timeInput.sendKeys('2:10');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            // });
+                            // timeInput.clear();
+                            // // users can enter time in 24 hr format
+                            // timeInput.sendKeys('20:00:00');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            // });
+                            // timeInput.clear();
+                            // // users can enter 0 for the time
+                            // timeInput.sendKeys('00:00:00');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            // });
 
                             // Invalid date + good time = error
                             // If user enters a valid time but no date, an error msg should appear
-                            dateInput.clear();
-                            timeInput.clear();
-                            timeInput.sendKeys('12:00:00');
-                            chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate').then(function(error) {
-                                expect(error.isDisplayed()).toBeTruthy(colError(column.name, "Accepted an invalid date."));
+                            // dateInput.clear();
+                            // timeInput.clear();
+                            // timeInput.sendKeys('12:00:00');
+                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate').then(function(error) {
+                            //     expect(error.isDisplayed()).toBeTruthy(colError(column.name, "Accepted an invalid date."));
 
-                                // Good date + good time = no error
-                                // Now, if user enters a valid date, then no error message should appear
-                                return dateInput.sendKeys('2016-01-01');
-                            }).then(function() {
-                                return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate');
-                            }).then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                                // Good date + null time = no error
-                                return timeInput.clear();
-                            }).then(function() {
-                                return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampTime');
-                            }).then(function(error) {
-                                expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            });
+                            //     // Good date + good time = no error
+                            //     // Now, if user enters a valid date, then no error message should appear
+                            //     return dateInput.sendKeys('2016-01-01');
+                            // }).then(function() {
+                            //     return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate');
+                            // }).then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            //     // Good date + null time = no error
+                            //     return timeInput.clear();
+                            // }).then(function() {
+                            //     return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampTime');
+                            // }).then(function(error) {
+                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
+                            // });
 
                             timeInputFields.push({
                                 date: dateInput,
                                 time: timeInput,
-                                meridiem: meridiemBtn,
-                                nowBtn: nowBtn,
-                                clearBtn: clearBtn,
                                 column: column
                             });
                         });
@@ -1149,41 +1150,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         timeInputFields.forEach(function(obj) {
                             if (obj.column.generated || obj.column.immutable) return;
 
-                            obj.clearBtn.click();
-                            expect(obj.date.getAttribute('value')).toBeFalsy();
-                            expect(obj.time.getAttribute('value')).toBeFalsy();
-                            expect(obj.meridiem.getText()).toEqual('AM');
-                        });
-                    });
+                            obj.date.sendKeys('01-01-2016');
+                            obj.time.sendKeys('12:00:00PM');
 
-                    it('should have the current time after clicking the \"Now\" button', function() {
-                        timeInputFields.forEach(function(obj) {
+                            const buttonsObj = chaisePage.recordEditPage.getTimestampRemoveButtons(obj.column.name, recordIndex+1, 'remove-input-btn');
+                            buttonsObj.date.click().then(() => {
+                                expect(obj.date.getAttribute('value')).toBeFalsy();
 
-                            if (obj.column.generated || obj.column.immutable) return;
-
-                            var UIdate, date = moment().format('YYYY-MM-DD');
-                            var UItime, time = moment().format('x'); // in milliseconds
-                            var timeDelta = 60 * 1000; // 1 minute, in milliseconds
-                            var startTime = time - timeDelta, endTime = time + timeDelta;
-                            var meridiem = moment().format('A');
-
-                            obj.nowBtn.click();
-                            obj.date.getAttribute('value').then(function(dateVal) {
-                                // Check date input
-                                UIdate = dateVal;
-                                expect(dateVal).toEqual(date);
-                                return obj.time.getAttribute('value');
-                            }).then(function(timeVal) {
-                                // Check time input value is within an interval
-                                UItime = timeVal;
-                                var UItimestamp = moment(UIdate + UItime, 'YYYY-MM-DDhh:mm').format('x'); // in milliseconds
-                                expect(startTime < UItimestamp < endTime).toBeTruthy();
-                                return obj.meridiem.getText();
-                            }).then(function(meridiemVal) {
-                                // Check meridiem btn
-                                expect(meridiemVal).toEqual(meridiem);
-                            }).catch(function(error) {
-                                console.log(error);
+                                return buttonsObj.time.click();
+                            }).then(() => {
+                                expect(obj.time.getAttribute('value')).toBeFalsy();
                             });
                         });
                     });
@@ -1200,31 +1176,17 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             browser.sleep(10);
 
                             // change the date
-                            obj.date.sendKeys(value.format("YYYY-MM-DD"));
+                            obj.date.sendKeys(value.format('MM-DD-YYYY'));
 
                             expect(obj.date.getAttribute('value')).toEqual(value.format("YYYY-MM-DD"), colError(obj.column.name, "column date didn't change."));
 
                             // change the time
-                            obj.time.sendKeys(value.format("hh:mm:ss"));
+                            obj.time.sendKeys(value.format("hh:mm:ssA"));
 
                             // Check time input value is within an interval
                             expect(obj.time.getAttribute('value')).toEqual(value.format("hh:mm:ss"), colError(obj.column.name, "column time didn't change."));
 
-                            var meridiemValue = value.format("A");
-
-                            obj.meridiem.getText().then(function(initialMeridiem) {
-                                if (initialMeridiem !== meridiemValue) {
-                                    obj.meridiem.click();
-                                }
-                            }).then(function() {
-                                return obj.meridiem.getText();
-                            }).then(function(newText) {
-                                expect(newText).toEqual(meridiemValue, colError(obj.column.name, "column meridiem didn't change."));
-                            }).catch(function(error) {
-                                console.log(error);
-                                expect('There was an error in this promise chain.').toBe('Please see the error message.', colError(obj.column.name, ""));
-                            });
-
+                            // NOTE: removed meridiem tests since it's part of time input now
                         });
                     });
 
@@ -1235,17 +1197,16 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Integer fields,", function() {
                     it("should render input type as number with integer attribute", function() {
                         intCols.forEach(function(column) {
-                            chaisePage.recordEditPage.getIntegerInputForAColumn(column.name, recordIndex).then(function(intInput) {
-                                    expect(intInput.isDisplayed()).toBeTruthy();
+                            const intInput = chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex+1)
+                            expect(intInput.isDisplayed()).toBeTruthy();
 
-                                    intInput.column = column;
-                                    integerDataTypeFields.push(intInput);
+                            intInput.column = column;
+                            integerDataTypeFields.push(intInput);
 
-                                    var value = getRecordValue(column.name);
-                                    if (value != undefined) {
-                                        expect(intInput.getAttribute('value')).toBe(value, colError(column.name , "Doesn't have the expected value."));
-                                    }
-                            });
+                            var value = getRecordValue(column.name);
+                            if (value != undefined) {
+                                expect(intInput.getAttribute('value')).toBe(value, colError(column.name , "Doesn't have the expected value."));
+                            }
                         });
                     });
 
@@ -1267,11 +1228,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             }
                             chaisePage.recordEditPage.clearInput(intInput);
 
+                            const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(intInput);
                             if (c.nullok == false && !c.generated && !c.immutable) {
                                 chaisePage.recordEditPage.submitForm();
-                                chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
-                                    expect(err).toBe(null, colError(c, "Expected to show error."));
-                                });
+                                expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c, "Expected to show error."));
+                                chaisePage.recordEditPage.getAlertErrorClose().click();
                             }
 
                             // Invalid text value
@@ -1280,14 +1241,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             expect(intInput.getAttribute('value')).toBe(text);
 
 
-                            // Required Error message should disappear;
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'required').then(function(err) {
-                                expect(err).toBeNull(colError(c, "Expected to clear the error message on changing the value."));
-                            });
-
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'integer').then(function(err) {
-                                expect(err.isDisplayed()).toBeTruthy(colError(c, "Expected to show the integer error message on changing the value."));
-                            });
+                            // Required Error message should disappear and show integer error
+                            expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c, "Expected to show the integer error message on changing the value."));
+                            expect(errMessageSelector.getText()).toBe('Please enter a valid integer value.', colError(c, 'Wrong error message text displayed'));
 
                             // Clear value
                             chaisePage.recordEditPage.clearInput(intInput);
@@ -1301,76 +1257,63 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
 
-                    it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
-                        integerDataTypeFields.forEach(function(intInput) {
-                            var c = intInput.column;
+                    // TODO: min and max validations in integer inputs
+                    // it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
+                    //     integerDataTypeFields.forEach(function(intInput) {
+                    //         var c = intInput.column;
 
-                            if (c.skipValidation) return;
+                    //         if (c.skipValidation) return;
 
-                            if (c.generated || c.immutable) return;
+                    //         if (c.generated || c.immutable) return;
 
-                            var min = -9223372036854776000, max = 9223372036854776000, invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
-                            if (c.type == 'int2') {
-                                min = -32768, max = 32767, invalidMaxNo = "8375832757832", invalidMinNo = "-237587565";
-                            } else if (c.type == 'int4') {
-                                min = -2147483648, max = 2147483647, invalidMaxNo = "3827374576453", invalidMinNo = "-326745374576375";
-                            }
+                    //         var min = -9223372036854776000, max = 9223372036854776000, invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
+                    //         if (c.type == 'int2') {
+                    //             min = -32768, max = 32767, invalidMaxNo = "8375832757832", invalidMinNo = "-237587565";
+                    //         } else if (c.type == 'int4') {
+                    //             min = -2147483648, max = 2147483647, invalidMaxNo = "3827374576453", invalidMinNo = "-326745374576375";
+                    //         }
 
-                            var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
+                    //         var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
 
-                            // Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
-                            if (tableParams.primary_keys.indexOf(c.name) != -1) {
-                                intInput.getAttribute("value").then(function(value) {
-                                    validNo = value + "";
-                                });
-                            }
+                    //         // Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
+                    //         if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                    //             intInput.getAttribute("value").then(function(value) {
+                    //                 validNo = value + "";
+                    //             });
+                    //         }
 
-                            // Clear value if it is in edit mode
-                            chaisePage.recordEditPage.clearInput(intInput);
+                    //         // Clear value if it is in edit mode
+                    //         chaisePage.recordEditPage.clearInput(intInput);
 
-                            // Check for invalid maximum number
-                            intInput.sendKeys(invalidMaxNo);
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMax').then(function(err) {
-                                expect(err.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using maximum number."));
-                            });
+                    //         // Check for invalid maximum number
+                    //         intInput.sendKeys(invalidMaxNo);
+                    //         const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(intInput);
+                    //         expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using maximum number."));
 
+                    //         // Clear value
+                    //         chaisePage.recordEditPage.clearInput(intInput);
+                    //         expect(intInput.getAttribute('value')).toBe("");
 
-                            // Clear value
-                            chaisePage.recordEditPage.clearInput(intInput);
-                            expect(intInput.getAttribute('value')).toBe("");
+                    //         expect(errMessageSelector.isDisplayed()).toBeFalsy(colError(c.name , "Expected to clear error message after clearing maximum number."));
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMax').then(function(err) {
-                                expect(err).toBeNull(colError(c.name , "Expected to clear error message after clearing maximum number."));
-                            });
+                    //         // Check for invalid minimum number
+                    //         intInput.sendKeys(invalidMinNo);
 
-                            // Check for invalid minimum number
-                            intInput.sendKeys(invalidMinNo);
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMin').then(function(err) {
-                                expect(err.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using minimum number."));
-                            });
+                    //         expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using minimum number."));
 
-                            // Clear value
-                            chaisePage.recordEditPage.clearInput(intInput);
-                            expect(intInput.getAttribute('value')).toBe("");
+                    //         // Clear value
+                    //         chaisePage.recordEditPage.clearInput(intInput);
+                    //         expect(intInput.getAttribute('value')).toBe("");
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMin').then(function(err) {
-                                expect(err).toBeNull(colError(c.name , "Expected to clear error message after clearing maximum number."));
-                            });
+                    //         expect(errMessageSelector.isDisplayed()).toBeFalsy(colError(c.name , "Expected to clear error message after clearing maximum number."));
 
-                            // Check for a valid number
-                            intInput.sendKeys(validNo);
-                            expect(intInput.getAttribute('value')).toBe(validNo);
+                    //         // Check for a valid number
+                    //         intInput.sendKeys(validNo);
+                    //         expect(intInput.getAttribute('value')).toBe(validNo);
 
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMax').then(function(err) {
-                                expect(err).toBeNull(colError(c.name , "Expected to not show max error on valid number."));
-                            });
-
-                            chaisePage.recordEditPage.getInputErrorMessage(intInput, 'chaiseMin').then(function(err) {
-                                expect(err).toBeNull(colError(c.name , "Expected to not show max error on valid number."));
-                            });
-
-                        });
-                    });
+                    //         expect(errMessageSelector.isDisplayed()).toBeFalsy(colError(c.name , "Expected to not show max error on valid number."));
+                    //     });
+                    // });
 
                     it("should input the given values.", function () {
                         integerDataTypeFields.forEach(function(intInput) {
@@ -1402,22 +1345,21 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it("should render input type as number with float attribute", function(done) {
                         floatCols.forEach(function(column) {
-                            chaisePage.recordEditPage.getFloatInputForAColumn(column.name, recordIndex).then(function(floatInput) {
-                                expect(floatInput.isDisplayed()).toBeTruthy();
+                            const floatInput = chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex+1)
+                            expect(floatInput.isDisplayed()).toBeTruthy();
 
-                                floatInput.column = column;
-                                floatDataTypeFields.push(floatInput);
+                            floatInput.column = column;
+                            floatDataTypeFields.push(floatInput);
 
-                                var value = getRecordValue(column.name);
-                                if (value != undefined) {
-                                    expect(floatInput.getAttribute('value')).toBe(value, colError(column.name, "Didn't have the expected value."));
-                                }
-                                isDone(done);
-                            }).catch(chaisePage.catchTestError(done));
+                            var value = getRecordValue(column.name);
+                            if (value != undefined) {
+                                expect(floatInput.getAttribute('value')).toBe(value, colError(column.name, "Didn't have the expected value."));
+                            }
+                            isDone(done);
                         });
                     });
 
-                    xit("should validate invalid float input", function(done) {
+                    it("should validate invalid float input", function(done) {
                         // NOTE: something is happening in the execution of this `it` that cause a terminal error to be thrown
                         // writing this as chained promises might fix the issue
                         numDone = 0;
@@ -1431,9 +1373,11 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             var validNo = chaisePage.recordEditPage.getRandomArbitrary() + "",
                                 invalidValue = "1j2yu.5", usedValue = "12.5";
 
+                            const errMessageselector = chaisePage.recordEditPage.getInputErrorMessage(floatInput);
                             getExistingValue(c.name, floatInput).then(function (val) {
                                 validNo = val + "";
 
+                                // NOTE: using react might have fixed these tests
                                 // -------------------------------------------- //
                                 // TODO the terminal happens after the sendKeys
                                 // function when there's no sleep or pause in between the following
@@ -1450,14 +1394,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // -------------------------------------------- //
 
                                 // float error should show up
-                                return chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'float');
-                            }).then (function (err) {
-                                expect(err.isDisplayed()).toBeTruthy(colError(c, "Expected to show the float error message on changing the value."));
-
-                                // Required Error message should disappear;
-                                return chaisePage.recordEditPage.getInputErrorMessage(floatInput, 'required');
-                            }).then(function (err) {
-                                expect(err).toBeNull(colError(c.name , "Expected to not show required error."));
+                                expect(errMessageselector.isDisplayed()).toBeTruthy(colError(c, "Expected to show the float error message on changing the value."));
 
                                 // Clear value
                                 return chaisePage.recordEditPage.clearInput(floatInput);
@@ -1472,7 +1409,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 isDone(done);
                             }).catch(chaisePage.catchTestError(done));
                         });
-                    }).pend("this test case is broken and should be fixed");
+                    });
 
                     it("should input the given values.", function (done) {
                         numDone = 0;
@@ -1506,135 +1443,140 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                     it ("should render color input and show the color.", function (done) {
                         colorCols.forEach(function (column) {
-                            chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex).then(function (colorInput) {
-                                expect(colorInput.isDisplayed()).toBeTruthy(colError(column.name, "Wasn't displayed."));
+                            const colorInput = chaisePage.recordEditPage.getColorInputForAColumn(column.name, recordIndex+1)
+                            expect(colorInput.isDisplayed()).toBeTruthy(colError(column.name, "Wasn't displayed."));
 
-                                colorInput.column = column;
-                                colorDataTypeFields.push(colorInput);
+                            colorInput.column = column;
+                            colorDataTypeFields.push(colorInput);
 
-                                var value = getRecordValue(column.name);
-                                if (value != undefined) {
-                                    // make sure the displayed value is correct
-                                    expect(colorInput.getAttribute('value')).toBe(value, colError(column.name , "Doesn't have the expected value."));
+                            var value = getRecordValue(column.name);
+                            if (value != undefined) {
+                                // make sure the displayed value is correct
+                                expect(colorInput.getAttribute('value')).toBe(value, colError(column.name , "Doesn't have the expected value."));
 
-                                    // make sure the background color is correct
-                                    expect(chaisePage.recordEditPage.getColorInputBackground(recordIndex, column.title)).toEqual(value, colError(column.name , "Doesn't have the expected background."));
-                                }
-
-                                isDone(done);
-                            }).catch(function (err) {
-                                done.fail(err);
-                            })
-                        });
-                    });
-
-                    it ("should validate required and invalid color input.", function (done) {
-                        numDone = 0;
-                        colorDataTypeFields.forEach(function(colorInput) {
-                            var c = colorInput.column;
-
-                            if (c.skipValidation || c.generated || c.immutable) {
-                                isDone(done);
-                                return;
+                                // make sure the background color is correct
+                                expect(chaisePage.recordEditPage.getColorInputBackground(column.name, recordIndex+1)).toEqual(value, colError(column.name , "Doesn't have the expected background."));
                             }
 
-                            var prevValue, invalidValue = "invalidColor", testRequired = false;
-                            // c.nullok === false;
-                            getExistingValue(c.name, colorInput).then(function (val) {
-                                prevValue = val;
-
-                                // clear the value
-                                return chaisePage.recordEditPage.clearInput(colorInput);
-                            }).then(function () {
-                                // the input won't validate until we press enter or change focus
-                                return browser.actions().sendKeys(protractor.Key.ENTER).perform();
-                            }).then(function () {
-                                // // if testing required, submit the form so we can see the error
-                                if (testRequired) {
-                                    chaisePage.recordEditPage.submitForm();
-                                    return chaisePage.recordEditPage.getColorInputErrorMessage(colorInput, 'required');
-                                }
-                                return true;
-                            }).then(function (resp) {
-                                if (testRequired) {
-                                    expect(resp.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
-                                }
-                                return colorInput.sendKeys(invalidValue);
-                            }).then (function () {
-                                // the input won't validate until we press enter or change focus
-                                return browser.actions().sendKeys(protractor.Key.ENTER).perform();
-                            }).then (function () {
-                                // I had to turn this from a simple get attribute to wait
-                                // since it was throwing a terminal error
-                                browser.wait(function () {
-                                    return colorInput.getAttribute('value').then((function (val) {
-                                        return val == "";
-                                    })).catch(function (err) {
-                                        done.fail(err);
-                                    })
-                                });
-
-                                //Restore the value to the original one
-                                if (tableParams.primary_keys.indexOf(c.name) != -1) {
-                                    return colorInput.sendKeys(prevValue);
-                                }
-
-                                return true;
-                            }).then (function () {
-                                isDone(done);
-                            }).catch(function (err) {
-                                console.log(err);
-                                done.fail(err);
-                            })
+                            isDone(done);
                         });
                     });
 
-                    it("clicking on input should open the color popup, clear btn should be available based on nullok, and should be able to change value", function (done) {
-                        numDone = 0;
-                        colorDataTypeFields.forEach(function (colorInput) {
-                            var c = colorInput.column;
-                            if (c.skipValidation || c.generated || c.immutable) {
-                                isDone(done);
-                                return;
-                            }
+                    // TODO: figure out why `isDone()` and subsequently `done()` is being called, but test isn't ending
+                    // it ("should validate required and invalid color input.", function (done) {
+                    //     numDone = 0;
+                    //     colorDataTypeFields.forEach(function(colorInput) {
+                    //         var c = colorInput.column;
 
-                            var popup = chaisePage.recordEditPage.getColorInputPopup(),
-                                popupInput,
-                                value = "#555555";
+                    //         if (c.skipValidation || c.generated || c.immutable) {
+                    //             isDone(done);
+                    //             return;
+                    //         }
 
-                            // click the button to open popup
-                            chaisePage.recordEditPage.getColorInputBtn(recordIndex, c.title).click().then(function () {
+                    //         // NOTE: use valid color values that produce an invalid color option
+                    //         var prevValue, invalidValue = "de", testRequired = false;
 
-                                // make sure popup is displayed
-                                chaisePage.waitForElement(popup);
+                    //         const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(colorInput);
+                    //         // c.nullok === false;
+                    //         getExistingValue(c.name, colorInput).then(function (val) {
+                    //             prevValue = val;
 
-                                // make sure clear btn is offered regardless of null/not-null (just like any other  input)
-                                var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
-                                expect(clearBtn.isDisplayed()).toEqual(true, colError(c.name, "color popup: clear btn invalid state"));
+                    //             // clear the value
+                    //             return chaisePage.recordEditPage.clearInput(colorInput);
+                    //         }).then(function () {
+                    //             // the input won't validate until we press enter or change focus
+                    //             // TODO: click on a different input instead
+                    //             return browser.actions().sendKeys(protractor.Key.ENTER).perform();
+                    //         }).then(function () {
+                    //             // if testing required, submit the form so we can see the error
+                    //             if (testRequired) {
+                    //                 return chaisePage.recordEditPage.submitForm();
+                    //             }
+                    //             return true;
+                    //         }).then(function (resp) {
+                    //             if (testRequired) {
+                    //                 expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
+                    //                 chaisePage.recordEditPage.getAlertErrorClose().click();
+                    //             }
+                    //             return colorInput.sendKeys(invalidValue);
+                    //         }).then (function () {
+                    //             // the input won't validate until we press enter or change focus
+                    //             // TODO: click on a different input instead
+                    //             return browser.actions().sendKeys(protractor.Key.ENTER).perform();
+                    //         }).then (function () {
+                    //             // I had to turn this from a simple get attribute to wait
+                    //             // since it was throwing a terminal error
+                    //             browser.wait(function () {
+                    //                 return colorInput.getAttribute('value').then((function (val) {
+                    //                     return val == "";
+                    //                 })).catch(function (err) {
+                    //                     done.fail(err);
+                    //                 })
+                    //             });
 
-                                // write a color and submit
-                                popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
-                                expect(popupInput.isDisplayed).toBeTruthy(colError(c.name, "color popup: input is missing"));
+                    //             //Restore the value to the original one
+                    //             if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                    //                 colorInput.sendKeys(prevValue);
+                    //             }
+                            
+                    //             console.log('before is done');
+                    //             isDone(done);
+                    //         }).catch(function (err) {
+                    //             console.log(err);
+                    //             done.fail(err);
+                    //         })
+                    //     });
+                    // });
 
-                                // clear the input
-                                return chaisePage.recordEditPage.clearInput(popupInput);
-                            }).then (function () {
-                                // change the input
-                                return popupInput.sendKeys(value);
-                            }).then (function () {
+                    // TODO: when input is clicked, since it is the last row in the form, the popup opens down off page
+                    // it("clicking on input should open the color popup, clear btn should be available based on nullok, and should be able to change value", function (done) {
+                    //     numDone = 0;
+                    //     colorDataTypeFields.forEach(function (colorInput) {
+                    //         var c = colorInput.column;
+                    //         console.log('before skip validation check')
+                    //         if (c.skipValidation || c.generated || c.immutable) {
+                    //             isDone(done);
+                    //             return;
+                    //         }
 
-                                // close the popup
-                                return chaisePage.recordEditPage.getColorInputPopupSelectBtn().click();
-                            }).then(function () {
-                                chaisePage.waitForElementInverse(popup);
-                                expect(colorInput.getAttribute('value')).toBe(value, colError(c.name, "color popup: value didn't change"));
+                    //         var popup = chaisePage.recordEditPage.getColorInputPopup(),
+                    //             popupInput,
+                    //             value = "#555555";
 
-                                isDone(done);
-                            }).catch(function (err) {
-                                done.fail(err);
-                            });
-                        });
-                    });
+                    //         // click the button to open popup
+                    //         chaisePage.recordEditPage.getColorInputBtn(c.name, recordIndex+1).click().then(function () {
+                    //             browser.sleep(100000)
+
+                    //             // make sure popup is displayed
+                    //             chaisePage.waitForElement(popup);
+
+                    //             // make sure clear btn is offered regardless of null/not-null (just like any other  input)
+                    //             var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
+                    //             expect(clearBtn.isDisplayed()).toEqual(true, colError(c.name, "color popup: clear btn invalid state"));
+
+                    //             // write a color and submit
+                    //             popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
+                    //             expect(popupInput.isDisplayed).toBeTruthy(colError(c.name, "color popup: input is missing"));
+
+                    //             // clear the input
+                    //             return chaisePage.recordEditPage.clearInput(popupInput);
+                    //         }).then (function () {
+                    //             // change the input
+                    //             return popupInput.sendKeys(value);
+                    //         }).then (function () {
+
+                    //             // close the popup
+                    //             return chaisePage.recordEditPage.getColorInputPopupSelectBtn().click();
+                    //         }).then(function () {
+                    //             chaisePage.waitForElementInverse(popup);
+                    //             expect(colorInput.getAttribute('value')).toBe(value, colError(c.name, "color popup: value didn't change"));
+
+                    //             isDone(done);
+                    //         }).catch(function (err) {
+                    //             done.fail(err);
+                    //         });
+                    //     });
+                    // });
 
                     it ("should be able to input the given values", function (done) {
                         numDone = 0;
@@ -1651,8 +1593,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 return colorInput.sendKeys(text);
                             }).then(function () {
                                 // the input won't validate until we press enter or change focus
-                                return browser.actions().sendKeys(protractor.Key.ENTER).perform();
-                            }).then(function () {
+                            //     return browser.actions().sendKeys(protractor.Key.ENTER).perform();
+                            // }).then(function () {
 
                                 // make sure the displayed value is correct
                                 expect(colorInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));
@@ -1681,7 +1623,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
             }
         });
 
-        if (Array.isArray(tableParams.inputs) && recordIndex < tableParams.inputs.length-1) {
+        if (Array.isArray(tableParams.inputs) && recordIndex+1 < tableParams.inputs.length) {
             testMultipleRecords(recordIndex + 1);
         }
     };
@@ -1701,17 +1643,14 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
  * @return {[type]}              [description]
  */
 exports.testSubmission = function (tableParams, isEditMode) {
-    beforeAll(function() {
-        // Submit the form
-        chaisePage.recordEditPage.submitForm();
-    });
-
     var hasErrors = false;
 
     it("should have no errors.", function() {
-        chaisePage.recordEditPage.getAlertError().then(function(err) {
+        chaisePage.recordEditPage.submitForm().then(() => {
+            return chaisePage.recordEditPage.getAlertError();
+        }).then(function(err) {
             if (err) {
-                expect("Page has errors").toBe("No errors", "expected pge to have no errors");
+                expect("Page has errors").toBe("No errors", "expected page to have no errors");
                 hasErrors = true;
             } else {
                 expect(true).toBe(true);
@@ -1752,8 +1691,8 @@ exports.testSubmission = function (tableParams, isEditMode) {
 
         describe('result page, ', function () {
             it("should have the correct title.", function() {
-                var title = tableParams.results.length + "/" + tableParams.results.length + " " + tableParams.table_displayname + " records " + (isEditMode ? "updated" : "created") + " successfully";
-                expect(chaisePage.recordEditPage.getResultsetTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
+                var title = tableParams.results.length + " " + tableParams.table_displayname + " records " + (isEditMode ? "updated" : "created") + " successfully";
+                expect(chaisePage.recordEditPage.getEntityTitleElement().getText()).toBe(title, "Resultset page title is incorrect.");
             });
 
             it('should point to the correct link with caption.', function () {
@@ -1767,7 +1706,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
                 }
 
                 var expectedLink = process.env.CHAISE_BASE_URL + "/recordset/#" +  browser.params.catalogId + "/" + tableParams.schema_name + ":" + tableParams.table_name + linkModifier;
-                var titleLink = chaisePage.recordEditPage.getResultsetTitleLinkElement();
+                var titleLink = chaisePage.recordEditPage.getEntityTitleLinkElement();
 
                 expect(titleLink.getText()).toBe(tableParams.table_displayname, "Title of result page doesn't have the expected caption.");
                 expect(titleLink.getAttribute("href")).toContain(expectedLink , "Title of result page doesn't have the expected link.");
@@ -1943,20 +1882,16 @@ exports.selectFile = function(file, fileInput, txtInput) {
     browser.sleep(100);
 
     expect(fileInput.getAttribute('value')).toContain(file.name, "didn't select the correct file.");
-    expect(txtInput.getAttribute('value')).toBe(file.name, "didn't show the correct file name after selection.");
+    expect(txtInput.getText()).toBe(file.name, "didn't show the correct file name after selection.");
 
     if (typeof file.tooltip === "string") {
         // test the tooltip on hover
         // move the mouse first to force any other tooltips to hide
-        browser.actions().mouseMove(element(by.css(".text-danger"))).perform();
+        browser.actions().mouseMove(chaisePage.recordEditPage.getRequiredInfoEl()).perform();
         var tooltip = chaisePage.getTooltipDiv();
 
         chaisePage.waitForElementInverse(tooltip).then(function () {
-            browser.actions().mouseMove(txtInput).perform();
-
-            return chaisePage.waitForElement(tooltip)
-        }).then(function () {
-            expect(tooltip.getText()).toBe(file.tooltip, "Incorrect tooltip on the File Input");
+            chaisePage.testTooltipReturnPromise(txtInput, file.tooltip, 'recordedit');
         });
     }
 };
@@ -1971,39 +1906,31 @@ exports.selectFile = function(file, fileInput, txtInput) {
  * @param  {boolean=false}  print           should it print the file names or not.
  */
 exports.testFileInput = function (colName, recordIndex, file, currentValue, print, testValidation) {
-    chaisePage.recordEditPage.getInputForAColumn(colName, recordIndex).then(function(fileInput) {
-        print = typeof print !== "boolean" ? false : print;
+    const fileInput = chaisePage.recordEditPage.getInputForAColumn(colName, recordIndex+1);
+    print = typeof print !== "boolean" ? false : print;
 
-        if (fileInput) {
-            var txtInput;
-            chaisePage.recordEditPage.getInputForAColumn("txt" + colName, recordIndex).then(function(input) {
-                txtInput = input;
-                return txtInput.getAttribute('value');
-            }).then(function(value) {
-                // Incase of edit first clear the fileinput field by pressing the dismiss button
-                // and then set new file
-                if (value.trim().length > 0) {
-                    chaisePage.recordEditPage.getClearButton(txtInput).then(function(clearButton) {
-                        return clearButton.click();
-                    }).then(function () {
+    const textInput = chaisePage.recordEditPage.getTextFileInputForAColumn(colName, recordIndex+1)
+    textInput.getAttribute('value').then(function(value) {
+        // Incase of edit first clear the fileinput field by pressing the dismiss button
+        // and then set new file
+        if (value && value.trim().length > 0) {
+            chaisePage.recordEditPage.getClearButton(textInput).then(function(clearButton) {
+                return clearButton.click();
+            }).then(function () {
 
-                        browser.sleep(50);
+                browser.sleep(50);
 
-                        expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
-                        exports.selectFile(file, fileInput, txtInput);
-                    });
-                } else {
-                    exports.selectFile(file, fileInput, txtInput);
-                }
-
-                if (testValidation) {
-                    chaisePage.recordEditPage.getFileInputErrorMessage(fileInput, 'fileExtension').then(function(err) {
-                        expect(err.isDisplayed()).toBeTruthy("validation message is not displayed for file input");
-                    });
-                }
+                expect(txtInput.getAttribute('value')).toBe("", "couldn't clear the button.");
+                exports.selectFile(file, fileInput, textInput);
             });
         } else {
-            expect(undefined).toBeDefined("Unable to find file input field for column " + colName);
+            exports.selectFile(file, fileInput, textInput);
+        }
+
+        if (testValidation) {
+            chaisePage.recordEditPage.getFileInputErrorMessage(fileInput, 'fileExtension').then(function(err) {
+                expect(err.isDisplayed()).toBeTruthy("validation message is not displayed for file input");
+            });
         }
     });
 };

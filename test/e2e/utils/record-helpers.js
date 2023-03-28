@@ -1024,7 +1024,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
                 expect(url.indexOf('prefill=')).toBeGreaterThan(-1, "didn't have prefill");
 
                 var title = chaisePage.recordEditPage.getEntityTitleElement().getText();
-                expect(title).toBe("Create new " + params.tableDisplayname, "recordedit title missmatch.");
+                expect(title).toBe('Create 1 ' + params.tableDisplayname + ' record', "recordedit title missmatch.");
 
                 done();
             }).catch(function (err) {
@@ -1034,10 +1034,43 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
         });
 
         it ("the opened form should have the prefill value for foreignkey.", function (done) {
-            for (var col in params.prefilledValues) {
-                var fkInput = chaisePage.recordEditPage.getInputById(0, col);
-                expect(fkInput.getAttribute('value')).toBe(params.prefilledValues[col], "value missmatch for " + col);
-                expect(fkInput.getAttribute('disabled')).toBe(params.prefilledValues[col] === "" ? null : 'true', "disabled missmatch for " + col);
+            for (var column in params.prefilledValues) {
+                ((col) => {
+                    if (typeof params.prefilledValues[col] === 'object') {
+                        const colObj = params.prefilledValues[col];
+                        let input
+                        // disabled FK inputs are tested differently than disabled text inputs
+                        if (colObj.displayType === 'input') {
+                            input = chaisePage.recordEditPage.getInputForAColumn(col, 1);
+                            expect(input.getAttribute('value')).toBe(colObj.value, "value missmatch for " + col);
+                            expect(input.getAttribute('disabled')).toBe(colObj.value === "" ? null : 'true', "disabled missmatch for " + col);
+                        } else {
+                            input = chaisePage.recordEditPage.getForeignKeyInputDisplay(col, 1);
+                            expect(input.getText()).toBe(colObj.value, "value missmatch for " + col);
+
+                            input.getAttribute('class').then((classAttr) => {
+                                if (!colObj.isDisabled) {
+                                    expect(classAttr.indexOf('input-disabled')).toBe(-1, col + " was disabled.");
+                                } else {
+                                    expect(classAttr.indexOf('input-disabled')).toBeGreaterThan(-1, col + " was not disabled.");
+                                }
+                            });
+                        }   
+
+                    } else {
+                        // NOTE/TODO: should probably be removed since all tests should be migrated to have an object
+                        const fkInput = chaisePage.recordEditPage.getForeignKeyInputDisplay(col, 1);
+                        expect(fkInput.getText()).toBe(params.prefilledValues[col], "value missmatch for " + col);
+
+                        fkInput.getAttribute('class').then((classAttr) => {
+                            if (params.prefilledValues[col] === "") {
+                                expect(classAttr.indexOf('input-disabled')).toBe(-1, col + " was disabled.");
+                            } else {
+                                expect(classAttr.indexOf('input-disabled')).toBeGreaterThan(-1, col + " was not disabled.");
+                            }
+                        });
+                    }
+                })(column);
             }
             done();
         });

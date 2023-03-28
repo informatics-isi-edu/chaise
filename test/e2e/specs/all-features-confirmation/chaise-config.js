@@ -8,6 +8,7 @@ var chaiseConfig = {
     confirmDelete: true, //testing case-insensitive properties, this one is used over the previous one
     dataBrowser: '/',
     deFAuLtCaTAlog: 1, //testing case-insensitive properties
+    // TODO: make sure this is working properly in spec
     maxRecordsetRowHeight: false, // triggers (ignores) some logic in ellipsis.js. Tests view buttons having proper links
     allowErrorDismissal : true,
     resolverImplicitCatalog: 2, // in parallel config mode, this config is used first with catalog Id

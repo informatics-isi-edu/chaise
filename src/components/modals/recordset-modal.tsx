@@ -271,7 +271,7 @@ const RecordsetModal = ({
                 <span> for </span>
                 <Title reference={recordsetProps.parentReference} />
                 {recordsetProps.parentTuple &&
-                  <span>:<Title displayname={recordsetProps.parentTuple.displayname}></Title></span>
+                  <span>: <Title displayname={recordsetProps.parentTuple.displayname}></Title></span>
                 }
               </span>
             }

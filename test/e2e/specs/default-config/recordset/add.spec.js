@@ -113,7 +113,8 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPage.getInputForAColumn("title");
         }).then(function(input) {
             input.sendKeys(testParams.title);
-            return chaisePage.recordsetPage.getModalPopupBtn();
+
+            return chaisePage.recordsetPage.getModalPopupBtn('Category', 1);
         }).then(function(btn) {
             return btn.click();
         }).then(function() {
@@ -134,12 +135,16 @@ describe('Recordset add record,', function() {
             return chaisePage.recordsetPage.getInputForAColumn("rating");
         }).then(function(input) {
             input.sendKeys(testParams.rating);
-            return chaisePage.recordEditPage.getTextAreaForAcolumn("summary");
+            return chaisePage.recordEditPage.getTextAreaForAColumn("summary");
         }).then(function(input) {
             input.sendKeys(testParams.summary);
-            var nowBtn = element.all(by.css('button[name="opened_on-now"]')).get(0);
-            return nowBtn.click();
-        }).then(function() {
+
+            const timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn('opened_on', 1)
+            const momentNow = moment();
+
+            timestampInputs.date.sendKeys(momentNow.format('MM-DD-YYYY'));
+            timestampInputs.time.sendKeys(momentNow.format("hh:mm:ssA"));
+            
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page

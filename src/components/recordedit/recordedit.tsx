@@ -418,7 +418,7 @@ const RecordeditInner = ({
                     </button>
                   </ChaiseTooltip>
                   {canShowBulkDelete && <ChaiseTooltip placement='bottom' tooltip='Delete the displayed set of records.'>
-                    <button className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
+                    <button id='bulk-delete-button' className='chaise-btn chaise-btn-primary' onClick={onBulkDeleteButtonClick}>
                       <span className='chaise-btn-icon fa-regular fa-trash-alt'></span>
                       <span>Delete</span>
                     </button>
@@ -427,11 +427,12 @@ const RecordeditInner = ({
                 <h1 id='page-title'>{renderTitle()}</h1>
               </div>
               {!resultsetProps && <div className='form-controls'>
-                <span><span className='text-danger'><b>*</b></span> indicates required field</span>
+                {/* required-info used in testing for reseting cursor position when testing tooltips */}
+                <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span> 
                 <div className='add-forms chaise-input-group'>
                   {appMode === appModes.EDIT ?
                     <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
-                      <button className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
+                      <button id='recordedit-reset' className='chaise-btn chaise-btn-secondary' onClick={onResetClick} type='button'>
                         <span className='chaise-btn-icon fa-solid fa-undo'></span>
                         <span>Reset</span>
                       </button>
