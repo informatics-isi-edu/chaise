@@ -217,9 +217,14 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
       permissionError = columnPermissionErrors[colName];
     }
 
+    const safeClassNameId = `${formNumber}-${makeSafeIdAttr(columnModel.column.displayname.value)}`;
+
     return (<>
       {permissionError && typeof formIndex === 'number' &&
-        <div className='column-permission-overlay' onClick={() => onPermissionClick(formIndex)} />
+        <div
+          className={`column-permission-overlay column-permission-overlay-${safeClassNameId}`}
+          onClick={() => onPermissionClick(formIndex)}
+        />
       }
       <InputSwitch
         key={colName}
@@ -241,7 +246,7 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
         waitingForForeignKeyData={waitingForForeignKeyData}
       />
       {typeof formIndex === 'number' && formIndex in showPermissionError &&
-        <div className='column-permission-warning'>{permissionError}</div>
+        <div className={`column-permission-warning column-permission-warning-${safeClassNameId}`}>{permissionError}</div>
       }
     </>)
   }

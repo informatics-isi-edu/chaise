@@ -18,10 +18,6 @@ var recordEditPage = function() {
         return element(by.css('.resultset-container #page-title'));
     };
 
-    this.getResultsetTitleLinkElement = function () {
-        return this.getResultsetTitleElement().element(by.tagName('a'));
-    };
-
     this.getRequiredInfoEl = () => {
         return element(by.className('required-info'));
     }
@@ -34,14 +30,14 @@ var recordEditPage = function() {
       return element.all(by.css(".column-permission-overlay"));
     }
 
-    this.getColumnPermissionOverlay = function (rowIndex, displayName) {
+    this.getColumnPermissionOverlay = function (formNumber, displayName) {
         displayName = makeSafeIdAttr(displayName);
-        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-overlay"));
+        return element(by.css(".column-permission-overlay-" + formNumber + '-' + displayName));
     }
 
-    this.getColumnPermissionError = function (rowIndex, displayName) {
+    this.getColumnPermissionError = function (formNumber, displayName) {
         displayName = makeSafeIdAttr(displayName);
-        return element(by.id("form-" + rowIndex + '-' + displayName + "-col-perm-warn"));
+        return element(by.css(".column-permission-warning-" + formNumber + '-' + displayName));
     };
 
     this.getDisabledRowIcon = function (rowIndex) {
@@ -179,7 +175,7 @@ var recordEditPage = function() {
     this.getDropdownElements = function(el) {
         return el.element(by.xpath('ancestor::tr')).all(by.css(".chaise-input-control.dropdown-toggle"));
     };
-    
+
     this.getDropdownElementByName = (name, index) => {
         index = index || 1;
         const inputName = index + '-' + name;

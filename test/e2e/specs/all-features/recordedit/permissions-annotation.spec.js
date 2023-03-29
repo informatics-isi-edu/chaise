@@ -55,13 +55,21 @@ describe('When viewing RecordEdit app', function() {
         });
 
         describe('the FK search popup modal should have the select button in the action column and', function() {
-            var rows;
-            afterEach(function() {
-                // The select button in the action column should be displayed
-                rows = chaisePage.recordsetPage.getRows();
-                var selectBtn = rows.get(0).all(by.css('.select-action-button')).first();
-                expect(selectBtn.isDisplayed()).toBe(true);
-                selectBtn.click();
+            afterEach((done) => {
+                // wait for rows to show up
+                browser.wait(() => {
+                    return chaisePage.recordsetPage.getRows().count().then((ct) => (ct > 0));
+                }).then(() => {
+                    const rows = chaisePage.recordsetPage.getRows();
+
+                    //  select the first one
+                    const selectBtn = rows.all(by.css('.select-action-button')).first();
+                    expect(selectBtn.isDisplayed()).toBe(true);
+                    return selectBtn.click();
+                }).then(() => {
+                    done();
+                }).catch(chaisePage.catchTestError(done));
+
             });
 
             it('should show the create button in the modal for a FK-related table that allows creation', function() {
@@ -77,8 +85,7 @@ describe('When viewing RecordEdit app', function() {
             });
 
             it('should not show the create button in the modal for a read-only table', function() {
-                // index is 2 because of show all
-                var input = recordEditPage.getForeignKeyInputs().get(2);
+                var input = recordEditPage.getForeignKeyInputs().get(1);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
@@ -89,8 +96,7 @@ describe('When viewing RecordEdit app', function() {
             });
 
             it('should show the create button in the modal for a table that allows update and create', function() {
-                // index is 4 because of show all
-                var input = recordEditPage.getForeignKeyInputs().get(4);
+                var input = recordEditPage.getForeignKeyInputs().get(2);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
@@ -101,8 +107,7 @@ describe('When viewing RecordEdit app', function() {
             });
 
             it('should not show the create button in the modal for a table that only allows delete', function() {
-                // index is 6 because of show all
-                var input = recordEditPage.getForeignKeyInputs().get(6);
+                var input = recordEditPage.getForeignKeyInputs().get(3);
                 var modalTitle = recordEditPage.getModalTitle();
                 input.click();
                 chaisePage.waitForElement(modalTitle).then(function() {
