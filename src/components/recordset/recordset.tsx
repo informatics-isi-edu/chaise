@@ -558,7 +558,7 @@ const RecordsetInner = ({
           iconTooltip={cFacetRemovable ? 'Clear custom filter applied' : 'Predefined filter(s)'}
           // when it's not removable we're showing the icon and that's enough
           title={cFacetRemovable ? 'Custom Filter' : undefined}
-          value={transformCustomFilter(loc.customFacets.displayname.value)}
+          value={loc.customFacets.displayname}
           onRemove={cFacetRemovable ? (identifier) => facetCallbacks.current!.removeAppliedFilters(identifier) : undefined}
           removeClass='clear-custom-facets'
         />

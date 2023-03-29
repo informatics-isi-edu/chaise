@@ -89,12 +89,20 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
     (props.appMode !== appModes.EDIT && props.columnModel.column.default !== null));
 
   /**
-   * make sure the underlying raw columns are also emptied.
+   * make sure the underlying raw columns as well as foreignkey data are also emptied.
    */
   const onClear = () => {
+    // clear the raw values
     props.columnModel.column.foreignKey.colset.columns.forEach((col: any) => {
       setValue(`${usedFormNumber}-${col.name}`, '');
     });
+
+    // clear the foreignkey data
+    if (props.foreignKeyData && props.foreignKeyData.current) {
+      props.foreignKeyData.current[props.name] = {};
+    }
+
+    // the input-field will take care of clearing the displayed rowname.
   }
 
   const openRecordsetModal = (e: any) => {
@@ -119,8 +127,21 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
       andFilters.push({ source: col.name, hidden: true, not_null: true });
     });
 
-    // domain-filter support
-    const linkedData = props.foreignKeyData && props.foreignKeyData.current ? props.foreignKeyData.current[props.name] : {};
+    /**
+     * convert the foreignKeyData to something that ermrestjs expects.
+     * foreignKeyData currently is a flat list of object with `${formNumber}-{colName}` keys.
+     * the following will extract the foreignKeyData of the row that we need.
+     */
+    const linkedData : any = {};
+    if (props.foreignKeyData && props.foreignKeyData.current) {
+      props.parentReference.activeList.allOutBounds.forEach((col: any) => {
+        const k =  `${usedFormNumber}-${col.name}`;
+        if (k in props.foreignKeyData?.current) {
+          linkedData[col.name] = props.foreignKeyData?.current[k];
+        }
+      });
+    }
+
     const submissionRow = populateSubmissionRow(props.parentReference, usedFormNumber, getValues());
     const ref = props.columnModel.column.filteredRef(submissionRow, linkedData).addFacets(andFilters);
 
@@ -154,7 +175,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
         return;
       }
 
-      // TODO capture the foreignKeyData
+      // capture the foreignKeyData
       if (props.foreignKeyData && props.foreignKeyData.current) {
         props.foreignKeyData.current[props.name] = selectedRow.data;
       }

@@ -21,7 +21,7 @@ type FilterChicletProps = {
   /**
    * The displayed value
    */
-  value: JSX.Element | JSX.Element[] | string,
+  value: JSX.Element | JSX.Element[] | string | Displayname,
   /**
    * the tooltip for the value (is missing, the value itself will be used)
    */
@@ -60,9 +60,16 @@ const FilterChiclet = ({
   const IconTag = onRemove ? 'button' : 'span';
   const TitleTag = onTitleClick ? 'button' : 'span';
 
-  // if defined as string, transform them to a proper displayname
+  // make sure the title and value are proper types so later we can just use them.
   const usedTitle: Displayname | undefined = typeof title === 'string' ? { isHTML: false, value: title } : title;
-  const usedValue: JSX.Element | JSX.Element[] = typeof value === 'string' ? <DisplayValue value={{ isHTML: false, value: value }} /> : value;
+  let usedValue : JSX.Element | JSX.Element[];
+  if (typeof value === 'string') {
+    usedValue = <DisplayValue value={{ isHTML: false, value: value }} />;
+  } else if (typeof value === 'object' && ('value' in value)) {
+    usedValue = <DisplayValue value={value} />
+  } else {
+    usedValue = value;
+  }
 
   return (
     <div className='filter-chiclet chaise-btn-group'>

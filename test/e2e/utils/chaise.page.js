@@ -276,10 +276,6 @@ var recordEditPage = function() {
         return browser.executeScript("return $('.modal-popup-btn')");
     };
 
-    this.getForeignKeyInputRemoveBtns = function() {
-        return browser.executeScript("return $('.foreignkey-remove');");
-    };
-
     this.getModalTitle = function() {
         return element(by.css(".modal-title"));
     };
@@ -309,6 +305,10 @@ var recordEditPage = function() {
     this.getForeignKeyInputButton = function(columnDisplayName, index) {
         columnDisplayName = makeSafeIdAttr(columnDisplayName);
         return element(by.id("form-" + index + '-' + columnDisplayName + "-button"));
+    };
+
+    this.getForeignKeyInputClear = function(columnDisplayName, index) {
+        return this.getForeignKeyInputDisplay(columnDisplayName, index).element(by.className('remove-input-btn'));
     };
 
     this.getForeignKeyInputs = function() {

@@ -185,11 +185,7 @@ describe("Domain filter pattern support,", function () {
 
                 // clear col_w_fkeys_default, open col_w_fkeys
                 it("after clearing the foreignkey, it should not limit the set.", function (done) {
-                    chaisePage.recordEditPage.getForeignKeyInputRemoveBtns().then(function (btns) {
-                        // NOTE this is not the best way to find the button, it's by index
-                        // clears the col_w_fkeys_default input (should be the last visible "x")
-                        return chaisePage.clickButton(btns[btns.length - 1]);
-                    }).then(function () {
+                    chaisePage.recordEditPage.getForeignKeyInputClear(colWFkeysDefault, 1).click().then(function () {
                         return chaisePage.recordEditPage.getForeignKeyInputButton(colWFkeys, 1).click();
                     }).then(function () {
                         browser.wait(EC.visibilityOf(modalTitle), browser.params.defaultTimeout);
