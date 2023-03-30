@@ -179,7 +179,7 @@ export default function RecordeditProvider({
     })
     setColumnModels([...tempColumnModels]);
 
-    const ERMrest = windowRef.ERMrest;
+    const ERMrest = ConfigService.ERMrest;
     if (appMode === appModes.EDIT || appMode === appModes.COPY) {
       if (reference.canUpdate) {
         let numberRowsToRead = maxRowsToAdd;
@@ -455,8 +455,26 @@ export default function RecordeditProvider({
           }
         };
 
-        const submitErrorCB = (err: any) => {
-          addAlert(err.message, (err instanceof windowRef.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR));
+        const submitErrorCB = (exception: any) => {
+          /**
+           * TODO
+           * we used to call Session.validateSession() here before,
+           * but that function doesn't exist anymore. is it needed?
+           */
+          // TODO why? the validateSessionBeforeMutation should have already handled this
+          // if (!session && exception instanceof ConfigService.ERMrest.ConflictError) {
+          //   // login in a modal should show (Session timed out)
+          //   throw new ConfigService.ERMrest.UnauthorizedError();
+          // }
+
+          // append link to end of alert.
+          if (exception instanceof ConfigService.ERMrest.DuplicateConflictError) {
+            const link = exception.duplicateReference.contextualize.detailed.appLink;
+            exception.message += ` Click <a href="${link}" target="_blank">here</a> to see the conflicting record that already exists.`;
+          }
+
+          const alertType = (exception instanceof ConfigService.ERMrest.NoDataChangedError ? ChaiseAlertType.WARNING : ChaiseAlertType.ERROR);
+          addAlert(exception.message, alertType);
         };
 
         const submitFinallyCB = () => {

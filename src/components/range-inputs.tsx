@@ -222,6 +222,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
               <label>From:
                 <InputSwitch
                   displayErrors={false}
+                  disableInput={disabled}
                   name={minName}
                   type={inputType}
                   placeholder={absMin as string}
@@ -236,6 +237,7 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
               <label>To:
                 <InputSwitch
                   displayErrors={false}
+                  disableInput={disabled}
                   name={maxName}
                   type={inputType}
                   placeholder={absMax as string}

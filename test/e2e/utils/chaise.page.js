@@ -272,10 +272,6 @@ var recordEditPage = function() {
         return element.all(by.css(".modal-popup-btn"));
     };
 
-    this.getModalPopupBtnsUsingScript = function() {
-        return browser.executeScript("return $('.modal-popup-btn')");
-    };
-
     this.getModalTitle = function() {
         return element(by.css(".modal-title"));
     };
@@ -286,10 +282,6 @@ var recordEditPage = function() {
 
     this.getModalCloseBtn = function() {
         return element(by.css(".modal-close"));x
-    };
-
-    this.getForms = function() {
-        return element.all(by.css(".form-header"));
     };
 
     this.getForeignKeyInputDisplay = function(columnDisplayName, index) {
@@ -491,8 +483,8 @@ var recordEditPage = function() {
         return element(by.css('.alert-danger button'));
     }
 
-    this.getAlertErrorLinkHref = function() {
-        return browser.executeScript("return $('.alert-danger:visible a')[0].getAttribute('href');");
+    this.getAlertErrorLink = function() {
+        return element(by.css('.alert-danger a'));
     };
 
     this.getAlertWarning = function() {
@@ -1080,17 +1072,18 @@ var recordsetPage = function() {
 
     /******* Facet selectors for recordset with faceting ********/
     this.getHideFilterPanelBtn = function(el) {
-        var locator = by.className('hide-filter-panel-btn');
+        const locator = by.css('.hide-filter-panel-btn');
         return el ? el.element(locator) : element(locator);
     }
 
     this.getShowFilterPanelBtn = function(el) {
-        var locator = by.className('show-filter-panel-btn');
+        const locator = by.css('.show-filter-panel-btn');
         return el ? el.element(locator) : element(locator);
     }
 
-    this.getSidePanel = function() {
-      return element(by.css('.side-panel-resizable'));
+    this.getSidePanel = function(el) {
+        const locator = by.css('.side-panel-resizable');
+        return el ? el.element(locator) : element(locator);
     }
 
     this.getAllFacets = function (){
@@ -1147,11 +1140,6 @@ var recordsetPage = function() {
         return element(by.css(".chiclets-container")).all(by.css(".filter-chiclet"));
     }
 
-    // NOTE: keeping around until angular apps are rewritten
-    this.getAngularFacetFilters = function () {
-        return element(by.css(".recordset-chiclets")).all(by.css(".filter-chiclet"));
-    }
-
     this.getClearAllFilters = function () {
         return element(by.css(".clear-all-filters"));
     }
@@ -1188,11 +1176,6 @@ var recordsetPage = function() {
       return browser.executeScript(`
         return Array.from(document.querySelectorAll('.fc-${idx} .chaise-checkbox label')).map((el) =>  { try { return JSON.stringify(JSON.parse(a.textContent.trim())); } catch(e) { return a.textContent.trim()} })
       `);
-    }
-
-    // NOTE: keeping around until angular apps are rewritten
-    this.getAngularFacetOption = function (idx, option) {
-        return element(by.id("fc-" + idx)).element(by.id("checkbox-" + option));
     }
 
     this.getFacetOption = function (idx, option) {

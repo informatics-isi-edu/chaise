@@ -634,7 +634,7 @@ describe("regarding dynamic ACL support, ", function () {
                     return chaisePage.clickButton(summaryCloseBtn);
                 }).then(() => {
                     browser.wait(function() {
-                      return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                      return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                           // only one row was deletable
                           return (ct == 2);
                       });

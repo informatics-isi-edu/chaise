@@ -7,6 +7,7 @@ import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import DeleteConfirmationModal from '@isrd-isi-edu/chaise/src/components/modals/delete-confirmation-modal';
 import KeyColumn from '@isrd-isi-edu/chaise/src/components/recordedit/key-column';
 import FormContainer from '@isrd-isi-edu/chaise/src/components/recordedit/form-container';
+import Footer from '@isrd-isi-edu/chaise/src/components/footer';
 import Title from '@isrd-isi-edu/chaise/src/components/title';
 import ResultsetTable from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table';
 import ResultsetTableHeader from '@isrd-isi-edu/chaise/src/components/recordedit/resultset-table-header';
@@ -428,7 +429,7 @@ const RecordeditInner = ({
               </div>
               {!resultsetProps && <div className='form-controls'>
                 {/* required-info used in testing for reseting cursor position when testing tooltips */}
-                <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span> 
+                <span className='required-info'><span className='text-danger'><b>*</b></span> indicates required field</span>
                 <div className='add-forms chaise-input-group'>
                   {appMode === appModes.EDIT ?
                     <ChaiseTooltip tooltip='Reload the page to show the initial forms.' placement='bottom-end'>
@@ -529,6 +530,7 @@ const RecordeditInner = ({
                 </Accordion>
               </div>
             }
+            <Footer />
           </div>
         </div>
         {showDeleteConfirmationModal &&

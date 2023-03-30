@@ -1242,12 +1242,12 @@ describe("Other facet features, ", function() {
 
                 editLink.click().then(function() {
                     browser.wait(function() {
-                        return chaisePage.recordEditPage.getForms().count().then(function(ct) {
+                        return chaisePage.recordEditPage.getRecordeditForms().count().then(function(ct) {
                             return (ct == 25);
                         });
                     }, browser.params.defaultTimeout);
 
-                    return chaisePage.recordEditPage.getForms().count();
+                    return chaisePage.recordEditPage.getRecordeditForms().count();
                 }).then(function(count) {
                     expect(count).toBe(25);
 
@@ -1258,7 +1258,7 @@ describe("Other facet features, ", function() {
 
         describe("in recordedit app, foreign key popup should have facets available,", function() {
 
-            var hidePanelBtn, showPanelBtn;
+            var hidePanelBtn, showPanelBtn, sidePanel, modalBody;
 
             beforeAll(function (done) {
                 chaisePage.navigate(uri);
@@ -1276,12 +1276,9 @@ describe("Other facet features, ", function() {
             });
 
             it("should click the foreign key popup button and have the facet collapse button visible in search popup", function (done) {
-                expect(chaisePage.recordEditPage.getForms().count()).toBe(1, "number of forms shown is incorrect");
-                chaisePage.recordEditPage.getModalPopupBtnsUsingScript().then(function(popupBtns) {
-                    //there are two foreignkeys, so there will be four of this element.
-                    //NOTE I'm not sure what's the point of this check
-                    expect(popupBtns.length).toBe(4, "number of popup buttons is incorrect");
-
+                expect(chaisePage.recordEditPage.getRecordeditForms().count()).toBe(1, "number of forms shown is incorrect");
+                chaisePage.recordEditPage.getModalPopupBtns().then(function(popupBtns) {
+                    // open the first fk popup
                     return chaisePage.clickButton(popupBtns[0]);
                 }).then(function () {
                     browser.wait(EC.visibilityOf(chaisePage.recordEditPage.getModalTitle()), browser.params.defaultTimeout);
@@ -1292,7 +1289,14 @@ describe("Other facet features, ", function() {
                         });
                     });
 
-                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(element(by.css('.modal-body')));
+                    modalBody = element(by.css('.modal-body'));
+
+                    // make sure side bar is hidden
+                    sidePanel = chaisePage.recordsetPage.getSidePanel(modalBody);
+                    expect(sidePanel.isDisplayed()).toBe(false);
+
+                    // get show filter panel
+                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(modalBody);
                     chaisePage.waitForElement(showPanelBtn);
                     done();
                 }).catch(chaisePage.catchTestError(done));
@@ -1300,10 +1304,9 @@ describe("Other facet features, ", function() {
 
             it("clicking the side panel button should open the facet panel", function (done) {
                 showPanelBtn.click().then(function () {
-                    var sidePanel = chaisePage.recordsetPage.getSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn(element(by.css('.modal-body')));
+                    hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn(modalBody);
                     chaisePage.waitForElement(hidePanelBtn);
 
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");
@@ -1312,16 +1315,14 @@ describe("Other facet features, ", function() {
             });
 
             it("select a facet option and select a row for the input", function (done) {
-                // TODO: change selector once RE is migrated to react
-                chaisePage.clickButton(chaisePage.recordsetPage.getAngularFacetOption(0, 0)).then(function () {
+                chaisePage.clickButton(chaisePage.recordsetPage.getFacetOption(0, 0)).then(function () {
                     browser.wait(function () {
                         return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
                             return (ct == 1);
                         });
                     });
 
-                    // TODO: change selector once RE is migrated to react
-                    return chaisePage.recordsetPage.getAngularFacetFilters();
+                    return chaisePage.recordsetPage.getFacetFilters();
                 }).then(function (filters) {
                     expect(filters[0].getText()).toBe(testParams.foreignKeyPopupFacetFilter, "Filter for facet is incorrect");
 
@@ -1342,7 +1343,7 @@ describe("Other facet features, ", function() {
 
         describe("in record app, association add popup should have facets available,", function() {
 
-            var hidePanelBtn, showPanelBtn;
+            var hidePanelBtn, showPanelBtn, sidePanel, modalBody;
 
             beforeAll(function (done) {
                 chaisePage.navigate(uri);
@@ -1371,8 +1372,14 @@ describe("Other facet features, ", function() {
                         });
                     });
 
+                    modalBody = element(by.css('.modal-body'));
+
+                    // make sure side bar is hidden
+                    sidePanel = chaisePage.recordsetPage.getSidePanel(modalBody);
+                    expect(sidePanel.isDisplayed()).toBe(false);
+
                     // get show filter panel
-                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(element(by.css('.modal-body')));
+                    showPanelBtn = chaisePage.recordsetPage.getShowFilterPanelBtn(modalBody);
                     chaisePage.waitForElement(showPanelBtn);
 
                     done();
@@ -1381,10 +1388,9 @@ describe("Other facet features, ", function() {
 
             it("clicking the side panel button should open the facet panel", function (done) {
                 showPanelBtn.click().then(function () {
-                    var sidePanel = chaisePage.recordPage.getModalSidePanel();
                     browser.wait(EC.visibilityOf(sidePanel), browser.params.defaultTimeout);
 
-                    hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn(element(by.css('.modal-body')));
+                    hidePanelBtn = chaisePage.recordsetPage.getHideFilterPanelBtn(modalBody);
                     chaisePage.waitForElement(hidePanelBtn);
 
                     expect(sidePanel.isDisplayed()).toBeTruthy("Side panel is not visible after opening it");

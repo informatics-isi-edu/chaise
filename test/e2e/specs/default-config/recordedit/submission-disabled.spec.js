@@ -9,7 +9,7 @@ var testParams = {
     conflict_table_name: "duplicate_key_conflict",
     conflict_column: "duplicate_id",
     conflict_key: "1000",
-    conflict_message: "Error The entry cannot be created/updated. Please use a different duplicate_id for this record. Click here to see the conflicting record that already exists."
+    conflict_message: "The entry cannot be created/updated. Please use a different duplicate_id for this record. Click here to see the conflicting record that already exists."
 };
 
 describe("For error handling strategies on submission,", function() {
@@ -59,12 +59,10 @@ describe("For error handling strategies on submission,", function() {
             chaisePage.recordEditPage.submitForm().then(function () {
                 return browser.wait(function() { return chaisePage.recordEditPage.getAlertError(); }, browser.params.defaultTimeout);
             }).then(function(alert) {
-                // TODO: conflict message is missing duplicate id text:
-                //    - 'Click here to see the conflicting record that already exists.'
                 expect(alert.getText()).toContain(testParams.conflict_message, "alert message is incorrect");
 
                 var duplicate_uri = uri.replace('recordedit', 'record') + '/' + testParams.conflict_column + '=' + testParams.conflict_key;
-                expect(chaisePage.recordEditPage.getAlertErrorLinkHref()).toContain(duplicate_uri, "link to duplicate record is incorrect");
+                expect(chaisePage.recordEditPage.getAlertErrorLink().getAttribute('href')).toContain(duplicate_uri, "link to duplicate record is incorrect");
 
                 done();
             }).catch(chaisePage.catchTestError(done));
