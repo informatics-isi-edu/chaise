@@ -1679,7 +1679,7 @@ function chaisePage() {
             } else if (appName === 'recordset') {
                 browser.actions().mouseMove(self.recordsetPage.getTotalCount()).perform();
             } else if (appName === 'recordedit') {
-                browser.actions().mouseMove(self.recordeditPage.getRequiredInfoEl()).perform();
+                browser.actions().mouseMove(self.recordEditPage.getRequiredInfoEl()).perform();
             }
 
             // TODO what about other apps

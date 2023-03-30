@@ -135,9 +135,23 @@ export function formatDatetime(value: string, options: TimestampOptions) {
   return null;
 }
 
+export const INTEGER_LIMITS = {
+  INT_2_MIN: '-32768',
+  INT_2_MAX: '32767',
+  INT_4_MIN: '-2147483648',
+  INT_4_MAX: '2147483647',
+  INT_8_MIN: '-9223372036854775808',
+  INT_8_MAX: '9223372036854775807'
+}
 
 export const ERROR_MESSAGES = {
   REQUIRED: 'Please enter a value for this field.',
+  INTEGER_2_MIN: 'This field requires a value greater than ' + INTEGER_LIMITS.INT_2_MIN + '.',
+  INTEGER_4_MIN: 'This field requires a value greater than ' + INTEGER_LIMITS.INT_4_MIN + '.',
+  INTEGER_8_MIN: 'This field requires a value greater than ' + INTEGER_LIMITS.INT_8_MIN + '.',
+  INTEGER_2_MAX: 'This field requires a value less than ' + INTEGER_LIMITS.INT_2_MAX + '.',
+  INTEGER_4_MAX: 'This field requires a value less than ' + INTEGER_LIMITS.INT_4_MAX + '.',
+  INTEGER_8_MAX: 'This field requires a value less than ' + INTEGER_LIMITS.INT_8_MAX + '.',
   INVALID_INTEGER: 'Please enter a valid integer value.',
   INVALID_NUMERIC: 'Please enter a valid decimal value.',
   INVALID_DATE: 'Please enter a valid date value.',
@@ -208,6 +222,47 @@ export function humanFileSize(size: number) {
   return Number(( size / Math.pow(1024, i) ).toFixed(2)) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 
+const integer2FieldValidation = (value: string) => {
+  if (!value) return;
+  let isValid = true;
+  // test regex first
+  isValid = dataFormats.regexp.integer.test(value);
+  if (!isValid) return ERROR_MESSAGES.INVALID_INTEGER;
+
+  // test min/max
+  isValid = parseInt(value, 10) >= parseInt(INTEGER_LIMITS.INT_2_MIN, 10);
+  if (!isValid) return ERROR_MESSAGES.INTEGER_2_MIN;
+
+  return parseInt(value, 10) <= parseInt(INTEGER_LIMITS.INT_2_MAX, 10) || ERROR_MESSAGES.INTEGER_2_MAX;
+}
+
+const integer4FieldValidation = (value: string) => {
+  if (!value) return;
+  let isValid = true;
+  // test regex first
+  isValid = dataFormats.regexp.integer.test(value);
+  if (!isValid) return ERROR_MESSAGES.INVALID_INTEGER;
+
+  // test min/max
+  isValid = parseInt(value, 10) >= parseInt(INTEGER_LIMITS.INT_4_MIN, 10);
+  if (!isValid) return ERROR_MESSAGES.INTEGER_4_MIN;
+
+  return parseInt(value, 10) <= parseInt(INTEGER_LIMITS.INT_4_MAX, 10) || ERROR_MESSAGES.INTEGER_4_MAX;
+}
+
+const integer8FieldValidation = (value: string) => {
+  if (!value) return;
+  let isValid = true;
+  // test regex first
+  isValid = dataFormats.regexp.integer.test(value);
+  if (!isValid) return ERROR_MESSAGES.INVALID_INTEGER;
+
+  // test min/max
+  isValid = parseInt(value, 10) >= parseInt(INTEGER_LIMITS.INT_8_MIN, 10);
+  if (!isValid) return ERROR_MESSAGES.INTEGER_8_MIN;
+
+  return parseInt(value, 10) <= parseInt(INTEGER_LIMITS.INT_8_MAX, 10) || ERROR_MESSAGES.INTEGER_8_MAX;
+}
 
 const integerFieldValidation = {
   value: dataFormats.regexp.integer,
@@ -241,9 +296,9 @@ export const VALIDATE_VALUE_BY_TYPE: {
   [key: string]: any;
 } = {
   'int': integerFieldValidation,
-  'integer2': integerFieldValidation,
-  'integer4': integerFieldValidation,
-  'integer8': integerFieldValidation,
+  'integer2': integer2FieldValidation,
+  'integer4': integer4FieldValidation,
+  'integer8': integer8FieldValidation,
   'float': numericFieldValidation,
   'number': numericFieldValidation,
   'date': dateFieldValidation,

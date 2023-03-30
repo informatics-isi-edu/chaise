@@ -11,9 +11,6 @@ import useRecordedit from '@isrd-isi-edu/chaise/src/hooks/recordedit';
 import { appModes, SELECT_ALL_INPUT_FORM_VALUE } from '@isrd-isi-edu/chaise/src/models/recordedit';
 import { LogActions } from '@isrd-isi-edu/chaise/src/models/log';
 
-// services
-import { LogService } from '@isrd-isi-edu/chaise/src/services/log';
-
 // utils
 import { getDisabledInputValue } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
@@ -25,7 +22,7 @@ import { addTopHorizontalScroll } from '@isrd-isi-edu/chaise/src/utils/ui-utils'
 const FormContainer = (): JSX.Element => {
 
   const {
-    onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels, appMode, tuples
+    onSubmitValid, onSubmitInvalid, forms, removeForm, columnModels
   } = useRecordedit();
 
   const { handleSubmit } = useFormContext();
@@ -63,7 +60,12 @@ const FormContainer = (): JSX.Element => {
       <div className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
-      <form id='recordedit-form' className='recordedit-form chaise-hr-scrollable' onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)} ref={formContainer}>
+      <form 
+        id='recordedit-form' 
+        className='recordedit-form chaise-hr-scrollable' 
+        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)} 
+        ref={formContainer}
+      >
         {/* form header */}
         <div className='form-header-row'>
           {forms.map((formNumber: number, formIndex: number) => (

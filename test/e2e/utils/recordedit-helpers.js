@@ -1258,62 +1258,56 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     });
 
                     // TODO: min and max validations in integer inputs
-                    // it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
-                    //     integerDataTypeFields.forEach(function(intInput) {
-                    //         var c = intInput.column;
+                    it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
+                        integerDataTypeFields.forEach(function(intInput) {
+                            var c = intInput.column;
 
-                    //         if (c.skipValidation) return;
+                            if (c.skipValidation) return;
 
-                    //         if (c.generated || c.immutable) return;
+                            if (c.generated || c.immutable) return;
 
-                    //         var min = -9223372036854776000, max = 9223372036854776000, invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
-                    //         if (c.type == 'int2') {
-                    //             min = -32768, max = 32767, invalidMaxNo = "8375832757832", invalidMinNo = "-237587565";
-                    //         } else if (c.type == 'int4') {
-                    //             min = -2147483648, max = 2147483647, invalidMaxNo = "3827374576453", invalidMinNo = "-326745374576375";
-                    //         }
+                            var min = -9223372036854776000, max = 9223372036854776000, invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
+                            if (c.type == 'int2') {
+                                min = -32768, max = 32767, invalidMaxNo = "8375832757832", invalidMinNo = "-237587565";
+                            } else if (c.type == 'int4') {
+                                min = -2147483648, max = 2147483647, invalidMaxNo = "3827374576453", invalidMinNo = "-326745374576375";
+                            }
 
-                    //         var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
+                            var validNo = chaisePage.recordEditPage.getRandomInt(min, max) + "", invalidMaxNo = "2343243243242414423243242353253253253252352", invalidMinNo = "-2343243243242414423243242353253253253252352";
 
-                    //         // Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
-                    //         if (tableParams.primary_keys.indexOf(c.name) != -1) {
-                    //             intInput.getAttribute("value").then(function(value) {
-                    //                 validNo = value + "";
-                    //             });
-                    //         }
+                            // Store original value to reset it for avoiding any conflicts or referece issues due to unique or foreign key issue
+                            if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                                intInput.getAttribute("value").then(function(value) {
+                                    validNo = value + "";
+                                });
+                            }
 
-                    //         // Clear value if it is in edit mode
-                    //         chaisePage.recordEditPage.clearInput(intInput);
+                            // Clear value if it is in edit mode
+                            chaisePage.recordEditPage.clearInput(intInput);
 
-                    //         // Check for invalid maximum number
-                    //         intInput.sendKeys(invalidMaxNo);
-                    //         const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(intInput);
-                    //         expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using maximum number."));
+                            // Check for invalid maximum number
+                            intInput.sendKeys(invalidMaxNo);
+                            const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(intInput);
+                            expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using maximum number."));
 
-                    //         // Clear value
-                    //         chaisePage.recordEditPage.clearInput(intInput);
-                    //         expect(intInput.getAttribute('value')).toBe("");
+                            // Clear value
+                            chaisePage.recordEditPage.clearInput(intInput);
+                            expect(intInput.getAttribute('value')).toBe("");
 
-                    //         expect(errMessageSelector.isDisplayed()).toBeFalsy(colError(c.name , "Expected to clear error message after clearing maximum number."));
+                            // Check for invalid minimum number
+                            intInput.sendKeys(invalidMinNo);
 
-                    //         // Check for invalid minimum number
-                    //         intInput.sendKeys(invalidMinNo);
+                            expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using minimum number."));
 
-                    //         expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name ,"Expected to show error when using minimum number."));
+                            // Clear value
+                            chaisePage.recordEditPage.clearInput(intInput);
+                            expect(intInput.getAttribute('value')).toBe("");
 
-                    //         // Clear value
-                    //         chaisePage.recordEditPage.clearInput(intInput);
-                    //         expect(intInput.getAttribute('value')).toBe("");
-
-                    //         expect(errMessageSelector.isDisplayed()).toBeFalsy(colError(c.name , "Expected to clear error message after clearing maximum number."));
-
-                    //         // Check for a valid number
-                    //         intInput.sendKeys(validNo);
-                    //         expect(intInput.getAttribute('value')).toBe(validNo);
-
-                    //         expect(errMessageSelector.isDisplayed()).toBeFalsy(colError(c.name , "Expected to not show max error on valid number."));
-                    //     });
-                    // });
+                            // Check for a valid number
+                            intInput.sendKeys(validNo);
+                            expect(intInput.getAttribute('value')).toBe(validNo);
+                        });
+                    });
 
                     it("should input the given values.", function () {
                         integerDataTypeFields.forEach(function(intInput) {
@@ -1436,6 +1430,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Color fields", function () {
                     var numDone = 0, isDone = function (done) {
                         numDone++;
+
                         if (numDone === colorCols.length) {
                             done();
                         }
@@ -1462,121 +1457,105 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
 
-                    // TODO: figure out why `isDone()` and subsequently `done()` is being called, but test isn't ending
-                    // it ("should validate required and invalid color input.", function (done) {
-                    //     numDone = 0;
-                    //     colorDataTypeFields.forEach(function(colorInput) {
-                    //         var c = colorInput.column;
+                    it ("should validate required and invalid color input.", function (done) {
+                        numDone = 0;
+                        colorDataTypeFields.forEach(function(colorInput) {
+                            var c = colorInput.column;
 
-                    //         if (c.skipValidation || c.generated || c.immutable) {
-                    //             isDone(done);
-                    //             return;
-                    //         }
+                            if (c.skipValidation || c.generated || c.immutable) {
+                                isDone(done);
+                                return;
+                            }
 
-                    //         // NOTE: use valid color values that produce an invalid color option
-                    //         var prevValue, invalidValue = "de", testRequired = false;
+                            // NOTE: use valid color values that produce an invalid color option
+                            var prevValue, invalidValue = "de";
 
-                    //         const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(colorInput);
-                    //         // c.nullok === false;
-                    //         getExistingValue(c.name, colorInput).then(function (val) {
-                    //             prevValue = val;
+                            const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(colorInput);
+                            // c.nullok === false;
+                            getExistingValue(c.name, colorInput).then(function (val) {
+                                prevValue = val;
 
-                    //             // clear the value
-                    //             return chaisePage.recordEditPage.clearInput(colorInput);
-                    //         }).then(function () {
-                    //             // the input won't validate until we press enter or change focus
-                    //             // TODO: click on a different input instead
-                    //             return browser.actions().sendKeys(protractor.Key.ENTER).perform();
-                    //         }).then(function () {
-                    //             // if testing required, submit the form so we can see the error
-                    //             if (testRequired) {
-                    //                 return chaisePage.recordEditPage.submitForm();
-                    //             }
-                    //             return true;
-                    //         }).then(function (resp) {
-                    //             if (testRequired) {
-                    //                 expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(c.name , "Expected to show required error."));
-                    //                 chaisePage.recordEditPage.getAlertErrorClose().click();
-                    //             }
-                    //             return colorInput.sendKeys(invalidValue);
-                    //         }).then (function () {
-                    //             // the input won't validate until we press enter or change focus
-                    //             // TODO: click on a different input instead
-                    //             return browser.actions().sendKeys(protractor.Key.ENTER).perform();
-                    //         }).then (function () {
-                    //             // I had to turn this from a simple get attribute to wait
-                    //             // since it was throwing a terminal error
-                    //             browser.wait(function () {
-                    //                 return colorInput.getAttribute('value').then((function (val) {
-                    //                     return val == "";
-                    //                 })).catch(function (err) {
-                    //                     done.fail(err);
-                    //                 })
-                    //             });
-
-                    //             //Restore the value to the original one
-                    //             if (tableParams.primary_keys.indexOf(c.name) != -1) {
-                    //                 colorInput.sendKeys(prevValue);
-                    //             }
+                                // no value yet
+                                if (!isEditMode && (recordIndex + 1) === 1) return true
+                                    
+                                // use remove button to clear the value
+                                return chaisePage.recordEditPage.getRemoveButton(c.name, recordIndex+1, 'remove-input-btn').click();
+                            }).then(function () {
+                                // the input won't validate until we change focus
+                                return chaisePage.recordEditPage.getRequiredInfoEl().click();
+                            }).then(function () {
+                                return colorInput.sendKeys(invalidValue);
+                            }).then(function () {
+                                // the input won't validate until we change focus
+                                return chaisePage.recordEditPage.getRequiredInfoEl().click();
+                            }).then(function () {
+                                // I had to turn this from a simple get attribute to wait
+                                // since it was throwing a terminal error
+                                return browser.wait(function () {
+                                    return colorInput.getAttribute('value').then(function (val) {
+                                        return val === '#';
+                                    });
+                                });
+                            }).then(() => {
+                                //Restore the value to the original one
+                                if (tableParams.primary_keys.indexOf(c.name) != -1) {
+                                    colorInput.sendKeys(prevValue);
+                                }
                             
-                    //             console.log('before is done');
-                    //             isDone(done);
-                    //         }).catch(function (err) {
-                    //             console.log(err);
-                    //             done.fail(err);
-                    //         })
-                    //     });
-                    // });
+                                isDone(done);
+                            }).catch(function (err) {
+                                console.log(err);
+                                done.fail(err);
+                            });
+                        });
+                    });
 
-                    // TODO: when input is clicked, since it is the last row in the form, the popup opens down off page
-                    // it("clicking on input should open the color popup, clear btn should be available based on nullok, and should be able to change value", function (done) {
-                    //     numDone = 0;
-                    //     colorDataTypeFields.forEach(function (colorInput) {
-                    //         var c = colorInput.column;
-                    //         console.log('before skip validation check')
-                    //         if (c.skipValidation || c.generated || c.immutable) {
-                    //             isDone(done);
-                    //             return;
-                    //         }
+                    it("clicking on input should open the color popup, clear btn should be available based on nullok, and should be able to change value", function (done) {
+                        numDone = 0;
+                        colorDataTypeFields.forEach(function (colorInput) {
+                            var c = colorInput.column;
+                            if (c.skipValidation || c.generated || c.immutable) {
+                                isDone(done);
+                                return;
+                            }
 
-                    //         var popup = chaisePage.recordEditPage.getColorInputPopup(),
-                    //             popupInput,
-                    //             value = "#555555";
+                            var popup = chaisePage.recordEditPage.getColorInputPopup(),
+                                popupInput,
+                                value = "#555555";
 
-                    //         // click the button to open popup
-                    //         chaisePage.recordEditPage.getColorInputBtn(c.name, recordIndex+1).click().then(function () {
-                    //             browser.sleep(100000)
+                            // click the button to open popup
+                            chaisePage.recordEditPage.getColorInputBtn(c.name, recordIndex+1).click().then(function () {
 
-                    //             // make sure popup is displayed
-                    //             chaisePage.waitForElement(popup);
+                                // make sure popup is displayed
+                                chaisePage.waitForElement(popup);
 
-                    //             // make sure clear btn is offered regardless of null/not-null (just like any other  input)
-                    //             var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
-                    //             expect(clearBtn.isDisplayed()).toEqual(true, colError(c.name, "color popup: clear btn invalid state"));
+                                // make sure clear btn is offered regardless of null/not-null (just like any other  input)
+                                var clearBtn = chaisePage.recordEditPage.getColorInputPopupClearBtn();
+                                expect(clearBtn.isDisplayed()).toEqual(true, colError(c.name, "color popup: clear btn invalid state"));
 
-                    //             // write a color and submit
-                    //             popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
-                    //             expect(popupInput.isDisplayed).toBeTruthy(colError(c.name, "color popup: input is missing"));
+                                // write a color and submit
+                                popupInput = chaisePage.recordEditPage.getColorInputPopupInput();
+                                expect(popupInput.isDisplayed).toBeTruthy(colError(c.name, "color popup: input is missing"));
 
-                    //             // clear the input
-                    //             return chaisePage.recordEditPage.clearInput(popupInput);
-                    //         }).then (function () {
-                    //             // change the input
-                    //             return popupInput.sendKeys(value);
-                    //         }).then (function () {
+                                // clear the input
+                                return chaisePage.recordEditPage.clearInput(popupInput);
+                            }).then(function () {
+                                // change the input
+                                return popupInput.sendKeys(value);
+                            }).then(function () {
 
-                    //             // close the popup
-                    //             return chaisePage.recordEditPage.getColorInputPopupSelectBtn().click();
-                    //         }).then(function () {
-                    //             chaisePage.waitForElementInverse(popup);
-                    //             expect(colorInput.getAttribute('value')).toBe(value, colError(c.name, "color popup: value didn't change"));
+                                // close the popup
+                                return chaisePage.recordEditPage.getColorInputPopupSelectBtn().click();
+                            }).then(function () {
+                                chaisePage.waitForElementInverse(popup);
+                                expect(colorInput.getAttribute('value')).toBe(value, colError(c.name, "color popup: value didn't change"));
 
-                    //             isDone(done);
-                    //         }).catch(function (err) {
-                    //             done.fail(err);
-                    //         });
-                    //     });
-                    // });
+                                isDone(done);
+                            }).catch(function (err) {
+                                done.fail(err);
+                            });
+                        });
+                    });
 
                     it ("should be able to input the given values", function (done) {
                         numDone = 0;
@@ -1593,8 +1572,8 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 return colorInput.sendKeys(text);
                             }).then(function () {
                                 // the input won't validate until we press enter or change focus
-                            //     return browser.actions().sendKeys(protractor.Key.ENTER).perform();
-                            // }).then(function () {
+                                return chaisePage.recordEditPage.getRequiredInfoEl().click();
+                            }).then(function () {
 
                                 // make sure the displayed value is correct
                                 expect(colorInput.getAttribute('value')).toEqual(text, colError(c.name, "Couldn't change the value."));

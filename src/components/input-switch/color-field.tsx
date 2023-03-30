@@ -9,17 +9,28 @@ import Overlay from 'react-bootstrap/Overlay';
 import { useState, useRef, useCallback } from 'react';
 import useClickOutside from '@isrd-isi-edu/chaise/src/hooks/click-outside';
 
-
 // utils
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
-
+import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const ColorField = (props: InputFieldProps): JSX.Element => {
 
+  const colorInputContainer = useRef<HTMLInputElement>(null);
+
   const [showColorPopup, setShowColorPopup] = useState(false);
+  const [openPopupUp, setOpenPopupUp] = useState(false);
   const toggleColorPopup = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // if bottom is with 100px of viewport height, open up
+    // color picker popup has height = 260
+    if (colorInputContainer.current && (colorInputContainer.current.getBoundingClientRect().bottom + 260) >= windowRef.innerHeight) {
+      setOpenPopupUp(true);
+    } else if (openPopupUp) {
+      setOpenPopupUp(false);
+    }
+
     setShowColorPopup((val) => !val)
   };
   const close = useCallback(() => setShowColorPopup(false), []);
@@ -64,7 +75,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
   return (
     <InputField {...props}>
       {(field, onChange, showClear, clearInput) => (
-        <div className='chaise-input-group input-switch-color'>
+        <div className='chaise-input-group input-switch-color' ref={colorInputContainer}>
           <div
             className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}
             {... (!props.disableInput && { onClick: toggleColorPopup })}
@@ -83,7 +94,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
               </button>
             </ChaiseTooltip>
           </div>}
-          <Overlay placement='bottom-start' target={colorMainInput.current} show={showColorPopup} ref={colorPopup}>
+          <Overlay placement={openPopupUp ? 'top-start' : 'bottom-start'} target={colorMainInput.current} show={showColorPopup} ref={colorPopup}>
             {({ placement, arrowProps, show: _show, popper, ...props }) => (
               // `props` are passed from Overlay to its child. it will attach the css rules for positioning and etc.
               <div {...props} className='popover chaise-color-picker-popup'>
