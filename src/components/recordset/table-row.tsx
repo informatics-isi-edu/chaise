@@ -130,6 +130,7 @@ const TableRow = ({
       // dataCell must be defined and the previous overflow was false so check again to make sure it hasn't changed
       if (dataCell && !hasOverflow) {
         // overflow is true if the content overflows the cell
+        // TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height instead?
         hasOverflow = (dataCell.offsetHeight + tdPadding) > maxHeight;
       }
 

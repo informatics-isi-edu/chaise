@@ -60,10 +60,10 @@ const FormContainer = (): JSX.Element => {
       <div className='chaise-table-top-scroll-wrapper'>
         <div className='chaise-table-top-scroll'></div>
       </div>
-      <form 
-        id='recordedit-form' 
-        className='recordedit-form chaise-hr-scrollable' 
-        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)} 
+      <form
+        id='recordedit-form'
+        className='recordedit-form chaise-hr-scrollable'
+        onSubmit={handleSubmit(onSubmitValid, onSubmitInvalid)}
         ref={formContainer}
       >
         {/* form header */}
@@ -136,9 +136,10 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
     if (!container || !container.current) return;
 
     let cachedHeight = -1;
-    const sensor = new ResizeSensor(container.current as Element, () => {
-      if (container.current?.offsetHeight === cachedHeight || !container.current) return;
-      cachedHeight = container.current?.offsetHeight;
+    const sensor = new ResizeSensor(container.current as Element, (dimension) => {
+      const newHeight = container.current?.getBoundingClientRect().height;
+      if (newHeight === undefined || newHeight === cachedHeight || !container.current) return;
+      cachedHeight = newHeight;
       const header = document.querySelector<HTMLElement>(`.entity-key.entity-key-${columnModelIndex}`);
       if (header) {
         header.style.height = `${cachedHeight}px`;

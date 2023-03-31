@@ -18,6 +18,8 @@ import { ID_NAMES } from '@isrd-isi-edu/chaise/src/utils/constants';
  *    - .top-panel-container
  *    - .bottom-panel-container
  * Three ResizeSensors will be created for app-content, top-panel and bottom-panel to watch their size change.
+ *
+ * TODO offsetHeight is a rounded integer, should we use getBoundingClientRect().height in this function instead?
  */
 export function attachContainerHeightSensors(parentContainer?: any, parentContainerSticky?: any, useDocHeight?: boolean) {
   try {
