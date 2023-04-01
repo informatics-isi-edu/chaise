@@ -558,7 +558,10 @@ describe('Error related test cases,', function() {
         });
 
         it('On click of OK button the page should redirect to RecordSet', function(done){
-            chaisePage.errorModal.getOKButton().click().then(function(){
+            const modalOkButton = chaisePage.errorModal.getOKButton();
+            chaisePage.waitForClickableElement(modalOkButton).then(() => {
+                return modalOkButton.click()
+            }).then(() => {
                 const newapplink = url.replace("recordedit", "recordset");
                 const recordsetUrl = newapplink.slice(0, newapplink.lastIndexOf("/"));
 
