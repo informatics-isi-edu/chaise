@@ -117,6 +117,10 @@ export type InputSwitchProps = {
    * whether we're still waiting for foreignkey data
    */
   waitingForForeignKeyData?: boolean,
+  /**
+   * whether we should offer the extra now/today buttons
+   */
+  displayExtraDateTimeButtons?: boolean
 };
 
 const InputSwitch = ({
@@ -141,7 +145,8 @@ const InputSwitch = ({
   parentLogStack,
   parentLogStackPath,
   foreignKeyData,
-  waitingForForeignKeyData
+  waitingForForeignKeyData,
+  displayExtraDateTimeButtons
 }: InputSwitchProps): JSX.Element | null => {
 
 
@@ -222,6 +227,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          displayExtraDateTimeButtons={displayExtraDateTimeButtons}
         />;
       case 'date':
         return <DateField
@@ -236,6 +242,7 @@ const InputSwitch = ({
           styles={styles}
           displayErrors={displayErrors}
           placeholder={placeholder as string}
+          displayExtraDateTimeButtons={displayExtraDateTimeButtons}
         />;
       case 'integer2':
       case 'integer4':

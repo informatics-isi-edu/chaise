@@ -74,6 +74,7 @@ export const dataFormats = {
     time: 'HH:MM:SS'
   },
   date: 'YYYY-MM-DD',
+  time: ['H:m:s', 'H:m', 'H'],
   time12: 'hh:mm:ss', // used for displaying values in recordedit properly
   time24: 'HH:mm:ss',
   timestamp: 'YYYY-MM-DDTHH:mm:ss',

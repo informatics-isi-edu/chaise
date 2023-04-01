@@ -77,31 +77,14 @@
 }
 
 .input-switch-datetime {
-  flex-direction: column;
-
-  .chaise-input-control {
-    min-height: auto;
-
-    // TODO this rule is not needed for recordedit, is it needed for range-inputs?
-    // .input-switch-clear {
-      // top: -2px;
-    // }
+  .input-switch-time {
+    margin: 3px 0;
   }
 
-  .chaise-input-control:first-child {
-    margin-bottom: 5px;
+  .chaise-btn-group {
+    float: right;
   }
 }
-
-.input-switch-date,
-.input-switch-datetime {
-
-  .date-input-show-clear,
-  .time-input-show-clear {
-    margin-right: 10px;
-  }
-}
-
 
 .chaise-firefox .input-switch-date.chaise-input-control.has-feedback,
 .chaise-firefox .input-switch-time.chaise-input-control.has-feedback {

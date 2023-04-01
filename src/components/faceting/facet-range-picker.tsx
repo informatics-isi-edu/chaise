@@ -978,8 +978,7 @@ const FacetRangePicker = ({
         inputType={getInputType(facetColumn.column.type)}
         classes='facet-range-input'
         addRange={addFilter}
-        absMin={compState.rangeOptions.absMin}
-        absMax={compState.rangeOptions.absMax}
+        rangeOptions={compState.rangeOptions}
         disabled={facetColumn.hasNotNullFilter}
       />
       {renderHistogram()}

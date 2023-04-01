@@ -121,10 +121,16 @@ export function getDisabledInputValue(column: any) {
   }
 }
 
-export function formatDatetime(value: string, options: TimestampOptions) {
+export function formatDatetime(value: any, options: TimestampOptions) {
   if (value) {
-    // create a moment object (value should be string format)
-    const momentObj = options.currentMomentFormat ? windowRef.moment(value, options.currentMomentFormat) : windowRef.moment(value);
+    let momentObj;
+    if (typeof value === 'string') {
+      // create a moment object (value should be string format)
+      momentObj = options.currentMomentFormat ? windowRef.moment(value, options.currentMomentFormat) : windowRef.moment(value);
+    } else {
+      momentObj = value;
+    }
+
     return {
       date: momentObj.format(dataFormats.date),
       time: momentObj.format(dataFormats.time24),
@@ -154,7 +160,8 @@ export const ERROR_MESSAGES = {
   INTEGER_8_MAX: 'This field requires a value less than ' + INTEGER_LIMITS.INT_8_MAX + '.',
   INVALID_INTEGER: 'Please enter a valid integer value.',
   INVALID_NUMERIC: 'Please enter a valid decimal value.',
-  INVALID_DATE: 'Please enter a valid date value.',
+  INVALID_DATE: `Please enter a valid date value in ${dataFormats.placeholder.date} format.`,
+  INVALID_TIME: `Please enter a valid time value in 24-hr ${dataFormats.placeholder.time} format.`,
   INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
   INVALID_JSON: 'Please enter a valid JSON value.'
 }
@@ -280,6 +287,12 @@ const dateFieldValidation = (value: string) => {
   return date.isValid() || ERROR_MESSAGES.INVALID_DATE;
 };
 
+const timeFieldValidation = (value: string) => {
+  if (!value) return;
+  const date = windowRef.moment(value, dataFormats.time, true);
+  return date.isValid() || ERROR_MESSAGES.INVALID_TIME;
+};
+
 const timestampFieldValidation = (value: string) => {
   if (!value) return;
   const timestamp = windowRef.moment(value, dataFormats.timestamp, true);
@@ -302,6 +315,7 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'float': numericFieldValidation,
   'number': numericFieldValidation,
   'date': dateFieldValidation,
+  'time': timeFieldValidation,
   'timestamp': timestampFieldValidation,
   'timestamptz': timestamptzFieldValidation,
 };

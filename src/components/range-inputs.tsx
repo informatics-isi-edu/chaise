@@ -40,13 +40,9 @@ type RangeInputsProps = {
    */
   addRange: Function,
   /**
-   * the min value for the full dataset to show on load
+   * the range options that holds the values
    */
-  absMin: RangeOptions['absMin'],
-  /**
-   * the max value for the full dataset to show on load
-   */
-  absMax: RangeOptions['absMax'],
+  rangeOptions: RangeOptions,
   /**
    * whether the form should be disabled
    */
@@ -82,7 +78,16 @@ const getType = (inputType: string): string => {
   return type;
 }
 
-const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, name }: RangeInputsProps) => {
+const RangeInputs = ({
+  inputType,
+  classes,
+  addRange,
+  rangeOptions,
+  disabled,
+  name
+}: RangeInputsProps) => {
+
+  const { absMax, absMin } = rangeOptions;
 
   const type = getType(inputType);
   const classTypeName = (type === 'int' || type === 'number') ? 'numeric-width' : type === 'date' ? 'date-width' : 'time-width';
@@ -135,22 +140,34 @@ const RangeInputs = ({ inputType, classes, addRange, absMin, absMax, disabled, n
   // if the absMin/absMax are updated, update the value in the form
   // can occur when this facet is open and another facet is used
   useLayoutEffect(() => {
+    const { absMax: currAbsMax, absMin: currAbsMin } = rangeOptions;
+
     // match timestamp and timestamptz
     if (type.indexOf('timestamp') !== -1) {
-      const timestampMinValue = formatDatetime(absMin as string, timestampOptions);
+      const timestampMinValue = formatDatetime(currAbsMin as string, timestampOptions);
       methods.resetField(`${minName}`, { defaultValue: timestampMinValue?.datetime || '' });
       methods.resetField(`${minName}-date`, { defaultValue: timestampMinValue?.date || '' });
       methods.resetField(`${minName}-time`, { defaultValue: timestampMinValue?.time || '' });
 
-      const timestampMaxValue = formatDatetime(absMax as string, timestampOptions);
+      const timestampMaxValue = formatDatetime(currAbsMax as string, timestampOptions);
       methods.resetField(`${maxName}`, { defaultValue: timestampMaxValue?.datetime || '' });
       methods.resetField(`${maxName}-date`, { defaultValue: timestampMaxValue?.date || '' });
       methods.resetField(`${maxName}-time`, { defaultValue: timestampMaxValue?.time || '' });
     } else {
-      methods.resetField(minName, { defaultValue: replaceNullOrUndefined(absMin, '') });
-      methods.resetField(maxName, { defaultValue: replaceNullOrUndefined(absMax, '') });
+      methods.resetField(minName, { defaultValue: replaceNullOrUndefined(currAbsMin, '') });
+      methods.resetField(maxName, { defaultValue: replaceNullOrUndefined(currAbsMax, '') });
     }
-  }, [absMax, absMin])
+  },
+    /**
+     * instead of looking at individual absMin and absMax we have to look
+     * at the rangeOptions to make sure we're always updating values.
+     * this will support the scenario where even if the value of min/max has changed,
+     * we're still going to populate them based on the latest value.
+     * if we just use absMin and absMax, then it will only update when the underlying value
+     * has changed. so for example if we remove the input, it will not update anymore.
+     */
+    [rangeOptions]
+  )
 
   useEffect(() => {
     const subscribe = methods.watch((data, options) => {
