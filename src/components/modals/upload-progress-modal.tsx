@@ -136,7 +136,6 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
             tempFilesCt++;
             tempTotalSize += row[k].file.size;
 
-            console.log(row[k]);
             tuple.push(createUploadFileObject(row[k], column, row));
           } else {
             row[k] = (row[k] && row[k].url && row[k].url.length) ? row[k].url : null;
@@ -711,6 +710,8 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
 
     return;
   }
+
+  if (filesCt === 0) return;
 
   return (
     <Modal

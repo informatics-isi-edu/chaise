@@ -525,8 +525,12 @@ export default function RecordeditProvider({
   }
 
   const uploadFiles = (submissionRowsCopy: any[], onSuccess: () => void) => {
-    // If url is valid
-    if (areFilesValid(submissionRowsCopy)) {
+    const uploadInfo = areFilesValid(submissionRowsCopy);
+    // if there are no file inputs, or no files to upload
+    if (!uploadInfo.hasAssetColumn) {
+      onSuccess();
+    } else if (uploadInfo.filesValid) {
+      // If url is valid
       setUploadProgressModalProps({
         rows: submissionRowsCopy,
         onSuccess: onSuccess,
@@ -552,9 +556,9 @@ export default function RecordeditProvider({
   }
 
   const areFilesValid = (rows: any[]) => {
-    let isValid = true, index = 0;
+    let isValid = true, index = 0, hasAssetColumn = false;
     // Iterate over all rows that are passed as parameters to the modal controller
-    rows.forEach(function (row) {
+    rows.forEach((row) => {
 
       index++;
 
@@ -568,6 +572,7 @@ export default function RecordeditProvider({
         try {
           const column = reference.columns.find((c: any) => { return c.name === k; });
           if (column.isAsset) {
+            hasAssetColumn = true;
 
             if (row[k].url === '' && !column.nullok) {
               isValid = false;
@@ -590,7 +595,7 @@ export default function RecordeditProvider({
       }
     });
 
-    return isValid;
+    return { filesValid: isValid, hasAssetColumn: hasAssetColumn };
   }
 
   const addForm = (count: number) => {
