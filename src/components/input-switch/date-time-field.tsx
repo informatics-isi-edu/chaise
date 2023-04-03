@@ -40,6 +40,11 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
     /**
      * this will make sure we're updating the underlying value after
      * each update to the date and time fields.
+     *
+     * NOTE: just claling setError will not mark the form as invalid and the form.
+     * when users submit the form, the validators on the input itself will trigger
+     * that's why I'm setting the values to something invalid so it can then invalidate
+     * them and disallow submit.
      */
     const sub = watch((data, options) => {
       const name = props.name
@@ -58,6 +63,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
         // if date is missing, this is invalid
         if (!dateVal) {
           setError(name, { type: 'custom', message: ERROR_MESSAGES.INVALID_DATE });
+          setValue(name, 'invalid-value');
           return;
         }
         // otherwise validate the date value
@@ -65,7 +71,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
           const err = VALIDATE_VALUE_BY_TYPE['date'](dateVal);
           if (typeof err === 'string') {
             setError(name, { type: 'custom', message: err});
-            setValue(name, '');
+            setValue(name, 'invalid-value');
             return;
           }
         }
@@ -79,7 +85,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
           const err = VALIDATE_VALUE_BY_TYPE['time'](timeVal);
           if (typeof err === 'string') {
             setError(name, { type: 'custom', message: err });
-            setValue(name, '');
+            setValue(name, 'invalid-value');
             return;
           }
         }
@@ -161,7 +167,7 @@ const DateTimeField = (props: DateTimeFieldProps): JSX.Element => {
 
   return (
     <InputField {...props}
-      // make sure to mark the whole input as "touched" if any of the inpust are touched
+      // make sure to mark the whole input as "touched" if any of the inputs are touched
       checkIsTouched={() => isDateTouched || isTimeTouched}
       /**
        * the validation is done above and this one is technically not needed
