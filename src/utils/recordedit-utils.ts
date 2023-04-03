@@ -7,9 +7,9 @@ import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
 
 // models
 import { LogStackPaths, LogStackTypes } from '@isrd-isi-edu/chaise/src/models/log';
-import { 
-  appModes, PrefillObject, RecordeditColumnModel, 
-  SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions 
+import {
+  appModes, PrefillObject, RecordeditColumnModel,
+  SELECT_ALL_INPUT_FORM_VALUE, TimestampOptions
 } from '@isrd-isi-edu/chaise/src/models/recordedit'
 
 // services

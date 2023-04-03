@@ -231,7 +231,8 @@ const FormRow = ({ columnModelIndex }: FormRowProps): JSX.Element => {
       }
       <InputSwitch
         key={colName}
-        displayErrors={true}
+        displayErrors
+        displayExtraDateTimeButtons
         disableInput={isDisabled}
         requiredInput={columnModel.isRequired}
         name={`${formNumber}-${colName}`}
@@ -381,7 +382,8 @@ const SelectAllRow = ({ columnModelIndex }: FormRowProps) => {
       <div className='select-all-input'>
         <InputSwitch
           key={colName}
-          displayErrors={true}
+          displayErrors
+          displayExtraDateTimeButtons
           disableInput={false}
           requiredInput={false}
           name={inputName}

@@ -1,20 +1,11 @@
 import '@isrd-isi-edu/chaise/src/assets/scss/_input-switch.scss';
 
-// components
-import ClearInputBtn from '@isrd-isi-edu/chaise/src/components/clear-input-btn';
-
 // hooks
-import { useEffect, useState, useRef } from 'react';
-import { useFormContext, useController, useWatch, ControllerRenderProps, FieldValues } from 'react-hook-form';
-
-// models
-import { RangeOption, TimeStamp } from '@isrd-isi-edu/chaise/src/models/range-picker';
-import { RecordeditColumnModel } from '@isrd-isi-edu/chaise/src/models/recordedit';
+import { useEffect, useState } from 'react';
+import { useFormContext, useController, ControllerRenderProps, FieldValues, UseControllerReturn } from 'react-hook-form';
 
 // utils
-import { dataFormats } from '@isrd-isi-edu/chaise/src/utils/constants';
-import { arrayFieldPlaceholder, ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
-import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
+import { ERROR_MESSAGES } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { makeSafeIdAttr } from '@isrd-isi-edu/chaise/src/utils/string-utils';
 import { isObjectAndNotNull } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 
@@ -64,9 +55,10 @@ export type InputFieldProps = {
 type InputFieldChildFn = (
   (
     field: ControllerRenderProps<FieldValues, string>,
-    onChange: (value: any) => void,
+    onChange: (event?: any) => void,
     showClear: boolean,
-    clearInput: (e: any) => void
+    clearInput: (e: any) => void,
+    formInput: UseControllerReturn<FieldValues, string>,
   ) => JSX.Element
 )
 
@@ -176,7 +168,7 @@ const InputField = ({
 
   return (
     <div className={`${containerClasses} input-switch-container-${makeSafeIdAttr(name)}`} style={styles}>
-      {typeof children === 'function' ? children(field, onChange, showClear, clearInput) : children}
+      {typeof children === 'function' ? children(field, onChange, showClear, clearInput, formInput) : children}
       {showError && error?.message && <span className='input-switch-error text-danger'>{error.message}</span>}
     </div>
   );
