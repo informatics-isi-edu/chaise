@@ -62,64 +62,63 @@ var testParams = {
                 ["1001", "description 3", "768", JSON.stringify({"quantity":"6"},undefined,2), JSON.stringify({"quantity":"9"},undefined,2), ""],
                 ["1002", "I am number 3", "934", JSON.stringify(979.998,undefined,2), JSON.stringify(98.00243,undefined,2), ""]
             ]
+        },
+        {
+            table_name: 'table_w_multiple_assets',
+            tableComment: "table that has three file assets",
+            sortColumns: "id",
+            keys: [
+                {name: "id",value: "1", operator: "="},
+                {name: "id",value: "2",operator: "="}
+            ],
+            rows: [{
+                    "file_1": {"isFile": true, "value": "/hatrac/js/chaise/prev/111111", "input": 0},
+                    "file_2": {"isFile": true, "value": "/hatrac/js/chaise/prev/222222", "input": 1},
+                    "file_3": {"isFile": true, "value": "/hatrac/js/chaise/prev/333333", "input": 2},
+                    "timestamp_txt": {"input": currentTimestampTime, "value": ""}
+                },
+                {
+                    "file_1": {"isFile": true, "value": "/hatrac/js/chaise/prev/111111", "input": 0},
+                    "file_2": {"isFile": true, "value": "/hatrac/js/chaise/prev/222222", "input": 1},
+                    "file_3": {"isFile": true, "value": "/hatrac/js/chaise/prev/333333", "input": 2},
+                    "timestamp_txt": {"input": currentTimestampTime, "value": ""}
+                }
+            ],
+            results: [
+                [
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
+                ],
+                [
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
+                    {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
+                ]
+            ],
+            files: [{
+                    name: "testfile500kb_1.png",
+                    size: "512000",
+                    displaySize: "500KB",
+                    path: "testfile500kb_1.png",
+                    tooltip: "- testfile500kb_1.png\n- 500 kB"
+                },
+                {
+                    name: "testfile500kb_2.png",
+                    size: "512000",
+                    displaySize: "500KB",
+                    path: "testfile500kb_2.png",
+                    tooltip: "- testfile500kb_2.png\n- 500 kB"
+                },
+                {
+                    name: "testfile500kb_3.png",
+                    size: "512000",
+                    displaySize: "500KB",
+                    path: "testfile500kb_3.png",
+                    tooltip: "- testfile500kb_3.png\n- 500 kB"
+                }
+            ]
         }
-        // TODO: file_3 is invalid because _generated_col_invisible is not being added into the data for the templating engine
-        // , {
-        //     table_name: 'table_w_multiple_assets',
-        //     tableComment: "table that has three file assets",
-        //     sortColumns: "id",
-        //     keys: [
-        //         {name: "id",value: "1", operator: "="},
-        //         {name: "id",value: "2",operator: "="}
-        //     ],
-        //     rows: [{
-        //             "file_1": {"isFile": true, "value": "/hatrac/js/chaise/prev/111111", "input": 0},
-        //             "file_2": {"isFile": true, "value": "/hatrac/js/chaise/prev/222222", "input": 1},
-        //             "file_3": {"isFile": true, "value": "/hatrac/js/chaise/prev/333333", "input": 2},
-        //             "timestamp_txt": {"input": currentTimestampTime, "value": ""}
-        //         },
-        //         {
-        //             "file_1": {"isFile": true, "value": "/hatrac/js/chaise/prev/111111", "input": 0},
-        //             "file_2": {"isFile": true, "value": "/hatrac/js/chaise/prev/222222", "input": 1},
-        //             "file_3": {"isFile": true, "value": "/hatrac/js/chaise/prev/333333", "input": 2},
-        //             "timestamp_txt": {"input": currentTimestampTime, "value": ""}
-        //         }
-        //     ],
-        //     results: [
-        //         [
-        //             {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
-        //             {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
-        //             {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
-        //         ],
-        //         [
-        //             {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/value/","value": "testfile500kb_1.png"}, "testfile500kb_1.png", "512,000",
-        //             {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated/","value": "testfile500kb_2.png"}, "testfile500kb_2.png", "512,000",
-        //             {"link": "/hatrac/js/chaise/"+currentTimestampTime+"/generated_inv/","value": "testfile500kb_3.png"}, "testfile500kb_3.png", "512,000"
-        //         ]
-        //     ],
-        //     files: [{
-        //             name: "testfile500kb_1.png",
-        //             size: "512000",
-        //             displaySize: "500KB",
-        //             path: "testfile500kb_1.png",
-        //             tooltip: "- testfile500kb_1.png\n- 500 kB"
-        //         },
-        //         {
-        //             name: "testfile500kb_2.png",
-        //             size: "512000",
-        //             displaySize: "500KB",
-        //             path: "testfile500kb_2.png",
-        //             tooltip: "- testfile500kb_2.png\n- 500 kB"
-        //         },
-        //         {
-        //             name: "testfile500kb_3.png",
-        //             size: "512000",
-        //             displaySize: "500KB",
-        //             path: "testfile500kb_3.png",
-        //             tooltip: "- testfile500kb_3.png\n- 500 kB"
-        //         }
-        //     ]
-        // }
     ]
 
 };
@@ -225,7 +224,10 @@ describe('Edit multiple existing record,', function() {
 
 
                         if (hasFile) {
-                            browser.wait(EC.invisibilityOf($('.upload-table')), tableParams.files.length ? (tableParams.keys.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout);
+                            browser.wait(
+                              EC.invisibilityOf(element(by.css('.upload-table'))),
+                              tableParams.files.length ? (tableParams.keys.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout
+                            );
                         }
 
                         // Make sure the table shows up with the expected # of rows

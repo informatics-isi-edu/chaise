@@ -1,6 +1,7 @@
 // components
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Modal from 'react-bootstrap/Modal';
+import Spinner from 'react-bootstrap/Spinner';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -61,13 +62,13 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
   const [totalSize, setTotalSize, totalSizeRef] = useStateRef<number>(0);
   // the total size transferred to the server already, updated by onNotify callback
   const [sizeTransferred, setSizeTransferred, sizeTransferredRef] = useStateRef<number>(0);
-  // the total more readable size of all files to be uploaded 
+  // the total more readable size of all files to be uploaded
   const [humanTotalSize, setHumanTotalSize] = useState<string>('');
   // the total more readable size transferred to the server already, updated by onNotify callback
   const [humanSizeTransferred, setHumanSizeTransferred] = useState<string>('');
 
   // following state variables for each step have 2 values:
-  //   - progress: value from 0 - 100 
+  //   - progress: value from 0 - 100
   //   - completed: number of files completed in this step so far
 
   // checksum step state variables
@@ -274,7 +275,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     if (erred || aborted) return;
 
     setTitle('Finalizing Upload');
-    
+
     const item = jobCompletionQueueRef.current.shift();
     if (!item) return;
 
@@ -721,6 +722,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     >
       <Modal.Header>
         <Modal.Title>{title}</Modal.Title>
+        <div className='modal-close-absolute'><Spinner animation='border' /></div>
       </Modal.Header>
       <Modal.Body>
         <div className='row no-row-margin'>{renderBodyContent()}</div>

@@ -125,7 +125,7 @@ const FileField = (props: FileFieldProps): JSX.Element => {
   }
 
   const renderInputWithTooltip = (fieldValue: any, showClear: any, clearInput: any) => {
-    if (!fileObject) return renderInput(fieldValue, showClear, clearInput);
+    if (!fileObject || !fileObject.filename) return renderInput(fieldValue, showClear, clearInput);
 
     return (
       <ChaiseTooltip placement='bottom-start' tooltip={fileTooltip(fileObject)}>

@@ -1651,7 +1651,7 @@ exports.testSubmission = function (tableParams, isEditMode) {
         // if there is a file upload
         if (!process.env.CI && tableParams.files.length > 0) {
             var timeout =  tableParams.files.length ? (tableParams.results.length * tableParams.files.length * browser.params.defaultTimeout) : browser.params.defaultTimeout;
-            browser.wait(ExpectedConditions.invisibilityOf($('.upload-table')),timeout).catch(function (err) {
+            browser.wait(ExpectedConditions.invisibilityOf(element(by.css('.upload-table'))),timeout).catch(function (err) {
                 // if the element is not available (there is no file) it will return error which we should ignore.
             });
         }

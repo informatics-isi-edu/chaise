@@ -369,6 +369,26 @@ export default function RecordeditProvider({
       submissionRows.push(populateSubmissionRow(reference, f, data));
     });
 
+    /**
+     * Add raw values that are not visible to submissionRowsCopy:
+     *
+     * submissionRows is the datastructure that will be used for creating
+     * the upload url. It must have all the visible and invisible data.
+     * The following makes sure that submissionRows has all the underlying data
+     */
+    if (appMode === appModes.EDIT) {
+      for (let i = 0; i < submissionRows.length; i++) {
+        const newData = submissionRows[i];
+        const oldData = tuples[i].data;
+
+        // make sure submissionRows has all the data
+        for (const key in oldData) {
+            if (key in newData) continue;
+            newData[key] = oldData[key];
+        }
+      }
+    }
+
     validateSessionBeforeMutation(() => {
       // show spinner
       setShowSubmitSpinner(true);

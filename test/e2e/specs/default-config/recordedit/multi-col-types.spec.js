@@ -188,11 +188,13 @@ describe('When editing a record', function() {
     });
 
     describe('if the user made no edits', function() {
-        beforeAll(function() {
+        beforeAll(function(done) {
             chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/' + testParams.table_1.key.columnName + testParams.table_1.key.operator + testParams.table_1.key.value);
             chaisePage.recordeditPageReady().then(function() {
                 return recordEditPage.submitForm();
-            });
+            }).then(() => {
+              done();
+            }).catch(chaisePage.catchTestError(done));
         });
 
         it ('should show a warning letting users know that they need to make a change.', (done) => {
