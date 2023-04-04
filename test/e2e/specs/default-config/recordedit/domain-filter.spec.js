@@ -173,7 +173,6 @@ describe("Domain filter pattern support,", function () {
 
                 // open col_w_fkeys_default, select something.
                 it("should limit the set before setting the value if other foreignkey has default value.", function (done) {
-                    // TODO: expected count is not correct. Data is not being filtered
                     testModalCount(colWFkeysDefault, 2, done, true, "other fk values: 1, fixed");
                 });
 

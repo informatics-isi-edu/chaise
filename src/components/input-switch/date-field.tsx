@@ -17,9 +17,9 @@ type DateFieldProps = InputFieldProps & {
    */
   displayExtraDateTimeButtons?: boolean,
   /**
-   * when date-field used in date-time-field we want the prepend text
+   * whether we should show the label or not
    */
-  displayTimePrependText?: boolean
+  displayDateTimeLabels?: boolean
 }
 
 
@@ -40,7 +40,7 @@ const DateField = (props: DateFieldProps): JSX.Element => {
     <InputField {...props} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='chaise-input-group input-switch-date'>
-          {props.displayTimePrependText && <div className='chaise-input-group-prepend'>
+          {props.displayDateTimeLabels && <div className='chaise-input-group-prepend'>
             <div className='chaise-input-group-text dt-width'>Date</div>
           </div>}
           <div className={`chaise-input-control has-feedback ${props.classes} ${props.disableInput ? ' input-disabled' : ''}`}>
@@ -74,10 +74,10 @@ const DateField = (props: DateFieldProps): JSX.Element => {
               parse={(str) => windowRef.moment(str, dataFormats.date)}
               autofix={false}
               /**
-               * when lazy is turned on, it will always show the pattern (even if value is empty).
-               * but when the field is empty we don't want to show the pattern (and want to show the placeholder instead)
+               * when lazy is set to true, it will not show the pattern to users.
+               * so we set it to true when the input is empty or is disabled.
                */
-              lazy={field.value === '' ? true : false}
+              lazy={field.value === '' || props.disableInput ? true : false}
               blocks={{
                 // `0` in mask means any numbers. so this is saying any numbers.
                 YYYY: { mask: '0000', placeholderChar: 'Y' },
@@ -92,7 +92,7 @@ const DateField = (props: DateFieldProps): JSX.Element => {
             />
           </div>
           {!props.disableInput && props.displayExtraDateTimeButtons && <div className='chaise-input-group-append'>
-            <button type='button' className='chaise-btn chaise-btn-secondary' onClick={applyToday}>Today</button>
+            <button type='button' className='date-today-btn chaise-btn chaise-btn-secondary' onClick={applyToday}>Today</button>
           </div>}
         </div>
       )}

@@ -1055,7 +1055,7 @@ exports.testAddRelatedTable = function (params, isInline, inputCallback) {
                                     expect(classAttr.indexOf('input-disabled')).toBeGreaterThan(-1, col + " was not disabled.");
                                 }
                             });
-                        }   
+                        }
 
                     } else {
                         // NOTE/TODO: should probably be removed since all tests should be migrated to have an object

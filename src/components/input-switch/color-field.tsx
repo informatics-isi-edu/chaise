@@ -10,10 +10,20 @@ import { useState, useRef, useCallback } from 'react';
 import useClickOutside from '@isrd-isi-edu/chaise/src/hooks/click-outside';
 
 // utils
+import { VALIDATE_VALUE_BY_TYPE } from '@isrd-isi-edu/chaise/src/utils/input-utils';
 import { isStringAndNotEmpty } from '@isrd-isi-edu/chaise/src/utils/type-utils';
 import { windowRef } from '@isrd-isi-edu/chaise/src/utils/window-ref';
 
 const ColorField = (props: InputFieldProps): JSX.Element => {
+
+  const rules = {
+    /**
+     * DB only supports six character format, while the plugin that
+     * we're using allows short format too.
+     * This will make sure user is typing the proper full format.
+     */
+    validate: VALIDATE_VALUE_BY_TYPE['color']
+  };
 
   const colorInputContainer = useRef<HTMLInputElement>(null);
 
@@ -73,7 +83,7 @@ const ColorField = (props: InputFieldProps): JSX.Element => {
   };
 
   return (
-    <InputField {...props}>
+    <InputField {...props} controllerRules={rules}>
       {(field, onChange, showClear, clearInput) => (
         <div className='chaise-input-group input-switch-color' ref={colorInputContainer}>
           <div

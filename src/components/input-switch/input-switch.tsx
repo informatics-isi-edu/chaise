@@ -120,7 +120,11 @@ export type InputSwitchProps = {
   /**
    * whether we should offer the extra now/today buttons
    */
-  displayExtraDateTimeButtons?: boolean
+  displayExtraDateTimeButtons?: boolean,
+  /**
+   * whether we should display the date/time labels
+   */
+  displayDateTimeLabels?: boolean
 };
 
 const InputSwitch = ({
@@ -146,7 +150,8 @@ const InputSwitch = ({
   parentLogStackPath,
   foreignKeyData,
   waitingForForeignKeyData,
-  displayExtraDateTimeButtons
+  displayExtraDateTimeButtons,
+  displayDateTimeLabels
 }: InputSwitchProps): JSX.Element | null => {
 
 
@@ -216,7 +221,7 @@ const InputSwitch = ({
           timeClasses={timeClasses}
           clearTimeClasses={clearTimeClasses}
           type={type}
-          hasTimezone={columnModel?.column.type.name === 'timestamptz'}
+          hasTimezone={columnModel?.column.type.rootName === 'timestamptz'}
           name={name}
           classes={classes}
           inputClasses={inputClasses}
@@ -228,6 +233,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
+          displayDateTimeLabels={displayDateTimeLabels}
         />;
       case 'date':
         return <DateField
@@ -243,6 +249,7 @@ const InputSwitch = ({
           displayErrors={displayErrors}
           placeholder={placeholder as string}
           displayExtraDateTimeButtons={displayExtraDateTimeButtons}
+          displayDateTimeLabels={displayDateTimeLabels}
         />;
       case 'integer2':
       case 'integer4':

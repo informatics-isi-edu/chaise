@@ -228,7 +228,7 @@ export function populateCreateInitialValues(
       const tsOptions: TimestampOptions = { outputMomentFormat: '' };
 
       let isTimestamp = false;
-      switch (column.type.name) {
+      switch (column.type.rootName) {
         // timestamp[tz] and asset columns have default model objects if their inputs are NOT disabled
         case 'timestamp':
           // this is only going to change the underlying raw value
@@ -378,7 +378,8 @@ export function populateEditInitialValues(
       // Transform column values for use in view model
       const options: TimestampOptions = { outputMomentFormat: '' }
       let isTimestamp = false
-      switch (column.type.name) {
+      // we're using rootName so we can properly handle system columns
+      switch (column.type.rootName) {
         case 'timestamp':
           // this is only going to change the underlying raw value
           options.outputMomentFormat = dataFormats.timestamp;
@@ -504,16 +505,6 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
     }
   }
 
-  reference.columns.forEach((col: any) => {
-    if (col.isForeignKey) {
-      // the column value is just for display
-      // the actual raw values are going to be set after this loop
-      return;
-    } else {
-      setSubmission(col);
-    }
-  });
-
   // some outbound-fks might not be visible and prefilled
   // so instead of going based on the visible-columns, we're going based on all-outbounds
   reference.activeList.allOutBounds.forEach((col: any) => {
@@ -521,6 +512,19 @@ export function populateSubmissionRow(reference: any, formNumber: number, formDa
       // set the submission only if it has value
       setSubmission(fkCol, true);
     });
+  });
+
+  reference.columns.forEach((col: any) => {
+    if (col.isForeignKey) {
+      // the column value is just for display
+      // the difference between here and above is that if a fk input is
+      // visible and empty, we have to treat it as "null" instead of skipping it.
+      col.foreignKey.colset.columns.forEach((fkCol: any) => {
+        setSubmission(fkCol);
+      });
+    } else {
+      setSubmission(col);
+    }
   });
 
   return submissionRow;

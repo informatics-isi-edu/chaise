@@ -90,7 +90,9 @@ const RangeInputs = ({
   const { absMax, absMin } = rangeOptions;
 
   const type = getType(inputType);
-  const classTypeName = (type === 'int' || type === 'number') ? 'numeric-width' : type === 'date' ? 'date-width' : 'time-width';
+
+  const className = (type === 'timestamp') ? 'range-inputs-timestamp-width' : '';
+  const inputWrapperClassName = (type === 'int' || type === 'number') ? 'numeric-width' : type === 'date' ? 'date-width' : 'time-width';
 
   const minName = `${name}-min`;
   const maxName = `${name}-max`;
@@ -227,7 +229,7 @@ const RangeInputs = ({
 
   return (
     <div className={classes}>
-      <div className='range-input-container range-inputs-width'>
+      <div className={`range-input-container range-inputs-width${className ? ' ' + className : ''}`}>
         <FormProvider {...methods} >
           <form className='range-input-form' onSubmit={(event) => {
             // this will make sure only the current form is submitted and not outter forms.
@@ -235,14 +237,16 @@ const RangeInputs = ({
             event.stopPropagation();
             methods.handleSubmit(onSubmit)(event);
           }}>
-            <div className={`range-input ${classTypeName}`}>
+            <div className={`range-input ${inputWrapperClassName}`}>
               <label>From:
                 <InputSwitch
                   displayErrors={false}
                   disableInput={disabled}
                   name={minName}
                   type={inputType}
-                  placeholder={absMin as string}
+                  // when it's timestamp, we don't want to show placeholder as it could
+                  // be confusing when users only enter only time or date.
+                  placeholder={type === 'timestamp' ? undefined : absMin as string}
                   inputClasses={type === 'timestamp' ? 'ts-date-range-min' : 'range-min'}
                   timeClasses='ts-time-range-min'
                   clearClasses={type === 'timestamp' ? 'min-date-clear' : 'min-clear'}
@@ -250,14 +254,16 @@ const RangeInputs = ({
                 />
               </label>
             </div>
-            <div className={`range-input ${classTypeName}`}>
+            <div className={`range-input ${inputWrapperClassName}`}>
               <label>To:
                 <InputSwitch
                   displayErrors={false}
                   disableInput={disabled}
                   name={maxName}
                   type={inputType}
-                  placeholder={absMax as string}
+                  // when it's timestamp, we don't want to show placeholder as it could
+                  // be confusing when users enter only time or date.
+                  placeholder={type === 'timestamp' ? undefined : absMax as string}
                   inputClasses={type === 'timestamp' ? 'ts-date-range-max' : 'range-max'}
                   timeClasses='ts-time-range-max'
                   clearClasses={type === 'timestamp' ? 'max-date-clear' : 'max-clear'}

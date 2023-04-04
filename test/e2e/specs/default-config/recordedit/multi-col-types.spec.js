@@ -37,9 +37,9 @@ var testParams = {
             {name: "bool_null_col", displayType: "boolean", value: true},
             {name: "bool_true_col", displayType: "boolean", value: false},
             {name: "bool_false_col", displayType: "boolean", value: null},
-            {name: "timestamp_null_col", displayType: "timestamp", value: {date: "2016-01-18", time: "01:00:00"}},
+            {name: "timestamp_null_col", displayType: "timestamp", value: {date: "2016-01-18", time: "13:00:00"}},
             {name: "timestamp_col", displayType: "timestamp"},
-            {name: "timestamptz_null_col", displayType: "timestamptz", value: {date: "2016-01-18", time: "01:00:00"}},
+            {name: "timestamptz_null_col", displayType: "timestamptz", value: {date: "2016-01-18", time: "13:00:00"}},
             {name: "timestamptz_col", displayType: "timestamptz"},
             {name: "date_null_col", displayType: "date", value: "2016-08-15"},
             {name: "date_col", displayType: "date"},
@@ -195,19 +195,28 @@ describe('When editing a record', function() {
             });
         });
 
-        it('should submit the right data to the DB', function() {
-            var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/';
+        it ('should show a warning letting users know that they need to make a change.', (done) => {
+          const alert = chaisePage.recordEditPage.getAlertWarning();
+          chaisePage.waitForElement(alert).then(() => {
+              expect(alert.getText()).toContain("No data was changed in the update request. Please check the form content and resubmit the data.");
+              done();
+          }).catch(chaisePage.catchTestError(done));
+        })
 
-            browser.wait(function () {
-                return browser.driver.getCurrentUrl().then(function(url) {
-                    return url.startsWith(redirectUrl);
-                });
-            });
+        // TODO we're not making any edits, so why this test case expects recordedit to submit?
+        // it('should submit the right data to the DB', function() {
+        //     var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/';
 
-            expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
-            var colNames = Object.keys(testParams.table_1.submitted_values);
-            recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.submitted_values, colNames.length+5); // +5 for system columns
-        });
+        //     browser.wait(function () {
+        //         return browser.driver.getCurrentUrl().then(function(url) {
+        //             return url.startsWith(redirectUrl);
+        //         });
+        //     });
+
+        //     expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
+        //     var colNames = Object.keys(testParams.table_1.submitted_values);
+        //     recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.submitted_values, colNames.length+5); // +5 for system columns
+        // });
     });
 
     // If the user does make an edit, make sure the app correctly converted the submission data for ERMrest.
@@ -222,7 +231,7 @@ describe('When editing a record', function() {
         });
 
         // Test each column type to check that the app converts the submission data correctly for each type
-        it('should submit the right data to the DB', function() {
+        it('should properly set the values.', function() {
             // Edit each column with the new row data
             testParams.table_1.row.forEach(function(column) {
                 var newValue = column.value;
@@ -231,16 +240,22 @@ describe('When editing a record', function() {
                     case 'popup-select':
                         // Clear the foreign key field for fk_col b/c fk_col needs to be null
                         if (name === 'fk_col') {
-                            var clearBtns = element.all(by.css('.foreignkey-remove'));
-                            chaisePage.clickButton(clearBtns.get(1));
+                            chaisePage.clickButton(chaisePage.recordEditPage.getForeignKeyInputClear(name, 1));
                         }
                         // Select a non-null value for fk_null_col b/c fk_null_col needs to be non-null
                         if (name === 'fk_null_col') {
                             element.all(by.css('.modal-popup-btn')).first().click().then(function() {
-                                return chaisePage.recordsetPageReady();
+                                // wait for modal rows to load
+                                return browser.wait(function () {
+                                    return chaisePage.recordsetPage.getModalRows().count().then(function (ct) {
+                                        return (ct > 0);
+                                    });
+                                }, browser.params.defaultTimeout);
                             }).then(function() {
                                 // Get the first row in the modal popup table, find the row's select-action-buttons, and click the 1st one.
-                                return chaisePage.recordsetPage.getRows().first().all(by.css('.select-action-button')).first().click();
+                                return chaisePage.recordsetPage.getModalRows().get(0).all(by.css(".select-action-button"));
+                            }).then(function (selectButtons) {
+                                selectButtons[0].click();
                             }).catch(function(error) {
                                 console.log(error);
                                 expect('Something went wrong in this promise chain.').toBe('Please see error message.');
@@ -249,22 +264,51 @@ describe('When editing a record', function() {
                         break;
                     case 'timestamp':
                     case 'timestamptz':
-                        var inputs = recordEditPage.getTimestampInputsForAColumn(name, 0);
-                        var dateInput = inputs.date, timeInput = inputs.time, meridiemBtn = inputs.meridiem, clearBtn = inputs.clearBtn;
-
-                        chaisePage.clickButton(clearBtn).then(function() {
+                        var inputs = recordEditPage.getTimestampInputsForAColumn(name, 1);
+                        var dateInput = inputs.date, timeInput = inputs.time;
+                        chaisePage.clickButton(inputs.clearBtn).then(function() {
                             if (newValue) {
                                 dateInput.sendKeys(newValue.date);
                                 timeInput.sendKeys(newValue.time);
-                                return meridiemBtn.click();
                             }
                         }).catch(function(error) {
                             console.log(error);
                             expect('Something went wrong in this promise chain.').toBe('Please see error message.');
                         });
                         break;
-                    case 'date':
-                        var input = recordEditPage.getDateInputForAColumn(name, 0);
+                    case 'boolean':
+                        if (newValue !== null) {
+                            recordEditPage.selectDropdownValue(recordEditPage.getDropdownElementByName(name, 1), newValue);
+                        } else {
+                          chaisePage.clickButton(chaisePage.recordEditPage.getInputRemoveButton(name, 1));
+                        }
+                        break;
+                    case "asset":
+                        // empty the value if there's any
+                        if (name === 'asset_col') {
+                            chaisePage.clickButton(chaisePage.recordEditPage.getInputRemoveButton(name, 1));
+                        }
+                        // select new file
+                        if (newValue && !process.env.CI) {
+                            recordEditHelpers.testFileInput(name, 0, newValue, "", true, false);
+                        }
+                        break;
+                    case 'color':
+                        var input = chaisePage.recordEditPage.getColorInputForAColumn(name, 1);
+                        // we want to empty the value
+                        if (name === 'color_rgb_hex_col') {
+                            chaisePage.clickButton(chaisePage.recordEditPage.getInputRemoveButton(name, 1));
+                        }
+                        // select new value
+                        if (newValue) {
+                            input.sendKeys(newValue);
+                        }
+                        break;
+                    case 'longtext':
+                    case 'markdown':
+                    case 'json':
+                        var input = recordEditPage.getTextAreaForAColumn(name, 1);
+                        chaisePage.recordEditPage.clearInput(input);
                         input.clear().then(function() {
                             if (newValue) input.sendKeys(newValue);
                         }).catch(function(error) {
@@ -272,31 +316,9 @@ describe('When editing a record', function() {
                             expect('Something went wrong in this promise chain.').toBe('Please see error message.');
                         });
                         break;
-                    case 'boolean':
-                        var dropdown = recordEditPage.getBooleanInputDisplay(name, 0);
-                        if (newValue !== null) {
-                            recordEditPage.selectDropdownValue(dropdown, newValue);
-                        } else {
-                            recordEditPage.getDropdownClear(dropdown).click();
-                        }
-                        break;
-                    case "asset":
-                        var inpt = chaisePage.recordEditPage.getInputForAColumn(name, 0);
-                        var clearBtn = chaisePage.recordEditPage.getClearButton(inpt);
-                        // clear the asset
-                        // TODO: change after recordedit app migrated
-                        chaisePage.jqueryClickButton(clearBtn).then(function () {
-                            // select new file
-                            if (newValue && !process.env.CI) {
-                                recordEditHelpers.testFileInput(name, 0, newValue, "", true, false);
-                            }
-                        }).catch(function(error) {
-                            console.log(error);
-                            expect('Something went wrong in this promise chain.').toBe('Please see error message.');
-                        });
-                        break;
                     default:
-                        var input = recordEditPage.getInputById(0, name);
+                        var input = recordEditPage.getInputForAColumn(name, 1);
+                        chaisePage.recordEditPage.clearInput(input);
                         input.clear().then(function() {
                             if (newValue) input.sendKeys(newValue);
                         }).catch(function(error) {
@@ -305,28 +327,26 @@ describe('When editing a record', function() {
                         });
                 }   // match to switch statement
             });
+        });
 
-
+        it ('should submit the data properly and redirect to record page.', () => {
             // Submit the form
-            // TODO: disabled timestamp inputs (RCT/RMT) are not showing the values properly on load
             recordEditPage.submitForm().then(function() {
-
                 var redirectUrl = browser.params.url + "/record/#" + browser.params.catalogId + "/multi-column-types:" + testParams.table_1.tableName + '/';
-
                 browser.wait(function () {
                     return browser.driver.getCurrentUrl().then(function(url) {
                         return url.startsWith(redirectUrl);
                     });
                 });
-
-                expect(browser.driver.getCurrentUrl()).toContain(redirectUrl);
-
-                var colNames = Object.keys(testParams.table_1.null_submitted_values).filter(function (colName) {
-                    var el = testParams.table_1.null_submitted_values[colName];
-                    return !process.env.CI || !(typeof el === 'object' && el != null && el.ignoreInCI === true);
-                });
-                recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.null_submitted_values, colNames.length+5); // +5 for system columns
             });
+        });
+
+        it ('data should be properly saved.', () => {
+            var colNames = Object.keys(testParams.table_1.null_submitted_values).filter(function (colName) {
+                var el = testParams.table_1.null_submitted_values[colName];
+                return !process.env.CI || !(typeof el === 'object' && el != null && el.ignoreInCI === true);
+            });
+            recordEditHelpers.testRecordAppValuesAfterSubmission(colNames, testParams.table_1.null_submitted_values, colNames.length+5); // +5 for system columns
         });
     });
 

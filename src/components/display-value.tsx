@@ -45,7 +45,7 @@ const DisplayValue = ({
         dangerouslySetInnerHTML={{ __html: value.value }}
         className={usedClassName}
         // for foreign-key inputs display value
-        contentEditable='false'
+        contentEditable={false}
       >
       </span>
     )

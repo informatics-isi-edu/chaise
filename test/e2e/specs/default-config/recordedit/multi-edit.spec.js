@@ -7,7 +7,8 @@ var EC = protractor.ExpectedConditions
 var currentTimestampTime = moment().format("x");
 var testParams = {
     schema_name: "multi-edit",
-    tables: [{
+    tables: [
+        {
             table_name: "multi-edit-table",
             tableComment: "Table to represent adding multiple entities",
             sortColumns: "id",
@@ -33,7 +34,8 @@ var testParams = {
                 ["1000", "modified val", "4", JSON.stringify({"name":"This is the edited value of json"},undefined,2), JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2), "1"],
                 ["1001", "description 2", "66", JSON.stringify({"quantity":"6"},undefined,2), JSON.stringify({"quantity":"9"},undefined,2), "2"]
             ]
-        }, {
+        },
+        {
             table_name: "multi-edit-table",
             tableComment: "Table to represent adding multiple entities",
             sortColumns: "id",
@@ -54,9 +56,10 @@ var testParams = {
                     "text": {"value": "just text", "input": "I am number 3"}
                 }
             ],
+            // apart from the values changed above, the fk values are also empty because the first test case is also doing testFkClear
             results: [
-                ["1000", "changed it again", "5", JSON.stringify({"name":"This is the edited value of json"},undefined,2), JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2), "1"],
-                ["1001", "description 3", "768", JSON.stringify({"quantity":"6"},undefined,2), JSON.stringify({"quantity":"9"},undefined,2), "2"],
+                ["1000", "changed it again", "5", JSON.stringify({"name":"This is the edited value of json"},undefined,2), JSON.stringify({"name":"This is the edited value of jsonB"},undefined,2), ""],
+                ["1001", "description 3", "768", JSON.stringify({"quantity":"6"},undefined,2), JSON.stringify({"quantity":"9"},undefined,2), ""],
                 ["1002", "I am number 3", "934", JSON.stringify(979.998,undefined,2), JSON.stringify(98.00243,undefined,2), ""]
             ]
         }
@@ -157,7 +160,6 @@ describe('Edit multiple existing record,', function() {
                     chaisePage.navigate(browser.params.url + "/recordedit/#" + browser.params.catalogId + "/" + schemaName + ":" + tableParams.table_name + "/" + keyPairs.join(";") + "@sort(" + tableParams.sortColumns + ")");
                 });
 
-                
                 it("should have the title displayed properly.", function() {
                     let entityTitleText = 'Edit ' + tableParams.keys.length + ' ' + tableParams.table_name + ' records';
                     // if submit button is visible, this means the recordedit page has loaded
@@ -311,7 +313,7 @@ describe('Edit multiple existing record,', function() {
                             return clearAllBtn.click();
                         }).then(function () {
                             cancelBtn.click();
-                            
+
                             done();
                         }).catch(function (err) {
                             console.log(err);
@@ -322,14 +324,14 @@ describe('Edit multiple existing record,', function() {
                     it("should submit the form and show " + tableParams.keys.length + " rows updated", function (done) {
                          // submit form
                          chaisePage.recordEditPage.submitForm();
- 
+
                          // Make sure the table shows up with the expected # of rows
                          browser.wait(function() {
                              return chaisePage.recordsetPage.getRows().count().then(function(ct) {
                                  return (ct == tableParams.keys.length);
                              });
                          }, browser.params.defaultTimeout);
-                         
+
                          expect(chaisePage.recordsetPage.getRows().count()).toBe(tableParams.keys.length, "Incorrect number of rows showing after update");
                          done();
                     })

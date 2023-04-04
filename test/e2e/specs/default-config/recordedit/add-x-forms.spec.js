@@ -189,7 +189,7 @@ describe('Record Add', function() {
                     expect(tsInput1.date.getAttribute("value")).toBe(dateMomentValue);
                     expect(tsInput2.date.getAttribute("value")).toBe(dateMomentValue);
                     expect(tsInput3.date.getAttribute("value")).toBe(dateMomentValue);
-                    
+
                     const timeMomentValue = moment(timeValue, 'hh:mm:ssA').format('hh:mm:ss');
                     expect(tsInput1.time.getAttribute("value")).toBe(timeMomentValue);
                     expect(tsInput2.time.getAttribute("value")).toBe(timeMomentValue);
@@ -222,7 +222,7 @@ describe('Record Add', function() {
                             return (ct == 5);
                         });
                     }, browser.params.defaultTimeout);
-                    
+
                     var displayingText = "Displaying all\n5\nof 5 records";
                         displayingTextError = "The total count display in the foreign key popup is incorrect";
 
@@ -361,7 +361,7 @@ describe('Record Add', function() {
                 dateInput3.date.sendKeys(testParams.values.date.modified);
 
                 // get clear btn for dateinput1
-                chaisePage.recordEditPage.getRemoveButton(testParams.date_col_name, 1, 'remove-input-btn').click().then(function () {
+                chaisePage.recordEditPage.getInputRemoveButton(testParams.date_col_name, 1).click().then(function () {
                     expect(dateInput1.date.getAttribute("value")).toBe("");
                     const input2DateMomentValue = moment(testParams.values.date.initial, 'MM-DD-YYYY').format('YYYY-MM-DD');
                     expect(dateInput2.date.getAttribute("value")).toBe(input2DateMomentValue);
@@ -428,7 +428,7 @@ describe('Record Add', function() {
             if (!process.env.CI && testParams.files.length > 0) {
                 it("should clear the uri value in form 3.", function () {
                     var file = testParams.files[0];
-                    chaisePage.recordEditPage.getRemoveButton(testParams.uri_col_name, 3, 'remove-input-btn').click().then(() => {
+                    chaisePage.recordEditPage.getInputRemoveButton(testParams.uri_col_name, 3).click().then(() => {
                         expect(uploadInput1.getText()).toBe(file.name);
                         expect(uploadInput2.getText()).toBe(file.name);
                         expect(uploadInput3.getText()).toBe("");

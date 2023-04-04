@@ -28,7 +28,7 @@ var testParams = {
         date_disabled_value: "2014-05-12",
         timestamp_value: "2016-05-14T17:30:00",
         timestamp_date_value: "2016-05-14",
-        timestamp_time_value: "17:30:00", // no separate meridiem input, change time value to 24 hour
+        timestamp_time_value: "17:30:00",
         timestamp_disabled_value: "2012-06-22T18:36:00",
         timestamp_disabled_date_value: "2012-06-22",
         timestamp_disabled_time_value: "18:36:00",
@@ -37,7 +37,7 @@ var testParams = {
         timestamp_disabled_no_default_time_value: "",
         timestamptz_value: "2014-05-07T14:40:00-07:00",
         timestamptz_date_value: "2014-05-07",
-        timestamptz_time_value: "14:40:00", // no separate meridiem input, change time value to 24 hour
+        timestamptz_time_value: "14:40:00",
         timestamptz_disabled_value: "2010-06-13T17:22:00-07:00",
         timestamptz_disabled_date_value: "2010-06-13",
         timestamptz_disabled_time_value: "17:22:00",
@@ -55,10 +55,10 @@ var testParams = {
         rid_disabled_value: "Automatically generated",
         rcb_disabled_value: "Automatically generated",
         rmb_disabled_value: "Automatically generated",
-        rct_disabled_date_value: "",
-        rct_disabled_time_value: "",
-        rmt_disabled_date_value: "",
-        rmt_disabled_time_value: "",
+        rct_disabled_date_value: "Automatically generated",
+        rct_disabled_time_value: "Automatically generated",
+        rmt_disabled_date_value: "Automatically generated",
+        rmt_disabled_time_value: "Automatically generated",
     },
     record_column_values: {
     // data values
@@ -91,17 +91,17 @@ var testParams = {
     },
     edit_key: { name: "id", value: "2", operator: "="},
     re_column_names: [
-        { name: "text_disabled" }, 
-        { name: "markdown_disabled", type: "textarea" }, 
-        { name: "foreign_key_disabled", type: "foreign_key" }, 
-        { name: "int_disabled" }, 
-        { name: "float_disabled" }, 
+        { name: "text_disabled" },
+        { name: "markdown_disabled", type: "textarea" },
+        { name: "foreign_key_disabled", type: "foreign_key" },
+        { name: "int_disabled" },
+        { name: "float_disabled" },
         { name: "boolean_disabled", type: "dropdown" },
-        { name: "date_disabled" }, 
-        { name: "timestamp_disabled", type: "timestamp" }, 
-        { name: "timestamptz_disabled", type: "timestamp" }, 
-        { name: "json_disabled", type: "textarea" }, 
-        { name: "asset_disabled", type: "asset" }, 
+        { name: "date_disabled" },
+        { name: "timestamp_disabled", type: "timestamp" },
+        { name: "timestamptz_disabled", type: "timestamp" },
+        { name: "json_disabled", type: "textarea" },
+        { name: "asset_disabled", type: "asset" },
         { name: "color_rgb_hex_disabled", type: "color" }
     ],
     re_column_values: {
@@ -293,12 +293,12 @@ describe('Record Add with defaults', function() {
             expect(ridDisabledInput.getAttribute("placeholder")).toBe(values.rid_disabled_value, "RID disabled input default is incorrect");
             expect(rcbDisabledInput.getAttribute("placeholder")).toBe(values.rcb_disabled_value, "RCB disabled input default is incorrect");
             expect(rmbDisabledInput.getAttribute("placeholder")).toBe(values.rmb_disabled_value, "RMB disabled input default is incorrect");
-            
-            expect(rctDisabledInput.date.getText()).toBe(values.rct_disabled_date_value, "RCT disabled date input default is incorrect");
-            expect(rctDisabledInput.time.getText()).toBe(values.rct_disabled_time_value, "RCT disabled time input default is incorrect");
 
-            expect(rmtDisabledInput.date.getText()).toBe(values.rmt_disabled_date_value, "RMT disabled date input default is incorrect");
-            expect(rmtDisabledInput.time.getText()).toBe(values.rmt_disabled_time_value, "RMT disabled time input default is incorrect");
+            expect(rctDisabledInput.date.getAttribute("placeholder")).toBe(values.rct_disabled_date_value, "RCT disabled date input default is incorrect");
+            expect(rctDisabledInput.time.getAttribute("placeholder")).toBe(values.rct_disabled_time_value, "RCT disabled time input default is incorrect");
+
+            expect(rmtDisabledInput.date.getAttribute("placeholder")).toBe(values.rmt_disabled_date_value, "RMT disabled date input default is incorrect");
+            expect(rmtDisabledInput.time.getAttribute("placeholder")).toBe(values.rmt_disabled_time_value, "RMT disabled time input default is incorrect");
         });
 
         // TODO write tests for default values for composite foreign keys when implemented
@@ -353,7 +353,7 @@ describe("Record Edit with immutable columns", function() {
                         case 'asset':
                             input = chaisePage.recordEditPage.getTextFileInputForAColumn(columnName, 1);
                             expect(input.getText()).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-                        
+
                             // that's why the asset column must be added to the begining of visible columns list
                             const tooltip = chaisePage.getTooltipDiv();
                             chaisePage.waitForElementInverse(tooltip).then(function () {
@@ -379,7 +379,7 @@ describe("Record Edit with immutable columns", function() {
                         case 'timestamp':
                             input = chaisePage.recordEditPage.getInputForAColumn(columnName, 1);
                             expect(input.getAttribute('value')).toBe(testParams.re_column_values[columnName], "Recordedit value for: " + columnName + " is incorrect");
-    
+
                             const inputObj = chaisePage.recordEditPage.getTimestampInputsForAColumn(columnName, 1);
                             expect(inputObj.date.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_date'], "Recordedit value for: " + columnName + " date is incorrect");
                             expect(inputObj.time.getAttribute('value')).toBe(testParams.re_column_values[columnName + '_time'], "Recordedit value for: " + columnName + " time is incorrect");

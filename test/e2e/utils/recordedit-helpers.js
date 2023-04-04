@@ -218,7 +218,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     const errMessageSelector = chaisePage.recordEditPage.getInputErrorMessage(input);
 
                     expect(errMessageSelector.isDisplayed()).toBeTruthy(colError(col, "Expected to show error."));
-                    
+
                     return chaisePage.recordEditPage.getAlertErrorClose().click();
                 }).then(() => {
                     return defer.fulfill(), defer.promise;
@@ -275,13 +275,12 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     disabledCols.forEach(function(column) {
                         if (column.type == 'timestamp' || column.type == 'timestamptz') {
                             var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex+1);
-                            var dateInput = timeInputs.date, timeInput = timeInputs.time, meridiemBtn = timeInputs.meridiem;
+                            var dateInput = timeInputs.date, timeInput = timeInputs.time;
                             expect(dateInput.isEnabled()).toBe(false, colError(column.name, "date input of generated timestamp column is enabled."));
                             expect(timeInput.isEnabled()).toBe(false, colError(column.name, "time input of generated timestamp column is enabled."));
-                            expect(meridiemBtn.isEnabled()).toBe(false, colError(column.name, "meridiem input of generated timestamp column is enabled."));
                         } else {
                             const inputSelector = chaisePage.recordEditPage.getInputForAColumn(column.name, recordIndex+1);
-                            
+
                             expect(inputSelector.isEnabled()).toBe(false, colError(column.name, "input of generated column is enabled."));
                             if (!tableParams.key) {
                                 expect(inputSelector.getAttribute('placeholder')).toBe('Automatically generated', colError(column.name, "placeholder of generated column is not correct."));
@@ -557,7 +556,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 (function(input){
                                     c._value = input;
                                     jsonTxtArea.sendKeys(input);
-                                    
+
                                     const errMessageSelector = chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json');
                                     // sleep for an error to "possibly show", it shouldn't
                                     browser.sleep(20);
@@ -577,7 +576,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 ((input) => {
                                     c._value = input;
                                     jsonTxtArea.sendKeys(input);
-                                    
+
                                     const errMessageSelector = chaisePage.recordEditPage.getJSONInputErrorMessage(jsonTxtArea, 'json');
                                     expect(errMessageSelector.getText()).toBe('Please enter a valid JSON value.', colError(c.name , 'Some Invalid JSON Values didn\'t show error'));
                                 })(invalidJSONTextParams[i].stringVal);
@@ -748,7 +747,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                     it("should show a dropdown", function() {
                         dropdowns.forEach(function(dropdown) {
                             const el = chaisePage.recordEditPage.getDropdownElementByName(dropdown.column.name, recordIndex+1);
-                            
+
                             expect(el.isDisplayed()).toBeTruthy();
 
                             var value = getRecordValue(dropdown.column.name);
@@ -774,7 +773,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 // close the dropdown before next test
                                 return dropdown.dropdownInput.click();
                             }).then(() => {
-                                // do nothing, done() here if we use it 
+                                // do nothing, done() here if we use it
                             }).catch((error) => {
                                 console.dir(error);
                                 expect('Something went wrong in this promise chain').toBe('Please see error message.', colError(dropdown.column.name, "While counting the values in the dropdown."));
@@ -916,7 +915,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                         var displayingText = "Displaying all\n" + col.count + "\nof " + col.totalCount + " records";
                                             displayingTextError = "The total count display in the foreign key popup is incorrect";
 
-                                        
+
                                         expect(chaisePage.recordsetPage.getTotalCount().getText()).toBe(displayingText, displayingTextError);
 
                                         return rows.all(by.css(".select-action-button"));
@@ -983,36 +982,43 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             if (column.generated || column.immutable) return;
 
+                            const error = chaisePage.recordEditPage.getErrorMessageForAColumn(column.name, recordIndex+1);
+
                             chaisePage.recordEditPage.clearInput(dateInput);
                             browser.sleep(10);
 
-                            // TODO: do we want to validate dates and show errors?
-                            //    - input doesn't allow date values that don't exist, but we could test partial dates?
-                            // dateInput.sendKeys('1234-13-31');
-                            // chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
-                            //     expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Expected to show a error on invalid input."));
-                            // });
+                            // testing partial input
+                            dateInput.sendKeys('1234-1');
+                            chaisePage.waitForElement(error);
+                            expect(error.getText()).toBe('Please enter a valid date value in YYYY-MM-DD format.');
 
-                            // chaisePage.recordEditPage.clearInput(dateInput);
-                            // browser.sleep(10);
+                            chaisePage.recordEditPage.clearInput(dateInput);
+                            browser.sleep(10);
 
-                            // input is displayed as MM/dd/YYYY
-                            dateInput.sendKeys('01-01-2016');
+                            // send a proper value and see if the error clears up or not.
+                            dateInput.sendKeys('2016-01-01');
                             expect(dateInput.getAttribute('value')).toEqual('2016-01-01', colError(column.name, "value didn't change."));
-                            // chaisePage.recordEditPage.getDateInputErrorMessage(dateInput, 'date').then(function(error) {
-                            //     expect(error).toBeNull(colError(column.name , "Expected to not show any error on valid input."));
-                            // });
+                            expect(error.isPresent()).toBeFalsy();
                         });
                     });
 
-                    // NOTE: removed Today button test since the browser is now overlaying the calendar icon
+                    it('\"Today\" button should enter the current date into the input', function() {
+                      var today = moment().format('YYYY-MM-DD');
+                      datePickerFields.forEach(function(dp) {
+
+                          if (dp.column.generated || dp.column.immutable) return;
+
+                          dp.todayBtn.click();
+                          expect(dp.date.getAttribute('value')).toEqual(today, colError(dp.column.name, "selected date is not correct."));
+                      });
+                  });
 
                     it('\"Clear\" button clear the date input respectively', function() {
                         datePickerFields.forEach(function(dp) {
 
                             if (dp.column.generated || dp.column.immutable) return;
 
-                            chaisePage.recordEditPage.getRemoveButton(dp.column.name, recordIndex+1, 'remove-input-btn').click().then(function () {
+                            chaisePage.recordEditPage.getInputRemoveButton(dp.column.name, recordIndex+1).click().then(function () {
                                 expect(dp.date.getAttribute('value')).toBeFalsy(colError(dp.column.name, "Couldn't clear the input."));
                             });
                         });
@@ -1027,13 +1033,10 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                             chaisePage.recordEditPage.clearInput(inp);
                             browser.sleep(10);
 
-                            const value = getRecordInput(column.name, '01-01-2016');
-                            const momentValue = moment(value, 'MM-DD-YYYY');
+                            const value = getRecordInput(column.name, '2016-01-01');
 
-                            // send value in MM-DD-YYYY format
                             inp.sendKeys(value);
-                            // compare value in YYYY-MM-DD format
-                            expect(inp.getAttribute('value')).toEqual(momentValue.format('YYYY-MM-DD'), colError(column.name, "value didn't change."));
+                            expect(inp.getAttribute('value')).toEqual(value, colError(column.name, "value didn't change."));
                         });
                     });
                 });
@@ -1043,9 +1046,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                 describe("Timestamp fields,", function() {
                     it('should have 3 inputs with validation for each timestamp column', function() {
                         timestampCols.forEach(function(column) {
-                            var timeInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex+1);
-                            var dateInput = timeInputs.date, 
-                                timeInput = timeInputs.time;
+                            var timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn(column.name, recordIndex+1);
+                            var dateInput = timestampInputs.date,
+                                timeInput = timestampInputs.time;
 
                             expect(dateInput).toBeDefined(colError(column.name, "Date input is not defined."));
                             expect(timeInput).toBeDefined(colError(column.name, "Time input is not defined."));
@@ -1068,98 +1071,110 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             if (column.generated || column.immutable) return;
 
-                            // NOTE: removed meridiem tests cases since it's not a button anymore
+                            const error = chaisePage.recordEditPage.getErrorMessageForAColumn(column.name, recordIndex+1);
+                            const timeErrorMessage = 'Please enter a valid time value in 24-hr HH:MM:SS format.';
+                            const dateErrorMessage = 'Please enter a valid date value in YYYY-MM-DD format.';
 
-                            // TODO: decide how to validate time
+                            // the test cases below are only checking time, so we should first add a proper date.
+                            dateInput.clear();
+                            dateInput.sendKeys('2016-01-01');
+
                             // If user enters an invalid time an error msg should appear
-                            // timeInput.clear();
-                            // timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error.isDisplayed()).toBeTruthy(colError(column.name , "Accepted an invalid time."));
-                            // });
+                            timeInput.clear();
+                            timeInput.sendKeys('24:12:00'); // this is invalid because we're only accepting 24-hr time formats from 0-23
+                            chaisePage.waitForElement(error);
+                            expect(error.getText()).toBe(timeErrorMessage);
 
                             // If user enters a valid time, then error msg should disappear
-                            // timeInput.clear();
-                            // timeInput.sendKeys('12:00:00');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error).toBeNull("An error message was not supposed to appear. But one was found", colError(column.name, ""));
-                            // });
-                            // timeInput.clear();
-                            // // users can enter 1 digit in any place
-                            // timeInput.sendKeys('2:00:00');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            // });
-                            // timeInput.clear();
-                            // // users can enter just the hours
-                            // timeInput.sendKeys('08');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            // });
-                            // timeInput.clear();
-                            // // users can enter less than the full string
-                            // timeInput.sendKeys('2:10');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            // });
-                            // timeInput.clear();
-                            // // users can enter time in 24 hr format
-                            // timeInput.sendKeys('20:00:00');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            // });
-                            // timeInput.clear();
-                            // // users can enter 0 for the time
-                            // timeInput.sendKeys('00:00:00');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'time').then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            // });
+                            timeInput.clear();
+                            timeInput.sendKeys('12:00:00');
+                            expect(error.isPresent()).toBeFalsy();
+
+                            timeInput.clear();
+                            // users can enter 1 digit in any place
+                            timeInput.sendKeys('2:00:00');
+                            expect(error.isPresent()).toBeFalsy();
+
+                            timeInput.clear();
+                            // users can enter just the hours
+                            timeInput.sendKeys('08');
+                            expect(error.isPresent()).toBeFalsy();
+
+                            timeInput.clear();
+                            // users can enter less than the full string
+                            timeInput.sendKeys('2:10');
+                            expect(error.isPresent()).toBeFalsy();
+
+                            timeInput.clear();
+                            // users can enter time in 24 hr format
+                            timeInput.sendKeys('20:00:00');
+                            expect(error.isPresent()).toBeFalsy();
+
+                            timeInput.clear();
+                            // users can enter 0 for the time
+                            timeInput.sendKeys('00:00:00');
+                            expect(error.isPresent()).toBeFalsy();
 
                             // Invalid date + good time = error
                             // If user enters a valid time but no date, an error msg should appear
-                            // dateInput.clear();
-                            // timeInput.clear();
-                            // timeInput.sendKeys('12:00:00');
-                            // chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate').then(function(error) {
-                            //     expect(error.isDisplayed()).toBeTruthy(colError(column.name, "Accepted an invalid date."));
+                            dateInput.clear();
+                            timeInput.clear();
+                            timeInput.sendKeys('12:00:00');
+                            chaisePage.waitForElement(error);
+                            expect(error.getText()).toBe(dateErrorMessage);
 
-                            //     // Good date + good time = no error
-                            //     // Now, if user enters a valid date, then no error message should appear
-                            //     return dateInput.sendKeys('2016-01-01');
-                            // }).then(function() {
-                            //     return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampDate');
-                            // }).then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            //     // Good date + null time = no error
-                            //     return timeInput.clear();
-                            // }).then(function() {
-                            //     return chaisePage.recordEditPage.getTimestampInputErrorMessage(timeInput, 'timestampTime');
-                            // }).then(function(error) {
-                            //     expect(error).toBeNull('An error message was not supposed to appear. But one was found.', colError(column.name, ""));
-                            // });
+                            // Good date + good time = no error
+                            // Now, if user enters a valid date, then no error message should appear
+                            dateInput.sendKeys('2016-01-01');
+                            expect(error.isPresent()).toBeFalsy();
+
+                            // Good date + null time = no error
+                            timeInput.clear();
+                            expect(error.isPresent()).toBeFalsy();
 
                             timeInputFields.push({
-                                date: dateInput,
-                                time: timeInput,
-                                column: column
+                                column: column,
+                                date: timestampInputs.date,
+                                time: timestampInputs.time,
+                                nowBtn: timestampInputs.nowBtn,
+                                clearBtn: timestampInputs.clearBtn,
                             });
                         });
                     });
 
-                    it('should clear the input after clicking the \"Clear\" button', function() {
+                    it('should clear the input after clicking the "Clear" button', function() {
                         timeInputFields.forEach(function(obj) {
                             if (obj.column.generated || obj.column.immutable) return;
 
-                            obj.date.sendKeys('01-01-2016');
-                            obj.time.sendKeys('12:00:00PM');
+                            obj.clearBtn.click();
+                            expect(obj.date.getAttribute('value')).toBeFalsy();
+                            expect(obj.time.getAttribute('value')).toBeFalsy();
+                        });
+                    });
 
-                            const buttonsObj = chaisePage.recordEditPage.getTimestampRemoveButtons(obj.column.name, recordIndex+1, 'remove-input-btn');
-                            buttonsObj.date.click().then(() => {
-                                expect(obj.date.getAttribute('value')).toBeFalsy();
+                    it('should have the current time after clicking the "Now" button', function() {
+                        timeInputFields.forEach(function(obj) {
 
-                                return buttonsObj.time.click();
-                            }).then(() => {
-                                expect(obj.time.getAttribute('value')).toBeFalsy();
+                            if (obj.column.generated || obj.column.immutable) return;
+
+                            var UIdate, date = moment().format('YYYY-MM-DD');
+                            var UItime, time = moment().format('x'); // in milliseconds
+                            var timeDelta = 60 * 1000; // 1 minute, in milliseconds
+                            var startTime = time - timeDelta, endTime = time + timeDelta;
+
+                            obj.nowBtn.click();
+                            obj.date.getAttribute('value').then(function(dateVal) {
+                                // Check date input
+                                UIdate = dateVal;
+                                expect(dateVal).toEqual(date);
+                                return obj.time.getAttribute('value');
+                            }).then(function(timeVal) {
+                                // Check time input value is within an interval
+                                UItime = timeVal;
+                                var UItimestamp = moment(UIdate + UItime, 'YYYY-MM-DDhh:mm').format('x'); // in milliseconds
+                                expect(startTime < UItimestamp < endTime).toBeTruthy();
+                            }).catch(function(error) {
+                                console.log(error);
                             });
                         });
                     });
@@ -1171,22 +1186,20 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                             var value = getRecordInput(obj.column.name, moment());
 
+                            // first clear both inputs
                             obj.date.clear();
-                            obj.time.clear();
+                            // NOTE using a simple obj.time.clear(); wasn't working. not sure why.
+                            chaisePage.recordEditPage.clearInput(obj.time);
                             browser.sleep(10);
 
-                            // change the date
-                            obj.date.sendKeys(value.format('MM-DD-YYYY'));
-
+                            // select the date
+                            obj.date.sendKeys(value.format('YYYY-MM-DD'));
                             expect(obj.date.getAttribute('value')).toEqual(value.format("YYYY-MM-DD"), colError(obj.column.name, "column date didn't change."));
 
-                            // change the time
-                            obj.time.sendKeys(value.format("hh:mm:ssA"));
-
-                            // Check time input value is within an interval
-                            expect(obj.time.getAttribute('value')).toEqual(value.format("hh:mm:ss"), colError(obj.column.name, "column time didn't change."));
-
-                            // NOTE: removed meridiem tests since it's part of time input now
+                            // select the time
+                            const storedValue = value.format("hh:mm:ss");
+                            obj.time.sendKeys(storedValue);
+                            expect(obj.time.getAttribute('value')).toEqual(storedValue, colError(obj.column.name, "column time didn't change."));
                         });
                     });
 
@@ -1257,7 +1270,6 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                         });
                     });
 
-                    // TODO: min and max validations in integer inputs
                     it("should validate int8(-9223372036854776000 < value < 9223372036854776000), int4(-2147483648 < value < 2147483647) and int2(-32768 < value < 32767) with range values", function() {
                         integerDataTypeFields.forEach(function(intInput) {
                             var c = intInput.column;
@@ -1477,9 +1489,9 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
 
                                 // no value yet
                                 if (!isEditMode && (recordIndex + 1) === 1) return true
-                                    
+
                                 // use remove button to clear the value
-                                return chaisePage.recordEditPage.getRemoveButton(c.name, recordIndex+1, 'remove-input-btn').click();
+                                return chaisePage.recordEditPage.getInputRemoveButton(c.name, recordIndex+1).click();
                             }).then(function () {
                                 // the input won't validate until we change focus
                                 return chaisePage.recordEditPage.getRequiredInfoEl().click();
@@ -1501,7 +1513,7 @@ exports.testPresentationAndBasicValidation = function(tableParams, isEditMode) {
                                 if (tableParams.primary_keys.indexOf(c.name) != -1) {
                                     colorInput.sendKeys(prevValue);
                                 }
-                            
+
                                 isDone(done);
                             }).catch(function (err) {
                                 console.log(err);
@@ -1893,7 +1905,7 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
         // Incase of edit first clear the fileinput field by pressing the dismiss button
         // and then set new file
         if (value && value.trim().length > 0) {
-            chaisePage.recordEditPage.getClearButton(textInput).then(function(clearButton) {
+            chaisePage.recordEditPage.getInputRemoveButton(colName, recordIndex+1).then(function(clearButton) {
                 return clearButton.click();
             }).then(function () {
 
@@ -1907,9 +1919,9 @@ exports.testFileInput = function (colName, recordIndex, file, currentValue, prin
         }
 
         if (testValidation) {
-            chaisePage.recordEditPage.getFileInputErrorMessage(fileInput, 'fileExtension').then(function(err) {
-                expect(err.isDisplayed()).toBeTruthy("validation message is not displayed for file input");
-            });
+          const error = chaisePage.recordEditPage.getErrorMessageForAColumn(colName, recordIndex+1);
+          // this is just making sure the error shows up
+          chaisePage.waitForElement(error);
         }
     });
 };

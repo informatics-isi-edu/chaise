@@ -163,6 +163,7 @@ export const ERROR_MESSAGES = {
   INVALID_DATE: `Please enter a valid date value in ${dataFormats.placeholder.date} format.`,
   INVALID_TIME: `Please enter a valid time value in 24-hr ${dataFormats.placeholder.time} format.`,
   INVALID_TIMESTAMP: 'Please enter a valid date and time value.',
+  INVALID_COLOR: 'Please enter a valid color value.',
   INVALID_JSON: 'Please enter a valid JSON value.'
 }
 
@@ -305,6 +306,11 @@ const timestamptzFieldValidation = (value: string) => {
   return timestamp.isValid() || ERROR_MESSAGES.INVALID_TIMESTAMP;
 };
 
+const colorFieldValidation = (value: string) => {
+  if (!value) return;
+  return (/#[0-9a-fA-F]{6}$/i.test(value)) || ERROR_MESSAGES.INVALID_COLOR;
+}
+
 export const VALIDATE_VALUE_BY_TYPE: {
   [key: string]: any;
 } = {
@@ -318,4 +324,5 @@ export const VALIDATE_VALUE_BY_TYPE: {
   'time': timeFieldValidation,
   'timestamp': timestampFieldValidation,
   'timestamptz': timestamptzFieldValidation,
+  'color': colorFieldValidation,
 };

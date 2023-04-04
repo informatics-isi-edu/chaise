@@ -212,7 +212,7 @@ const ForeignkeyField = (props: ForeignkeyFieldProps): JSX.Element => {
                 <DisplayValue className='popup-select-value' value={{ value: field?.value, isHTML: true }} /> :
                 <span
                   className='chaise-input-placeholder popup-select-value'
-                  contentEditable='false'
+                  contentEditable={false}
                 >
                   {props.placeholder ? props.placeholder : 'Select a value'}
                 </span>
