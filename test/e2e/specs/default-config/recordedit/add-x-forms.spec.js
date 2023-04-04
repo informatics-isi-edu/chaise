@@ -1,6 +1,5 @@
 var chaisePage = require('../../../utils/chaise.page.js');
 var recordEditHelpers = require('../../../utils/recordedit-helpers.js');
-var moment = require('moment');
 var testParams = {
     table_name: "multi-add-table",
     records: 3,
@@ -24,17 +23,17 @@ var testParams = {
     }],
     values: {
         date: {
-            initial: "10-09-2018",
-            modified: "06-05-2017"
+            initial: "2018-10-09",
+            modified: "2017-06-05"
         },
         timestamp: {
             initial: {
-                date: "10-10-2018",
-                time: "10:48:02AM"
+                date: "2018-10-10",
+                time: "10:48:02"
             },
             modified: {
-                date: "06-05-2017",
-                time: "01:22:39AM"
+                date: "2017-06-05",
+                time: "01:22:39"
             }
         },
         fk: {
@@ -153,11 +152,10 @@ describe('Record Add', function() {
                 }).then(function () {
                     return cancelBtn.click();
                 }).then(function () {
-                    const momentValue = moment(value, 'MM-DD-YYYY').format('YYYY-MM-DD');
                     // verify the values
-                    expect(dateInput1.date.getAttribute("value")).toBe(momentValue);
-                    expect(dateInput2.date.getAttribute("value")).toBe(momentValue);
-                    expect(dateInput3.date.getAttribute("value")).toBe(momentValue);
+                    expect(dateInput1.date.getAttribute("value")).toBe(value);
+                    expect(dateInput2.date.getAttribute("value")).toBe(value);
+                    expect(dateInput3.date.getAttribute("value")).toBe(value);
 
                     done();
                 }).catch(function (err) {
@@ -184,16 +182,14 @@ describe('Record Add', function() {
                 }).then(function () {
                     return cancelBtn.click();
                 }).then(function () {
-                    const dateMomentValue = moment(dateValue, 'MM-DD-YYYY').format('YYYY-MM-DD');
                     // verify the values
-                    expect(tsInput1.date.getAttribute("value")).toBe(dateMomentValue);
-                    expect(tsInput2.date.getAttribute("value")).toBe(dateMomentValue);
-                    expect(tsInput3.date.getAttribute("value")).toBe(dateMomentValue);
+                    expect(tsInput1.date.getAttribute("value")).toBe(dateValue);
+                    expect(tsInput2.date.getAttribute("value")).toBe(dateValue);
+                    expect(tsInput3.date.getAttribute("value")).toBe(dateValue);
 
-                    const timeMomentValue = moment(timeValue, 'hh:mm:ssA').format('hh:mm:ss');
-                    expect(tsInput1.time.getAttribute("value")).toBe(timeMomentValue);
-                    expect(tsInput2.time.getAttribute("value")).toBe(timeMomentValue);
-                    expect(tsInput3.time.getAttribute("value")).toBe(timeMomentValue);
+                    expect(tsInput1.time.getAttribute("value")).toBe(timeValue);
+                    expect(tsInput2.time.getAttribute("value")).toBe(timeValue);
+                    expect(tsInput3.time.getAttribute("value")).toBe(timeValue);
 
                     done();
                 }).catch(function (err) {
@@ -363,10 +359,8 @@ describe('Record Add', function() {
                 // get clear btn for dateinput1
                 chaisePage.recordEditPage.getInputRemoveButton(testParams.date_col_name, 1).click().then(function () {
                     expect(dateInput1.date.getAttribute("value")).toBe("");
-                    const input2DateMomentValue = moment(testParams.values.date.initial, 'MM-DD-YYYY').format('YYYY-MM-DD');
-                    expect(dateInput2.date.getAttribute("value")).toBe(input2DateMomentValue);
-                    const input3DateMomentValue = moment(testParams.values.date.modified, 'MM-DD-YYYY').format('YYYY-MM-DD');
-                    expect(dateInput3.date.getAttribute("value")).toBe(input3DateMomentValue);
+                    expect(dateInput2.date.getAttribute("value")).toBe(testParams.values.date.initial);
+                    expect(dateInput3.date.getAttribute("value")).toBe(testParams.values.date.modified);
                 });
             });
 
@@ -377,22 +371,16 @@ describe('Record Add', function() {
                 chaisePage.recordEditPage.clearInput(tsInput3.time);
                 tsInput3.time.sendKeys(testParams.values.timestamp.modified.time);
 
-                tsInput2RemoveBtns = chaisePage.recordEditPage.getTimestampRemoveButtons(testParams.timestamp_col_name, 2);
+                const clearBtn = chaisePage.recordEditPage.getTimestampInputsForAColumn(testParams.timestamp_col_name, 2).clearBtn;
 
-                tsInput2RemoveBtns.date.click().then(() => {
-                    return tsInput2RemoveBtns.time.click();
-                }).then(() => {
-                    const input1DateMomentValue = moment(testParams.values.timestamp.initial.date, 'MM-DD-YYYY').format('YYYY-MM-DD');
-                    expect(tsInput1.date.getAttribute("value")).toBe(input1DateMomentValue);
+                clearBtn.click().then(() => {
+                    expect(tsInput1.date.getAttribute("value")).toBe(testParams.values.timestamp.initial.date);
                     expect(tsInput2.date.getAttribute("value")).toBe("");
-                    const input3DateMomentValue = moment(testParams.values.timestamp.modified.date, 'MM-DD-YYYY').format('YYYY-MM-DD');
-                    expect(tsInput3.date.getAttribute("value")).toBe(input3DateMomentValue);
+                    expect(tsInput3.date.getAttribute("value")).toBe(testParams.values.timestamp.modified.date);
 
-                    const input1TimeMomentValue = moment(testParams.values.timestamp.initial.time, 'hh:mm:ssA').format('hh:mm:ss');
-                    expect(tsInput1.time.getAttribute("value")).toBe(input1TimeMomentValue);
+                    expect(tsInput1.time.getAttribute("value")).toBe(testParams.values.timestamp.initial.time);
                     expect(tsInput2.time.getAttribute("value")).toBe("");
-                    const input3TimeMomentValue = moment(testParams.values.timestamp.modified.time, 'hh:mm:ssA').format('hh:mm:ss');
-                    expect(tsInput3.time.getAttribute("value")).toBe(input3TimeMomentValue);
+                    expect(tsInput3.time.getAttribute("value")).toBe(testParams.values.timestamp.modified.time);
                 });
             });
 
