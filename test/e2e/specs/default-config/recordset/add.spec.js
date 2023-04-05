@@ -17,6 +17,13 @@ describe('Recordset add record,', function() {
     beforeAll(function () {
         chaisePage.navigate(browser.params.url + "/recordset/#" + browser.params.catalogId + "/" + testParams.schemaName + ":" + testParams.table_name);
         chaisePage.recordsetPageReady();
+
+        // the truncation test sometimes would fail because it was running before rows show up
+        browser.wait(function () {
+          return chaisePage.recordsetPage.getRows().count().then(function (ct) {
+              return (ct > 0)
+          });
+      });
     });
 
 
@@ -138,13 +145,8 @@ describe('Recordset add record,', function() {
             return chaisePage.recordEditPage.getTextAreaForAColumn("summary");
         }).then(function(input) {
             input.sendKeys(testParams.summary);
-
-            const timestampInputs = chaisePage.recordEditPage.getTimestampInputsForAColumn('opened_on', 1)
-            const momentNow = moment();
-
-            timestampInputs.date.sendKeys(momentNow.format('MM-DD-YYYY'));
-            timestampInputs.time.sendKeys(momentNow.format("hh:mm:ssA"));
-            
+            return chaisePage.recordEditPage.getTimestampInputsForAColumn('opened_on', 1).nowBtn.click();
+        }).then (function () {
             return chaisePage.recordEditPage.submitForm();
         }).then(function() {
             // wait until redirected to record page

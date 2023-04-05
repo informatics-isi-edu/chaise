@@ -33,6 +33,7 @@ exports.parameterize = function(config, configParams) {
         config.capabilities['name'] = process.env.GITHUB_WORKFLOW;
         config.capabilities['idleTimeout'] = 190;
         config.capabilities['commandTimeout'] = 500;
+        config.capabilities['timeZone'] = 'Los_Angeles';
 
     }
 
