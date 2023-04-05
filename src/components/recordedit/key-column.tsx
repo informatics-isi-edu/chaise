@@ -93,17 +93,23 @@ const KeyColumn = (): JSX.Element => {
         const colName = column.name;
         const colDisplay = makeSafeIdAttr(column.displayname.value)
 
-        const isDisabled = disableSelectAllbtn(cmIndex);
+        const disableSelectAll = disableSelectAllbtn(cmIndex);
         let tooltip = cmIndex === activeSelectAll ? 'Click to close the set all input.' : 'Click to set a value for all records.';
-        if (isDisabled) {
+        if (disableSelectAll) {
           tooltip = 'Cannot perform this action.';
         }
 
-        // try changing to div if height adjustment does not work
+        const showSelectAll = canShowSelectAllBtn(cmIndex);
+
+        let entityKeyClassName = `entity-key entity-key-${cmIndex}`;
+        if (showSelectAll) {
+          entityKeyClassName += ' with-select-all-toggle';
+        }
+
         return (
           // NOTE `entity-key-${cmIndex}` is used in form-container.tsx
           // to ensure consistent height between this element and FormRow
-          <span key={colName} className={`entity-key entity-key-${cmIndex}`} >
+          <span key={colName} className={entityKeyClassName} >
             {cm.isRequired && <span className='text-danger'><b>*</b> </span>}
             {column.comment ?
               <ChaiseTooltip
@@ -114,11 +120,11 @@ const KeyColumn = (): JSX.Element => {
               </ChaiseTooltip> :
               renderColumnHeader(column)
             }
-            {canShowSelectAllBtn(cmIndex) &&
+            {showSelectAll &&
               <ChaiseTooltip placement='bottom' tooltip={tooltip}>
                 <button
                   className={`chaise-btn chaise-btn-secondary toggle-select-all-btn toggle-select-all-btn-${cmIndex} select-all-${colDisplay}`}
-                  disabled={isDisabled}
+                  disabled={disableSelectAll}
                   onClick={() => onToggleClick(cmIndex)}
                 >
                   <span className={`fa-solid ${cmIndex === activeSelectAll ? 'fa-chevron-up' : 'fa-pencil'}`}></span>

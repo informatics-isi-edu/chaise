@@ -2,6 +2,7 @@
 import ChaiseTooltip from '@isrd-isi-edu/chaise/src/components/tooltip';
 import Modal from 'react-bootstrap/Modal';
 import Spinner from 'react-bootstrap/Spinner';
+import ProgressBar from 'react-bootstrap/ProgressBar';
 
 // hooks
 import { useEffect, useRef, useState } from 'react';
@@ -664,16 +665,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
         <td>
           <div className='progress'>
             {(!item.uploadStarted) ?
-              <div
-                className='progress-bar'
-                role='progressbar'
-                style={{ 'width': item.checksumPercent + '%', 'backgroundColor': '#8cacc7 !important' }}
-              /> :
-              <div
-                className='progress-bar'
-                role='progressbar'
-                style={{ 'width': item.progressPercent + '%' }}
-              />
+              <ProgressBar now={item.checksumPercent} /> : <ProgressBar now={item.checksumPercent} />
             }
           </div>
           {(!item.uploadStarted) ?

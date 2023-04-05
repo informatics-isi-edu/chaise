@@ -53,10 +53,17 @@
         height: 47px;
 
         flex: none;
-      }
+        position: relative;
 
-      .toggle-select-all-btn {
-        float: right;
+        &.with-select-all-toggle {
+          padding-right: 45px;
+        }
+
+        .toggle-select-all-btn {
+          position: absolute;
+          right: 5px;
+          top: 8px;
+        }
       }
     }
 
