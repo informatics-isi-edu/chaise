@@ -712,7 +712,7 @@ const UploadProgressModal = ({ rows, show, onSuccess, onCancel }: UploadProgress
     return;
   }
 
-  if (filesCt === 0) return;
+  if (filesCt === 0) return <></>;
 
   return (
     <Modal
